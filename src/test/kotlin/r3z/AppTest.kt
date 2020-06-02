@@ -4,11 +4,18 @@
 package r3z
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class AppTest {
     @Test fun testAppHasAGreeting() {
         val classUnderTest = App()
         assertNotNull(classUnderTest.greeting, "app should have a greeting")
+    }
+
+    @Test fun `what in the actual foo`() {
+        val booboo = App()
+        val thingValue = booboo.thing()
+        assertEquals("FOO!!!", thingValue)
     }
 }
