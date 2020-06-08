@@ -1,6 +1,7 @@
 package r3z
 
 import org.junit.Test
+import r3z.domainobjects.*
 import kotlin.test.assertEquals
 
 
@@ -61,13 +62,31 @@ class AppTest {
      * data, on the output we want a nice data object that has the relevant
      * interrelated data
      */
-//    @Test fun `make time entry`() {
-//        val user = User()
-//        val project = Project()
-//        val time = Time()
-//        val log = Log()
-//        makeDataEntry(user, project, time, log)
-//    }
+    @Test fun `make time entry`() {
+        val expectedDataEntry = generateDataEntry()
+        val user = User(1)
+        val project = Project()
+        val time = Time()
+        val log = Log()
+        val actualDataEntry : DataEntry = makeDataEntry(user, project, time, log)
+        assertEquals(expectedDataEntry, actualDataEntry)
+    }
+
+    @Test fun `a user should have a unique integer identifier`() {
+        val user = User(1)
+        assertEquals(1, user.id)
+    }
+
+    /**
+     * A helper method to create data entries for timekeeping
+     */
+    private fun generateDataEntry() : DataEntry {
+        return DataEntry(User(1), Project(), Time(), Log())
+    }
+
+    private fun makeDataEntry(user: User, project: Project, time: Time, log: Log) : DataEntry {
+        return DataEntry(User(1), Project(), Time(), Log())
+    }
 
 
 }
