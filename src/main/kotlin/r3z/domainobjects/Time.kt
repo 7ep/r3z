@@ -1,3 +1,3 @@
 package r3z.domainobjects
 
-class Time
+class Time(val numberOfMinutes : Int)
