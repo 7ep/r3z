@@ -45,17 +45,14 @@ fun mockMeBaby(input : String) : String {
  * Takes naughty potty-mouth text and takes that shit out
  */
 fun restrictMySpeech(text: String) : String {
-    val pottywords = listOf("fuck", "shit")
-    var regexes : MutableList<String> = mutableListOf()
-    for (word in pottywords) {
-        var newword = ""
-        for (letter in word) {
-            newword += "$letter.?"
-        }
-        newword += "[^ ]* ?"
-        regexes.add(newword)
+    val bannedWords = listOf("fuck", "shit")
+    val regexes : MutableList<String> = mutableListOf()
+    for (word in bannedWords) {
+        val partialRegex = word.toCharArray()
+                .joinToString(".?") +  // I want to potentially handle a single-char divider between letters
+                "[^ ]* ?"              // zero or more "not-a-space", ending at a space
+        regexes.add(partialRegex)
     }
     val regex = Regex(regexes.joinToString("|"), RegexOption.IGNORE_CASE)
-    // val regex = Regex("f.?u.?c.?k.?[^ ]* ?|shit[^ ]* ?")
     return regex.replace(text, "").trim()
 }
