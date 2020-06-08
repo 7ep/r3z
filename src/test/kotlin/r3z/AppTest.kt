@@ -64,7 +64,7 @@ class AppTest {
      */
     @Test fun `make time entry`() {
         val expectedDataEntry = generateDataEntry()
-        val user = User()
+        val user = User(1)
         val project = Project()
         val time = Time()
         val log = Log()
@@ -73,8 +73,7 @@ class AppTest {
     }
 
     @Test fun `a user should have a unique integer identifier`() {
-        val user = User(id: 1)
-
+        val user = User(1)
         assertEquals(1, user.id)
     }
 
@@ -82,11 +81,11 @@ class AppTest {
      * A helper method to create data entries for timekeeping
      */
     private fun generateDataEntry() : DataEntry {
-        return DataEntry(User(), Project(), Time(), Log())
+        return DataEntry(User(1), Project(), Time(), Log())
     }
 
     private fun makeDataEntry(user: User, project: Project, time: Time, log: Log) : DataEntry {
-        return DataEntry(User(), Project(), Time(), Log())
+        return DataEntry(User(1), Project(), Time(), Log())
     }
 
 
