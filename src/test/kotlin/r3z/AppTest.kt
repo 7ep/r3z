@@ -84,6 +84,12 @@ class AppTest {
         assertEquals(threeHoursFifteen, time.numberOfMinutes)
     }
 
+//    @Test fun `a project should have a name and an id`() {
+//        val project = Project(1, "some project name")
+//        assertEquals(1, project.id)
+//        assertEquals("some project name", project.name)
+//    }
+
     /**
      * A helper method to create data entries for timekeeping
      */
