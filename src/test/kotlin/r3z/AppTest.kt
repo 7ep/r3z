@@ -7,6 +7,8 @@ import kotlin.test.assertEquals
 
 class AppTest {
 
+    private val threeHoursFifteen = (3 * 60) + 15
+
     @Test fun `hey there dude, add two numbers will ya?`() {
         val result = mattBaddassAdder(2, 2)
         assertEquals(4, result)
@@ -66,7 +68,7 @@ class AppTest {
         val expectedDataEntry = generateDataEntry()
         val user = User(1)
         val project = Project()
-        val time = Time()
+        val time = Time(threeHoursFifteen)
         val log = Log()
         val actualDataEntry : DataEntry = makeDataEntry(user, project, time, log)
         assertEquals(expectedDataEntry, actualDataEntry)
@@ -77,15 +79,26 @@ class AppTest {
         assertEquals(1, user.id)
     }
 
+    @Test fun `a time should have a decimal representation of its value`() {
+        val time = Time(threeHoursFifteen)
+        assertEquals(threeHoursFifteen, time.numberOfMinutes)
+    }
+
+//    @Test fun `a project should have a name and an id`() {
+//        val project = Project(1, "some project name")
+//        assertEquals(1, project.id)
+//        assertEquals("some project name", project.name)
+//    }
+
     /**
      * A helper method to create data entries for timekeeping
      */
     private fun generateDataEntry() : DataEntry {
-        return DataEntry(User(1), Project(), Time(), Log())
+        return DataEntry(User(1), Project(), Time(threeHoursFifteen), Log())
     }
 
     private fun makeDataEntry(user: User, project: Project, time: Time, log: Log) : DataEntry {
-        return DataEntry(User(1), Project(), Time(), Log())
+        return DataEntry(User(1), Project(), Time(threeHoursFifteen), Log())
     }
 
 
