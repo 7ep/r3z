@@ -1,6 +1,6 @@
 package r3z.domainobjects
 
-class DataEntry(user: User, project: Project, time: Time, log: Log) {
+class TimeEntry(val user: User, val project: Project, val time: Time, val details: Details) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

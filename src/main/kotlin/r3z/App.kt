@@ -1,6 +1,9 @@
 
 package r3z
 
+import r3z.domainobjects.TimeEntry
+import java.io.File
+
 class App {
 
     val greeting: String
@@ -55,4 +58,9 @@ fun restrictMySpeech(text: String) : String {
     }
     val regex = Regex(regexes.joinToString("|"), RegexOption.IGNORE_CASE)
     return regex.replace(text, "").trim()
+}
+
+fun recordTime(entry : TimeEntry) {
+    val stringRepresentation = "ID: " + entry.user.id + "Time: " + entry.time.numberOfMinutes + "\nDetails: " + entry.details.value
+    File("data-entry.txt").writeText(stringRepresentation)
 }

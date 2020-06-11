@@ -3,6 +3,7 @@ package r3z
 import org.junit.Test
 import r3z.domainobjects.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 
 class AppTest {
@@ -52,12 +53,17 @@ class AppTest {
      * so our testing becomes more difficult.  We have to *do* a thing, then
      * run separate code to check that the thing was *done*
      */
-//    @Test fun `record time for someone`() {
-//
-//        recordTime(timeEntry);
-//
+    @Test fun `record time for someone`() {
+        val user = User(1)
+        val time = Time(300)
+        val project = Project(1, "test")
+        val details = Details("testing, testing")
+
+        val entry = TimeEntry(user, project, time, details)
+        recordTime(entry)
+
 //        printTime(user)
-//    }
+    }
 
     /**
      * Now, this is something functional.  On the input, we want various
@@ -67,10 +73,10 @@ class AppTest {
     @Test fun `make time entry`() {
         val expectedDataEntry = generateDataEntry()
         val user = User(1)
-        val project = Project()
+        val project = Project(1, "a")
         val time = Time(threeHoursFifteen)
-        val log = Log()
-        val actualDataEntry : DataEntry = makeDataEntry(user, project, time, log)
+        val details = Details("sample comment")
+        val actualDataEntry : TimeEntry = makeDataEntry(user, project, time, details)
         assertEquals(expectedDataEntry, actualDataEntry)
     }
 
@@ -84,21 +90,50 @@ class AppTest {
         assertEquals(threeHoursFifteen, time.numberOfMinutes)
     }
 
-//    @Test fun `a project should have a name and an id`() {
-//        val project = Project(1, "some project name")
-//        assertEquals(1, project.id)
-//        assertEquals("some project name", project.name)
-//    }
+    @Test fun `a project should have a name and an id`() {
+        val project = Project(1, "some project name")
+        assertEquals(1, project.id)
+        assertEquals("some project name", project.name)
+    }
+
+    @Test fun `details should have a string representation` () {
+        val actual = Details("Testing, testing")
+        val expected = "Testing, testing"
+        assertEquals(expected, actual.value)
+    }
+
+    /**
+     * What does a default (empty) Details look like
+     */
+    @Test fun `details should by default contain an empty string`() {
+        val actual = Details()
+        val expected = ""
+
+        assertEquals(expected, actual.value)
+    }
+
+    /**
+     * Crazy-long details are shunned
+     */
+    @Test fun `details shouldn't be too long`() {
+        assertFailsWith<AssertionError> { Details("way too long wayyyy too long  ".repeat(30)) }
+    }
+
+    @Test fun `there should be no difference between details with no args and details with ""`() {
+        val actual = Details("")
+        val expected = Details()
+        assertEquals(expected, actual)
+    }
 
     /**
      * A helper method to create data entries for timekeeping
      */
-    private fun generateDataEntry() : DataEntry {
-        return DataEntry(User(1), Project(), Time(threeHoursFifteen), Log())
+    private fun generateDataEntry() : TimeEntry {
+        return TimeEntry(User(1), Project(1, "a"), Time(threeHoursFifteen), Details())
     }
 
-    private fun makeDataEntry(user: User, project: Project, time: Time, log: Log) : DataEntry {
-        return DataEntry(User(1), Project(), Time(threeHoursFifteen), Log())
+    private fun makeDataEntry(user: User, project: Project, time: Time, details: Details) : TimeEntry {
+        return TimeEntry(User(1), Project(1, "a"), Time(threeHoursFifteen), Details())
     }
 
 
