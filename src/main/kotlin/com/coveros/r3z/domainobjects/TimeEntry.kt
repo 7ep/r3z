@@ -1,4 +1,4 @@
-package r3z.domainobjects
+package com.coveros.r3z.domainobjects
 
 class TimeEntry(val user: User, val project: Project, val time: Time, val details: Details) {
 

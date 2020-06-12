@@ -1,11 +1,9 @@
 package com.coveros.r3z
 
+import com.coveros.r3z.domainobjects.*
 import org.junit.Test
-import r3z.*
-import r3z.domainobjects.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-
 
 class AppTest {
 
@@ -55,7 +53,7 @@ class AppTest {
      * run separate code to check that the thing was *done*
      */
     @Test fun `record time for someone`() {
-        val user = User(1)
+        val user = User(1, "")
         val time = Time(300)
         val project = Project(1, "test")
         val details = Details("testing, testing")
@@ -73,7 +71,7 @@ class AppTest {
      */
     @Test fun `make time entry`() {
         val expectedDataEntry = generateDataEntry()
-        val user = User(1)
+        val user = User(1, "")
         val project = Project(1, "a")
         val time = Time(threeHoursFifteen)
         val details = Details("sample comment")
@@ -82,8 +80,18 @@ class AppTest {
     }
 
     @Test fun `a user should have a unique integer identifier`() {
-        val user = User(1)
+        val user = User(1, "")
         assertEquals(1, user.id)
+    }
+
+    @Test fun `a user should have a name`() {
+        val name = "this is my name bro"
+        val id : Long = 1
+
+        val user = User(id, name)
+
+        assertEquals(id, user.id)
+        assertEquals(name, user.name)
     }
 
     @Test fun `a time should have a decimal representation of its value`() {
@@ -130,11 +138,11 @@ class AppTest {
      * A helper method to create data entries for timekeeping
      */
     private fun generateDataEntry() : TimeEntry {
-        return TimeEntry(User(1), Project(1, "a"), Time(threeHoursFifteen), Details())
+        return TimeEntry(User(1, ""), Project(1, "a"), Time(threeHoursFifteen), Details())
     }
 
     private fun makeDataEntry(user: User, project: Project, time: Time, details: Details) : TimeEntry {
-        return TimeEntry(User(1), Project(1, "a"), Time(threeHoursFifteen), Details())
+        return TimeEntry(User(1, ""), Project(1, "a"), Time(threeHoursFifteen), Details())
     }
 
 
