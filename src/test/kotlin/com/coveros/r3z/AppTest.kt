@@ -1,6 +1,7 @@
-package r3z
+package com.coveros.r3z
 
 import org.junit.Test
+import r3z.*
 import r3z.domainobjects.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
