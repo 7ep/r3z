@@ -1,4 +1,4 @@
-package r3z.domainobjects
+package com.coveros.r3z.domainobjects
 
 class Details(val value : String = "") {
 

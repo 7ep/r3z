@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    // provides unit test coverage
+    id 'jacoco'
+    // provides access to a database versioning tool.
+    id "org.flywaydb.flyway" version "6.4.1"
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+group 'com.coveros.r3z'
+version '0.0.1-SNAPSHOT'
+mainClassName = "io.ktor.server.jetty.EngineMain"
+
+sourceSets {
+    main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
+    test.kotlin.srcDirs = test.java.srcDirs = ['src/test/kotlin']
+    main.resources.srcDirs = ['src/main/resources']
+    test.resources.srcDirs = ['src/test/resources']
+}
+
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven { url 'https://kotlin.bintray.com/ktor' }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "io.ktor:ktor-server-jetty:$ktor_version"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-freemarker:$ktor_version"
+    implementation "io.ktor:ktor-server-host-common:$ktor_version"
+    testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+
+
+    // junit, for running unit tests
+    testImplementation ("junit:junit:4.13")
+
+    // Use the Kotlin JUnit integration.
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+
+    // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+    // also see https://github.com/brettwooldridge/HikariCP
+    // a connection pool for our database.  This should enable
+    // a much faster communication to any database that is used.
+    implementation ("com.zaxxer:HikariCP:3.4.5")
+
+    // we'll use this as our database
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    implementation ("com.h2database:h2:1.4.199")
+
+    // provide database migrations - see https://flywaydb.org/
+    implementation ("org.flywaydb:flyway-core:6.4.1")
+}
+
+flyway {
+    // with this URL, H2 will create a file at build/db/training, will use
+    // postgresql syntax for the SQL (mode=postgresql), and the first time you hit the database
+    // will open the database's server up for further connections (auto_server = true)
+    url = "jdbc:h2:./build/db/training;AUTO_SERVER=TRUE;MODE=POSTGRESQL"
+    driver = "org.h2.Driver"
+    // no point in using a username or password, security slows our teaching down.
+    user = "sa"
+    password = ""
+    schemas = ["ADMINISTRATIVE", "USER", "AUTH"]
+}

@@ -1,6 +1,6 @@
-package r3z.persistence
+package com.coveros.r3z.persistence
 
-import r3z.domainobjects.TimeEntry
+import com.coveros.r3z.domainobjects.TimeEntry
 
 class DatabaseAccessImpl : DatabaseAccess {
 
