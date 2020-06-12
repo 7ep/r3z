@@ -12,7 +12,7 @@ interface DatabaseAccess {
     /**
      * gets the data of a particular time entry from
      * the database
-     * @param the id of a particular time entry
+     * @param id the identifier of a particular time entry
      * @return the time entry data
      */
     fun readTimeEntry(id : Int) : TimeEntry
