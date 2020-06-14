@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence
+package com.coveros.r3z.persistence.microorm
 
 import kotlin.reflect.KClass
 

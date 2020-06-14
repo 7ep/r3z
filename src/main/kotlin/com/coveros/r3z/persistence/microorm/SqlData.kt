@@ -1,11 +1,9 @@
-package com.coveros.r3z.persistence
+package com.coveros.r3z.persistence.microorm
 
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.util.*
-import java.util.function.Function
 import kotlin.reflect.KClass
 
 

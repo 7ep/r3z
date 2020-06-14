@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence
+package com.coveros.r3z.persistence.microorm
 
 import com.coveros.r3z.domainobjects.TimeEntry
 

@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence
+package com.coveros.r3z.persistence.microorm
 
 import org.flywaydb.core.Flyway
 import java.sql.Connection
@@ -20,13 +20,19 @@ import javax.sql.DataSource
  * ==========================================================
  * ==========================================================
  */
-class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
+class DbAccessHelper(private val dataSource : DataSource) :
+    IDbAccessHelper {
 
     /**
      * This command provides a template to execute updates (including inserts) on the database
      */
     override fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?) {
-        val sqlData: SqlData<Any> = SqlData(description, preparedStatement, params=params)
+        val sqlData: SqlData<Any> =
+            SqlData(
+                description,
+                preparedStatement,
+                params = params
+            )
         try {
             dataSource.connection.use {
                 connection -> prepareStatementWithKeys(sqlData, connection)
@@ -41,7 +47,12 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
             description: String,
             preparedStatement: String,
             vararg params: Any?): Long {
-        val sqlData: SqlData<Any> = SqlData(description, preparedStatement, params=params)
+        val sqlData: SqlData<Any> =
+            SqlData(
+                description,
+                preparedStatement,
+                params = params
+            )
         try {
             dataSource.connection.use {
                 connection -> prepareStatementWithKeys(sqlData, connection)
@@ -61,9 +72,11 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
                 newId = generatedKeys.getLong(1)
                 assert(newId > 0)
             } else {
-                throw SqlRuntimeException("failed Sql.  Description: " +
-                        sqlData.description + " SQL code: " +
-                        sqlData.preparedStatement)
+                throw SqlRuntimeException(
+                    "failed Sql.  Description: " +
+                            sqlData.description + " SQL code: " +
+                            sqlData.preparedStatement
+                )
             }
             return newId
         }
@@ -131,6 +144,4 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
                 .dataSource(dataSource)
                 .load()
     }
-
-
 }
