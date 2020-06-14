@@ -1,9 +1,13 @@
 package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.withTestApplication
+import org.junit.Assert.*
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+
 
 class AppTest {
 
@@ -125,13 +129,33 @@ class AppTest {
      * Crazy-long details are shunned
      */
     @Test fun `details shouldn't be too long`() {
-        assertFailsWith<AssertionError> { Details("way too long wayyyy too long  ".repeat(30)) }
+        assertThrows(AssertionError::class.java) {Details("way too long wayyyy too long  ".repeat(30))}
     }
 
     @Test fun `there should be no difference between details with no args and details with ""`() {
         val actual = Details("")
         val expected = Details()
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testRoot() {
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Get, "/").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("HELLO WORLD!", response.content)
+            }
+        }
+    }
+
+    @Test
+    fun testTemplatePage() {
+        withTestApplication({ module(testing = true) }) {
+            handleRequest(HttpMethod.Get, "/login").apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertTrue(response.content!!.contains("Hi everybody!"))
+            }
+        }
     }
 
     /**
