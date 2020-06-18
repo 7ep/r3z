@@ -1,12 +1,16 @@
 package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.domainobjects.*
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
 
 class TimeRecordingTests {
 
     private val threeHoursFifteen = (3 * 60) + 15
+    private val mockTimeEntryPersistence = mockAPersistenceLayer()
+    private val utils = TimeRecordingUtilities(mockTimeEntryPersistence)
 
     /**
      * Happy path - record time successfully
@@ -16,9 +20,18 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper()
         val expectedResult = RecordTimeResult(id =1, status = StatusEnum.SUCCESS)
 
-        val actualResult = recordTime(entry)
+        val actualResult = utils.recordTime(entry)
 
         Assert.assertEquals("expect to see a success indicator", expectedResult, actualResult)
+    }
+
+    /**
+     * Really simplistic mock - make persistNewTimeEntry always return 1
+     */
+    private fun mockAPersistenceLayer(): TimeEntryPersistence {
+        val tep = mockk<TimeEntryPersistence>()
+        every { tep.persistNewTimeEntry(any()) } returns 1
+        return tep
     }
 
     /**
@@ -31,7 +44,7 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper(project=Project(null, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
 
-        val actualResult = recordTime(entry)
+        val actualResult = utils.recordTime(entry)
 
         Assert.assertEquals("Expect to see a success indicator", expectedResult, actualResult)
     }
@@ -107,6 +120,20 @@ class TimeRecordingTests {
         val expected = "Testing, testing"
         Assert.assertEquals(expected, actual.value)
     }
+
+    /**
+     * Crazy-long details are shunned
+     */
+    @Test fun `details shouldn't be too long`() {
+        Assert.assertThrows(AssertionError::class.java) { Details("way too long wayyyy too long  ".repeat(30)) }
+    }
+
+    @Test fun `there should be no difference between details with no args and details with ""`() {
+        val actual = Details("")
+        val expected = Details()
+        Assert.assertEquals(expected, actual)
+    }
+
 
     /**
      * A helper method to create data entries for timekeeping

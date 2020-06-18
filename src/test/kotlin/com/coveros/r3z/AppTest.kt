@@ -1,7 +1,6 @@
 package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.timerecording.recordTime
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
@@ -58,18 +57,6 @@ class AppTest {
         assertEquals(expected, actual.value)
     }
 
-    /**
-     * Crazy-long details are shunned
-     */
-    @Test fun `details shouldn't be too long`() {
-        assertThrows(AssertionError::class.java) {Details("way too long wayyyy too long  ".repeat(30))}
-    }
-
-    @Test fun `there should be no difference between details with no args and details with ""`() {
-        val actual = Details("")
-        val expected = Details()
-        assertEquals(expected, actual)
-    }
 
     @Test
     fun testRoot() {
