@@ -110,8 +110,5 @@ fun restrictMySpeech(text: String) : String {
     return regex.replace(text, "").trim()
 }
 
-fun recordTime(entry : TimeEntry) {
-    val stringRepresentation = "ID: " + entry.user.id + "Time: " + entry.time.numberOfMinutes + "\nDetails: " + entry.details.value
-    // do nothing for now.
-}
+
 

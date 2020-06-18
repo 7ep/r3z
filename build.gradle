@@ -62,6 +62,10 @@ dependencies {
     // junit, for running unit tests
     testImplementation ("junit:junit:4.13")
 
+    // https://mockk.io/#gradlemaven-dependency
+    // this tool is used to mock stuff for our unit tests
+    testImplementation "io.mockk:mockk:1.10.0"
+
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     // also see https://github.com/brettwooldridge/HikariCP
     // a connection pool for our database.  This should enable

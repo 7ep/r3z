@@ -1,0 +1,30 @@
+User story checklist:
+
+The following is used during story development as a reminder to the development team
+what is needed for high-quality software.
+
+functional development and considerations
+    documented thoughtfully
+        [ ] classes
+        [ ] methods
+        [ ] tests
+        [ ] unusual aspects documented within code
+        [ ] README's
+        [ ] Developer documentation
+        [ ] User documentation
+    correctness
+        [ ] unit tests written
+        [ ] invariants applied (e.g. assert val > 10)
+        [ ] integration tests written
+
+non-functionals:
+    [ ] perf
+    [ ] security
+    [ ] accessibility
+    [ ] logging
+    [ ] graceful degradation
+    [ ] mobile-first
+
+[ ] static analysis considered
+[ ] risks considered
+[ ] should it be refactored?
