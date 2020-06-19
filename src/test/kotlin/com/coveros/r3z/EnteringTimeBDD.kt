@@ -22,20 +22,14 @@ class EnteringTimeBDD {
     @Ignore
     fun `capability to enter time`() {
         // `given I have worked 1 hour on project "A" on Monday`()
-        val user = User(1, "I")
-        val time = Time(60)
-        val project = Project(1, "A")
-        val entry = TimeEntry(user, project, time)
+        val entry = createTimeEntry()
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
 
         // `when I enter in that time`()
-        val pool = getMemoryBasedDatabaseConnectionPool()
-        val timeEntryPersistence = TimeEntryPersistence(pool)
-        val timeRecordingUtilities = TimeRecordingUtilities(timeEntryPersistence)
-        val recordStatus : RecordTimeResult = timeRecordingUtilities.recordTime(entry)
+        val recordStatus: RecordTimeResult = enterTime(entry)
 
         // `then the system indicates it has persisted the new information`()
-        assertEquals("We should see success", expectedStatus, recordStatus)
+        assertEquals("the system indicates it has persisted the new information", expectedStatus, recordStatus)
     }
 
 
@@ -46,21 +40,16 @@ class EnteringTimeBDD {
     @Ignore
     fun `A user enters six hours on a project with copious notes`() {
         // `given I have worked 6 hour on project "A" on Monday with a lot of notes`()
-        val user = User(1, "I")
-        val time = Time(60 * 6)
-        val project = Project(1, "A")
-        val details = Details("Four score and seven years ago, blah blah blah".repeat(10))
-        val entry = TimeEntry(user, project, time, details)
+        val entry = createTimeEntry(
+            time = Time(60 * 6),
+            details = Details("Four score and seven years ago, blah blah blah".repeat(10)))
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
 
         // `when I enter in that time`()
-        val pool = getMemoryBasedDatabaseConnectionPool()
-        val timeEntryPersistence = TimeEntryPersistence(pool)
-        val timeRecordingUtilities = TimeRecordingUtilities(timeEntryPersistence)
-        val recordStatus : RecordTimeResult = timeRecordingUtilities.recordTime(entry)
+        val recordStatus: RecordTimeResult = enterTime(entry)
 
         // `then the system indicates it has persisted the new information`()
-        assertEquals("We should see success", expectedStatus, recordStatus)
+        assertEquals("the system indicates it has persisted the new information", expectedStatus, recordStatus)
     }
 
 
@@ -68,21 +57,14 @@ class EnteringTimeBDD {
     @Ignore
     fun `If a user enters 0 hours on a project do nothing, but don't complain`() {
         // given I did some work but accidentally typed 0 for hours
-        val user = User(1, "I")
-        val time = Time(0)
-        val project = Project(1, "A")
-        val details = Details("Four score and seven years ago, blah blah blah".repeat(10))
-        val entry = TimeEntry(user, project, time, details)
+        val entry = createTimeEntry(time=Time(0))
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
 
         // when I enter that in
-        val pool = getMemoryBasedDatabaseConnectionPool()
-        val timeEntryPersistence = TimeEntryPersistence(pool)
-        val timeRecordingUtilities = TimeRecordingUtilities(timeEntryPersistence)
-        val recordStatus : RecordTimeResult = timeRecordingUtilities.recordTime(entry)
+        val recordStatus: RecordTimeResult = enterTime(entry)
 
         // then the system reacts as though I entered nothing
-        assertEquals("We should see success", expectedStatus, recordStatus)
+        assertEquals("the system reacts as though I entered nothing", expectedStatus, recordStatus)
     }
 
     @Test
@@ -121,6 +103,23 @@ class EnteringTimeBDD {
         // when you try to enter time on that project
 
         // the system disallows it
+    }
+
+
+    private fun enterTime(entry: TimeEntry): RecordTimeResult {
+        val pool = getMemoryBasedDatabaseConnectionPool()
+        val timeEntryPersistence = TimeEntryPersistence(pool)
+        val timeRecordingUtilities = TimeRecordingUtilities(timeEntryPersistence)
+        return timeRecordingUtilities.recordTime(entry)
+    }
+
+    private fun createTimeEntry(
+        user : User = User(1, "I"),
+        time : Time = Time(60),
+        project : Project = Project(1, "A"),
+        details : Details = Details()
+    ): TimeEntry {
+        return TimeEntry(user, project, time, details)
     }
 
 }
