@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 /**
  * a container for the parameters for the [SqlData] object.
  */
-class ParameterObject<T : Any> internal constructor(
+data class ParameterObject<T : Any> internal constructor(
     /**
          * The data we are injecting into the SQL statement
          */

@@ -3,4 +3,4 @@ package com.coveros.r3z.domainobjects
 /**
  * a length of time, in minutes
  */
-class Time(val numberOfMinutes : Int)
+data class Time(val numberOfMinutes : Int)
