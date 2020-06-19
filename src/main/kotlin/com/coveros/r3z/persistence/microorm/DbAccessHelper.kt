@@ -140,7 +140,7 @@ class DbAccessHelper(private val dataSource : DataSource) :
 
     private fun configureFlyway(): Flyway {
         return Flyway.configure()
-                .schemas("ADMINISTRATIVE", "USER", "AUTH")
+                .schemas("ADMINISTRATIVE", "USER", "AUTH", "TIME")
                 .dataSource(dataSource)
                 .load()
     }
