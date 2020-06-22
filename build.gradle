@@ -16,6 +16,10 @@ plugins {
     id "org.flywaydb.flyway" version "6.4.1"
 }
 
+// useful to see the dependencies. 
+// generate a report like this: gradlew htmldependencyreport
+apply plugin: 'project-report'
+
 // enables us to use Kotlin on the JVM
 apply plugin: 'kotlin'
 
