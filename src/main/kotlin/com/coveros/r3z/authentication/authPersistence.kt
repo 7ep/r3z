@@ -17,9 +17,11 @@ class authPersistence(ds: DataSource) {
 
     // authentication functions
     fun addUser(username: String): User {
+        assert(username.isNotEmpty())
         val newId = db.executeInsert(
             "Creates a new user in the database",
             "INSERT INTO USER.PERSON (name) VALUES (?);", username)
+        assert(newId > 0)
         return User(newId, username)
     }
 
