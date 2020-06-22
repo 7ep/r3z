@@ -2,6 +2,8 @@ package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
+import com.coveros.r3z.persistence.microorm.DbAccessHelper
+import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
@@ -19,17 +21,36 @@ class EnteringTimeBDD {
      * Just a happy path for entering a time entry
      */
     @Test
-    @Ignore
     fun `capability to enter time`() {
         // `given I have worked 1 hour on project "A" on Monday`()
         val entry = createTimeEntry()
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val timeRecordingUtilities = createTimeRecordingUtility()
 
         // `when I enter in that time`()
-        val recordStatus: RecordTimeResult = enterTime(entry)
+        val recordStatus = timeRecordingUtilities.recordTime(entry)
 
         // `then the system indicates it has persisted the new information`()
         assertEquals("the system indicates it has persisted the new information", expectedStatus, recordStatus)
+    }
+
+    /**
+     * A test helper method to generate a [TimeRecordingUtilities]
+     * with a real database connected - H2
+     */
+    private fun createTimeRecordingUtility(): TimeRecordingUtilities {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val timeEntryPersistence = TimeEntryPersistence(dbAccessHelper)
+        return TimeRecordingUtilities(timeEntryPersistence)
+    }
+
+    private fun initializeDatabaseForTest() : IDbAccessHelper {
+        val ds = getMemoryBasedDatabaseConnectionPool()
+        val dbAccessHelper: IDbAccessHelper =
+                DbAccessHelper(ds)
+        dbAccessHelper.cleanDatabase()
+        dbAccessHelper.migrateDatabase()
+        return dbAccessHelper
     }
 
 
@@ -44,9 +65,10 @@ class EnteringTimeBDD {
             time = Time(60 * 6),
             details = Details("Four score and seven years ago, blah blah blah".repeat(10)))
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val timeRecordingUtilities = createTimeRecordingUtility()
 
         // `when I enter in that time`()
-        val recordStatus: RecordTimeResult = enterTime(entry)
+        val recordStatus = timeRecordingUtilities.recordTime(entry)
 
         // `then the system indicates it has persisted the new information`()
         assertEquals("the system indicates it has persisted the new information", expectedStatus, recordStatus)
@@ -59,9 +81,10 @@ class EnteringTimeBDD {
         // given I did some work but accidentally typed 0 for hours
         val entry = createTimeEntry(time=Time(0))
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val timeRecordingUtilities = createTimeRecordingUtility()
 
-        // when I enter that in
-        val recordStatus: RecordTimeResult = enterTime(entry)
+        // `when I enter in that time`()
+        val recordStatus = timeRecordingUtilities.recordTime(entry)
 
         // then the system reacts as though I entered nothing
         assertEquals("the system reacts as though I entered nothing", expectedStatus, recordStatus)
@@ -105,14 +128,9 @@ class EnteringTimeBDD {
         // the system disallows it
     }
 
-
-    private fun enterTime(entry: TimeEntry): RecordTimeResult {
-        val pool = getMemoryBasedDatabaseConnectionPool()
-        val timeEntryPersistence = TimeEntryPersistence(pool)
-        val timeRecordingUtilities = TimeRecordingUtilities(timeEntryPersistence)
-        return timeRecordingUtilities.recordTime(entry)
-    }
-
+    /**
+     * a test helper method to create a [TimeEntry]
+     */
     private fun createTimeEntry(
         user : User = User(1, "I"),
         time : Time = Time(60),
