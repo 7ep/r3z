@@ -9,7 +9,7 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
         return dbHelper.executeInsert(
                 "Creates a new user in the database",
                 "INSERT INTO TIME.TIMEENTRY (user, project, time_in_minutes, details) VALUES (?, ?, ?, ?);",
-                entry.user.id, entry.project.id, entry.time, entry.details)
+                entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.details.value)
     }
 
 }
