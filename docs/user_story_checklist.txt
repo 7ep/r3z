@@ -14,6 +14,7 @@ functional development and considerations
         [ ] User documentation
     correctness
         [ ] unit tests written
+        [ ] Were the tests thorough, or only superficial?
         [ ] invariants applied (e.g. assert val > 10)
         [ ] integration tests written
 
