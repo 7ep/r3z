@@ -7,3 +7,7 @@ build
 # Ignore Intellij's files
 .idea
 out
+
+# Ignore floobits - a plugin that eases pair programming
+.floo
+.flooignore
