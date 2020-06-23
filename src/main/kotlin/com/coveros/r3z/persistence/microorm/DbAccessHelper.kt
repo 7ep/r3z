@@ -3,7 +3,6 @@ package com.coveros.r3z.persistence.microorm
 import org.flywaydb.core.Flyway
 import java.sql.Connection
 import java.sql.PreparedStatement
-import java.sql.SQLException
 import java.sql.Statement
 import javax.sql.DataSource
 
@@ -33,13 +32,9 @@ class DbAccessHelper(private val dataSource : DataSource) :
                 preparedStatement,
                 params = params
             )
-        try {
             dataSource.connection.use {
                 connection -> prepareStatementWithKeys(sqlData, connection)
                     .use { st -> executeUpdateOnPreparedStatement(sqlData, st) } }
-        } catch (ex: SQLException) {
-            throw SqlRuntimeException(ex)
-        }
     }
 
 
@@ -48,17 +43,14 @@ class DbAccessHelper(private val dataSource : DataSource) :
             preparedStatement: String,
             vararg params: Any?): Long {
         val sqlData: SqlData<Any> =
-            SqlData(
-                description,
-                preparedStatement,
-                params = params
-            )
-        try {
-            dataSource.connection.use {
-                connection -> prepareStatementWithKeys(sqlData, connection)
-                    .use { st -> return executeInsertOnPreparedStatement(sqlData, st) } }
-        } catch (ex: SQLException) {
-            throw SqlRuntimeException(ex)
+                SqlData(
+                        description,
+                        preparedStatement,
+                        params = params
+                )
+        dataSource.connection.use { connection ->
+            prepareStatementWithKeys(sqlData, connection)
+                    .use { st -> return executeInsertOnPreparedStatement(sqlData, st) }
         }
     }
 
@@ -67,17 +59,9 @@ class DbAccessHelper(private val dataSource : DataSource) :
         sqlData.applyParametersToPreparedStatement(st)
         st.executeUpdate()
         st.generatedKeys.use { generatedKeys ->
-            val newId: Long
-            if (generatedKeys.next()) {
-                newId = generatedKeys.getLong(1)
+            generatedKeys.next()
+            val newId: Long = generatedKeys.getLong(1)
                 assert(newId > 0)
-            } else {
-                throw SqlRuntimeException(
-                    "failed Sql.  Description: " +
-                            sqlData.description + " SQL code: " +
-                            sqlData.preparedStatement
-                )
-            }
             return newId
         }
     }
@@ -105,15 +89,11 @@ class DbAccessHelper(private val dataSource : DataSource) :
 
 
     override fun <R : Any> runQuery(sqlData: SqlData<R>): R? {
-        try {
-            dataSource.connection.use { connection ->
-                connection.prepareStatement(sqlData.preparedStatement).use { st ->
-                    sqlData.applyParametersToPreparedStatement(st)
-                    st.executeQuery().use { resultSet -> return sqlData.extractor(resultSet) }
-                }
+        dataSource.connection.use { connection ->
+            connection.prepareStatement(sqlData.preparedStatement).use { st ->
+                sqlData.applyParametersToPreparedStatement(st)
+                st.executeQuery().use { resultSet -> return sqlData.extractor(resultSet) }
             }
-        } catch (ex: SQLException) {
-            throw SqlRuntimeException(ex)
         }
     }
 
@@ -140,7 +120,7 @@ class DbAccessHelper(private val dataSource : DataSource) :
 
     private fun configureFlyway(): Flyway {
         return Flyway.configure()
-                .schemas("ADMINISTRATIVE", "USER", "AUTH", "TIME")
+                .schemas("ADMINISTRATIVE", "TIMEANDEXPENSES", "AUTH")
                 .dataSource(dataSource)
                 .load()
     }

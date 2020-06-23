@@ -1,5 +1,6 @@
 package com.coveros.r3z.timerecording
 
+import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +42,7 @@ class TimeRecordingTests {
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
-        val entry = makeDefaultTimeEntryHelper(project=Project(null, "an invalid project"))
+        val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
 
         val actualResult = utils.recordTime(entry)
@@ -75,13 +76,11 @@ class TimeRecordingTests {
      */
     @Test
     fun `make time entry`() {
-        val expectedDataEntry = generateDataEntry()
-        val user = User(1, "")
-        val project = Project(1, "a")
-        val time = Time(threeHoursFifteen)
-        val details = Details("sample comment")
-        val actualDataEntry : TimeEntry = makeDataEntry(user, project, time, details)
-        Assert.assertEquals(expectedDataEntry, actualDataEntry)
+        val timeEntry : TimeEntry = createTimeEntry()
+        Assert.assertEquals(User(1, "I"), timeEntry.user)
+        Assert.assertEquals(Time(60), timeEntry.time)
+        Assert.assertEquals(Project(1, "A"), timeEntry.project)
+        Assert.assertEquals(Details(), timeEntry.details)
     }
 
     @Test
@@ -122,10 +121,32 @@ class TimeRecordingTests {
     }
 
     /**
-     * Crazy-long details are shunned
+     * Both the database the type disallow a details message longer than 500 characters.
+     * Testing that 501 throws an exception
      */
-    @Test fun `details shouldn't be too long`() {
-        Assert.assertThrows(AssertionError::class.java) { Details("way too long wayyyy too long  ".repeat(30)) }
+    @Test fun `Details should throw an exception if longer than 500 characters`() {
+        val ex = Assert.assertThrows(AssertionError::class.java ) {Details("A".repeat(501))}
+        Assert.assertTrue(ex.message.toString().contains("lord's prayer"))
+    }
+
+    /**
+     * Both the database the type disallow a details message longer than 500 characters.
+     * Testing that 499 doesn't throw an exception
+     */
+    @Test fun `Details should allow an input of 499 characters`() {
+        val value = "A".repeat(499)
+        val details = Details(value)
+        Assert.assertEquals(value, details.value)
+    }
+
+    /**
+     * Both the database the type disallow a details message longer than 500 characters.
+     * Testing that 500 doesn't throw an exception
+     */
+    @Test fun `Details should allow an input of 500 characters`() {
+        val value = "A".repeat(500)
+        val details = Details(value)
+        Assert.assertEquals(value, details.value)
     }
 
     @Test fun `there should be no difference between details with no args and details with ""`() {
@@ -134,16 +155,14 @@ class TimeRecordingTests {
         Assert.assertEquals(expected, actual)
     }
 
-
-    /**
-     * A helper method to create data entries for timekeeping
-     */
-    private fun generateDataEntry() : TimeEntry {
-        return TimeEntry(User(1, ""), Project(1, "a"), Time(threeHoursFifteen), Details())
+    @Test fun `Can't record a time entry that has 0 minutes`() {
+        val ex = Assert.assertThrows(AssertionError::class.java ) {Time(0)}
+        Assert.assertTrue(ex.message.toString().contains("must be greater than 0"))
     }
 
-    private fun makeDataEntry(user: User, project: Project, time: Time, details: Details) : TimeEntry {
-        return TimeEntry(User(1, ""), Project(1, "a"), Time(threeHoursFifteen), Details())
+    @Test fun `Can't record a time entry that has -1 minutes`() {
+        val ex = Assert.assertThrows(AssertionError::class.java ) {Time(-1)}
+        Assert.assertTrue(ex.message.toString().contains("must be greater than 0"))
     }
 
 }

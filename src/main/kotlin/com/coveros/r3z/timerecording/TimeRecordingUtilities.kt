@@ -19,4 +19,8 @@ class TimeRecordingUtilities(val persistence: TimeEntryPersistence) {
         }
         return true
     }
+
+    fun createProject(projectName: ProjectName) : Project {
+        return persistence.persistNewProject(projectName)
+    }
 }

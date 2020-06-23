@@ -1,3 +1,4 @@
 package com.coveros.r3z.domainobjects
 
-data class Project(val id: Int?, val name: String)
+data class ProjectName(val value: String)
+data class Project(val id: Long, val name: String)

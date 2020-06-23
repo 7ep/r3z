@@ -11,42 +11,6 @@ import org.junit.Test
 
 class AppTest {
 
-
-    @Test fun `hey there dude, add two numbers will ya?`() {
-        val result = mattBaddassAdder(2, 2)
-        assertEquals(4, result)
-    }
-
-    @Test fun `square a number`() {
-        val result = byronBaddassSinglePurposePow(3)
-        assertEquals(9, result)
-    }
-
-    @Test fun `make fun of people`() {
-        val expected = "nO yOu ArE"
-        val input = "no you are"
-
-        val result = mockMeBaby(input)
-
-        assertEquals(expected, result)
-    }
-
-    @Test fun `censor naughty potty words`() {
-        val expected = "I love that kotlin"
-        val input = "I fucking love that kotlin shit"
-        val result = restrictMySpeech(input)
-
-        assertEquals(expected, result)
-    }
-
-    @Test fun `censor naughty potty words with extreme vigilance and prejudice`() {
-        val expected = "I love that kotlin"
-        val input = "I f.u.c.king shit shitting FUCK love that kotlin shit"
-        val result = restrictMySpeech(input)
-
-        assertEquals(expected, result)
-    }
-
     /**
      * What does a default (empty) Details look like
      */

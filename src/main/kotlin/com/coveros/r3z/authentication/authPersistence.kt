@@ -20,7 +20,7 @@ class authPersistence(ds: DataSource) {
         assert(username.isNotEmpty())
         val newId = db.executeInsert(
             "Creates a new user in the database",
-            "INSERT INTO USER.PERSON (name) VALUES (?);", username)
+            "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
         assert(newId > 0)
         return User(newId, username)
     }
@@ -37,7 +37,7 @@ class authPersistence(ds: DataSource) {
         return db.runQuery(
             SqlData(
                 "get all the users in the database",
-                "SELECT NAME FROM USER.PERSON",
+                "SELECT NAME FROM TIMEANDEXPENSES.PERSON",
                 extractor,
                 arrayOf()
             )

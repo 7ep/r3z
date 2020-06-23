@@ -12,6 +12,7 @@ functional development and considerations
         [ ] README's
         [ ] Developer documentation
         [ ] User documentation
+        [ ] Log entries added
     correctness
         [ ] unit tests written
         [ ] Were the tests thorough, or only superficial?

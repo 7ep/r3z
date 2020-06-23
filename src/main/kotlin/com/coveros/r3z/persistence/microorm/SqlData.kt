@@ -3,7 +3,6 @@ package com.coveros.r3z.persistence.microorm
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.SQLException
 import kotlin.reflect.KClass
 
 
@@ -88,27 +87,25 @@ import kotlin.reflect.KClass
      * @param st a prepared statement
      */
     fun applyParametersToPreparedStatement(st: PreparedStatement) {
-        try {
-            for (i in 1..parameterList.size) {
-                val p: ParameterObject<*> = parameterList[i - 1]
-                when {
-                    p.type == String::class -> {
-                        st.setString(i, p.data as String)
-                    }
-                    p.type == Int::class -> {
-                        st.setInt(i, (p.data as Int))
-                    }
-                    p.type == Long::class -> {
-                        st.setLong(i, (p.data as Long))
-                    }
-                    p.type == Date::class -> {
-                        st.setDate(i, p.data as Date)
-                    }
-                    else -> {throw Exception("parameter " + p.data + " had a type of " + p.type + " which isn't recognized as a SQL data type.")}
+        for (i in 1..parameterList.size) {
+            val p: ParameterObject<*> = parameterList[i - 1]
+            when {
+                p.type == String::class -> {
+                    st.setString(i, p.data as String)
+                }
+                p.type == Int::class -> {
+                    st.setInt(i, (p.data as Int))
+                }
+                p.type == Long::class -> {
+                    st.setLong(i, (p.data as Long))
+                }
+                p.type == Date::class -> {
+                    st.setDate(i, p.data as Date)
+                }
+                else -> {
+                    throw Exception("parameter " + p.data + " had a type of " + p.type + " which isn't recognized as a SQL data type.")
                 }
             }
-        } catch (e: SQLException) {
-            throw SqlRuntimeException(e)
         }
     }
 
