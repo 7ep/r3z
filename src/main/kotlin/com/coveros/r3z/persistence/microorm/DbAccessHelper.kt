@@ -3,6 +3,7 @@ package com.coveros.r3z.persistence.microorm
 import org.flywaydb.core.Flyway
 import java.sql.Connection
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 import java.sql.Statement
 import javax.sql.DataSource
 
@@ -54,6 +55,25 @@ class DbAccessHelper(private val dataSource : DataSource) :
         }
     }
 
+    override fun <R : Any> runQuery(description: String,
+                                    preparedStatement: String,
+                                    extractor : (ResultSet) -> R?,
+                                    vararg params: Any?): R? {
+        val sqlData: SqlData<R> =
+                SqlData(
+                        description,
+                        preparedStatement,
+                        extractor,
+                        params
+                )
+        dataSource.connection.use { connection ->
+            connection.prepareStatement(sqlData.preparedStatement).use { st ->
+                sqlData.applyParametersToPreparedStatement(st)
+                st.executeQuery().use { resultSet -> return sqlData.extractor(resultSet) }
+            }
+        }
+    }
+
 
     private fun <T : Any> executeInsertOnPreparedStatement(sqlData: SqlData<T>, st: PreparedStatement): Long {
         sqlData.applyParametersToPreparedStatement(st)
@@ -85,16 +105,6 @@ class DbAccessHelper(private val dataSource : DataSource) :
         return connection.prepareStatement(
                 sqlData.preparedStatement,
                 Statement.RETURN_GENERATED_KEYS)
-    }
-
-
-    override fun <R : Any> runQuery(sqlData: SqlData<R>): R? {
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(sqlData.preparedStatement).use { st ->
-                sqlData.applyParametersToPreparedStatement(st)
-                st.executeQuery().use { resultSet -> return sqlData.extractor(resultSet) }
-            }
-        }
     }
 
 

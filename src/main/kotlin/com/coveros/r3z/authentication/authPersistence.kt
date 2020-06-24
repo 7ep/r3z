@@ -35,12 +35,9 @@ class authPersistence(ds: DataSource) {
         }
 
         return db.runQuery(
-            SqlData(
                 "get all the users in the database",
                 "SELECT NAME FROM TIMEANDEXPENSES.PERSON",
-                extractor,
-                arrayOf()
-            )
+                extractor
         )
     }
 }

@@ -8,7 +8,7 @@ class TimeRecordingUtilities(val persistence: TimeEntryPersistence) {
 
     fun recordTime(entry: TimeEntry): RecordTimeResult {
         // true if the database has 24 hours already for the provided user and project
-        var minutesRecorded = persistence.queryMinutesRecorded(User(1,"Test"), Date(3))
+        val minutesRecorded = persistence.queryMinutesRecorded(User(1,"Test"), Date(3)) ?: 0
 
         if ((minutesRecorded + entry.time.numberOfMinutes) > 24*60) {
             throw ExceededDailyHoursAmountException()

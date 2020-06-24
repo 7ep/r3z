@@ -1,5 +1,7 @@
 package com.coveros.r3z.persistence.microorm
 
+import java.sql.ResultSet
+
 interface IDbAccessHelper {
 
     /**
@@ -18,7 +20,10 @@ interface IDbAccessHelper {
      *   An extractor is simply a function that, given a resultset, returns something of type R.
      *   What is R?  That's up to you.
      */
-    fun <R : Any> runQuery(sqlData: SqlData<R>): R?
+    fun <R : Any> runQuery(description: String,
+                           preparedStatement: String,
+                           extractor : (ResultSet) -> R?,
+                           vararg params: Any?) : R?
 
     /**
      * Burns the database down to initial state.  Wipes out everything, pretty much.

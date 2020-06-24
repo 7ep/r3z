@@ -29,14 +29,11 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     /**
      * Provided a user and date, give the number of minutes they worked on that date
      */
-    fun queryMinutesRecorded(user: User, date: Date): Int {
-//        val a = { i: Int -> i + 1 } // The inferred type is (Int) -> Int
-//        val extractor = { r : ResultSet -> r.getInt("time") }
-//
-//        val query = SqlData("description",
-//                            "SELECT SUM (minutes) AS total FROM TIMEANDEXPENSES.TIMENTRY WHERE user=(user) VALUES(?);",
-//                extractor, user.name)
-//        val minutes = dbHelper.runQuery(query)
-        return 24*60+1
+    fun queryMinutesRecorded(user: User, date: Date): Int? {
+        return dbHelper.runQuery(
+                "description",
+                "SELECT SUM (minutes) AS total FROM TIMEANDEXPENSES.TIMENTRY WHERE user=(user) VALUES(?);",
+                { r -> r.getInt("time")},
+                user.name)
     }
 }
