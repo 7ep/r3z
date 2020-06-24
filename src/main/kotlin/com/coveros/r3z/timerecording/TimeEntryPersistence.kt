@@ -3,7 +3,11 @@ package com.coveros.r3z.timerecording
 import com.coveros.r3z.domainobjects.Project
 import com.coveros.r3z.domainobjects.ProjectName
 import com.coveros.r3z.domainobjects.TimeEntry
+import com.coveros.r3z.domainobjects.User
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
+import com.coveros.r3z.persistence.microorm.SqlData
+import java.sql.Date
+import java.sql.ResultSet
 
 class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
@@ -20,5 +24,19 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
         return Project(id, projectName.value)
+    }
+
+    /**
+     * Provided a user and date, give the number of minutes they worked on that date
+     */
+    fun queryMinutesRecorded(user: User, date: Date): Int {
+//        val a = { i: Int -> i + 1 } // The inferred type is (Int) -> Int
+//        val extractor = { r : ResultSet -> r.getInt("time") }
+//
+//        val query = SqlData("description",
+//                            "SELECT SUM (minutes) AS total FROM TIMEANDEXPENSES.TIMENTRY WHERE user=(user) VALUES(?);",
+//                extractor, user.name)
+//        val minutes = dbHelper.runQuery(query)
+        return 24*60+1
     }
 }

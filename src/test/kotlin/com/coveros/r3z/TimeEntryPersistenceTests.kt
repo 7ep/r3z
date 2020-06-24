@@ -2,6 +2,8 @@ package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.Details
 import com.coveros.r3z.domainobjects.ProjectName
+import com.coveros.r3z.domainobjects.Time
+import com.coveros.r3z.domainobjects.User
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
@@ -10,6 +12,7 @@ import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert
 import org.junit.Test
+import java.sql.Date
 
 class TimeEntryPersistenceTests {
 
@@ -108,6 +111,19 @@ class TimeEntryPersistenceTests {
 
         val message = "we expect that the insertion of a new row will return the new id"
         Assert.assertEquals(message, expectedNewId, result)
+    }
+
+    /**
+     * We need to be able to know how many hours a user has worked for the purpose of validation
+     */
+    @Test
+    fun `Can query hours worked by a user on a given day`() {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val tep = TimeEntryPersistence(dbAccessHelper)
+        tep.persistNewTimeEntry(createTimeEntry(user=User(1,"test"), time= Time(60)))
+
+        val query = tep.queryMinutesRecorded(user=User(1,"Test"), date=Date(3))
+        Assert.assertTrue(query == 60)
     }
 
     private fun initializeDatabaseForTest() : IDbAccessHelper {
