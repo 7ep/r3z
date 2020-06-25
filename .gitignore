@@ -11,3 +11,6 @@ out
 # Ignore floobits - a plugin that eases pair programming
 .floo
 .flooignore
+
+# Ignore Mac's baloney
+.DS_Store
