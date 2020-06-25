@@ -4,8 +4,8 @@ import com.coveros.r3z.authentication.authPersistence
 import com.coveros.r3z.domainobjects.User
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
 
 
 class DbAccessHelperTests {
