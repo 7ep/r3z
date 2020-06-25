@@ -12,6 +12,7 @@ class TimeRecordingTests {
     private val threeHoursFifteen = (3 * 60) + 15
     private val mockTimeEntryPersistence = mockAPersistenceLayer()
     private val utils = TimeRecordingUtilities(mockTimeEntryPersistence)
+    private val A_RANDOM_DAY_IN_JUNE_2020 = "2020-06-25"
 
     /**
      * Happy path - record time successfully
@@ -76,7 +77,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `make time entry`() {
-        val timeEntry : TimeEntry = createTimeEntry()
+        val timeEntry : TimeEntry = createTimeEntry(date = Date(A_RANDOM_DAY_IN_JUNE_2020))
         Assert.assertEquals(User(1, "I"), timeEntry.user)
         Assert.assertEquals(Time(60), timeEntry.time)
         Assert.assertEquals(Project(1, "A"), timeEntry.project)

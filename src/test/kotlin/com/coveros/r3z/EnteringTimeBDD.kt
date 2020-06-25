@@ -17,7 +17,7 @@ import org.junit.Test
  * So that I am easily able to document my time in an organized way
  */
 class EnteringTimeBDD {
-
+    private val A_RANDOM_DAY_IN_JUNE_2020 = "2020-06-25"
     /**
      * Just a happy path for entering a time entry
      */
@@ -28,7 +28,7 @@ class EnteringTimeBDD {
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
-        val entry = createTimeEntry(project = newProject)
+        val entry = createTimeEntry(project = newProject, date = Date(A_RANDOM_DAY_IN_JUNE_2020))
 
         // `when I enter in that time`()
         val recordStatus = tru.recordTime(entry)
@@ -47,9 +47,11 @@ class EnteringTimeBDD {
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
         val entry = createTimeEntry(
-                project = newProject,
-                time = Time(60 * 6),
-                details = Details("Four score and seven years ago, blah blah blah".repeat(10)))
+            time = Time(60 * 6),
+            project = newProject,
+            details = Details("Four score and seven years ago, blah blah blah".repeat(10)),
+            date = Date(A_RANDOM_DAY_IN_JUNE_2020)
+        )
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
 
         // `when I enter in that time`()
@@ -66,10 +68,10 @@ class EnteringTimeBDD {
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
 
-        createTimeEntry(project=newProject, time=Time(60 * 24))
+        createTimeEntry(project=newProject, time=Time(60 * 24), date= Date("2020-06-25"))
 
         // when they enter in a new time entry for one hour
-        val entry = createTimeEntry(project=newProject, time=Time(30))
+        val entry = createTimeEntry(time=Time(30), project=newProject, date = Date(A_RANDOM_DAY_IN_JUNE_2020))
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) {tru.recordTime(entry)}
     }

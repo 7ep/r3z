@@ -1,11 +1,7 @@
 package com.coveros.r3z.timerecording
 
-import com.coveros.r3z.domainobjects.Project
-import com.coveros.r3z.domainobjects.ProjectName
-import com.coveros.r3z.domainobjects.TimeEntry
-import com.coveros.r3z.domainobjects.User
+import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
-import java.sql.Date
 
 class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
