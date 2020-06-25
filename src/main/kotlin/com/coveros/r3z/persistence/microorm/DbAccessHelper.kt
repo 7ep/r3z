@@ -69,7 +69,15 @@ class DbAccessHelper(private val dataSource : DataSource) :
         dataSource.connection.use { connection ->
             connection.prepareStatement(sqlData.preparedStatement).use { st ->
                 sqlData.applyParametersToPreparedStatement(st)
-                st.executeQuery().use { resultSet -> return sqlData.extractor(resultSet) }
+                st.executeQuery().use { resultSet ->
+                    // we need to move forward to the first row of data,
+                    // unless there is no data, in which case we just return null
+                    return if (resultSet.next()) {
+                        sqlData.extractor(resultSet)
+                    } else {
+                        null
+                    }
+                }
             }
         }
     }
