@@ -5,9 +5,7 @@ import com.coveros.r3z.domainobjects.ProjectName
 import com.coveros.r3z.domainobjects.TimeEntry
 import com.coveros.r3z.domainobjects.User
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
-import com.coveros.r3z.persistence.microorm.SqlData
 import java.sql.Date
-import java.sql.ResultSet
 
 class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
@@ -29,11 +27,11 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     /**
      * Provided a user and date, give the number of minutes they worked on that date
      */
-    fun queryMinutesRecorded(user: User, date: Date): Int? {
+    fun queryMinutesRecorded(user: User, date: Date): Long? {
         return dbHelper.runQuery(
                 "description",
-                "SELECT SUM (minutes) AS total FROM TIMEANDEXPENSES.TIMENTRY WHERE user=(user) VALUES(?);",
-                { r -> r.getInt("time")},
-                user.name)
+                "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?);",
+                { r -> r.getLong("total")},
+                user.id)
     }
 }

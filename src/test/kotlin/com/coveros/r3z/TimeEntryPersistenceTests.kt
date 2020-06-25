@@ -120,10 +120,12 @@ class TimeEntryPersistenceTests {
     fun `Can query hours worked by a user on a given day`() {
         val dbAccessHelper = initializeDatabaseForTest()
         val tep = TimeEntryPersistence(dbAccessHelper)
-        tep.persistNewTimeEntry(createTimeEntry(user=User(1,"test"), time= Time(60)))
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+        val testUser = User(1, "test")
+        tep.persistNewTimeEntry(createTimeEntry(project=newProject, user=testUser, time= Time(60)))
 
-        val query = tep.queryMinutesRecorded(user=User(1,"Test"), date=Date(3))
-        Assert.assertTrue(query == 60)
+        val query = tep.queryMinutesRecorded(user=testUser, date=Date(3))
+        Assert.assertEquals(60L, query)
     }
 
     private fun initializeDatabaseForTest() : IDbAccessHelper {
