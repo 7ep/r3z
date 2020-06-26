@@ -1,5 +1,7 @@
 package com.coveros.r3z.timerecording
 
+import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
+import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import io.mockk.every
@@ -12,7 +14,7 @@ class TimeRecordingTests {
     private val threeHoursFifteen = (3 * 60) + 15
     private val mockTimeEntryPersistence = mockAPersistenceLayer()
     private val utils = TimeRecordingUtilities(mockTimeEntryPersistence)
-    private val A_RANDOM_DAY_IN_JUNE_2020 = "2020-06-25"
+
 
     /**
      * Happy path - record time successfully
@@ -21,6 +23,7 @@ class TimeRecordingTests {
     fun `record time for someone`() {
         val entry = makeDefaultTimeEntryHelper()
         val expectedResult = RecordTimeResult(id =1, status = StatusEnum.SUCCESS)
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
 
         val actualResult = utils.recordTime(entry)
 
@@ -45,10 +48,49 @@ class TimeRecordingTests {
         // it's an invalid project because the project doesn't exist
         val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
 
         val actualResult = utils.recordTime(entry)
 
         Assert.assertEquals("Expect to see a success indicator", expectedResult, actualResult)
+    }
+
+    /**
+     * Negative case - what happens if we ask the system to record
+     * any more time when we've already recorded the maximum for the day?
+     * (It should throw an exception)
+     */
+    @Test
+    fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
+        // it's an invalid project because the project doesn't exist
+        val entry = makeDefaultTimeEntryHelper(time=Time(1), project=Project(1, "an invalid project"))
+        `setup 24 hours already recorded for the day`()
+
+        Assert.assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+    }
+
+    /**
+     * Negative case - what happens if we ask the system to record
+     * any more time when we've already recorded the maximum for the day?
+     * (It should throw an exception)
+     */
+    @Test
+    fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
+        // it's an invalid project because the project doesn't exist
+        val entry = makeDefaultTimeEntryHelper(time=Time(60*2), project=Project(1, "an invalid project"))
+        `setup 23 hours already recorded for the day`()
+
+        Assert.assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+    }
+
+    private fun `setup 24 hours already recorded for the day`() {
+        val twentyFourHours: Long = 24 * 60
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyFourHours
+    }
+
+    private fun `setup 23 hours already recorded for the day`() {
+        val twentyThreeHours: Long = 23 * 60
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyThreeHours
     }
 
     /**
@@ -58,9 +100,10 @@ class TimeRecordingTests {
             user : User = User(1, ""),
             time : Time = Time(300),
             project : Project = Project(1, "project"),
+            date : Date = A_RANDOM_DAY_IN_JUNE_2020,
             details : Details = Details("testing, testing")
     ): TimeEntry {
-        return TimeEntry(user, project, time, details)
+        return TimeEntry(user, project, time, date, details)
     }
 
     /**
@@ -77,7 +120,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `make time entry`() {
-        val timeEntry : TimeEntry = createTimeEntry(date = Date(A_RANDOM_DAY_IN_JUNE_2020))
+        val timeEntry : TimeEntry = createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020)
         Assert.assertEquals(User(1, "I"), timeEntry.user)
         Assert.assertEquals(Time(60), timeEntry.time)
         Assert.assertEquals(Project(1, "A"), timeEntry.project)

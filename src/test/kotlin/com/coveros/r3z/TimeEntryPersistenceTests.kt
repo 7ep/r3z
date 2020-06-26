@@ -10,17 +10,16 @@ import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert
 import org.junit.Test
 
-class TimeEntryPersistenceTests {
+const val MAX_DETAIL_TEXT_LENGTH = 500
 
-    private val MAX_DETAIL_TEXT_LENGTH = 500
-    private val A_RANDOM_DAY_IN_JUNE_2020 = "2020-06-25"
+class TimeEntryPersistenceTests {
 
     @Test fun `can record a time entry to the database`() {
         val dbAccessHelper = initializeDatabaseForTest()
         val expectedNewId : Long = 1
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val result = tep.persistNewTimeEntry(createTimeEntry(project = newProject, date = Date(A_RANDOM_DAY_IN_JUNE_2020)))
+        val result = tep.persistNewTimeEntry(createTimeEntry(project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
 
         val message = "we expect that the insertion of a new row will return the new id"
         Assert.assertEquals(message, expectedNewId, result)
@@ -34,7 +33,7 @@ class TimeEntryPersistenceTests {
         val dbAccessHelper = initializeDatabaseForTest()
         val tep = TimeEntryPersistence(dbAccessHelper)
         Assert.assertThrows(JdbcSQLIntegrityConstraintViolationException::class.java) {
-            tep.persistNewTimeEntry(createTimeEntry(date = Date(A_RANDOM_DAY_IN_JUNE_2020)))
+            tep.persistNewTimeEntry(createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020))
         }
     }
 
@@ -107,7 +106,7 @@ class TimeEntryPersistenceTests {
         val result = tep.persistNewTimeEntry(createTimeEntry(
             project = newProject,
             details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好"),
-            date = Date(A_RANDOM_DAY_IN_JUNE_2020)
+            date = A_RANDOM_DAY_IN_JUNE_2020
         ))
 
         val message = "we expect that the insertion of a new row will return the new id"
@@ -123,9 +122,9 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60), project=newProject, date = Date(A_RANDOM_DAY_IN_JUNE_2020)))
+        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
 
-        val query = tep.queryMinutesRecorded(user=testUser, date=Date(A_RANDOM_DAY_IN_JUNE_2020))
+        val query = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
         Assert.assertEquals(60L, query)
     }
 
