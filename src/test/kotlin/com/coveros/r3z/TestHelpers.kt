@@ -6,6 +6,7 @@ import com.coveros.r3z.domainobjects.*
  */
 
 val A_RANDOM_DAY_IN_JUNE_2020 = Date("2020-06-25")
+val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 
 fun createTimeEntry(
     user: User = User(1, "I"),

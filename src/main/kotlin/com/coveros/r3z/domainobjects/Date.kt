@@ -2,16 +2,11 @@ package com.coveros.r3z.domainobjects
 
 import java.time.LocalDate
 
-class Date() {
-    constructor(date: java.sql.Date) {
-        val value = date
-    }
-    constructor(calendarDate: String) {
-        val value = java.sql.Date(LocalDate.parse(calendarDate).toEpochDay())
-    }
-    constructor(longDate: Long) {
-        val value = java.sql.Date(longDate)
-    }
+class Date(val value : java.sql.Date) {
+
+    constructor(calendarDate: String) : this(java.sql.Date(LocalDate.parse(calendarDate).toEpochDay()))
+
+    constructor(millisecondsSinceEpoch: Long) : this(java.sql.Date(millisecondsSinceEpoch))
 
 }
 

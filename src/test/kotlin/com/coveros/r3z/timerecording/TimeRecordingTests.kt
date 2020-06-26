@@ -1,6 +1,7 @@
 package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
+import com.coveros.r3z.THREE_HOURS_FIFTEEN
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
@@ -11,7 +12,6 @@ import org.junit.Test
 
 class TimeRecordingTests {
 
-    private val threeHoursFifteen = (3 * 60) + 15
     private val mockTimeEntryPersistence = mockAPersistenceLayer()
     private val utils = TimeRecordingUtilities(mockTimeEntryPersistence)
 
@@ -98,7 +98,7 @@ class TimeRecordingTests {
      */
     private fun makeDefaultTimeEntryHelper(
             user : User = User(1, ""),
-            time : Time = Time(300),
+            time : Time = THREE_HOURS_FIFTEEN,
             project : Project = Project(1, "project"),
             date : Date = A_RANDOM_DAY_IN_JUNE_2020,
             details : Details = Details("testing, testing")
@@ -145,9 +145,9 @@ class TimeRecordingTests {
     }
 
     @Test
-    fun `a time should have a decimal representation of its value`() {
-        val time = Time(threeHoursFifteen)
-        Assert.assertEquals(threeHoursFifteen, time.numberOfMinutes)
+    fun `a time should contain an integer number of minutes`() {
+        val time = Time((60 * 3) + 15)
+        Assert.assertEquals(THREE_HOURS_FIFTEEN, time)
     }
 
     @Test
