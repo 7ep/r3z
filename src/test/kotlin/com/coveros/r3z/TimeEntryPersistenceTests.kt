@@ -19,10 +19,28 @@ class TimeEntryPersistenceTests {
         val expectedNewId : Long = 1
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val result = tep.persistNewTimeEntry(createTimeEntry(project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
+        val result = tep.persistNewTimeEntry(createTimeEntry(project = newProject))
 
         val message = "we expect that the insertion of a new row will return the new id"
+
         Assert.assertEquals(message, expectedNewId, result)
+    }
+
+    @Test fun `can get all time entries by a user`() {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val expectedNewId : Long = 1
+        val tep = TimeEntryPersistence(dbAccessHelper)
+        val user = User(1L, "test")
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+        val entry1 = createTimeEntry(user = user, project = newProject)
+        val entry2 = createTimeEntry(user = user, project = newProject)
+
+        tep.persistNewTimeEntry(entry1)
+        tep.persistNewTimeEntry(entry2)
+
+        val result : List<TimeEntry>? = tep.readTimeEntries(user)
+
+        Assert.assertEquals("what we entered and what we get back should be identical", entry1, result)
     }
 
     /**
@@ -33,7 +51,7 @@ class TimeEntryPersistenceTests {
         val dbAccessHelper = initializeDatabaseForTest()
         val tep = TimeEntryPersistence(dbAccessHelper)
         Assert.assertThrows(JdbcSQLIntegrityConstraintViolationException::class.java) {
-            tep.persistNewTimeEntry(createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020))
+            tep.persistNewTimeEntry(createTimeEntry())
         }
     }
 
@@ -105,8 +123,7 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val result = tep.persistNewTimeEntry(createTimeEntry(
             project = newProject,
-            details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好"),
-            date = A_RANDOM_DAY_IN_JUNE_2020
+            details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好")
         ))
 
         val message = "we expect that the insertion of a new row will return the new id"
