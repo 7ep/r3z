@@ -38,21 +38,6 @@ class DbAccessHelperTests {
         assertEquals(User(1, "this is someone's name"), user)
     }
 
-    @Test fun `testing adding a user and retrieving it`() {
-        val ds = getMemoryBasedDatabaseConnectionPool()
-        val dbAccessHelper : IDbAccessHelper =
-            DbAccessHelper(ds)
-        dbAccessHelper.cleanDatabase()
-        dbAccessHelper.migrateDatabase()
-        val expectedUsers : List<User>? = listOf(User(1, "this is someone's name"))
-        val b = authPersistence(ds)
-
-        b.addUser("this is someone's name")
-
-        val allUsers = b.getAllUsers()
-        assertEquals(expectedUsers, allUsers)
-    }
-
 
 
 }
