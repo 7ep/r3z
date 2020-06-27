@@ -28,7 +28,7 @@ class EnteringTimeBDD {
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
-        val entry = createTimeEntry(project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020)
+        val entry = createTimeEntry(project = newProject)
 
         // `when I enter in that time`()
         val recordStatus = tru.recordTime(entry)
@@ -49,8 +49,7 @@ class EnteringTimeBDD {
         val entry = createTimeEntry(
             time = Time(60 * 6),
             project = newProject,
-            details = Details("Four score and seven years ago, blah blah blah".repeat(10)),
-            date = A_RANDOM_DAY_IN_JUNE_2020
+            details = Details("Four score and seven years ago, blah blah blah".repeat(10))
         )
         val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
 
@@ -68,11 +67,11 @@ class EnteringTimeBDD {
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
-
-        createTimeEntry(project=newProject, time=Time(60 * 24), date= A_RANDOM_DAY_IN_JUNE_2020)
+        createTimeEntry(project=newProject, time=Time(60 * 24))
 
         // when they enter in a new time entry for one hour
-        val entry = createTimeEntry(time=Time(30), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020)
+        val entry = createTimeEntry(time=Time(30), project=newProject)
+
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }

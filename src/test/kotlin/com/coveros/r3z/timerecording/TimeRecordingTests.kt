@@ -7,7 +7,7 @@ import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Test
 
 class TimeRecordingTests {
@@ -27,7 +27,7 @@ class TimeRecordingTests {
 
         val actualResult = utils.recordTime(entry)
 
-        Assert.assertEquals("expect to see a success indicator", expectedResult, actualResult)
+        assertEquals("expect to see a success indicator", expectedResult, actualResult)
     }
 
     /**
@@ -52,7 +52,7 @@ class TimeRecordingTests {
 
         val actualResult = utils.recordTime(entry)
 
-        Assert.assertEquals("Expect to see a success indicator", expectedResult, actualResult)
+        assertEquals("Expect to see a success indicator", expectedResult, actualResult)
     }
 
     /**
@@ -66,7 +66,7 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper(time=Time(1), project=Project(1, "an invalid project"))
         `setup 24 hours already recorded for the day`()
 
-        Assert.assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
 
     /**
@@ -80,7 +80,12 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper(time=Time(60*2), project=Project(1, "an invalid project"))
         `setup 23 hours already recorded for the day`()
 
-        Assert.assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+    }
+
+    @Test
+    fun `just checking that two similar time entries are considered equal`() {
+        assertEquals(createTimeEntry(), createTimeEntry())
     }
 
     private fun `setup 24 hours already recorded for the day`() {
@@ -121,16 +126,16 @@ class TimeRecordingTests {
     @Test
     fun `make time entry`() {
         val timeEntry : TimeEntry = createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020)
-        Assert.assertEquals(User(1, "I"), timeEntry.user)
-        Assert.assertEquals(Time(60), timeEntry.time)
-        Assert.assertEquals(Project(1, "A"), timeEntry.project)
-        Assert.assertEquals(Details(), timeEntry.details)
+        assertEquals(User(1, "I"), timeEntry.user)
+        assertEquals(Time(60), timeEntry.time)
+        assertEquals(Project(1, "A"), timeEntry.project)
+        assertEquals(Details(), timeEntry.details)
     }
 
     @Test
     fun `a user should have a unique integer identifier`() {
         val user = User(1, "")
-        Assert.assertEquals(1, user.id)
+        assertEquals(1, user.id)
     }
 
     @Test
@@ -140,28 +145,28 @@ class TimeRecordingTests {
 
         val user = User(id, name)
 
-        Assert.assertEquals(id, user.id)
-        Assert.assertEquals(name, user.name)
+        assertEquals(id, user.id)
+        assertEquals(name, user.name)
     }
 
     @Test
     fun `a time should contain an integer number of minutes`() {
         val time = Time((60 * 3) + 15)
-        Assert.assertEquals(THREE_HOURS_FIFTEEN, time)
+        assertEquals(THREE_HOURS_FIFTEEN, time)
     }
 
     @Test
     fun `a project should have a name and an id`() {
         val project = Project(1, "some project name")
-        Assert.assertEquals(1, project.id)
-        Assert.assertEquals("some project name", project.name)
+        assertEquals(1, project.id)
+        assertEquals("some project name", project.name)
     }
 
     @Test
     fun `details should have a string representation` () {
         val actual = Details("Testing, testing")
         val expected = "Testing, testing"
-        Assert.assertEquals(expected, actual.value)
+        assertEquals(expected, actual.value)
     }
 
     /**
@@ -169,8 +174,8 @@ class TimeRecordingTests {
      * Testing that 501 throws an exception
      */
     @Test fun `Details should throw an exception if longer than 500 characters`() {
-        val ex = Assert.assertThrows(AssertionError::class.java ) {Details("A".repeat(501))}
-        Assert.assertTrue(ex.message.toString().contains("lord's prayer"))
+        val ex = assertThrows(AssertionError::class.java ) {Details("A".repeat(501))}
+        assertTrue(ex.message.toString().contains("lord's prayer"))
     }
 
     /**
@@ -180,7 +185,7 @@ class TimeRecordingTests {
     @Test fun `Details should allow an input of 499 characters`() {
         val value = "A".repeat(499)
         val details = Details(value)
-        Assert.assertEquals(value, details.value)
+        assertEquals(value, details.value)
     }
 
     /**
@@ -190,23 +195,23 @@ class TimeRecordingTests {
     @Test fun `Details should allow an input of 500 characters`() {
         val value = "A".repeat(500)
         val details = Details(value)
-        Assert.assertEquals(value, details.value)
+        assertEquals(value, details.value)
     }
 
     @Test fun `there should be no difference between details with no args and details with ""`() {
         val actual = Details("")
         val expected = Details()
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test fun `Can't record a time entry that has 0 minutes`() {
-        val ex = Assert.assertThrows(AssertionError::class.java ) {Time(0)}
-        Assert.assertTrue(ex.message.toString().contains("must be greater than 0"))
+        val ex = assertThrows(AssertionError::class.java ) {Time(0)}
+        assertTrue(ex.message.toString().contains("must be greater than 0"))
     }
 
     @Test fun `Can't record a time entry that has -1 minutes`() {
-        val ex = Assert.assertThrows(AssertionError::class.java ) {Time(-1)}
-        Assert.assertTrue(ex.message.toString().contains("must be greater than 0"))
+        val ex = assertThrows(AssertionError::class.java ) {Time(-1)}
+        assertTrue(ex.message.toString().contains("must be greater than 0"))
     }
 
 }

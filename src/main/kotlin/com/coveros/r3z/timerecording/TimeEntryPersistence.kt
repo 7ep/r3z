@@ -9,8 +9,8 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     fun persistNewTimeEntry(entry: TimeEntry): Long {
         return dbHelper.executeInsert(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
-                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, details) VALUES (?, ?, ?, ?);",
-                entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.details.value)
+                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
+                entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.date.sqlDate, entry.details.value)
     }
 
     fun persistNewProject(projectName: ProjectName) : Project {
@@ -19,6 +19,15 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
         return Project(id, projectName.value)
+    }
+
+    fun persistNewUser(username: String): User {
+        assert(username.isNotEmpty())
+        val newId = dbHelper.executeInsert(
+            "Creates a new user in the database",
+            "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
+        assert(newId > 0)
+        return User(newId, username)
     }
 
     /**
@@ -37,21 +46,28 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
         val extractor: (ResultSet) -> List<TimeEntry> = { r ->
             val myList: MutableList<TimeEntry> = mutableListOf()
-            while (r.next()) {
+            do {
                 myList.add(
                     TimeEntry(
-                        User(r.getLong("user"), ""),
-                        Project(r.getLong("project"), ""),
+                        User(r.getLong("userid"), r.getString("username")),
+                        Project(r.getLong("projectid"), r.getString("projectname")),
                         Time(r.getInt("time")),
-                        Date(r.getDate("date")),
+                        Date.convertSqlDateToOurDate(r.getDate("date")),
                         Details(r.getString("details"))
                     )
                 )
-            }
+            } while (r.next())
             myList.toList()
         }
         return dbHelper.runQuery("For validation, it is sometimes necessary to look up existing entries",
-            "SELECT * FROM TIMEANDEXPENSES.TIMEENETRY WHERE user=(?);",
+            """
+        SELECT te.user as userid, p.name as username, te.project as projectid, pj.name as projectname, 
+            te.time_in_minutes as time, te.date, te.details 
+                FROM TIMEANDEXPENSES.TIMEENTRY as te 
+                JOIN timeandexpenses.person as p on te.user = p.id
+                JOIN timeandexpenses.project as pj on te.project = pj.id
+                WHERE user=(?);
+            """,
             extractor,
             user.id)
     }

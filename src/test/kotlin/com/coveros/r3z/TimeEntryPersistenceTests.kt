@@ -8,6 +8,7 @@ import com.coveros.r3z.timerecording.TimeEntryPersistence
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 const val MAX_DETAIL_TEXT_LENGTH = 500
@@ -23,24 +24,26 @@ class TimeEntryPersistenceTests {
 
         val message = "we expect that the insertion of a new row will return the new id"
 
-        Assert.assertEquals(message, expectedNewId, result)
+        assertEquals(message, expectedNewId, result)
     }
 
     @Test fun `can get all time entries by a user`() {
         val dbAccessHelper = initializeDatabaseForTest()
-        val expectedNewId : Long = 1
         val tep = TimeEntryPersistence(dbAccessHelper)
-        val user = User(1L, "test")
+        val userName = "test"
+        val user = User(1L, userName)
+        tep.persistNewUser(userName)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val entry1 = createTimeEntry(user = user, project = newProject)
         val entry2 = createTimeEntry(user = user, project = newProject)
-
         tep.persistNewTimeEntry(entry1)
         tep.persistNewTimeEntry(entry2)
+        val expectedResult = listOf(entry1, entry2)
 
-        val result : List<TimeEntry>? = tep.readTimeEntries(user)
+        val actualResult = tep.readTimeEntries(user) ?: listOf()
 
-        Assert.assertEquals("what we entered and what we get back should be identical", entry1, result)
+        val msg = "what we entered and what we get back should be identical, instead got"
+        assertEquals(msg, expectedResult, actualResult)
     }
 
     /**
@@ -66,8 +69,8 @@ class TimeEntryPersistenceTests {
         Assert.assertThrows(JdbcSQLDataException::class.java) {
             dbAccessHelper.executeInsert(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
-                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, details) VALUES (?, ?, ?, ?);",
-                    1, newProject.id, 60, "a".repeat(MAX_DETAIL_TEXT_LENGTH + 1))
+                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
+                    1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "a".repeat(MAX_DETAIL_TEXT_LENGTH + 1))
         }
     }
 
@@ -93,8 +96,8 @@ class TimeEntryPersistenceTests {
         Assert.assertThrows(JdbcSQLDataException::class.java) {
             dbAccessHelper.executeInsert(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
-                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, details) VALUES (?, ?, ?, ?);",
-                    1, newProject.id, 60, unicodeWeirdCharacters.repeat(numberTimesToRepeat))
+                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
+                    1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, unicodeWeirdCharacters.repeat(numberTimesToRepeat))
         }
     }
 
@@ -108,9 +111,9 @@ class TimeEntryPersistenceTests {
 
         val newId = dbAccessHelper.executeInsert(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
-                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, details) VALUES (?, ?, ?, ?);",
-                1, newProject.id, 60, "h̬͕̘ͅiͅ ̘͔̝̺̩͚͚̕b̧͈̙͕̰̖̯y̡̺r̙o̦̯̙͎̮n̯̘̣͖")
-        Assert.assertEquals("we should get a new id for the new timeentry", 1, newId)
+                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
+                1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "h̬͕̘ͅiͅ ̘͔̝̺̩͚͚̕b̧͈̙͕̰̖̯y̡̺r̙o̦̯̙͎̮n̯̘̣͖")
+        assertEquals("we should get a new id for the new timeentry", 1, newId)
     }
 
     /**
@@ -127,7 +130,7 @@ class TimeEntryPersistenceTests {
         ))
 
         val message = "we expect that the insertion of a new row will return the new id"
-        Assert.assertEquals(message, expectedNewId, result)
+        assertEquals(message, expectedNewId, result)
     }
 
     /**
@@ -142,7 +145,7 @@ class TimeEntryPersistenceTests {
         tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
 
         val query = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
-        Assert.assertEquals(60L, query)
+        assertEquals(60L, query)
     }
 
     private fun initializeDatabaseForTest() : IDbAccessHelper {
