@@ -9,6 +9,8 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Test
+import java.time.LocalDate
+import java.time.ZoneId
 
 class TimeRecordingTests {
 
@@ -212,6 +214,29 @@ class TimeRecordingTests {
     @Test fun `Can't record a time entry that has -1 minutes`() {
         val ex = assertThrows(AssertionError::class.java ) {Time(-1)}
         assertTrue(ex.message.toString().contains("must be greater than 0"))
+    }
+
+    /**
+     * it's easy to get this confused, but [LocalDate.toEpochDay] gives a number of days,
+     * but [java.sql.Date] actually needs a number of milliseconds since 1970, not days.
+     */
+    @Test fun `java sql Date needs to be accurately converted to our Date class`() {
+
+        val epochDate = LocalDate.parse("2020-07-01").atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val sqlDate = java.sql.Date(epochDate)
+        val actual = Date.convertSqlDateToOurDate(sqlDate)
+        val expected = Date(2020, Month.JUL, 1)
+        assertEquals(expected, actual)
+    }
+
+    /**
+     * a basic happy path
+     */
+    @Test fun `can create project`() {
+        every { mockTimeEntryPersistence.persistNewProject(any()) } returns Project(1, "test project")
+        val expected = utils.createProject(ProjectName("test project"))
+        val actual = Project(1, "test project")
+        assertEquals(expected, actual)
     }
 
 }
