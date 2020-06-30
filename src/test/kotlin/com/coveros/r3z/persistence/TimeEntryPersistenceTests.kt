@@ -1,7 +1,9 @@
 package com.coveros.r3z.persistence
 
+import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
+import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
+import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
@@ -70,7 +72,8 @@ class TimeEntryPersistenceTests {
             dbAccessHelper.executeInsert(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
-                    1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "a".repeat(MAX_DETAIL_TEXT_LENGTH + 1))
+                    1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "a".repeat(
+                    MAX_DETAIL_TEXT_LENGTH + 1))
         }
     }
 
@@ -89,7 +92,7 @@ class TimeEntryPersistenceTests {
         // we think it should fit into the given maximum character length, plus one in
         // order to bust through the ceiling.
 
-        val numberTimesToRepeat = MAX_DETAIL_TEXT_LENGTH/unicodeWeirdCharacters.length + 1
+        val numberTimesToRepeat = MAX_DETAIL_TEXT_LENGTH /unicodeWeirdCharacters.length + 1
         // as of the time of writing, numberTimesToRepeat was 13
         print("only have to repeat $numberTimesToRepeat times for this to bust the ceiling")
 
@@ -124,10 +127,12 @@ class TimeEntryPersistenceTests {
         val expectedNewId : Long = 1
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val result = tep.persistNewTimeEntry(createTimeEntry(
-            project = newProject,
-            details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好")
-        ))
+        val result = tep.persistNewTimeEntry(
+            createTimeEntry(
+                project = newProject,
+                details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好")
+            )
+        )
 
         val message = "we expect that the insertion of a new row will return the new id"
         assertEquals(message, expectedNewId, result)
@@ -142,9 +147,16 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020
+            )
+        )
 
-        val query = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
+        val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(60L, query)
     }
 
@@ -154,7 +166,7 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val testUser = User(1, "test")
 
-        val minutesWorked = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
+        val minutesWorked = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("should be 0 since they didn't work that day", 0L, minutesWorked)
     }
@@ -165,11 +177,32 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60*10), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60*13), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020
+            )
+        )
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60 * 10),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020
+            )
+        )
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60 * 13),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020
+            )
+        )
 
-        val query = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
+        val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("we should get 24 hours worked for this day", 60L * 24, query)
     }
@@ -180,10 +213,24 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60 * 8), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020))
-        tep.persistNewTimeEntry(createTimeEntry(user=testUser, time= Time(60 * 8), project=newProject, date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE))
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60 * 8),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020
+            )
+        )
+        tep.persistNewTimeEntry(
+            createTimeEntry(
+                user = testUser,
+                time = Time(60 * 8),
+                project = newProject,
+                date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
+            )
+        )
 
-        val query = tep.queryMinutesRecorded(user=testUser, date=A_RANDOM_DAY_IN_JUNE_2020)
+        val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("we should get 8 hours worked for this day", 60L * 8, query)
     }
