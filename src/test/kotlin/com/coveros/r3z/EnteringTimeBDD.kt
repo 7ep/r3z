@@ -86,29 +86,6 @@ class EnteringTimeBDD {
         assertEquals(ex.message, "Entries do not span multiple days, thus must be <=24 hrs")
     }
 
-    @Test
-    @Ignore
-    fun `cannot enter time if you're an invalid user`() {
-        // given you were banned from entering hours for whatever reason
-
-        // when you try to enter time
-
-        // the system disallows it
-
-    }
-
-
-    @Test
-    @Ignore
-    fun `cannot enter time if your project is invalid`() {
-        // given a project is banned from entering hours for whatever reason
-
-        // when you try to enter time on that project
-
-        // the system disallows it
-    }
-
-
     /**
      * A test helper method to generate a [TimeRecordingUtilities]
      * with a real database connected - H2
