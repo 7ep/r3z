@@ -11,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Ignore
 import org.junit.Test
+import java.lang.AssertionError
 
 /**
  * As an employee
@@ -77,13 +78,12 @@ class EnteringTimeBDD {
     }
 
     @Test
-    @Ignore
-    fun `A user cannot enter more than 24 hours in a single day`() {
+    fun `A user cannot enter more than 24 hours in a single entry`() {
         // given someone has somehow done 25 hours of work in a single day
-
         // when they try entering that...
-
         // the system disallows it
+        val ex = assertThrows(AssertionError::class.java) { createTimeEntry(time = Time((60 * 24) + 1)) }
+        assertEquals(ex.message, "Entries do not span multiple days, thus must be <=24 hrs")
     }
 
     @Test
