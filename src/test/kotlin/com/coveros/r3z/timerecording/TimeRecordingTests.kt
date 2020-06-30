@@ -233,9 +233,11 @@ class TimeRecordingTests {
         assertEquals(expected, actual)
     }
 
+
     /**
      * a basic happy path
      */
+
     @Test fun `can create project`() {
         every { mockTimeEntryPersistence.persistNewProject(any()) } returns Project(1, "test project")
         val expected = utils.createProject(ProjectName("test project"))
@@ -263,4 +265,5 @@ class TimeRecordingTests {
 
         return rtn
     }
+
 }
