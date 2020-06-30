@@ -208,12 +208,12 @@ class TimeRecordingTests {
 
     @Test fun `Can't record a time entry that has 0 minutes`() {
         val ex = assertThrows(AssertionError::class.java ) {Time(0)}
-        assertTrue(ex.message.toString().contains("must be greater than 0"))
+        assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
     }
 
     @Test fun `Can't record a time entry that has -1 minutes`() {
         val ex = assertThrows(AssertionError::class.java ) {Time(-1)}
-        assertTrue(ex.message.toString().contains("must be greater than 0"))
+        assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
     }
 
     /**
