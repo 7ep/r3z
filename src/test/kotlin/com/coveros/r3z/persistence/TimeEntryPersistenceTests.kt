@@ -10,8 +10,9 @@ import com.coveros.r3z.timerecording.TimeEntryPersistence
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Test
+import java.sql.SQLException
 
 const val MAX_DETAIL_TEXT_LENGTH = 500
 
@@ -55,7 +56,7 @@ class TimeEntryPersistenceTests {
     @Test fun `Can't record a time entry that has a nonexistent project id`() {
         val dbAccessHelper = initializeDatabaseForTest()
         val tep = TimeEntryPersistence(dbAccessHelper)
-        Assert.assertThrows(JdbcSQLIntegrityConstraintViolationException::class.java) {
+        assertThrows(JdbcSQLIntegrityConstraintViolationException::class.java) {
             tep.persistNewTimeEntry(createTimeEntry())
         }
     }
@@ -68,7 +69,7 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
-        Assert.assertThrows(JdbcSQLDataException::class.java) {
+        assertThrows(JdbcSQLDataException::class.java) {
             dbAccessHelper.executeInsert(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
@@ -96,7 +97,7 @@ class TimeEntryPersistenceTests {
         // as of the time of writing, numberTimesToRepeat was 13
         print("only have to repeat $numberTimesToRepeat times for this to bust the ceiling")
 
-        Assert.assertThrows(JdbcSQLDataException::class.java) {
+        assertThrows(JdbcSQLDataException::class.java) {
             dbAccessHelper.executeInsert(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
@@ -205,6 +206,51 @@ class TimeEntryPersistenceTests {
         val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("we should get 24 hours worked for this day", 60L * 24, query)
+    }
+
+    @Test
+    fun `If a user worked more than 24 hours total in a day, it should fail`() {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val twentyFourHoursAndOneMinute = 24 * 60 + 1
+        val tep = TimeEntryPersistence(dbAccessHelper)
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+
+        assertThrows(SQLException::class.java) {
+            dbAccessHelper.executeInsert(
+                    "Creates a new time entry in the database - a record of a particular users's time on a project",
+                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
+                    1L, newProject.id, twentyFourHoursAndOneMinute, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
+        }
+    }
+
+    @Test
+    fun `If a user worked exactly 24 hours total in a day, it should pass`() {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val twentyFourHoursExactly = 24 * 60
+        val tep = TimeEntryPersistence(dbAccessHelper)
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+
+        val result = dbAccessHelper.executeInsert(
+                "Creates a new time entry in the database - a record of a particular users's time on a project",
+                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
+                1L, newProject.id, twentyFourHoursExactly, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
+
+        assertTrue(result > 0)
+    }
+
+    @Test
+    fun `If a user worked 1 minute less than 24 hours total in a day, it should pass`() {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val oneMinuteLessThan24Hours = (24 * 60) - 1
+        val tep = TimeEntryPersistence(dbAccessHelper)
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+
+        val result = dbAccessHelper.executeInsert(
+                "Creates a new time entry in the database - a record of a particular users's time on a project",
+                "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
+                1L, newProject.id, oneMinuteLessThan24Hours, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
+
+        assertTrue(result > 0)
     }
 
     @Test

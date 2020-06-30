@@ -16,5 +16,6 @@ CREATE TABLE TIMEANDEXPENSES.TIMEENTRY (
     date DATE NOT NULL,
     -- See Details.kt for details about the max length
     details VARCHAR(500),
-    FOREIGN KEY (project) REFERENCES PROJECT (id)
+    FOREIGN KEY (project) REFERENCES PROJECT (id),
+    CONSTRAINT CHECK_HOURS CHECK (time_in_minutes <= 24 * 60)
 );
