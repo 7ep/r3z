@@ -6,10 +6,10 @@ import com.coveros.r3z.domainobjects.*
 class TimeRecordingUtilities(val persistence: TimeEntryPersistence) {
 
     fun recordTime(entry: TimeEntry): RecordTimeResult {
-        // true if the database has 24 hours already for the provided user and project
         val minutesRecorded = persistence.queryMinutesRecorded(User(1,"Test"), entry.date) ?: 0
 
         val twentyFourHours = 24 * 60
+        // If the user is entering in more than 24 hours in a day, that's insane.
         if ((minutesRecorded + entry.time.numberOfMinutes) > twentyFourHours) {
             throw ExceededDailyHoursAmountException()
         }

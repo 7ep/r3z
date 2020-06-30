@@ -61,13 +61,13 @@ class EnteringTimeBDD {
     }
 
     @Test
-    @Ignore
     fun `A user has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
         // given the user has already entered 24 hours of time entries before
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
-        createTimeEntry(project=newProject, time=Time(60 * 24))
+        val existingTimeForTheDay = createTimeEntry(project = newProject, time = Time(60 * 24))
+        tru.recordTime(existingTimeForTheDay)
 
         // when they enter in a new time entry for one hour
         val entry = createTimeEntry(time=Time(30), project=newProject)

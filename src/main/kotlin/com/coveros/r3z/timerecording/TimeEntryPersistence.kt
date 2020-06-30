@@ -36,9 +36,9 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     fun queryMinutesRecorded(user: User, date: Date): Long? {
         return dbHelper.runQuery(
                 "To restrict impossible states for users, it's necessary to check total hours recorded w/in criteria",
-                "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?);",
+                "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?) AND date=(?);",
                 { r -> r.getLong("total")},
-                user.id)
+                user.id, date.sqlDate)
     }
 
     fun readTimeEntries(user: User): List<TimeEntry>? {
