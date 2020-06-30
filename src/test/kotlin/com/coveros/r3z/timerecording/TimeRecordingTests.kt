@@ -43,14 +43,7 @@ class TimeRecordingTests {
         assertTrue("expect to see an entry about recording Time", logs.contains("a new time entry was recorded with this info: foo bar"))
     }
 
-    /**
-     * Really simplistic mock - make persistNewTimeEntry always return 1
-     */
-    private fun mockAPersistenceLayer(): TimeEntryPersistence {
-        val tep = mockk<TimeEntryPersistence>()
-        every { tep.persistNewTimeEntry(any()) } returns 1
-        return tep
-    }
+
 
     /**
      * Negative case - what happens if we receive a request to enter
@@ -250,5 +243,24 @@ class TimeRecordingTests {
         assertEquals(expected, actual)
     }
 
+    /*************
+     *  HELPERS  *
+     *************/
 
+    /**
+     * Really simplistic mock - make persistNewTimeEntry always return 1
+     */
+    private fun mockAPersistenceLayer(): TimeEntryPersistence {
+        val tep = mockk<TimeEntryPersistence>()
+        every { tep.persistNewTimeEntry(any()) } returns 1
+        return tep
+    }
+
+    private fun getLogForTimeRecordingUtils(): List<String> {
+        val rtn : MutableList<String> = mutableListOf()
+        rtn.add("Foo")
+        rtn.add("Foo")
+
+        return rtn
+    }
 }
