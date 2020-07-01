@@ -20,39 +20,21 @@ import javax.sql.DataSource
  * ==========================================================
  * ==========================================================
  */
-class DbAccessHelper(private val dataSource : DataSource) :
-    IDbAccessHelper {
+class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
 
     /**
      * This command provides a template to execute updates (including inserts) on the database
      */
-    override fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?) {
+    override fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?) : Long {
         val sqlData: SqlData<Any> =
             SqlData(
                 description,
                 preparedStatement,
                 params = params
             )
-            dataSource.connection.use {
+            return dataSource.connection.use {
                 connection -> prepareStatementWithKeys(sqlData, connection)
                     .use { st -> executeUpdateOnPreparedStatement(sqlData, st) } }
-    }
-
-
-    override fun executeInsert(
-            description: String,
-            preparedStatement: String,
-            vararg params: Any?): Long {
-        val sqlData: SqlData<Any> =
-                SqlData(
-                        description,
-                        preparedStatement,
-                        params = params
-                )
-        dataSource.connection.use { connection ->
-            prepareStatementWithKeys(sqlData, connection)
-                    .use { st -> return executeInsertOnPreparedStatement(sqlData, st) }
-        }
     }
 
     override fun <R : Any> runQuery(description: String,
@@ -83,23 +65,26 @@ class DbAccessHelper(private val dataSource : DataSource) :
     }
 
 
-    private fun <T : Any> executeInsertOnPreparedStatement(sqlData: SqlData<T>, st: PreparedStatement): Long {
+    private fun <T : Any> executeUpdateOnPreparedStatement(sqlData: SqlData<T>, st: PreparedStatement): Long {
         sqlData.applyParametersToPreparedStatement(st)
         st.executeUpdate()
+        return obtainNewKey(st)
+    }
+
+    /**
+     * used to obtain the new key for an entry to a table
+     * in the database.  That is, for example, if we added
+     * a new user to tht user table with a generated id of
+     * 1 and a name of "bob", we return 1.
+     */
+    private fun obtainNewKey(st: PreparedStatement) : Long {
         st.generatedKeys.use { generatedKeys ->
             generatedKeys.next()
             val newId: Long = generatedKeys.getLong(1)
-                assert(newId > 0)
+            assert(newId > 0)
             return newId
         }
     }
-
-
-    private fun <T : Any> executeUpdateOnPreparedStatement(sqlData: SqlData<T>, st: PreparedStatement) {
-        sqlData.applyParametersToPreparedStatement(st)
-        st.executeUpdate()
-    }
-
 
     /**
      * A helper method.  Simply creates a prepared statement that

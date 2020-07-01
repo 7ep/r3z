@@ -5,14 +5,9 @@ import java.sql.ResultSet
 interface IDbAccessHelper {
 
     /**
-     * Update data in the database
+     * Update or insert data in the database
      */
-    fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?)
-
-    /**
-     * Insert new data into the database
-     */
-    fun executeInsert(description: String, preparedStatement: String, vararg params: Any?): Long
+    fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?) : Long
 
     /**
      * Run a command on the database that may receive a result.

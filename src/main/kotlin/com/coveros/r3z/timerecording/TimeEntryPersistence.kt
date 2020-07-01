@@ -7,14 +7,14 @@ import java.sql.ResultSet
 class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
     fun persistNewTimeEntry(entry: TimeEntry): Long {
-        return dbHelper.executeInsert(
+        return dbHelper.executeUpdate(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.date.sqlDate, entry.details.value)
     }
 
     fun persistNewProject(projectName: ProjectName) : Project {
-        val id = dbHelper.executeInsert(
+        val id = dbHelper.executeUpdate(
                 "record a new project, the database will give us its id",
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
@@ -23,7 +23,7 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
     fun persistNewUser(username: String): User {
         assert(username.isNotEmpty())
-        val newId = dbHelper.executeInsert(
+        val newId = dbHelper.executeUpdate(
             "Creates a new user in the database",
             "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
         assert(newId > 0)

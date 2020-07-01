@@ -70,7 +70,7 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         assertThrows(JdbcSQLDataException::class.java) {
-            dbAccessHelper.executeInsert(
+            dbAccessHelper.executeUpdate(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
                     1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "a".repeat(
@@ -98,7 +98,7 @@ class TimeEntryPersistenceTests {
         print("only have to repeat $numberTimesToRepeat times for this to bust the ceiling")
 
         assertThrows(JdbcSQLDataException::class.java) {
-            dbAccessHelper.executeInsert(
+            dbAccessHelper.executeUpdate(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
                     1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, unicodeWeirdCharacters.repeat(numberTimesToRepeat))
@@ -113,7 +113,7 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
-        val newId = dbAccessHelper.executeInsert(
+        val newId = dbAccessHelper.executeUpdate(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
                 1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "h̬͕̘ͅiͅ ̘͔̝̺̩͚͚̕b̧͈̙͕̰̖̯y̡̺r̙o̦̯̙͎̮n̯̘̣͖")
@@ -216,7 +216,7 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         assertThrows(SQLException::class.java) {
-            dbAccessHelper.executeInsert(
+            dbAccessHelper.executeUpdate(
                     "Creates a new time entry in the database - a record of a particular users's time on a project",
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                     1L, newProject.id, twentyFourHoursAndOneMinute, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
@@ -230,7 +230,7 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
-        val result = dbAccessHelper.executeInsert(
+        val result = dbAccessHelper.executeUpdate(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 1L, newProject.id, twentyFourHoursExactly, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
@@ -245,7 +245,7 @@ class TimeEntryPersistenceTests {
         val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
-        val result = dbAccessHelper.executeInsert(
+        val result = dbAccessHelper.executeUpdate(
                 "Creates a new time entry in the database - a record of a particular users's time on a project",
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 1L, newProject.id, oneMinuteLessThan24Hours, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "")
