@@ -4,6 +4,7 @@ import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
+import com.coveros.r3z.persistence.microorm.FlywayHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
@@ -99,8 +100,9 @@ class EnteringTimeBDD {
         val ds = getMemoryBasedDatabaseConnectionPool()
         val dbAccessHelper: IDbAccessHelper =
                 DbAccessHelper(ds)
-        dbAccessHelper.cleanDatabase()
-        dbAccessHelper.migrateDatabase()
+        val flywayHelper = FlywayHelper(ds)
+        flywayHelper.cleanDatabase()
+        flywayHelper.migrateDatabase()
         return dbAccessHelper
     }
 }

@@ -8,21 +8,20 @@ import java.sql.ResultSet
  * This class encapsulates some of the actions related to
  * injecting data into a prepared SQL statement, so that
  * we are able to summarize what we want done without
- * all the annoying boilerplate.  See examples like PersistenceLayer.saveNewBorrower
+ * all the annoying boilerplate.
  *
- *
- * Was necessary to suppress the nullness warnings on this class due to its
- * use of generics.
  * The generic R is the result type - if we ask for a string, R would be a String.
- * On the other hand if R might be a compound type, like Employee.
+ * On the other hand R might be a compound type, like Employee.
  * @param R - the return type of this SqlData
  */
  class SqlData<R : Any>(
 
         /**
          * A summary description of what this SQL is doing.
+         * This way, if someone investigates a given SqlData, it's clear
+         * what its purpose is.
          */
-        val description: String,
+        private val description: String,
 
         /**
          * This is the String text of the SQL prepared statement.  We're using PostgreSQL,

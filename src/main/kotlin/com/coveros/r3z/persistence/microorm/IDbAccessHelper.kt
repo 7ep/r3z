@@ -20,14 +20,4 @@ interface IDbAccessHelper {
                            extractor : (ResultSet) -> R?,
                            vararg params: Any?) : R?
 
-    /**
-     * Burns the database down to initial state.  Wipes out everything, pretty much.
-     */
-    fun cleanDatabase()
-
-    /**
-     * Runs the migration scripts to put the database into
-     * a state that is expected for a particular version.
-     */
-    fun migrateDatabase()
 }

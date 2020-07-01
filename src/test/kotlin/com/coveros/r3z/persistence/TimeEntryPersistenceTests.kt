@@ -5,6 +5,7 @@ import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
 import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
+import com.coveros.r3z.persistence.microorm.FlywayHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
 import org.h2.jdbc.JdbcSQLDataException
@@ -285,8 +286,9 @@ class TimeEntryPersistenceTests {
         val ds = getMemoryBasedDatabaseConnectionPool()
         val dbAccessHelper: IDbAccessHelper =
                 DbAccessHelper(ds)
-        dbAccessHelper.cleanDatabase()
-        dbAccessHelper.migrateDatabase()
+        val flywayHelper = FlywayHelper(ds)
+        flywayHelper.cleanDatabase()
+        flywayHelper.migrateDatabase()
         return dbAccessHelper
     }
 }

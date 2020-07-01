@@ -1,6 +1,5 @@
 package com.coveros.r3z.persistence.microorm
 
-import org.flywaydb.core.Flyway
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -100,31 +99,4 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
                 Statement.RETURN_GENERATED_KEYS)
     }
 
-
-    /*
-     * ==========================================================
-     * ==========================================================
-     *
-     *  Database migration code - using FlywayDb
-     *
-     * ==========================================================
-     * ==========================================================
-     */
-
-    override fun cleanDatabase() {
-        val flyway: Flyway = configureFlyway()
-        flyway.clean()
-    }
-
-    override fun migrateDatabase() {
-        val flyway: Flyway = configureFlyway()
-        flyway.migrate()
-    }
-
-    private fun configureFlyway(): Flyway {
-        return Flyway.configure()
-                .schemas("ADMINISTRATIVE", "TIMEANDEXPENSES", "AUTH")
-                .dataSource(dataSource)
-                .load()
-    }
 }
