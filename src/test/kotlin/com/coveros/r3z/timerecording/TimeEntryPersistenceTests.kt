@@ -1,16 +1,15 @@
-package com.coveros.r3z.persistence
+package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
 import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
 import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
+import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.FlywayHelper
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
-import com.coveros.r3z.timerecording.TimeEntryPersistence
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
-import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
 import java.sql.SQLException
