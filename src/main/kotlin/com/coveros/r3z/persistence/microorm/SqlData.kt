@@ -5,14 +5,15 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 
 /**
- * This class encapsulates some of the actions related to
- * injecting data into a prepared SQL statement, so that
- * we are able to summarize what we want done without
- * all the annoying boilerplate.
+ * This class encapsulates necessary data for communication
+ * with the database.  In particular,
+ * 1) the SQL command to run (preparedStatement)
+ * 2) an extractor (if necessary), which is code run to convert the database's [ResultSet] to something we want
+ * 3) params - the data we are including as part of our SQL command.  This makes the
+ *    communication safer (much less likely to see SQL injection).
  *
- * The generic R is the result type - if we ask for a string, R would be a String.
- * On the other hand R might be a compound type, like Employee.
- * @param R - the return type of this SqlData
+ * @param R - The generic R is the result type - if we ask for a string, R would be a String.
+ *            On the other hand R might be a compound type, like Employee.
  */
  class SqlData<R : Any>(
 
@@ -33,6 +34,8 @@ import java.sql.ResultSet
          * A generic function - takes a [ResultSet] straight from the database,
          * and then carries out actions on it, per the user's intentions, to convert it
          * into something of type [R].
+         *
+         * Providing a default of {_ -> null} in case the user provides nothing.
          */
         val extractor: (ResultSet) -> R? = {_ -> null},
 

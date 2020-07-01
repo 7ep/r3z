@@ -2,6 +2,11 @@ package com.coveros.r3z.persistence.microorm
 
 import java.sql.ResultSet
 
+/**
+ * Provides an interface to some helper methods
+ * for running commands on the database, mainly to
+ * avoid unnecessary duplication when coding SQL commands.
+ */
 interface IDbAccessHelper {
 
     /**
