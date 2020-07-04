@@ -18,19 +18,14 @@ import javax.sql.DataSource
  */
 class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
 
+
     /**
      * This command provides a template to execute updates (including inserts) on the database
      */
-    override fun executeUpdate(description: String, preparedStatement: String, vararg params: Any?) : Long {
-        val sqlData: SqlData<Any> =
-            SqlData(
-                description,
-                preparedStatement,
-                params = params
-            )
-            return dataSource.connection.use {
-                connection -> prepareStatementWithKeys(sqlData, connection)
-                    .use { st -> executeUpdateOnPreparedStatement(sqlData, st) } }
+    override fun executeUpdate(description: String, sqlQuery: String, vararg params: Any?) : Long {
+        return dataSource.connection.use {
+            connection -> connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)
+                .use { st -> executeUpdateOnPreparedStatement(params, st) } }
     }
 
     override fun <R : Any> runQuery(description: String,
@@ -66,8 +61,9 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
      * easier to test and evaluate correctness.
      */
     companion object {
-        private fun <T : Any> executeUpdateOnPreparedStatement(sqlData: SqlData<T>, st: PreparedStatement): Long {
-            applyParametersToPreparedStatement(st, sqlData.params)
+
+        private fun executeUpdateOnPreparedStatement(params : Array<out Any?>, st: PreparedStatement): Long {
+            applyParametersToPreparedStatement(st, params)
             st.executeUpdate()
             return obtainNewKey(st)
         }
@@ -110,19 +106,6 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
             }
         }
 
-        /**
-         * A helper method.  Simply creates a prepared statement that
-         * always returns the generated keys from the database, like
-         * when you insert a new row of data in a table with auto-generating primary key.
-         *
-         * @param sqlData    see [SqlData]
-         * @param connection a typical [Connection]
-         */
-        private fun <T : Any> prepareStatementWithKeys(sqlData: SqlData<T>, connection: Connection): PreparedStatement {
-            return connection.prepareStatement(
-                    sqlData.sqlCommand,
-                    Statement.RETURN_GENERATED_KEYS)
-        }
     }
 
 }
