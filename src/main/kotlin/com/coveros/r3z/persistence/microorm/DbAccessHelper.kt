@@ -22,19 +22,19 @@ class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
     /**
      * This command provides a template to execute updates (including inserts) on the database
      */
-    override fun executeUpdate(description: String, sqlQuery: String, vararg params: Any?) : Long {
+    override fun executeUpdate(sqlQuery: String, vararg params: Any?) : Long {
         return dataSource.connection.use {
             connection -> connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)
                 .use { st -> executeUpdateOnPreparedStatement(params, st) } }
     }
 
-    override fun <R : Any> runQuery(description: String,
+    override fun <R : Any> runQuery(
                                     preparedStatement: String,
                                     extractor : (ResultSet) -> R?,
                                     vararg params: Any?): R? {
         val sqlData: SqlData<R> =
                 SqlData(
-                        description,
+                        "",
                         preparedStatement,
                         extractor,
                         params

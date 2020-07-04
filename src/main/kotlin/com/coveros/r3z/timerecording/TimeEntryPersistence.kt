@@ -14,7 +14,6 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
 
     fun persistNewTimeEntry(entry: TimeEntry): Long {
         return dbHelper.executeUpdate(
-                "Creates a new time entry in the database - a record of a particular users's time on a project",
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.date.sqlDate, entry.details.value)
     }
@@ -24,7 +23,6 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
         log.info("Recording a new project, ${projectName.value}, to the database")
 
         val id = dbHelper.executeUpdate(
-                "record a new project, the database will give us its id",
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
 
@@ -37,7 +35,6 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
         log.info("Recording a new user, $username, to the database")
 
         val newId = dbHelper.executeUpdate(
-            "Creates a new user in the database",
             "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
 
         assert(newId > 0) {"A valid user will receive a positive id"}
@@ -49,7 +46,6 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
      */
     fun queryMinutesRecorded(user: User, date: Date): Long? {
         return dbHelper.runQuery(
-                "To restrict impossible states for users, it's necessary to check total hours recorded w/in criteria",
                 "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?) AND date=(?);",
                 { r -> r.getLong("total")},
                 user.id, date.sqlDate)
@@ -73,7 +69,7 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
             } while (r.next())
             myList.toList()
         }
-        return dbHelper.runQuery("For validation, it is sometimes necessary to look up existing entries",
+        return dbHelper.runQuery(
             """
         SELECT te.user as userid, p.name as username, te.project as projectid, pj.name as projectname, 
             te.time_in_minutes as time, te.date, te.details 
