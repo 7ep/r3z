@@ -1,12 +1,12 @@
 package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.persistence.microorm.IDbAccessHelper
+import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 
-class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
+class TimeEntryPersistence(private val dbHelper: DbAccessHelper) {
 
     companion object {
         val log : Logger = LoggerFactory.getLogger(TimeEntryPersistence::class.java)
@@ -47,7 +47,7 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     fun queryMinutesRecorded(user: User, date: Date): Long? {
         return dbHelper.runQuery(
                 "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?) AND date=(?);",
-                { r -> r.getLong("total")},
+                { r : ResultSet -> r.getLong("total")},
                 user.id, date.sqlDate)
     }
 

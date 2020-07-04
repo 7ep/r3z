@@ -32,19 +32,6 @@ class TimeRecordingTests {
         assertEquals("expect to see a success indicator", expectedResult, actualResult)
     }
 
-
-    @Test fun `creating a time entry enters a log item`() {
-        val entry = makeDefaultTimeEntryHelper()
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
-        utils.recordTime(entry)
-
-        val logs : List<String> = getLogForTimeRecordingUtils()
-
-        assertTrue("expect to see an entry about recording Time", logs.contains("a new time entry was recorded with this info: foo bar"))
-    }
-
-
-
     /**
      * Negative case - what happens if we receive a request to enter
      * time for an invalid project?

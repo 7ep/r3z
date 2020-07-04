@@ -5,7 +5,6 @@ import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.FlywayHelper
-import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -131,15 +130,14 @@ class EnteringTimeBDD {
      * A test helper method to generate a [TimeRecordingUtilities]
      * with a real database connected - H2
      */
-    private fun createTimeRecordingUtility(dbAccessHelper : IDbAccessHelper): TimeRecordingUtilities {
+    private fun createTimeRecordingUtility(dbAccessHelper : DbAccessHelper): TimeRecordingUtilities {
         val timeEntryPersistence = TimeEntryPersistence(dbAccessHelper)
         return TimeRecordingUtilities(timeEntryPersistence)
     }
 
-    private fun initializeDatabaseForTest() : IDbAccessHelper {
+    private fun initializeDatabaseForTest() : DbAccessHelper {
         val ds = getMemoryBasedDatabaseConnectionPool()
-        val dbAccessHelper: IDbAccessHelper =
-                DbAccessHelper(ds)
+        val dbAccessHelper = DbAccessHelper(ds)
         val flywayHelper = FlywayHelper(ds)
         flywayHelper.cleanDatabase()
         flywayHelper.migrateDatabase()

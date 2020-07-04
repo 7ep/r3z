@@ -7,7 +7,6 @@ import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.microorm.FlywayHelper
-import com.coveros.r3z.persistence.microorm.IDbAccessHelper
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert.*
@@ -275,10 +274,9 @@ class TimeEntryPersistenceTests {
         assertEquals("we should get 8 hours worked for this day", 60L * 8, query)
     }
 
-    private fun initializeDatabaseForTest() : IDbAccessHelper {
+    private fun initializeDatabaseForTest() : DbAccessHelper {
         val ds = getMemoryBasedDatabaseConnectionPool()
-        val dbAccessHelper: IDbAccessHelper =
-                DbAccessHelper(ds)
+        val dbAccessHelper = DbAccessHelper(ds)
         val flywayHelper = FlywayHelper(ds)
         flywayHelper.cleanDatabase()
         flywayHelper.migrateDatabase()

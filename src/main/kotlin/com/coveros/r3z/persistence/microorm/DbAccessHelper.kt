@@ -16,37 +16,36 @@ import javax.sql.DataSource
  * ==========================================================
  * ==========================================================
  */
-class DbAccessHelper(private val dataSource : DataSource) : IDbAccessHelper {
+class DbAccessHelper(private val dataSource : DataSource) {
 
 
     /**
-     * This command provides a template to execute updates (including inserts) on the database
+     * Update or insert data in the database
      */
-    override fun executeUpdate(sqlQuery: String, vararg params: Any?) : Long {
+    fun executeUpdate(sqlQuery: String, vararg params: Any?) : Long {
         return dataSource.connection.use {
             connection -> connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)
                 .use { st -> executeUpdateOnPreparedStatement(params, st) } }
     }
 
-    override fun <R : Any> runQuery(
-                                    preparedStatement: String,
-                                    extractor : (ResultSet) -> R?,
-                                    vararg params: Any?): R? {
-        val sqlData: SqlData<R> =
-                SqlData(
-                        "",
-                        preparedStatement,
-                        extractor,
-                        params
-                )
+    /**
+     * Run a command on the database that may receive a result.
+     * Handle the result by providing a SqlData that has an Extractor
+     *   An extractor is simply a function that, given a resultset, returns something of type R.
+     *   What is R?  That's up to you.
+     */
+    fun <R : Any> runQuery(
+            sqlQuery: String,
+            extractor : (ResultSet) -> R?,
+            vararg params: Any?): R? {
         dataSource.connection.use { connection ->
-            connection.prepareStatement(sqlData.sqlCommand).use { st ->
-                applyParametersToPreparedStatement(st, sqlData.params)
+            connection.prepareStatement(sqlQuery).use { st ->
+                applyParametersToPreparedStatement(st, params)
                 st.executeQuery().use { resultSet ->
                     // we need to move forward to the first row of data,
                     // unless there is no data, in which case we just return null
                     return if (resultSet.next()) {
-                        sqlData.extractor(resultSet)
+                        extractor(resultSet)
                     } else {
                         null
                     }
