@@ -42,10 +42,14 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
         every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
+        val projectExceptionMessage =
+            "Referential integrity constraint violation: \"CONSTRAINT_A8: TIMEANDEXPENSES.TIMEENTRY FOREIGN KEY(PROJECT) REFERENCES TIMEANDEXPENSES.PROJECT(ID) (1)\"; SQL statement:\n" +
+                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?); [23506-199]"
+        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException(projectExceptionMessage, "", "", 23506, Throwable(), "")
 
         val actualResult = utils.recordTime(entry)
 
-        assertEquals("Expect to see a success indicator", expectedResult, actualResult)
+        assertEquals("Expect to see a message about invalid project", expectedResult, actualResult)
     }
 
     /**

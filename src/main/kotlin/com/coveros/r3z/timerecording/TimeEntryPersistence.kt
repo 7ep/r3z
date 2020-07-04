@@ -13,6 +13,7 @@ class TimeEntryPersistence(private val dbHelper: DbAccessHelper) {
     }
 
     fun persistNewTimeEntry(entry: TimeEntry): Long {
+        log.info("persisting a new timeEntry, $entry")
         return dbHelper.executeUpdate(
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.date.sqlDate, entry.details.value)
