@@ -9,6 +9,10 @@ import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
+import org.slf4j.LoggerFactory
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+
 
 /**
  * Feature: Entering time
@@ -67,8 +71,12 @@ class EnteringTimeBDD {
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject : Project = tru.createProject(ProjectName("A"))
 
+        // turn off logging, otherwise, we get *way* too much data
+        val logger: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+        logger.level = Level.ERROR
+
         // when I enter in that time
-        val numberOfSamples = 60 * 8
+        val numberOfSamples = 100
         val durations = LongArray(numberOfSamples)
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
