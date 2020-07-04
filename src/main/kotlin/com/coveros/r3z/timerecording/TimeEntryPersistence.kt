@@ -2,9 +2,15 @@ package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.microorm.IDbAccessHelper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 
 class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
+
+    companion object {
+        val log : Logger = LoggerFactory.getLogger(TimeEntryPersistence::class.java)
+    }
 
     fun persistNewTimeEntry(entry: TimeEntry): Long {
         return dbHelper.executeUpdate(
@@ -14,19 +20,27 @@ class TimeEntryPersistence(private val dbHelper: IDbAccessHelper) {
     }
 
     fun persistNewProject(projectName: ProjectName) : Project {
+        assert(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
+        log.info("Recording a new project, ${projectName.value}, to the database")
+
         val id = dbHelper.executeUpdate(
                 "record a new project, the database will give us its id",
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
+
+        assert(id > 0) {"A valid project will receive a positive id"}
         return Project(id, projectName.value)
     }
 
     fun persistNewUser(username: String): User {
         assert(username.isNotEmpty())
+        log.info("Recording a new user, $username, to the database")
+
         val newId = dbHelper.executeUpdate(
             "Creates a new user in the database",
             "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
-        assert(newId > 0)
+
+        assert(newId > 0) {"A valid user will receive a positive id"}
         return User(newId, username)
     }
 

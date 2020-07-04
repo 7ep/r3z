@@ -26,12 +26,7 @@ class EnteringTimeBDD {
      */
     @Test
     fun `capability to enter time`() {
-        // given I have worked 1 hour on project "A" on Monday
-        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
-        val newProject : Project = tru.createProject(ProjectName("A"))
-        val entry = createTimeEntry(project = newProject)
+        val (expectedStatus, tru, entry) = `given I have worked 1 hour on project "A" on Monday`()
 
         // when I enter in that time
         val recordStatus = tru.recordTime(entry)
@@ -45,16 +40,7 @@ class EnteringTimeBDD {
      */
     @Test
     fun `A user enters six hours on a project with copious notes`() {
-        // given I have worked 6 hour on project "A" on Monday with a lot of notes
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
-        val newProject : Project = tru.createProject(ProjectName("A"))
-        val entry = createTimeEntry(
-            time = Time(60 * 6),
-            project = newProject,
-            details = Details("Four score and seven years ago, blah blah blah".repeat(10))
-        )
-        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val (tru, entry, expectedStatus) = `given I have worked 6 hour on project "A" on Monday with a lot of notes`()
 
         // when I enter in that time
         val recordStatus = tru.recordTime(entry)
@@ -65,27 +51,13 @@ class EnteringTimeBDD {
 
     @Test
     fun `A user has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
-        // given the user has already entered 24 hours of time entries before
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
-        val newProject : Project = tru.createProject(ProjectName("A"))
-        val existingTimeForTheDay = createTimeEntry(project = newProject, time = Time(60 * 24))
-        tru.recordTime(existingTimeForTheDay)
+        val (tru, newProject: Project) = `given the user has already entered 24 hours of time entries before`()
 
         // when they enter in a new time entry for one hour
         val entry = createTimeEntry(time=Time(30), project=newProject)
 
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
-    }
-
-    @Test
-    fun `A user cannot enter more than 24 hours in a single entry`() {
-        // given someone has somehow done 25 hours of work in a single day
-        // when they try entering that...
-        // the system disallows it
-        val ex = assertThrows(AssertionError::class.java) { createTimeEntry(time = Time((60 * 24) + 1)) }
-        assertEquals(ex.message, "Entries do not span multiple days, thus must be <=24 hrs")
     }
 
     @Test
@@ -121,6 +93,38 @@ class EnteringTimeBDD {
         println("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
 
         assertTrue("the system should respond quickly, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
+    }
+
+    private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntry> {
+        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val dbAccessHelper = initializeDatabaseForTest()
+        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val newProject: Project = tru.createProject(ProjectName("A"))
+        val entry = createTimeEntry(project = newProject)
+        return Triple(expectedStatus, tru, entry)
+    }
+
+    private fun `given I have worked 6 hour on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
+        //
+        val dbAccessHelper = initializeDatabaseForTest()
+        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val newProject: Project = tru.createProject(ProjectName("A"))
+        val entry = createTimeEntry(
+                time = Time(60 * 6),
+                project = newProject,
+                details = Details("Four score and seven years ago, blah blah blah".repeat(10))
+        )
+        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        return Triple(tru, entry, expectedStatus)
+    }
+
+    private fun `given the user has already entered 24 hours of time entries before`(): Pair<TimeRecordingUtilities, Project> {
+        val dbAccessHelper = initializeDatabaseForTest()
+        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val newProject: Project = tru.createProject(ProjectName("A"))
+        val existingTimeForTheDay = createTimeEntry(project = newProject, time = Time(60 * 24))
+        tru.recordTime(existingTimeForTheDay)
+        return Pair(tru, newProject)
     }
 
     /**
