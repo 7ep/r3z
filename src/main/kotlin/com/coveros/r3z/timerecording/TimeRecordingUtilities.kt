@@ -5,7 +5,7 @@ import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class TimeRecordingUtilities(val persistence: TimeEntryPersistence) {
+class TimeRecordingUtilities(private val persistence: TimeEntryPersistence) {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(TimeRecordingUtilities::class.java)
@@ -16,26 +16,23 @@ class TimeRecordingUtilities(val persistence: TimeEntryPersistence) {
         `confirm the user has a total (new plus existing) of less than 24 hours`(entry)
         try {
             val newId = persistence.persistNewTimeEntry(entry)
-            return if (newId > 0) {
-                log.info("recorded time sucessfully")
-                RecordTimeResult(id = newId, status = StatusEnum.SUCCESS)
-            } else {
-                log.info("time was not recorded successfully")
-                RecordTimeResult(id = newId, status = StatusEnum.FAILURE)
-            }
+            assert(newId > 0) {"the new id must be positive at this point"}
+            log.info("recorded time sucessfully")
+            return RecordTimeResult(id = newId, status = StatusEnum.SUCCESS)
         } catch (ex : org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException) {
             log.info("time was not recorded successfully: error was: ${ex.message}")
             val indicatesProjectConstraintFailure = "REFERENCES TIMEANDEXPENSES.PROJECT(ID)"
-            return if (ex.message!!.contains(indicatesProjectConstraintFailure)) {
-                RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
+            if (ex.message!!.contains(indicatesProjectConstraintFailure)) {
+                return RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
             } else {
-                RecordTimeResult(id = null, status = StatusEnum.FAILURE)
+                // at this point, we're in unknown territory, may as well throw
+                throw ex
             }
         }
     }
 
     private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntry) {
-        log.info("Received request for all available books")
+        log.info("checking that the user has a total (new plus existing) of less than 24 hours")
         // make sure the user has a total (new plus existing) of less than 24 hours
         val minutesRecorded = persistence.queryMinutesRecorded(User(1, "Test"), entry.date) ?: 0
 

@@ -4,7 +4,6 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.sql.PreparedStatement
 
 class MicroOrmTests {
 
@@ -13,7 +12,7 @@ class MicroOrmTests {
      */
     data class Foo(val a : Int)
 
-    @Test fun `if we pass an unrecognized type to SqlData, we get a good exception message`() {
+    @Test fun `if we pass an unrecognized type, we get a good exception message`() {
         // Foo will be unrecognized here, which will cause an exception to be thrown.
         val ex = assertThrows(Exception::class.java) {
             DbAccessHelper.applyParametersToPreparedStatement(mockk(), arrayOf(Foo(1)))

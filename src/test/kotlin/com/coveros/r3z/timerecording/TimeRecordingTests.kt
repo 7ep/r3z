@@ -53,6 +53,23 @@ class TimeRecordingTests {
     }
 
     /**
+     * Negative case - what happens if the database has a general integrity complaint we haven't considered?
+     *
+     * It might happen that our system hasn't been developed fully - we haven't accounted for some
+     * constraint in the database.  If that happens, we'll let recordTime just throw the exception.
+     *
+     * Follows the strategy of "fail fast and loud"
+     */
+    @Test
+    fun `Should throw when there is a database failure`() {
+        val entry = makeDefaultTimeEntryHelper()
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
+        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException("unexpected error here", "", "", 23506, Throwable(), "")
+
+        assertThrows(org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException::class.java) {utils.recordTime(entry)}
+    }
+
+    /**
      * Negative case - what happens if we ask the system to record
      * any more time when we've already recorded the maximum for the day?
      * (It should throw an exception)
@@ -84,36 +101,6 @@ class TimeRecordingTests {
     fun `just checking that two similar time entries are considered equal`() {
         assertEquals(createTimeEntry(), createTimeEntry())
     }
-
-    private fun `setup 24 hours already recorded for the day`() {
-        val twentyFourHours: Long = 24 * 60
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyFourHours
-    }
-
-    private fun `setup 23 hours already recorded for the day`() {
-        val twentyThreeHours: Long = 23 * 60
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyThreeHours
-    }
-
-    /**
-     * Generates a default time entry for use in testing
-     */
-    private fun makeDefaultTimeEntryHelper(
-            user : User = User(1, ""),
-            time : Time = THREE_HOURS_FIFTEEN,
-            project : Project = Project(1, "project"),
-            date : Date = A_RANDOM_DAY_IN_JUNE_2020,
-            details : Details = Details("testing, testing")
-    ): TimeEntry {
-        return TimeEntry(user, project, time, date, details)
-    }
-
-    /**
-     * recordTime() should:
-     * - put the time entry in a database
-     * - returns a status based on how the above action went
-     * - error on invalid timeEntry (e.g. project is invalid, user is invalid)
-     */
 
     /**
      * Now, this is something functional.  On the input, we want various
@@ -190,7 +177,7 @@ class TimeRecordingTests {
      * Testing that 500 doesn't throw an exception
      */
     @Test fun `Details should allow an input of 500 characters`() {
-        val value = "A".repeat(500)
+        val value = "A".repeat(MAX_DETAIL_TEXT_LENGTH)
         val details = Details(value)
         assertEquals(value, details.value)
     }
@@ -239,6 +226,30 @@ class TimeRecordingTests {
     /*************
      *  HELPERS  *
      *************/
+
+
+    private fun `setup 24 hours already recorded for the day`() {
+        val twentyFourHours: Long = 24 * 60
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyFourHours
+    }
+
+    private fun `setup 23 hours already recorded for the day`() {
+        val twentyThreeHours: Long = 23 * 60
+        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyThreeHours
+    }
+
+    /**
+     * Generates a default time entry for use in testing
+     */
+    private fun makeDefaultTimeEntryHelper(
+        user : User = User(1, ""),
+        time : Time = THREE_HOURS_FIFTEEN,
+        project : Project = Project(1, "project"),
+        date : Date = A_RANDOM_DAY_IN_JUNE_2020,
+        details : Details = Details("testing, testing")
+    ): TimeEntry {
+        return TimeEntry(user, project, time, date, details)
+    }
 
     /**
      * Really simplistic mock - make persistNewTimeEntry always return 1

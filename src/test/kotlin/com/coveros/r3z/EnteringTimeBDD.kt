@@ -43,7 +43,7 @@ class EnteringTimeBDD {
      */
     @Test
     fun `A user enters six hours on a project with copious notes`() {
-        val (tru, entry, expectedStatus) = `given I have worked 6 hour on project "A" on Monday with a lot of notes`()
+        val (tru, entry, expectedStatus) = `given I have worked 6 hours on project "A" on Monday with a lot of notes`()
 
         // when I enter in that time
         val recordStatus = tru.recordTime(entry)
@@ -90,16 +90,20 @@ class EnteringTimeBDD {
             durations[i-1] = timeElapsed
         }
 
+        // turn logging back on
+        logger.level = Level.INFO
+
         // the system should perform quickly
         val average = durations.average()
-        val takesLessThanMillisecondsAverage = average < 3
+        val maximumAllowableMilliseconds = 5
+        val takesLessThanMillisecondsAverage = average < maximumAllowableMilliseconds
         println("Durations:")
         durations.forEach { d -> print(" $d") }
         val endOfTest = System.currentTimeMillis()
         val totalTime = endOfTest - startAfterDatabase
         println("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
 
-        assertTrue("the system should respond quickly, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
+        assertTrue("average should be less than $maximumAllowableMilliseconds milliseconds, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
     }
 
     private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntry> {
@@ -111,8 +115,7 @@ class EnteringTimeBDD {
         return Triple(expectedStatus, tru, entry)
     }
 
-    private fun `given I have worked 6 hour on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
-        //
+    private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject: Project = tru.createProject(ProjectName("A"))
