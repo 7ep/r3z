@@ -154,11 +154,11 @@ class TimeRecordingTests {
     }
 
     /**
-     * Both the database the type disallow a details message longer than 500 characters.
-     * Testing that 501 throws an exception
+     * Both the database the type disallow a details message longer than some length of characters.
+     * Testing that 1 more throws an exception
      */
-    @Test fun `Details should throw an exception if longer than 500 characters`() {
-        val ex = assertThrows(AssertionError::class.java ) {Details("A".repeat(501))}
+    @Test fun `Details should throw an exception if one longer than max-length characters`() {
+        val ex = assertThrows(AssertionError::class.java ) {Details("A".repeat(MAX_DETAILS_LENGTH + 1))}
         assertTrue(ex.message.toString().contains("lord's prayer"))
     }
 
@@ -166,18 +166,18 @@ class TimeRecordingTests {
      * Both the database the type disallow a details message longer than 500 characters.
      * Testing that 499 doesn't throw an exception
      */
-    @Test fun `Details should allow an input of 499 characters`() {
-        val value = "A".repeat(499)
+    @Test fun `Details should allow an input of max-length minus 1 characters`() {
+        val value = "A".repeat(MAX_DETAILS_LENGTH - 1)
         val details = Details(value)
         assertEquals(value, details.value)
     }
 
     /**
      * Both the database the type disallow a details message longer than 500 characters.
-     * Testing that 500 doesn't throw an exception
+     * Testing that max length doesn't throw an exception
      */
-    @Test fun `Details should allow an input of 500 characters`() {
-        val value = "A".repeat(MAX_DETAIL_TEXT_LENGTH)
+    @Test fun `Details should allow an input of max-length characters`() {
+        val value = "A".repeat(MAX_DETAILS_LENGTH)
         val details = Details(value)
         assertEquals(value, details.value)
     }

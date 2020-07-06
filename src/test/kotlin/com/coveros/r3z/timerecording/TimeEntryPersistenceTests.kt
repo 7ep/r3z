@@ -13,8 +13,6 @@ import org.junit.Assert.*
 import org.junit.Test
 import java.sql.SQLException
 
-const val MAX_DETAIL_TEXT_LENGTH = 500
-
 class TimeEntryPersistenceTests {
 
     @Test fun `can record a time entry to the database`() {
@@ -72,7 +70,7 @@ class TimeEntryPersistenceTests {
             dbAccessHelper.executeUpdate(
                     "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?, ?, ?, ?);",
                     1, newProject.id, 60, A_RANDOM_DAY_IN_JUNE_2020.sqlDate, "a".repeat(
-                    MAX_DETAIL_TEXT_LENGTH + 1))
+                    MAX_DETAILS_LENGTH + 1))
         }
     }
 
@@ -91,7 +89,7 @@ class TimeEntryPersistenceTests {
         // we think it should fit into the given maximum character length, plus one in
         // order to bust through the ceiling.
 
-        val numberTimesToRepeat = MAX_DETAIL_TEXT_LENGTH /unicodeWeirdCharacters.length + 1
+        val numberTimesToRepeat = MAX_DETAILS_LENGTH /unicodeWeirdCharacters.length + 1
         // as of the time of writing, numberTimesToRepeat was 13
         print("only have to repeat $numberTimesToRepeat times for this to bust the ceiling")
 
