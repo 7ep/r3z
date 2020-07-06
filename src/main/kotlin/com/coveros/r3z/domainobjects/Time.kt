@@ -5,7 +5,8 @@ package com.coveros.r3z.domainobjects
  */
 data class Time(val numberOfMinutes : Int) {
     init {
-        assert(numberOfMinutes > 0) { "number of minutes worked must be greater than 0, doesn't make sense otherwise"}
+        assert(numberOfMinutes > 0) {"Doesn't make sense to have zero or negative time"}
+        assert(numberOfMinutes <= 60*24) {"Entries do not span multiple days, thus must be <=24 hrs"}
     }
 }
 

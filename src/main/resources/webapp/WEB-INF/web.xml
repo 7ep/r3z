@@ -5,11 +5,6 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
-    <servlet-mapping>
-        <servlet-name>KtorServlet</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>H2Console</servlet-name>
         <servlet-class>org.h2.server.web.WebServlet</servlet-class>
@@ -35,30 +30,5 @@
         <!-- Disables URL-based sessions (no more 'jsessionid' in the URL using Tomcat) -->
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
-
-    <!-- path to application.conf file, required -->
-    <!-- note that this file is always loaded as an absolute path from the classpath -->
-    <context-param>
-        <param-name>io.ktor.ktor.config</param-name>
-        <param-value>application.conf</param-value>
-    </context-param>
-
-    <servlet>
-        <display-name>KtorServlet</display-name>
-        <servlet-name>KtorServlet</servlet-name>
-        <servlet-class>io.ktor.server.servlet.ServletApplicationEngine</servlet-class>
-
-        <!-- required! -->
-        <async-supported>true</async-supported>
-
-        <!-- 100mb max file upload, optional -->
-        <multipart-config>
-            <max-file-size>304857600</max-file-size>
-            <max-request-size>304857600</max-request-size>
-            <file-size-threshold>0</file-size-threshold>
-        </multipart-config>
-    </servlet>
-
-
 
 </web-app>
