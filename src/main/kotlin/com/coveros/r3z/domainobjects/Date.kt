@@ -29,7 +29,7 @@ data class Date(val year: Int, val month: Month, val day: Int) {
     val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.of(year, month.ord+1, day))
 
     init {
-        assert(year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had "+year}
+        assert(year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had $year"}
         assert(day in 1..31) {"months only go between 1 and 31 days"}
     }
 

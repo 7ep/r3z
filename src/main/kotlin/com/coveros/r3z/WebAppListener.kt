@@ -1,7 +1,7 @@
 package com.coveros.r3z
 
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
-import com.coveros.r3z.persistence.microorm.FlywayHelper
+import com.coveros.r3z.persistence.FlywayHelper
 import javax.servlet.ServletContextEvent
 import javax.servlet.ServletContextListener
 import javax.servlet.annotation.WebListener

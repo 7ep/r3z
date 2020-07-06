@@ -6,7 +6,7 @@ import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
-import com.coveros.r3z.persistence.microorm.FlywayHelper
+import com.coveros.r3z.persistence.FlywayHelper
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert.*

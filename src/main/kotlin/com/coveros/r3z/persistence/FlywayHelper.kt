@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence.microorm
+package com.coveros.r3z.persistence
 
 import org.flywaydb.core.Flyway
 import javax.sql.DataSource

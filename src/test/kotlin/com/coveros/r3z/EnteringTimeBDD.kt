@@ -4,7 +4,7 @@ import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
-import com.coveros.r3z.persistence.microorm.FlywayHelper
+import com.coveros.r3z.persistence.FlywayHelper
 import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*

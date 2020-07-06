@@ -31,7 +31,7 @@ class DbAccessHelper(private val dataSource : DataSource) {
     /**
      * Run a command on the database that may receive a result.
      * Handle the result by providing a SqlData that has an Extractor
-     *   An extractor is simply a function that, given a resultset, returns something of type R.
+     *   An extractor is simply a function that, given a [ResultSet], returns something of type R.
      *   What is R?  That's up to you.
      */
     fun <R : Any> runQuery(
