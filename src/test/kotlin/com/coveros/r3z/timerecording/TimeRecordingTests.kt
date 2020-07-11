@@ -24,7 +24,7 @@ class TimeRecordingTests {
     @Test
     fun `record time for someone`() {
         val entry = makeDefaultTimeEntryHelper()
-        val expectedResult = RecordTimeResult(id =1, status = StatusEnum.SUCCESS)
+        val expectedResult = RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
         every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
 
         val actualResult = utils.recordTime(entry)
@@ -254,18 +254,10 @@ class TimeRecordingTests {
     /**
      * Really simplistic mock - make persistNewTimeEntry always return 1
      */
-    private fun mockAPersistenceLayer(): TimeEntryPersistence {
-        val tep = mockk<TimeEntryPersistence>()
-        every { tep.persistNewTimeEntry(any()) } returns 1
+    private fun mockAPersistenceLayer(): ITimeEntryPersistence {
+        val tep = mockk<ITimeEntryPersistence>()
+        every { tep.persistNewTimeEntry(any()) } returns Unit
         return tep
-    }
-
-    private fun getLogForTimeRecordingUtils(): List<String> {
-        val rtn : MutableList<String> = mutableListOf()
-        rtn.add("Foo")
-        rtn.add("Foo")
-
-        return rtn
     }
 
 }
