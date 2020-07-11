@@ -108,7 +108,7 @@ class EnteringTimeBDD {
     }
 
     private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntry> {
-        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         val dbAccessHelper = initializeDatabaseForTest()
         val tru = createTimeRecordingUtility(dbAccessHelper)
         val newProject: Project = tru.createProject(ProjectName("A"))
@@ -125,7 +125,7 @@ class EnteringTimeBDD {
                 project = newProject,
                 details = Details("Four score and seven years ago, blah blah blah".repeat(10))
         )
-        val expectedStatus = RecordTimeResult(1, StatusEnum.SUCCESS)
+        val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         return Triple(tru, entry, expectedStatus)
     }
 
