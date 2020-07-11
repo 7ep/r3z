@@ -31,8 +31,8 @@ class TimeEntryPersistenceTests {
     @Test fun `can get all time entries by a user`() {
         val dbAccessHelper = initializeDatabaseForTest()
         val tep = TimeEntryPersistence(dbAccessHelper)
-        val userName = "test"
-        val user = User(1L, userName)
+        val userName = UserName("test")
+        val user = User(1L, userName.value)
         tep.persistNewUser(userName)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val entry1 = createTimeEntry(user = user, project = newProject)
