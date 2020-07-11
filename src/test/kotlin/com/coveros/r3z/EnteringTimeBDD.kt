@@ -12,6 +12,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
 
 
 /**
@@ -147,6 +148,9 @@ class EnteringTimeBDD {
     }
 
     private fun initializeDatabaseForTest() : DbAccessHelper {
+        val pmd = PureMemoryDatabase
+        pmd.clearDatabase()
+
         val ds = getMemoryBasedDatabaseConnectionPool()
         val dbAccessHelper = DbAccessHelper(ds)
         val flywayHelper = FlywayHelper(ds)

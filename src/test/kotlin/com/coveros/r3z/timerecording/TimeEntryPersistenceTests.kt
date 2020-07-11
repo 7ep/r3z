@@ -7,6 +7,7 @@ import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
 import com.coveros.r3z.persistence.FlywayHelper
+import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert.*
@@ -273,6 +274,9 @@ class TimeEntryPersistenceTests {
     }
 
     private fun initializeDatabaseForTest() : DbAccessHelper {
+        val pmd = PureMemoryDatabase
+        pmd.clearDatabase()
+
         val ds = getMemoryBasedDatabaseConnectionPool()
         val dbAccessHelper = DbAccessHelper(ds)
         val flywayHelper = FlywayHelper(ds)
