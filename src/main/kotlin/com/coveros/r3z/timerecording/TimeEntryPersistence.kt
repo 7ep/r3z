@@ -2,6 +2,7 @@ package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.microorm.DbAccessHelper
+import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
@@ -10,10 +11,14 @@ class TimeEntryPersistence(private val dbHelper: DbAccessHelper) {
 
     companion object {
         val log : Logger = LoggerFactory.getLogger(TimeEntryPersistence::class.java)
+        val pmd = PureMemoryDatabase
     }
 
     fun persistNewTimeEntry(entry: TimeEntry): Long {
         log.info("persisting a new timeEntry, $entry")
+
+        pmd.addTimeEntry(entry)
+
         return dbHelper.executeUpdate(
                 "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?);",
                 entry.user.id, entry.project.id, entry.time.numberOfMinutes, entry.date.sqlDate, entry.details.value)
@@ -23,11 +28,14 @@ class TimeEntryPersistence(private val dbHelper: DbAccessHelper) {
         assert(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
         log.info("Recording a new project, ${projectName.value}, to the database")
 
+        val newId = pmd.addNewProject(projectName)
+
         val id = dbHelper.executeUpdate(
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
 
         assert(id > 0) {"A valid project will receive a positive id"}
+        assert(newId == id) {"newId, $newId should be equal to id, $id"}
         return Project(id, projectName.value)
     }
 
