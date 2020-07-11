@@ -118,7 +118,7 @@ class TimeRecordingTests {
 
     @Test
     fun `a user should have a unique integer identifier`() {
-        val user = User(1, "")
+        val user = User(1, "someone")
         assertEquals(1, user.id)
     }
 
@@ -242,7 +242,7 @@ class TimeRecordingTests {
      * Generates a default time entry for use in testing
      */
     private fun makeDefaultTimeEntryHelper(
-        user : User = User(1, ""),
+        user : User = User(1, "someone"),
         time : Time = THREE_HOURS_FIFTEEN,
         project : Project = Project(1, "project"),
         date : Date = A_RANDOM_DAY_IN_JUNE_2020,
