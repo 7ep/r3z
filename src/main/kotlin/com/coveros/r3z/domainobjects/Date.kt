@@ -20,13 +20,17 @@ enum class Month(val ord: Int) {
  * all this has is those three values.  In contrast, those other classes
  * have tricky little bits inside to represent a more complex world.
  */
-data class Date(val year: Int, val month: Month, val day: Int) {
+class Date(year: Int, month: Month, day: Int) {
+
+    // The core data - the number of days since the Epoch - day 0 is 1970-01-01
+    private val epochDay = LocalDate.of(year, month.ord+1, day).toEpochDay()
 
     // have to add 1 to month's ordinal for use with LocalDate.
     // annoyingly, GregorianCalendar and LocalDate differ on the ordinal
     // they assign to months.  Gregorian does it starting with January at 0,
     // and LocalDate does it with January at 1.  Yuck.
-    val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.of(year, month.ord+1, day))
+    val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
+    val stringValue: String = sqlDate.toString()
 
     init {
         assert(year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had $year"}
@@ -51,6 +55,30 @@ data class Date(val year: Int, val month: Month, val day: Int) {
         }
 
     }
+
+    /**
+     * All we care about is the epoch day, making
+     * this as simple as it can get.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Date
+
+        if (epochDay != other.epochDay) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return epochDay.hashCode()
+    }
+
+    override fun toString(): String {
+        return "Date(epochDay=$epochDay, $stringValue)"
+    }
+
 }
 
 
