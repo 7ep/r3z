@@ -27,10 +27,10 @@ object PureMemoryDatabase {
         return newIndex
     }
 
-    fun getMinutesRecordedOnDate(user: User, date: Date): Long? {
+    fun getMinutesRecordedOnDate(user: User, date: Date): Int {
         return timeEntries
                 .filter { te -> te.user == user && te.date == date }
-                .sumBy { te -> te.time.numberOfMinutes }.toLong()
+                .sumBy { te -> te.time.numberOfMinutes }
     }
 
     fun clearDatabase() {
