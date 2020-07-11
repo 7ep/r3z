@@ -1,9 +1,6 @@
 package com.coveros.r3z.persistence.microorm
 
-import com.coveros.r3z.domainobjects.Project
-import com.coveros.r3z.domainobjects.ProjectName
-import com.coveros.r3z.domainobjects.TimeEntry
-import com.coveros.r3z.domainobjects.User
+import com.coveros.r3z.domainobjects.*
 
 object PureMemoryDatabase {
     private val users : MutableList<User> = mutableListOf()
@@ -24,9 +21,22 @@ object PureMemoryDatabase {
         return newIndex
     }
 
+    fun addNewUser(username: UserName) : Long {
+        val newIndex = users.size.toLong() + 1
+        users.add(User(newIndex, username.value))
+        return newIndex
+    }
+
+    fun getMinutesRecordedOnDate(user: User, date: Date): Long? {
+        return timeEntries
+                .filter { te -> te.user == user && te.date == date }
+                .sumBy { te -> te.time.numberOfMinutes }.toLong()
+    }
+
     fun clearDatabase() {
         users.clear()
         projects.clear()
         timeEntries.clear()
     }
+
 }

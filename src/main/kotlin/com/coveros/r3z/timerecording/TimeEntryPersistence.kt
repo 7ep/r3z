@@ -28,32 +28,36 @@ class TimeEntryPersistence(private val dbHelper: DbAccessHelper) {
         assert(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
         log.info("Recording a new project, ${projectName.value}, to the database")
 
-        val newId = pmd.addNewProject(projectName)
+        val pmdId = pmd.addNewProject(projectName)
 
         val id = dbHelper.executeUpdate(
                 "INSERT INTO TIMEANDEXPENSES.PROJECT (name) VALUES (?);",
                 projectName.value)
 
         assert(id > 0) {"A valid project will receive a positive id"}
-        assert(newId == id) {"newId, $newId should be equal to id, $id"}
+        assert(pmdId == id) {"newId, $pmdId should be equal to id, $id"}
         return Project(id, projectName.value)
     }
 
-    fun persistNewUser(username: String): User {
-        assert(username.isNotEmpty())
-        log.info("Recording a new user, $username, to the database")
+    fun persistNewUser(username: UserName): User {
+        log.info("Recording a new user, ${username.value}, to the database")
+
+        val pmdId = pmd.addNewUser(username)
 
         val newId = dbHelper.executeUpdate(
-            "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username)
+            "INSERT INTO TIMEANDEXPENSES.PERSON (name) VALUES (?);", username.value)
 
+        assert(pmdId == newId) {"pmdId, $pmdId should be equal to newId, $newId"}
         assert(newId > 0) {"A valid user will receive a positive id"}
-        return User(newId, username)
+        return User(newId, username.value)
     }
 
     /**
      * Provided a user and date, give the number of minutes they worked on that date
      */
     fun queryMinutesRecorded(user: User, date: Date): Long? {
+        val minutes : Long? = pmd.getMinutesRecordedOnDate(user, date)
+
         return dbHelper.runQuery(
                 "SELECT SUM (TIME_IN_MINUTES) AS total FROM TIMEANDEXPENSES.TIMEENTRY WHERE user=(?) AND date=(?);",
                 { r : ResultSet -> r.getLong("total")},
