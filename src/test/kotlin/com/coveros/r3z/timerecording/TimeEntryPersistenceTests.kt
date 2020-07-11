@@ -11,26 +11,27 @@ import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
 import org.h2.jdbc.JdbcSQLDataException
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import java.sql.SQLException
 
 class TimeEntryPersistenceTests {
 
+    private val dbAccessHelper : DbAccessHelper = initializeDatabaseForTest()
+    private var tep : ITimeEntryPersistence = TimeEntryPersistence(dbAccessHelper)
+
+    @Before fun init() {
+        tep = TimeEntryPersistence(dbAccessHelper)
+    }
+
     @Test fun `can record a time entry to the database`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val expectedNewId : Long = 1
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val result = tep.persistNewTimeEntry(createTimeEntry(project = newProject))
-
-        val message = "we expect that the insertion of a new row will return the new id"
-
-        assertEquals(message, expectedNewId, result)
+        tep.persistNewTimeEntry(createTimeEntry(project = newProject))
+        val count = dbAccessHelper.runQuery("SELECT COUNT(*) as count FROM TIMEANDEXPENSES.TIMEENTRY", {r -> r.getLong("count")})
+        assertEquals("There should be exactly one entry in the database", 1L, count)
     }
 
     @Test fun `can get all time entries by a user`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val userName = UserName("test")
         val user = User(1L, userName.value)
         tep.persistNewUser(userName)
@@ -52,8 +53,6 @@ class TimeEntryPersistenceTests {
      * the database, we should get an exception back from the database
      */
     @Test fun `Can't record a time entry that has a nonexistent project id`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         assertThrows(JdbcSQLIntegrityConstraintViolationException::class.java) {
             tep.persistNewTimeEntry(createTimeEntry())
         }
@@ -63,8 +62,6 @@ class TimeEntryPersistenceTests {
      * Details only takes up to MAX_DETAIL_TEXT_LENGTH characters.  Any more and an exception will be thrown.
      */
     @Test fun `Can't record a time entry with too many letters in details`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         assertThrows(JdbcSQLDataException::class.java) {
@@ -80,8 +77,6 @@ class TimeEntryPersistenceTests {
      * This checks the unicode version of that idea.
      */
     @Test fun `Can't record a time entry with too many letters in details, using unicode`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         // the following unicode is longer than it seems.  Thanks Matt!
         val unicodeWeirdCharacters = "h̬͕̘ͅiͅ ̘͔̝̺̩͚͚̕b̧͈̙͕̰̖̯y̡̺r̙o̦̯̙͎̮n̯̘̣͖"
@@ -105,8 +100,6 @@ class TimeEntryPersistenceTests {
      * Make sure that when we use really weird unicode, it's accepted
      */
     @Test fun `Can record a time entry with unicode letters in details`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         val newId = dbAccessHelper.executeUpdate(
@@ -119,19 +112,18 @@ class TimeEntryPersistenceTests {
      * Can we store data from non-English alphabets? you betcha
      */
     @Test fun `Can record a time entry with unicode chars`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val expectedNewId : Long = 1
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val result = tep.persistNewTimeEntry(
+        val unicodeText = " Γεια σου κόσμε! こんにちは世界 世界，你好"
+        tep.persistNewTimeEntry(
             createTimeEntry(
                 project = newProject,
-                details = Details(" Γεια σου κόσμε! こんにちは世界 世界，你好")
+                details = Details(unicodeText)
             )
         )
-
-        val message = "we expect that the insertion of a new row will return the new id"
-        assertEquals(message, expectedNewId, result)
+        val count = dbAccessHelper.runQuery("SELECT COUNT(*) as count FROM TIMEANDEXPENSES.TIMEENTRY", {r -> r.getLong("count")})
+        assertEquals("There should be exactly one entry in the database", 1L, count)
+        val detailsOutput = dbAccessHelper.runQuery("SELECT details FROM TIMEANDEXPENSES.TIMEENTRY", {r -> r.getString("details")})
+        assertEquals("That entry should have unicode", unicodeText, detailsOutput)
     }
 
     /**
@@ -139,8 +131,6 @@ class TimeEntryPersistenceTests {
      */
     @Test
     fun `Can query hours worked by a user on a given day`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
         tep.persistNewTimeEntry(
@@ -158,8 +148,6 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `if a user has not worked on a given day, we return 0 as their minutes worked that day`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val testUser = User(1, "test")
 
         val minutesWorked = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
@@ -169,8 +157,6 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `If a user worked 24 hours total in a day, we should get that from queryMinutesRecorded`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
         tep.persistNewTimeEntry(
@@ -205,9 +191,7 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `If a user worked more than 24 hours total in a day, it should fail`() {
-        val dbAccessHelper = initializeDatabaseForTest()
         val twentyFourHoursAndOneMinute = 24 * 60 + 1
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         assertThrows(SQLException::class.java) {
@@ -219,9 +203,7 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `If a user worked exactly 24 hours total in a day, it should pass`() {
-        val dbAccessHelper = initializeDatabaseForTest()
         val twentyFourHoursExactly = 24 * 60
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         val result = dbAccessHelper.executeUpdate(
@@ -233,9 +215,7 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `If a user worked 1 minute less than 24 hours total in a day, it should pass`() {
-        val dbAccessHelper = initializeDatabaseForTest()
         val oneMinuteLessThan24Hours = (24 * 60) - 1
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
 
         val result = dbAccessHelper.executeUpdate(
@@ -247,8 +227,6 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `If a user worked 8 hours a day for two days, we should get just 8 hours when checking one of those days`() {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tep = TimeEntryPersistence(dbAccessHelper)
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val testUser = User(1, "test")
         tep.persistNewTimeEntry(

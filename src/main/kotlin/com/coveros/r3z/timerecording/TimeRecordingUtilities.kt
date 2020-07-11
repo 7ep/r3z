@@ -5,7 +5,7 @@ import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class TimeRecordingUtilities(private val persistence: TimeEntryPersistence) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(TimeRecordingUtilities::class.java)
@@ -15,10 +15,9 @@ class TimeRecordingUtilities(private val persistence: TimeEntryPersistence) {
         log.info("Starting to record time for $entry")
         `confirm the user has a total (new plus existing) of less than 24 hours`(entry)
         try {
-            val newId = persistence.persistNewTimeEntry(entry)
-            assert(newId > 0) {"the new id must be positive at this point"}
+            persistence.persistNewTimeEntry(entry)
             log.info("recorded time sucessfully")
-            return RecordTimeResult(id = newId, status = StatusEnum.SUCCESS)
+            return RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
         } catch (ex : org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException) {
             log.info("time was not recorded successfully: error was: ${ex.message}")
             val indicatesProjectConstraintFailure = "REFERENCES TIMEANDEXPENSES.PROJECT(ID)"
@@ -34,7 +33,7 @@ class TimeRecordingUtilities(private val persistence: TimeEntryPersistence) {
     private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntry) {
         log.info("checking that the user has a total (new plus existing) of less than 24 hours")
         // make sure the user has a total (new plus existing) of less than 24 hours
-        val minutesRecorded = persistence.queryMinutesRecorded(User(1, "Test"), entry.date) ?: 0
+        val minutesRecorded = persistence.queryMinutesRecorded(User(1, "Test"), entry.date)
 
         val twentyFourHours = 24 * 60
         // If the user is entering in more than 24 hours in a day, that's invalid.
