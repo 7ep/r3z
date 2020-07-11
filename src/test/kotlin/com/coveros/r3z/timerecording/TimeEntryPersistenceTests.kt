@@ -252,7 +252,7 @@ class TimeEntryPersistenceTests {
     }
 
     private fun initializeDatabaseForTest() : DbAccessHelper {
-        val pmd = PureMemoryDatabase
+        val pmd = PureMemoryDatabase()
         pmd.clearDatabase()
 
         val ds = getMemoryBasedDatabaseConnectionPool()

@@ -2,10 +2,6 @@ package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
-import com.coveros.r3z.persistence.getMemoryBasedDatabaseConnectionPool
-import com.coveros.r3z.persistence.microorm.DbAccessHelper
-import com.coveros.r3z.persistence.FlywayHelper
-import com.coveros.r3z.timerecording.TimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
@@ -13,6 +9,8 @@ import org.slf4j.LoggerFactory
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
+import com.coveros.r3z.timerecording.ITimeEntryPersistence
+import com.coveros.r3z.timerecording.TimeEntryPersistence2
 
 
 /**
@@ -67,9 +65,8 @@ class EnteringTimeBDD {
     @Test
     fun `Performance test`() {
         // given I have worked on a project
-        val dbAccessHelper = initializeDatabaseForTest()
         val startAfterDatabase = System.currentTimeMillis()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val tru = createTimeRecordingUtility()
         val newProject : Project = tru.createProject(ProjectName("A"))
 
         // turn off logging, otherwise, we get *way* too much data
@@ -77,7 +74,7 @@ class EnteringTimeBDD {
         logger.level = Level.ERROR
 
         // when I enter in that time
-        val numberOfSamples = 100
+        val numberOfSamples = 60 * 23
         val durations = LongArray(numberOfSamples)
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
@@ -109,16 +106,14 @@ class EnteringTimeBDD {
 
     private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntry> {
         val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val entry = createTimeEntry(project = newProject)
         return Triple(expectedStatus, tru, entry)
     }
 
     private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val entry = createTimeEntry(
                 time = Time(60 * 6),
@@ -130,8 +125,7 @@ class EnteringTimeBDD {
     }
 
     private fun `given the user has already entered 24 hours of time entries before`(): Pair<TimeRecordingUtilities, Project> {
-        val dbAccessHelper = initializeDatabaseForTest()
-        val tru = createTimeRecordingUtility(dbAccessHelper)
+        val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val existingTimeForTheDay = createTimeEntry(project = newProject, time = Time(60 * 24))
         tru.recordTime(existingTimeForTheDay)
@@ -142,20 +136,9 @@ class EnteringTimeBDD {
      * A test helper method to generate a [TimeRecordingUtilities]
      * with a real database connected - H2
      */
-    private fun createTimeRecordingUtility(dbAccessHelper : DbAccessHelper): TimeRecordingUtilities {
-        val timeEntryPersistence = TimeEntryPersistence(dbAccessHelper)
+    private fun createTimeRecordingUtility(): TimeRecordingUtilities {
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence2(PureMemoryDatabase())
         return TimeRecordingUtilities(timeEntryPersistence)
     }
 
-    private fun initializeDatabaseForTest() : DbAccessHelper {
-        val pmd = PureMemoryDatabase
-        pmd.clearDatabase()
-
-        val ds = getMemoryBasedDatabaseConnectionPool()
-        val dbAccessHelper = DbAccessHelper(ds)
-        val flywayHelper = FlywayHelper(ds)
-        flywayHelper.cleanDatabase()
-        flywayHelper.migrateDatabase()
-        return dbAccessHelper
-    }
 }

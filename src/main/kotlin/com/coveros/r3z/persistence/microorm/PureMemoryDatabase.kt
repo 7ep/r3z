@@ -2,7 +2,7 @@ package com.coveros.r3z.persistence.microorm
 
 import com.coveros.r3z.domainobjects.*
 
-object PureMemoryDatabase {
+class PureMemoryDatabase {
     private val users : MutableList<User> = mutableListOf()
     private val projects : MutableList<Project> = mutableListOf()
     private val timeEntries : MutableList<TimeEntry> = mutableListOf()

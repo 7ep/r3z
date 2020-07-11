@@ -5,11 +5,10 @@ import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class TimeEntryPersistence2 : ITimeEntryPersistence {
+class TimeEntryPersistence2(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     companion object {
         val log : Logger = LoggerFactory.getLogger(TimeEntryPersistence2::class.java)
-        val pmd = PureMemoryDatabase
     }
 
     override fun persistNewTimeEntry(entry: TimeEntry) {

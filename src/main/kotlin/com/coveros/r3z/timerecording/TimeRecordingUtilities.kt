@@ -33,16 +33,17 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
     private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntry) {
         log.info("checking that the user has a total (new plus existing) of less than 24 hours")
         // make sure the user has a total (new plus existing) of less than 24 hours
-        val minutesRecorded = persistence.queryMinutesRecorded(User(1, "Test"), entry.date)
+        val minutesRecorded = persistence.queryMinutesRecorded(entry.user, entry.date)
 
         val twentyFourHours = 24 * 60
         // If the user is entering in more than 24 hours in a day, that's invalid.
-        if ((minutesRecorded + entry.time.numberOfMinutes) > twentyFourHours) {
-            log.info("User entered more time than exists in a day")
+        val existingPlusNewMinutes = minutesRecorded + entry.time.numberOfMinutes
+        if (existingPlusNewMinutes > twentyFourHours) {
+            log.info("User entered more time than exists in a day: $existingPlusNewMinutes minutes")
             throw ExceededDailyHoursAmountException()
         }
 
-        log.info("User is entering a total of fewer than 24 hours ($minutesRecorded) for this date (${entry.date})")
+        log.info("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes) for this date (${entry.date})")
     }
 
     fun createProject(projectName: ProjectName) : Project {
