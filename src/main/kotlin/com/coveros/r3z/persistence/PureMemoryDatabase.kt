@@ -29,12 +29,6 @@ class PureMemoryDatabase {
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
-    fun clearDatabase() {
-        users.clear()
-        projects.clear()
-        timeEntries.clear()
-    }
-
     fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {
         return timeEntries.filter{te -> te.user == user}
     }
