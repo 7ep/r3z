@@ -9,7 +9,7 @@ data class UserName(val value: String) {
     }
 }
 
-data class User(val id: Long, val name: String) {
+data class User(val id: Int, val name: String) {
     init {
         assert(name.isNotEmpty()) {"All user must have a non-empty name"}
         assert(id < 100_000_000) { "There is no way on earth this company has ever or will " +

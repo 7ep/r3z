@@ -2,13 +2,14 @@ package com.coveros.r3z.timerecording
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import com.coveros.r3z.logging.Logger
+import com.coveros.r3z.persistence.ProjectIntegrityViolationException
+import com.coveros.r3z.persistence.UserIntegrityViolationException
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(TimeRecordingUtilities::class.java)
+        val log : Logger = Logger()
     }
 
     fun recordTime(entry: TimeEntry): RecordTimeResult {
@@ -18,15 +19,12 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
             persistence.persistNewTimeEntry(entry)
             log.info("recorded time sucessfully")
             return RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
-        } catch (ex : org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException) {
-            log.info("time was not recorded successfully: error was: ${ex.message}")
-            val indicatesProjectConstraintFailure = "REFERENCES TIMEANDEXPENSES.PROJECT(ID)"
-            if (ex.message!!.contains(indicatesProjectConstraintFailure)) {
-                return RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
-            } else {
-                // at this point, we're in unknown territory, may as well throw
-                throw ex
-            }
+        } catch (ex : ProjectIntegrityViolationException) {
+            log.info("time was not recorded successfully: project id did not match a valid project")
+            return RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
+        } catch (ex : UserIntegrityViolationException) {
+            log.info("time was not recorded successfully: user id did not match a valid user")
+            return RecordTimeResult(id = null, status = StatusEnum.INVALID_USER)
         }
     }
 

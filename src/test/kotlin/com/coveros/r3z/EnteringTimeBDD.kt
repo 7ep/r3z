@@ -2,13 +2,11 @@ package com.coveros.r3z
 
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
+import com.coveros.r3z.logging.Logger
 import com.coveros.r3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
-import org.slf4j.LoggerFactory
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
-import com.coveros.r3z.persistence.microorm.PureMemoryDatabase
+import com.coveros.r3z.persistence.PureMemoryDatabase
 import com.coveros.r3z.timerecording.ITimeEntryPersistence
 import com.coveros.r3z.timerecording.TimeEntryPersistence2
 
@@ -22,6 +20,10 @@ import com.coveros.r3z.timerecording.TimeEntryPersistence2
  *      So that I am easily able to document my time in an organized way
  */
 class EnteringTimeBDD {
+
+    companion object {
+        val log : Logger = Logger()
+    }
 
     /**
      * Just a happy path for entering a time entry
@@ -69,12 +71,8 @@ class EnteringTimeBDD {
         val tru = createTimeRecordingUtility()
         val newProject : Project = tru.createProject(ProjectName("A"))
 
-        // turn off logging, otherwise, we get *way* too much data
-        val logger: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-        logger.level = Level.ERROR
-
         // when I enter in that time
-        val numberOfSamples = 60 * 23
+        val numberOfSamples = 10
         val durations = LongArray(numberOfSamples)
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
@@ -88,18 +86,15 @@ class EnteringTimeBDD {
             durations[i-1] = timeElapsed
         }
 
-        // turn logging back on
-        logger.level = Level.INFO
-
         // the system should perform quickly
         val average = durations.average()
         val maximumAllowableMilliseconds = 5
         val takesLessThanMillisecondsAverage = average < maximumAllowableMilliseconds
-        println("Durations:")
+        log.info("Durations:")
         durations.forEach { d -> print(" $d") }
         val endOfTest = System.currentTimeMillis()
         val totalTime = endOfTest - startAfterDatabase
-        println("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
+        log.info("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
 
         assertTrue("average should be less than $maximumAllowableMilliseconds milliseconds, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
     }
