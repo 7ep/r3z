@@ -1,13 +1,9 @@
 package com.coveros.r3z.timerecording
 
-import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
-import com.coveros.r3z.THREE_HOURS_FIFTEEN
+import com.coveros.r3z.*
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
-import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
 import com.coveros.r3z.persistence.ProjectIntegrityViolationException
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Test
 import java.time.LocalDate
@@ -15,18 +11,15 @@ import java.time.ZoneId
 
 class TimeRecordingTests {
 
-    private val mockTimeEntryPersistence = mockAPersistenceLayer()
-    private val utils = TimeRecordingUtilities(mockTimeEntryPersistence)
-
-
     /**
      * Happy path - record time successfully
      */
     @Test
     fun `record time for someone`() {
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60L)
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val entry = makeDefaultTimeEntryHelper()
         val expectedResult = RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
 
         val actualResult = utils.recordTime(entry)
 
@@ -40,10 +33,12 @@ class TimeRecordingTests {
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                minutesRecorded = 60,
+                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
-        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws ProjectIntegrityViolationException()
 
         val actualResult = utils.recordTime(entry)
 
@@ -57,9 +52,12 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
-        // it's an invalid project because the project doesn't exist
+        val twentyFourHours: Long = 24 * 60
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                minutesRecorded = twentyFourHours,
+                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val entry = makeDefaultTimeEntryHelper(time=Time(1), project=Project(1, "an invalid project"))
-        `setup 24 hours already recorded for the day`()
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -71,12 +69,16 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
-        // it's an invalid project because the project doesn't exist
+        val twentyThreeHours: Long = 23 * 60
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                minutesRecorded = twentyThreeHours,
+                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val entry = makeDefaultTimeEntryHelper(time=Time(60*2), project=Project(1, "an invalid project"))
-        `setup 23 hours already recorded for the day`()
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
+
 
     @Test
     fun `just checking that two similar time entries are considered equal`() {
@@ -184,7 +186,6 @@ class TimeRecordingTests {
      * but [java.sql.Date] actually needs a number of milliseconds since 1970, not days.
      */
     @Test fun `java sql Date needs to be accurately converted to our Date class`() {
-
         val epochDate = LocalDate.parse("2020-07-01").atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val sqlDate = java.sql.Date(epochDate)
         val actual = Date.convertSqlDateToOurDate(sqlDate)
@@ -198,7 +199,9 @@ class TimeRecordingTests {
      */
 
     @Test fun `can create project`() {
-        every { mockTimeEntryPersistence.persistNewProject(any()) } returns Project(1, "test project")
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                persistNewProjectBehavior = {Project(1, "test project")})
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val expected = utils.createProject(ProjectName("test project"))
         val actual = Project(1, "test project")
         assertEquals(expected, actual)
@@ -209,15 +212,6 @@ class TimeRecordingTests {
      *************/
 
 
-    private fun `setup 24 hours already recorded for the day`() {
-        val twentyFourHours: Long = 24 * 60
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyFourHours
-    }
-
-    private fun `setup 23 hours already recorded for the day`() {
-        val twentyThreeHours: Long = 23 * 60
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns twentyThreeHours
-    }
 
     /**
      * Generates a default time entry for use in testing
@@ -233,13 +227,49 @@ class TimeRecordingTests {
         return TimeEntry(id, user, project, time, date, details)
     }
 
-    /**
-     * Really simplistic mock - make persistNewTimeEntry always return 1
-     */
-    private fun mockAPersistenceLayer(): ITimeEntryPersistence {
-        val tep = mockk<ITimeEntryPersistence>()
-        every { tep.persistNewTimeEntry(any()) } returns Unit
-        return tep
+    class FakeTimeEntryPersistence(
+            val minutesRecorded: Long = 0L,
+            val persistNewTimeEntryBehavior : () -> Unit = {},
+            val persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
+
+
+        override fun persistNewTimeEntry(entry: TimeEntry) {
+            persistNewTimeEntryBehavior()
+        }
+
+        override fun persistNewProject(projectName: ProjectName): Project {
+            return persistNewProjectBehavior()
+        }
+
+        override fun persistNewUser(username: UserName): User {
+            return DEFAULT_USER
+        }
+
+
+        override fun queryMinutesRecorded(user: User, date: Date): Long {
+            return minutesRecorded
+        }
+
+        override fun readTimeEntries(user: User): List<TimeEntry>? {
+            return listOf()
+        }
+
     }
+
+//    /**
+//     * Really simplistic mock - make persistNewTimeEntry always return 1
+//     */
+//    private fun mockAPersistenceLayer(): ITimeEntryPersistence {
+//        val start = System.currentTimeMillis()
+//
+////        val tep = mockk<ITimeEntryPersistence>()
+//
+////        every { tep.persistNewTimeEntry(any()) } returns Unit
+//        val tep = FakeTimeEntryPersistence()
+//        val finish = System.currentTimeMillis()
+//
+//        println("Time taken was ${finish - start}")
+//        return tep
+//    }
 
 }

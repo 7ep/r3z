@@ -6,7 +6,7 @@ import com.coveros.r3z.logging.Logger
 import com.coveros.r3z.persistence.ProjectIntegrityViolationException
 import com.coveros.r3z.persistence.UserIntegrityViolationException
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
+class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
 
     companion object {
         val log : Logger = Logger()
@@ -44,10 +44,25 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
         log.info("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes) for this date (${entry.date})")
     }
 
+    /**
+     * Business code for creating a new project in the
+     * system (persists it to the database)
+     */
     fun createProject(projectName: ProjectName) : Project {
         assert(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
         log.info("Creating a new project, ${projectName.value}")
 
         return persistence.persistNewProject(projectName)
+    }
+
+    /**
+     * Business code for creating a new user in the
+     * system (persists it to the database)
+     */
+    fun createUser(username: UserName) : User {
+        assert(username.value.isNotEmpty()) {"User name cannot be empty"}
+        log.info("Creating a new user, ${username.value}")
+
+        return persistence.persistNewUser(username)
     }
 }

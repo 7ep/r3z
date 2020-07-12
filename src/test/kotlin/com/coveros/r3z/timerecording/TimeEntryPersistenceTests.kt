@@ -21,8 +21,9 @@ class TimeEntryPersistenceTests {
 
     @Test fun `can record a time entry to the database`() {
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        tep.persistNewTimeEntry(createTimeEntry(project = newProject))
-        val count = tep.readTimeEntries(DEFAULT_USER)!!.size
+        val newUser = tep.persistNewUser(UserName("test user"))
+        tep.persistNewTimeEntry(createTimeEntry(project = newProject, user = newUser))
+        val count = tep.readTimeEntries(newUser)!!.size
         assertEquals("There should be exactly one entry in the database", 1, count)
     }
 
@@ -59,17 +60,17 @@ class TimeEntryPersistenceTests {
     @Test
     fun `Can query hours worked by a user on a given day`() {
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val testUser = User(1, "test")
+        val newUser = tep.persistNewUser(UserName("test user"))
         tep.persistNewTimeEntry(
             createTimeEntry(
-                user = testUser,
+                user = newUser,
                 time = Time(60),
                 project = newProject,
                 date = A_RANDOM_DAY_IN_JUNE_2020
             )
         )
 
-        val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
+        val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(60L, query)
     }
 
@@ -120,10 +121,10 @@ class TimeEntryPersistenceTests {
     @Test
     fun `If a user worked 8 hours a day for two days, we should get just 8 hours when checking one of those days`() {
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val testUser = User(1, "test")
+        val newUser = tep.persistNewUser(UserName(DEFAULT_USER.name))
         tep.persistNewTimeEntry(
             createTimeEntry(
-                user = testUser,
+                user = newUser,
                 time = Time(60 * 8),
                 project = newProject,
                 date = A_RANDOM_DAY_IN_JUNE_2020
@@ -131,14 +132,14 @@ class TimeEntryPersistenceTests {
         )
         tep.persistNewTimeEntry(
             createTimeEntry(
-                user = testUser,
+                user = newUser,
                 time = Time(60 * 8),
                 project = newProject,
                 date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
             )
         )
 
-        val query = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
+        val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("we should get 8 hours worked for this day", 60L * 8, query)
     }

@@ -53,9 +53,6 @@ dependencies {
     // junit, for running unit tests
     testImplementation ("junit:junit:4.13")
 
-    // https://mockk.io/#gradlemaven-dependency
-    // this tool is used to mock stuff for our unit tests
-    testImplementation "io.mockk:mockk:1.10.0"
 }
 
 
@@ -74,7 +71,7 @@ test {
     }
 
     // Fail the 'test' task on the first test failure
-    failFast = true
+    failFast = false
 
     debugOptions {
         // make the following true if you want to attach with a debugger while testing
