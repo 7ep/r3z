@@ -13,11 +13,12 @@ val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT = Project(1, "A")
 
 fun createTimeEntry(
+    id : Int = 1,
     user: User = DEFAULT_USER,
     time: Time = DEFAULT_TIME,
     project: Project = DEFAULT_PROJECT,
     details: Details = Details(),
     date: Date = A_RANDOM_DAY_IN_JUNE_2020
 ): TimeEntry {
-    return TimeEntry(user, project, time, date, details)
+    return TimeEntry(id, user, project, time, date, details)
 }

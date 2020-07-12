@@ -5,6 +5,7 @@ import com.coveros.r3z.THREE_HOURS_FIFTEEN
 import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
 import com.coveros.r3z.createTimeEntry
 import com.coveros.r3z.domainobjects.*
+import com.coveros.r3z.persistence.ProjectIntegrityViolationException
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*
@@ -42,31 +43,11 @@ class TimeRecordingTests {
         val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
         every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
-        val projectExceptionMessage =
-            "Referential integrity constraint violation: \"CONSTRAINT_A8: TIMEANDEXPENSES.TIMEENTRY FOREIGN KEY(PROJECT) REFERENCES TIMEANDEXPENSES.PROJECT(ID) (1)\"; SQL statement:\n" +
-                    "INSERT INTO TIMEANDEXPENSES.TIMEENTRY (user, project, time_in_minutes, date, details) VALUES (?, ?,?, ?, ?); [23506-199]"
-        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException(projectExceptionMessage, "", "", 23506, Throwable(), "")
+        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws ProjectIntegrityViolationException()
 
         val actualResult = utils.recordTime(entry)
 
         assertEquals("Expect to see a message about invalid project", expectedResult, actualResult)
-    }
-
-    /**
-     * Negative case - what happens if the database has a general integrity complaint we haven't considered?
-     *
-     * It might happen that our system hasn't been developed fully - we haven't accounted for some
-     * constraint in the database.  If that happens, we'll let recordTime just throw the exception.
-     *
-     * Follows the strategy of "fail fast and loud"
-     */
-    @Test
-    fun `Should throw when there is a database failure`() {
-        val entry = makeDefaultTimeEntryHelper()
-        every { mockTimeEntryPersistence.queryMinutesRecorded(any(), any()) } returns 60
-        every { mockTimeEntryPersistence.persistNewTimeEntry(any()) } throws org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException("unexpected error here", "", "", 23506, Throwable(), "")
-
-        assertThrows(org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException::class.java) {utils.recordTime(entry)}
     }
 
     /**
@@ -125,7 +106,7 @@ class TimeRecordingTests {
     @Test
     fun `a user should have a name`() {
         val name = "this is my name bro"
-        val id : Long = 1
+        val id = 1
 
         val user = User(id, name)
 
@@ -242,13 +223,14 @@ class TimeRecordingTests {
      * Generates a default time entry for use in testing
      */
     private fun makeDefaultTimeEntryHelper(
+        id : Int = 1,
         user : User = User(1, "someone"),
         time : Time = THREE_HOURS_FIFTEEN,
         project : Project = Project(1, "project"),
         date : Date = A_RANDOM_DAY_IN_JUNE_2020,
         details : Details = Details("testing, testing")
     ): TimeEntry {
-        return TimeEntry(user, project, time, date, details)
+        return TimeEntry(id, user, project, time, date, details)
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence.microorm
+package com.coveros.r3z.persistence
 
 import com.coveros.r3z.domainobjects.*
 
@@ -11,18 +11,14 @@ class PureMemoryDatabase {
         timeEntries.add(timeEntry)
     }
 
-    fun getTimeEntryByUser(user : User) : Iterable<TimeEntry> {
-        return timeEntries.filter { te -> te.user.id == user.id}
-    }
-
-    fun addNewProject(projectName: ProjectName) : Long {
-        val newIndex = projects.size.toLong() + 1
+    fun addNewProject(projectName: ProjectName) : Int {
+        val newIndex = projects.size + 1
         projects.add(Project(newIndex, projectName.value))
         return newIndex
     }
 
-    fun addNewUser(username: UserName) : Long {
-        val newIndex = users.size.toLong() + 1
+    fun addNewUser(username: UserName) : Int {
+        val newIndex = users.size + 1
         users.add(User(newIndex, username.value))
         return newIndex
     }
@@ -37,6 +33,20 @@ class PureMemoryDatabase {
         users.clear()
         projects.clear()
         timeEntries.clear()
+    }
+
+    fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {
+        return timeEntries.filter{te -> te.user == user}
+    }
+
+    fun getProjectById(id: Int) : Project? {
+        assert(id > 0)
+        return projects.singleOrNull { p -> p.id == id }
+    }
+
+    fun getUserById(id: Int): User? {
+        assert(id > 0)
+        return users.singleOrNull {u -> u.id == id}
     }
 
 }

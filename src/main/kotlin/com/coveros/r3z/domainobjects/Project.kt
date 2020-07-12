@@ -12,4 +12,4 @@ data class ProjectName(val value: String) {
 /**
  * A full Project object
  */
-data class Project(val id: Long, val name: String)
+data class Project(val id: Int, val name: String)
