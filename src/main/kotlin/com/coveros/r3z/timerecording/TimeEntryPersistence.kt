@@ -6,7 +6,7 @@ import com.coveros.r3z.persistence.ProjectIntegrityViolationException
 import com.coveros.r3z.persistence.PureMemoryDatabase
 import com.coveros.r3z.persistence.UserIntegrityViolationException
 
-class TimeEntryPersistence2(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
+class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     companion object {
         val log : Logger = Logger()
