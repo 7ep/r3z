@@ -5,8 +5,4 @@ class Logger {
     fun info(msg : String) {
         println("INFO: $msg")
     }
-
-    fun error(msg : String) {
-        println("ERROR: $msg")
-    }
 }

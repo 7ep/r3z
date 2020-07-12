@@ -2,6 +2,12 @@ package com.coveros.r3z.persistence
 
 import com.coveros.r3z.domainobjects.*
 
+/**
+ * Why use those heavy-handed database applications when you
+ * can simply store your data in simple collections?
+ *
+ * Here, things are simple.  Anything you need, you make.
+ */
 class PureMemoryDatabase {
     private val users : MutableList<User> = mutableListOf()
     private val projects : MutableList<Project> = mutableListOf()
@@ -27,12 +33,6 @@ class PureMemoryDatabase {
         return timeEntries
                 .filter { te -> te.user == user && te.date == date }
                 .sumBy { te -> te.time.numberOfMinutes }
-    }
-
-    fun clearDatabase() {
-        users.clear()
-        projects.clear()
-        timeEntries.clear()
     }
 
     fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {

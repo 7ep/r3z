@@ -8,7 +8,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import com.coveros.r3z.persistence.PureMemoryDatabase
 import com.coveros.r3z.timerecording.ITimeEntryPersistence
-import com.coveros.r3z.timerecording.TimeEntryPersistence2
+import com.coveros.r3z.timerecording.TimeEntryPersistence
 
 
 /**
@@ -55,10 +55,10 @@ class EnteringTimeBDD {
 
     @Test
     fun `A user has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
-        val (tru, newProject: Project) = `given the user has already entered 24 hours of time entries before`()
+        val (tru, newProject: Project, newUser : User) = `given the user has already entered 24 hours of time entries before`()
 
         // when they enter in a new time entry for one hour
-        val entry = createTimeEntry(time=Time(30), project=newProject)
+        val entry = createTimeEntry(time=Time(30), project=newProject, user=newUser)
 
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
@@ -70,6 +70,7 @@ class EnteringTimeBDD {
         val startAfterDatabase = System.currentTimeMillis()
         val tru = createTimeRecordingUtility()
         val newProject : Project = tru.createProject(ProjectName("A"))
+        val newUser : User = tru.createUser(UserName("B"))
 
         // when I enter in that time
         val numberOfSamples = 10
@@ -77,6 +78,7 @@ class EnteringTimeBDD {
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
             val entry = createTimeEntry(
+                    user = newUser,
                     time = Time(1),
                     project = newProject,
                     details = Details("Four score and seven years ago, blah blah blah"))
@@ -103,28 +105,32 @@ class EnteringTimeBDD {
         val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
-        val entry = createTimeEntry(project = newProject)
+        val newUser: User = tru.createUser(UserName("B"))
+        val entry = createTimeEntry(project = newProject, user = newUser)
         return Triple(expectedStatus, tru, entry)
     }
 
     private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
+        val newUser : User = tru.createUser(UserName("B"))
         val entry = createTimeEntry(
-                time = Time(60 * 6),
+                user = newUser,
                 project = newProject,
+                time = Time(60 * 6),
                 details = Details("Four score and seven years ago, blah blah blah".repeat(10))
         )
         val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         return Triple(tru, entry, expectedStatus)
     }
 
-    private fun `given the user has already entered 24 hours of time entries before`(): Pair<TimeRecordingUtilities, Project> {
+    private fun `given the user has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, User> {
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
-        val existingTimeForTheDay = createTimeEntry(project = newProject, time = Time(60 * 24))
+        val newUser: User = tru.createUser(UserName("B"))
+        val existingTimeForTheDay = createTimeEntry(user = newUser, project = newProject, time = Time(60 * 24))
         tru.recordTime(existingTimeForTheDay)
-        return Pair(tru, newProject)
+        return Triple(tru, newProject, newUser)
     }
 
     /**
@@ -132,7 +138,7 @@ class EnteringTimeBDD {
      * with a real database connected - H2
      */
     private fun createTimeRecordingUtility(): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence2(PureMemoryDatabase())
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
         return TimeRecordingUtilities(timeEntryPersistence)
     }
 
