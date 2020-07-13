@@ -70,6 +70,7 @@ class EnteringTimeBDD {
         val startAfterDatabase = System.currentTimeMillis()
         val tru = createTimeRecordingUtility()
         val newProject : Project = tru.createProject(ProjectName("A"))
+        val newUser : User = tru.createUser(UserName("B"))
 
         // when I enter in that time
         val numberOfSamples = 10
@@ -77,6 +78,7 @@ class EnteringTimeBDD {
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
             val entry = createTimeEntry(
+                    user = newUser,
                     time = Time(1),
                     project = newProject,
                     details = Details("Four score and seven years ago, blah blah blah"))
