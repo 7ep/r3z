@@ -2,6 +2,12 @@ package com.coveros.r3z.persistence
 
 import com.coveros.r3z.domainobjects.*
 
+/**
+ * Why use those heavy-handed database applications when you
+ * can simply store your data in simple collections?
+ *
+ * Here, things are simple.  Anything you need, you make.
+ */
 class PureMemoryDatabase {
     private val users : MutableList<User> = mutableListOf()
     private val projects : MutableList<Project> = mutableListOf()
