@@ -78,6 +78,7 @@ class EnteringTimeBDD {
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
             val entry = createTimeEntry(
+                    id = i,
                     user = newUser,
                     time = Time(1),
                     project = newProject,

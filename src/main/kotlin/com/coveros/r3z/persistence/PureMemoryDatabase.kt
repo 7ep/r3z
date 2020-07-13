@@ -9,9 +9,10 @@ import com.coveros.r3z.domainobjects.*
  * Here, things are simple.  Anything you need, you make.
  */
 class PureMemoryDatabase {
-    private val users : MutableList<User> = mutableListOf()
-    private val projects : MutableList<Project> = mutableListOf()
-    private val timeEntries : MutableList<TimeEntry> = mutableListOf()
+
+    private val users : MutableSet<User> = mutableSetOf()
+    private val projects : MutableSet<Project> = mutableSetOf()
+    private val timeEntries : MutableSet<TimeEntry> = mutableSetOf()
 
     fun addTimeEntry(timeEntry : TimeEntry) {
         timeEntries.add(timeEntry)
