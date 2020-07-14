@@ -1,4 +1,4 @@
-package com.coveros.r3z.persistence
+package coverosR3z.persistence
 
 /**
  * This is thrown whenever data is changed in such a way

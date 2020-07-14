@@ -1,10 +1,10 @@
-package com.coveros.r3z.timerecording
+package coverosR3z.timerecording
 
-import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.logging.Logger
-import com.coveros.r3z.persistence.ProjectIntegrityViolationException
-import com.coveros.r3z.persistence.PureMemoryDatabase
-import com.coveros.r3z.persistence.UserIntegrityViolationException
+import coverosR3z.domainobjects.*
+import coverosR3z.logging.Logger
+import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.persistence.UserIntegrityViolationException
 
 class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 

@@ -1,4 +1,4 @@
-package com.coveros.r3z.domainobjects
+package coverosR3z.domainobjects
 
 /**
  * A data object that stores all the business-related needs for a time entry.

@@ -1,4 +1,4 @@
-package com.coveros.r3z.exceptions
+package coverosR3z.exceptions
 
 /**
  * If the system encounters the situation that a user

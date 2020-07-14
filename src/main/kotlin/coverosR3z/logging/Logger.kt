@@ -1,4 +1,4 @@
-package com.coveros.r3z.logging
+package coverosR3z.logging
 
 class Logger {
 

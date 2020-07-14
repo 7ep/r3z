@@ -1,6 +1,6 @@
-package com.coveros.r3z.timerecording
+package coverosR3z.timerecording
 
-import com.coveros.r3z.domainobjects.*
+import coverosR3z.domainobjects.*
 
 interface ITimeEntryPersistence {
     fun persistNewTimeEntry(entry: TimeEntry)
