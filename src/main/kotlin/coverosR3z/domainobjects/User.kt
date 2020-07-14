@@ -17,4 +17,12 @@ data class User(val id: Int, val name: String) {
     }
 }
 
+data class UserId(val id: Int) {
+    init {
+        assert(id < 100_000_000) { "There is no way on earth this company has ever or will " +
+                "ever have more than even a million employees" }
+    }
+}
+
+
 

@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.domainobjects.*
+import coverosR3z.persistence.FakeTimeEntryPersistence
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import org.junit.Assert.*
 import org.junit.Test
@@ -226,50 +227,5 @@ class TimeRecordingTests {
     ): TimeEntry {
         return TimeEntry(id, user, project, time, date, details)
     }
-
-    class FakeTimeEntryPersistence(
-            val minutesRecorded: Long = 0L,
-            val persistNewTimeEntryBehavior : () -> Unit = {},
-            val persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
-
-
-        override fun persistNewTimeEntry(entry: TimeEntry) {
-            persistNewTimeEntryBehavior()
-        }
-
-        override fun persistNewProject(projectName: ProjectName): Project {
-            return persistNewProjectBehavior()
-        }
-
-        override fun persistNewUser(username: UserName): User {
-            return DEFAULT_USER
-        }
-
-
-        override fun queryMinutesRecorded(user: User, date: Date): Long {
-            return minutesRecorded
-        }
-
-        override fun readTimeEntries(user: User): List<TimeEntry>? {
-            return listOf()
-        }
-
-    }
-
-//    /**
-//     * Really simplistic mock - make persistNewTimeEntry always return 1
-//     */
-//    private fun mockAPersistenceLayer(): ITimeEntryPersistence {
-//        val start = System.currentTimeMillis()
-//
-////        val tep = mockk<ITimeEntryPersistence>()
-//
-////        every { tep.persistNewTimeEntry(any()) } returns Unit
-//        val tep = FakeTimeEntryPersistence()
-//        val finish = System.currentTimeMillis()
-//
-//        println("Time taken was ${finish - start}")
-//        return tep
-//    }
 
 }

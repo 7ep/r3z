@@ -12,4 +12,15 @@ data class ProjectName(val value: String) {
 /**
  * A full Project object
  */
-data class Project(val id: Int, val name: String)
+data class Project(val id: Int, val name: String) {
+    init {
+        assert(name.isNotEmpty()) {"Makes no sense to have an empty project name"}
+        assert(id < 100_000_000) { "100 million projects seems too unlikely" }
+    }
+}
+
+data class ProjectId(val id: Int) {
+    init {
+        assert(id < 100_000_000) { "100 million projects seems too unlikely" }
+    }
+}
