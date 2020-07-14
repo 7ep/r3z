@@ -2,7 +2,7 @@ package coverosR3z
 
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.logging.Logger
+import coverosR3z.logging.logInfo
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
@@ -20,10 +20,6 @@ import coverosR3z.timerecording.TimeEntryPersistence
  *      So that I am easily able to document my time in an organized way
  */
 class EnteringTimeBDD {
-
-    companion object {
-        val log : Logger = Logger()
-    }
 
     /**
      * Just a happy path for entering a time entry
@@ -93,11 +89,11 @@ class EnteringTimeBDD {
         val average = durations.average()
         val maximumAllowableMilliseconds = 5
         val takesLessThanMillisecondsAverage = average < maximumAllowableMilliseconds
-        log.info("Durations:")
+        logInfo("Durations:")
         durations.forEach { d -> print(" $d") }
         val endOfTest = System.currentTimeMillis()
         val totalTime = endOfTest - startAfterDatabase
-        log.info("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
+        logInfo("\nThe functions took a total of $totalTime milliseconds for $numberOfSamples database calls")
 
         assertTrue("average should be less than $maximumAllowableMilliseconds milliseconds, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
     }
