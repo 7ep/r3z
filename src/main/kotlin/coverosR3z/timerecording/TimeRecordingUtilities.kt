@@ -16,7 +16,7 @@ class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
         log.info("Starting to record time for $entry")
         `confirm the user has a total (new plus existing) of less than 24 hours`(entry)
         try {
-            persistence.persistNewTimeEntry(entry)
+            persistence.persistNewTimeEntry(entry.toTimeEntryForDatabase())
             log.info("recorded time sucessfully")
             return RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
         } catch (ex : ProjectIntegrityViolationException) {

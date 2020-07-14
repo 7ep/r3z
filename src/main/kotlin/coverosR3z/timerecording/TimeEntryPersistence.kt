@@ -12,7 +12,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         val log : Logger = Logger()
     }
 
-    override fun persistNewTimeEntry(entry: TimeEntry) {
+    override fun persistNewTimeEntry(entry: TimeEntryForDatabase) {
         log.info("persisting a new timeEntry, $entry")
         isEntryValid(entry)
         pmd.addTimeEntry(entry)
@@ -22,9 +22,9 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      * This will throw an exception if the project or user in
      * this timeentry don't exist in the list of projects / users
      */
-    private fun isEntryValid(entry: TimeEntry) {
-        pmd.getProjectById(entry.project.id) ?: throw ProjectIntegrityViolationException()
-        pmd.getUserById(entry.user.id) ?: throw UserIntegrityViolationException()
+    private fun isEntryValid(entry: TimeEntryForDatabase) {
+        pmd.getProjectById(entry.projectId.id) ?: throw ProjectIntegrityViolationException()
+        pmd.getUserById(entry.userId.id) ?: throw UserIntegrityViolationException()
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -48,7 +48,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return minutes.toLong()
     }
 
-    override fun readTimeEntries(user: User): List<TimeEntry>? {
+    override fun readTimeEntries(user: User): List<TimeEntryForDatabase>? {
         return pmd.getAllTimeEntriesForUser(user)
     }
 }
