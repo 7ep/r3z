@@ -1,4 +1,4 @@
-package com.coveros.r3z.domainobjects
+package coverosR3z.domainobjects
 
 /**
  * Holds a user's name before we have a whole object, like [User]

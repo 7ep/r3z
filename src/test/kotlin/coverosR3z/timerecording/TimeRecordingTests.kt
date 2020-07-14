@@ -1,9 +1,9 @@
-package com.coveros.r3z.timerecording
+package coverosR3z.timerecording
 
-import com.coveros.r3z.*
-import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
-import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.*
+import coverosR3z.domainobjects.*
+import coverosR3z.persistence.ProjectIntegrityViolationException
 import org.junit.Assert.*
 import org.junit.Test
 import java.time.LocalDate
@@ -35,10 +35,10 @@ class TimeRecordingTests {
         // it's an invalid project because the project doesn't exist
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = 60,
-                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(project=Project(1, "an invalid project"))
-        val expectedResult = RecordTimeResult(id =null, status = StatusEnum.INVALID_PROJECT)
+        val entry = makeDefaultTimeEntryHelper(project= Project(1, "an invalid project"))
+        val expectedResult = RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
 
         val actualResult = utils.recordTime(entry)
 
@@ -55,9 +55,9 @@ class TimeRecordingTests {
         val twentyFourHours: Long = 24 * 60
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyFourHours,
-                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(time=Time(1), project=Project(1, "an invalid project"))
+        val entry = makeDefaultTimeEntryHelper(time= Time(1), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -72,9 +72,9 @@ class TimeRecordingTests {
         val twentyThreeHours: Long = 23 * 60
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyThreeHours,
-                persistNewTimeEntryBehavior = {throw ProjectIntegrityViolationException()})
+                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(time=Time(60*2), project=Project(1, "an invalid project"))
+        val entry = makeDefaultTimeEntryHelper(time= Time(60 * 2), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -141,7 +141,7 @@ class TimeRecordingTests {
      * Testing that 1 more throws an exception
      */
     @Test fun `Details should throw an exception if one longer than max-length characters`() {
-        val ex = assertThrows(AssertionError::class.java ) {Details("A".repeat(MAX_DETAILS_LENGTH + 1))}
+        val ex = assertThrows(AssertionError::class.java ) { Details("A".repeat(MAX_DETAILS_LENGTH + 1)) }
         assertTrue(ex.message.toString().contains("lord's prayer"))
     }
 
@@ -172,12 +172,12 @@ class TimeRecordingTests {
     }
 
     @Test fun `Can't record a time entry that has 0 minutes`() {
-        val ex = assertThrows(AssertionError::class.java ) {Time(0)}
+        val ex = assertThrows(AssertionError::class.java ) { Time(0) }
         assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
     }
 
     @Test fun `Can't record a time entry that has -1 minutes`() {
-        val ex = assertThrows(AssertionError::class.java ) {Time(-1)}
+        val ex = assertThrows(AssertionError::class.java ) { Time(-1) }
         assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
     }
 
@@ -200,7 +200,7 @@ class TimeRecordingTests {
 
     @Test fun `can create project`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                persistNewProjectBehavior = {Project(1, "test project")})
+                persistNewProjectBehavior = { Project(1, "test project") })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val expected = utils.createProject(ProjectName("test project"))
         val actual = Project(1, "test project")
@@ -217,12 +217,12 @@ class TimeRecordingTests {
      * Generates a default time entry for use in testing
      */
     private fun makeDefaultTimeEntryHelper(
-        id : Int = 1,
-        user : User = User(1, "someone"),
-        time : Time = THREE_HOURS_FIFTEEN,
-        project : Project = Project(1, "project"),
-        date : Date = A_RANDOM_DAY_IN_JUNE_2020,
-        details : Details = Details("testing, testing")
+            id : Int = 1,
+            user : User = User(1, "someone"),
+            time : Time = THREE_HOURS_FIFTEEN,
+            project : Project = Project(1, "project"),
+            date : Date = A_RANDOM_DAY_IN_JUNE_2020,
+            details : Details = Details("testing, testing")
     ): TimeEntry {
         return TimeEntry(id, user, project, time, date, details)
     }

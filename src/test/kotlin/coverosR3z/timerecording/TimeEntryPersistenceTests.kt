@@ -1,12 +1,15 @@
-package com.coveros.r3z.timerecording
+package coverosR3z.timerecording
 
-import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020
-import com.coveros.r3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
-import com.coveros.r3z.DEFAULT_USER
-import com.coveros.r3z.createTimeEntry
-import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.persistence.ProjectIntegrityViolationException
-import com.coveros.r3z.persistence.PureMemoryDatabase
+import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
+import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
+import coverosR3z.DEFAULT_USER
+import coverosR3z.createTimeEntry
+import coverosR3z.domainobjects.ProjectName
+import coverosR3z.domainobjects.Time
+import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.UserName
+import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -32,8 +35,8 @@ class TimeEntryPersistenceTests {
         val user = User(1, userName.value)
         tep.persistNewUser(userName)
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val entry1 = createTimeEntry(id=1, user = user, project = newProject)
-        val entry2 = createTimeEntry(id=2, user = user, project = newProject)
+        val entry1 = createTimeEntry(id = 1, user = user, project = newProject)
+        val entry2 = createTimeEntry(id = 2, user = user, project = newProject)
         tep.persistNewTimeEntry(entry1)
         tep.persistNewTimeEntry(entry2)
         val expectedResult = listOf(entry1, entry2)
@@ -62,12 +65,12 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val newUser = tep.persistNewUser(UserName("test user"))
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
@@ -88,28 +91,28 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val newUser = tep.persistNewUser(UserName("test user"))
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020
+                )
         )
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60 * 10),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60 * 10),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020
+                )
         )
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60 * 13),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60 * 13),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
@@ -123,20 +126,20 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val newUser = tep.persistNewUser(UserName(DEFAULT_USER.name))
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60 * 8),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60 * 8),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020
+                )
         )
         tep.persistNewTimeEntry(
-            createTimeEntry(
-                user = newUser,
-                time = Time(60 * 8),
-                project = newProject,
-                date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
-            )
+                createTimeEntry(
+                        user = newUser,
+                        time = Time(60 * 8),
+                        project = newProject,
+                        date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)

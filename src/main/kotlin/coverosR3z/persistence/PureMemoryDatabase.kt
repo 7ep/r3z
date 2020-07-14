@@ -1,6 +1,6 @@
-package com.coveros.r3z.persistence
+package coverosR3z.persistence
 
-import com.coveros.r3z.domainobjects.*
+import coverosR3z.domainobjects.*
 
 /**
  * Why use those heavy-handed database applications when you

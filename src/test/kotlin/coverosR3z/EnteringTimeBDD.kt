@@ -1,14 +1,14 @@
-package com.coveros.r3z
+package coverosR3z
 
-import com.coveros.r3z.domainobjects.*
-import com.coveros.r3z.exceptions.ExceededDailyHoursAmountException
-import com.coveros.r3z.logging.Logger
-import com.coveros.r3z.timerecording.TimeRecordingUtilities
+import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.logging.Logger
+import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
-import com.coveros.r3z.persistence.PureMemoryDatabase
-import com.coveros.r3z.timerecording.ITimeEntryPersistence
-import com.coveros.r3z.timerecording.TimeEntryPersistence
+import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.timerecording.ITimeEntryPersistence
+import coverosR3z.timerecording.TimeEntryPersistence
 
 
 /**
@@ -58,7 +58,7 @@ class EnteringTimeBDD {
         val (tru, newProject: Project, newUser : User) = `given the user has already entered 24 hours of time entries before`()
 
         // when they enter in a new time entry for one hour
-        val entry = createTimeEntry(time=Time(30), project=newProject, user=newUser)
+        val entry = createTimeEntry(time = Time(30), project = newProject, user = newUser)
 
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }

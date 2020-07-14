@@ -1,4 +1,4 @@
-package com.coveros.r3z.domainobjects
+package coverosR3z.domainobjects
 
 /**
  * When we just have a name (like when adding a new project, or searching)

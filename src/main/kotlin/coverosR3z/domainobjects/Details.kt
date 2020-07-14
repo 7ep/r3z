@@ -1,4 +1,4 @@
-package com.coveros.r3z.domainobjects
+package coverosR3z.domainobjects
 
 const val MAX_DETAILS_LENGTH = 500
 
