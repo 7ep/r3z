@@ -12,7 +12,7 @@ class FakeTimeEntryPersistence(
         val persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
 
 
-    override fun persistNewTimeEntry(entry: TimeEntryForDatabase) {
+    override fun persistNewTimeEntry(entry: TimeEntry) {
         persistNewTimeEntryBehavior()
     }
 
@@ -29,7 +29,7 @@ class FakeTimeEntryPersistence(
         return minutesRecorded
     }
 
-    override fun readTimeEntries(user: User): List<TimeEntryForDatabase>? {
+    override fun readTimeEntries(user: User): List<TimeEntry>? {
         return listOf()
     }
 
