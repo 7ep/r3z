@@ -8,7 +8,7 @@ import coverosR3z.persistence.UserIntegrityViolationException
 
 class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
-    override fun persistNewTimeEntry(entry: TimeEntry) {
+    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
         logInfo("persisting a new timeEntry, $entry")
         isEntryValid(entry)
         pmd.addTimeEntry(entry)
@@ -18,7 +18,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      * This will throw an exception if the project or user in
      * this timeentry don't exist in the list of projects / users
      */
-    private fun isEntryValid(entry: TimeEntry) {
+    private fun isEntryValid(entry: TimeEntryPreDatabase) {
         pmd.getProjectById(entry.project.id) ?: throw ProjectIntegrityViolationException()
         pmd.getUserById(entry.project.id) ?: throw UserIntegrityViolationException()
     }

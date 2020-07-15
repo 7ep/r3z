@@ -13,3 +13,14 @@ data class TimeEntry (
         val date: Date,
         val details : Details = Details())
 
+/**
+ * Same as [TimeEntry] but it has no id because we haven't
+ * spoken to the database yet
+ */
+data class TimeEntryPreDatabase (
+        val user: User,
+        val project: Project,
+        val time: Time,
+        val date: Date,
+        val details : Details = Details())
+

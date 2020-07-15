@@ -19,7 +19,7 @@ class TimeRecordingTests {
     fun `record time for someone`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60L)
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper()
+        val entry = createTimeEntryPreDatabase()
         val expectedResult = RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
 
         val actualResult = utils.recordTime(entry)
@@ -38,7 +38,7 @@ class TimeRecordingTests {
                 minutesRecorded = 60,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(project= Project(1, "an invalid project"))
         val expectedResult = RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
 
         val actualResult = utils.recordTime(entry)
@@ -58,7 +58,7 @@ class TimeRecordingTests {
                 minutesRecorded = twentyFourHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(time= Time(1), project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(time= Time(1), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -75,7 +75,7 @@ class TimeRecordingTests {
                 minutesRecorded = twentyThreeHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
-        val entry = makeDefaultTimeEntryHelper(time= Time(60 * 2), project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(time= Time(60 * 2), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -83,7 +83,7 @@ class TimeRecordingTests {
 
     @Test
     fun `just checking that two similar time entries are considered equal`() {
-        assertEquals(createTimeEntry(), createTimeEntry())
+        assertEquals(createTimeEntryPreDatabase(), createTimeEntryPreDatabase())
     }
 
     /**
@@ -93,7 +93,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `make time entry`() {
-        val timeEntry : TimeEntry = createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020)
+        val timeEntry = createTimeEntryPreDatabase(date = A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(User(1, "I"), timeEntry.user)
         assertEquals(Time(60), timeEntry.time)
         assertEquals(Project(1, "A"), timeEntry.project)
@@ -206,26 +206,6 @@ class TimeRecordingTests {
         val expected = utils.createProject(ProjectName("test project"))
         val actual = Project(1, "test project")
         assertEquals(expected, actual)
-    }
-
-    /*************
-     *  HELPERS  *
-     *************/
-
-
-
-    /**
-     * Generates a default time entry for use in testing
-     */
-    private fun makeDefaultTimeEntryHelper(
-            id : Int = 1,
-            user : User = User(1, "someone"),
-            time : Time = THREE_HOURS_FIFTEEN,
-            project : Project = Project(1, "project"),
-            date : Date = A_RANDOM_DAY_IN_JUNE_2020,
-            details : Details = Details("testing, testing")
-    ): TimeEntry {
-        return TimeEntry(id, user, project, time, date, details)
     }
 
 }

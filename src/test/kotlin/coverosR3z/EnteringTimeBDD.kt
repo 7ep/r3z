@@ -54,7 +54,7 @@ class EnteringTimeBDD {
         val (tru, newProject: Project, newUser : User) = `given the user has already entered 24 hours of time entries before`()
 
         // when they enter in a new time entry for one hour
-        val entry = createTimeEntry(time = Time(30), project = newProject, user = newUser)
+        val entry = createTimeEntryPreDatabase(time = Time(30), project = newProject, user = newUser)
 
         // then the system disallows it
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
@@ -65,16 +65,15 @@ class EnteringTimeBDD {
         // given I have worked on a project
         val startAfterDatabase = System.currentTimeMillis()
         val tru = createTimeRecordingUtility()
-        val newProject : Project = tru.createProject(ProjectName("A"))
-        val newUser : User = tru.createUser(UserName("B"))
+        val newProject : Project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val newUser : User = tru.createUser(DEFAULT_USERNAME)
 
         // when I enter in that time
         val numberOfSamples = 10
         val durations = LongArray(numberOfSamples)
         for (i in 1..numberOfSamples) {
             val start = System.currentTimeMillis()
-            val entry = createTimeEntry(
-                    id = i,
+            val entry = createTimeEntryPreDatabase(
                     user = newUser,
                     time = Time(1),
                     project = newProject,
@@ -98,20 +97,20 @@ class EnteringTimeBDD {
         assertTrue("average should be less than $maximumAllowableMilliseconds milliseconds, but with $numberOfSamples samples, this took $average", takesLessThanMillisecondsAverage)
     }
 
-    private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntry> {
+    private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntryPreDatabase> {
         val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newUser: User = tru.createUser(UserName("B"))
-        val entry = createTimeEntry(project = newProject, user = newUser)
+        val entry = createTimeEntryPreDatabase(project = newProject, user = newUser)
         return Triple(expectedStatus, tru, entry)
     }
 
-    private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntry, RecordTimeResult> {
+    private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newUser : User = tru.createUser(UserName("B"))
-        val entry = createTimeEntry(
+        val entry = createTimeEntryPreDatabase(
                 user = newUser,
                 project = newProject,
                 time = Time(60 * 6),
@@ -125,7 +124,7 @@ class EnteringTimeBDD {
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newUser: User = tru.createUser(UserName("B"))
-        val existingTimeForTheDay = createTimeEntry(user = newUser, project = newProject, time = Time(60 * 24))
+        val existingTimeForTheDay = createTimeEntryPreDatabase(user = newUser, project = newProject, time = Time(60 * 24))
         tru.recordTime(existingTimeForTheDay)
         return Triple(tru, newProject, newUser)
     }

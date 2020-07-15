@@ -3,7 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.*
 
 interface ITimeEntryPersistence {
-    fun persistNewTimeEntry(entry: TimeEntry)
+    fun persistNewTimeEntry(entry: TimeEntryPreDatabase)
     fun persistNewProject(projectName: ProjectName) : Project
     fun persistNewUser(username: UserName): User
 
