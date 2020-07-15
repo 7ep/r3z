@@ -12,9 +12,9 @@ class PureMemoryDatabase {
 
     private val users : MutableSet<User> = mutableSetOf()
     private val projects : MutableSet<Project> = mutableSetOf()
-    private val timeEntries : MutableSet<TimeEntryForDatabase> = mutableSetOf()
+    private val timeEntries : MutableSet<TimeEntry> = mutableSetOf()
 
-    fun addTimeEntry(timeEntry : TimeEntryForDatabase) {
+    fun addTimeEntry(timeEntry : TimeEntry) {
         timeEntries.add(timeEntry)
     }
 
@@ -32,12 +32,12 @@ class PureMemoryDatabase {
 
     fun getMinutesRecordedOnDate(user: User, date: Date): Int {
         return timeEntries
-                .filter { te -> te.userId.id == user.id && te.date == date }
+                .filter { te -> te.id == user.id && te.date == date }
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
-    fun getAllTimeEntriesForUser(user: User): List<TimeEntryForDatabase> {
-        return timeEntries.filter{te -> te.userId.id == user.id}
+    fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {
+        return timeEntries.filter{te -> te.user.id == user.id}
     }
 
     fun getProjectById(id: Int) : Project? {

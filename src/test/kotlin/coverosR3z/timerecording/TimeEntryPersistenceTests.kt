@@ -4,10 +4,7 @@ import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
 import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
 import coverosR3z.DEFAULT_USER
 import coverosR3z.createTimeEntry
-import coverosR3z.domainobjects.ProjectName
-import coverosR3z.domainobjects.Time
-import coverosR3z.domainobjects.User
-import coverosR3z.domainobjects.UserName
+import coverosR3z.domainobjects.*
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
@@ -25,7 +22,7 @@ class TimeEntryPersistenceTests {
     @Test fun `can record a time entry to the database`() {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val newUser = tep.persistNewUser(UserName("test user"))
-        tep.persistNewTimeEntry(createTimeEntry(project = newProject, user = newUser).toTimeEntryForDatabase())
+        tep.persistNewTimeEntry(createTimeEntry(project = newProject, user = newUser))
         val count = tep.readTimeEntries(newUser)!!.size
         assertEquals("There should be exactly one entry in the database", 1, count)
     }
@@ -34,9 +31,9 @@ class TimeEntryPersistenceTests {
         val userName = UserName("test")
         val user = User(1, userName.value)
         tep.persistNewUser(userName)
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val entry1 = createTimeEntry(id = 1, user = user, project = newProject).toTimeEntryForDatabase()
-        val entry2 = createTimeEntry(id = 2, user = user, project = newProject).toTimeEntryForDatabase()
+        val newProject: Project = tep.persistNewProject(ProjectName("test project"))
+        val entry1 = createTimeEntry(id = 1, user = user, project = newProject)
+        val entry2 = createTimeEntry(id = 2, user = user, project = newProject)
         tep.persistNewTimeEntry(entry1)
         tep.persistNewTimeEntry(entry2)
         val expectedResult = listOf(entry1, entry2)
@@ -53,7 +50,7 @@ class TimeEntryPersistenceTests {
      */
     @Test fun `Can't record a time entry that has a nonexistent project id`() {
         assertThrows(ProjectIntegrityViolationException::class.java) {
-            tep.persistNewTimeEntry(createTimeEntry().toTimeEntryForDatabase())
+            tep.persistNewTimeEntry(createTimeEntry())
         }
     }
 
@@ -70,7 +67,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020
-                ).toTimeEntryForDatabase()
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
@@ -96,7 +93,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020
-                ).toTimeEntryForDatabase()
+                )
         )
         tep.persistNewTimeEntry(
                 createTimeEntry(
@@ -104,7 +101,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60 * 10),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020
-                ).toTimeEntryForDatabase()
+                )
         )
         tep.persistNewTimeEntry(
                 createTimeEntry(
@@ -112,7 +109,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60 * 13),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020
-                ).toTimeEntryForDatabase()
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
@@ -131,7 +128,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60 * 8),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020
-                ).toTimeEntryForDatabase()
+                )
         )
         tep.persistNewTimeEntry(
                 createTimeEntry(
@@ -139,7 +136,7 @@ class TimeEntryPersistenceTests {
                         time = Time(60 * 8),
                         project = newProject,
                         date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
-                ).toTimeEntryForDatabase()
+                )
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
