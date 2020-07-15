@@ -12,7 +12,7 @@ class FakeTimeEntryPersistence(
         val persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
 
 
-    override fun persistNewTimeEntry(entry: TimeEntry) {
+    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
         persistNewTimeEntryBehavior()
     }
 

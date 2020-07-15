@@ -12,15 +12,12 @@ val DEFAULT_USER = User(1, "I")
 val DEFAULT_USERNAME = UserName("I")
 val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT = Project(1, "A")
-val DEFAULT_PROJECTNAME = ProjectName("A")
+val DEFAULT_PROJECT_NAME = ProjectName("A")
 
-fun createTimeEntry(
-        id : Int = 1,
+fun createTimeEntryPreDatabase(
         user: User = DEFAULT_USER,
         time: Time = DEFAULT_TIME,
         project: Project = DEFAULT_PROJECT,
         details: Details = Details(),
         date: Date = A_RANDOM_DAY_IN_JUNE_2020
-): TimeEntry {
-    return TimeEntry(id, user, project, time, date, details)
-}
+) = TimeEntryPreDatabase ( user, project, time, date, details)

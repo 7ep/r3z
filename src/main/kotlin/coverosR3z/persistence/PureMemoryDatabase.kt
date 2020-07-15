@@ -14,8 +14,15 @@ class PureMemoryDatabase {
     private val projects : MutableSet<Project> = mutableSetOf()
     private val timeEntries : MutableSet<TimeEntry> = mutableSetOf()
 
-    fun addTimeEntry(timeEntry : TimeEntry) {
-        timeEntries.add(timeEntry)
+    fun addTimeEntry(timeEntry : TimeEntryPreDatabase) {
+        val newIndex = timeEntries.size + 1
+        timeEntries.add(TimeEntry(
+                newIndex,
+                timeEntry.user,
+                timeEntry.project,
+                timeEntry.time,
+                timeEntry.date,
+                timeEntry.details))
     }
 
     fun addNewProject(projectName: ProjectName) : Int {

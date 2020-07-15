@@ -3,7 +3,6 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -17,7 +16,7 @@ class PureMemoryDatabaseTests {
     }
 
     @Test fun `should be able to add a new project`() {
-        pmd.addNewProject(DEFAULT_PROJECTNAME)
+        pmd.addNewProject(DEFAULT_PROJECT_NAME)
         val project = pmd.getProjectById(DEFAULT_PROJECT.id)
         assertEquals(1, project!!.id)
     }
@@ -29,7 +28,7 @@ class PureMemoryDatabaseTests {
     }
 
     @Test fun `should be able to add a new time entry`() {
-        pmd.addTimeEntry(TimeEntry(1, DEFAULT_USER, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
+        pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_USER, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
         val timeEntries = pmd.getAllTimeEntriesForUser(DEFAULT_USER)[0]
         assertEquals(1, timeEntries.id)
         assertEquals(DEFAULT_USER, timeEntries.user)
@@ -39,7 +38,7 @@ class PureMemoryDatabaseTests {
     }
 
     @Test fun `should be able to get the minutes on a certain date`() {
-        pmd.addTimeEntry(TimeEntry(1, DEFAULT_USER, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
+        pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_USER, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
         val minutes = pmd.getMinutesRecordedOnDate(DEFAULT_USER, A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(DEFAULT_TIME.numberOfMinutes, minutes)
     }

@@ -6,9 +6,9 @@ import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.UserIntegrityViolationException
 
-class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
 
-    fun recordTime(entry: TimeEntry): RecordTimeResult {
+    fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         logInfo("Starting to record time for $entry")
         `confirm the user has a total (new plus existing) of less than 24 hours`(entry)
         try {
@@ -24,7 +24,7 @@ class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
         }
     }
 
-    private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntry) {
+    private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
         logInfo("checking that the user has a total (new plus existing) of less than 24 hours")
         // make sure the user has a total (new plus existing) of less than 24 hours
         val minutesRecorded = persistence.queryMinutesRecorded(entry.user, entry.date)
@@ -37,7 +37,7 @@ class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
             throw ExceededDailyHoursAmountException()
         }
 
-        logInfo("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes minutes) for this date (${entry.date})")
+        logInfo("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes minutes / ${existingPlusNewMinutes / 60} hours) for this date (${entry.date})")
     }
 
     /**
