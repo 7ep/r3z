@@ -11,18 +11,6 @@ class PureMemoryDatabaseTests {
 
     lateinit var pmd : PureMemoryDatabase
 
-    @Test fun createStuff() {
-        val user = User(1, "my name is hello")
-        val project = Project(1, "I am a good little company")
-        val tes = mutableListOf<TimeEntry>()
-        tes.add(TimeEntry(1, user, project, Time(123), Date(2020, Month.DEC, 6)))
-        tes.add(TimeEntry(2, user, project, Time(22),  Date(2020, Month.DEC, 6)))
-        assertTrue(tes[0].user === user)
-        assertTrue(tes[0].project === project)
-        assertTrue(tes[1].user === user)
-        assertTrue(tes[1].project === project)
-    }
-
     @Before
     fun init() {
         pmd = PureMemoryDatabase()
