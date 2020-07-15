@@ -37,7 +37,7 @@ class TimeRecordingUtilities(val persistence: ITimeEntryPersistence) {
             throw ExceededDailyHoursAmountException()
         }
 
-        logInfo("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes) for this date (${entry.date})")
+        logInfo("User is entering a total of fewer than 24 hours ($existingPlusNewMinutes minutes) for this date (${entry.date})")
     }
 
     /**

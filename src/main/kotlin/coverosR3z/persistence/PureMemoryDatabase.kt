@@ -32,7 +32,7 @@ class PureMemoryDatabase {
 
     fun getMinutesRecordedOnDate(user: User, date: Date): Int {
         return timeEntries
-                .filter { te -> te.id == user.id && te.date == date }
+                .filter { te -> te.user.id == user.id && te.date == date }
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
