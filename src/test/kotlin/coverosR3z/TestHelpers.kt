@@ -21,3 +21,19 @@ fun createTimeEntryPreDatabase(
         details: Details = Details(),
         date: Date = A_RANDOM_DAY_IN_JUNE_2020
 ) = TimeEntryPreDatabase ( user, project, time, date, details)
+
+/**
+ * returns the time spent on the items inside.
+ * To use: simply wrap the code with getTime, like this:
+ *
+ *      val timeTaken = getTime {
+ *           foo()
+ *           bar()
+ *      }
+ */
+fun getTime(function: () -> Unit): Long {
+        val start = System.currentTimeMillis()
+        function()
+        val finish = System.currentTimeMillis()
+        return finish - start
+}

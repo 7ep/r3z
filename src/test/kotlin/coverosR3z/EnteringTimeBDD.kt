@@ -71,17 +71,18 @@ class EnteringTimeBDD {
         // when I enter in that time
         val numberOfSamples = 10
         val durations = LongArray(numberOfSamples)
+
         for (i in 1..numberOfSamples) {
-            val start = System.currentTimeMillis()
-            val entry = createTimeEntryPreDatabase(
+            val timeElapsed : Long = getTime {
+                val entry = createTimeEntryPreDatabase(
                     user = newUser,
                     time = Time(1),
                     project = newProject,
-                    details = Details("Four score and seven years ago, blah blah blah"))
-            tru.recordTime(entry)
-            val finish = System.currentTimeMillis()
-            val timeElapsed = finish - start
-            durations[i-1] = timeElapsed
+                    details = Details("Four score and seven years ago, blah blah blah")
+                )
+                tru.recordTime(entry)
+            }
+            durations[i - 1] = timeElapsed
         }
 
         // the system should perform quickly
