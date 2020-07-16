@@ -57,4 +57,12 @@ class PureMemoryDatabase {
         return users.singleOrNull {u -> u.id == id}
     }
 
+    fun getAllUsers() : List<User>? {
+        return users.toList()
+    }
+
+    fun getAllProjects(): List<Project>? {
+        return projects.toList()
+    }
+
 }
