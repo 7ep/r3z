@@ -5,8 +5,8 @@ import java.util.*
 
 
 enum class Month(val ord: Int) {
-    JAN(0), FEB(1), MAR(2), APR(3), MAY(4), JUN(5),
-    JUL(6), AUG(7), SEP(8), OCT(9), NOV(10), DEC(11);
+    JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
+    JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
 
     companion object {
         fun from(ord: Int): Month? = values().find { it.ord == ord }
@@ -23,14 +23,10 @@ enum class Month(val ord: Int) {
 class Date(year: Int, month: Month, day: Int) {
 
     // The core data - the number of days since the Epoch - day 0 is 1970-01-01
-    private val epochDay = LocalDate.of(year, month.ord+1, day).toEpochDay()
+    private val epochDay = LocalDate.of(year, month.ord, day).toEpochDay()
 
-    // have to add 1 to month's ordinal for use with LocalDate.
-    // annoyingly, GregorianCalendar and LocalDate differ on the ordinal
-    // they assign to months.  Gregorian does it starting with January at 0,
-    // and LocalDate does it with January at 1.  Yuck.
-    val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
-    val stringValue: String = sqlDate.toString()
+    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
+    private val stringValue: String = sqlDate.toString()
 
     init {
         assert(year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had $year"}
@@ -45,13 +41,13 @@ class Date(year: Int, month: Month, day: Int) {
          * [GregorianCalendar] for that job.
          */
         fun convertSqlDateToOurDate(date : java.sql.Date) : Date {
-            val cal = GregorianCalendar()
-            cal.time = date
-            val month = Month.from(cal.get(Calendar.MONTH)) ?: throw Exception("somehow, inexplicably, month was null")
-            val year = cal.get(Calendar.YEAR)
-            val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
-            assert(dayOfMonth in 1..31)
-            return Date(year, month, dayOfMonth)
+            val localDate = date.toLocalDate()
+            return Date(localDate.year, Month.from(localDate.monthValue)!!, localDate.dayOfMonth)
+        }
+
+        fun makeDateFromEpoch(day : Long) : Date {
+            val localDate = LocalDate.ofEpochDay(day)
+            return Date(localDate.year, Month.from(localDate.monthValue)!!, localDate.dayOfMonth)
         }
 
     }
