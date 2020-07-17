@@ -25,7 +25,7 @@ class Date(year: Int, month: Month, day: Int) {
     // The core data - the number of days since the Epoch - day 0 is 1970-01-01
     private val epochDay = LocalDate.of(year, month.ord, day).toEpochDay()
 
-    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
+    val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
     private val stringValue: String = sqlDate.toString()
 
     init {
