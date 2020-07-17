@@ -6,7 +6,7 @@ import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.persistence.UserIntegrityViolationException
 
-class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
+class TimeEntryPersistencePmd(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
         logInfo("persisting a new timeEntry, $entry")

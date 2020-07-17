@@ -11,12 +11,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class TimeEntryPersistenceTests {
+class TimeEntryPersistencePmdTests {
 
-    private var tep : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
+    private var tep : ITimeEntryPersistence = TimeEntryPersistencePmd(PureMemoryDatabase())
 
     @Before fun init() {
-        tep = TimeEntryPersistence(PureMemoryDatabase())
+        tep = TimeEntryPersistencePmd(PureMemoryDatabase())
     }
 
     @Test fun `can record a time entry to the database`() {
