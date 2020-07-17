@@ -8,7 +8,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeEntryPersistence
-import coverosR3z.timerecording.TimeEntryPersistencePmd
+import coverosR3z.timerecording.TimeEntryPersistence
 
 
 /**
@@ -135,7 +135,7 @@ class EnteringTimeBDD {
      * with a real database connected - H2
      */
     private fun createTimeRecordingUtility(): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistencePmd(PureMemoryDatabase())
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
         return TimeRecordingUtilities(timeEntryPersistence)
     }
 
