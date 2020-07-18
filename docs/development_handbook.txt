@@ -5,3 +5,9 @@ Developer handbook
     ---------------------------------
 
     BDD files will have a suffix of "BDD".  See "EnteringExpensesBDD" for a sample.
+
+
+    Test Helpers
+    ------------
+
+    When writing tests, you might find some of the functions in TestHelpers.kt handy
