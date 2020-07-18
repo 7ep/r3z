@@ -48,11 +48,10 @@ class PureMemoryDatabaseTests {
         assertEquals(A_RANDOM_DAY_IN_JUNE_2020, timeEntries.date)
     }
 
-    @Ignore("This is not for common regular testing.  It is an artifact of the database design process")
     @Test
-    fun `a 200-person firm should be able to add time entries for 10 years`() {
-        // generate the 200 users
-        val usernames = listOf("Aaren", "Aarika", "Abagael", "Abagail", "Abbe", "Abbey", "Abbi", "Abbie", "Abby", "Abbye", "Abigael", "Abigail", "Abigale", "Abra", "Ada", "Adah", "Adaline", "Adan", "Adara", "Adda", "Addi", "Addia", "Addie", "Addy", "Adel", "Adela", "Adelaida", "Adelaide", "Adele", "Adelheid", "Adelice", "Adelina", "Adelind", "Adeline", "Adella", "Adelle", "Adena", "Adey", "Adi", "Adiana", "Adina", "Adora", "Adore", "Adoree", "Adorne", "Adrea", "Adria", "Adriaens", "Adrian", "Adriana", "Adriane", "Adrianna", "Adrianne", "Adriena", "Adrienne", "Aeriel", "Aeriela", "Aeriell", "Afton", "Ag", "Agace", "Agata", "Agatha", "Agathe", "Aggi", "Aggie", "Aggy", "Agna", "Agnella", "Agnes", "Agnese", "Agnesse", "Agneta", "Agnola", "Agretha", "Aida", "Aidan", "Aigneis", "Aila", "Aile", "Ailee", "Aileen", "Ailene", "Ailey", "Aili", "Ailina", "Ailis", "Ailsun", "Ailyn", "Aime", "Aimee", "Aimil", "Aindrea", "Ainslee", "Ainsley", "Ainslie", "Ajay", "Alaine", "Alameda", "Alana", "Alanah", "Alane", "Alanna", "Alayne", "Alberta", "Albertina", "Albertine", "Albina", "Alecia", "Aleda", "Aleece", "Aleen", "Alejandra", "Alejandrina", "Alena", "Alene", "Alessandra", "Aleta", "Alethea", "Alex", "Alexa", "Alexandra", "Alexandrina", "Alexi", "Alexia", "Alexina", "Alexine", "Alexis", "Alfi", "Alfie", "Alfreda", "Alfy", "Ali", "Alia", "Alica", "Alice", "Alicea", "Alicia", "Alida", "Alidia", "Alie", "Alika", "Alikee", "Alina", "Aline", "Alis", "Alisa", "Alisha", "Alison", "Alissa", "Alisun", "Alix", "Aliza", "Alla", "Alleen", "Allegra", "Allene", "Alli", "Allianora", "Allie", "Allina", "Allis", "Allison", "Allissa", "Allix", "Allsun", "Allx", "Ally", "Allyce", "Allyn", "Allys", "Allyson", "Alma", "Almeda", "Almeria", "Almeta", "Almira", "Almire", "Aloise", "Aloisia", "Aloysia", "Alta", "Althea", "Alvera", "Alverta", "Alvina", "Alvinia", "Alvira", "Alyce", "Alyda", "Alys", "Alysa", "Alyse", "Alysia", "Alyson", "Alyss", "Alyssa", "Amabel", "Amabelle", "Amalea")
+    fun `a 10-person firm should be able to add time entries for a month very quickly`() {
+        // generate the users
+        val usernames = listOf("Aaren", "Aarika", "Abagael", "Abagail", "Abbe", "Abbey", "Abbi", "Abbie", "Abby", "Abbye")
         val timeToEnterUsers = getTime {
             usernames.forEach { u -> pmd.addNewUser(UserName(u)) }
         }
@@ -64,17 +63,17 @@ class PureMemoryDatabaseTests {
         }
         logInfo("It took $timeToReadAllUsers milliseconds to read all the users")
 
-        // generate 2000 projects
-        val timeToCreateProjects = getTime { (0..2000).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
+        // generate 20 projects
+        val timeToCreateProjects = getTime { (0..20).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
         logInfo("It took $timeToCreateProjects milliseconds to create the projects")
 
         lateinit var allProjects: List<Project>
         val timeToReadAllProjects = getTime { allProjects = pmd.getAllProjects().orEmpty() }
         logInfo("It took $timeToReadAllProjects milliseconds to read all the projects")
 
-        val tenYears = 10 * 365
+        val oneMonth = 31
         val timeToEnterAllTimeEntries = getTime {
-            for (day in 1..tenYears) {
+            for (day in 1..oneMonth) {
                 for (user in allUsers) {
                     pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date.makeDateFromEpoch(18438L + day), Details("a".repeat(500))))
                     pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date.makeDateFromEpoch(18438L + day), Details("a".repeat(500))))
