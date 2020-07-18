@@ -81,7 +81,7 @@ class PureMemoryDatabaseTests {
 
             // generate some projects
             val timeToCreateProjects =
-                getTime { (0..2000).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
+                getTime { (0..numberOfProjects).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
             logInfo("It took $timeToCreateProjects milliseconds to create $numberOfProjects projects")
 
             lateinit var allProjects: List<Project>
