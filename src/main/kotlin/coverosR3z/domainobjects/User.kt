@@ -1,5 +1,8 @@
 package coverosR3z.domainobjects
 
+private const val maxEmployeeCount = 100_000_000
+private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
+
 /**
  * Holds a user's name before we have a whole object, like [User]
  */
@@ -10,6 +13,15 @@ data class UserName(val value: String) {
 }
 
 data class User(val id: Int, val name: String) {
+
+    init {
+        assert(name.isNotEmpty()) {"All users must have a non-empty name"}
+        assert(id < maxEmployeeCount) { maxEmployeeMsg }
+    }
+
+    fun serialize(): String {
+        return "{id=$id,name=$name}"
+    }
 
     companion object {
         private val deserializationRegex = "\\{id=(.*),name=(.*)}".toRegex()
@@ -26,21 +38,11 @@ data class User(val id: Int, val name: String) {
         }
     }
 
-    fun serialize(): String {
-        return "{id=$id,name=$name}"
-    }
-
-    init {
-        assert(name.isNotEmpty()) {"All users must have a non-empty name"}
-        assert(id < 100_000_000) { "There is no way on earth this company has ever or will " +
-                "ever have more than even a million employees" }
-    }
 }
 
 data class UserId(val id: Int) {
     init {
-        assert(id < 100_000_000) { "There is no way on earth this company has ever or will " +
-                "ever have more than even a million employees" }
+        assert(id < maxEmployeeCount) {maxEmployeeMsg }
     }
 }
 

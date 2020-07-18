@@ -6,17 +6,16 @@ import org.junit.Test
 
 class UserTests {
 
-    val text = getResourceAsText("/coverosR3z/domainobjects/user_serialized1.txt")
+    private val text = getResourceAsText("/coverosR3z/domainobjects/user_serialized1.txt")
+    private val user = User(1, "some user")
 
     @Test
     fun `can serialize User`() {
-        val user = User(1, "some user")
         assertEquals(text, user.serialize())
     }
 
     @Test
     fun `can deserialize User`() {
-        val user = User(1, "some user")
         assertEquals(user, User.deserialize(text))
     }
 }
