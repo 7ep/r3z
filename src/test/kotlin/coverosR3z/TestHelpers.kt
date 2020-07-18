@@ -37,3 +37,10 @@ fun getTime(function: () -> Unit): Long {
         val finish = System.currentTimeMillis()
         return finish - start
 }
+
+/**
+ * Makes it easy to access data in the resource directory
+ */
+fun getResourceAsText(path: String): String {
+        return object {}.javaClass.getResource(path).readText()
+}

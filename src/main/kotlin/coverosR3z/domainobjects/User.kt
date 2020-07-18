@@ -10,6 +10,26 @@ data class UserName(val value: String) {
 }
 
 data class User(val id: Int, val name: String) {
+
+    companion object {
+        private val deserializationRegex = "\\{id=(.*),name=(.*)}".toRegex()
+
+        fun deserialize(value : String) : User? {
+            val matches = deserializationRegex.matchEntire(value)
+            if (matches != null) {
+                val (idString, name) = matches.destructured
+                val id = Integer.parseInt(idString)
+                return User(id, name)
+            } else {
+                return null
+            }
+        }
+    }
+
+    fun serialize(): String {
+        return "{id=$id,name=$name}"
+    }
+
     init {
         assert(name.isNotEmpty()) {"All users must have a non-empty name"}
         assert(id < 100_000_000) { "There is no way on earth this company has ever or will " +
