@@ -1,7 +1,7 @@
 package coverosR3z.domainobjects
 
+import java.lang.Long.parseLong
 import java.time.LocalDate
-import java.util.*
 
 
 enum class Month(val ord: Int) {
@@ -49,6 +49,25 @@ class Date(val epochDay : Long) {
 
     override fun toString(): String {
         return "Date(epochDay=$epochDay, $stringValue)"
+    }
+
+    fun serialize(): String {
+        return "{epochDay=$epochDay}"
+    }
+
+    companion object {
+        private val deserializationRegex = "\\{epochDay=(.*)}".toRegex()
+
+        fun deserialize(value : String) : Date? {
+            val matches = deserializationRegex.matchEntire(value)
+            if (matches != null) {
+                val (epochDayString) = matches.destructured
+                val epochDay = parseLong(epochDayString)
+                return Date(epochDay)
+            } else {
+                return null
+            }
+        }
     }
 
 }
