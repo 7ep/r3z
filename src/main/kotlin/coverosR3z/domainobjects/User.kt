@@ -1,5 +1,7 @@
 package coverosR3z.domainobjects
 
+import java.lang.Integer.parseInt
+
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
 
@@ -30,7 +32,7 @@ data class User(val id: Int, val name: String) {
             val matches = deserializationRegex.matchEntire(value)
             if (matches != null) {
                 val (idString, name) = matches.destructured
-                val id = Integer.parseInt(idString)
+                val id = parseInt(idString)
                 return User(id, name)
             } else {
                 return null

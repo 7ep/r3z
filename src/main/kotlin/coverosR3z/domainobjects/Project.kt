@@ -1,5 +1,7 @@
 package coverosR3z.domainobjects
 
+import java.lang.Integer.parseInt
+
 private const val maximumProjectsCount = 100_000_000
 private const val maxProjectErrorMsg = "100 million projects seems too unlikely"
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
@@ -34,7 +36,7 @@ data class Project(val id: Int, val name: String) {
             val matches = deserializationRegex.matchEntire(value)
             if (matches != null) {
                 val (idString, name) = matches.destructured
-                val id = Integer.parseInt(idString)
+                val id = parseInt(idString)
                 return Project(id, name)
             } else {
                 return null
