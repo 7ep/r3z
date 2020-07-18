@@ -14,42 +14,18 @@ enum class Month(val ord: Int) {
 }
 
 /**
- * A simplistic representation of date - simply and solely holds information
- * about a year, a month, and a day of the month.  Unlike complicated classes
- * like [java.sql.Date] or [java.util.Date] or [java.util.GregorianCalendar],
- * all this has is those three values.  In contrast, those other classes
- * have tricky little bits inside to represent a more complex world.
+ * A simplistic representation of date.
+ *
+ * internal data is merely the number of days since the epoch - 1970-01-01
  */
-class Date(year: Int, month: Month, day: Int) {
+class Date(val epochDay : Long) {
+    constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay())
 
-    // The core data - the number of days since the Epoch - day 0 is 1970-01-01
-    private val epochDay = LocalDate.of(year, month.ord, day).toEpochDay()
-
-    val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
+    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
     private val stringValue: String = sqlDate.toString()
 
     init {
-        assert(year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had $year"}
-        assert(day in 1..31) {"months only go between 1 and 31 days"}
-    }
-
-    companion object {
-
-        /**
-         * Given a date in [java.sql.Date] form, convert it to our simplified
-         * date, which requires extracting the year, month, and date.  We use
-         * [GregorianCalendar] for that job.
-         */
-        fun convertSqlDateToOurDate(date : java.sql.Date) : Date {
-            val localDate = date.toLocalDate()
-            return Date(localDate.year, Month.from(localDate.monthValue)!!, localDate.dayOfMonth)
-        }
-
-        fun makeDateFromEpoch(day : Long) : Date {
-            val localDate = LocalDate.ofEpochDay(day)
-            return Date(localDate.year, Month.from(localDate.monthValue)!!, localDate.dayOfMonth)
-        }
-
+        assert(sqlDate.toLocalDate().year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had ${sqlDate.toLocalDate().year}"}
     }
 
     /**
