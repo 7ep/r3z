@@ -99,9 +99,9 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun `should be possible to quickly write our data to disk`() {
-        val numberOfUsers = 20
-        val numberOfProjects = 100
-        val numberOfDays = 31
+        val numberOfUsers = 10
+        val numberOfProjects = 20
+        val numberOfDays = 5
 
         recordManyTimeEntries(numberOfUsers, numberOfProjects, numberOfDays)
 
