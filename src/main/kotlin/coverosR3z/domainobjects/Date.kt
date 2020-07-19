@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.exceptions.MalformedDataDuringSerializationException
 import java.lang.Long.parseLong
 import java.time.LocalDate
 
@@ -59,13 +60,13 @@ class Date(val epochDay : Long) {
         private val deserializationRegex = "\\{epochDay=(.*)}".toRegex()
 
         fun deserialize(value : String) : Date? {
-            val matches = deserializationRegex.matchEntire(value)
-            if (matches != null) {
+            try {
+                val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
                 val (epochDayString) = matches.destructured
                 val epochDay = parseLong(epochDayString)
                 return Date(epochDay)
-            } else {
-                return null
+            } catch (ex : Exception) {
+                throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
             }
         }
     }
