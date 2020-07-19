@@ -1,75 +1,53 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.exceptions.MalformedDataDuringSerializationException
-import coverosR3z.getResourceAsText
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.JsonDecodingException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.lang.AssertionError
+import coverosR3z.jsonSerialzation as json
 
 class DateTests {
 
     private val date = Date(18438)
 
-    @Test
-    fun `can serialize Date`() {
-        val text =  getResourceAsText("/coverosR3z/domainobjects/date_serialized1.txt")
-        assertEquals(text, date.serialize())
-    }
+    // Json also has .Default configuration which provides more reasonable settings,
+    // but is subject to change in future versions
+
 
     @Test
-    fun `can deserialize Date`() {
-        val text =  getResourceAsText("/coverosR3z/domainobjects/date_serialized1.txt")
-        assertEquals(date, Date.deserialize(text))
-    }
+    fun `can serialize Date with Kotlin serialization`() {
+        // serializing objects
+        val jsonData = json.stringify(Date.serializer(), date)
+        assertEquals("""{"epochDay":18438}""", jsonData)
 
-    /**
-     * How is it handled when the number cannot be parsed?
-     */
-    @Test
-    fun `should get exception when deserializing Date and see malformed data - bad number`() {
-        val errortext_badNumber = getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_bad_number.txt")
-        val ex = assertThrows(MalformedDataDuringSerializationException::class.java) { Date.deserialize(errortext_badNumber) }
-        assertEquals("was unable to deserialize this: ( {epochDay=18438L} )", ex.message)
+        // serializing lists
+        val jsonList = json.stringify(Date.serializer().list, listOf(date))
+        assertEquals("""[{"epochDay":18438}]""", jsonList)
+
+        // parsing data back
+        val obj: Date = json.parse(Date.serializer(), """{"epochDay":18438}""")
+        assertEquals(date, obj)
     }
 
     /**
-     * How is it handled when the key value is bad?
+     * If the persisted data is corrupted, I want this to indicate what
+     * was the problem so I can repair it.
      */
     @Test
-    fun `should get exception when deserializing Date and see malformed data - bad key`() {
-        val errortext_badKey =  getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_bad_key.txt")
-        val ex = assertThrows(MalformedDataDuringSerializationException::class.java) { Date.deserialize(errortext_badKey) }
-        assertEquals("was unable to deserialize this: ( {foo=18438} )", ex.message)
+    fun `failed deserialization should make it clear what went wrong`() {
+        val ex = assertThrows(JsonDecodingException::class.java) { json.parse(Date.serializer(), """{"epochDay":18438L,"stringValue":"2020-06-25"}""") }
+        assertEquals("Unexpected JSON token at offset 19: Failed to parse 'int'.\n" +
+                " JSON input: {\"epochDay\":18438L,\"stringValue\":\"2020-06-25\"}", ex.message)
     }
 
     /**
-     * How is it handled when the data is empty?
+     * If the persisted data is corrupted, I want this to indicate what
+     * was the problem so I can repair it.
      */
     @Test
-    fun `should get exception when deserializing Date and see malformed data - empty`() {
-        val errortext_empty = getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_empty.txt")
-        val ex = assertThrows(MalformedDataDuringSerializationException::class.java) { Date.deserialize(errortext_empty) }
-        assertEquals("was unable to deserialize this: (  )", ex.message)
-    }
-
-    /**
-     * How is it handled when the id is too large? (like, past the year 2100? 200 years from now is 91438
-     */
-    @Test
-    fun `should get exception when deserializing Date and see malformed data - too far in future`() {
-        val errortext_tooFuture = getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_toofuture.txt")
-        val ex = assertThrows(AssertionError::class.java) { Date.deserialize(errortext_tooFuture) }
+    fun `failed deserialization should make it clear what went wrong, too high a year`() {
+        val ex = assertThrows(AssertionError::class.java) { json.parse(Date.serializer(), """{"epochDay":91438}""") }
         assertEquals("no way on earth people are using this before 2020 or past 2100, you had a date of 2220-05-08", ex.message)
-    }
-
-    /**
-     * How is it handled when the number is just frankly too large for the type?
-     */
-    @Test
-    fun `should get exception when deserializing Date and see malformed data - too large`() {
-        val errortext_tooLarge =  getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_toolarge.txt")
-        val ex = assertThrows(MalformedDataDuringSerializationException::class.java) { Date.deserialize(errortext_tooLarge) }
-        assertEquals("was unable to deserialize this: ( {epochDay=123456789012345678901234567890} )", ex.message)
     }
 }
