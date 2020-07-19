@@ -1,6 +1,7 @@
 package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
+import kotlinx.serialization.Serializable
 
 /**
  * Why use those heavy-handed database applications when you
@@ -8,6 +9,7 @@ import coverosR3z.domainobjects.*
  *
  * Here, things are simple.  Anything you need, you make.
  */
+@Serializable
 class PureMemoryDatabase {
 
     private val users : MutableSet<User> = mutableSetOf()
@@ -64,5 +66,26 @@ class PureMemoryDatabase {
     fun getAllProjects(): List<Project>? {
         return projects.toList()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PureMemoryDatabase
+
+        if (users != other.users) return false
+        if (projects != other.projects) return false
+        if (timeEntries != other.timeEntries) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = users.hashCode()
+        result = 31 * result + projects.hashCode()
+        result = 31 * result + timeEntries.hashCode()
+        return result
+    }
+
 
 }

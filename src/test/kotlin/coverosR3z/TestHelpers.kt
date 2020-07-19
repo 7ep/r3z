@@ -2,6 +2,8 @@ package coverosR3z
 import coverosR3z.domainobjects.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import java.io.File
+import java.net.URL
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -42,6 +44,7 @@ fun getTime(function: () -> Unit): Long {
 
 /**
  * Makes it easy to access data in the resource directory
+ * This is to read text from a file in the resource directory
  */
 fun getResourceAsText(path: String): String {
         return object {}.javaClass.getResource(path).readText()
@@ -54,3 +57,4 @@ fun getResourceAsText(path: String): String {
  * See https://github.com/Kotlin/kotlinx.serialization
  */
 val jsonSerialzation : Json = Json(JsonConfiguration.Stable)
+val jsonSerialzationWithPrettyPrint : Json = Json(JsonConfiguration.Stable.copy(prettyPrint = true))
