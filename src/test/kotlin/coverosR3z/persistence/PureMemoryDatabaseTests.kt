@@ -91,10 +91,10 @@ class PureMemoryDatabaseTests {
             val timeToEnterAllTimeEntries = getTime {
                 for (day in 1..numberOfDays) {
                     for (user in allUsers) {
-                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
+                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                        pmd.addTimeEntry(TimeEntryPreDatabase(user, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
                     }
                 }
             }

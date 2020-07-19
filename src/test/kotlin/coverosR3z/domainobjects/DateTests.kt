@@ -9,7 +9,7 @@ import java.lang.AssertionError
 
 class DateTests {
 
-    private val date = Date(18438L)
+    private val date = Date(18438)
 
     @Test
     fun `can serialize Date`() {

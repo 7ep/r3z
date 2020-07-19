@@ -1,6 +1,7 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.exceptions.MalformedDataDuringSerializationException
+import java.lang.Integer.parseInt
 import java.lang.Long.parseLong
 import java.time.LocalDate
 
@@ -19,10 +20,10 @@ enum class Month(val ord: Int) {
  *
  * internal data is merely the number of days since the epoch - 1970-01-01
  */
-class Date(val epochDay : Long) {
-    constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay())
+class Date(val epochDay : Int) {
+    constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
-    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay))
+    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong()))
     private val stringValue: String = sqlDate.toString()
 
     init {
@@ -63,7 +64,7 @@ class Date(val epochDay : Long) {
             try {
                 val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
                 val (epochDayString) = matches.destructured
-                val epochDay = parseLong(epochDayString)
+                val epochDay = parseInt(epochDayString)
                 return Date(epochDay)
             } catch (ex : Exception) {
                 throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
