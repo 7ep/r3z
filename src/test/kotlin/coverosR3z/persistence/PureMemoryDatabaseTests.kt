@@ -3,9 +3,8 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.JsonElement
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -51,7 +50,7 @@ class PureMemoryDatabaseTests {
     }
 
     @Test
-    fun `a firm should get responses from the database quite quickly`() {
+    fun `PERFORMANCE a firm should get responses from the database quite quickly`() {
         val numberOfUsers = 30
         val numberOfProjects = 30
         val numberOfDays = 31
@@ -63,6 +62,7 @@ class PureMemoryDatabaseTests {
         }
 
         logInfo("It took a total of $totalTime milliseconds for this code")
+        assertTrue(totalTime < 100)
     }
 
     @Test
@@ -79,7 +79,7 @@ class PureMemoryDatabaseTests {
      * serialization, writing to disk, reading from disk, and deserialization
      */
     @Test
-    fun `should be possible to quickly serialize our data`() {
+    fun `PERFORMANCE should be possible to quickly serialize our data`() {
         val numberOfUsers = 3
         val numberOfProjects = 6
         val numberOfDays = 5
@@ -92,13 +92,14 @@ class PureMemoryDatabaseTests {
             assertEquals(pmd, deserializedPmd)
         }
         logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
+        assertTrue(totalTime < 100)
     }
 
     /**
      * Here we'll try out disk writing / reading with serialization
      */
     @Test
-    fun `should be possible to quickly write our data to disk`() {
+    fun `PERFORMANCE should be possible to quickly write our data to disk`() {
         val numberOfUsers = 10
         val numberOfProjects = 20
         val numberOfDays = 5
@@ -115,6 +116,7 @@ class PureMemoryDatabaseTests {
             assertEquals(pmd, deserializedPmd)
         }
         logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
+        assertTrue(totalTime < 100)
     }
 
     private fun recordManyTimeEntries(numberOfUsers: Int, numberOfProjects: Int, numberOfDays: Int) : List<User> {
