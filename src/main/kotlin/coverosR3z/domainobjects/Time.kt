@@ -1,8 +1,11 @@
 package coverosR3z.domainobjects
 
+import kotlinx.serialization.Serializable
+
 /**
  * a length of time, in minutes
  */
+@Serializable
 data class Time(val numberOfMinutes : Int) {
     init {
         assert(numberOfMinutes > 0) {"Doesn't make sense to have zero or negative time"}

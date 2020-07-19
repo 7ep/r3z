@@ -1,6 +1,7 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.exceptions.MalformedDataDuringSerializationException
+import kotlinx.serialization.Serializable
 import java.lang.Integer.parseInt
 
 private const val maxEmployeeCount = 100_000_000
@@ -10,12 +11,14 @@ private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
 /**
  * Holds a user's name before we have a whole object, like [User]
  */
+@Serializable
 data class UserName(val value: String) {
     init {
         assert(value.isNotEmpty()) {nameCannotBeEmptyMsg}
     }
 }
 
+@Serializable
 data class User(val id: Int, val name: String) {
 
     init {
@@ -45,6 +48,7 @@ data class User(val id: Int, val name: String) {
 
 }
 
+@Serializable
 data class UserId(val id: Int) {
     init {
         assert(id < maxEmployeeCount) {maxEmployeeMsg }

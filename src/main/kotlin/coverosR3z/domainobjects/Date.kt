@@ -2,10 +2,11 @@ package coverosR3z.domainobjects
 
 import coverosR3z.exceptions.MalformedDataDuringSerializationException
 import java.lang.Integer.parseInt
-import java.lang.Long.parseLong
 import java.time.LocalDate
+import kotlinx.serialization.*
 
 
+@Serializable
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
@@ -20,14 +21,14 @@ enum class Month(val ord: Int) {
  *
  * internal data is merely the number of days since the epoch - 1970-01-01
  */
+@Serializable
 class Date(val epochDay : Int) {
     constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
-    private val sqlDate: java.sql.Date = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong()))
-    private val stringValue: String = sqlDate.toString()
+    private val stringValue: String = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
 
     init {
-        assert(sqlDate.toLocalDate().year in 2020..2100) {"no way on earth people are using this before 2020 or past 2100, you had ${sqlDate.toLocalDate().year}"}
+        assert(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
     }
 
     /**
