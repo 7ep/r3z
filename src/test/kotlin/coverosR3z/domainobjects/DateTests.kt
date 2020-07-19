@@ -60,7 +60,7 @@ class DateTests {
     fun `should get exception when deserializing Date and see malformed data - too far in future`() {
         val errortext_tooFuture = getResourceAsText("/coverosR3z/domainobjects/date_serialized_error_toofuture.txt")
         val ex = assertThrows(AssertionError::class.java) { Date.deserialize(errortext_tooFuture) }
-        assertEquals("no way on earth people are using this before 2020 or past 2100, you had 2220", ex.message)
+        assertEquals("no way on earth people are using this before 2020 or past 2100, you had a date of 2220-05-08", ex.message)
     }
 
     /**

@@ -1,7 +1,10 @@
 package coverosR3z.domainobjects
 
+import kotlinx.serialization.Serializable
+
 const val MAX_DETAILS_LENGTH = 500
 
+@Serializable
 data class Details(val value : String = "") {
     init {
         // This max length is reinforced in V1_Create_person_table.sql
