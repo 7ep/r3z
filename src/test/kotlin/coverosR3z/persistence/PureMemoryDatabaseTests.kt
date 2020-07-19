@@ -107,8 +107,10 @@ class PureMemoryDatabaseTests {
 
         val totalTime = getTime {
             val pmdJson = jsonSerialzationWithPrettyPrint.stringify(PureMemoryDatabase.serializer(), pmd)
-            File("build/tmp/pmdrecord.txt").writeText(pmdJson)
-            val readFile = File("build/tmp/pmdrecord.txt").readText()
+            File("build/tmp/").mkdirs()
+            val dbFile = File("build/tmp/pmdrecord.txt")
+            dbFile.writeText(pmdJson)
+            val readFile = dbFile.readText()
             val deserializedPmd: PureMemoryDatabase = jsonSerialzationWithPrettyPrint.parse(PureMemoryDatabase.serializer(), readFile)
             assertEquals(pmd, deserializedPmd)
         }
