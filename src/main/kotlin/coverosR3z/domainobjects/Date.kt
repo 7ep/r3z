@@ -25,10 +25,10 @@ enum class Month(val ord: Int) {
 class Date(val epochDay : Int) {
     constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
-    private val stringValue: String = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
+    private fun stringValue() : String { return java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString() }
 
     init {
-        assert(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
+        assert(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of ${stringValue()}"}
     }
 
     /**
@@ -51,7 +51,7 @@ class Date(val epochDay : Int) {
     }
 
     override fun toString(): String {
-        return "Date(epochDay=$epochDay, $stringValue)"
+        return "Date(epochDay=$epochDay, ${stringValue()})"
     }
 
     fun serialize(): String {

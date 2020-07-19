@@ -1,5 +1,7 @@
 package coverosR3z
 import coverosR3z.domainobjects.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -44,3 +46,11 @@ fun getTime(function: () -> Unit): Long {
 fun getResourceAsText(path: String): String {
         return object {}.javaClass.getResource(path).readText()
 }
+
+/**
+ * This is useful for tests that require serialization
+ * using Kotlin's own serialization framework.
+ *
+ * See https://github.com/Kotlin/kotlinx.serialization
+ */
+val jsonSerialzation : Json = Json(JsonConfiguration.Stable)
