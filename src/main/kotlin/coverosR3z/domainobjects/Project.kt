@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.exceptions.MalformedDataDuringSerializationException
 import java.lang.Integer.parseInt
 
 private const val maximumProjectsCount = 100_000_000
@@ -33,13 +34,13 @@ data class Project(val id: Int, val name: String) {
         private val deserializationRegex = "\\{id=(.*),name=(.*)}".toRegex()
 
         fun deserialize(value : String) : Project? {
-            val matches = deserializationRegex.matchEntire(value)
-            if (matches != null) {
+            try {
+                val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
                 val (idString, name) = matches.destructured
                 val id = parseInt(idString)
                 return Project(id, name)
-            } else {
-                return null
+            } catch (ex : Exception) {
+                throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
             }
         }
     }
