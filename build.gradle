@@ -70,7 +70,7 @@ test {
     }
 
     // Fail the 'test' task on the first test failure
-    failFast = false
+    failFast = true
 
     debugOptions {
         // make the following true if you want to attach with a debugger while testing
