@@ -61,7 +61,7 @@ class EnteringTimeBDD {
     }
 
     @Test
-    fun `Performance test`() {
+    fun `PERFORMANCE test`() {
         // given I have worked on a project
         val startAfterDatabase = System.currentTimeMillis()
         val tru = createTimeRecordingUtility()
