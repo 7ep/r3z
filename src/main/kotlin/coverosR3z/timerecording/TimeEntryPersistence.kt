@@ -20,7 +20,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
         pmd.getProjectById(entry.project.id) ?: throw ProjectIntegrityViolationException()
-        pmd.getUserById(entry.project.id) ?: throw UserIntegrityViolationException()
+        pmd.getUserById(entry.user.id) ?: throw UserIntegrityViolationException()
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -44,7 +44,12 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return minutes.toLong()
     }
 
-    override fun readTimeEntries(user: User): List<TimeEntry>? {
+    override fun readTimeEntries(user: User): List<TimeEntry> {
         return pmd.getAllTimeEntriesForUser(user)
     }
+
+    override fun readTimeEntriesOnDate(user: User, date: Date): List<TimeEntry> {
+        return pmd.getAllTimeEntriesForUserOnDate(user, date)
+    }
+
 }

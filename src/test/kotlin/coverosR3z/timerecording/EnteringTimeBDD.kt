@@ -1,14 +1,11 @@
-package coverosR3z
+package coverosR3z.timerecording
 
+import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.logging.logInfo
-import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
-import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.timerecording.ITimeEntryPersistence
-import coverosR3z.timerecording.TimeEntryPersistence
 
 
 /**
@@ -75,10 +72,10 @@ class EnteringTimeBDD {
         for (i in 1..numberOfSamples) {
             val (timeElapsed) = getTime {
                 val entry = createTimeEntryPreDatabase(
-                    user = newUser,
-                    time = Time(1),
-                    project = newProject,
-                    details = Details("Four score and seven years ago, blah blah blah")
+                        user = newUser,
+                        time = Time(1),
+                        project = newProject,
+                        details = Details("Four score and seven years ago, blah blah blah")
                 )
                 tru.recordTime(entry)
             }
@@ -109,8 +106,8 @@ class EnteringTimeBDD {
 
     private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
         val tru = createTimeRecordingUtility()
-        val newProject: Project = tru.createProject(ProjectName("A"))
-        val newUser : User = tru.createUser(UserName("B"))
+        val newProject: Project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val newUser : User = tru.createUser(DEFAULT_USERNAME)
         val entry = createTimeEntryPreDatabase(
                 user = newUser,
                 project = newProject,
@@ -130,13 +127,6 @@ class EnteringTimeBDD {
         return Triple(tru, newProject, newUser)
     }
 
-    /**
-     * A test helper method to generate a [TimeRecordingUtilities]
-     * with a real database connected - H2
-     */
-    private fun createTimeRecordingUtility(): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        return TimeRecordingUtilities(timeEntryPersistence)
-    }
+
 
 }

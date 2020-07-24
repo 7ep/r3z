@@ -14,7 +14,12 @@ data class TimeEntry (
         val project: Project,
         val time: Time,
         val date: Date,
-        val details : Details = Details())
+        val details : Details = Details()) {
+
+    fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
+        return TimeEntryPreDatabase(user, project, time, date, details)
+    }
+}
 
 /**
  * Same as [TimeEntry] but it has no id because we haven't

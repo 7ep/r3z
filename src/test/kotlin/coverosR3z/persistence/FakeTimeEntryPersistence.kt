@@ -29,7 +29,11 @@ class FakeTimeEntryPersistence(
         return minutesRecorded
     }
 
-    override fun readTimeEntries(user: User): List<TimeEntry>? {
+    override fun readTimeEntries(user: User): List<TimeEntry> {
+        return listOf()
+    }
+
+    override fun readTimeEntriesOnDate(user: User, date: Date): List<TimeEntry> {
         return listOf()
     }
 

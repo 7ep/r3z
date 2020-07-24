@@ -23,7 +23,7 @@ class TimeEntryPersistenceTests {
         val newProject = tep.persistNewProject(ProjectName("test project"))
         val newUser = tep.persistNewUser(UserName("test user"))
         tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, user = newUser))
-        val count = tep.readTimeEntries(newUser)!!.size
+        val count = tep.readTimeEntries(newUser).size
         assertEquals("There should be exactly one entry in the database", 1, count)
     }
 
@@ -38,7 +38,7 @@ class TimeEntryPersistenceTests {
         tep.persistNewTimeEntry(entry2)
         val expectedResult = listOf(entry1, entry2)
 
-        val actualResult = tep.readTimeEntries(user) ?: listOf()
+        val actualResult = tep.readTimeEntries(user)
 
         val msg = "what we entered and what we get back should be identical, instead got"
         val listOfResultsMinusId = actualResult.map { r -> TimeEntryPreDatabase(r.user, r.project, r.time, r.date, r.details) }.toList()

@@ -11,6 +11,7 @@ interface ITimeEntryPersistence {
      * Provided a user and date, give the number of minutes they worked on that date
      */
     fun queryMinutesRecorded(user: User, date: Date): Long
-    fun readTimeEntries(user: User): List<TimeEntry>?
+    fun readTimeEntries(user: User): List<TimeEntry>
+    fun readTimeEntriesOnDate(user: User, date: Date): List<TimeEntry>
 
 }

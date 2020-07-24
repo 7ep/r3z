@@ -49,6 +49,10 @@ class PureMemoryDatabase {
         return timeEntries.filter{te -> te.user.id == user.id}
     }
 
+    fun getAllTimeEntriesForUserOnDate(user: User, date: Date): List<TimeEntry> {
+        return timeEntries.filter{te -> te.user.id == user.id && te.date == date}
+    }
+
     fun getProjectById(id: Int) : Project? {
         assert(id > 0)
         return projects.singleOrNull { p -> p.id == id }

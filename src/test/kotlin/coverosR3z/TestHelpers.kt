@@ -1,9 +1,11 @@
 package coverosR3z
 import coverosR3z.domainobjects.*
+import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.timerecording.ITimeEntryPersistence
+import coverosR3z.timerecording.TimeEntryPersistence
+import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import java.io.File
-import java.net.URL
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -58,3 +60,12 @@ fun getResourceAsText(path: String): String {
  */
 val jsonSerialzation : Json = Json(JsonConfiguration.Stable)
 val jsonSerialzationWithPrettyPrint : Json = Json(JsonConfiguration.Stable.copy(prettyPrint = true))
+
+/**
+ * A test helper method to generate a [TimeRecordingUtilities]
+ * with a real database connected
+ */
+fun createTimeRecordingUtility(): TimeRecordingUtilities {
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
+        return TimeRecordingUtilities(timeEntryPersistence)
+}
