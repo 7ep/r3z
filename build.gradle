@@ -15,8 +15,7 @@ plugins {
     // provides unit test coverage
     id 'jacoco'
 
-    // provides access to a database versioning tool.
-    id "org.flywaydb.flyway" version "6.4.1"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.3.72'
 }
 
 // useful to see the dependencies. 
@@ -50,36 +49,15 @@ repositories {
 }
 
 dependencies {
-    // necessary for HTTP servlets
-    implementation 'javax:javaee-api:8.0.1'
-
     // necessary to use kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
-    // provides logging for the program
-    implementation "ch.qos.logback:logback-classic:$logback_version"
 
     // junit, for running unit tests
     testImplementation ("junit:junit:4.13")
 
-    // https://mockk.io/#gradlemaven-dependency
-    // this tool is used to mock stuff for our unit tests
-    testImplementation "io.mockk:mockk:1.10.0"
-
-    // we'll use this as our database
-    // https://mvnrepository.com/artifact/com.h2database/h2
-    implementation ("com.h2database:h2:1.4.199")
-
-    // provide database migrations - see https://flywaydb.org/
-    implementation ("org.flywaydb:flyway-core:6.4.1")
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
 }
 
-
-// Configure our javadoc to include an overview for our project, a
-// document that provides general ideas of the whole.
-javadoc {
-    options.overview = "src/main/javadoc/overview.html"
-}
 
 test {
     testLogging {
