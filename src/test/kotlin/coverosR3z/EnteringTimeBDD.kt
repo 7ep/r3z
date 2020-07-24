@@ -73,7 +73,7 @@ class EnteringTimeBDD {
         val durations = LongArray(numberOfSamples)
 
         for (i in 1..numberOfSamples) {
-            val timeElapsed : Long = getTime {
+            val (timeElapsed) = getTime {
                 val entry = createTimeEntryPreDatabase(
                     user = newUser,
                     time = Time(1),

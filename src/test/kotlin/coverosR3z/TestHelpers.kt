@@ -35,11 +35,11 @@ fun createTimeEntryPreDatabase(
  *           bar()
  *      }
  */
-fun getTime(function: () -> Unit): Long {
+fun <T>getTime(function: () -> T): Pair<Long, T> {
         val start = System.currentTimeMillis()
-        function()
+        val result : T = function()
         val finish = System.currentTimeMillis()
-        return finish - start
+        return Pair(finish - start, result)
 }
 
 /**
