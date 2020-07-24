@@ -16,7 +16,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = `given I have created some time entries`()
 
         // when I request my time entries
-        val dbEntries : List<TimeEntry> = tru.getEntriesForUserOnDate(DEFAULT_USER, A_RANDOM_DAY_IN_JUNE_2020)
+        val dbEntries = tru.getEntriesForUserOnDate(DEFAULT_USER, A_RANDOM_DAY_IN_JUNE_2020)
 
         `then I see all of them`(entries, dbEntries)
     }
