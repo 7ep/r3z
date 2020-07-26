@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.exceptions.UserNotRegisteredException
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.UserIntegrityViolationException
@@ -27,7 +28,16 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
     private fun `confirm the user has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
         logInfo("checking that the user has a total (new plus existing) of less than 24 hours")
         // make sure the user has a total (new plus existing) of less than 24 hours
-        val minutesRecorded = persistence.queryMinutesRecorded(entry.user, entry.date)
+        var minutesRecorded : Int
+        try {
+            minutesRecorded = persistence.queryMinutesRecorded(entry.user, entry.date)
+        } catch (ex : UserNotRegisteredException) {
+            // if we hit here, it means the user doesn't exist yet.  For these purposes, that is
+            // fine, we are just checking here that if a user *does* exist, they don't have too many minutes.
+            // if they don't exist, just move on through.
+            logInfo("user ${entry.user} was not registered in the database.  returning 0 minutes recorded.")
+            minutesRecorded = 0
+        }
 
         val twentyFourHours = 24 * 60
         // If the user is entering in more than 24 hours in a day, that's invalid.

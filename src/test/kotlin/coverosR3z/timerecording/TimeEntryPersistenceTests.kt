@@ -1,9 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
-import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE
-import coverosR3z.DEFAULT_USER
-import coverosR3z.createTimeEntryPreDatabase
+import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
@@ -73,16 +70,15 @@ class TimeEntryPersistenceTests {
         )
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(60L, query)
+        assertEquals(60, query)
     }
 
     @Test
     fun `if a user has not worked on a given day, we return 0 as their minutes worked that day`() {
-        val testUser = User(1, "test")
+        val newUser: User = tep.persistNewUser(DEFAULT_USERNAME)
+        val minutesWorked = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        val minutesWorked = tep.queryMinutesRecorded(user=testUser, date= A_RANDOM_DAY_IN_JUNE_2020)
-
-        assertEquals("should be 0 since they didn't work that day", 0L, minutesWorked)
+        assertEquals("should be 0 since they didn't work that day", 0, minutesWorked)
     }
 
     @Test
@@ -116,7 +112,7 @@ class TimeEntryPersistenceTests {
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals("we should get 24 hours worked for this day", 60L * 24, query)
+        assertEquals("we should get 24 hours worked for this day", 60 * 24, query)
     }
 
 
@@ -143,7 +139,7 @@ class TimeEntryPersistenceTests {
 
         val query = tep.queryMinutesRecorded(user=newUser, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals("we should get 8 hours worked for this day", 60L * 8, query)
+        assertEquals("we should get 8 hours worked for this day", 60 * 8, query)
     }
 
 }

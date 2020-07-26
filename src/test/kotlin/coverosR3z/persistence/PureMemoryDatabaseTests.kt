@@ -6,6 +6,7 @@ import coverosR3z.logging.logInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
@@ -137,6 +138,39 @@ class PureMemoryDatabaseTests {
 
         logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
         assertTrue(totalTime < 100)
+    }
+
+//    @Test
+//    fun `there should be a function to persist the database to disk`() {
+//        val numberOfUsers = 10
+//        val numberOfProjects = 20
+//        val numberOfDays = 5
+//
+//        recordManyTimeEntries(numberOfUsers, numberOfProjects, numberOfDays)
+//        persistDb(pmd)
+//    }
+
+//    @Ignore
+//    @Test
+//    fun `there should be a function to read the database from disk` {
+//        val numberOfUsers = 10
+//        val numberOfProjects = 20
+//        val numberOfDays = 5
+//
+//        recordManyTimeEntries()
+//        writeDbToDisk(pmd)
+//        readDbFromDisk
+//    }
+
+    /**
+     * There's no way on earth we could have more than that.  It's just not reasonable.
+     * Reason is: we're going to split up the databases per user.  So, will a given
+     * user have this many time entries? no way.
+     */
+    @Ignore
+    @Test
+    fun `should respond with exception if more than 100 * 1000 * 1000 time entries`() {
+
     }
 
     private fun recordManyTimeEntries(numberOfUsers: Int, numberOfProjects: Int, numberOfDays: Int) : List<User> {

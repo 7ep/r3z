@@ -17,7 +17,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `record time for someone`() {
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60L)
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60)
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
         val entry = createTimeEntryPreDatabase()
         val expectedResult = RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
@@ -53,7 +53,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
-        val twentyFourHours: Long = 24 * 60
+        val twentyFourHours: Int = 24 * 60
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyFourHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
@@ -70,7 +70,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
-        val twentyThreeHours: Long = 23 * 60
+        val twentyThreeHours: Int = 23 * 60
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyThreeHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })

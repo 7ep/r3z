@@ -1,6 +1,7 @@
 package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.UserNotRegisteredException
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,11 +15,16 @@ class PureMemoryDatabase {
 
     private val users : MutableSet<User> = mutableSetOf()
     private val projects : MutableSet<Project> = mutableSetOf()
-    private val timeEntries : MutableSet<TimeEntry> = mutableSetOf()
+    private val timeEntries : MutableMap<User, MutableSet<TimeEntry>> = mutableMapOf()
 
     fun addTimeEntry(timeEntry : TimeEntryPreDatabase) {
-        val newIndex = timeEntries.size + 1
-        timeEntries.add(TimeEntry(
+        var userTimeEntries = timeEntries[timeEntry.user]
+        if (userTimeEntries == null) {
+            userTimeEntries = mutableSetOf()
+            timeEntries[timeEntry.user] = userTimeEntries
+        }
+        val newIndex = userTimeEntries.size + 1
+        userTimeEntries.add(TimeEntry(
                 newIndex,
                 timeEntry.user,
                 timeEntry.project,
@@ -39,18 +45,30 @@ class PureMemoryDatabase {
         return newIndex
     }
 
+    /**
+     * gets the number of minutes a particular [User] has worked
+     * on a certain date.
+     *
+     * @throws [UserNotRegisteredException] if the user isn't known.
+     */
     fun getMinutesRecordedOnDate(user: User, date: Date): Int {
-        return timeEntries
+        val userTimeEntries = timeEntries[user]
+                ?: if (!users.contains(user)) {
+                    throw UserNotRegisteredException()
+                } else {
+                    return 0
+                }
+        return userTimeEntries
                 .filter { te -> te.user.id == user.id && te.date == date }
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
     fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {
-        return timeEntries.filter{te -> te.user.id == user.id}
+        return timeEntries[user]!!.filter{te -> te.user.id == user.id}
     }
 
     fun getAllTimeEntriesForUserOnDate(user: User, date: Date): List<TimeEntry> {
-        return timeEntries.filter{te -> te.user.id == user.id && te.date == date}
+        return timeEntries[user]!!.filter{te -> te.user.id == user.id && te.date == date}
     }
 
     fun getProjectById(id: Int) : Project? {
