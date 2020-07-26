@@ -18,16 +18,36 @@ class SeeTimeEntriesBDD {
         // when I request my time entries
         val dbEntries = tru.getEntriesForUserOnDate(DEFAULT_USER, A_RANDOM_DAY_IN_JUNE_2020)
 
+        `then I see all of them on that date`(entries, dbEntries)
+    }
+
+    @Test fun `should be able to obtain all my time entries`() {
+        val (tru, entries) = `given I have created some time entries`()
+
+        // when I request my time entries
+        val dbEntries = tru.getAllEntriesForUser(DEFAULT_USER)
+
         `then I see all of them`(entries, dbEntries)
     }
 
-    private fun `then I see all of them`(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>) {
+    private fun `then I see all of them on that date`(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>) {
         // then I see all of them
         val todayEntries = entries.filter { e -> e.date == A_RANDOM_DAY_IN_JUNE_2020 }
         assertEquals(todayEntries.size, dbEntries.size)
 
         // for each entry we added...
         for (entry in todayEntries) {
+            // we should find exactly one that matches it in the ones we pulled from the database
+            dbEntries.single { d -> d.toTimeEntryPreDatabase() == entry }
+        }
+    }
+
+    private fun `then I see all of them`(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>) {
+        // then I see all of them
+        assertEquals(entries.size, dbEntries.size)
+
+        // for each entry we added...
+        for (entry in entries) {
             // we should find exactly one that matches it in the ones we pulled from the database
             dbEntries.single { d -> d.toTimeEntryPreDatabase() == entry }
         }

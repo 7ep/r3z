@@ -75,4 +75,8 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
     fun getEntriesForUserOnDate(user: User, date: Date): List<TimeEntry> {
         return persistence.readTimeEntriesOnDate(user, date)
     }
+
+    fun getAllEntriesForUser(user: User): List<TimeEntry> {
+        return persistence.readTimeEntries(user)
+    }
 }
