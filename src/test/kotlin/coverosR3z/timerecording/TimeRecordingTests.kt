@@ -3,12 +3,9 @@ package coverosR3z.timerecording
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.domainobjects.*
-import coverosR3z.persistence.FakeTimeEntryPersistence
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import org.junit.Assert.*
 import org.junit.Test
-import java.time.LocalDate
-import java.time.ZoneId
 
 class TimeRecordingTests {
 
