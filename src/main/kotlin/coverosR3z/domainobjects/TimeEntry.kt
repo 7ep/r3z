@@ -10,14 +10,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TimeEntry (
         val id : Int,
-        val user: User,
+        val employee: Employee,
         val project: Project,
         val time: Time,
         val date: Date,
         val details : Details = Details()) {
 
     fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
-        return TimeEntryPreDatabase(user, project, time, date, details)
+        return TimeEntryPreDatabase(employee, project, time, date, details)
     }
 }
 
@@ -27,7 +27,7 @@ data class TimeEntry (
  */
 @Serializable
 data class TimeEntryPreDatabase (
-        val user: User,
+        val employee: Employee,
         val project: Project,
         val time: Time,
         val date: Date,

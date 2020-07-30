@@ -11,7 +11,7 @@ const val MAX_NUMBER_OF_TIMEENTRIES_PER_FILE = 100
  * It doesn't simply write the whole thing in one big file.
  * Rather, it splits things out a bit.
  *
- * Users goes into its own file
+ * Employees goes into its own file
  *
  * Projects does too
  *

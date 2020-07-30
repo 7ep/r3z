@@ -7,4 +7,4 @@ package coverosR3z.persistence
  * project exists.
  */
 class ProjectIntegrityViolationException : Exception()
-class UserIntegrityViolationException : Exception()
+class EmployeeIntegrityViolationException : Exception()

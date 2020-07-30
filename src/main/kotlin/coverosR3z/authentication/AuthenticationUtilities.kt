@@ -27,4 +27,8 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
 
     }
 
+    fun isUserRegistered(username: String) : Boolean {
+        return ap.isUserRegistered(username)
+    }
+
 }

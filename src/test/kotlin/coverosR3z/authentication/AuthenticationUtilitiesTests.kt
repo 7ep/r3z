@@ -90,4 +90,13 @@ class AuthenticationUtilitiesTests {
         assertEquals(RegistrationResult.ALREADY_REGISTERED, result)
     }
 
+    @Test
+    fun `Should determine if a particular username is for a registered user`() {
+        ap = FakeAuthPersistence(isUserRegisteredBehavior = {true})
+        authUtils = AuthenticationUtilities(ap)
+
+        val result = authUtils.isUserRegistered("jenna")
+        assertEquals(true, result)
+    }
+
 }

@@ -4,7 +4,7 @@ enum class StatusEnum {
     SUCCESS,
     FAILURE,
     INVALID_PROJECT,
-    INVALID_USER,
+    INVALID_EMPLOYEE,
     NULL}
 
 /**

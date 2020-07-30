@@ -1,9 +1,8 @@
 package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_PROJECT
-import coverosR3z.DEFAULT_USER
+import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.domainobjects.*
-import coverosR3z.timerecording.ITimeEntryPersistence
 
 
 class FakeTimeEntryPersistence(
@@ -20,20 +19,20 @@ class FakeTimeEntryPersistence(
         return persistNewProjectBehavior()
     }
 
-    override fun persistNewUser(username: UserName): User {
-        return DEFAULT_USER
+    override fun persistNewEmployee(employeename: EmployeeName): Employee {
+        return DEFAULT_EMPLOYEE
     }
 
 
-    override fun queryMinutesRecorded(user: User, date: Date): Int {
+    override fun queryMinutesRecorded(employee: Employee, date: Date): Int {
         return minutesRecorded
     }
 
-    override fun readTimeEntries(user: User): List<TimeEntry> {
+    override fun readTimeEntries(employee: Employee): List<TimeEntry> {
         return listOf()
     }
 
-    override fun readTimeEntriesOnDate(user: User, date: Date): List<TimeEntry> {
+    override fun readTimeEntriesOnDate(employee: Employee, date: Date): List<TimeEntry> {
         return listOf()
     }
 

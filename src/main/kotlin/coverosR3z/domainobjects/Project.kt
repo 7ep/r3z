@@ -29,25 +29,6 @@ data class Project(val id: Int, val name: String) {
         assert(id < maximumProjectsCount) { maxProjectErrorMsg }
     }
 
-    fun serialize(): String {
-        return "{id=$id,name=$name}"
-    }
-
-    companion object {
-        private val deserializationRegex = "\\{id=(.*),name=(.*)}".toRegex()
-
-        fun deserialize(value : String) : Project? {
-            try {
-                val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
-                val (idString, name) = matches.destructured
-                val id = parseInt(idString)
-                return Project(id, name)
-            } catch (ex : Exception) {
-                throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
-            }
-        }
-    }
-
 }
 
 @Serializable

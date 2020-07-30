@@ -16,7 +16,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = `given I have created some time entries`()
 
         // when I request my time entries
-        val dbEntries = tru.getEntriesForUserOnDate(DEFAULT_USER, A_RANDOM_DAY_IN_JUNE_2020)
+        val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
         `then I see all of them on that date`(entries, dbEntries)
     }
@@ -25,7 +25,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = `given I have created some time entries`()
 
         // when I request my time entries
-        val dbEntries = tru.getAllEntriesForUser(DEFAULT_USER)
+        val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
 
         `then I see all of them`(entries, dbEntries)
     }
@@ -58,24 +58,24 @@ class SeeTimeEntriesBDD {
         val project1: Project = tru.createProject(ProjectName("project 1"))
         val project2: Project = tru.createProject(ProjectName("project 2"))
         val project3: Project = tru.createProject(ProjectName("project 3"))
-        val newUser : User = tru.createUser(DEFAULT_USERNAME)
+        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEENAME)
 
         val entries : List<TimeEntryPreDatabase> = listOf(
             createTimeEntryPreDatabase(
-                    user = newUser,
+                    employee = newEmployee,
                     project = project1,
                     time = Time(30),
                     details = Details("abc")
             ),
             createTimeEntryPreDatabase(
-                    user = newUser,
+                    employee = newEmployee,
                     project = project2,
                     time = Time(120),
                     details = Details("def")
             ),
                 // create one for the day after
             createTimeEntryPreDatabase(
-                    user = newUser,
+                    employee = newEmployee,
                     project = project3,
                     time = Time(120),
                     details = Details("ghi"),
