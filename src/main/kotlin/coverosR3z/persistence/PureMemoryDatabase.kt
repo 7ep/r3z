@@ -46,6 +46,12 @@ class PureMemoryDatabase {
         return newIndex
     }
 
+    fun addNewUser(userName: UserName, hash: Hash) : Int {
+        val newIndex = users.size + 1
+        users.add(User(newIndex, userName.value, hash.value))
+        return newIndex
+    }
+
     /**
      * gets the number of minutes a particular [Employee] has worked
      * on a certain date.
@@ -72,9 +78,8 @@ class PureMemoryDatabase {
         return timeEntries[employee]!!.filter{ te -> te.employee.id == employee.id && te.date == date}
     }
 
-    fun getUserByName(name: String) : User? {
-        assert(name.isNotEmpty())
-        return users.singleOrNull { u -> u.name == name }
+    fun getUserByName(name: UserName) : User? {
+        return users.singleOrNull { u -> u.name == name.value }
     }
 
     fun getProjectById(id: Int) : Project? {

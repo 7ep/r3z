@@ -2,8 +2,10 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.RegistrationResult
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import java.lang.IllegalArgumentException
 
 class AuthenticationUtilitiesTests {
     lateinit var authUtils : AuthenticationUtilities
@@ -97,6 +99,18 @@ class AuthenticationUtilitiesTests {
 
         val result = authUtils.isUserRegistered("jenna")
         assertEquals(true, result)
+    }
+
+    @Test
+    fun `Should throw exception if we pass in an empty string`() {
+        val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered("") }
+        assertEquals("no username was provided to check", thrown.message)
+    }
+
+    @Test
+    fun `Should throw exception if we pass in all whitespace`() {
+        val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered("   ") }
+        assertEquals("no username was provided to check", thrown.message)
     }
 
 }

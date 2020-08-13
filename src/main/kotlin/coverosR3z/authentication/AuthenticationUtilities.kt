@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.RegistrationResult
+import coverosR3z.domainobjects.UserName
 
 
 class AuthenticationUtilities(val ap : IAuthPersistence){
@@ -20,7 +21,7 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
         if(blacklistedPasswords.contains(password)){
             return RegistrationResult.BLACKLISTED_PASSWORD
         }
-        if(ap.isUserRegistered(username)){
+        if(ap.isUserRegistered(UserName(username))){
             return RegistrationResult.ALREADY_REGISTERED
         }
         return RegistrationResult.SUCCESS
@@ -28,7 +29,8 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
     }
 
     fun isUserRegistered(username: String) : Boolean {
-        return ap.isUserRegistered(username)
+        require(username.isNotBlank()){"no username was provided to check"}
+        return ap.isUserRegistered(UserName(username))
     }
 
 }
