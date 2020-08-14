@@ -1,6 +1,8 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.persistence.PureMemoryDatabase
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -43,6 +45,20 @@ class AuthenticationBDD {
 
         // then the system records the registration successfully
         assertTrue("our user should be registered", au.isUserRegistered("matt"))
+    }
+
+    @Test
+    fun `I should not be able to register a employee if they are already registered`() {
+        // given I am currently registered
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+        au.register("matt", "asdfoiajwefowejf")
+
+        // when I register again with the same credentials
+        val result = au.register("matt", "asdfoiajwefowejf")
+
+        // then the system records the registration successfully
+        assertEquals("we shouldn't be allowed to register a user again", RegistrationResult.ALREADY_REGISTERED, result)
     }
 
     @Test

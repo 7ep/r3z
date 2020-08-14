@@ -26,9 +26,9 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
             return RegistrationResult.ALREADY_REGISTERED
         }
 
-
-        //past here I'm (Mitch) assuming we've passed all of the registration checks, and we want to add the user to the database
-        ap.createUser(UserName(username), Hash(password))
+        //past here we're assuming we've passed all of the registration checks, and we want to add the user to the database
+        val salt = Hash.getSalt()
+        ap.createUser(UserName(username), Hash.createHash(password + salt), salt)
         return RegistrationResult.SUCCESS
 
     }

@@ -58,8 +58,8 @@ fun getResourceAsText(path: String): String {
  *
  * See https://github.com/Kotlin/kotlinx.serialization
  */
-val jsonSerialzation : Json = Json(JsonConfiguration.Stable)
-val jsonSerialzationWithPrettyPrint : Json = Json(JsonConfiguration.Stable.copy(prettyPrint = true))
+val jsonSerialzation : Json = Json{allowStructuredMapKeys = true}
+val jsonSerialzationWithPrettyPrint : Json = Json{prettyPrint = true; allowStructuredMapKeys = true}
 
 /**
  * A test helper method to generate a [TimeRecordingUtilities]

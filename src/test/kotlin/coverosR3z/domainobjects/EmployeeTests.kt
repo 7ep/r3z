@@ -1,8 +1,7 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.jsonSerialzation
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.JsonDecodingException
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -15,15 +14,15 @@ class EmployeeTests {
     @Test
     fun `can serialize Employee with Kotlin serialization`() {
         // serializing objects
-        val jsonData = jsonSerialzation.stringify(Employee.serializer(), employee)
+        val jsonData = jsonSerialzation.encodeToString(Employee.serializer(), employee)
         assertEquals("""{"id":1,"name":"some employee"}""", jsonData)
 
         // serializing lists
-        val jsonList = jsonSerialzation.stringify(Employee.serializer().list, listOf(employee))
+        val jsonList = jsonSerialzation.encodeToString(ListSerializer(Employee.serializer()), listOf(employee))
         assertEquals("""[{"id":1,"name":"some employee"}]""", jsonList)
 
         // parsing data back
-        val obj: Employee = jsonSerialzation.parse(Employee.serializer(), """{"id":1,"name":"some employee"}""")
+        val obj: Employee = jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":1,"name":"some employee"}""")
         assertEquals(employee, obj)
     }
 
@@ -33,10 +32,10 @@ class EmployeeTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong`() {
-        val ex = assertThrows(JsonDecodingException::class.java) {
-            jsonSerialzation.parse(Employee.serializer(), """{"id":1ABC,"name":"some employee"}""") }
-        assertEquals("Unexpected JSON token at offset 11: Failed to parse 'int'.\n" +
-                " JSON input: {\"id\":1ABC,\"name\":\"some employee\"}", ex.message)
+        val ex = assertThrows(Exception::class.java) {
+            jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":1ABC,"name":"some employee"}""") }
+        assertEquals("Unexpected JSON token at offset 11: Failed to parse 'int'\n" +
+                "JSON input: {\"id\":1ABC,\"name\":\"some employee\"}", ex.message)
     }
 
     /**
@@ -46,7 +45,7 @@ class EmployeeTests {
     @Test
     fun `failed deserialization should make it clear what went wrong, empty name`() {
         val ex = assertThrows(AssertionError::class.java) {
-            jsonSerialzation.parse(Employee.serializer(), """{"id":1,"name":""}""") }
+            jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":1,"name":""}""") }
         assertEquals("All employees must have a non-empty name", ex.message)
     }
 
@@ -56,10 +55,10 @@ class EmployeeTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong, empty id`() {
-        val ex = assertThrows(JsonDecodingException::class.java) {
-            jsonSerialzation.parse(Employee.serializer(), """{"id":,"name":"some employee"}""") }
-        assertEquals("Unexpected JSON token at offset 6: Expected string or non-null literal.\n" +
-                " JSON input: {\"id\":,\"name\":\"some employee\"}", ex.message)
+        val ex = assertThrows(Exception::class.java) {
+            jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":,"name":"some employee"}""") }
+        assertEquals("Unexpected JSON token at offset 6: Expected string or non-null literal\n" +
+                "JSON input: {\"id\":,\"name\":\"some employee\"}", ex.message)
     }
 
     /**
@@ -69,7 +68,7 @@ class EmployeeTests {
     @Test
     fun `failed deserialization should make it clear what went wrong, negative id`() {
         val ex = assertThrows(AssertionError::class.java) {
-            jsonSerialzation.parse(Employee.serializer(), """{"id":-1,"name":"some employee"}""") }
+            jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":-1,"name":"some employee"}""") }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
 
@@ -79,9 +78,9 @@ class EmployeeTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong, too large id`() {
-        val ex = assertThrows(JsonDecodingException::class.java) {
-            jsonSerialzation.parse(Employee.serializer(), """{"id":123456789012345678901234567890,"name":"some employee"}""") }
-        assertEquals("Unexpected JSON token at offset 37: Failed to parse 'int'.\n" +
-                " JSON input: {\"id\":123456789012345678901234567890,\"name\":\"some employee\"}", ex.message)
+        val ex = assertThrows(Exception::class.java) {
+            jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":123456789012345678901234567890,"name":"some employee"}""") }
+        assertEquals("Unexpected JSON token at offset 37: Failed to parse 'int'\n" +
+                "JSON input: {\"id\":123456789012345678901234567890,\"name\":\"some employee\"}", ex.message)
     }
 }

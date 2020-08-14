@@ -87,8 +87,8 @@ class PureMemoryDatabaseTests {
         recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
         val (totalTime) = getTime {
-            val pmdJson = jsonSerialzation.stringify(PureMemoryDatabase.serializer(), pmd)
-            val deserializedPmd: PureMemoryDatabase = jsonSerialzation.parse(PureMemoryDatabase.serializer(), pmdJson)
+            val pmdJson = jsonSerialzation.encodeToString(PureMemoryDatabase.serializer(), pmd)
+            val deserializedPmd: PureMemoryDatabase = jsonSerialzation.decodeFromString(PureMemoryDatabase.serializer(), pmdJson)
             assertEquals(pmd, deserializedPmd)
         }
         logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
@@ -108,7 +108,7 @@ class PureMemoryDatabaseTests {
         recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
         val (totalTime) = getTime {
-            val (timeToSerialize, pmdJson) = getTime {jsonSerialzationWithPrettyPrint.stringify(PureMemoryDatabase.serializer(), pmd)}
+            val (timeToSerialize, pmdJson) = getTime {jsonSerialzationWithPrettyPrint.encodeToString(PureMemoryDatabase.serializer(), pmd)}
             logInfo("It took $timeToSerialize milliseconds to serialize")
 
             val (timeToMakeDirs) = getTime {File("build/tmp/").mkdirs()}
@@ -127,7 +127,7 @@ class PureMemoryDatabaseTests {
             logInfo("it took $timeToReadText milliseconds to read the text")
 
             val (timeToDeserialize, deserializedPmd) = getTime {
-                jsonSerialzationWithPrettyPrint.parse(PureMemoryDatabase.serializer(), readFile)
+                jsonSerialzationWithPrettyPrint.decodeFromString(PureMemoryDatabase.serializer(), readFile)
             }
 
             logInfo("it took $timeToDeserialize milliseconds to deserialize back to our database")

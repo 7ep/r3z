@@ -46,9 +46,9 @@ class PureMemoryDatabase {
         return newIndex
     }
 
-    fun addNewUser(userName: UserName, hash: Hash) : Int {
+    fun addNewUser(userName: UserName, hash: Hash, salt: String) : Int {
         val newIndex = users.size + 1
-        users.add(User(newIndex, userName.value, hash.value))
+        users.add(User(newIndex, userName.value, hash, salt))
         return newIndex
     }
 

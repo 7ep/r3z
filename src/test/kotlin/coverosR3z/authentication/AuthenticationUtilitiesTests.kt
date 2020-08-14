@@ -1,8 +1,10 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.RegistrationResult
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.UserName
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.lang.IllegalArgumentException
@@ -101,6 +103,16 @@ class AuthenticationUtilitiesTests {
         assertEquals(true, result)
     }
 
+    /**
+     * Say we have "password123", we should get what we know unsalted sha-256 hashes that as
+     */
+    @Test
+    fun `should create a cryptographically secure hash from a password`() {
+        val password = "password123"
+        val result = Hash.createHash(password)
+        assertEquals("ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f", result.value)
+    }
+
     @Test
     fun `Should throw exception if we pass in an empty string`() {
         val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered("") }
@@ -111,6 +123,33 @@ class AuthenticationUtilitiesTests {
     fun `Should throw exception if we pass in all whitespace`() {
         val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered("   ") }
         assertEquals("no username was provided to check", thrown.message)
+    }
+
+    fun createUser() {
+        val salt = "blahblahblah"
+        val testUser = User(1, "matt", Hash.createHash("password123" + salt), salt)
+    }
+
+    /**
+     * Cursory tests to work out the functionality of getSalt
+     */
+    @Test
+    fun `password hash should be salted`() {
+        val first = Hash.createHash("password123")
+        val salt : String = Hash.getSalt()
+        val second = Hash.createHash("password123" + salt)
+        assertNotEquals(first, second)
+    }
+
+    /**
+     *The intention of this is to ensure that the getSalt method is implemented in such a way
+     * that it provides randomness. Nothing in this test actually ensures secure randomness.
+     */
+    @Test
+    fun `salts should not be the same each time`(){
+        val first = Hash.getSalt()
+        val second = Hash.getSalt()
+        assertNotEquals(first, second)
     }
 
 }
