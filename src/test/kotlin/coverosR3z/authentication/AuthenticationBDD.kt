@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.persistence.PureMemoryDatabase
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -41,14 +42,23 @@ class AuthenticationBDD {
         au.register("matt", "asdfoiajwefowejf")
 
         // then the system records the registration successfully
-        // au.isUserRegistered("matt")
+        assertTrue("our user should be registered", au.isUserRegistered("matt"))
     }
 
     @Test
     fun `I should be able to log in once I'm a registered employee`() {
         // given I have registered
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+        au.register("matt", "asdfoiajwefowejf")
+
         // when I enter valid credentials
-        // then the system grants me access
+//        val user : User = au.login("matt", "asdfoiajwefowejf")
+//
+        // then the system knows who I am
+        // maybe a mutable singleton?
+//        assertEquals()
+
     }
 
     @Test
