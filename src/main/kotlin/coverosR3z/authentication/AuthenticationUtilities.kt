@@ -1,5 +1,6 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.domainobjects.UserName
 
@@ -24,6 +25,10 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
         if(ap.isUserRegistered(UserName(username))){
             return RegistrationResult.ALREADY_REGISTERED
         }
+
+
+        //past here I'm (Mitch) assuming we've passed all of the registration checks, and we want to add the user to the database
+        ap.createUser(UserName(username), Hash(password))
         return RegistrationResult.SUCCESS
 
     }
