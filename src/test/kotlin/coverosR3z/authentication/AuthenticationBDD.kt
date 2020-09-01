@@ -69,12 +69,11 @@ class AuthenticationBDD {
         au.register("matt", "asdfoiajwefowejf")
 
         // when I enter valid credentials
-//        val user : User = au.login("matt", "asdfoiajwefowejf")
-//
-        // then the system knows who I am
-        // maybe a mutable singleton?
-//        assertEquals()
+        val (status, _) = au.login("matt", "asdfoiajwefowejf")
 
+        // then the system knows who I am
+//        assertEquals("SUCCESS", status)
+        // TODO
     }
 
     @Test
