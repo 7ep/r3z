@@ -4,6 +4,8 @@ import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
+import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.timerecording.FakeTimeEntryPersistence
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -125,11 +127,6 @@ class AuthenticationUtilitiesTests {
         assertEquals("no username was provided to check", thrown.message)
     }
 
-    fun createUser() {
-        val salt = "blahblahblah"
-        val testUser = User(1, "matt", Hash.createHash("password123" + salt), salt)
-    }
-
     /**
      * Cursory tests to work out the functionality of getSalt
      */
@@ -150,6 +147,52 @@ class AuthenticationUtilitiesTests {
         val first = Hash.getSalt()
         val second = Hash.getSalt()
         assertNotEquals(first, second)
+    }
+
+    /**
+     * I should get a success status if I log in with valid credentials
+     */
+    @Test
+    fun `should get success with valid login`() {
+
+        val salt = Hash.getSalt()
+        val wellSeasoned = "password123$salt"
+        val fap = FakeAuthPersistence(
+                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt) }
+        )
+        val au = AuthenticationUtilities(fap)
+        val (status, _) = au.login("matt", "password123")
+        assertEquals("SUCCESS", status)
+    }
+
+    /**
+     * I should get a failure status if I log in with the wrong password
+     */
+    @Test
+    fun `should get failure with wrong password`() {
+
+        val salt = Hash.getSalt()
+        val wellSeasoned = "password123$salt"
+        val fap = FakeAuthPersistence(
+                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt) }
+        )
+        val au = AuthenticationUtilities(fap)
+        val (status, _) = au.login("matt", "wrong")
+        assertEquals("FAILURE", status)
+    }
+
+
+    /**
+     * I should get an error telling me my user doesn't exist if I log in with an unregistered user
+     */
+    @Test
+    fun `should get descriptive failure with nonreal user`() {
+        val fap = FakeAuthPersistence(
+                getUserBehavior= { null }
+        )
+        val au = AuthenticationUtilities(fap)
+        val (status, _) = au.login("matt", "arbitrary")
+        assertEquals("NOT_REGISTERED", status)
     }
 
 }
