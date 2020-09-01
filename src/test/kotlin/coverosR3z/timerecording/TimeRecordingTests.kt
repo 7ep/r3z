@@ -3,12 +3,9 @@ package coverosR3z.timerecording
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.domainobjects.*
-import coverosR3z.persistence.FakeTimeEntryPersistence
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import org.junit.Assert.*
 import org.junit.Test
-import java.time.LocalDate
-import java.time.ZoneId
 
 class TimeRecordingTests {
 
@@ -94,27 +91,27 @@ class TimeRecordingTests {
     @Test
     fun `make time entry`() {
         val timeEntry = createTimeEntryPreDatabase(date = A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(User(1, "I"), timeEntry.user)
+        assertEquals(Employee(1, "I"), timeEntry.employee)
         assertEquals(Time(60), timeEntry.time)
         assertEquals(Project(1, "A"), timeEntry.project)
         assertEquals(Details(), timeEntry.details)
     }
 
     @Test
-    fun `a user should have a unique integer identifier`() {
-        val user = User(1, "someone")
-        assertEquals(1, user.id)
+    fun `a employee should have a unique integer identifier`() {
+        val employee = Employee(1, "someone")
+        assertEquals(1, employee.id)
     }
 
     @Test
-    fun `a user should have a name`() {
+    fun `a employee should have a name`() {
         val name = "this is my name bro"
         val id = 1
 
-        val user = User(id, name)
+        val employee = Employee(id, name)
 
-        assertEquals(id, user.id)
-        assertEquals(name, user.name)
+        assertEquals(id, employee.id)
+        assertEquals(name, employee.name)
     }
 
     @Test

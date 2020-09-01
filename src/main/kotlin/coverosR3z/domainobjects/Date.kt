@@ -54,25 +54,6 @@ class Date(val epochDay : Int) {
         return "Date(epochDay=$epochDay, ${stringValue()})"
     }
 
-    fun serialize(): String {
-        return "{epochDay=$epochDay}"
-    }
-
-    companion object {
-        private val deserializationRegex = "\\{epochDay=(.*)}".toRegex()
-
-        fun deserialize(value : String) : Date? {
-            try {
-                val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
-                val (epochDayString) = matches.destructured
-                val epochDay = parseInt(epochDayString)
-                return Date(epochDay)
-            } catch (ex : Exception) {
-                throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
-            }
-        }
-    }
-
 }
 
 

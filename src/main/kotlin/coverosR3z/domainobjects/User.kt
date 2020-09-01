@@ -1,63 +1,58 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.exceptions.MalformedDataDuringSerializationException
 import kotlinx.serialization.Serializable
-import java.lang.Integer.parseInt
+import java.security.MessageDigest
+import java.security.SecureRandom
+import kotlin.random.Random
 
-private const val maxEmployeeCount = 100_000_000
-private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
+private const val maxUserCount = 100_000_000
+private const val maxUserMsg = "No way this company has more than 100 million users"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
-
+private const val hashCannotBeEmptyMsg = "All users must have a hash"
 
 /**
- * Holds a user's name before we have a whole object, like [User]
+ * Holds a username before we have a whole object, like [User]
  */
 @Serializable
-data class UserName(val value: String) {
+data class UserName(val value: String){
     init {
-        assert(value.isNotEmpty()) {nameCannotBeEmptyMsg}
+        assert(value.isNotBlank()) {nameCannotBeEmptyMsg}
     }
 }
 
 @Serializable
-data class User(val id: Int, val name: String) {
+data class User(val id: Int, val name: String, val hash: Hash, val salt: String) {
 
     init {
-        assert(name.isNotEmpty()) {nameCannotBeEmptyMsg}
-        assert(id < maxEmployeeCount) { maxEmployeeMsg }
+        assert(name.isNotBlank()) {nameCannotBeEmptyMsg}
+        assert(id < maxUserCount) { maxUserMsg }
         assert(id > 0) { minIdMsg }
     }
+}
 
-    fun serialize(): String {
-        return "{id=$id,name=$name}"
-    }
+@Serializable
+data class Hash private constructor(val value: String) {
 
-    companion object {
-        private val deserializationRegex = "\\{id=(.*),name=(.*)}".toRegex()
-
-        fun deserialize(value : String) : User? {
-            try {
-                val matches = deserializationRegex.matchEntire(value) ?: throw Exception()
-                val (idString, name) = matches.destructured
-                val id = parseInt(idString)
-                return User(id, name)
-            } catch (ex : Exception) {
-                throw MalformedDataDuringSerializationException("was unable to deserialize this: ( $value )")
-            }
-
+    companion object{
+        /**
+         * Hash the input string with the provided SHA-256 algorithm, and return a string representation
+         */
+        fun createHash(password: String): Hash {
+            val md = MessageDigest.getInstance("SHA-256")
+            md.update(password.toByteArray())
+            val hashed : ByteArray = md.digest()
+            return Hash(hashed.joinToString("") {"%02x".format(it)})
         }
+
+        /**
+         * Creates a random string to salt our hashes so they're yummy.
+         * See https://en.wikipedia.org/wiki/Salt_(cryptography)
+         */
+        fun getSalt(): String {
+            val randomBytes : ByteArray = Random.nextBytes(16)
+            return randomBytes.joinToString("") {"%02x".format(it)}
+        }
+
     }
-
 }
-
-@Serializable
-data class UserId(val id: Int) {
-    init {
-        assert(id < maxEmployeeCount) {maxEmployeeMsg }
-        assert(id > 0) { minIdMsg }
-    }
-}
-
-
-

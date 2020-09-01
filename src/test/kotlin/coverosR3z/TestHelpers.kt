@@ -14,19 +14,19 @@ import kotlinx.serialization.json.JsonConfiguration
 val A_RANDOM_DAY_IN_JUNE_2020 = Date(2020, Month.JUN, 25)
 val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
-val DEFAULT_USER = User(1, "I")
-val DEFAULT_USERNAME = UserName("I")
+val DEFAULT_EMPLOYEE = Employee(1, "I")
+val DEFAULT_EMPLOYEENAME = EmployeeName("I")
 val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT = Project(1, "A")
 val DEFAULT_PROJECT_NAME = ProjectName("A")
 
 fun createTimeEntryPreDatabase(
-        user: User = DEFAULT_USER,
+        employee: Employee = DEFAULT_EMPLOYEE,
         time: Time = DEFAULT_TIME,
         project: Project = DEFAULT_PROJECT,
         details: Details = Details(),
         date: Date = A_RANDOM_DAY_IN_JUNE_2020
-) = TimeEntryPreDatabase ( user, project, time, date, details)
+) = TimeEntryPreDatabase ( employee, project, time, date, details)
 
 /**
  * returns the time spent on the items inside.
@@ -58,8 +58,8 @@ fun getResourceAsText(path: String): String {
  *
  * See https://github.com/Kotlin/kotlinx.serialization
  */
-val jsonSerialzation : Json = Json(JsonConfiguration.Stable)
-val jsonSerialzationWithPrettyPrint : Json = Json(JsonConfiguration.Stable.copy(prettyPrint = true))
+val jsonSerialzation : Json = Json{allowStructuredMapKeys = true}
+val jsonSerialzationWithPrettyPrint : Json = Json{prettyPrint = true; allowStructuredMapKeys = true}
 
 /**
  * A test helper method to generate a [TimeRecordingUtilities]

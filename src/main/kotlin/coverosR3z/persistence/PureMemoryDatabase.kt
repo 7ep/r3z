@@ -1,7 +1,7 @@
 package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
-import coverosR3z.exceptions.UserNotRegisteredException
+import coverosR3z.exceptions.EmployeeNotRegisteredException
 import kotlinx.serialization.Serializable
 
 /**
@@ -13,20 +13,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PureMemoryDatabase {
 
+    private val employees : MutableSet<Employee> = mutableSetOf()
     private val users : MutableSet<User> = mutableSetOf()
     private val projects : MutableSet<Project> = mutableSetOf()
-    private val timeEntries : MutableMap<User, MutableSet<TimeEntry>> = mutableMapOf()
+    private val timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf()
 
     fun addTimeEntry(timeEntry : TimeEntryPreDatabase) {
-        var userTimeEntries = timeEntries[timeEntry.user]
-        if (userTimeEntries == null) {
-            userTimeEntries = mutableSetOf()
-            timeEntries[timeEntry.user] = userTimeEntries
+        var employeeTimeEntries = timeEntries[timeEntry.employee]
+        if (employeeTimeEntries == null) {
+            employeeTimeEntries = mutableSetOf()
+            timeEntries[timeEntry.employee] = employeeTimeEntries
         }
-        val newIndex = userTimeEntries.size + 1
-        userTimeEntries.add(TimeEntry(
+        val newIndex = employeeTimeEntries.size + 1
+        employeeTimeEntries.add(TimeEntry(
                 newIndex,
-                timeEntry.user,
+                timeEntry.employee,
                 timeEntry.project,
                 timeEntry.time,
                 timeEntry.date,
@@ -39,36 +40,46 @@ class PureMemoryDatabase {
         return newIndex
     }
 
-    fun addNewUser(username: UserName) : Int {
+    fun addNewEmployee(employeename: EmployeeName) : Int {
+        val newIndex = employees.size + 1
+        employees.add(Employee(newIndex, employeename.value))
+        return newIndex
+    }
+
+    fun addNewUser(userName: UserName, hash: Hash, salt: String) : Int {
         val newIndex = users.size + 1
-        users.add(User(newIndex, username.value))
+        users.add(User(newIndex, userName.value, hash, salt))
         return newIndex
     }
 
     /**
-     * gets the number of minutes a particular [User] has worked
+     * gets the number of minutes a particular [Employee] has worked
      * on a certain date.
      *
-     * @throws [UserNotRegisteredException] if the user isn't known.
+     * @throws [EmployeeNotRegisteredException] if the employee isn't known.
      */
-    fun getMinutesRecordedOnDate(user: User, date: Date): Int {
-        val userTimeEntries = timeEntries[user]
-                ?: if (!users.contains(user)) {
-                    throw UserNotRegisteredException()
+    fun getMinutesRecordedOnDate(employee: Employee, date: Date): Int {
+        val employeeTimeEntries = timeEntries[employee]
+                ?: if (!employees.contains(employee)) {
+                    throw EmployeeNotRegisteredException()
                 } else {
                     return 0
                 }
-        return userTimeEntries
-                .filter { te -> te.user.id == user.id && te.date == date }
+        return employeeTimeEntries
+                .filter { te -> te.employee.id == employee.id && te.date == date }
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
-    fun getAllTimeEntriesForUser(user: User): List<TimeEntry> {
-        return timeEntries[user]!!.filter{te -> te.user.id == user.id}
+    fun getAllTimeEntriesForEmployee(employee: Employee): List<TimeEntry> {
+        return timeEntries[employee]!!.filter{ te -> te.employee.id == employee.id}
     }
 
-    fun getAllTimeEntriesForUserOnDate(user: User, date: Date): List<TimeEntry> {
-        return timeEntries[user]!!.filter{te -> te.user.id == user.id && te.date == date}
+    fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
+        return timeEntries[employee]!!.filter{ te -> te.employee.id == employee.id && te.date == date}
+    }
+
+    fun getUserByName(name: UserName) : User? {
+        return users.singleOrNull { u -> u.name == name.value }
     }
 
     fun getProjectById(id: Int) : Project? {
@@ -76,16 +87,16 @@ class PureMemoryDatabase {
         return projects.singleOrNull { p -> p.id == id }
     }
 
-    fun getUserById(id: Int): User? {
+    fun getEmployeeById(id: Int): Employee? {
         assert(id > 0)
-        return users.singleOrNull {u -> u.id == id}
+        return employees.singleOrNull { u -> u.id == id}
     }
 
-    fun getAllUsers() : List<User>? {
-        return users.toList()
+    fun getAllEmployees() : List<Employee> {
+        return employees.toList()
     }
 
-    fun getAllProjects(): List<Project>? {
+    fun getAllProjects(): List<Project> {
         return projects.toList()
     }
 
@@ -95,7 +106,7 @@ class PureMemoryDatabase {
 
         other as PureMemoryDatabase
 
-        if (users != other.users) return false
+        if (employees != other.employees) return false
         if (projects != other.projects) return false
         if (timeEntries != other.timeEntries) return false
 
@@ -103,7 +114,7 @@ class PureMemoryDatabase {
     }
 
     override fun hashCode(): Int {
-        var result = users.hashCode()
+        var result = employees.hashCode()
         result = 31 * result + projects.hashCode()
         result = 31 * result + timeEntries.hashCode()
         return result
