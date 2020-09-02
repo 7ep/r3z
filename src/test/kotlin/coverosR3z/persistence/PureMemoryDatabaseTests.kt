@@ -29,7 +29,7 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun `should be able to add a new employee`() {
-        pmd.addNewEmployee(DEFAULT_EMPLOYEENAME)
+        pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
 
         val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id)
 

@@ -1,5 +1,6 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.exceptions.EmployeeNotRegisteredException
@@ -10,6 +11,11 @@ import coverosR3z.persistence.EmployeeIntegrityViolationException
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
+        val user = CurrentUser.get()
+        // compare logged in user with user whose time is being entred, if no match, return error//
+        if (user!!.employeeId != entry.employee.id) {
+            return RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH)
+        }
         logInfo("Starting to record time for $entry")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         try {

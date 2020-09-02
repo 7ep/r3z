@@ -75,7 +75,7 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun `if a employee has not worked on a given day, we return 0 as their minutes worked that day`() {
-        val newEmployee: Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEENAME)
+        val newEmployee: Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val minutesWorked = tep.queryMinutesRecorded(employee=newEmployee, date= A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals("should be 0 since they didn't work that day", 0, minutesWorked)

@@ -58,7 +58,7 @@ class SeeTimeEntriesBDD {
         val project1: Project = tru.createProject(ProjectName("project 1"))
         val project2: Project = tru.createProject(ProjectName("project 2"))
         val project3: Project = tru.createProject(ProjectName("project 3"))
-        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEENAME)
+        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
         val entries : List<TimeEntryPreDatabase> = listOf(
             createTimeEntryPreDatabase(
