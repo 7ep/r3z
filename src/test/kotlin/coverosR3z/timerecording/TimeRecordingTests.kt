@@ -89,11 +89,11 @@ class TimeRecordingTests {
      * interrelated data
      */
     @Test
-    fun `make time entry`() {
+    fun `creating a time entry should record its details`() {
         val timeEntry = createTimeEntryPreDatabase(date = A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(Employee(1, "I"), timeEntry.employee)
-        assertEquals(Time(60), timeEntry.time)
-        assertEquals(Project(1, "A"), timeEntry.project)
+        assertEquals(DEFAULT_EMPLOYEE, timeEntry.employee)
+        assertEquals(DEFAULT_TIME, timeEntry.time)
+        assertEquals(DEFAULT_PROJECT, timeEntry.project)
         assertEquals(Details(), timeEntry.details)
     }
 

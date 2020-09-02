@@ -22,7 +22,7 @@ data class UserName(val value: String){
 }
 
 @Serializable
-data class User(val id: Int, val name: String, val hash: Hash, val salt: String) {
+data class User(val id: Int, val name: String, val hash: Hash, val salt: String, val employeeId: Int?) {
 
     init {
         assert(name.isNotBlank()) {nameCannotBeEmptyMsg}

@@ -1,11 +1,17 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.LoginStatuses as ls
+import coverosR3z.*
+import coverosR3z.domainobjects.RecordTimeResult
 import coverosR3z.domainobjects.RegistrationResult
+import coverosR3z.domainobjects.StatusEnum
+import coverosR3z.domainobjects.UserName
 import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.timerecording.TimeEntryPersistence
+import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import coverosR3z.domainobjects.LoginStatuses as ls
 
 /**
  *
@@ -30,9 +36,14 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        // given I am logged in as user_a
-        // when I try to add a time-entry for user b
+        val tru = `given I am logged in as jenna`()
+
+        // when I try to add a time-entry for "not_jenna"
+        val entry = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE)
+        val result = tru.recordTime(entry)
+
         // then the system disallows it
+        assertEquals(RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH), result)
     }
 
     @Test
@@ -65,21 +76,23 @@ class AuthenticationBDD {
     @Test
     fun `I should be able to log in once I'm a registered employee`() {
         // given I have registered
+        CurrentUser.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
         au.register("matt", "asdfoiajwefowejf")
 
         // when I enter valid credentials
-        val (status, _) = au.login("matt", "asdfoiajwefowejf")
+        au.login("matt", "asdfoiajwefowejf")
 
         // then the system knows who I am
-//        assertEquals("SUCCESS", status)
-        // TODO
+        val user = authPersistence.getUser(UserName("matt"))
+        assertEquals(user, CurrentUser.get())
     }
 
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
         // given I have registered using "usera" and "password123"
+        CurrentUser.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
         val regStatus = au.register("usera", "password1234")
@@ -103,5 +116,26 @@ class AuthenticationBDD {
 
         // then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
+    }
+
+
+    private fun `given I am logged in as jenna`(): TimeRecordingUtilities {
+        // clearing the current user
+        CurrentUser.clearCurrentUserTestOnly()
+
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+
+        // registering a new user and logging in with them
+        val username = "jenna"
+        val password = "password12345"
+        au.register(username, password)
+        au.login(username, password)
+
+        // preparing so we can enter time with this employee and project
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()))
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        return tru
     }
 }

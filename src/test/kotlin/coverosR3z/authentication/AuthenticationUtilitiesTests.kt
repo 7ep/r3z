@@ -150,11 +150,12 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
+        CurrentUser.clearCurrentUserTestOnly()
 
         val salt = Hash.getSalt()
         val wellSeasoned = "password123$salt"
         val fap = FakeAuthPersistence(
-                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt) }
+                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "password123")
@@ -170,7 +171,7 @@ class AuthenticationUtilitiesTests {
         val salt = Hash.getSalt()
         val wellSeasoned = "password123$salt"
         val fap = FakeAuthPersistence(
-                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt) }
+                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "wrong")
@@ -189,6 +190,40 @@ class AuthenticationUtilitiesTests {
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "arbitrary")
         assertEquals(NOT_REGISTERED, status)
+    }
+
+    /**
+     * Here, we want to obtain the universally-accessible
+     * information of who is running commands.  The current user.
+     */
+    @Test
+    fun `should be able to get the current user`() {
+        CurrentUser.clearCurrentUserTestOnly()
+        val user = User(1, "matt", Hash.createHash(""), "", null)
+        CurrentUser.set(user)
+
+        val currentUser = CurrentUser.get()
+
+        assertEquals(user, currentUser)
+    }
+
+    @Test
+    fun `should store who the user is during login process`() {
+        CurrentUser.clearCurrentUserTestOnly()
+
+        val username = "mitch"
+        val password = "password12345"
+        val userId = 1
+        val salt = "abc123"
+        val user = User(userId, username, Hash.createHash("$password$salt"), salt, null)
+        val fap = FakeAuthPersistence(
+                getUserBehavior= { user }
+        )
+        val au = AuthenticationUtilities(fap)
+
+        val (result, _) = au.login(username, password)
+
+        assertEquals(user, CurrentUser.get())
     }
 
 }

@@ -1,9 +1,9 @@
 package coverosR3z.timerecording
 
 import coverosR3z.*
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.logging.logInfo
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -57,6 +57,7 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
+
     private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntryPreDatabase> {
         val expectedStatus = RecordTimeResult(null, StatusEnum.SUCCESS)
         val tru = createTimeRecordingUtility()
@@ -69,7 +70,7 @@ class EnteringTimeBDD {
     private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(DEFAULT_PROJECT_NAME)
-        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEENAME)
+        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val entry = createTimeEntryPreDatabase(
                 employee = newEmployee,
                 project = newProject,
@@ -81,6 +82,8 @@ class EnteringTimeBDD {
     }
 
     private fun `given the employee has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, Employee> {
+        CurrentUser.clearCurrentUserTestOnly()
+        CurrentUser.set(User(1, "Zim", Hash.createHash(""), "", 1))
         val tru = createTimeRecordingUtility()
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newEmployee: Employee = tru.createEmployee(EmployeeName("B"))

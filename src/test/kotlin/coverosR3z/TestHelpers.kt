@@ -14,11 +14,11 @@ import kotlinx.serialization.json.JsonConfiguration
 val A_RANDOM_DAY_IN_JUNE_2020 = Date(2020, Month.JUN, 25)
 val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
-val DEFAULT_EMPLOYEE = Employee(1, "I")
-val DEFAULT_EMPLOYEENAME = EmployeeName("I")
+val DEFAULT_EMPLOYEE = Employee(1, "DefaultEmployee")
+val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
 val DEFAULT_TIME = Time(60)
-val DEFAULT_PROJECT = Project(1, "A")
-val DEFAULT_PROJECT_NAME = ProjectName("A")
+val DEFAULT_PROJECT = Project(1, "Default_Project")
+val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 
 fun createTimeEntryPreDatabase(
         employee: Employee = DEFAULT_EMPLOYEE,

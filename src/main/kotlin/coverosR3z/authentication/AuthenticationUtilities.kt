@@ -47,10 +47,11 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
         if(u != null){
             val hashedSaltedPassword : Hash = Hash.createHash(password + u.salt)
             if(u.hash == hashedSaltedPassword){
+                CurrentUser.set(u)
                 return LoginResult(SUCCESS, u)
             }
             return LoginResult(FAILURE, u)
         }
-        return LoginResult(NOT_REGISTERED, User(1, user, Hash.createHash(password), "a"))
+        return LoginResult(NOT_REGISTERED, User(1, user, Hash.createHash(password), "", null))
     }
 }
