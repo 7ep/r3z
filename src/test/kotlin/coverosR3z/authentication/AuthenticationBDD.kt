@@ -1,5 +1,6 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.LoginStatuses as ls
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.assertEquals
@@ -79,16 +80,28 @@ class AuthenticationBDD {
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
         // given I have registered using "usera" and "password123"
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+        val regStatus = au.register("usera", "password1234")
+        assertEquals(RegistrationResult.SUCCESS, regStatus)
+
         // when I login with "usera" and "not_right_password"
+        val status = au.login("usera", "not_right_password").status
+
         // then the system denies me access
+        assertEquals(ls.FAILURE, status)
     }
 
     @Test
     fun `if I enter an invalid password while registering, it will disallow it`() {
         // given I am unregistered
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+
         // when I register with "usera" and "short" as password
+        val regStatus = au.register("usera", "password123")
+
         // then the system denies the registration on the basis of a bad password
+        assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
     }
-
-
 }

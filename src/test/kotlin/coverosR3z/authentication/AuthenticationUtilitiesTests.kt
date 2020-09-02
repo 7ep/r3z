@@ -1,11 +1,7 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.RegistrationResult
-import coverosR3z.domainobjects.User
-import coverosR3z.domainobjects.UserName
-import coverosR3z.persistence.ProjectIntegrityViolationException
-import coverosR3z.timerecording.FakeTimeEntryPersistence
+import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.LoginStatuses.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -162,7 +158,7 @@ class AuthenticationUtilitiesTests {
         )
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "password123")
-        assertEquals("SUCCESS", status)
+        assertEquals(SUCCESS, status)
     }
 
     /**
@@ -178,7 +174,7 @@ class AuthenticationUtilitiesTests {
         )
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "wrong")
-        assertEquals("FAILURE", status)
+        assertEquals(FAILURE, status)
     }
 
 
@@ -192,7 +188,7 @@ class AuthenticationUtilitiesTests {
         )
         val au = AuthenticationUtilities(fap)
         val (status, _) = au.login("matt", "arbitrary")
-        assertEquals("NOT_REGISTERED", status)
+        assertEquals(NOT_REGISTERED, status)
     }
 
 }
