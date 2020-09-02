@@ -4,6 +4,8 @@ import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
+import coverosR3z.domainobjects.LoginResult
+import coverosR3z.domainobjects.LoginStatuses.*
 
 
 class AuthenticationUtilities(val ap : IAuthPersistence){
@@ -39,19 +41,16 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
         return ap.isUserRegistered(UserName(username))
     }
 
-    data class LoginResult(val status: String, val user: User)
 
     fun login(user: String, password: String): LoginResult {
         val u : User? = ap.getUser(UserName(user))
         if(u != null){
             val hashedSaltedPassword : Hash = Hash.createHash(password + u.salt)
             if(u.hash == hashedSaltedPassword){
-                return LoginResult("SUCCESS", u)
+                return LoginResult(SUCCESS, u)
             }
-            //return LoginResult("FAILURE", u)
+            return LoginResult(FAILURE, u)
         }
-
-        return LoginResult("FAILURE", User(1, user, Hash.createHash(password), "a"))
+        return LoginResult(NOT_REGISTERED, User(1, user, Hash.createHash(password), "a"))
     }
-
 }
