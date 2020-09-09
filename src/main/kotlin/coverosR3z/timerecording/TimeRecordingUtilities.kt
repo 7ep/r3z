@@ -7,13 +7,15 @@ import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.EmployeeIntegrityViolationException
+import java.lang.AssertionError
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        val user = CurrentUser.get()
-        // compare logged in user with user whose time is being entred, if no match, return error//
-        if (user!!.employeeId != entry.employee.id) {
+        val user = CurrentUser.get() ?: throw AssertionError("Cannot record time when no user is logged in, you mangy cur")
+
+        // ensure time entry user is the logged in user
+        if (user.employeeId != entry.employee.id) {
             return RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
         logInfo("Starting to record time for $entry")

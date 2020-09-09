@@ -1,7 +1,10 @@
 package coverosR3z.authentication
 
+import coverosR3z.createTimeEntryPreDatabase
 import coverosR3z.domainobjects.*
 import coverosR3z.domainobjects.LoginStatuses.*
+import coverosR3z.timerecording.FakeTimeEntryPersistence
+import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -221,9 +224,18 @@ class AuthenticationUtilitiesTests {
         )
         val au = AuthenticationUtilities(fap)
 
-        val (result, _) = au.login(username, password)
+        au.login(username, password)
 
         assertEquals(user, CurrentUser.get())
+    }
+
+    @Test
+    fun `When no user is logged in, time entry should throw an exception`() {
+        CurrentUser.clearCurrentUserTestOnly()
+
+        val trt = TimeRecordingUtilities(FakeTimeEntryPersistence())
+
+        assertThrows(AssertionError::class.java) {trt.recordTime(createTimeEntryPreDatabase())}
     }
 
 }
