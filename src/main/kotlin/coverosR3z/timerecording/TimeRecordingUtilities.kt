@@ -1,18 +1,18 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.CurrentUser
+import coverosR3z.authentication.CurrentUserAccessor
+import coverosR3z.authentication.CurrentUserAccessorImpl
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.EmployeeIntegrityViolationException
-import java.lang.AssertionError
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : CurrentUserAccessor = CurrentUserAccessorImpl()) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        val user = CurrentUser.get() ?: throw AssertionError("Cannot record time when no user is logged in, you mangy cur")
+        val user = cua.getCurrentUser()
 
         // ensure time entry user is the logged in user
         if (user.employeeId != entry.employee.id) {
