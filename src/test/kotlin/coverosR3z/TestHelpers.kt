@@ -5,7 +5,6 @@ import coverosR3z.timerecording.ITimeEntryPersistence
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -14,6 +13,9 @@ import kotlinx.serialization.json.JsonConfiguration
 val A_RANDOM_DAY_IN_JUNE_2020 = Date(2020, Month.JUN, 25)
 val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
+val DEFAULT_SALT = "12345"
+val DEFAULT_PASSWORD = "password123"
+val DEFAULT_USER = User(1, "DefaultUser", Hash.createHash(DEFAULT_PASSWORD + DEFAULT_SALT), DEFAULT_SALT, 1)
 val DEFAULT_EMPLOYEE = Employee(1, "DefaultEmployee")
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
 val DEFAULT_TIME = Time(60)
