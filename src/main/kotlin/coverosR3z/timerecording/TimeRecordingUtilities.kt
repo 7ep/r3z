@@ -1,7 +1,7 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.ICurrentUserAccessor
 import coverosR3z.authentication.CurrentUserAccessor
-import coverosR3z.authentication.CurrentUserAccessorImpl
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.exceptions.EmployeeNotRegisteredException
@@ -9,10 +9,10 @@ import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.EmployeeIntegrityViolationException
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : CurrentUserAccessor = CurrentUserAccessorImpl()) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        val user = cua.getCurrentUser()
+        val user = cua.get()
 
         // ensure time entry user is the logged in user
         if (user.employeeId != entry.employee.id) {

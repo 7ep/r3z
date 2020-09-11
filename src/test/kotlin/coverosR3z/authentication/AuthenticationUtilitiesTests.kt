@@ -153,14 +153,12 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        CurrentUser.clearCurrentUserTestOnly()
-
         val salt = Hash.getSalt()
         val wellSeasoned = "password123$salt"
         val fap = FakeAuthPersistence(
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
-        val au = AuthenticationUtilities(fap)
+        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
         val (status, _) = au.login("matt", "password123")
         assertEquals(SUCCESS, status)
     }
@@ -201,18 +199,20 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should be able to get the current user`() {
-        CurrentUser.clearCurrentUserTestOnly()
+        val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         val user = User(1, "matt", Hash.createHash(""), "", null)
-        CurrentUser.set(user)
+        cua.set(user)
 
-        val currentUser = CurrentUser.get()
+        val currentUser = cua.get()
 
         assertEquals(user, currentUser)
     }
 
     @Test
     fun `should store who the user is during login process`() {
-        CurrentUser.clearCurrentUserTestOnly()
+        val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
 
         val username = "mitch"
         val password = "password12345"
@@ -222,18 +222,19 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { user }
         )
-        val au = AuthenticationUtilities(fap)
+        val au = AuthenticationUtilities(fap, cua)
 
         au.login(username, password)
 
-        assertEquals(user, CurrentUser.get())
+        assertEquals(user, cua.get())
     }
 
     @Test
     fun `When no user is logged in, time entry should throw an exception`() {
-        CurrentUser.clearCurrentUserTestOnly()
+        val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
 
-        val trt = TimeRecordingUtilities(FakeTimeEntryPersistence())
+        val trt = TimeRecordingUtilities(FakeTimeEntryPersistence(), cua)
 
         assertThrows(AssertionError::class.java) {trt.recordTime(createTimeEntryPreDatabase())}
     }

@@ -1,9 +1,10 @@
 package coverosR3z.timerecording
 
 import coverosR3z.*
-import coverosR3z.authentication.CurrentUser
+import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -17,6 +18,8 @@ import org.junit.Test
  *      So that I am easily able to document my time in an organized way
  */
 class EnteringTimeBDD {
+
+    val cua = CurrentUserAccessor()
 
     /**
      * Just a happy path for entering a time entry
@@ -82,9 +85,10 @@ class EnteringTimeBDD {
     }
 
     private fun `given the employee has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, Employee> {
-        CurrentUser.clearCurrentUserTestOnly()
-        CurrentUser.set(User(1, "Zim", Hash.createHash(""), "", 1))
-        val tru = createTimeRecordingUtility()
+        cua.clearCurrentUserTestOnly()
+        cua.set(User(1, "Zim", Hash.createHash(""), "", 1))
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
+        val tru = TimeRecordingUtilities(timeEntryPersistence, cua)
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newEmployee: Employee = tru.createEmployee(EmployeeName("B"))
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))
