@@ -16,20 +16,20 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
 
         // ensure time entry user is the logged in user
         if (user.employeeId != entry.employee.id) {
-            return RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH)
+            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
         logInfo("Starting to record time for $entry")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         try {
             persistence.persistNewTimeEntry(entry)
             logInfo("recorded time sucessfully")
-            return RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
+            return RecordTimeResult(StatusEnum.SUCCESS)
         } catch (ex : ProjectIntegrityViolationException) {
             logInfo("time was not recorded successfully: project id did not match a valid project")
-            return RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
+            return RecordTimeResult(StatusEnum.INVALID_PROJECT)
         } catch (ex : EmployeeIntegrityViolationException) {
             logInfo("time was not recorded successfully: employee id did not match a valid employee")
-            return RecordTimeResult(id = null, status = StatusEnum.INVALID_EMPLOYEE)
+            return RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
         }
     }
 

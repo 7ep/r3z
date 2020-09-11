@@ -1,10 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.*
-import coverosR3z.domainobjects.RecordTimeResult
-import coverosR3z.domainobjects.RegistrationResult
-import coverosR3z.domainobjects.StatusEnum
-import coverosR3z.domainobjects.UserName
+import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
@@ -30,8 +27,30 @@ class AuthenticationBDD {
     @Test
     fun `I can add a time entry`() {
         // given I am logged in
+        val pmd = PureMemoryDatabase()
+        val cua = CurrentUserAccessor() // We need a real cua for this test, sharing a pmd with auth persistence
+        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        cua.clearCurrentUserTestOnly()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val username = "matt"
+        val password = "asdfoiajwefowejf"
+        tru.createEmployee(EmployeeName(username))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        au.register(username, password)
+        au.login(username, password)
+        val user = authPersistence.getUser(UserName(username))
+        assertEquals(user, cua.get()) // auth persistence and user persistence must agree
+        assertTrue("our user should be registered", au.isUserRegistered(username)) // registration must succeed
+
         // when I add a time entry
+        val id = cua.get().employeeId ?: 1 // we should use the actual id of the employee in the following TimeEntry
+        val entry = createTimeEntryPreDatabase(employee = Employee(id, username))
+        val result = tru.recordTime(entry)
+
         // then it proceeds successfully
+        assertEquals(RecordTimeResult(StatusEnum.SUCCESS), result)
     }
 
     @Test
@@ -39,11 +58,12 @@ class AuthenticationBDD {
         val tru = `given I am logged in as jenna`()
 
         // when I try to add a time-entry for "not_jenna"
-        val entry = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE)
+        val entry = createTimeEntryPreDatabase(Employee(2, "not_jenna")) // id=1 will belong to jenna, and
+            // RecordTimeResult only compares for mismatch by id
         val result = tru.recordTime(entry)
 
         // then the system disallows it
-        assertEquals(RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH), result)
+        assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH), result)
     }
 
     @Test
