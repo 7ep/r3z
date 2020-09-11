@@ -5,6 +5,7 @@ import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.User
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Ignore
 import org.junit.Test
 
 class CurrentUserAccessorTests {
@@ -14,12 +15,14 @@ class CurrentUserAccessorTests {
     @Test
     fun `we should get an exception if we try to get the user when the user has not been set`() {
         val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         assertThrows(AssertionError::class.java){cua.get()}
     }
 
     @Test
-    fun `happy path - should successfully set the user`() {
+    fun `happy path - should successfully set and get the user`() {
         val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         cua.set(DEFAULT_USER)
         assertEquals(DEFAULT_USER, cua.get())
     }
@@ -27,17 +30,31 @@ class CurrentUserAccessorTests {
     @Test
     fun `test should throw exception if user is already set`() {
         val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         cua.set(DEFAULT_USER)
         assertThrows(AssertionError::class.java) {cua.set(NOT_DEFAULT_USER)}
     }
 
     @Test
-    fun foo() {
+    fun `test that two different instances of a class access the same singleton object`() {
         val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         cua.set(DEFAULT_USER)
         val cua2 = CurrentUserAccessor()
-        assertThrows(AssertionError::class.java) {cua2.set(NOT_DEFAULT_USER)}
+        assertEquals(DEFAULT_USER, cua2.get())
+    }
 
+    /**
+     * This is to show that if we don't intentionally clear the value
+     * of the CurrentUser object (a singleton), it will carry over to
+     * other tests.  You will need to run clearCurrentUserTestOnly in
+     * order to get it cleared for a test.
+     */
+    @Test
+    @Ignore("This was just to check that previous tests will impact this test.  This is here for historical purposes")
+    fun `test that setting a value in a previous test will carry over to this test`() {
+        val cua = CurrentUserAccessor()
+        assertEquals(DEFAULT_USER, cua.get())
     }
 
 }
