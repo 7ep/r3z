@@ -36,8 +36,7 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        val cua = CurrentUserAccessor()
-        val tru = `given I am logged in as jenna`(cua)
+        val tru = `given I am logged in as jenna`()
 
         // when I try to add a time-entry for "not_jenna"
         val entry = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE)
@@ -120,12 +119,11 @@ class AuthenticationBDD {
     }
 
 
-    private fun `given I am logged in as jenna`(cua : ICurrentUserAccessor): TimeRecordingUtilities {
-        // clearing the current user
+    private fun `given I am logged in as jenna`(): TimeRecordingUtilities {
+        val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
-
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence, cua)
+        val au = AuthenticationUtilities(authPersistence)
 
         // registering a new user and logging in with them
         val username = "jenna"
