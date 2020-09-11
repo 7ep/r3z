@@ -36,7 +36,8 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        val tru = `given I am logged in as jenna`()
+        val cua = CurrentUserAccessor()
+        val tru = `given I am logged in as jenna`(cua)
 
         // when I try to add a time-entry for "not_jenna"
         val entry = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE)
@@ -76,7 +77,8 @@ class AuthenticationBDD {
     @Test
     fun `I should be able to log in once I'm a registered employee`() {
         // given I have registered
-        CurrentUser.clearCurrentUserTestOnly()
+        val cua = CurrentUserAccessor()
+        cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
         au.register("matt", "asdfoiajwefowejf")
@@ -86,15 +88,14 @@ class AuthenticationBDD {
 
         // then the system knows who I am
         val user = authPersistence.getUser(UserName("matt"))
-        assertEquals(user, CurrentUser.get())
+        assertEquals(user, cua.get())
     }
 
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
         // given I have registered using "usera" and "password123"
-        CurrentUser.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, FakeCurrentUserAccessor())
         val regStatus = au.register("usera", "password1234")
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
@@ -119,12 +120,12 @@ class AuthenticationBDD {
     }
 
 
-    private fun `given I am logged in as jenna`(): TimeRecordingUtilities {
+    private fun `given I am logged in as jenna`(cua : ICurrentUserAccessor): TimeRecordingUtilities {
         // clearing the current user
-        CurrentUser.clearCurrentUserTestOnly()
+        cua.clearCurrentUserTestOnly()
 
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, cua)
 
         // registering a new user and logging in with them
         val username = "jenna"

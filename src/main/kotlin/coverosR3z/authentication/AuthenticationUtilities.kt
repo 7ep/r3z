@@ -8,7 +8,7 @@ import coverosR3z.domainobjects.LoginResult
 import coverosR3z.domainobjects.LoginStatuses.*
 
 
-class AuthenticationUtilities(val ap : IAuthPersistence){
+class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()){
 
     val blacklistedPasswords : List<String> = listOf<String>("password")
 
@@ -47,7 +47,7 @@ class AuthenticationUtilities(val ap : IAuthPersistence){
         if(u != null){
             val hashedSaltedPassword : Hash = Hash.createHash(password + u.salt)
             if(u.hash == hashedSaltedPassword){
-                CurrentUser.set(u)
+                cua.set(u)
                 return LoginResult(SUCCESS, u)
             }
             return LoginResult(FAILURE, u)

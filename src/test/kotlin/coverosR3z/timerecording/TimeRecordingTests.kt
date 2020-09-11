@@ -2,7 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
-import coverosR3z.authentication.FakeCurrentUserAccessorImpl
+import coverosR3z.authentication.FakeCurrentUserAccessor
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import org.junit.Assert.*
@@ -55,7 +55,7 @@ class TimeRecordingTests {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyFourHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, cua = FakeCurrentUserAccessorImpl())
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, cua = FakeCurrentUserAccessor())
         val entry = createTimeEntryPreDatabase(time= Time(1), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
