@@ -15,4 +15,4 @@ enum class StatusEnum {
  * This data holds the information that is relevant
  * to us after storing a time entry.
  */
-data class RecordTimeResult(val id: Long?, val status: StatusEnum = StatusEnum.NULL)
+data class RecordTimeResult(val status: StatusEnum = StatusEnum.NULL)

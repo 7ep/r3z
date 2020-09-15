@@ -12,24 +12,26 @@ import coverosR3z.persistence.EmployeeIntegrityViolationException
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        val user = cua.get()
-
+        val user = cua.get()?: throw AssertionError("Cannot record time when no user is logged in."  +
+                                        "Please be aware: if this occurred during a test, it is possible" +
+                                        "that it is due to parallel tests conflicting with each other.  In that" +
+                                        "case, now is the time to strongly consider having tests that use this run serially")
         // ensure time entry user is the logged in user
         if (user.employeeId != entry.employee.id) {
-            return RecordTimeResult(id = null, status = StatusEnum.USER_EMPLOYEE_MISMATCH)
+            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
         logInfo("Starting to record time for $entry")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         try {
             persistence.persistNewTimeEntry(entry)
             logInfo("recorded time sucessfully")
-            return RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
+            return RecordTimeResult(StatusEnum.SUCCESS)
         } catch (ex : ProjectIntegrityViolationException) {
             logInfo("time was not recorded successfully: project id did not match a valid project")
-            return RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
+            return RecordTimeResult(StatusEnum.INVALID_PROJECT)
         } catch (ex : EmployeeIntegrityViolationException) {
             logInfo("time was not recorded successfully: employee id did not match a valid employee")
-            return RecordTimeResult(id = null, status = StatusEnum.INVALID_EMPLOYEE)
+            return RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
         }
     }
 

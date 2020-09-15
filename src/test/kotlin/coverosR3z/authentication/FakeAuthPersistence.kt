@@ -10,7 +10,7 @@ class FakeAuthPersistence(
         var getUserBehavior: () -> User? = {null}
 ) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: String) {
+    override fun createUser(name: UserName, hash: Hash, salt: String, employeeId: Int?) {
         createUserBehavior()
     }
 

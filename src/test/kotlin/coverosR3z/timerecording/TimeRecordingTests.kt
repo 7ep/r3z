@@ -16,9 +16,10 @@ class TimeRecordingTests {
     @Test
     fun `record time for someone`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60)
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
+        val cua = FakeCurrentUserAccessor()
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, cua)
         val entry = createTimeEntryPreDatabase()
-        val expectedResult = RecordTimeResult(id = null, status = StatusEnum.SUCCESS)
+        val expectedResult = RecordTimeResult(status = StatusEnum.SUCCESS)
 
         val actualResult = utils.recordTime(entry)
 
@@ -35,9 +36,10 @@ class TimeRecordingTests {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = 60,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
+        val cua = FakeCurrentUserAccessor()
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, cua)
         val entry = createTimeEntryPreDatabase(project= Project(1, "an invalid project"))
-        val expectedResult = RecordTimeResult(id = null, status = StatusEnum.INVALID_PROJECT)
+        val expectedResult = RecordTimeResult(StatusEnum.INVALID_PROJECT)
 
         val actualResult = utils.recordTime(entry)
 
@@ -72,7 +74,7 @@ class TimeRecordingTests {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyThreeHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, cua=FakeCurrentUserAccessor())
         val entry = createTimeEntryPreDatabase(time= Time(60 * 2), project= Project(1, "an invalid project"))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }

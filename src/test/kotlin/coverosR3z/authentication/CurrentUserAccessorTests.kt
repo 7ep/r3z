@@ -3,8 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.User
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
 
@@ -13,10 +12,11 @@ class CurrentUserAccessorTests {
     val NOT_DEFAULT_USER = User(123, "Mitch", Hash.createHash(""), "", null)
 
     @Test
-    fun `we should get an exception if we try to get the user when the user has not been set`() {
+    fun `we should get null if we try to get the user when the user has not been set`() {
         val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
-        assertThrows(AssertionError::class.java){cua.get()}
+        val user = cua.get()
+        assertNull(user)
     }
 
     @Test

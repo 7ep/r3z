@@ -6,12 +6,8 @@ import java.lang.AssertionError
 // TODO - keep an eye on this class.  Starting 9/11/2020, if you haven't seen problems with this class running in parallel tests, maybe we were overly unnecessarily concerned.
 class CurrentUserAccessor() : ICurrentUserAccessor {
 
-    override fun get(): User {
+    override fun get(): User? {
         return CurrentUser.get()
-                ?: throw AssertionError("Cannot record time when no user is logged in, you mangy cur" +
-                        "Please be aware: if this occurred during a test, it is possible " +
-                        "that it is due to parallel tests conflicting with each other.  In that " +
-                        "case, now is the time to strongly consider having tests that use this run serially")
     }
 
     override fun set(value : User) {

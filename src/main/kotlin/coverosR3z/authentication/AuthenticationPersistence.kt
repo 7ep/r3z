@@ -7,8 +7,8 @@ import coverosR3z.persistence.PureMemoryDatabase
 
 class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: String) {
-        pmd.addNewUser(name, hash, salt)
+    override fun createUser(name: UserName, hash: Hash, salt: String, employeeId: Int?) {
+        pmd.addNewUser(name, hash, salt, employeeId)
     }
 
     override fun isUserRegistered(name: UserName): Boolean {

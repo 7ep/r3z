@@ -22,7 +22,7 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun `It should not be possible to register a new user with an empty password`() {
-        val result = authUtils.register("matt", "")
+        val result = authUtils.register("matt", "", 12, )
 
         assertEquals("the result should clearly indicate an empty password", RegistrationResult.EMPTY_PASSWORD, result)
     }
@@ -39,7 +39,7 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(256)
         assert(password.length == 256)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.register("matt", password, 12, )
 
         assertEquals(RegistrationResult.PASSWORD_TOO_LONG, result)
     }
@@ -49,7 +49,7 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(255)
         assert(password.length == 255)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.register("matt", password, 12, )
 
         assertEquals(RegistrationResult.SUCCESS, result)
     }
@@ -62,7 +62,7 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(11)
         assert(password.length == 11)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.register("matt", password, 12, )
 
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, result)
     }
@@ -72,7 +72,7 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(12)
         assert(password.length == 12)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.register("matt", password, 12, )
 
         assertEquals(RegistrationResult.SUCCESS, result)
     }
@@ -81,7 +81,7 @@ class AuthenticationUtilitiesTests {
     fun `A password greater than 12 chars should pass`() {
         val password = "a".repeat(13)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.register("matt", password, 12, )
 
         assertEquals(RegistrationResult.SUCCESS, result)
     }
@@ -90,7 +90,7 @@ class AuthenticationUtilitiesTests {
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.register("matt", "just don't care")
+        val result = authUtils.register("matt", "just don't care", 12, )
 
         assertEquals(RegistrationResult.ALREADY_REGISTERED, result)
     }
