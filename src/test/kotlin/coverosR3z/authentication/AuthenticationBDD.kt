@@ -37,9 +37,6 @@ class AuthenticationBDD {
         // Perform some quick checks
         val user = authPersistence.getUser(UserName(DEFAULT_USER.name))
 
-        println("DEBUG")
-        println(cua.get())
-
         assertEquals(user, cua.get()) // auth persistence and user persistence must agree
         assertTrue("our user should be registered", au.isUserRegistered(DEFAULT_USER.name)) // registration must succeed
     }
