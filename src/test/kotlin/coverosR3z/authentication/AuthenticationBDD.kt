@@ -55,10 +55,15 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        val tru = `given I am logged in as jenna`()
+        `given I am logged in as jenna`()
+
+        // an employee that is not jenna needs to exist
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()))
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        tru.createProject(DEFAULT_PROJECT_NAME)
 
         // when I try to add a time-entry for "not_jenna"
-        val entry = createTimeEntryPreDatabase(Employee(2, "not_jenna")) // id=1 will belong to jenna, and
+        val entry = createTimeEntryPreDatabase(DEFAULT_EMPLOYEE) // id=1 will belong to jenna, and
             // RecordTimeResult only compares for mismatch by id
         val result = tru.recordTime(entry)
 
@@ -80,7 +85,7 @@ class AuthenticationBDD {
     }
 
     @Test
-    fun `I should not be able to register a employee if they are already registered`() {
+    fun `I should not be able to register a user if they are already registered`() {
         // given I am currently registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
@@ -94,7 +99,7 @@ class AuthenticationBDD {
     }
 
     @Test
-    fun `I should be able to log in once I'm a registered employee`() {
+    fun `I should be able to log in once I'm a registered user`() {
         // given I have registered
         val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
@@ -139,7 +144,7 @@ class AuthenticationBDD {
     }
 
 
-    private fun `given I am logged in as jenna`(): TimeRecordingUtilities {
+    private fun `given I am logged in as jenna`() {
         val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
@@ -150,11 +155,5 @@ class AuthenticationBDD {
         val password = "password12345"
         au.register(username, password)
         au.login(username, password)
-
-        // preparing so we can enter time with this employee and project
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()))
-        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        tru.createProject(DEFAULT_PROJECT_NAME)
-        return tru
     }
 }
