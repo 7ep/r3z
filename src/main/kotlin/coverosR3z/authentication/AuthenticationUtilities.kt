@@ -6,32 +6,46 @@ import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
 import coverosR3z.domainobjects.LoginResult
 import coverosR3z.domainobjects.LoginStatuses.*
+import coverosR3z.logging.logInfo
 
 
 class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()){
 
     val blacklistedPasswords : List<String> = listOf<String>("password")
 
-    fun register(username: String, password: String) : RegistrationResult {
+    /**
+     * Register a user through auth persistent, providing a username, password, and employeeId
+     */
+    fun register(username: String, password: String, employeeId: Int) : RegistrationResult {
         if (password.isEmpty()) {
-            return RegistrationResult.EMPTY_PASSWORD
+            val result = RegistrationResult.EMPTY_PASSWORD
+            logInfo("User registration failed, $result")
+            return result
         }
         if(password.length < 12) {
-            return RegistrationResult.PASSWORD_TOO_SHORT
+            val result = RegistrationResult.PASSWORD_TOO_SHORT
+            logInfo("User registration failed, $result")
+            return result
         }
         if (password.length > 255) {
-            return RegistrationResult.PASSWORD_TOO_LONG
+            val result = RegistrationResult.PASSWORD_TOO_LONG
+            logInfo("User registration failed, $result")
+            return result
         }
         if(blacklistedPasswords.contains(password)){
-            return RegistrationResult.BLACKLISTED_PASSWORD
+            val result = RegistrationResult.BLACKLISTED_PASSWORD
+            logInfo("User registration failed, $result")
+            return result
         }
-        if(ap.isUserRegistered(UserName(username))){
-            return RegistrationResult.ALREADY_REGISTERED
+        if(ap.isUserRegistered(UserName(username))) {
+            val result = RegistrationResult.ALREADY_REGISTERED
+            logInfo("User registration failed, $result")
+            return result
         }
 
         //past here we're assuming we've passed all of the registration checks, and we want to add the user to the database
         val salt = Hash.getSalt()
-        ap.createUser(UserName(username), Hash.createHash(password + salt), salt)
+        ap.createUser(UserName(username), Hash.createHash(password + salt), salt, employeeId)
         return RegistrationResult.SUCCESS
 
     }

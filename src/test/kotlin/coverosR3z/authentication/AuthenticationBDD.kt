@@ -26,34 +26,43 @@ class AuthenticationBDD {
      * can only modify Alice's stuff.
      */
 
-    fun `given I am logged in`() {
+    fun `given I am logged in`(pmd: PureMemoryDatabase) {
+        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
+        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, 1) // we know DEFAULT_EMPLOYEE has an id=1
+        au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
+        // Perform some quick checks
+        val user = authPersistence.getUser(UserName(DEFAULT_USER.name))
+
+        println("DEBUG")
+        println(cua.get())
+
+        assertEquals(user, cua.get()) // auth persistence and user persistence must agree
+        assertTrue("our user should be registered", au.isUserRegistered(DEFAULT_USER.name)) // registration must succeed
     }
     @Test
     fun `I can add a time entry`() {
         // given I am logged in
         val pmd = PureMemoryDatabase()
-        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
-        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
-        val username = "matt"
-        val password = "asdfoiajwefowejf"
-        tru.createEmployee(EmployeeName(username))
-        tru.createProject(DEFAULT_PROJECT_NAME)
-        au.register(username, password)
-        au.login(username, password)
-        val user = authPersistence.getUser(UserName(username))
-        assertEquals(user, cua.get()) // auth persistence and user persistence must agree
-        assertTrue("our user should be registered", au.isUserRegistered(username)) // registration must succeed
 
+        `given I am logged in`(pmd)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        tru.createEmployee(EmployeeName(DEFAULT_USER.name))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+
+        println("DEBUG")
+        println(cua.get())
         // when I add a time entry
-        val id = cua.get().employeeId ?: 1 // we should use the actual id of the employee in the following TimeEntry
-        val entry = createTimeEntryPreDatabase(employee = Employee(id, username))
+//        val id = cua.get().employeeId ?: 1 // we should use the actual id of the employee in the following TimeEntry
+        val entry = createTimeEntryPreDatabase(DEFAULT_EMPLOYEE)
         val result = tru.recordTime(entry)
 
         // then it proceeds successfully
+        // TODO: this is known to fail, because employeeId for the registered user is null
         assertEquals(RecordTimeResult(StatusEnum.SUCCESS), result)
     }
 
@@ -83,7 +92,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // when I register a new employee with employeename "matt" and password "asdfoiajwefowejf"
-        au.register("matt", "asdfoiajwefowejf")
+        au.register("matt", "asdfoiajwefowejf", 12, )
 
         // then the system records the registration successfully
         assertTrue("our user should be registered", au.isUserRegistered("matt"))
@@ -94,10 +103,10 @@ class AuthenticationBDD {
         // given I am currently registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf")
+        au.register("matt", "asdfoiajwefowejf", 12, )
 
         // when I register again with the same credentials
-        val result = au.register("matt", "asdfoiajwefowejf")
+        val result = au.register("matt", "asdfoiajwefowejf", 12, )
 
         // then the system records the registration successfully
         assertEquals("we shouldn't be allowed to register a user again", RegistrationResult.ALREADY_REGISTERED, result)
@@ -109,7 +118,7 @@ class AuthenticationBDD {
         cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf")
+        au.register("matt", "asdfoiajwefowejf", 12, )
 
         // when I enter valid credentials
         au.login("matt", "asdfoiajwefowejf")
@@ -124,7 +133,7 @@ class AuthenticationBDD {
         // given I have registered using "usera" and "password123"
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence, FakeCurrentUserAccessor())
-        val regStatus = au.register("usera", "password1234")
+        val regStatus = au.register("usera", "password1234", 12, )
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // when I login with "usera" and "not_right_password"
@@ -141,7 +150,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // when I register with "usera" and "short" as password
-        val regStatus = au.register("usera", "password123")
+        val regStatus = au.register("usera", "password123", 12, )
 
         // then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
@@ -156,7 +165,7 @@ class AuthenticationBDD {
         // registering a new user and logging in with them
         val username = "jenna"
         val password = "password12345"
-        au.register(username, password)
+        au.register(username, password, 12, )
         au.login(username, password)
     }
 }

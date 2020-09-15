@@ -22,7 +22,7 @@ class AuthenticationPersistenceTests {
     fun `Should be able to create a new user`() {
         val ap : IAuthPersistence = AuthenticationPersistence(PureMemoryDatabase())
 
-        ap.createUser(UserName("jenna"), Hash.createHash("thisIsFake"), "")
+        ap.createUser(UserName("jenna"), Hash.createHash("thisIsFake"), "", )
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
     }
