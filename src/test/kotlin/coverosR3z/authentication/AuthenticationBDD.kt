@@ -89,7 +89,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // when I register a new employee with employeename "matt" and password "asdfoiajwefowejf"
-        au.register("matt", "asdfoiajwefowejf", 12, )
+        au.register("matt", "asdfoiajwefowejf", 12)
 
         // then the system records the registration successfully
         assertTrue("our user should be registered", au.isUserRegistered("matt"))
