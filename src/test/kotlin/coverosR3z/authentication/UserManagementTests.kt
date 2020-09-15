@@ -12,7 +12,6 @@ class UserManagementTests {
      * administrator. We cannot allow a user to simply create their corresponding employee--
      * they must be invited into the org, with some prior setup.
      */
-
     @Test
     fun `Registering a user should require a employee identifier`() {
         val cua = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
