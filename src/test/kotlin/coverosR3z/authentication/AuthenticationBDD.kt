@@ -18,19 +18,23 @@ import coverosR3z.domainobjects.LoginStatuses as ls
  */
 class AuthenticationBDD {
 
+    val cua = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
     /**
      * The key here is that when we do this, it's
      * recording who does what, and only allows proper
      * people to carry out actions.  Like, Alice
      * can only modify Alice's stuff.
      */
+
+    fun `given I am logged in`() {
+
+    }
     @Test
     fun `I can add a time entry`() {
         // given I am logged in
         val pmd = PureMemoryDatabase()
-        val cua = CurrentUserAccessor() // We need a real cua for this test, sharing a pmd with auth persistence
+        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
         // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
@@ -55,10 +59,11 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        `given I am logged in as jenna`()
+        val pmd = PureMemoryDatabase()
+        `given I am logged in as jenna`(pmd)
 
         // an employee that is not jenna needs to exist
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()))
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         tru.createProject(DEFAULT_PROJECT_NAME)
 
@@ -101,7 +106,6 @@ class AuthenticationBDD {
     @Test
     fun `I should be able to log in once I'm a registered user`() {
         // given I have registered
-        val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
@@ -144,10 +148,9 @@ class AuthenticationBDD {
     }
 
 
-    private fun `given I am logged in as jenna`() {
-        val cua = CurrentUserAccessor()
+    private fun `given I am logged in as jenna`(pmd: PureMemoryDatabase) {
         cua.clearCurrentUserTestOnly()
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 
         // registering a new user and logging in with them
