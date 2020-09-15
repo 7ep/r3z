@@ -26,7 +26,7 @@ class UserManagementTests {
         val user = cua.get()
         println(user)
         val entry = createTimeEntryPreDatabase(employee=Employee(17, "matt"))
-        assertEquals(user.employeeId, entry.employee.id)
+        assertEquals(user?.employeeId, entry.employee.id)
     }
 
 }

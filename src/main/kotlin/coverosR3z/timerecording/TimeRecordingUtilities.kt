@@ -12,8 +12,10 @@ import coverosR3z.persistence.EmployeeIntegrityViolationException
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        val user = cua.get()
-
+        val user = cua.get()?: throw AssertionError("Cannot record time when no user is logged in."  +
+                                        "Please be aware: if this occurred during a test, it is possible" +
+                                        "that it is due to parallel tests conflicting with each other.  In that" +
+                                        "case, now is the time to strongly consider having tests that use this run serially")
         // ensure time entry user is the logged in user
         if (user.employeeId != entry.employee.id) {
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
