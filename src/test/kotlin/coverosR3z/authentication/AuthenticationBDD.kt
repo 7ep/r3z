@@ -20,37 +20,6 @@ class AuthenticationBDD {
 
     private val cua = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
 
-    fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-        // We need to use cua for this test, sharing a pmd with auth persistence
-        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        val (tru, _) = initializeAUserAndLogin()
-        val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
-
-        return Pair(tru, sarah)
-    }
-
-    fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-
-        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
-        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        val pmd = PureMemoryDatabase()
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
-        au.register("alice", DEFAULT_PASSWORD, 1)
-        au.login("alice", DEFAULT_PASSWORD)
-
-        // Perform some quick checks
-        assertEquals("Auth persistence and user persistence must agree",
-                authPersistence.getUser(UserName("alice")), cua.get())
-        assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
-
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
-        val alice = tru.createEmployee(EmployeeName("Alice"))
-        tru.createProject(DEFAULT_PROJECT_NAME)
-
-        return Pair(tru, alice)
-    }
-
     @Test
     fun `I can add a time entry`() {
         // Given I am logged in
@@ -146,5 +115,46 @@ class AuthenticationBDD {
 
         // Then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
+    }
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+    fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
+        // We need to use cua for this test, sharing a pmd with auth persistence
+        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        val (tru, _) = initializeAUserAndLogin()
+        val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
+
+        return Pair(tru, sarah)
+    }
+
+    fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
+
+        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
+        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val alice = tru.createEmployee(EmployeeName("Alice"))
+
+        au.register("alice", DEFAULT_PASSWORD, alice.id)
+        au.login("alice", DEFAULT_PASSWORD)
+
+        // Perform some quick checks
+        assertEquals("Auth persistence and user persistence must agree",
+                authPersistence.getUser(UserName("alice")), cua.get())
+        assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
+
+        tru.createProject(DEFAULT_PROJECT_NAME)
+
+        return Pair(tru, alice)
     }
 }
