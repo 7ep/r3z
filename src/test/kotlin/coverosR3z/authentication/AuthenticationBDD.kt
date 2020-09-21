@@ -40,26 +40,37 @@ class AuthenticationBDD {
         assertEquals(user, cua.get()) // auth persistence and user persistence must agree
         assertTrue("our user should be registered", au.isUserRegistered(DEFAULT_USER.name)) // registration must succeed
     }
-    @Test
-    fun `I can add a time entry`() {
-        // given I am logged in
+    fun `setup basic authentication system`() : TimeRecordingUtilities{
         val pmd = PureMemoryDatabase()
+        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
+        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, 1) // we know DEFAULT_EMPLOYEE has an id=1
+        au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
-        `given I am logged in`(pmd)
+        // Perform some quick checks
+        val user = authPersistence.getUser(UserName(DEFAULT_USER.name))
+
+        assertEquals(user, cua.get()) // auth persistence and user persistence must agree
+        assertTrue("our user should be registered", au.isUserRegistered(DEFAULT_USER.name)) // registration must succeed
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
         tru.createEmployee(EmployeeName(DEFAULT_USER.name))
         tru.createProject(DEFAULT_PROJECT_NAME)
 
-        println("DEBUG")
-        println(cua.get())
+        return tru
+    }
+    @Test
+    fun `I can add a time entry`() {
+        // given I am logged in
+        val tru = `setup basic authentication system`()
+
         // when I add a time entry
-//        val id = cua.get().employeeId ?: 1 // we should use the actual id of the employee in the following TimeEntry
         val entry = createTimeEntryPreDatabase(DEFAULT_EMPLOYEE)
         val result = tru.recordTime(entry)
 
         // then it proceeds successfully
-        // TODO: this is known to fail, because employeeId for the registered user is null
         assertEquals(RecordTimeResult(StatusEnum.SUCCESS), result)
     }
 
