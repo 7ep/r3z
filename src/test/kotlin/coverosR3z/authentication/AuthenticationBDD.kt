@@ -26,12 +26,13 @@ class AuthenticationBDD {
      * can only modify Alice's stuff.
      */
 
-    fun `given I am logged in`(pmd: PureMemoryDatabase) {
+    fun `set up authentication and employee`() : Pair<TimeRecordingUtilities, Employee>{
         cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
         // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+        val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, 1) // we know DEFAULT_EMPLOYEE has an id=1
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, 2) // we know DEFAULT_EMPLOYEE has an id=1
         au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // Perform some quick checks
@@ -39,7 +40,14 @@ class AuthenticationBDD {
 
         assertEquals(user, cua.get()) // auth persistence and user persistence must agree
         assertTrue("our user should be registered", au.isUserRegistered(DEFAULT_USER.name)) // registration must succeed
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val sarah = tru.createEmployee(EmployeeName("Sarah"))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+
+        return Pair(tru, sarah)
     }
+
     fun `setup basic authentication system`() : TimeRecordingUtilities{
         val pmd = PureMemoryDatabase()
         cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
@@ -61,6 +69,7 @@ class AuthenticationBDD {
 
         return tru
     }
+
     @Test
     fun `I can add a time entry`() {
         // given I am logged in
@@ -76,17 +85,11 @@ class AuthenticationBDD {
 
     @Test
     fun `I cannot change someone else's time`() {
-        val pmd = PureMemoryDatabase()
-        `given I am logged in as jenna`(pmd)
+        //given I am logged in as "default" and employee Sarah exists in the database
+        val (tru, sarah) = `set up authentication and employee`()
 
-        // an employee that is not jenna needs to exist
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
-        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        tru.createProject(DEFAULT_PROJECT_NAME)
-
-        // when I try to add a time-entry for "not_jenna"
-        val entry = createTimeEntryPreDatabase(DEFAULT_EMPLOYEE) // id=1 will belong to jenna, and
-            // RecordTimeResult only compares for mismatch by id
+        // when I try to add a time-entry for Sarah
+        val entry = createTimeEntryPreDatabase(sarah)
         val result = tru.recordTime(entry)
 
         // then the system disallows it
@@ -162,18 +165,5 @@ class AuthenticationBDD {
 
         // then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
-    }
-
-
-    private fun `given I am logged in as jenna`(pmd: PureMemoryDatabase) {
-        cua.clearCurrentUserTestOnly()
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
-
-        // registering a new user and logging in with them
-        val username = "jenna"
-        val password = "password12345"
-        au.register(username, password, 12, )
-        au.login(username, password)
     }
 }
