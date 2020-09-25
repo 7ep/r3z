@@ -2,9 +2,9 @@ package coverosR3z.persistence
 
 import coverosR3z.*
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -141,6 +141,20 @@ class PureMemoryDatabaseTests {
         assertTrue("totaltime was suppoed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
     }
 
+    @Test
+    fun `should not be able to get minutes recorded for an unregistered employee`() {
+
+        assertThrows(EmployeeNotRegisteredException::class.java) {pmd.getMinutesRecordedOnDate(Employee(7, "Harold"), A_RANDOM_DAY_IN_JUNE_2020)}
+    }
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
     private fun recordManyTimeEntries(numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
         val lotsOfEmployees: List<String> = generateEmployeeNames()
         persistEmployeesToDatabase(numberOfEmployees, lotsOfEmployees)

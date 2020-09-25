@@ -16,6 +16,9 @@ plugins {
     id 'jacoco'
 
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+
+    // scans our code for static analysis
+    id "org.sonarqube" version "2.8"
 }
 
 // useful to see the dependencies. 
@@ -86,6 +89,19 @@ jacocoTestReport {
         xml.destination file("${buildDir}/jacoco/jacoco.xml")
         // enable a nice-looking HTML report
         html.destination file("${buildDir}/reports/jacoco")
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "$rootProject.name"
+        property "sonar.projectName", "$rootProject.name"
+        property "sonar.projectDescription", "An application to practice agile development with pair programming"
+        property "sonar.sources", "src/main/kotlin"
+        property "sonar.tests", "src/test/kotlin"
+        property "sonar.kotlin.binaries", "build/classes/kotlin/main"
+        property "sonar.junit.reportPaths", "build/test-results/test/"
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/jacoco/jacoco.xml"
     }
 }
 
