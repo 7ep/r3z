@@ -49,11 +49,15 @@ class AuthenticationBDD {
     @Test
     fun `I should be able to register a employee with a valid password`() {
         // Given I am not currently registered
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val matt = tru.createEmployee(EmployeeName("Matt"))
+
         // When I register a new user
-        au.register("matt", "asdfoiajwefowejf")
+        au.register("matt", "asdfoiajwefowejf", matt.id)
 
         // Then the system records that the registration succeeded
         assertTrue("The user should be registered", au.isUserRegistered("matt"))

@@ -14,7 +14,8 @@ class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurr
     val blacklistedPasswords : List<String> = listOf<String>("password")
 
     /**
-     * Register a user through auth persistent, providing a username, password, and employeeId
+     * Register a user through auth persistent, providing a username, password, and
+     * optional employeeId (defaults to null)
      */
     fun register(username: String, password: String, employeeId: Int? = null) : RegistrationResult {
         val result = when {
