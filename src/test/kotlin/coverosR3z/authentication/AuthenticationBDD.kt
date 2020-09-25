@@ -53,7 +53,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // When I register a new user
-        au.register("matt", "asdfoiajwefowejf", 12)
+        au.register("matt", "asdfoiajwefowejf")
 
         // Then the system records that the registration succeeded
         assertTrue("The user should be registered", au.isUserRegistered("matt"))
@@ -64,10 +64,10 @@ class AuthenticationBDD {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf", 12)
+        au.register("matt", "asdfoiajwefowejf")
 
         // When I try to register again
-        val result = au.register("matt", "asdfoiajwefowejf", 12)
+        val result = au.register("matt", "asdfoiajwefowejf")
 
         // Then the system records that the registration failed
         assertEquals("The user shouldn't be allowed to register again", RegistrationResult.ALREADY_REGISTERED, result)
@@ -79,7 +79,7 @@ class AuthenticationBDD {
         cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf", 12)
+        au.register("matt", "asdfoiajwefowejf")
 
         // When I enter valid credentials
         au.login("matt", "asdfoiajwefowejf")
@@ -94,7 +94,7 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence, FakeCurrentUserAccessor())
-        val regStatus = au.register("matt", "asdfoiajwefowejf", 12)
+        val regStatus = au.register("matt", "asdfoiajwefowejf")
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // When I login with the wrong credentials
@@ -111,7 +111,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // When I register with too short of a a password
-        val regStatus = au.register("matt", "too short", 12)
+        val regStatus = au.register("matt", "too short")
 
         // Then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)

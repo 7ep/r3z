@@ -16,37 +16,26 @@ class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurr
     /**
      * Register a user through auth persistent, providing a username, password, and employeeId
      */
-    fun register(username: String, password: String, employeeId: Int) : RegistrationResult {
-        if (password.isEmpty()) {
-            val result = RegistrationResult.EMPTY_PASSWORD
-            logInfo("User registration failed, $result")
-            return result
-        }
-        if(password.length < 12) {
-            val result = RegistrationResult.PASSWORD_TOO_SHORT
-            logInfo("User registration failed, $result")
-            return result
-        }
-        if (password.length > 255) {
-            val result = RegistrationResult.PASSWORD_TOO_LONG
-            logInfo("User registration failed, $result")
-            return result
-        }
-        if(blacklistedPasswords.contains(password)){
-            val result = RegistrationResult.BLACKLISTED_PASSWORD
-            logInfo("User registration failed, $result")
-            return result
-        }
-        if(ap.isUserRegistered(UserName(username))) {
-            val result = RegistrationResult.ALREADY_REGISTERED
-            logInfo("User registration failed, $result")
-            return result
+    fun register(username: String, password: String, employeeId: Int? = null) : RegistrationResult {
+        val result = when {
+            password.isEmpty() -> RegistrationResult.EMPTY_PASSWORD
+            password.length < 12 -> RegistrationResult.PASSWORD_TOO_SHORT
+            password.length > 255 -> RegistrationResult.PASSWORD_TOO_LONG
+            blacklistedPasswords.contains(password) -> RegistrationResult.BLACKLISTED_PASSWORD
+            ap.isUserRegistered(UserName(username)) -> RegistrationResult.ALREADY_REGISTERED
+            else -> RegistrationResult.SUCCESS
         }
 
-        //past here we're assuming we've passed all of the registration checks, and we want to add the user to the database
-        val salt = Hash.getSalt()
-        ap.createUser(UserName(username), Hash.createHash(password + salt), salt, employeeId)
-        return RegistrationResult.SUCCESS
+        if(result != RegistrationResult.SUCCESS){
+            logInfo("User registration failed for $username: $result")
+        }else{
+            //Registration success -> add the user to the database
+            val salt = Hash.getSalt()
+            ap.createUser(UserName(username), Hash.createHash(password + salt), salt, employeeId)
+            logInfo("User registration successful for $username")
+        }
+
+        return result
 
     }
 
@@ -62,10 +51,13 @@ class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurr
             val hashedSaltedPassword : Hash = Hash.createHash(password + u.salt)
             if(u.hash == hashedSaltedPassword){
                 cua.set(u)
+                logInfo("Login successful for user $user. Very good work")
                 return LoginResult(SUCCESS, u)
             }
+            logInfo("Login failed for user $user: Incorrect password. Please stop trying to hack me")
             return LoginResult(FAILURE, u)
         }
+        logInfo("Login failed: user $user is not registered. Maybe try registering first?")
         return LoginResult(NOT_REGISTERED, User(1, user, Hash.createHash(password), "", null))
     }
 }
