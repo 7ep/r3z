@@ -9,7 +9,7 @@ import coverosR3z.domainobjects.LoginStatuses.*
 import coverosR3z.logging.logInfo
 
 
-class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()){
+class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurrentUserAccessor){
 
     val blacklistedPasswords : List<String> = listOf<String>("password")
 

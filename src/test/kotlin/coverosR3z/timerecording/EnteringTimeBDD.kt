@@ -6,6 +6,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 
 
@@ -19,7 +20,12 @@ import org.junit.Test
  */
 class EnteringTimeBDD {
 
-    val cua = CurrentUserAccessor()
+    val currentUserAccessor = CurrentUserAccessor()
+
+    @Before
+    fun init() {
+        currentUserAccessor.clearCurrentUserTestOnly()
+    }
 
     /**
      * Just a happy path for entering a time entry
@@ -85,10 +91,10 @@ class EnteringTimeBDD {
     }
 
     private fun `given the employee has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, Employee> {
-        cua.clearCurrentUserTestOnly()
-        cua.set(User(1, "Zim", Hash.createHash(""), "", 1))
+        currentUserAccessor.clearCurrentUserTestOnly()
+        currentUserAccessor.set(User(1, "Zim", Hash.createHash(""), "", 1))
         val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        val tru = TimeRecordingUtilities(timeEntryPersistence, cua)
+        val tru = TimeRecordingUtilities(timeEntryPersistence, currentUserAccessor)
         val newProject: Project = tru.createProject(ProjectName("A"))
         val newEmployee: Employee = tru.createEmployee(EmployeeName("B"))
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))

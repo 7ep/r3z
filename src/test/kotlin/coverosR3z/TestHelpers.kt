@@ -1,4 +1,5 @@
 package coverosR3z
+import coverosR3z.authentication.FakeCurrentUserAccessor
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeEntryPersistence
@@ -69,5 +70,5 @@ val jsonSerialzationWithPrettyPrint : Json = Json{prettyPrint = true; allowStruc
  */
 fun createTimeRecordingUtility(): TimeRecordingUtilities {
         val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        return TimeRecordingUtilities(timeEntryPersistence)
+        return TimeRecordingUtilities(timeEntryPersistence, FakeCurrentUserAccessor())
 }

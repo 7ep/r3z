@@ -9,7 +9,7 @@ import coverosR3z.logging.logInfo
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.EmployeeIntegrityViolationException
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor = CurrentUserAccessor()) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor) {
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         val user = cua.get()?: throw AssertionError("Cannot record time when no user is logged in."  +
