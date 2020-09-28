@@ -21,7 +21,7 @@ class SeeTimeEntriesBDD {
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
         // Then I see all of them
-        allEntriesArePresentOnDate(entries, dbEntries)
+        allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020)
     }
 
     @Test
@@ -53,8 +53,8 @@ class SeeTimeEntriesBDD {
                  |_|
      alt-text: Helper Methods
      */
-    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>) {
-        val todayEntries = entries.filter { e -> e.date == A_RANDOM_DAY_IN_JUNE_2020 }
+    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>, entryDate: Date) {
+        val todayEntries = entries.filter { e -> e.date == entryDate }
         allEntriesArePresent(todayEntries, dbEntries)
     }
 
