@@ -27,19 +27,6 @@ class AuthenticationBDD {
     }
 
     @Test
-    fun `I can add a time entry`() {
-        // Given I am logged in
-        val (tru, _) = initializeAUserAndLogin()
-
-        // When I add a time entry
-        val entry = createTimeEntryPreDatabase(Employee(1, "Alice"))
-        val result = tru.recordTime(entry)
-
-        // Then it proceeds successfully
-        assertEquals(RecordTimeResult(StatusEnum.SUCCESS), result)
-    }
-
-    @Test
     fun `I cannot change someone else's time`() {
         // Given I am logged in as user "alice" and employees Sarah and Alice exist in the database
         val (tru, sarah) = initializeTwoUsersAndLogin()
@@ -137,30 +124,11 @@ class AuthenticationBDD {
     fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         // We need to use cua for this test, sharing a pmd with auth persistence
         // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        val (tru, _) = initializeAUserAndLogin()
+        val (tru, _) = initializeAUserAndLogin(currentUserAccessor)
         val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
 
         return Pair(tru, sarah)
     }
 
-    fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-        val pmd = PureMemoryDatabase()
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
-        val alice = tru.createEmployee(EmployeeName("Alice"))
-
-        au.register("alice", DEFAULT_PASSWORD, alice.id)
-        au.login("alice", DEFAULT_PASSWORD)
-
-        // Perform some quick checks
-        assertEquals("Auth persistence and user persistence must agree",
-                authPersistence.getUser(UserName("alice")), currentUserAccessor.get())
-        assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
-
-        tru.createProject(DEFAULT_PROJECT_NAME)
-
-        return Pair(tru, alice)
-    }
 }

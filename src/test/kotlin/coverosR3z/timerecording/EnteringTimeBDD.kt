@@ -31,14 +31,16 @@ class EnteringTimeBDD {
      * Just a happy path for entering a time entry
      */
     @Test
-    fun `capability to enter time`() {
-        val (expectedStatus, tru, entry) = `given I have worked 1 hour on project "A" on Monday`()
+    fun `I can add a time entry`() {
+        // Given I am logged in
+        val (tru, _) = initializeAUserAndLogin(currentUserAccessor)
 
-        // when I enter in that time
-        val recordStatus = tru.recordTime(entry)
+        // When I add a time entry
+        val entry = createTimeEntryPreDatabase(Employee(1, "Alice"))
+        val result = tru.recordTime(entry)
 
-        // then the system indicates it has persisted the new information
-        assertEquals("the system indicates it has persisted the new information", expectedStatus, recordStatus)
+        // Then it proceeds successfully
+        assertEquals(RecordTimeResult(StatusEnum.SUCCESS), result)
     }
 
     /**
@@ -66,6 +68,14 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
 
     private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntryPreDatabase> {
         val expectedStatus = RecordTimeResult(StatusEnum.SUCCESS)
@@ -101,7 +111,5 @@ class EnteringTimeBDD {
         tru.recordTime(existingTimeForTheDay)
         return Triple(tru, newProject, newEmployee)
     }
-
-
 
 }
