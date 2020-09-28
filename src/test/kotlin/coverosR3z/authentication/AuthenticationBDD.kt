@@ -7,6 +7,7 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import coverosR3z.domainobjects.LoginStatuses as ls
 
@@ -18,7 +19,12 @@ import coverosR3z.domainobjects.LoginStatuses as ls
  */
 class AuthenticationBDD {
 
-    private val cua = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
+    private val currentUserAccessor = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
+
+    @Before
+    fun init() {
+        currentUserAccessor.clearCurrentUserTestOnly()
+    }
 
     @Test
     fun `I can add a time entry`() {
@@ -51,9 +57,9 @@ class AuthenticationBDD {
         // Given I am not currently registered
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
         val matt = tru.createEmployee(EmployeeName("Matt"))
 
         // When I register a new user
@@ -67,7 +73,7 @@ class AuthenticationBDD {
     fun `I should not be able to register a user if they are already registered`() {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
         au.register("matt", "asdfoiajwefowejf")
 
         // When I try to register again
@@ -80,9 +86,8 @@ class AuthenticationBDD {
     @Test
     fun `I should be able to log in once I'm a registered user`() {
         // Given I have registered
-        cua.clearCurrentUserTestOnly()
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
         au.register("matt", "asdfoiajwefowejf")
 
         // When I enter valid credentials
@@ -90,7 +95,7 @@ class AuthenticationBDD {
 
         // Then the system knows who I am
         val user = authPersistence.getUser(UserName("matt"))
-        assertEquals(user, cua.get())
+        assertEquals(user, currentUserAccessor.get())
     }
 
     @Test
@@ -112,7 +117,7 @@ class AuthenticationBDD {
     fun `if I enter an invalid password while registering, it will disallow it`() {
         // Given I am not registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
 
         // When I register with too short of a a password
         val regStatus = au.register("matt", "too short")
@@ -139,14 +144,11 @@ class AuthenticationBDD {
     }
 
     fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-
-        cua.clearCurrentUserTestOnly() // We need to use cua for this test, sharing a pmd with auth persistence
-        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd))
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
         val alice = tru.createEmployee(EmployeeName("Alice"))
 
         au.register("alice", DEFAULT_PASSWORD, alice.id)
@@ -154,7 +156,7 @@ class AuthenticationBDD {
 
         // Perform some quick checks
         assertEquals("Auth persistence and user persistence must agree",
-                authPersistence.getUser(UserName("alice")), cua.get())
+                authPersistence.getUser(UserName("alice")), currentUserAccessor.get())
         assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
 
         tru.createProject(DEFAULT_PROJECT_NAME)

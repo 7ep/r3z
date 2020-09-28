@@ -189,7 +189,7 @@ class TimeRecordingTests {
     @Test fun `can create project`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 persistNewProjectBehavior = { Project(1, "test project") })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence)
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, FakeCurrentUserAccessor())
         val expected = utils.createProject(ProjectName("test project"))
         val actual = Project(1, "test project")
         assertEquals(expected, actual)

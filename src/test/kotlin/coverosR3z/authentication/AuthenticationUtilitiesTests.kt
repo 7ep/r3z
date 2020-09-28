@@ -17,7 +17,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap)
+        authUtils = AuthenticationUtilities(ap, FakeCurrentUserAccessor())
     }
 
     @Test
@@ -98,7 +98,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `Should determine if a particular username is for a registered user`() {
         ap = FakeAuthPersistence(isUserRegisteredBehavior = {true})
-        authUtils = AuthenticationUtilities(ap)
+        authUtils = AuthenticationUtilities(ap, FakeCurrentUserAccessor())
 
         val result = authUtils.isUserRegistered("jenna")
         assertEquals(true, result)
@@ -174,7 +174,7 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
-        val au = AuthenticationUtilities(fap)
+        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
         val (status, _) = au.login("matt", "wrong")
         assertEquals(FAILURE, status)
     }
@@ -188,7 +188,7 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { null }
         )
-        val au = AuthenticationUtilities(fap)
+        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
         val (status, _) = au.login("matt", "arbitrary")
         assertEquals(NOT_REGISTERED, status)
     }
