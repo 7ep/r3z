@@ -1,6 +1,8 @@
 package coverosR3z.timerecording
 
 import coverosR3z.*
+import coverosR3z.authentication.AuthenticationPersistence
+import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
@@ -48,6 +50,7 @@ class EnteringTimeBDD {
      */
     @Test
     fun `A employee enters six hours on a project with copious notes`() {
+        // Given I have worked 6 hours on project "A" on Monday with a lot of notes
         val (tru, entry, expectedStatus) = `given I have worked 6 hours on project "A" on Monday with a lot of notes`()
 
         // when I enter in that time
@@ -87,11 +90,24 @@ class EnteringTimeBDD {
     }
 
     private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
-        val tru = createTimeRecordingUtility()
-        val newProject: Project = tru.createProject(DEFAULT_PROJECT_NAME)
-        val newEmployee : Employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
+        val alice = tru.createEmployee(EmployeeName("Alice"))
+
+        au.register("alice", DEFAULT_PASSWORD, alice.id)
+        au.login("alice", DEFAULT_PASSWORD)
+
+        assertEquals("Auth persistence and user persistence must agree",
+            authPersistence.getUser(UserName("alice")), currentUserAccessor.get())
+        assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
+
+        val newProject = tru.createProject(DEFAULT_PROJECT_NAME)
+
         val entry = createTimeEntryPreDatabase(
-                employee = newEmployee,
+                employee = alice,
                 project = newProject,
                 time = Time(60 * 6),
                 details = Details("Four score and seven years ago, blah blah blah".repeat(10))
