@@ -51,7 +51,7 @@ class EnteringTimeBDD {
     @Test
     fun `A employee enters six hours on a project with copious notes`() {
         // Given I have worked 6 hours on project "A" on Monday with a lot of notes
-        val (tru, entry, expectedStatus) = `given I have worked 6 hours on project "A" on Monday with a lot of notes`()
+        val (tru, entry, expectedStatus) = addingProjectHoursWithNotes()
 
         // when I enter in that time
         val recordStatus = tru.recordTime(entry)
@@ -89,7 +89,7 @@ class EnteringTimeBDD {
         return Triple(expectedStatus, tru, entry)
     }
 
-    private fun `given I have worked 6 hours on project "A" on Monday with a lot of notes`(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
+    private fun addingProjectHoursWithNotes(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
@@ -97,12 +97,12 @@ class EnteringTimeBDD {
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
         val alice = tru.createEmployee(EmployeeName("Alice"))
 
-        au.register("alice", DEFAULT_PASSWORD, alice.id)
-        au.login("alice", DEFAULT_PASSWORD)
+        au.register("alice_1", DEFAULT_PASSWORD, alice.id)
+        au.login("alice_1", DEFAULT_PASSWORD)
 
         assertEquals("Auth persistence and user persistence must agree",
-            authPersistence.getUser(UserName("alice")), currentUserAccessor.get())
-        assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
+            authPersistence.getUser(UserName("alice_1")), currentUserAccessor.get())
+        assertTrue("Registration must have succeeded", au.isUserRegistered("alice_1"))
 
         val newProject = tru.createProject(DEFAULT_PROJECT_NAME)
 
