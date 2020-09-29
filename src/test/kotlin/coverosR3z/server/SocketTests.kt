@@ -1,6 +1,8 @@
 package coverosR3z.server
 
+import org.junit.FixMethodOrder
 import org.junit.Test
+import org.junit.runners.MethodSorters
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -8,6 +10,7 @@ import java.net.ServerSocket
 import java.net.Socket
 
 var I_AM_READY_TO_ROCK = false
+var crazyFunc = { }
 
 class ClientHandler(private val clientSocket: Socket): Runnable {
     private val connectionId: Int
@@ -42,6 +45,7 @@ class MyServer() : Runnable {
     fun main(args: Array<String>) {
         val serverSocket = ServerSocket(12321)
         try {
+            crazyFunc()
             while (true) {
                 // announce to the heavens that we are rockin'
                 I_AM_READY_TO_ROCK = true
@@ -58,6 +62,7 @@ class MyServer() : Runnable {
     }
 }
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class SocketTests() {
 
     /**
@@ -65,6 +70,35 @@ class SocketTests() {
      */
     @Test
     fun testEchoServerShouldReply() {
+        Thread(MyServer()).start()
+        val sock = Socket("localhost", 12321)
+        sock.use {
+            it.outputStream.write("hello socket world".toByteArray())
+        }
+    }
+
+
+    /**
+     * Negative case - what happens if our server takes
+     * too long to load and we try using it too early?
+     */
+    @Test
+    fun testEchoServerShouldFailToLoadInTime() {
+        crazyFunc = {Thread.sleep(1000)}
+        Thread(MyServer()).start()
+        val sock = Socket("localhost", 12321)
+        sock.use {
+            it.outputStream.write("hello socket world".toByteArray())
+        }
+    }
+
+    /**
+     * Positive case - what happens if our server takes
+     * too long to load and we wait until it's ready?
+     */
+    @Test
+    fun testEchoServer_waitingUntilReady() {
+        crazyFunc = {Thread.sleep(1000)}
         Thread(MyServer()).start()
         while(!I_AM_READY_TO_ROCK) {
             Thread.sleep(5)
