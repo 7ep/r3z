@@ -38,11 +38,14 @@ class SeeTimeEntriesBDD {
 
     @Test
     fun `there should be no entries on a given date if they have not been recorded yet`(){
+        // Given no time entries were made on a day
         val (tru, _) = generateSomeEntriesPreDatabase()
 
+        // When I ask for the time entries of that day
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals(listOf<TimeEntry>(), dbEntries)
+        // Then I am returned nothing
+        assertEquals(emptyList<TimeEntry>(), dbEntries)
     }
 
     /*
@@ -53,6 +56,8 @@ class SeeTimeEntriesBDD {
                  |_|
      alt-text: Helper Methods
      */
+
+
     private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>, entryDate: Date) {
         val todayEntries = entries.filter { e -> e.date == entryDate }
         allEntriesArePresent(todayEntries, dbEntries)

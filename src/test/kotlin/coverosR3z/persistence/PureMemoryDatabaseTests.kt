@@ -143,8 +143,17 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun `should not be able to get minutes recorded for an unregistered employee`() {
-
         assertThrows(EmployeeNotRegisteredException::class.java) {pmd.getMinutesRecordedOnDate(Employee(7, "Harold"), A_RANDOM_DAY_IN_JUNE_2020)}
+    }
+
+    /**
+     * If I ask the database for all the time entries for a particular employee on
+     * a date and there aren't any, I should get back an empty list, not a null.
+     */
+    @Test
+    fun testShouldReturnEmptyListIfNoEntries() {
+        val result = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
+        assertEquals(emptyList<TimeEntry>() , result)
     }
 
     /*
