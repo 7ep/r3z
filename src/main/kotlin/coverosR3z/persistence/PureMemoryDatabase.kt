@@ -76,7 +76,7 @@ class PureMemoryDatabase {
 
     fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
         // Return an empty list if there are no entries for the employee, rather than default NPE behavior
-        val employeesEntries = timeEntries[employee]?: return emptyList()
+        val employeesEntries = timeEntries[employee] ?: return emptyList()
         return employeesEntries.filter{ te -> te.employee.id == employee.id && te.date == date}
     }
 
