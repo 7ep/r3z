@@ -30,6 +30,23 @@ class ClientHandler(): Runnable {
 
 }
 
+class HTTPHandler(): Runnable {
+
+    override fun run() {
+        val serverSocket = ServerSocket(12321)
+
+        val clientSocket = serverSocket.accept()
+        bagOfSockets.add(clientSocket)
+        val br = BufferedReader(InputStreamReader(clientSocket.inputStream))
+        val line = "HTTP/1.1 200 OK"
+        println("Received: $line")
+        clientSocket.outputStream.write(line.toByteArray())
+
+        serverSocket.close()
+    }
+
+}
+
 class SocketTests() {
 
     @Test
@@ -53,7 +70,15 @@ class SocketTests() {
         val request = "GET / HTTP/1.1\n"
         val expectedResponse = "HTTP/1.1 200 OK"
 
-        val response = talkToServer(request)
+        val server = Thread(HTTPHandler())
+        server.start()
+
+        val br = BufferedReader(InputStreamReader())
+        val response =
+            talkToHTTPSocket(request)
+
+
+
 
         assertTrue("We should receive a good status message", response.contains(expectedResponse))
     }
@@ -89,6 +114,17 @@ class SocketTests() {
             it.outputStream.write("hello socket world $x".toByteArray())
         }
     }
+
+    private fun talkToHTTPSocket(request : String) : String{
+        val sock = Socket("localhost", 12321)
+        var response = ""
+        sock.use {
+            it.outputStream.write("$request".toByteArray())
+            response = BufferedReader(InputStreamReader(it.inputStream)).readLine()
+        }
+        return response
+    }
+
 
 
 }
