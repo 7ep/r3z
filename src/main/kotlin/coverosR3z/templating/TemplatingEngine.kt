@@ -12,34 +12,11 @@ class TemplatingEngine() {
         assert(openSquiggles == closedSquiggles) {
             "Invalid templating syntax, number of open '{'s must match number of closed '}'s" }
 
+        var regex = """\{\{(.*?)\}\}""".toRegex()
+        val results = regex.findAll(input)
+        val words = results.map{r -> r.groupValues[1]}
+
         var rendered = input
-        var words = mutableListOf<String>()
-        var word = ""
-
-        var start = false
-        var i=0;
-        while (i < input.length-1) {
-            val c = input[i]
-            val next = input[i+1]
-
-            if ("${c}${next}" == "{{") {
-                start = true
-                i += 2
-            }
-            if (start) {
-                while (input[i] != '}') {
-                    word += input[i]
-                    i++
-                }
-                words.add(word)
-                word = ""
-                start = false
-            }
-            i++
-        }
-
-        println("Values in words are: ")
-        println(words)
 
         for (word in words) {
             if (word in mapping.keys) {
@@ -47,7 +24,6 @@ class TemplatingEngine() {
                 rendered = rendered.replace("{{$word}}", mapping[word]?: "")
                 println(rendered)
             }
-
         }
 
         return rendered
