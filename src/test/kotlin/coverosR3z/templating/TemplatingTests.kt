@@ -4,6 +4,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import coverosR3z.templating.*
+import org.junit.Assert
+import java.lang.AssertionError
 
 class TemplatingTests {
 
@@ -32,5 +34,12 @@ class TemplatingTests {
             "verb" to "jumped"
         )
         assertEquals(expected, te.render(actual, mappings))
+    }
+
+    @Test
+    fun `invalid templating syntax should break the renderer`() {
+        var templateMe = "<body>this should {{break}</body>"
+
+        assertThrows(AssertionError::class.java) {te.render(templateMe, mapOf())}
     }
 }

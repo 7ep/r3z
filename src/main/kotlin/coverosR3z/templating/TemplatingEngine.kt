@@ -6,24 +6,36 @@ import kotlin.collections.*
 class TemplatingEngine() {
 
     fun render(input: String, mapping: Map<String, String>): String {
+        val openSquiggles = input.count{ key -> key=='{' }
+        val closedSquiggles = input.count{ key -> key=='}'}
+
+        assert(openSquiggles == closedSquiggles) {
+            "Invalid templating syntax, number of open '{'s must match number of closed '}'s" }
+
         var rendered = input
-        var flag = 0
         var words = mutableListOf<String>()
         var word = ""
-        for (s in input) {
-            println(s)
-            if (flag == 2 && s != '}') {
-                word += s
+
+        var start = false
+        var i=0;
+        while (i < input.length-1) {
+            val c = input[i]
+            val next = input[i+1]
+
+            if ("${c}${next}" == "{{") {
+                start = true
+                i += 2
             }
-            if (s == '{') {
-                flag++
-            }
-            if (s == '}') {
-                flag = 0
-                println(word)
+            if (start) {
+                while (input[i] != '}') {
+                    word += input[i]
+                    i++
+                }
                 words.add(word)
                 word = ""
+                start = false
             }
+            i++
         }
 
         println("Values in words are: ")
