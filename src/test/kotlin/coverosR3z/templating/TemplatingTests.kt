@@ -12,8 +12,6 @@ class TemplatingTests {
     @Test
     fun `should be able to generate html with a variable substituted`() {
         var expected = "<body>hello matt</body>"
-
-        
         var pre = "<body>hello {{value}}</body>"
         var actual = te.render(pre)
 
