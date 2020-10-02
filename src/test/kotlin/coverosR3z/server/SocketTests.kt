@@ -8,7 +8,6 @@ import java.io.InputStreamReader
 import java.net.ServerSocket
 import java.net.Socket
 
-val bagOfSockets = mutableListOf<Socket>()
 
 class ClientHandler(): Runnable {
 
@@ -16,14 +15,13 @@ class ClientHandler(): Runnable {
         val serverSocket = ServerSocket(12321)
         while(true) {
             val clientSocket = serverSocket.accept()
-            bagOfSockets.add(clientSocket)
             val br = BufferedReader(InputStreamReader(clientSocket.inputStream))
             val line = br.readLine()
             println("Received: $line")
             if (line == "exit") {
                 break
             }
-//            clientSocket.close()
+            clientSocket.close()
         }
         serverSocket.close()
     }
@@ -34,14 +32,12 @@ class HTTPHandler(): Runnable {
 
     override fun run() {
         val serverSocket = ServerSocket(12321)
-
         val clientSocket = serverSocket.accept()
-        bagOfSockets.add(clientSocket)
-        val br = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val line = "HTTP/1.1 200 OK"
-        println("Received: $line")
-        clientSocket.outputStream.write(line.toByteArray())
-
+        clientSocket.use {
+            val br = BufferedReader(InputStreamReader(it.inputStream))
+            println("Server received: ${br.readLine()}")
+            it.outputStream.write("HTTP/1.1 200 OK".toByteArray())
+        }
         serverSocket.close()
     }
 
@@ -58,7 +54,6 @@ class SocketTests() {
         }
 
         `say goodbye to the socket`()
-        `show all the sockets`()
     }
 
     /**
@@ -73,19 +68,16 @@ class SocketTests() {
         val server = Thread(HTTPHandler())
         server.start()
 
-        val br = BufferedReader(InputStreamReader())
-        val response =
-            talkToHTTPSocket(request)
+        val sock = Socket("localhost", 12321)
+        sock.use {
+            it.outputStream.write(request.toByteArray())
+            val br = BufferedReader(InputStreamReader(it.inputStream))
+            val response = br.readLine()
+            println("Client received: $response")
+            assertTrue("We should receive a good status message", response.contains(expectedResponse))
+        }
 
-
-
-
-        assertTrue("We should receive a good status message", response.contains(expectedResponse))
     }
-
-
-
-
 
 
     private fun startAServer() {
@@ -94,14 +86,8 @@ class SocketTests() {
     }
 
 
-    private fun `show all the sockets`() {
-        logInfo(bagOfSockets.joinToString { s -> s.toString() })
-    }
-
-
     private fun `say goodbye to the socket`() {
         val sock = Socket("localhost", 12321)
-        bagOfSockets.add(sock)
         sock.use {
             it.outputStream.write("exit".toByteArray())
         }
@@ -109,22 +95,9 @@ class SocketTests() {
 
     private fun talkToSocket(x: Int) {
         val sock = Socket("localhost", 12321)
-        bagOfSockets.add(sock)
         sock.use {
             it.outputStream.write("hello socket world $x".toByteArray())
         }
     }
-
-    private fun talkToHTTPSocket(request : String) : String{
-        val sock = Socket("localhost", 12321)
-        var response = ""
-        sock.use {
-            it.outputStream.write("$request".toByteArray())
-            response = BufferedReader(InputStreamReader(it.inputStream)).readLine()
-        }
-        return response
-    }
-
-
 
 }
