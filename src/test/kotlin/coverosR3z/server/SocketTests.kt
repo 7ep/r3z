@@ -8,26 +8,6 @@ import java.io.InputStreamReader
 import java.net.ServerSocket
 import java.net.Socket
 
-
-class ClientHandler(): Runnable {
-
-    override fun run() {
-        val serverSocket = ServerSocket(12321)
-        while(true) {
-            val clientSocket = serverSocket.accept()
-            val br = BufferedReader(InputStreamReader(clientSocket.inputStream))
-            val line = br.readLine()
-            println("Received: $line")
-            if (line == "exit") {
-                break
-            }
-            clientSocket.close()
-        }
-        serverSocket.close()
-    }
-
-}
-
 class HTTPHandler(): Runnable {
 
     override fun run() {
@@ -40,21 +20,9 @@ class HTTPHandler(): Runnable {
         }
         serverSocket.close()
     }
-
 }
 
 class SocketTests() {
-
-    @Test
-    fun testShouldConnect() {
-        startAServer()
-
-        for (x in 0..3) {
-            talkToSocket(x)
-        }
-
-        `say goodbye to the socket`()
-    }
 
     /**
      * If we talk to an HTTP server with the proper protocol,
@@ -74,30 +42,7 @@ class SocketTests() {
             val br = BufferedReader(InputStreamReader(it.inputStream))
             val response = br.readLine()
             println("Client received: $response")
-            assertTrue("We should receive a good status message", response.contains(expectedResponse))
-        }
-
-    }
-
-
-    private fun startAServer() {
-        val server = Thread(ClientHandler())
-        server.start()
-    }
-
-
-    private fun `say goodbye to the socket`() {
-        val sock = Socket("localhost", 12321)
-        sock.use {
-            it.outputStream.write("exit".toByteArray())
+            assertTrue("Status message should be good", response.contains(expectedResponse))
         }
     }
-
-    private fun talkToSocket(x: Int) {
-        val sock = Socket("localhost", 12321)
-        sock.use {
-            it.outputStream.write("hello socket world $x".toByteArray())
-        }
-    }
-
 }
