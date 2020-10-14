@@ -46,7 +46,8 @@ class TemplatingTests {
 
     @Test
     fun `can read from template file and apply username value`() {
-        var toRender = readUtl("sample_template.utl")
+        var toRender = javaClass.classLoader.getResource("sample_template.utl").readText()
+            //readUtl("sample_template.utl")
         var actual = te.render(toRender, mapOf("username" to "Jona"))
         var expected = "Hello there, Jona!"
         println(actual)
