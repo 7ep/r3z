@@ -1,11 +1,7 @@
 package coverosR3z.templating
 
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
-import coverosR3z.templating.*
-import org.junit.Assert
-import java.io.File
 import java.lang.AssertionError
 
 class TemplatingTests {
@@ -46,13 +42,19 @@ class TemplatingTests {
 
     @Test
     fun `can read from template file and apply username value`() {
-        var toRender = javaClass.classLoader.getResource("sample_template.utl").readText()
-            //readUtl("sample_template.utl")
+        var toRender = readResourceFile("sample_template.utl")
         var actual = te.render(toRender, mapOf("username" to "Jona"))
-        var expected = "Hello there, Jona!"
-        println(actual)
+        var expected = readResourceFile("sample.html")
 
-        assertTrue(actual.contains(expected))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `Should handle bracketed items without anything to map to`() {
+        var toRender = "<body>this should {{fail}}</body>"
+
+        var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
+        assertEquals(exception, "All double bracketed values must have corresponding mappings")
     }
 
     /*
@@ -67,7 +69,7 @@ class TemplatingTests {
     /**
      * Read in template file as a string
      */
-    fun readUtl(filename: String) : String {
-        return File("resources/$filename").inputStream().readBytes().toString(Charsets.UTF_8)
+    fun readResourceFile(filename: String) : String {
+        return javaClass.classLoader.getResource(filename).readBytes().toString(Charsets.UTF_8)
     }
 }
