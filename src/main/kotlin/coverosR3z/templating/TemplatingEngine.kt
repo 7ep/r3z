@@ -9,8 +9,13 @@ class TemplatingEngine() {
         val openSquiggles = input.count{ key -> key=='{' }
         val closedSquiggles = input.count{ key -> key=='}'}
 
-        assert(openSquiggles == closedSquiggles) {
-            "Invalid templating syntax, number of open '{'s must match number of closed '}'s" }
+        if (openSquiggles != closedSquiggles) {
+            throw InvalidTemplateException(
+                "Invalid syntax; amount of open and closed '{' brackets must match."
+            )
+        }
+//        assert(openSquiggles == closedSquiggles) {
+//            "Invalid templating syntax, number of open '{'s must match number of closed '}'s" }
 
         var regex = """\{\{(.*?)\}\}""".toRegex()
         val results = regex.findAll(input)
@@ -25,7 +30,7 @@ class TemplatingEngine() {
                 println(rendered)
             }
             else {
-                throw InvalidTemplateException("All double bracketed values must have corresponding mappings")
+                throw InvalidTemplateException("Invalid syntax; all double bracketed values must have corresponding mappings.")
             }
         }
 
