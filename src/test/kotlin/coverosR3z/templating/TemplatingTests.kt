@@ -5,6 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import coverosR3z.templating.*
 import org.junit.Assert
+import java.io.File
 import java.lang.AssertionError
 
 class TemplatingTests {
@@ -41,5 +42,31 @@ class TemplatingTests {
         var templateMe = "<body>this should {{break}</body>"
 
         assertThrows(AssertionError::class.java) {te.render(templateMe, mapOf())}
+    }
+
+    @Test
+    fun `can read from template file and apply username value`() {
+        var toRender = readUtl("sample_template.utl")
+        var actual = te.render(toRender, mapOf("username" to "Jona"))
+        var expected = "Hello there, Jona!"
+        println(actual)
+
+        assertTrue(actual.contains(expected))
+    }
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+    /**
+     * Read in template file as a string
+     */
+    fun readUtl(filename: String) : String {
+        return File("resources/$filename").inputStream().readBytes().toString(Charsets.UTF_8)
     }
 }
