@@ -5,6 +5,8 @@ import kotlin.collections.*
 
 class TemplatingEngine() {
 
+    private val DEBUG = false
+
     fun render(input: String, mapping: Map<String, String>): String {
         val openSquiggles = input.count{ key -> key=='{' }
         val closedSquiggles = input.count{ key -> key=='}'}
@@ -25,9 +27,9 @@ class TemplatingEngine() {
 
         for (word in words) {
             if (word in mapping.keys) {
-                println("replacing instances of '$word' with '${mapping[word]}'")
+                if (DEBUG) println("replacing instances of '$word' with '${mapping[word]}'")
                 rendered = rendered.replace("{{$word}}", mapping[word]?: "")
-                println(rendered)
+                if (DEBUG) println(rendered)
             }
             else {
                 throw InvalidTemplateException("Invalid syntax; all double bracketed values must have corresponding mappings.")
