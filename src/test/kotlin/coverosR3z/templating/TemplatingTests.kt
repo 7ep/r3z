@@ -54,7 +54,7 @@ class TemplatingTests {
         var toRender = "<body>this should {{fail}}</body>"
 
         var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
-        assertEquals(exception, "All double bracketed values must have corresponding mappings")
+        assertEquals(exception.message, "All double bracketed values must have corresponding mappings")
     }
 
     /*

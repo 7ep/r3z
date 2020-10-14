@@ -24,6 +24,9 @@ class TemplatingEngine() {
                 rendered = rendered.replace("{{$word}}", mapping[word]?: "")
                 println(rendered)
             }
+            else {
+                throw InvalidTemplateException("All double bracketed values must have corresponding mappings")
+            }
         }
 
         return rendered
