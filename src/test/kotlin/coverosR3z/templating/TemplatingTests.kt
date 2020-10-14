@@ -1,6 +1,7 @@
 package coverosR3z.templating
 
 import org.junit.Assert.*
+import org.junit.Ignore
 import org.junit.Test
 import java.lang.AssertionError
 
@@ -34,10 +35,10 @@ class TemplatingTests {
     }
 
     @Test
-    fun `invalid templating syntax should break the renderer`() {
-        var templateMe = "<body>this should {{break}</body>"
-
-        assertThrows(AssertionError::class.java) {te.render(templateMe, mapOf())}
+    fun `uneven amounts of brackets should throw an exception`() {
+        var toRender = "{}}"
+        var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
+        assertEquals(exception.message, "Invalid syntax; amount of open and closed '{' brackets must match.")
     }
 
     @Test
@@ -54,7 +55,7 @@ class TemplatingTests {
         var toRender = "<body>this should {{fail}}</body>"
 
         var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
-        assertEquals(exception.message, "All double bracketed values must have corresponding mappings")
+        assertEquals(exception.message, "Invalid syntax; all double bracketed values must have corresponding mappings.")
     }
 
     /*
