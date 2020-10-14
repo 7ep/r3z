@@ -58,6 +58,15 @@ class TemplatingTests {
         assertEquals(exception.message, "Invalid syntax; all double bracketed values must have corresponding mappings.")
     }
 
+    @Test
+    fun `Should handle multiple values with a template file`() {
+        var toRender = readResourceFile("multiple_values_template.utl")
+        var actual = te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
+        var expected = readResourceFile("multiple_values.html")
+
+        assertEquals(expected, actual)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
