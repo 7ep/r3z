@@ -1,5 +1,6 @@
 package coverosR3z.templating
 
+import coverosR3z.FileReader
 import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
@@ -43,9 +44,9 @@ class TemplatingTests {
 
     @Test
     fun `can read from template file and apply username value`() {
-        val toRender = readResourceFile("sample_template.utl")
+        val toRender = FileReader.read("sample_template.utl")
         val actual = te.render(toRender, mapOf("username" to "Jona"))
-        val expected = readResourceFile("sample.html")
+        val expected = FileReader.read("sample.html")
 
         assertEquals(expected, actual)
     }
@@ -60,26 +61,10 @@ class TemplatingTests {
 
     @Test
     fun `Should handle multiple values with a template file`() {
-        var toRender = readResourceFile("multiple_values_template.utl")
+        var toRender = FileReader.read("multiple_values_template.utl")
         var actual = te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
-        var expected = readResourceFile("multiple_values.html")
+        var expected = FileReader.read("multiple_values.html")
 
         assertEquals(expected, actual)
-    }
-
-    /*
-     _ _       _                  __ __        _    _           _
-    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
-    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
-    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
-                 |_|
-     alt-text: Helper Methods
-     */
-
-    /**
-     * Read in template file as a string
-     */
-    private fun readResourceFile(filename: String) : String {
-        return javaClass.classLoader.getResource(filename)!!.readBytes().toString(Charsets.UTF_8)
     }
 }
