@@ -3,7 +3,7 @@ package coverosR3z.templating
 import kotlin.collections.*
 
 
-class TemplatingEngine() {
+class TemplatingEngine {
 
     private val DEBUG = false
 
