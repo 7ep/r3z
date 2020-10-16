@@ -1,13 +1,9 @@
 package coverosR3z.server
 
-import coverosR3z.logging.logInfo
 import org.junit.*
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -15,7 +11,7 @@ import java.net.Socket
 var clientSocket : Socket = Socket("localhost", 12321)
 var serverSocket : Socket = Socket("localhost", 12321)
 
-class HTTPHandler(): Runnable {
+class ServerSocketInitializer(): Runnable {
 
     override fun run() {
         val halfOpenServerSocket = ServerSocket(12321)
@@ -27,7 +23,7 @@ class SocketTests() {
 
     @Before
     fun openSockets() {
-        val server = Thread(HTTPHandler())
+        val server = Thread(ServerSocketInitializer())
         server.start()
         clientSocket = Socket("localhost", 12321)
     }
@@ -44,5 +40,37 @@ class SocketTests() {
         val br = BufferedReader(InputStreamReader(serverSocket.inputStream))
         val value = br.readLine()
         assertEquals(value, "Hello")
+    }
+
+    @Test
+    fun test200Response() {
+        //set up server and client input streams
+        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
+        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
+        val clientWriter = clientSocket.getOutputStream()
+        val serverWriter = serverSocket.getOutputStream()
+
+        clientWriter.write("GET / HTTP/1.1\n".toByteArray())
+        val serverInput = serverReader.readLine()
+        if(serverInput == "GET / HTTP/1.1"){
+            serverWriter.write("HTTP/1.1 200 OK\n".toByteArray())
+        }
+        val response = clientReader.readLine()
+
+        assertEquals(response, "HTTP/1.1 200 OK")
+    }
+
+    @Test
+    fun `I want to hit a homepage when I point my browser to the application domain`(){
+        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
+        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
+        val clientWriter = clientSocket.getOutputStream()
+        val serverWriter = serverSocket.getOutputStream()
+
+        clientWriter.write("I want a homepage and I want it now\n".toByteArray())
+
+        val response = clientReader.readLine()
+
+        assert(response.contains("Welcome to the HOME PAGE"))
     }
 }
