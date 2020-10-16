@@ -11,17 +11,17 @@ class TemplatingTests {
 
     @Test
     fun `should be able to generate html with a variable substituted`() {
-        var expected = "<body>hello matt</body>"
-        var pre = "<body>hello {{name}}</body>"
-        var actual = te.render(pre, mapOf<String, String>("name" to "matt"))
+        val expected = "<body>hello matt</body>"
+        val pre = "<body>hello {{name}}</body>"
+        val actual = te.render(pre, mapOf<String, String>("name" to "matt"))
 
         assertEquals(expected, actual)
     }
 
     @Test
     fun `should convert a template and list of keys and values into expected html`() {
-        var actual = "<body>the {{adjective1}} {{adjective2}} {{noun1}} {{verb}} over the {{adjective3}} {{noun2}}</body>"
-        var expected = "<body>the quick brown fox jumped over the lazy dog</body>"
+        val actual = "<body>the {{adjective1}} {{adjective2}} {{noun1}} {{verb}} over the {{adjective3}} {{noun2}}</body>"
+        val expected = "<body>the quick brown fox jumped over the lazy dog</body>"
 
         val mappings = mapOf<String, String>(
             "adjective1" to "quick",
@@ -36,25 +36,25 @@ class TemplatingTests {
 
     @Test
     fun `uneven amounts of brackets should throw an exception`() {
-        var toRender = "{}}"
-        var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
+        val toRender = "{}}"
+        val exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
         assertEquals(exception.message, "Invalid syntax; amount of open and closed '{' brackets must match.")
     }
 
     @Test
     fun `can read from template file and apply username value`() {
-        var toRender = readResourceFile("sample_template.utl")
-        var actual = te.render(toRender, mapOf("username" to "Jona"))
-        var expected = readResourceFile("sample.html")
+        val toRender = readResourceFile("sample_template.utl")
+        val actual = te.render(toRender, mapOf("username" to "Jona"))
+        val expected = readResourceFile("sample.html")
 
         assertEquals(expected, actual)
     }
 
     @Test
     fun `Should handle bracketed items without anything to map to`() {
-        var toRender = "<body>this should {{fail}}</body>"
+        val toRender = "<body>this should {{fail}}</body>"
 
-        var exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
+        val exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
         assertEquals(exception.message, "Invalid syntax; all double bracketed values must have corresponding mappings.")
     }
 
@@ -70,7 +70,7 @@ class TemplatingTests {
     /**
      * Read in template file as a string
      */
-    fun readResourceFile(filename: String) : String {
-        return javaClass.classLoader.getResource(filename).readBytes().toString(Charsets.UTF_8)
+    private fun readResourceFile(filename: String) : String {
+        return javaClass.classLoader.getResource(filename)!!.readBytes().toString(Charsets.UTF_8)
     }
 }
