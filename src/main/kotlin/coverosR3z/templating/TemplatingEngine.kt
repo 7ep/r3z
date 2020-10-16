@@ -16,10 +16,8 @@ class TemplatingEngine() {
                 "Invalid syntax; amount of open and closed '{' brackets must match."
             )
         }
-//        assert(openSquiggles == closedSquiggles) {
-//            "Invalid templating syntax, number of open '{'s must match number of closed '}'s" }
 
-        var regex = """\{\{(.*?)\}\}""".toRegex()
+        val regex = """\{\{(.*?)}}""".toRegex()
         val results = regex.findAll(input)
         val words = results.map{r -> r.groupValues[1]}
 
