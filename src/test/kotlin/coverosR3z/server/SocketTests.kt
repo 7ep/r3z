@@ -36,22 +36,6 @@ class SocketTests() {
             clientSocket.close()
         }
     }
-//    @Before
-//    fun openSockets() {
-//        val server = Thread(ServerSocketInitializer())
-//        server.start()
-//        clientSocket = Socket("localhost", 12321)
-//    }
-//
-//    @After
-//    fun closeSockets() {
-//        serverSocket.shutdownInput()
-//        clientSocket.shutdownOutput()
-//        serverSocket.close()
-//        clientSocket.close()
-////        clientSocket = Socket("localhost", 12321)
-////        serverSocket = Socket("localhost", 12321)
-//    }
 
     @Test
     fun testSimpleConversation() {
