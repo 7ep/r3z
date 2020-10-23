@@ -102,16 +102,56 @@ class SocketTests() {
         assertEquals(webpage, body)
     }
 
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_MaybeRefactored() {
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
+
+        val fileWeRead = FileReader.read("sample.html")
+        client.write("GET / HTTP/1.1\n")
+
+        val serverInput = server.readLine()
+
+        val status = "HTTP/1.1 200 OK"
+        val header = "Content-Length: ${fileWeRead.length}"
+        val input = "$status\n" +
+                "$header\n" +
+                "\n" +
+                "${fileWeRead}"
+
+        if(serverInput == "GET / HTTP/1.1"){
+            server.write(input)
+        }
+
+        val responseFromServer = client.read(input.length)
+        val body : String = getBody(responseFromServer)
+
+        assertEquals(fileWeRead, responseFromServer)
+    }
+
+    private fun getBody(responseFromServer: String): String {
+        val regex = "\n\n".toRegex()
+        val results = regex.findAll(responseFromServer)
+        val body = results.map { r -> r.groupValues[1]}.toString()
+        return body
+    }
+
     class IOHolder(socket: Socket) {
         private val writer: OutputStream = socket.getOutputStream()
         private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
         fun write(input: String) {
-            return writer.write(input.toByteArray())
+            writer.write(input.toByteArray())
         }
 
         fun readLine(): String {
             return reader.readLine()
+        }
+
+        fun read(len : Int) : String {
+            val cbuf = CharArray(len)
+            reader.read(cbuf, 0, len)
+            return cbuf.joinToString("")
         }
     }
 
