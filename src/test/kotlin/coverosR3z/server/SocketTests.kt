@@ -5,6 +5,7 @@ import org.junit.*
 import org.junit.Assert.assertEquals
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -15,7 +16,7 @@ var serverSocket : Socket = Socket("localhost", 12321)
 class ServerSocketInitializer(): Runnable {
 
     override fun run() {
-        var halfOpenServerSocket = ServerSocket(12321)
+        val halfOpenServerSocket = ServerSocket(12321)
         serverSocket = halfOpenServerSocket.accept()
     }
 }
@@ -48,62 +49,70 @@ class SocketTests() {
     @Test
     fun test200Response() {
         //set up server and client input streams
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
 
-        clientWriter.write("GET / HTTP/1.1\n".toByteArray())
-        val serverInput = serverReader.readLine()
+        client.write("GET / HTTP/1.1\n")
+        val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
-            serverWriter.write("HTTP/1.1 200 OK\n".toByteArray())
+            server.write("HTTP/1.1 200 OK\n")
         }
-        val response = clientReader.readLine()
+        val response = client.readLine()
 
         assertEquals(response, "HTTP/1.1 200 OK")
     }
 
     @Test
-    fun `I want to hit a homepage when I point my browser to the application domain`(){
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
+    fun testShouldGetHtmlResponseFromServer(){
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
 
-        clientWriter.write("GET / HTTP/1.1\n".toByteArray())
-        val serverInput = serverReader.readLine()
+        client.write("GET / HTTP/1.1\n")
+        val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
-            serverWriter.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n (the whole text of the page)\n".toByteArray())
+            server.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n (the whole text of the page)\n")
         }
 
-        clientReader.readLine()
-        val response = clientReader.readLine()
+        client.readLine()
+        val response = client.readLine()
 
         assert(response.contains("<!DOCTYPE html>"))
     }
 
     @Test
-    fun `should see a welcome message from an html file when GET requesting server`() {
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
+    fun testShouldGetHtmlFileResponseFromServer() {
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
 
         val webpage = FileReader.read("sample.html")
-        clientWriter.write("GET / HTTP/1.1\n".toByteArray())
-        val serverInput = serverReader.readLine()
+        client.write("GET / HTTP/1.1\n")
+        val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
-            serverWriter.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n${webpage}\n".toByteArray())
+            server.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n${webpage}\n")
         }
 
-        repeat(2) {clientReader.readLine()}
+        repeat(2) {client.readLine()}
         var body = ""
-        var nextLine = clientReader.readLine()
+        var nextLine = client.readLine()
         while (nextLine != "</html>") {
             body += "${nextLine}\n"
-            nextLine = clientReader.readLine()
+            nextLine = client.readLine()
         }
         body += nextLine
         assertEquals(webpage, body)
     }
+
+    class IOHolder(socket: Socket) {
+        private val writer: OutputStream = socket.getOutputStream()
+        private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
+
+        fun write(input: String) {
+            return writer.write(input.toByteArray())
+        }
+
+        fun readLine(): String {
+            return reader.readLine()
+        }
+    }
+
 }
