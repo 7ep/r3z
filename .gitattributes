@@ -4,3 +4,12 @@
 # These are explicitly windows files and should use crlf
 *.bat           text eol=crlf
 
+# LF normalization for text files
+* text eol=lf
+
+# screenshots are binary and shouldn't be changed
+*.jpg binary
+*.png binary
+
+# jar files are binary.
+*.jar binary
