@@ -5,22 +5,32 @@ import org.junit.*
 import org.junit.Assert.assertEquals
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.net.ServerSocket
 import java.net.Socket
 
-
 var clientSocket : Socket = Socket("localhost", 12321)
 var serverSocket : Socket = Socket("localhost", 12321)
-
-class ServerSocketInitializer(): Runnable {
-
-    override fun run() {
-        var halfOpenServerSocket = ServerSocket(12321)
-        serverSocket = halfOpenServerSocket.accept()
-    }
-}
+lateinit var clientReader: BufferedReader
+lateinit var serverReader: BufferedReader
+lateinit var clientWriter: OutputStream
+lateinit var serverWriter: OutputStream
 
 class SocketTests() {
+
+    class ServerSocketInitializer(): Runnable {
+
+        override fun run() {
+            var halfOpenServerSocket = ServerSocket(12321)
+            serverSocket = halfOpenServerSocket.accept()
+
+            //set up server and client input streams
+            clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
+            serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
+            clientWriter = clientSocket.getOutputStream()
+            serverWriter = serverSocket.getOutputStream()
+        }
+    }
 
     companion object{
         @BeforeClass @JvmStatic
@@ -47,12 +57,6 @@ class SocketTests() {
 
     @Test
     fun test200Response() {
-        //set up server and client input streams
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
-
         clientWriter.write("GET / HTTP/1.1\n".toByteArray())
         val serverInput = serverReader.readLine()
         if(serverInput == "GET / HTTP/1.1"){
@@ -64,12 +68,7 @@ class SocketTests() {
     }
 
     @Test
-    fun `I want to hit a homepage when I point my browser to the application domain`(){
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
-
+    fun testShouldGetHtmlResponseFromServer(){
         clientWriter.write("GET / HTTP/1.1\n".toByteArray())
         val serverInput = serverReader.readLine()
         if(serverInput == "GET / HTTP/1.1"){
@@ -83,12 +82,7 @@ class SocketTests() {
     }
 
     @Test
-    fun `should see a welcome message from an html file when GET requesting server`() {
-        val clientReader = BufferedReader(InputStreamReader(clientSocket.inputStream))
-        val serverReader = BufferedReader(InputStreamReader(serverSocket.inputStream))
-        val clientWriter = clientSocket.getOutputStream()
-        val serverWriter = serverSocket.getOutputStream()
-
+    fun testShouldGetHtmlFileResponseFromServer() {
         val webpage = FileReader.read("sample.html")
         clientWriter.write("GET / HTTP/1.1\n".toByteArray())
         val serverInput = serverReader.readLine()
@@ -96,7 +90,7 @@ class SocketTests() {
             serverWriter.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n${webpage}\n".toByteArray())
         }
 
-        repeat(2) {clientReader.readLine()}
+        repeat(1) {clientReader.readLine()}
         var body = ""
         var nextLine = clientReader.readLine()
         while (nextLine != "</html>") {
