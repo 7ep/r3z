@@ -1,6 +1,5 @@
 package coverosR3z.templating
 
-import coverosR3z.FileReader
 import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
@@ -61,9 +60,9 @@ class TemplatingTests {
 
     @Test
     fun `Should handle multiple values with a template file`() {
-        var toRender = FileReader.read("multiple_values_template.utl")
-        var actual = te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
-        var expected = FileReader.read("multiple_values.html")
+        val toRender = FileReader.read("multiple_values_template.utl")
+        val actual = te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
+        val expected = FileReader.read("multiple_values.html")
 
         assertEquals(expected, actual)
     }

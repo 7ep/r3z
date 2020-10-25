@@ -1,22 +1,27 @@
 package coverosR3z.server
 
-import coverosR3z.FileReader
-import org.junit.*
+import coverosR3z.templating.FileReader
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.BeforeClass
+import org.junit.Test
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.net.ServerSocket
 import java.net.Socket
 
 
-var clientSocket : Socket = Socket("localhost", 12321)
-var serverSocket : Socket = Socket("localhost", 12321)
+lateinit var clientSocket : Socket
+lateinit var serverSocket : Socket
+lateinit var halfOpenServerSocket : ServerSocket
+lateinit var server: Thread
+
+val contentLengthRegex = "Content-Length: (.*)$".toRegex()
 
 class ServerSocketInitializer(): Runnable {
 
     override fun run() {
-        val halfOpenServerSocket = ServerSocket(12321)
+        halfOpenServerSocket = ServerSocket(12321)
         serverSocket = halfOpenServerSocket.accept()
     }
 }
@@ -26,15 +31,16 @@ class SocketTests() {
     companion object{
         @BeforeClass @JvmStatic
         fun openSockets() {
-            val server = Thread(ServerSocketInitializer())
+            server = Thread(ServerSocketInitializer())
             server.start()
             clientSocket = Socket("localhost", 12321)
         }
 
         @AfterClass @JvmStatic
         fun closeSockets() {
-            serverSocket.close()
+            halfOpenServerSocket.close()
             clientSocket.close()
+            serverSocket.close()
         }
     }
 
@@ -102,57 +108,116 @@ class SocketTests() {
         assertEquals(webpage, body)
     }
 
+    /**
+     * This takes [testShouldGetHtmlFileResponseFromServer] and
+     * refactors it a bit so we can more easily separate the
+     * client and server code
+     */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_MaybeRefactored() {
         val server = IOHolder(serverSocket)
         val client = IOHolder(clientSocket)
 
-        val fileWeRead = FileReader.read("sample.html")
-        client.write("GET / HTTP/1.1\n")
+        // client - send a request to the server for the page we want
+        val pageDesired = "sample.html"
+        client.write("GET /$pageDesired HTTP/1.1\n")
 
-        val serverInput = server.readLine()
+        // server - handle the request
+        serverHandleRequest(server)
 
-        val status = "HTTP/1.1 200 OK"
-        val header = "Content-Length: ${fileWeRead.length}"
-        val input = "$status\n" +
-                "$header\n" +
-                "\n" +
-                "${fileWeRead}"
+        // client - read status line
+        val statusline = client.readLine()
+        // client - read the headers
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        // client - read the body
+        val body = client.read(length)
 
-        if(serverInput == "GET / HTTP/1.1"){
-            server.write(input)
-        }
-
-        val responseFromServer = client.read(input.length)
-        val body : String = getBody(responseFromServer)
-
-        assertEquals(fileWeRead, responseFromServer)
+        // assert all is well
+        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertEquals(1, headers.size)
+        assertEquals("Content-Length: 853", headers[0])
+        val fileWeRead = FileReader.read(pageDesired)
+        assertEquals(fileWeRead, body)
     }
 
-    private fun getBody(responseFromServer: String): String {
-        val regex = "\n\n".toRegex()
-        val results = regex.findAll(responseFromServer)
-        val body = results.map { r -> r.groupValues[1]}.toString()
-        return body
+    /**
+     * What should the server return if we ask for something
+     * the server doesn't have?
+     */
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_unfound() {
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
+
+        // send a request to the server for something that doesn't exist
+        client.write("GET /doesnotexist HTTP/1.1\n")
+
+        // server - handle the request
+        serverHandleRequest(server)
+
+        // client - read status line
+        val statusline = client.readLine()
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        val body = client.read(length)
+
+        // assert all is well
+        assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
+        assertEquals(1, headers.size)
+        assertEquals("Content-Length: 194", headers[0])
+        val fileWeRead = FileReader.read("404error.html")
+        assertEquals(fileWeRead, body)
     }
 
-    class IOHolder(socket: Socket) {
-        private val writer: OutputStream = socket.getOutputStream()
-        private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
+    /**
+     * What if we send a totally bad request, like GET BLAHBLAHBLAH
+     */
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_badRequest() {
+        val server = IOHolder(serverSocket)
+        val client = IOHolder(clientSocket)
 
-        fun write(input: String) {
-            writer.write(input.toByteArray())
-        }
+        // send a request to the server for something that doesn't exist
+        client.write("GET BLAHBLAHBLAH HTTP/1.1\n")
 
-        fun readLine(): String {
-            return reader.readLine()
-        }
+        // server - handle the request
+        serverHandleRequest(server)
 
-        fun read(len : Int) : String {
-            val cbuf = CharArray(len)
-            reader.read(cbuf, 0, len)
-            return cbuf.joinToString("")
-        }
+        // client - read status line
+        val statusline = client.readLine()
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        val body = client.read(length)
+
+        // assert all is well
+        assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
+        assertEquals(1, headers.size)
+        assertEquals("Content-Length: 194", headers[0])
+        val fileWeRead = FileReader.read("400error.html")
+        assertEquals(fileWeRead, body)
     }
+
+
+
+
+    /**
+     * Helper method to collect the headers line by line, stopping when it
+     * encounters an empty line
+     */
+    private fun getHeaders(client: IOHolder): MutableList<String> {
+        // get the headers
+        val headers = mutableListOf<String>()
+        while (true) {
+            val header = client.readLine()
+            if (header.length > 0) {
+                headers.add(header)
+            } else {
+                break
+            }
+        }
+        return headers
+    }
+
 
 }
