@@ -1,6 +1,7 @@
 package coverosR3z.templating
 
 import coverosR3z.logging.logDebug
+import java.lang.IllegalArgumentException
 import kotlin.collections.*
 
 
@@ -36,4 +37,17 @@ class TemplatingEngine {
         return rendered
     }
 
+}
+
+class FileReader {
+    companion object {
+        /**
+         * Read in template file as a string
+         */
+        fun read(filename: String) : String {
+            val foo = this::class.java.classLoader.getResource(filename)
+                ?: throw IllegalArgumentException("Could not read a filename of $filename")
+            return foo.readBytes().toString(Charsets.UTF_8)
+        }
+    }
 }

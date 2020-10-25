@@ -10,6 +10,7 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.json.Json
 import org.junit.Assert
+import java.lang.IllegalArgumentException
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -101,13 +102,3 @@ fun initializeAUserAndLogin(cua : CurrentUserAccessor) : Pair<TimeRecordingUtili
         return Pair(tru, alice)
 }
 
-class FileReader {
-        companion object {
-                /**
-                 * Read in template file as a string
-                 */
-                fun read(filename: String) : String {
-                        return this.javaClass.classLoader.getResource(filename)!!.readBytes().toString(Charsets.UTF_8)
-                }
-        }
-}
