@@ -42,8 +42,6 @@ class SocketTests() {
         @AfterClass @JvmStatic
         fun closeSockets() {
             halfOpenServerSocket.close()
-            clientSocket.close()
-            serverSocket.close()
         }
     }
 
