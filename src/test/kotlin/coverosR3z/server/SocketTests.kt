@@ -169,23 +169,31 @@ class SocketTests() {
     @Test
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
         // send a request to the server for something that doesn't exist
-        client.write("GET BLAHBLAHBLAH HTTP/1.1\n")
+        val badRequests = listOf(
+                "GET BLAHBLAHBLAH HTTP/1.1\n",
+                "GET\n",
+                "BLAHBLAHBLAH HTTP/1.1\n",
+                "HTTP/1.1\n",
+        )
+        for (request in badRequests) {
+            client.write(request)
 
-        // server - handle the request
-        serverHandleRequest(server)
+            // server - handle the request
+            serverHandleRequest(server)
 
-        // client - read status line
-        val statusline = client.readLine()
-        val headers = getHeaders(client)
-        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
-        val body = client.read(length)
+            // client - read status line
+            val statusline = client.readLine()
+            val headers = getHeaders(client)
+            val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+            val body = client.read(length)
 
-        // assert all is well
-        assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
-        assertEquals(1, headers.size)
-        assertEquals("Content-Length: 194", headers[0])
-        val fileWeRead = FileReader.read("400error.html")
-        assertEquals(fileWeRead, body)
+            // assert all is well
+            assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
+            assertEquals(1, headers.size)
+            assertEquals("Content-Length: 194", headers[0])
+            val fileWeRead = FileReader.read("400error.html")
+            assertEquals(fileWeRead, body)
+        }
     }
 
     /**
