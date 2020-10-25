@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.templating.FileReader
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.BufferedReader
@@ -14,7 +15,9 @@ import java.net.Socket
 lateinit var clientSocket : Socket
 lateinit var serverSocket : Socket
 lateinit var halfOpenServerSocket : ServerSocket
-lateinit var server: Thread
+lateinit var serverThread: Thread
+lateinit var server : IOHolder
+lateinit var client : IOHolder
 
 val contentLengthRegex = "Content-Length: (.*)$".toRegex()
 
@@ -31,8 +34,8 @@ class SocketTests() {
     companion object{
         @BeforeClass @JvmStatic
         fun openSockets() {
-            server = Thread(ServerSocketInitializer())
-            server.start()
+            serverThread = Thread(ServerSocketInitializer())
+            serverThread.start()
             clientSocket = Socket("localhost", 12321)
         }
 
@@ -42,6 +45,12 @@ class SocketTests() {
             clientSocket.close()
             serverSocket.close()
         }
+    }
+
+    @Before
+    fun init() {
+        server = IOHolder(serverSocket)
+        client = IOHolder(clientSocket)
     }
 
     @Test
@@ -54,10 +63,6 @@ class SocketTests() {
 
     @Test
     fun test200Response() {
-        //set up server and client input streams
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         client.write("GET / HTTP/1.1\n")
         val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
@@ -70,9 +75,6 @@ class SocketTests() {
 
     @Test
     fun testShouldGetHtmlResponseFromServer(){
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         client.write("GET / HTTP/1.1\n")
         val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
@@ -87,9 +89,6 @@ class SocketTests() {
 
     @Test
     fun testShouldGetHtmlFileResponseFromServer() {
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         val webpage = FileReader.read("sample.html")
         client.write("GET / HTTP/1.1\n")
         val serverInput = server.readLine()
@@ -115,9 +114,6 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_MaybeRefactored() {
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         // client - send a request to the server for the page we want
         val pageDesired = "sample.html"
         client.write("GET /$pageDesired HTTP/1.1\n")
@@ -147,9 +143,6 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         // send a request to the server for something that doesn't exist
         client.write("GET /doesnotexist HTTP/1.1\n")
 
@@ -175,9 +168,6 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
-        val server = IOHolder(serverSocket)
-        val client = IOHolder(clientSocket)
-
         // send a request to the server for something that doesn't exist
         client.write("GET BLAHBLAHBLAH HTTP/1.1\n")
 
@@ -197,9 +187,6 @@ class SocketTests() {
         val fileWeRead = FileReader.read("400error.html")
         assertEquals(fileWeRead, body)
     }
-
-
-
 
     /**
      * Helper method to collect the headers line by line, stopping when it
