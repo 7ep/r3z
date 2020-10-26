@@ -123,17 +123,9 @@ class SocketTests() {
             server.write(input)
         }
 
-        val responseFromServer = client.read(input.length)
-        val body : String = getBody(responseFromServer)
+        var responseFromServer = client.read(input.length).substring("$status\n$header\n\n".length)
 
         assertEquals(fileWeRead, responseFromServer)
-    }
-
-    private fun getBody(responseFromServer: String): String {
-        val regex = "\n\n".toRegex()
-        val results = regex.findAll(responseFromServer)
-        val body = results.map { r -> r.groupValues[1]}.toString()
-        return body
     }
 
     class IOHolder(socket: Socket) {
