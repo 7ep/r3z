@@ -1,9 +1,8 @@
 package coverosR3z.templating
 
-import org.junit.Assert.*
-import org.junit.Ignore
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.lang.AssertionError
 
 class TemplatingTests {
 

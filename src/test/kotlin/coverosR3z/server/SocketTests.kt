@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -136,6 +137,32 @@ class SocketTests() {
     }
 
     /**
+     * What if we ask for nothing? like, GET / HTTP/1.1
+     */
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_AskForNothing() {
+        // client - send a request to the server for the page we want
+        client.write("GET / HTTP/1.1\n")
+
+        // server - handle the request
+        serverHandleRequest(server)
+
+        // client - read status line
+        val statusline = client.readLine()
+        // client - read the headers
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        // client - read the body
+        val body = client.read(length)
+        logDebug(body)
+
+        // assert all is well
+        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertEquals(1, headers.size)
+//        assertEquals("Content-Length: 853", headers[0])
+    }
+
+    /**
      * What should the server return if we ask for something
      * the server doesn't have?
      */
@@ -213,7 +240,7 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-//        assertEquals("Content-Length: 194", headers[0])
+        assertEquals("Content-Length: 853", headers[0])
         val fileWeRead = FileReader.read("sample.html")
         assertEquals(fileWeRead, body)
     }
