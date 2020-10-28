@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.templating.FileReader
+import coverosR3z.templating.TemplatingEngine
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -48,24 +49,47 @@ class IOHolder(socket: Socket) {
 fun serverHandleRequest(server: IOHolder) {
     // read a line
     val serverInput = server.readLine()
-
-    // check that we got a valid client request
-    // if we didn't get a good result from looking at the client's
-    // request, something is horribly wrong - return a 400
-    // result == null means we didn't match anything (I think)
     val result: MatchResult? = pageExtractorRegex.matchEntire(serverInput)
+
+    // if the server request doesn't match our regex, it's invalid
     if (result == null) {
         handleInvalidRequest(server)
-    } else {
-        try {
-            // read the file requested by the client
-            val fileRequested = result.groups[1]!!.value
-            returnFile(fileRequested, server)
-        } catch (ex : IllegalArgumentException) {
-            handleUnfound(server)
-        }
+        return
     }
 
+    // get the file requested
+    val requestedFileMatch = result.groups[1]
+
+    // if the file requested is null (how does this happen, again?), it's invalid
+    if (requestedFileMatch == null) {
+        handleInvalidRequest(server)
+        return
+    }
+
+    val requestedFile = requestedFileMatch.value
+
+    val isFound: Boolean = FileReader.exists(requestedFile)
+    if (!isFound) {
+        handleUnfound(server)
+        return
+    }
+
+    val fileToSend = if (requestedFile.takeLast(4) == ".utl") {
+        renderTemplate(requestedFile)
+    } else {
+        FileReader.read(requestedFile)
+    }
+
+    returnData(fileToSend, server)
+
+}
+
+private fun renderTemplate(requestedFile: String): String {
+    val template = FileReader.read(requestedFile)
+    val te = TemplatingEngine()
+    // TODO: replace following code ASAP
+    val mapping = mapOf("username" to "Jona")
+    return te.render(template, mapping)
 }
 
 /**
@@ -85,19 +109,17 @@ private fun handleUnfound(server: IOHolder) {
 }
 
 /**
- * Return the requested file, if we have it, from a
- * request like GET /file HTTP/1.1
+ * sends data as the body of a response from server
  */
-private fun returnFile(fileRequested: String, server: IOHolder) {
+private fun returnData(dataToSend: String, server: IOHolder) {
     // server - send a page to the client
     // prepare some data to send from the server
     val status = "HTTP/1.1 200 OK"
-    val fileWeRead = FileReader.read(fileRequested)
-    val header = "Content-Length: ${fileWeRead.length}"
+    val header = "Content-Length: ${dataToSend.length}"
     val input = "$status\n" +
             "$header\n" +
             "\n" +
-            fileWeRead
+            dataToSend
     server.write(input)
 }
 
