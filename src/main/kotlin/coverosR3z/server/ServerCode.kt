@@ -46,53 +46,74 @@ class IOHolder(socket: Socket) {
  * GET / HTTP/1.1
  */
 fun serverHandleRequest(server: IOHolder) {
-    // server - read a line
+    // read a line
     val serverInput = server.readLine()
-
-    val result: MatchResult? = pageExtractorRegex.matchEntire(serverInput)
 
     // check that we got a valid client request
     // if we didn't get a good result from looking at the client's
     // request, something is horribly wrong - return a 400
     // result == null means we didn't match anything (I think)
+    val result: MatchResult? = pageExtractorRegex.matchEntire(serverInput)
     if (result == null) {
-        // prepare some data to send from the server
-        val status = "HTTP/1.1 400 BAD REQUEST"
-        val fileWeRead = FileReader.read("400error.html")
-        val header = "Content-Length: ${fileWeRead.length}"
-        val input = "$status\n" +
-                "$header\n" +
-                "\n" +
-                fileWeRead
-        server.write(input)
-        return
+        handleInvalidRequest(server)
+    } else {
+        try {
+            // read the file requested by the client
+            val fileRequested = result.groups[1]!!.value
+            returnFile(fileRequested, server)
+        } catch (ex : IllegalArgumentException) {
+            handleUnfound(server)
+        }
     }
 
-    // read the file requested by the client
-    val fileRequested = result.groups[1]!!.value
-    try {
-        // server - send a page to the client
-        // prepare some data to send from the server
-        val status = "HTTP/1.1 200 OK"
-        val fileWeRead = FileReader.read(fileRequested)
-        val header = "Content-Length: ${fileWeRead.length}"
-        val input = "$status\n" +
-                "$header\n" +
-                "\n" +
-                fileWeRead
-        server.write(input)
-        return
-    } catch (ex : IllegalArgumentException) {
-        // prepare some data to send from the server
-        val status = "HTTP/1.1 404 NOT FOUND"
-        val fileWeRead = FileReader.read("404error.html")
-        val header = "Content-Length: ${fileWeRead.length}"
-        val input = "$status\n" +
-                "$header\n" +
-                "\n" +
-                fileWeRead
-        server.write(input)
-        return
-    }
+}
 
+/**
+ * If we are asked for something we don't have, like
+ * if they request GET /foo HTTP/1.1 and we don't have foo
+ */
+private fun handleUnfound(server: IOHolder) {
+    // prepare some data to send from the server
+    val status = "HTTP/1.1 404 NOT FOUND"
+    val fileWeRead = FileReader.read("404error.html")
+    val header = "Content-Length: ${fileWeRead.length}"
+    val input = "$status\n" +
+            "$header\n" +
+            "\n" +
+            fileWeRead
+    server.write(input)
+}
+
+/**
+ * Return the requested file, if we have it, from a
+ * request like GET /file HTTP/1.1
+ */
+private fun returnFile(fileRequested: String, server: IOHolder) {
+    // server - send a page to the client
+    // prepare some data to send from the server
+    val status = "HTTP/1.1 200 OK"
+    val fileWeRead = FileReader.read(fileRequested)
+    val header = "Content-Length: ${fileWeRead.length}"
+    val input = "$status\n" +
+            "$header\n" +
+            "\n" +
+            fileWeRead
+    server.write(input)
+}
+
+/**
+ * If we are sent an invalid request,
+ * like BLAH BLAH BLAH BLAH
+ * instead of GET / HTTP/1.1
+ */
+private fun handleInvalidRequest(server: IOHolder) {
+    // prepare some data to send from the server
+    val status = "HTTP/1.1 400 BAD REQUEST"
+    val fileWeRead = FileReader.read("400error.html")
+    val header = "Content-Length: ${fileWeRead.length}"
+    val input = "$status\n" +
+            "$header\n" +
+            "\n" +
+            fileWeRead
+    server.write(input)
 }
