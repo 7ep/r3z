@@ -160,7 +160,6 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-//        assertEquals("Content-Length: 853", headers[0])
     }
 
     /**
