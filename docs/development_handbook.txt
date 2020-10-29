@@ -11,3 +11,25 @@ Developer handbook
     ------------
 
     When writing tests, you might find some of the functions in TestHelpers.kt handy
+
+
+    Invariants
+    ----------
+
+    We hold these truths to be self-evident in our code...
+
+    fun require(value: Boolean)
+    Throws an IllegalArgumentException if the value is false.
+
+    fun check(value: Boolean)
+    Throws an IllegalStateException if the value is false.
+
+    fun <T : Any> checkNotNull(value: T?): T
+    Throws an IllegalStateException if the value is null.
+    Otherwise returns the not null value.
+
+    fun assert(value: Boolean)
+    For JVM
+    Throws an AssertionError if the value is false and runtime assertions
+    have been enabled on the JVM using the -ea JVM option.
+    (Maybe *not* best to use this, we want these invariants to always work)

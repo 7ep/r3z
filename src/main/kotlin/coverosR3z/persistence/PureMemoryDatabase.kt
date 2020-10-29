@@ -71,7 +71,8 @@ class PureMemoryDatabase {
     }
 
     fun getAllTimeEntriesForEmployee(employee: Employee): List<TimeEntry> {
-        return timeEntries[employee]!!.filter{ te -> te.employee.id == employee.id}
+        val employees = checkNotNull(timeEntries[employee]) {"This employee, ${employee.name}, does not exist in the map of time entries"}
+        return employees.filter{ te -> te.employee.id == employee.id}
     }
 
     fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
