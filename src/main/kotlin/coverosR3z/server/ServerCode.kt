@@ -8,6 +8,8 @@ import java.io.OutputStream
 import java.lang.IllegalArgumentException
 import java.net.Socket
 
+data class PreparedResponseData(val fileContents: String, val server: IOHolder, val code: String, val status: String)
+
 /**
  * This is our regex for looking at a client's request
  * and determining what to send them.  For example,
@@ -42,46 +44,43 @@ class IOHolder(socket: Socket) {
 }
 
 /**
+ * Serve prepared response object to the client
+ */
+fun serverHandleRequest(server: IOHolder) {
+    returnData(prepareResponseData(server))
+}
+
+/**
  * Code on the server that will handle a request from a
  * client.  This is hardcoded to handle just one thing:
  * GET / HTTP/1.1
+ * Prepares a response object to be served to the client
  */
-fun serverHandleRequest(server: IOHolder) {
+fun prepareResponseData(server: IOHolder): PreparedResponseData {
     // read a line
     val serverInput = server.readLine()
-    val result: MatchResult? = pageExtractorRegex.matchEntire(serverInput)
+    val result: MatchResult = pageExtractorRegex.matchEntire(serverInput)
+            ?: return PreparedResponseData(FileReader.read("400error.html"), server, "400", "BAD REQUEST")
 
     // if the server request doesn't match our regex, it's invalid
-    if (result == null) {
-        handleInvalidRequest(server)
-        return
-    }
-
     // get the file requested
-    val requestedFileMatch = result.groups[1]
+    val requestedFileMatch = checkNotNull(result.groups[1])
 
-    // if the file requested is null (how does this happen, again?), it's invalid
-    if (requestedFileMatch == null) {
-        handleInvalidRequest(server)
-        return
-    }
+    val fileToRead = requestedFileMatch.value
 
-    val requestedFile = requestedFileMatch.value
+    val isFound: Boolean = FileReader.exists(fileToRead)
 
-    val isFound: Boolean = FileReader.exists(requestedFile)
     if (!isFound) {
-        handleUnfound(server)
-        return
+        return PreparedResponseData(FileReader.read("404error.html"), server, "404", "NOT FOUND")
     }
 
-    val fileToSend = if (requestedFile.takeLast(4) == ".utl") {
-        renderTemplate(requestedFile)
+    val file = if (fileToRead.takeLast(4) == ".utl") {
+        renderTemplate(fileToRead)
     } else {
-        FileReader.read(requestedFile)
+        FileReader.read(fileToRead)
     }
 
-    returnData(fileToSend, server)
-
+    return PreparedResponseData(file, server, "200", "OK")
 }
 
 private fun renderTemplate(requestedFile: String): String {
@@ -93,49 +92,15 @@ private fun renderTemplate(requestedFile: String): String {
 }
 
 /**
- * If we are asked for something we don't have, like
- * if they request GET /foo HTTP/1.1 and we don't have foo
- */
-private fun handleUnfound(server: IOHolder) {
-    // prepare some data to send from the server
-    val status = "HTTP/1.1 404 NOT FOUND"
-    val fileWeRead = FileReader.read("404error.html")
-    val header = "Content-Length: ${fileWeRead.length}"
-    val input = "$status\n" +
-            "$header\n" +
-            "\n" +
-            fileWeRead
-    server.write(input)
-}
-
-/**
  * sends data as the body of a response from server
  */
-private fun returnData(dataToSend: String, server: IOHolder) {
-    // server - send a page to the client
-    // prepare some data to send from the server
-    val status = "HTTP/1.1 200 OK"
-    val header = "Content-Length: ${dataToSend.length}"
-    val input = "$status\n" +
-            "$header\n" +
-            "\n" +
-            dataToSend
-    server.write(input)
-}
+private fun returnData(data: PreparedResponseData) {
 
-/**
- * If we are sent an invalid request,
- * like BLAH BLAH BLAH BLAH
- * instead of GET / HTTP/1.1
- */
-private fun handleInvalidRequest(server: IOHolder) {
-    // prepare some data to send from the server
-    val status = "HTTP/1.1 400 BAD REQUEST"
-    val fileWeRead = FileReader.read("400error.html")
-    val header = "Content-Length: ${fileWeRead.length}"
+    val status = "HTTP/1.1 ${data.code} ${data.status}"
+    val header = "Content-Length: ${data.fileContents.length}"
     val input = "$status\n" +
             "$header\n" +
             "\n" +
-            fileWeRead
-    server.write(input)
+            data.fileContents
+    data.server.write(input)
 }
