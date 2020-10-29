@@ -42,7 +42,7 @@ class TemplatingTests {
 
     @Test
     fun `can read from template file and apply username value`() {
-        val toRender = FileReader.read("sample_template.utl")
+        val toRender = FileReader.readNotNull("sample_template.utl")
         val actual = te.render(toRender, mapOf("username" to "Jona"))
         val expected = FileReader.read("sample.html")
 
@@ -59,7 +59,7 @@ class TemplatingTests {
 
     @Test
     fun `Should handle multiple values with a template file`() {
-        val toRender = FileReader.read("multiple_values_template.utl")
+        val toRender = FileReader.readNotNull("multiple_values_template.utl")
         val actual = te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
         val expected = FileReader.read("multiple_values.html")
 
