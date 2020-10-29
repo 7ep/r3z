@@ -246,34 +246,6 @@ class SocketTests() {
     }
 
     /**
-     * Our code looks at the last four characters to see
-     * if it's a template file, in which case it would
-     * render the template.  What happens if the file requested
-     * is less than four characters?
-     */
-    @Test
-    fun testShouldGetHtmlFileResponseFromServer_templateCode_LessThanFourCharacters() {
-        client.write("GET /utl HTTP/1.1\n")
-
-        // server - handle the request
-        serverHandleRequest(server)
-
-        // client - read status line
-        val statusline = client.readLine()
-        val headers = getHeaders(client)
-        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
-        val body = client.read(length)
-
-        // assert all is well
-        assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
-        assertEquals(1, headers.size)
-        assertEquals("Content-Length: 194", headers[0])
-        val fileWeRead = FileReader.read("404error.html")
-        assertEquals(fileWeRead, body)
-    }
-
-
-    /**
      * Helper method to collect the headers line by line, stopping when it
      * encounters an empty line
      */
