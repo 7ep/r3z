@@ -37,7 +37,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `It should not be possible to create a password longer than 255 characters`() {
         val password = "a".repeat(256)
-        assert(password.length == 256)
+        assertTrue(password.length == 256)
 
         val result = authUtils.register("matt", password)
 
@@ -47,7 +47,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `A 255-character password should succeed`() {
         val password = "a".repeat(255)
-        assert(password.length == 255)
+        assertTrue(password.length == 255)
 
         val result = authUtils.register("matt", password)
 
@@ -60,7 +60,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `A 11 character password should fail`() {
         val password = "a".repeat(11)
-        assert(password.length == 11)
+        assertTrue(password.length == 11)
 
         val result = authUtils.register("matt", password)
 
@@ -70,7 +70,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `An 12 character password is a-ok`() {
         val password = "a".repeat(12)
-        assert(password.length == 12)
+        assertTrue(password.length == 12)
 
         val result = authUtils.register("matt", password)
 

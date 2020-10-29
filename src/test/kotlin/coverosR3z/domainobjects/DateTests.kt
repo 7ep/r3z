@@ -46,7 +46,7 @@ class DateTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong, too high a year`() {
-        val ex = assertThrows(AssertionError::class.java) { json.decodeFromString(Date.serializer(), """{"epochDay":91438}""") }
+        val ex = assertThrows(IllegalArgumentException::class.java) { json.decodeFromString(Date.serializer(), """{"epochDay":91438}""") }
         assertEquals("no way on earth people are using this before 2020 or past 2100, you had a date of 2220-05-08", ex.message)
     }
 }

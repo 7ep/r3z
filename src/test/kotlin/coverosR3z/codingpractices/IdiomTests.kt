@@ -32,4 +32,5 @@ class IdiomTests {
         val thrownException = assertThrows(IllegalStateException::class.java) { checkNotNull(value) {"This really really should not be null"} }
         assertEquals("This really really should not be null", thrownException.message)
     }
+
 }

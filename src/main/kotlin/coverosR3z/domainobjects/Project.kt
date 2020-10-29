@@ -14,7 +14,7 @@ private const val emptyProjectNameMsg = "Makes no sense to have an empty project
 @Serializable
 data class ProjectName(val value: String) {
     init {
-        assert(value.isNotEmpty()) {emptyProjectNameMsg}
+        require(value.isNotEmpty()) {emptyProjectNameMsg}
     }
 }
 
@@ -25,8 +25,8 @@ data class ProjectName(val value: String) {
 data class Project(val id: Int, val name: String) {
 
     init {
-        assert(name.isNotEmpty()) {emptyProjectNameMsg}
-        assert(id < maximumProjectsCount) { maxProjectErrorMsg }
+        require(name.isNotEmpty()) {emptyProjectNameMsg}
+        require(id < maximumProjectsCount) { maxProjectErrorMsg }
     }
 
 }
@@ -34,6 +34,6 @@ data class Project(val id: Int, val name: String) {
 @Serializable
 data class ProjectId(val id: Int) {
     init {
-        assert(id < maximumProjectsCount) { maxProjectErrorMsg }
+        require(id < maximumProjectsCount) { maxProjectErrorMsg }
     }
 }

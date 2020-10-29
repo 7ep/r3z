@@ -14,7 +14,7 @@ private const val nameCannotBeEmptyMsg = "All employees must have a non-empty na
 @Serializable
 data class EmployeeName(val value: String) {
     init {
-        assert(value.isNotEmpty()) {nameCannotBeEmptyMsg}
+        require(value.isNotEmpty()) {nameCannotBeEmptyMsg}
     }
 }
 
@@ -22,9 +22,9 @@ data class EmployeeName(val value: String) {
 data class Employee(val id: Int, val name: String) {
 
     init {
-        assert(name.isNotEmpty()) {nameCannotBeEmptyMsg}
-        assert(id < maxEmployeeCount) { maxEmployeeMsg }
-        assert(id > 0) { minIdMsg }
+        require(name.isNotEmpty()) {nameCannotBeEmptyMsg}
+        require(id < maxEmployeeCount) { maxEmployeeMsg }
+        require(id > 0) { minIdMsg }
     }
 
 }

@@ -32,7 +32,7 @@ class CurrentUserAccessorTests {
         val cua = CurrentUserAccessor()
         cua.clearCurrentUserTestOnly()
         cua.set(DEFAULT_USER)
-        assertThrows(AssertionError::class.java) {cua.set(NOT_DEFAULT_USER)}
+        assertThrows(IllegalArgumentException::class.java) {cua.set(NOT_DEFAULT_USER)}
     }
 
     @Test

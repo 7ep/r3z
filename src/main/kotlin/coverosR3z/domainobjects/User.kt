@@ -17,7 +17,7 @@ private const val hashCannotBeEmptyMsg = "All users must have a hash"
 @Serializable
 data class UserName(val value: String){
     init {
-        assert(value.isNotBlank()) {nameCannotBeEmptyMsg}
+        require(value.isNotBlank()) {nameCannotBeEmptyMsg}
     }
 }
 
@@ -25,9 +25,9 @@ data class UserName(val value: String){
 data class User(val id: Int, val name: String, val hash: Hash, val salt: String, val employeeId: Int?) {
 
     init {
-        assert(name.isNotBlank()) {nameCannotBeEmptyMsg}
-        assert(id < maxUserCount) { maxUserMsg }
-        assert(id > 0) { minIdMsg }
+        require(name.isNotBlank()) {nameCannotBeEmptyMsg}
+        require(id < maxUserCount) { maxUserMsg }
+        require(id > 0) { minIdMsg }
     }
 }
 
