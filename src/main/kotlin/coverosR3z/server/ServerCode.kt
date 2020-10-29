@@ -34,24 +34,24 @@ class ServerUtilities(private val server: IOHolder) {
 
     private fun prepareDataForServing(action: Action): PreparedResponseData {
         return when (action.type) {
-
-            ResponseType.BAD_REQUEST -> {
-                PreparedResponseData(FileReader.readNotNull("400error.html"), "400", "BAD REQUEST")
-            }
+            ResponseType.BAD_REQUEST -> handleBadRequest()
 
             ResponseType.READ_FILE,
-            ResponseType.TEMPLATE -> {
-                val fileContents = FileReader.read(action.filename)
-                if (fileContents == null) {
-                    PreparedResponseData(FileReader.readNotNull("404error.html"), "404", "NOT FOUND")
-                } else {
-                    if (action.type == ResponseType.TEMPLATE) {
-                        PreparedResponseData(renderTemplate(fileContents), "200", "OK")
-                    } else {
-                        PreparedResponseData(fileContents, "200", "OK")
-                    }
+            ResponseType.TEMPLATE ->  handleReadingFiles(action)
+        }
+    }
 
-                }
+    private fun handleBadRequest() = PreparedResponseData(FileReader.readNotNull("400error.html"), "400", "BAD REQUEST")
+
+    private fun handleReadingFiles(action: Action): PreparedResponseData {
+        val fileContents = FileReader.read(action.filename)
+        return if (fileContents == null) {
+            PreparedResponseData(FileReader.readNotNull("404error.html"), "404", "NOT FOUND")
+        } else {
+            if (action.type == ResponseType.TEMPLATE) {
+                PreparedResponseData(renderTemplate(fileContents), "200", "OK")
+            } else {
+                PreparedResponseData(fileContents, "200", "OK")
             }
 
         }
