@@ -8,7 +8,7 @@ import java.io.OutputStream
 import java.lang.IllegalArgumentException
 import java.net.Socket
 
-data class PreparedResponseData(val fileContents: String, val server: IOHolder, val code: String, val status: String)
+data class PreparedResponseData(val fileContents: String, val code: String, val status: String)
 
 /**
  * This is our regex for looking at a client's request
@@ -61,7 +61,7 @@ class ServerUtilities(val server: IOHolder) {
         // read a line
         val serverInput = server.readLine()
         val result: MatchResult = pageExtractorRegex.matchEntire(serverInput)
-                ?: return PreparedResponseData(FileReader.read("400error.html"), server, "400", "BAD REQUEST")
+                ?: return PreparedResponseData(FileReader.read("400error.html"), "400", "BAD REQUEST")
 
         // if the server request doesn't match our regex, it's invalid
         // get the file requested
@@ -72,7 +72,7 @@ class ServerUtilities(val server: IOHolder) {
         val isFound: Boolean = FileReader.exists(fileToRead)
 
         if (!isFound) {
-            return PreparedResponseData(FileReader.read("404error.html"), server, "404", "NOT FOUND")
+            return PreparedResponseData(FileReader.read("404error.html"), "404", "NOT FOUND")
         }
 
         val file = if (fileToRead.takeLast(4) == ".utl") {
@@ -81,7 +81,7 @@ class ServerUtilities(val server: IOHolder) {
             FileReader.read(fileToRead)
         }
 
-        return PreparedResponseData(file, server, "200", "OK")
+        return PreparedResponseData(file, "200", "OK")
     }
 
     private fun renderTemplate(requestedFile: String): String {
@@ -103,6 +103,6 @@ class ServerUtilities(val server: IOHolder) {
                 "$header\n" +
                 "\n" +
                 data.fileContents
-        data.server.write(input)
+        server.write(input)
     }
 }
