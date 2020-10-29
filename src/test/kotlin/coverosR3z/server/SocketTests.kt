@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import com.sun.security.ntlm.Server
 import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
 import org.junit.AfterClass
@@ -20,6 +21,7 @@ lateinit var halfOpenServerSocket : ServerSocket
 lateinit var serverThread: Thread
 lateinit var server : IOHolder
 lateinit var client : IOHolder
+lateinit var su: ServerUtilities
 
 val contentLengthRegex = "Content-Length: (.*)$".toRegex()
 
@@ -50,6 +52,7 @@ class SocketTests() {
     @Before
     fun init() {
         server = IOHolder(serverSocket)
+        su = ServerUtilities(server)
         client = IOHolder(clientSocket)
     }
 
@@ -119,7 +122,7 @@ class SocketTests() {
         client.write("GET /$pageDesired HTTP/1.1\n")
 
         // server - handle the request
-        serverHandleRequest(server)
+        su.serverHandleRequest()
 
         // client - read status line
         val statusline = client.readLine()
@@ -146,7 +149,7 @@ class SocketTests() {
         client.write("GET / HTTP/1.1\n")
 
         // server - handle the request
-        serverHandleRequest(server)
+        su.serverHandleRequest()
 
         // client - read status line
         val statusline = client.readLine()
@@ -172,7 +175,7 @@ class SocketTests() {
         client.write("GET /doesnotexist HTTP/1.1\n")
 
         // server - handle the request
-        serverHandleRequest(server)
+        su.serverHandleRequest()
 
         // client - read status line
         val statusline = client.readLine()
@@ -204,7 +207,7 @@ class SocketTests() {
             client.write(request)
 
             // server - handle the request
-            serverHandleRequest(server)
+            su.serverHandleRequest()
 
             // client - read status line
             val statusline = client.readLine()
@@ -229,7 +232,7 @@ class SocketTests() {
         client.write("GET /sample_template.utl HTTP/1.1\n")
 
         // server - handle the request
-        serverHandleRequest(server)
+        su.serverHandleRequest()
 
         // client - read status line
         val statusline = client.readLine()

@@ -43,64 +43,66 @@ class IOHolder(socket: Socket) {
     }
 }
 
-/**
- * Serve prepared response object to the client
- */
-fun serverHandleRequest(server: IOHolder) {
-    returnData(prepareResponseData(server))
-}
-
-/**
- * Code on the server that will handle a request from a
- * client.  This is hardcoded to handle just one thing:
- * GET / HTTP/1.1
- * Prepares a response object to be served to the client
- */
-fun prepareResponseData(server: IOHolder): PreparedResponseData {
-    // read a line
-    val serverInput = server.readLine()
-    val result: MatchResult = pageExtractorRegex.matchEntire(serverInput)
-            ?: return PreparedResponseData(FileReader.read("400error.html"), server, "400", "BAD REQUEST")
-
-    // if the server request doesn't match our regex, it's invalid
-    // get the file requested
-    val requestedFileMatch = checkNotNull(result.groups[1])
-
-    val fileToRead = requestedFileMatch.value
-
-    val isFound: Boolean = FileReader.exists(fileToRead)
-
-    if (!isFound) {
-        return PreparedResponseData(FileReader.read("404error.html"), server, "404", "NOT FOUND")
+class ServerUtilities(val server: IOHolder) {
+    /**
+     * Serve prepared response object to the client
+     */
+    fun serverHandleRequest() {
+        returnData(prepareResponseData())
     }
 
-    val file = if (fileToRead.takeLast(4) == ".utl") {
-        renderTemplate(fileToRead)
-    } else {
-        FileReader.read(fileToRead)
+    /**
+     * Code on the server that will handle a request from a
+     * client.  This is hardcoded to handle just one thing:
+     * GET / HTTP/1.1
+     * Prepares a response object to be served to the client
+     */
+    private fun prepareResponseData(): PreparedResponseData {
+        // read a line
+        val serverInput = server.readLine()
+        val result: MatchResult = pageExtractorRegex.matchEntire(serverInput)
+                ?: return PreparedResponseData(FileReader.read("400error.html"), server, "400", "BAD REQUEST")
+
+        // if the server request doesn't match our regex, it's invalid
+        // get the file requested
+        val requestedFileMatch = checkNotNull(result.groups[1])
+
+        val fileToRead = requestedFileMatch.value
+
+        val isFound: Boolean = FileReader.exists(fileToRead)
+
+        if (!isFound) {
+            return PreparedResponseData(FileReader.read("404error.html"), server, "404", "NOT FOUND")
+        }
+
+        val file = if (fileToRead.takeLast(4) == ".utl") {
+            renderTemplate(fileToRead)
+        } else {
+            FileReader.read(fileToRead)
+        }
+
+        return PreparedResponseData(file, server, "200", "OK")
     }
 
-    return PreparedResponseData(file, server, "200", "OK")
-}
+    private fun renderTemplate(requestedFile: String): String {
+        val template = FileReader.read(requestedFile)
+        val te = TemplatingEngine()
+        // TODO: replace following code ASAP
+        val mapping = mapOf("username" to "Jona")
+        return te.render(template, mapping)
+    }
 
-private fun renderTemplate(requestedFile: String): String {
-    val template = FileReader.read(requestedFile)
-    val te = TemplatingEngine()
-    // TODO: replace following code ASAP
-    val mapping = mapOf("username" to "Jona")
-    return te.render(template, mapping)
-}
+    /**
+     * sends data as the body of a response from server
+     */
+    private fun returnData(data: PreparedResponseData) {
 
-/**
- * sends data as the body of a response from server
- */
-private fun returnData(data: PreparedResponseData) {
-
-    val status = "HTTP/1.1 ${data.code} ${data.status}"
-    val header = "Content-Length: ${data.fileContents.length}"
-    val input = "$status\n" +
-            "$header\n" +
-            "\n" +
-            data.fileContents
-    data.server.write(input)
+        val status = "HTTP/1.1 ${data.code} ${data.status}"
+        val header = "Content-Length: ${data.fileContents.length}"
+        val input = "$status\n" +
+                "$header\n" +
+                "\n" +
+                data.fileContents
+        data.server.write(input)
+    }
 }
