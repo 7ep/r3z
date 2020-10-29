@@ -1,6 +1,5 @@
 package coverosR3z.server
 
-import com.sun.security.ntlm.Server
 import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
 import org.junit.AfterClass

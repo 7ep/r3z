@@ -2,12 +2,10 @@ package coverosR3z.server
 
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStream
-import java.lang.IllegalArgumentException
-import java.net.Socket
 
+/**
+ * Data for shipping to the client
+ */
 data class PreparedResponseData(val fileContents: String, val code: String, val status: String)
 
 /**
@@ -20,72 +18,98 @@ data class PreparedResponseData(val fileContents: String, val code: String, val 
  */
 val pageExtractorRegex = "GET /(.*) HTTP/1.1".toRegex()
 
-/**
- * Provides access to the reading and writing functions on a socket
- * in a standardized, tightly-controlled way
- */
-class IOHolder(socket: Socket) {
-    private val writer: OutputStream = socket.getOutputStream()
-    private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
+class ServerUtilities(private val server: IOHolder) {
 
-    fun write(input: String) {
-        writer.write(input.toByteArray())
-    }
-
-    fun readLine(): String {
-        return reader.readLine()
-    }
-
-    fun read(len : Int) : String {
-        val cbuf = CharArray(len)
-        reader.read(cbuf, 0, len)
-        return cbuf.joinToString("")
-    }
-}
-
-class ServerUtilities(val server: IOHolder) {
     /**
      * Serve prepared response object to the client
      */
     fun serverHandleRequest() {
-        returnData(prepareResponseData())
+        // read a line the client is sending us (the request,
+        // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
+        val serverInput = server.readLine()
+        val action = parseClientRequest(serverInput)
+        val responseData = prepareDataForServing(action)
+        returnData(responseData)
+    }
+
+    private fun prepareDataForServing(action: Action): PreparedResponseData {
+        return when (action.type) {
+
+            ResponseType.BAD_REQUEST -> {
+                PreparedResponseData(FileReader.readNotNull("400error.html"), "400", "BAD REQUEST")
+            }
+
+            ResponseType.READ_FILE,
+            ResponseType.TEMPLATE -> {
+                val fileContents = FileReader.read(action.filename)
+                if (fileContents == null) {
+                    PreparedResponseData(FileReader.readNotNull("404error.html"), "404", "NOT FOUND")
+                } else {
+                    if (action.type == ResponseType.TEMPLATE) {
+                        PreparedResponseData(renderTemplate(fileContents), "200", "OK")
+                    } else {
+                        PreparedResponseData(fileContents, "200", "OK")
+                    }
+
+                }
+            }
+
+        }
+    }
+
+
+    /**
+     * Possible behaviors of the server
+     */
+    enum class ResponseType {
+        /**
+         * Just read a file, plain and simple
+         */
+        READ_FILE,
+
+        /**
+         * This file will require rendering
+         */
+        TEMPLATE,
+
+        /**
+         * The client sent us a bad (malformed) request
+         */
+        BAD_REQUEST,
     }
 
     /**
-     * Code on the server that will handle a request from a
-     * client.  This is hardcoded to handle just one thing:
-     * GET / HTTP/1.1
-     * Prepares a response object to be served to the client
+     * Encapsulates the proper action by the server, based on what
+     * the client wants from us
      */
-    private fun prepareResponseData(): PreparedResponseData {
-        // read a line
-        val serverInput = server.readLine()
-        val result: MatchResult = pageExtractorRegex.matchEntire(serverInput)
-                ?: return PreparedResponseData(FileReader.read("400error.html"), "400", "BAD REQUEST")
+    data class Action(val type : ResponseType, val filename : String)
 
-        // if the server request doesn't match our regex, it's invalid
-        // get the file requested
-        val requestedFileMatch = checkNotNull(result.groups[1])
+    /**
+     * Based on the request from the client, come up with an [Action]
+     * of what we should do next
+     */
+    private fun parseClientRequest(clientRequest : String) : Action {
+        val result = pageExtractorRegex.matchEntire(clientRequest)
+        val responseType : ResponseType
+        var file = ""
 
-        val fileToRead = requestedFileMatch.value
-
-        val isFound: Boolean = FileReader.exists(fileToRead)
-
-        if (!isFound) {
-            return PreparedResponseData(FileReader.read("404error.html"), "404", "NOT FOUND")
-        }
-
-        val file = if (fileToRead.takeLast(4) == ".utl") {
-            renderTemplate(fileToRead)
+        if (result == null) {
+            responseType = ResponseType.BAD_REQUEST
         } else {
-            FileReader.read(fileToRead)
+            // determine which file the client is requesting
+            file = checkNotNull(result.groups[1]).value
+
+            if (file.takeLast(4) == ".utl") {
+                responseType = ResponseType.TEMPLATE
+            } else {
+                responseType = ResponseType.READ_FILE
+            }
         }
 
-        return PreparedResponseData(file, "200", "OK")
+        return Action(responseType, file)
     }
 
-    private fun renderTemplate(requestedFile: String): String {
-        val template = FileReader.read(requestedFile)
+    private fun renderTemplate(template: String): String {
         val te = TemplatingEngine()
         // TODO: replace following code ASAP
         val mapping = mapOf("username" to "Jona")
@@ -96,7 +120,6 @@ class ServerUtilities(val server: IOHolder) {
      * sends data as the body of a response from server
      */
     private fun returnData(data: PreparedResponseData) {
-
         val status = "HTTP/1.1 ${data.code} ${data.status}"
         val header = "Content-Length: ${data.fileContents.length}"
         val input = "$status\n" +
@@ -105,4 +128,5 @@ class ServerUtilities(val server: IOHolder) {
                 data.fileContents
         server.write(input)
     }
+
 }
