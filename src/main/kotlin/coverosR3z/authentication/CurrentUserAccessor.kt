@@ -23,7 +23,7 @@ class CurrentUserAccessor() : ICurrentUserAccessor {
         private var user : User? = null
 
         fun set(value : User) {
-            assert(user == null) { "CurrentUser.id is already set to $user.  " +
+            require(user == null) { "CurrentUser.id is already set to $user.  " +
                     "Please be aware: if this occurred during a test, it is possible " +
                     "that it is due to parallel tests conflicting with each other.  In that " +
                     "case, now is the time to strongly consider having tests that use this run serially" }

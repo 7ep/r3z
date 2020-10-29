@@ -4,6 +4,7 @@ import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -83,7 +84,7 @@ class SocketTests() {
         client.readLine()
         val response = client.readLine()
 
-        assert(response.contains("<!DOCTYPE html>"))
+        assertTrue(response.contains("<!DOCTYPE html>"))
     }
 
     @Test

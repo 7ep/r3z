@@ -17,16 +17,28 @@ Developer handbook
     ----------
 
     We hold these truths to be self-evident in our code...
+    The following are used in our code to positively assert
+    truthful statements inside algorithms.  Don't use "assert",
+    since that is possible to turn off, and we want these to always
+    run.
 
     fun require(value: Boolean)
     Throws an IllegalArgumentException if the value is false.
+    This is for asserting any kind of truth for an argument to a function.
 
     fun check(value: Boolean)
     Throws an IllegalStateException if the value is false.
+    This is for asserting any kind of truth for a section of code in an algorithm.
 
     fun <T : Any> checkNotNull(value: T?): T
     Throws an IllegalStateException if the value is null.
     Otherwise returns the not null value.
+    This is for asserting that code within an algorithm is not null.
+
+    fun <T : Any> requireNotNull(value: T?): T
+    Throws an IllegalArgumentException if the value is null.
+    Otherwise returns the not null value.
+    This is for asserting that arguments to a function aren't null.
 
     fun assert(value: Boolean)
     For JVM

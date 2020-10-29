@@ -28,7 +28,7 @@ class Date(val epochDay : Int) {
     private fun stringValue() : String { return java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString() }
 
     init {
-        assert(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of ${stringValue()}"}
+        require(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of ${stringValue()}"}
     }
 
     /**

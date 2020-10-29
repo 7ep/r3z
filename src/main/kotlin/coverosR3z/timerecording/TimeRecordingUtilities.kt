@@ -65,7 +65,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      * system (persists it to the database)
      */
     fun createProject(projectName: ProjectName) : Project {
-        assert(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
+        require(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
         logInfo("Creating a new project, ${projectName.value}")
 
         return persistence.persistNewProject(projectName)
@@ -76,7 +76,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      * system (persists it to the database)
      */
     fun createEmployee(employeename: EmployeeName) : Employee {
-        assert(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
+        require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
         logInfo("Creating a new employee, ${employeename.value}")
 
         return persistence.persistNewEmployee(employeename)

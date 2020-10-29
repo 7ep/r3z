@@ -44,7 +44,7 @@ class EmployeeTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong, empty name`() {
-        val ex = assertThrows(AssertionError::class.java) {
+        val ex = assertThrows(IllegalArgumentException::class.java) {
             jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":1,"name":""}""") }
         assertEquals("All employees must have a non-empty name", ex.message)
     }
@@ -67,7 +67,7 @@ class EmployeeTests {
      */
     @Test
     fun `failed deserialization should make it clear what went wrong, negative id`() {
-        val ex = assertThrows(AssertionError::class.java) {
+        val ex = assertThrows(IllegalArgumentException::class.java) {
             jsonSerialzation.decodeFromString(Employee.serializer(), """{"id":-1,"name":"some employee"}""") }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }

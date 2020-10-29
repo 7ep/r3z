@@ -86,12 +86,12 @@ class PureMemoryDatabase {
     }
 
     fun getProjectById(id: Int) : Project? {
-        assert(id > 0)
+        require(id > 0)
         return projects.singleOrNull { p -> p.id == id }
     }
 
     fun getEmployeeById(id: Int): Employee? {
-        assert(id > 0)
+        require(id > 0)
         return employees.singleOrNull { u -> u.id == id}
     }
 
