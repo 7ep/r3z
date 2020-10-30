@@ -248,7 +248,6 @@ class SocketTests() {
      * When we POST some data, we should receive a success message back
      */
     // TODO
-    @Ignore("Next to work on")
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
         client.write("POST /entertime HTTP/1.1\n")
@@ -259,16 +258,18 @@ class SocketTests() {
         su.serverHandleRequest()
 
         // client - read status line
-        val statusline = client.readLine()
+        val statusline = client.readLine() // freezes here
         val headers = getHeaders(client)
         val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
         val body = client.read(length)
 
+
+
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-        val fileWeRead = FileReader.read("sample.html")
-        assertEquals(fileWeRead, body)
+//        val fileWeRead = FileReader.read("sample.html")
+        assertEquals("<p>Thank you, your time has been recorded</p>", body)
     }
 
     @Ignore("This is to assist in manual testing only")
