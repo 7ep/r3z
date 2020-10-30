@@ -26,7 +26,6 @@ class TemplatingEngine {
             if (word in mapping.keys) {
                 logDebug("replacing instances of '$word' with '${mapping[word]}'")
                 rendered = rendered.replace("{{$word}}", mapping[word]?: "")
-                logDebug(rendered)
             }
             else {
                 throw InvalidTemplateException("Invalid syntax; all double bracketed values must have corresponding mappings.")
