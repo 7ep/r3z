@@ -1,7 +1,15 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.AuthenticationPersistence
+import coverosR3z.authentication.AuthenticationUtilities
+import coverosR3z.authentication.CurrentUserAccessor
+import coverosR3z.domainobjects.*
+import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
+import coverosR3z.timerecording.TimeEntryPersistence
+import coverosR3z.timerecording.TimeRecordingUtilities
+import java.time.LocalDate
 
 /**
  * Data for shipping to the client
@@ -50,7 +58,42 @@ class ServerUtilities(private val server: IOHolder) {
     private fun handlePost(server : IOHolder) {
         val body = server.readLine()
         val data = parsePostedData(body) // we may use this, eventually
-        // enter the time
+        // enter the time *****
+        //**************************************************************************
+        //    D A N G E R    Z O N E - BEGINS
+        //**************************************************************************
+
+        val cua = CurrentUserAccessor()
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence, cua)
+
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
+        val employee = systemTru.createEmployee(EmployeeName("Jona"))
+
+        val password = "password1234567"
+        val username = "jona"
+        au.register(username, password, employee.id)
+        au.login(username, password)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
+
+        val project = checkNotNull(data["project_entry"])
+        val createdProject = tru.createProject(ProjectName(project))
+
+        val timeEntry = TimeEntryPreDatabase(employee,
+                createdProject,
+                Time(checkNotNull(data["time_entry"]).toInt()),
+                Date(LocalDate.now().toEpochDay().toInt()),
+                Details(checkNotNull(data["detail_entry"])))
+
+        tru.recordTime(timeEntry)
+
+
+        //**************************************************************************
+        //    D A N G E R    Z O N E - ENDS
+        //**************************************************************************
+
         returnData(PreparedResponseData("<p>Thank you, your time has been recorded</p>", "200", "OK"))
     }
 
@@ -114,10 +157,6 @@ class ServerUtilities(private val server: IOHolder) {
 
                 ActionType.HANDLE_POST_FROM_CLIENT ->  TODO("Not yet implemented")
             }
-        }
-
-        private fun handlePostFromClient(action : Action) {
-            val foo = action.data
         }
 
         private fun handleBadRequest() = PreparedResponseData(FileReader.readNotNull("400error.html"), "400", "BAD REQUEST")
