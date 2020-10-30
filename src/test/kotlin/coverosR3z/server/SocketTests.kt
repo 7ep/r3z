@@ -116,7 +116,7 @@ class SocketTests() {
     fun testShouldGetHtmlFileResponseFromServer_MaybeRefactored() {
         // client - send a request to the server for the page we want
         val pageDesired = "sample.html"
-        client.write("GET /$pageDesired HTTP/1.1\n")
+        client.write("GET /$pageDesired HTTP/1.1\n\n")
 
         // server - handle the request
         su.serverHandleRequest()
@@ -142,7 +142,7 @@ class SocketTests() {
     @Test
     fun testShouldGetHtmlFileResponseFromServer_AskForNothing() {
         // client - send a request to the server for the page we want
-        client.write("GET / HTTP/1.1\n")
+        client.write("GET / HTTP/1.1\n\n")
 
         // server - handle the request
         su.serverHandleRequest()
@@ -168,7 +168,7 @@ class SocketTests() {
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
         // send a request to the server for something that doesn't exist
-        client.write("GET /doesnotexist HTTP/1.1\n")
+        client.write("GET /doesnotexist HTTP/1.1\n\n")
 
         // server - handle the request
         su.serverHandleRequest()
@@ -194,10 +194,10 @@ class SocketTests() {
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
         // send a request to the server for something that doesn't exist
         val badRequests = listOf(
-                "GET BLAHBLAHBLAH HTTP/1.1\n",
-                "GET\n",
-                "BLAHBLAHBLAH HTTP/1.1\n",
-                "HTTP/1.1\n",
+                "GET BLAHBLAHBLAH HTTP/1.1\n\n",
+                "GET\n\n",
+                "BLAHBLAHBLAH HTTP/1.1\n\n",
+                "HTTP/1.1\n\n",
         )
         for (request in badRequests) {
             client.write(request)
@@ -225,7 +225,7 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_template() {
-        client.write("GET /sample_template.utl HTTP/1.1\n")
+        client.write("GET /sample_template.utl HTTP/1.1\n\n")
 
         // server - handle the request
         su.serverHandleRequest()
@@ -247,11 +247,9 @@ class SocketTests() {
     /**
      * When we POST some data, we should receive a success message back
      */
-    // TODO
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        client.write("POST /entertime HTTP/1.1\n")
-        client.write("\n")
+        client.write("POST /entertime HTTP/1.1\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say\n")
 
         // server - handle the request
@@ -263,12 +261,9 @@ class SocketTests() {
         val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
         val body = client.read(length)
 
-
-
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-//        val fileWeRead = FileReader.read("sample.html")
         assertEquals("<p>Thank you, your time has been recorded</p>", body)
     }
 
