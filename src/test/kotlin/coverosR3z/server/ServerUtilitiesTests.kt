@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -19,12 +20,20 @@ class ServerUtilitiesTests {
         val input = "project_entry=projecta&time_entry=2&detail_entry=nothing+to+say"
         val expected = mapOf("project_entry" to "projecta", "time_entry" to "2", "detail_entry" to "nothing to say")
 
-        val result : String = parse(input)
+        val result = parsePostedData(input)
 
         assertEquals(expected, result)
     }
 
-    private fun parse(input: String): String {
-        TODO("Not yet implemented")
+
+
+    @Test
+    fun testShouldParseMultipleClientRequestTypes() {
+        val input = "POST /entertime HTTP/1.1"
+        val expected = ServerUtilities.Companion.Action(ServerUtilities.Companion.ActionType.HANDLE_POST_FROM_CLIENT, "")
+
+        val result = ServerUtilities.parseClientRequest(input)
+
+        assertEquals(expected, result)
     }
 }
