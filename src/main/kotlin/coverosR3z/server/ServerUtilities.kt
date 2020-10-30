@@ -69,7 +69,11 @@ class ServerUtilities(private val server: IOHolder) {
     companion object {
 
         fun parsePostedData(input: String): Map<String, String> {
-            TODO("Not yet implemented")
+            // Need to split up '&' separated fields into keys and values and pack into a kotlin map
+            // Closures for efficiency ahoy, sorry
+            return (input.split("&").associate { field ->
+                field.split("=").let { it[0] to it[1].replace("+", " ") }
+            })
         }
 
         /**
