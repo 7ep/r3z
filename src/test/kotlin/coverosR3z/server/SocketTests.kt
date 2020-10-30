@@ -2,12 +2,9 @@ package coverosR3z.server
 
 import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
-import org.junit.AfterClass
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.ServerSocket
@@ -134,7 +131,6 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-        assertEquals("Content-Length: 853", headers[0])
         val fileWeRead = FileReader.read(pageDesired)
         assertEquals(fileWeRead, body)
     }
@@ -242,9 +238,19 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
         assertEquals(1, headers.size)
-        assertEquals("Content-Length: 853", headers[0])
         val fileWeRead = FileReader.read("sample.html")
         assertEquals(fileWeRead, body)
+    }
+
+    @Ignore("This is to assist in manual testing only")
+    @Test
+    fun testingRealConnectionWithBrowser() {
+        val halfOpenServerSocket = ServerSocket(8080)
+        // Following line runs when we connect with the browser
+        val serverSocket = halfOpenServerSocket.accept()
+        val server = IOHolder(serverSocket)
+        val su = ServerUtilities(server)
+        su.serverHandleRequest()
     }
 
     /**
@@ -256,7 +262,7 @@ class SocketTests() {
         val headers = mutableListOf<String>()
         while (true) {
             val header = client.readLine()
-            if (header.length > 0) {
+            if (header.isNotEmpty()) {
                 headers.add(header)
             } else {
                 break
