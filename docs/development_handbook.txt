@@ -13,6 +13,12 @@ Developer handbook
     When writing tests, you might find some of the functions in TestHelpers.kt handy
 
 
+    Performance
+    -----------
+
+    Performance tests include the text "PERFORMANCE" in the name
+
+
     Invariants
     ----------
 

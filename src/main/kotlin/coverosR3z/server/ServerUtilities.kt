@@ -68,12 +68,22 @@ class ServerUtilities(private val server: IOHolder) {
 
     companion object {
 
+        /**
+         * Parse data formatted by application/x-www-form-urlencoded
+         * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+         */
         fun parsePostedData(input: String): Map<String, String> {
+            require(input.isNotEmpty()) {"The input to parse was empty"}
             // Need to split up '&' separated fields into keys and values and pack into a kotlin map
             // Closures for efficiency ahoy, sorry
-            return (input.split("&").associate { field ->
-                field.split("=").let { it[0] to it[1].replace("+", " ") }
-            })
+            try {
+                return (input.split("&").associate { field ->
+                    field.split("=").let { it[0] to it[1].replace("+", " ") }
+                })
+            } catch (ex : IndexOutOfBoundsException) {
+                throw IllegalArgumentException("We failed to parse \"$input\" as application/x-www-form-urlencoded", ex)
+            }
+
         }
 
         /**
