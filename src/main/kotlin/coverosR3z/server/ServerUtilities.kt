@@ -27,11 +27,12 @@ class ServerUtilities(private val server: IOHolder) {
         // read a line the client is sending us (the request,
         // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
         val serverInput = server.readLine()
+        val headers: List<String> = getHeaders(server) // we may also use this, eventually
         val action: Action = parseClientRequest(serverInput)
         if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {
-            handlePost(server)
+            handlePost(server) // a POST will have a body
         } else {
-            handleGet(action)
+            handleGet(action) // there is nothing more to get for a GET
         }
     }
 
@@ -47,10 +48,10 @@ class ServerUtilities(private val server: IOHolder) {
      * The user has sent us data, we have to process it
      */
     private fun handlePost(server : IOHolder) {
-        val headers: List<String> = getHeaders(server)
         val body = server.readLine()
-        val data = parsePostedData(body)
-        // respond, "thanks, your time has been entered"
+        val data = parsePostedData(body) // we may use this, eventually
+        // enter the time
+        returnData(PreparedResponseData("<p>Thank you, your time has been recorded</p>", "200", "OK"))
     }
 
     /**
