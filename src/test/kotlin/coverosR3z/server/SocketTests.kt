@@ -247,6 +247,8 @@ class SocketTests() {
     /**
      * When we POST some data, we should receive a success message back
      */
+    // TODO
+    @Ignore("Next to work on")
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
         client.write("POST /entertime HTTP/1.1\n")

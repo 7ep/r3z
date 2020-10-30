@@ -10,6 +10,8 @@ private const val maxUserMsg = "No way this company has more than 100 million us
 private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
 private const val hashCannotBeEmptyMsg = "All users must have a hash"
+private val md = MessageDigest.getInstance("SHA-256")
+
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -34,12 +36,12 @@ data class User(val id: Int, val name: String, val hash: Hash, val salt: String,
 @Serializable
 data class Hash private constructor(val value: String) {
 
+
     companion object{
         /**
          * Hash the input string with the provided SHA-256 algorithm, and return a string representation
          */
         fun createHash(password: String): Hash {
-            val md = MessageDigest.getInstance("SHA-256")
             md.update(password.toByteArray())
             val hashed : ByteArray = md.digest()
             return Hash(hashed.joinToString("") {"%02x".format(it)})
