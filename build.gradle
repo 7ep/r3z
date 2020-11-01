@@ -29,7 +29,7 @@ apply plugin: 'project-report'
 apply plugin: 'kotlin'
 
 group 'com.coveros.r3z'
-version '0.0.1-SNAPSHOT'
+version ''
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
@@ -50,6 +50,27 @@ dependencies {
     testImplementation ("junit:junit:4.13")
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'coverosR3z.server.MainKt'
+    }
+    // This line of code recursively collects and copies all of a project's files
+    // and adds them to the JAR itself. One can extend this task, to skip certain
+    // files or particular types at will
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+task uberJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'coverosR3z.MainKt'
+    }
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
 
 test {
     testLogging {
