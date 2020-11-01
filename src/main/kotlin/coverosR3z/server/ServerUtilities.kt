@@ -26,6 +26,12 @@ data class PreparedResponseData(val fileContents: String, val code: String, val 
  */
 val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
 
+/**
+ * Used for extracting the length of the body, in POSTs and
+ * responses from servers
+ */
+val contentLengthRegex = "Content-Length: (.*)$".toRegex()
+
 class ServerUtilities(private val server: IOHolder) {
 
     /**
@@ -35,7 +41,7 @@ class ServerUtilities(private val server: IOHolder) {
         // read a line the client is sending us (the request,
         // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
         val serverInput = server.readLine()
-        val headers: List<String> = getHeaders(server) // we may also use this, eventually
+
         val action: Action = parseClientRequest(serverInput)
         if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {
             handlePost(server) // a POST will have a body
@@ -56,7 +62,11 @@ class ServerUtilities(private val server: IOHolder) {
      * The user has sent us data, we have to process it
      */
     private fun handlePost(server : IOHolder) {
-        val body = server.readLine()
+        val headers: List<String> = getHeaders(server) // we may also use this, eventually
+        val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
+        // TODO following should be made safe / clean
+        val length: Int = contentLengthRegex.matchEntire(lengthHeader)!!.groups[1]!!.value.toInt()
+        val body = server.read(length)
         val data = parsePostedData(body) // we may use this, eventually
         // enter the time *****
         //**************************************************************************
