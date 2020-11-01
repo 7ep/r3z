@@ -4,6 +4,7 @@ import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.domainobjects.*
+import coverosR3z.logging.logDebug
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
@@ -41,6 +42,7 @@ class ServerUtilities(private val server: IOHolder) {
         // read a line the client is sending us (the request,
         // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
         val serverInput = server.readLine()
+        logDebug("request from client: ${serverInput}")
 
         val action: Action = parseClientRequest(serverInput)
         if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {
@@ -111,6 +113,7 @@ class ServerUtilities(private val server: IOHolder) {
      * sends data as the body of a response from server
      */
     private fun returnData(data: PreparedResponseData) {
+        logDebug("Assembling data just before shipping to client")
         val status = "HTTP/1.1 ${data.code} ${data.status}"
         val header = "Content-Length: ${data.fileContents.length}"
         val input = "$status\n" +
@@ -174,10 +177,14 @@ class ServerUtilities(private val server: IOHolder) {
         private fun handleReadingFiles(action: Action): PreparedResponseData {
             val fileContents = FileReader.read(action.filename)
             return if (fileContents == null) {
-                PreparedResponseData(FileReader.readNotNull("404error.html"), "404", "NOT FOUND")
+                logDebug("unable to read a file named ${action.filename}")
+                val unfound = FileReader.readNotNull("404error.html")
+                PreparedResponseData(unfound, "404", "NOT FOUND")
             } else {
                 if (action.type == ActionType.TEMPLATE) {
-                    PreparedResponseData(renderTemplate(fileContents), "200", "OK")
+                    logDebug("Sending file for rendering")
+                    val renderedFile = renderTemplate(fileContents)
+                    PreparedResponseData(renderedFile, "200", "OK")
                 } else {
                     PreparedResponseData(fileContents, "200", "OK")
                 }
@@ -228,20 +235,27 @@ class ServerUtilities(private val server: IOHolder) {
             var file = ""
 
             if (result == null) {
+                logDebug("Unable to parse client request")
                 responseType = ActionType.BAD_REQUEST
             } else {
                 // determine which file the client is requesting
                 val verb = checkNotNull(result.groups[1]).value
+                logDebug("verb from client was: $verb")
 
                 if (verb == "POST") {
+                    logDebug("Handling POST from client")
                     responseType = ActionType.HANDLE_POST_FROM_CLIENT
 
                 } else {
+                    logDebug("Handling GET from client")
                     file = checkNotNull(result.groups[2]).value
+                    logDebug("Client wants this file: $file")
 
                     if (file.takeLast(4) == ".utl") {
+                        logDebug("file requested is a template")
                         responseType = ActionType.TEMPLATE
                     } else {
+                        logDebug("file requested is a text file")
                         responseType = ActionType.READ_FILE
                     }
                 }
