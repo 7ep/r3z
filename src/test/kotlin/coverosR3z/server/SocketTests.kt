@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.logging.logDebug
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
@@ -20,7 +21,7 @@ lateinit var server : IOHolder
 lateinit var client : IOHolder
 lateinit var su: ServerUtilities
 
-val contentLengthRegex = "Content-Length: (.*)$".toRegex()
+
 
 class ServerSocketInitializer(): Runnable {
 
@@ -194,10 +195,10 @@ class SocketTests() {
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
         // send a request to the server for something that doesn't exist
         val badRequests = listOf(
-                "GET BLAHBLAHBLAH HTTP/1.1\n\n",
-                "GET\n\n",
-                "BLAHBLAHBLAH HTTP/1.1\n\n",
-                "HTTP/1.1\n\n",
+                "GET BLAHBLAHBLAH HTTP/1.1\n",
+                "GET\n",
+                "BLAHBLAHBLAH HTTP/1.1\n",
+                "HTTPBYRON/1.1\n",
         )
         for (request in badRequests) {
             client.write(request)
@@ -249,8 +250,10 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        client.write("POST /entertime HTTP/1.1\n\n")
-        client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say\n")
+        CurrentUserAccessor().clearCurrentUserTestOnly()
+        client.write("POST /entertime HTTP/1.1\n")
+        client.write("Content-Length: 63\n\n")
+        client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
         // server - handle the request
         su.serverHandleRequest()
@@ -273,16 +276,12 @@ class SocketTests() {
         // handle the GET
         val halfOpenServerSocket = ServerSocket(8080)
         // Following line runs when we connect with the browser
-        val serverSocket = halfOpenServerSocket.accept()
-        val server = IOHolder(serverSocket)
-        val su = ServerUtilities(server)
-
-        // handle the POST
-        su.serverHandleRequest()
-        val serverSocketPost = halfOpenServerSocket.accept()
-        val serverPost = IOHolder(serverSocketPost)
-        val suPost = ServerUtilities(serverPost)
-        suPost.serverHandleRequest()
+        while (true) {
+            val serverSocket = halfOpenServerSocket.accept()
+            val server = IOHolder(serverSocket)
+            val su = ServerUtilities(server)
+            su.serverHandleRequest()
+        }
     }
 
 
