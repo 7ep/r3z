@@ -46,8 +46,17 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // or "kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC" // JVM dependency
 
+    // Selenium - used for testing commonly-used browsers
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+
+    // HtmlUnit is a browser that is controlled directly by Java.  It has no UI, and
+    // runs really, *really* fast.
+    // https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit
+    implementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.44.0'
+
     // junit, for running unit tests
-    testImplementation ("junit:junit:4.13")
+    testImplementation ("junit:junit:4.13.1")
 }
 
 jar {

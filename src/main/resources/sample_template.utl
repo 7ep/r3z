@@ -7,7 +7,7 @@
         <form action="entertime" method="post">
 
             <p>
-                Hello there, {{username}}!
+                Hello there, <span id="username">{{username}}</span>!
             </p>
 
             <p>
