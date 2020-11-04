@@ -100,8 +100,6 @@ class ServerUtilities(private val server: IOHolder) {
                 Details(checkNotNull(data["detail_entry"])))
 
         tru.recordTime(timeEntry)
-
-
         //**************************************************************************
         //    D A N G E R    Z O N E - ENDS
         //**************************************************************************
@@ -128,6 +126,8 @@ class ServerUtilities(private val server: IOHolder) {
         /**
          * Parse data formatted by application/x-www-form-urlencoded
          * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+         *
+         * for example, valuea=3&valueb=this+is+something
          */
         fun parsePostedData(input: String): Map<String, String> {
             require(input.isNotEmpty()) {"The input to parse was empty"}
