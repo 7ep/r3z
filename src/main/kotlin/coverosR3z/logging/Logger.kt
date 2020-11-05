@@ -1,11 +1,19 @@
 package coverosR3z.logging
 
-import coverosR3z.authentication.CurrentUserAccessor
+import coverosR3z.authentication.CurrentUser
+import coverosR3z.domainobjects.SYSTEM_USER
 
-val cua = CurrentUserAccessor()
+/**
+ * The class version of logging
+ */
+class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
+    fun info(msg : String) {
+        println("INFO: ${cu.user.name}: $msg")
+    }
+}
 
-fun logInfo(msg : String) {
-    println("INFO: ${cua.get()?.name ?: "SYSTEM"}: $msg")
+fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
+    println("INFO: ${cu.user.name}: $msg")
 }
 
 /**

@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.authentication.CurrentUser
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -10,6 +11,18 @@ private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
 private val md = MessageDigest.getInstance("SHA-256")
 
+/**
+ * This is used to represent no user - just to avoid using null for a user
+ */
+val NO_USER = User(-1, "NO_USER", Hash.createHash(""), "THIS REPRESENTS NO USER", -1)
+
+/**
+ * This is the user who does things if no one is logged in actively doing it.
+ * Like for example, when someone is authenticating, it is the system user
+ * that is taking care of them.  Where on the other hand, if someone is recording
+ * time, we would want to see that user indicated as the executor.
+ */
+val SYSTEM_USER = User(0, "SYSTEM", Hash.createHash(""), "THIS REPRESENTS ACTIONS BY THE SYSTEM", null)
 
 /**
  * Holds a username before we have a whole object, like [User]

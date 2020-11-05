@@ -4,7 +4,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
 
 
-class AuthenticationUtilities(private val ap : IAuthPersistence, private val cua : ICurrentUserAccessor){
+class AuthenticationUtilities(private val ap : IAuthPersistence){
 
     private val blacklistedPasswords = listOf("password")
 
@@ -65,23 +65,22 @@ class AuthenticationUtilities(private val ap : IAuthPersistence, private val cua
     }
 
 
-    fun login(username: String, password: String): LoginResult {
+    fun login(username: String, password: String): Pair<LoginResult, User> {
         val user = ap.getUser(UserName(username))
 
         if (user == null) {
             logInfo("Login failed: user $user is not registered.")
-            return LoginResult.NOT_REGISTERED
+            return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
         val hashedSaltedPassword = Hash.createHash(password + user.salt)
         if (user.hash != hashedSaltedPassword) {
             logInfo("Login failed for user $user: Incorrect password.")
-            return LoginResult.FAILURE
+            return Pair(LoginResult.FAILURE, NO_USER)
         }
 
-        cua.set(user)
         logInfo("Login successful for user $user.")
-        return LoginResult.SUCCESS
+        return Pair(LoginResult.SUCCESS, user)
     }
 
 }

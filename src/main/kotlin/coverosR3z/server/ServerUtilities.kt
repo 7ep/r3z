@@ -2,7 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
-import coverosR3z.authentication.CurrentUserAccessor
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.persistence.PureMemoryDatabase
@@ -75,20 +75,19 @@ class ServerUtilities(private val server: IOHolder) {
         //    D A N G E R    Z O N E - BEGINS
         //**************************************************************************
 
-        val cua = CurrentUserAccessor()
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence, cua)
+        val au = AuthenticationUtilities(authPersistence)
 
-        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
         val employee = systemTru.createEmployee(EmployeeName("Jona"))
 
         val password = "password1234567"
         val username = "jona"
         au.register(username, password, employee.id)
-        au.login(username, password)
+        val (_, user) = au.login(username, password)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
 
         val project = checkNotNull(data["project_entry"])
         val createdProject = tru.createProject(ProjectName(project))
