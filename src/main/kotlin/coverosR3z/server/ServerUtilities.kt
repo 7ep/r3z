@@ -42,7 +42,7 @@ class ServerUtilities(private val server: IOHolder) {
         // read a line the client is sending us (the request,
         // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
         val serverInput = server.readLine()
-        logDebug("request from client: ${serverInput}")
+        logDebug("request from client: $serverInput")
 
         val action: Action = parseClientRequest(serverInput)
         if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {

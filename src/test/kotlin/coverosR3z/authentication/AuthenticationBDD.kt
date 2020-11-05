@@ -9,7 +9,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import coverosR3z.domainobjects.LoginStatuses as ls
 
 /**
  *
@@ -67,7 +66,7 @@ class AuthenticationBDD {
         val result = au.register("matt", "asdfoiajwefowejf")
 
         // Then the system records that the registration failed
-        assertEquals("The user shouldn't be allowed to register again", RegistrationResult.ALREADY_REGISTERED, result)
+        assertEquals("The user shouldn't be allowed to register again", RegistrationResult.FAILURE, result)
     }
 
     @Test
@@ -94,10 +93,10 @@ class AuthenticationBDD {
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // When I login with the wrong credentials
-        val status = au.login("matt", "I'm not even trying to be a good password").status
+        val status = au.login("matt", "I'm not even trying to be a good password")
 
         // Then the system denies me access
-        assertEquals(ls.FAILURE, status)
+        assertEquals(LoginResult.FAILURE, status)
     }
 
     @Test
@@ -110,7 +109,7 @@ class AuthenticationBDD {
         val regStatus = au.register("matt", "too short")
 
         // Then the system denies the registration on the basis of a bad password
-        assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, regStatus)
+        assertEquals(RegistrationResult.FAILURE, regStatus)
     }
 
     /*

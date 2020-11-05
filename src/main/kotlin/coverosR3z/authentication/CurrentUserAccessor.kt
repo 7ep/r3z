@@ -1,7 +1,6 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.User
-import java.lang.AssertionError
 
 // TODO - keep an eye on this class.  Starting 9/11/2020, if you haven't seen problems with this class running in parallel tests, maybe we were overly unnecessarily concerned.
 class CurrentUserAccessor() : ICurrentUserAccessor {

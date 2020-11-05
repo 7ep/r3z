@@ -1,9 +1,7 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.exceptions.MalformedDataDuringSerializationException
-import java.lang.Integer.parseInt
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
-import kotlinx.serialization.*
 
 
 @Serializable

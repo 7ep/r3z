@@ -2,7 +2,6 @@ package coverosR3z.authentication
 
 import coverosR3z.createTimeEntryPreDatabase
 import coverosR3z.domainobjects.*
-import coverosR3z.domainobjects.LoginStatuses.*
 import coverosR3z.timerecording.FakeTimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -22,9 +21,9 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun `It should not be possible to register a new user with an empty password`() {
-        val result = authUtils.register("matt", "")
+        val result = authUtils.analyzePassword("")
 
-        assertEquals("the result should clearly indicate an empty password", RegistrationResult.EMPTY_PASSWORD, result)
+        assertEquals("the result should clearly indicate an empty password", RegistrationPasswordResult.EMPTY_PASSWORD, result)
     }
 
     /****************
@@ -39,9 +38,22 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(256)
         assertTrue(password.length == 256)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.analyzePassword(password)
 
-        assertEquals(RegistrationResult.PASSWORD_TOO_LONG, result)
+        assertEquals(RegistrationPasswordResult.PASSWORD_TOO_LONG, result)
+    }
+
+    /**
+     * At a certain point, a username can be too long.
+     */
+    @Test
+    fun `It should not be possible to create a username longer than 50 characters`() {
+        val username = "a".repeat(51)
+        assertTrue(username.length == 51)
+
+        val result = authUtils.analyzeUsername(username)
+
+        assertEquals(RegistrationUsernameResult.USERNAME_TOO_LONG, result)
     }
 
     @Test
@@ -49,9 +61,20 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(255)
         assertTrue(password.length == 255)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.analyzePassword(password)
 
-        assertEquals(RegistrationResult.SUCCESS, result)
+        assertEquals(RegistrationPasswordResult.SUCCESS, result)
+    }
+
+
+    @Test
+    fun `A 50-character username should succeed`() {
+        val username = "a".repeat(50)
+        assertTrue(username.length == 50)
+
+        val result = authUtils.analyzeUsername(username)
+
+        assertEquals(RegistrationUsernameResult.SUCCESS, result)
     }
 
     /**
@@ -62,9 +85,33 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(11)
         assertTrue(password.length == 11)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.analyzePassword(password)
 
-        assertEquals(RegistrationResult.PASSWORD_TOO_SHORT, result)
+        assertEquals(RegistrationPasswordResult.PASSWORD_TOO_SHORT, result)
+    }
+
+    /**
+     * For sanity's sake, let's say that 2 characters is too short for a username
+     */
+    @Test
+    fun `A 2-character username should be considered too short`() {
+        val username = "aa"
+
+        val result = authUtils.analyzeUsername(username)
+
+        assertEquals(RegistrationUsernameResult.USERNAME_TOO_SHORT, result)
+    }
+
+    /**
+     * Three-character usernames would be ok - maybe initials
+     */
+    @Test
+    fun `A 3-character username should be considered ok`() {
+        val username = "aaa"
+
+        val result = authUtils.analyzeUsername(username)
+
+        assertEquals(RegistrationUsernameResult.SUCCESS, result)
     }
 
     @Test
@@ -72,36 +119,27 @@ class AuthenticationUtilitiesTests {
         val password = "a".repeat(12)
         assertTrue(password.length == 12)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.analyzePassword(password)
 
-        assertEquals(RegistrationResult.SUCCESS, result)
+        assertEquals(RegistrationPasswordResult.SUCCESS, result)
     }
 
     @Test
     fun `A password greater than 12 chars should pass`() {
         val password = "a".repeat(13)
 
-        val result = authUtils.register("matt", password)
+        val result = authUtils.analyzePassword(password)
 
-        assertEquals(RegistrationResult.SUCCESS, result)
+        assertEquals(RegistrationPasswordResult.SUCCESS, result)
     }
 
     @Test
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.register("matt", "just don't care")
+        val result = authUtils.analyzeUsername("matt")
 
-        assertEquals(RegistrationResult.ALREADY_REGISTERED, result)
-    }
-
-    @Test
-    fun `Should determine if a particular username is for a registered user`() {
-        ap = FakeAuthPersistence(isUserRegisteredBehavior = {true})
-        authUtils = AuthenticationUtilities(ap, FakeCurrentUserAccessor())
-
-        val result = authUtils.isUserRegistered("jenna")
-        assertEquals(true, result)
+        assertEquals(RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED, result)
     }
 
     /**
@@ -159,8 +197,8 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
-        val (status, _) = au.login("matt", "password123")
-        assertEquals(SUCCESS, status)
+        val status = au.login("matt", "password123")
+        assertEquals(LoginResult.SUCCESS, status)
     }
 
     /**
@@ -175,8 +213,8 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
-        val (status, _) = au.login("matt", "wrong")
-        assertEquals(FAILURE, status)
+        val status= au.login("matt", "wrong")
+        assertEquals(LoginResult.FAILURE, status)
     }
 
 
@@ -189,8 +227,8 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { null }
         )
         val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
-        val (status, _) = au.login("matt", "arbitrary")
-        assertEquals(NOT_REGISTERED, status)
+        val status = au.login("matt", "arbitrary")
+        assertEquals(LoginResult.NOT_REGISTERED, status)
     }
 
     /**
