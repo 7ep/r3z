@@ -1,13 +1,12 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.ICurrentUserAccessor
-import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.domainobjects.*
-import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.exceptions.EmployeeNotRegisteredException
+import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.logging.logInfo
-import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.EmployeeIntegrityViolationException
+import coverosR3z.persistence.ProjectIntegrityViolationException
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cua : ICurrentUserAccessor) {
 

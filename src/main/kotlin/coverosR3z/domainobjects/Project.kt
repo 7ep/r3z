@@ -1,8 +1,6 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.exceptions.MalformedDataDuringSerializationException
 import kotlinx.serialization.Serializable
-import java.lang.Integer.parseInt
 
 private const val maximumProjectsCount = 100_000_000
 private const val maxProjectErrorMsg = "100 million projects seems too unlikely"

@@ -32,7 +32,7 @@ class ServerBDD {
      *  remain "graceful degradation". This also helps keep up mobile-first,
      *  easily accessible, and highly performant.
      */
-
+    @Ignore
     @Test
     fun `happy path - I should be able to see a page - Chrome`() {
         // Given I am a Chrome browser user
@@ -50,6 +50,7 @@ class ServerBDD {
     /**
      * HtmlUnit is a Java-based headless browser
      */
+    @Ignore
     @Test
     fun `happy path - I should be able to see a page without javascript`() {
         // Given I am on a browser without javascript

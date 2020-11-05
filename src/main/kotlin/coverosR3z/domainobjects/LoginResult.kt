@@ -1,9 +1,7 @@
 package coverosR3z.domainobjects
 
-enum class LoginStatuses{
+enum class LoginResult{
     SUCCESS,
     FAILURE,
     NOT_REGISTERED
 }
-
-data class LoginResult(val status: LoginStatuses, val user: User)

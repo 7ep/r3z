@@ -1,34 +1,30 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.RegistrationResult
-import coverosR3z.domainobjects.User
-import coverosR3z.domainobjects.UserName
-import coverosR3z.domainobjects.LoginResult
-import coverosR3z.domainobjects.LoginStatuses.*
+import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
 
 
-class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurrentUserAccessor){
+class AuthenticationUtilities(private val ap : IAuthPersistence, private val cua : ICurrentUserAccessor){
 
-    val blacklistedPasswords : List<String> = listOf<String>("password")
+    private val blacklistedPasswords = listOf("password")
 
     /**
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
     fun register(username: String, password: String, employeeId: Int? = null) : RegistrationResult {
-        val result = when {
-            password.isEmpty() -> RegistrationResult.EMPTY_PASSWORD
-            password.length < 12 -> RegistrationResult.PASSWORD_TOO_SHORT
-            password.length > 255 -> RegistrationResult.PASSWORD_TOO_LONG
-            blacklistedPasswords.contains(password) -> RegistrationResult.BLACKLISTED_PASSWORD
-            ap.isUserRegistered(UserName(username)) -> RegistrationResult.ALREADY_REGISTERED
-            else -> RegistrationResult.SUCCESS
-        }
+        val passwordResult = analyzePassword(password)
+        val usernameResult = analyzeUsername(username)
 
-        if(result != RegistrationResult.SUCCESS){
-            logInfo("User registration failed for $username: $result")
+        val registrationResult =
+            if (passwordResult == RegistrationPasswordResult.SUCCESS && usernameResult == RegistrationUsernameResult.SUCCESS) {
+                RegistrationResult.SUCCESS
+            } else {
+                RegistrationResult.FAILURE
+            }
+
+        if(registrationResult == RegistrationResult.FAILURE){
+            logInfo("User registration failed for $username: passwordResult: $passwordResult usernameResult: $usernameResult")
         }else{
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
@@ -36,8 +32,31 @@ class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurr
             logInfo("User registration successful for $username")
         }
 
-        return result
+        return registrationResult
+    }
 
+    fun analyzeUsername(username: String): RegistrationUsernameResult {
+        return when {
+            username.isEmpty() -> RegistrationUsernameResult.EMPTY_USERNAME
+            username.length < 3 -> RegistrationUsernameResult.USERNAME_TOO_SHORT
+            username.length > 50 -> RegistrationUsernameResult.USERNAME_TOO_LONG
+            ap.isUserRegistered(UserName(username)) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
+            else -> RegistrationUsernameResult.SUCCESS
+        }
+    }
+
+    /**
+     * Examine the password the registrant wishes to use for
+     * meeting our quality characteristics
+     */
+    fun analyzePassword(password: String): RegistrationPasswordResult {
+        return when {
+            password.isEmpty() -> RegistrationPasswordResult.EMPTY_PASSWORD
+            password.length < 12 -> RegistrationPasswordResult.PASSWORD_TOO_SHORT
+            password.length > 255 -> RegistrationPasswordResult.PASSWORD_TOO_LONG
+            blacklistedPasswords.contains(password) -> RegistrationPasswordResult.BLACKLISTED_PASSWORD
+            else -> RegistrationPasswordResult.SUCCESS
+        }
     }
 
     fun isUserRegistered(username: String) : Boolean {
@@ -46,19 +65,23 @@ class AuthenticationUtilities(val ap : IAuthPersistence, private val cua : ICurr
     }
 
 
-    fun login(user: String, password: String): LoginResult {
-        val u : User? = ap.getUser(UserName(user))
-        if(u != null){
-            val hashedSaltedPassword : Hash = Hash.createHash(password + u.salt)
-            if(u.hash == hashedSaltedPassword){
-                cua.set(u)
-                logInfo("Login successful for user $user. Very good work")
-                return LoginResult(SUCCESS, u)
-            }
-            logInfo("Login failed for user $user: Incorrect password. Please stop trying to hack me")
-            return LoginResult(FAILURE, u)
+    fun login(username: String, password: String): LoginResult {
+        val user = ap.getUser(UserName(username))
+
+        if (user == null) {
+            logInfo("Login failed: user $user is not registered.")
+            return LoginResult.NOT_REGISTERED
         }
-        logInfo("Login failed: user $user is not registered. Maybe try registering first?")
-        return LoginResult(NOT_REGISTERED, User(1, user, Hash.createHash(password), "", null))
+
+        val hashedSaltedPassword = Hash.createHash(password + user.salt)
+        if (user.hash != hashedSaltedPassword) {
+            logInfo("Login failed for user $user: Incorrect password.")
+            return LoginResult.FAILURE
+        }
+
+        cua.set(user)
+        logInfo("Login successful for user $user.")
+        return LoginResult.SUCCESS
     }
+
 }

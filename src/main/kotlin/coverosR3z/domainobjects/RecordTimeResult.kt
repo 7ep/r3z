@@ -2,7 +2,6 @@ package coverosR3z.domainobjects
 
 enum class StatusEnum {
     SUCCESS,
-    FAILURE,
     INVALID_PROJECT,
     INVALID_EMPLOYEE,
     /**

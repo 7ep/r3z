@@ -2,14 +2,12 @@ package coverosR3z.domainobjects
 
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
-import java.security.SecureRandom
 import kotlin.random.Random
 
 private const val maxUserCount = 100_000_000
 private const val maxUserMsg = "No way this company has more than 100 million users"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
-private const val hashCannotBeEmptyMsg = "All users must have a hash"
 private val md = MessageDigest.getInstance("SHA-256")
 
 

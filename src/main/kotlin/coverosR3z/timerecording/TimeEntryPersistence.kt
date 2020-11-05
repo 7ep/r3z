@@ -40,8 +40,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Int {
-        val minutes = pmd.getMinutesRecordedOnDate(employee, date)
-        return minutes
+        return pmd.getMinutesRecordedOnDate(employee, date)
     }
 
     override fun readTimeEntries(employee: Employee): List<TimeEntry> {

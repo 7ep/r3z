@@ -1,7 +1,5 @@
 package coverosR3z.templating
 
-import java.lang.IllegalArgumentException
-
 class FileReader {
     companion object {
 
