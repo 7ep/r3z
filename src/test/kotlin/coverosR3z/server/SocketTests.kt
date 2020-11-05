@@ -1,7 +1,7 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.logging.logDebug
+import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
 import org.junit.*
@@ -21,8 +21,6 @@ lateinit var server : IOHolder
 lateinit var client : IOHolder
 lateinit var su: ServerUtilities
 
-
-
 class ServerSocketInitializer(): Runnable {
 
     override fun run() {
@@ -32,6 +30,8 @@ class ServerSocketInitializer(): Runnable {
 }
 
 class SocketTests() {
+
+    val pmd = PureMemoryDatabase()
 
     companion object{
         @BeforeClass @JvmStatic
@@ -50,7 +50,7 @@ class SocketTests() {
     @Before
     fun init() {
         server = IOHolder(serverSocket)
-        su = ServerUtilities(server)
+        su = ServerUtilities(server, pmd)
         client = IOHolder(clientSocket)
     }
 
@@ -250,7 +250,6 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        CurrentUserAccessor().clearCurrentUserTestOnly()
         client.write("POST /entertime HTTP/1.1\n")
         client.write("Content-Length: 63\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
@@ -279,7 +278,7 @@ class SocketTests() {
         while (true) {
             val serverSocket = halfOpenServerSocket.accept()
             val server = IOHolder(serverSocket)
-            val su = ServerUtilities(server)
+            val su = ServerUtilities(server, pmd)
             su.serverHandleRequest()
         }
     }

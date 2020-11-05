@@ -19,6 +19,20 @@ Developer handbook
     Performance tests include the text "PERFORMANCE" in the name
 
 
+    Wrapping exceptions
+    -------------------
+
+    As we code, we encounter many places where exceptions can be thrown. Often,
+    in the case of third-party code, the exception may be confusing, ambiguous,
+    too-universal, or include critical information in a overly-complex stacktrace.
+
+    To avoid the difficulty this causes during maintenance and debugging, it is
+    imperative we wrap potential exception throwers in our own handling code
+    where we can more-precisely describe the problem.
+
+    For an example, see [parsePostedData]
+
+
     Invariants
     ----------
 
@@ -51,3 +65,23 @@ Developer handbook
     Throws an AssertionError if the value is false and runtime assertions
     have been enabled on the JVM using the -ea JVM option.
     (Maybe *not* best to use this, we want these invariants to always work)
+
+
+    General architecture
+    --------------------
+
+    The general architecture pattern is to have various abilities provided in files with a
+    suffix of "Utilities".  They, in turn, have access to a file with a suffix
+    of "Persistence" which controls their access to the database, and which
+    eventually talks to PureMemoryDatabase, where the data is actually stored.
+
+    These constitute the business application.  We then provide an interface
+    to this code from the outside world, like for example, by providing http
+    access.
+
+    Keeping things clean and simple is crucial.
+
+    To stay organized, follow these guidelines:
+        1) Calls from the outside world (e.g. the web) call into any of the
+        "-Utilities" files.  They must not call directly to the "-Persistence"
+        files or straight to the PureMemoryDatabase

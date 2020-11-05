@@ -1,8 +1,7 @@
 package coverosR3z
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
-import coverosR3z.authentication.CurrentUserAccessor
-import coverosR3z.authentication.FakeCurrentUserAccessor
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeEntryPersistence
@@ -73,32 +72,32 @@ val jsonSerialzationWithPrettyPrint : Json = Json{prettyPrint = true; allowStruc
  * A test helper method to generate a [TimeRecordingUtilities]
  * with a real database connected
  */
-fun createTimeRecordingUtility(): TimeRecordingUtilities {
+fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilities {
         val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        return TimeRecordingUtilities(timeEntryPersistence, FakeCurrentUserAccessor())
+        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
 }
 
 /**
  * Create an employee, "Alice", register a user for her, create a project
  */
-fun initializeAUserAndLogin(cua : CurrentUserAccessor) : Pair<TimeRecordingUtilities, Employee>{
+fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence, cua)
+        val au = AuthenticationUtilities(authPersistence)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
-        val alice = tru.createEmployee(EmployeeName("Alice"))
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
 
-        au.register("alice", DEFAULT_PASSWORD, alice.id)
-        au.login("alice", DEFAULT_PASSWORD)
+        au.register("alice", DEFAULT_PASSWORD, aliceEmployee.id)
+        val (_, aliceUser) = au.login("alice", DEFAULT_PASSWORD)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(aliceUser))
 
         // Perform some quick checks
-        Assert.assertEquals("Auth persistence and user persistence must agree",
-                authPersistence.getUser(UserName("alice")), cua.get())
         Assert.assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
 
         tru.createProject(DEFAULT_PROJECT_NAME)
 
-        return Pair(tru, alice)
+        return Pair(tru, aliceEmployee)
 }
 
