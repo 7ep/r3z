@@ -16,7 +16,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, FakeCurrentUserAccessor())
+        authUtils = AuthenticationUtilities(ap)
     }
 
     @Test
@@ -196,7 +196,7 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
-        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
+        val au = AuthenticationUtilities(fap)
         val status = au.login("matt", "password123")
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -212,7 +212,7 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
-        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
+        val au = AuthenticationUtilities(fap)
         val status= au.login("matt", "wrong")
         assertEquals(LoginResult.FAILURE, status)
     }
@@ -226,55 +226,8 @@ class AuthenticationUtilitiesTests {
         val fap = FakeAuthPersistence(
                 getUserBehavior= { null }
         )
-        val au = AuthenticationUtilities(fap, FakeCurrentUserAccessor())
+        val au = AuthenticationUtilities(fap)
         val status = au.login("matt", "arbitrary")
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
-
-    /**
-     * Here, we want to obtain the universally-accessible
-     * information of who is running commands.  The current user.
-     */
-    @Test
-    fun `should be able to get the current user`() {
-        val cua = CurrentUserAccessor()
-        cua.clearCurrentUserTestOnly()
-        val user = User(1, "matt", Hash.createHash(""), "", null)
-        cua.set(user)
-
-        val currentUser = cua.get()
-
-        assertEquals(user, currentUser)
-    }
-
-    @Test
-    fun `should store who the user is during login process`() {
-        val cua = CurrentUserAccessor()
-        cua.clearCurrentUserTestOnly()
-
-        val username = "mitch"
-        val password = "password12345"
-        val userId = 1
-        val salt = "abc123"
-        val user = User(userId, username, Hash.createHash("$password$salt"), salt, null)
-        val fap = FakeAuthPersistence(
-                getUserBehavior= { user }
-        )
-        val au = AuthenticationUtilities(fap, cua)
-
-        au.login(username, password)
-
-        assertEquals(user, cua.get())
-    }
-
-    @Test
-    fun `When no user is logged in, time entry should throw an exception`() {
-        val cua = CurrentUserAccessor()
-        cua.clearCurrentUserTestOnly()
-
-        val trt = TimeRecordingUtilities(FakeTimeEntryPersistence(), cua)
-
-        assertThrows(AssertionError::class.java) {trt.recordTime(createTimeEntryPreDatabase())}
-    }
-
 }

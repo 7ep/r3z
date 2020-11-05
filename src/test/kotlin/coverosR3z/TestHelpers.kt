@@ -80,24 +80,24 @@ fun createTimeRecordingUtility(): TimeRecordingUtilities {
 /**
  * Create an employee, "Alice", register a user for her, create a project
  */
-fun initializeAUserAndLogin(cua : CurrentUserAccessor) : Pair<TimeRecordingUtilities, Employee>{
+fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence, cua)
+        val au = AuthenticationUtilities(authPersistence)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cua)
-        val alice = tru.createEmployee(EmployeeName("Alice"))
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
 
-        au.register("alice", DEFAULT_PASSWORD, alice.id)
-        au.login("alice", DEFAULT_PASSWORD)
+        au.register("alice", DEFAULT_PASSWORD, aliceEmployee.id)
+        val (_, aliceUser) = au.login("alice", DEFAULT_PASSWORD)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(aliceUser))
 
         // Perform some quick checks
-        Assert.assertEquals("Auth persistence and user persistence must agree",
-                authPersistence.getUser(UserName("alice")), cua.get())
         Assert.assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
 
         tru.createProject(DEFAULT_PROJECT_NAME)
 
-        return Pair(tru, alice)
+        return Pair(tru, aliceEmployee)
 }
 

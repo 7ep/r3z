@@ -1,6 +1,5 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.CurrentUserAccessor
 import coverosR3z.logging.logDebug
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
@@ -250,7 +249,6 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        CurrentUserAccessor().clearCurrentUserTestOnly()
         client.write("POST /entertime HTTP/1.1\n")
         client.write("Content-Length: 63\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")

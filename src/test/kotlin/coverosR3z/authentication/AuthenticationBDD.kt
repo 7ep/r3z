@@ -18,13 +18,6 @@ import org.junit.Test
  */
 class AuthenticationBDD {
 
-    private val currentUserAccessor = CurrentUserAccessor() // since we have a method to clear this, we can share it between tests
-
-    @Before
-    fun init() {
-        currentUserAccessor.clearCurrentUserTestOnly()
-    }
-
     @Test
     fun `I cannot change someone else's time`() {
         // Given I am logged in as user "alice" and employees Sarah and Alice exist in the database
@@ -43,9 +36,9 @@ class AuthenticationBDD {
         // Given I am not currently registered
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
+        val au = AuthenticationUtilities(authPersistence)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), currentUserAccessor)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
         val matt = tru.createEmployee(EmployeeName("Matt"))
 
         // When I register a new user
@@ -59,7 +52,7 @@ class AuthenticationBDD {
     fun `I should not be able to register a user if they are already registered`() {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
+        val au = AuthenticationUtilities(authPersistence)
         au.register("matt", "asdfoiajwefowejf")
 
         // When I try to register again
@@ -73,22 +66,22 @@ class AuthenticationBDD {
     fun `I should be able to log in once I'm a registered user`() {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
+        val au = AuthenticationUtilities(authPersistence)
         au.register("matt", "asdfoiajwefowejf")
 
         // When I enter valid credentials
-        au.login("matt", "asdfoiajwefowejf")
+        val (_, mattUser) = au.login("matt", "asdfoiajwefowejf")
 
         // Then the system knows who I am
         val user = authPersistence.getUser(UserName("matt"))
-        assertEquals(user, currentUserAccessor.get())
+        assertEquals(user, mattUser)
     }
 
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence, FakeCurrentUserAccessor())
+        val au = AuthenticationUtilities(authPersistence)
         val regStatus = au.register("matt", "asdfoiajwefowejf")
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
@@ -103,7 +96,7 @@ class AuthenticationBDD {
     fun `if I enter an invalid password while registering, it will disallow it`() {
         // Given I am not registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence, currentUserAccessor)
+        val au = AuthenticationUtilities(authPersistence)
 
         // When I register with too short of a a password
         val regStatus = au.register("matt", "too short")
@@ -123,7 +116,7 @@ class AuthenticationBDD {
     fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         // We need to use cua for this test, sharing a pmd with auth persistence
         // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
-        val (tru, _) = initializeAUserAndLogin(currentUserAccessor)
+        val (tru, _) = initializeAUserAndLogin()
         val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
 
         return Pair(tru, sarah)
