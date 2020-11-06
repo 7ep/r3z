@@ -1,35 +1,18 @@
 <html>
-<head>
-    <title>demo register</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="register.css" />
-</head>
-    <form>
+    <head>
+        <title>register</title>
+    </head>
+    <body>
+        <h2>Register</h2>
+        <form action="register" method="post">
 
-        <div class="segment">
-            <h1>Sign up</h1>
-        </div>
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" />
 
-        <label>
-            <input type="text" placeholder="Email Address"/>
-        </label>
-        <label>
-            <input type="password" placeholder="Password"/>
-        </label>
-        <button class="red" type="button"><i class="icon ion-md-lock"></i> Log in</button>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" />
 
-        <div class="segment">
-            <button class="unit" type="button"><i class="icon ion-md-arrow-back"></i></button>
-            <button class="unit" type="button"><i class="icon ion-md-bookmark"></i></button>
-            <button class="unit" type="button"><i class="icon ion-md-settings"></i></button>
-        </div>
-
-        <div class="input-group">
-            <label>
-                <input type="text" placeholder="Email Address"/>
-            </label>
-            <button class="unit" type="button"><i class="icon ion-md-search"></i></button>
-        </div>
-
-    </form>
+            <button>Register</button>
+        </form>
+    </body>
 </html>

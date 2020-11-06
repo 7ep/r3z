@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>Company Employees</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        table,
+        td {
+            border: 1px solid #333;
+        }
+
+        thead,
+        tfoot {
+            background-color: #333;
+            color: #fff;
+        }
+
+        </style>
+    </head>
+    <body>
+        <p>
+            Here are the employees at your company, <span id="username">{{username}}</span>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Identifier</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Some employee</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </body>
+</html>

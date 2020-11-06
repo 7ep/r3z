@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>your time entries</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        table,
+        td {
+            border: 1px solid #333;
+        }
+
+        thead,
+        tfoot {
+            background-color: #333;
+            color: #fff;
+        }
+
+        </style>
+    </head>
+    <body>
+        <p>
+            Here are your entries, <span id="username">{{username}}</span>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Time</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Project_a</td>
+                    <td>20</td>
+                    <td>These are some details</td>
+                    <td>Jan 1, 1978</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </body>
+</html>
