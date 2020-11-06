@@ -56,6 +56,7 @@ dependencies {
     testImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.44.0'
 
     // junit, for running unit tests
+    // https://mvnrepository.com/artifact/junit/junit/4.13.1
     testImplementation ("junit:junit:4.13.1")
 }
 

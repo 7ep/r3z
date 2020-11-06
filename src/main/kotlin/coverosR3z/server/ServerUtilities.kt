@@ -33,7 +33,7 @@ val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
  */
 val contentLengthRegex = "Content-Length: (.*)$".toRegex()
 
-class ServerUtilities(private val server: IOHolder) {
+class ServerUtilities(private val server: IOHolder, private val pmd : PureMemoryDatabase) {
 
     /**
      * Serve prepared response object to the client
@@ -75,7 +75,6 @@ class ServerUtilities(private val server: IOHolder) {
         //    D A N G E R    Z O N E - BEGINS
         //**************************************************************************
 
-        val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 

@@ -86,7 +86,7 @@ class AuthenticationBDD {
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // When I login with the wrong credentials
-        val status = au.login("matt", "I'm not even trying to be a good password")
+        val (status, _) = au.login("matt", "I'm not even trying to be a good password")
 
         // Then the system denies me access
         assertEquals(LoginResult.FAILURE, status)

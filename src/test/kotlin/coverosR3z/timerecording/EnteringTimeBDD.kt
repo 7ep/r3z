@@ -8,7 +8,6 @@ import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
 
 
@@ -86,15 +85,17 @@ class EnteringTimeBDD {
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
-        val alice = tru.createEmployee(EmployeeName("Alice"))
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val alice = systemTru.createEmployee(EmployeeName("Alice"))
 
         au.register("alice_1", DEFAULT_PASSWORD, alice.id)
-        au.login("alice_1", DEFAULT_PASSWORD)
+        val (_, user) = au.login("alice_1", DEFAULT_PASSWORD)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
 
         assertTrue("Registration must have succeeded", au.isUserRegistered("alice_1"))
 
-        val newProject = tru.createProject(DEFAULT_PROJECT_NAME)
+        val newProject = systemTru.createProject(DEFAULT_PROJECT_NAME)
 
         val entry = createTimeEntryPreDatabase(
                 employee = alice,
@@ -107,11 +108,18 @@ class EnteringTimeBDD {
     }
 
     private fun `given the employee has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, Employee> {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val newProject: Project = tru.createProject(ProjectName("A"))
-        val newEmployee: Employee = tru.createEmployee(EmployeeName("B"))
+        val pmd = PureMemoryDatabase()
+        val timeEntryPersistence = TimeEntryPersistence(pmd)
+        val systemTru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(SYSTEM_USER))
+        val newProject = systemTru.createProject(ProjectName("A"))
+        val newEmployee = systemTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))
+
+        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        au.register(newEmployee.name, DEFAULT_PASSWORD, newEmployee.id)
+        val (_, user) = au.login(newEmployee.name, DEFAULT_PASSWORD)
+
+        val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
         tru.recordTime(existingTimeForTheDay)
         return Triple(tru, newProject, newEmployee)
     }

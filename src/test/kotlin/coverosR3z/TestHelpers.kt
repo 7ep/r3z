@@ -72,9 +72,9 @@ val jsonSerialzationWithPrettyPrint : Json = Json{prettyPrint = true; allowStruc
  * A test helper method to generate a [TimeRecordingUtilities]
  * with a real database connected
  */
-fun createTimeRecordingUtility(): TimeRecordingUtilities {
+fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilities {
         val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(SYSTEM_USER))
+        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
 }
 
 /**

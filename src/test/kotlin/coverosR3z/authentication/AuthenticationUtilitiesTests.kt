@@ -197,7 +197,7 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap)
-        val status = au.login("matt", "password123")
+        val (status, _) = au.login("matt", "password123")
         assertEquals(LoginResult.SUCCESS, status)
     }
 
@@ -213,7 +213,7 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
         )
         val au = AuthenticationUtilities(fap)
-        val status= au.login("matt", "wrong")
+        val (status, _) = au.login("matt", "wrong")
         assertEquals(LoginResult.FAILURE, status)
     }
 
@@ -227,7 +227,7 @@ class AuthenticationUtilitiesTests {
                 getUserBehavior= { null }
         )
         val au = AuthenticationUtilities(fap)
-        val status = au.login("matt", "arbitrary")
+        val (status, _) = au.login("matt", "arbitrary")
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
 }
