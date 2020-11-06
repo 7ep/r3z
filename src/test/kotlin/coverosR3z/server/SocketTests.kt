@@ -244,6 +244,54 @@ class SocketTests() {
         assertEquals(fileWeRead, body)
     }
 
+    /**
+     * When we ask for a file that requires reading a CSS file
+     */
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_CSS() {
+        client.write("GET /sample.css HTTP/1.1\n\n")
+
+        // server - handle the request
+        su.serverHandleRequest()
+
+        // client - read status line
+        val statusline = client.readLine()
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        val body = client.read(length)
+
+        // assert all is well
+        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertTrue(headers.size > 1)
+        assertEquals("Content-Type: text/css", headers[1])
+        val fileWeRead = FileReader.read("sample.css")
+        assertEquals(fileWeRead, body)
+    }
+
+    /**
+     * When we ask for a file that requires reading a JavaScript file
+     */
+    @Test
+    fun testShouldGetHtmlFileResponseFromServer_JS() {
+        client.write("GET /sample.js HTTP/1.1\n\n")
+
+        // server - handle the request
+        su.serverHandleRequest()
+
+        // client - read status line
+        val statusline = client.readLine()
+        val headers = getHeaders(client)
+        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
+        val body = client.read(length)
+
+        // assert all is well
+        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertTrue(headers.size > 1)
+        assertEquals("Content-Type: application/javascript", headers[1])
+        val fileWeRead = FileReader.read("sample.js")
+        assertEquals(fileWeRead, body)
+    }
+
 
     /**
      * When we POST some data, we should receive a success message back
