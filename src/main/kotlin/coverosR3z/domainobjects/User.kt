@@ -1,6 +1,5 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.authentication.CurrentUser
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -44,6 +43,15 @@ data class User(val id: Int, val name: String, val hash: Hash, val salt: String,
     }
 }
 
+/**
+ * Code analysis might complain about the following, that this
+ * private constructor is exposed in the copy method, but that's
+ * really ok - it's just this way so callers don't accidentally
+ * think it's alright to construct a hash directly, it's not really
+ * a security problem.  The following suppression annotation is to
+ * make the analysis shut up about it.
+ */
+@Suppress("DataClassPrivateConstructor")
 @Serializable
 data class Hash private constructor(val value: String) {
 
