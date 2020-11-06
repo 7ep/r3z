@@ -15,8 +15,27 @@ import java.time.LocalDate
 /**
  * Data for shipping to the client
  */
-data class PreparedResponseData(val fileContents: String, val code: String, val status: String)
+data class PreparedResponseData(val fileContents: String, val responseStatus: ResponseStatus, val type: ContentType)
 
+/**
+ * These are mime types (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
+ * which we'll use when conversing with clients to describe data
+ */
+enum class ContentType(val value: String) {
+
+    // Text MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#text
+    TEXT_HTML("text/html"),
+    TEXT_CSS("text/css"),
+
+    // Application MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#application
+    APPLICATION_JAVASCRIPT("application/javascript"),
+}
+
+enum class ResponseStatus(val value: String) {
+    OK("200 OK"),
+    NOT_FOUND("404 NOT FOUND"),
+    BAD_REQUEST("400 BAD REQUEST"),
+}
 /**
  * This is our regex for looking at a client's request
  * and determining what to send them.  For example,
@@ -102,7 +121,7 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
         //    D A N G E R    Z O N E - ENDS
         //**************************************************************************
 
-        returnData(PreparedResponseData("<p>Thank you, your time has been recorded</p>", "200", "OK"))
+        returnData(PreparedResponseData("<p>Thank you, your time has been recorded</p>", ResponseStatus.OK, ContentType.TEXT_HTML))
     }
 
     /**
@@ -110,10 +129,16 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
      */
     private fun returnData(data: PreparedResponseData) {
         logDebug("Assembling data just before shipping to client")
-        val status = "HTTP/1.1 ${data.code} ${data.status}"
-        val header = "Content-Length: ${data.fileContents.length}"
+        val status = "HTTP/1.1 ${data.responseStatus.value}"
+        logDebug("status: $status")
+        val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
+        val contentTypeHeader = "Content-Type: ${data.type.value}"
+
+        logDebug("contentLengthHeader: $contentLengthHeader")
+        logDebug("contentTypeHeader: $contentTypeHeader")
         val input = "$status\n" +
-                "$header\n" +
+                "$contentLengthHeader\n" +
+                "$contentTypeHeader\n" +
                 "\n" +
                 data.fileContents
         server.write(input)
@@ -170,21 +195,21 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
             }
         }
 
-        private fun handleBadRequest() = PreparedResponseData(FileReader.readNotNull("400error.html"), "400", "BAD REQUEST")
+        private fun handleBadRequest() = PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, ContentType.TEXT_HTML)
 
         private fun handleReadingFiles(action: Action): PreparedResponseData {
             val fileContents = FileReader.read(action.filename)
             return if (fileContents == null) {
                 logDebug("unable to read a file named ${action.filename}")
                 val unfound = FileReader.readNotNull("404error.html")
-                PreparedResponseData(unfound, "404", "NOT FOUND")
+                PreparedResponseData(unfound, ResponseStatus.NOT_FOUND, ContentType.TEXT_HTML)
             } else {
                 if (action.type == ActionType.TEMPLATE) {
                     logDebug("Sending file for rendering")
                     val renderedFile = renderTemplate(fileContents)
-                    PreparedResponseData(renderedFile, "200", "OK")
+                    PreparedResponseData(renderedFile,ResponseStatus.OK, ContentType.TEXT_HTML)
                 } else {
-                    PreparedResponseData(fileContents, "200", "OK")
+                    PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
                 }
 
             }
