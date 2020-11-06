@@ -189,6 +189,8 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
                 ActionType.BAD_REQUEST -> handleBadRequest()
 
                 ActionType.READ_FILE,
+                ActionType.CSS,
+                ActionType.JS,
                 ActionType.TEMPLATE -> handleReadingFiles(action)
 
                 ActionType.HANDLE_POST_FROM_CLIENT ->  TODO("Not yet implemented")
@@ -209,7 +211,11 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
                     val renderedFile = renderTemplate(fileContents)
                     PreparedResponseData(renderedFile,ResponseStatus.OK, ContentType.TEXT_HTML)
                 } else {
-                    PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
+                    when (action.type) {
+                        ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_CSS)
+                        ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.APPLICATION_JAVASCRIPT)
+                        else -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
+                    }
                 }
 
             }
@@ -240,6 +246,16 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
              * The client sent us a bad (malformed) request
              */
             BAD_REQUEST,
+
+            /**
+             * Cascading style sheet
+             */
+            CSS,
+
+            /**
+             * A JavaScript file
+             */
+            JS,
         }
 
         /**
@@ -277,6 +293,12 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
                     if (file.takeLast(4) == ".utl") {
                         logDebug("file requested is a template")
                         responseType = ActionType.TEMPLATE
+                    } else if (file.takeLast(4) == ".css") {
+                        logDebug("file requested is a CSS style sheet")
+                        responseType = ActionType.CSS
+                    } else if (file.takeLast(3) == ".js") {
+                        logDebug("file requested is a JavaScript file")
+                        responseType = ActionType.JS
                     } else {
                         logDebug("file requested is a text file")
                         responseType = ActionType.READ_FILE

@@ -71,10 +71,11 @@ class ServerUtilitiesTests {
         assertEquals("We failed to parse \"foo\" as application/x-www-form-urlencoded", ex.message)
     }
 
-
-
+    /**
+     * Action for a POST to an endpoint
+     */
     @Test
-    fun testShouldParseMultipleClientRequestTypes() {
+    fun testShouldParseMultipleClientRequestTypes_POST() {
         val input = "POST /entertime HTTP/1.1"
         val expected = Action(ActionType.HANDLE_POST_FROM_CLIENT, "")
 
@@ -82,4 +83,72 @@ class ServerUtilitiesTests {
 
         assertEquals(expected, result)
     }
+
+    /**
+     * Action for a valid GET on a simple file
+     */
+    @Test
+    fun testShouldParseMultipleClientRequestTypes_GET() {
+        val input = "GET /test HTTP/1.1"
+        val expected = Action(ActionType.READ_FILE, "test")
+
+        val result = parseClientRequest(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Action for a valid GET on a template file
+     */
+    @Test
+    fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
+        val input = "GET /test.utl HTTP/1.1"
+        val expected = Action(ActionType.TEMPLATE, "test.utl")
+
+        val result = parseClientRequest(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Action for an invalid request
+     */
+    @Test
+    fun testShouldParseMultipleClientRequestTypes_BadRequest() {
+        val input = "INVALID /test.utl HTTP/1.1"
+        val expected = Action(ActionType.BAD_REQUEST, "")
+
+        val result = parseClientRequest(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Action for a valid GET on a css file
+     */
+    @Test
+    fun testShouldParseMultipleClientRequestTypes_CSS() {
+        val input = "GET /test.css HTTP/1.1"
+        val expected = Action(ActionType.CSS, "test.css")
+
+        val result = parseClientRequest(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Action for a valid GET on a JavaScript file
+     */
+    @Test
+    fun testShouldParseMultipleClientRequestTypes_JS() {
+        val input = "GET /test.js HTTP/1.1"
+        val expected = Action(ActionType.JS, "test.js")
+
+        val result = parseClientRequest(input)
+
+        assertEquals(expected, result)
+    }
+
+
+
 }
