@@ -7,10 +7,8 @@ import coverosR3z.server.ServerUtilities
 import java.net.ServerSocket
 
 fun main() {
-    // handle the GET
     val halfOpenServerSocket = ServerSocket(8080)
     val pmd = PureMemoryDatabase()
-    // Following line runs when we connect with the browser
     while (true) {
         logInfo("waiting for socket connection")
         val serverSocket = halfOpenServerSocket.accept()
