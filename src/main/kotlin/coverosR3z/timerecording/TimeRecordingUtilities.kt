@@ -69,6 +69,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     fun createProject(projectName: ProjectName) : Project {
         require(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
+        require(persistence.getProjectByName(projectName.value) == null) {"Cannot create a new project if one already exists by that same name"}
         log.info("Creating a new project, ${projectName.value}")
 
         return persistence.persistNewProject(projectName)

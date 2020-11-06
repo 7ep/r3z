@@ -90,6 +90,11 @@ class PureMemoryDatabase {
         return projects.singleOrNull { p -> p.id == id }
     }
 
+    fun getProjectByName(name: String): Project? {
+        require(name.isNotEmpty())
+        return projects.singleOrNull { p -> p.name == name }
+    }
+
     fun getEmployeeById(id: Int): Employee? {
         require(id > 0)
         return employees.singleOrNull { u -> u.id == id}
