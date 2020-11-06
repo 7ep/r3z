@@ -51,4 +51,8 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return pmd.getAllTimeEntriesForEmployeeOnDate(employee, date)
     }
 
+    override fun getProjectByName(name: String): Project? {
+        return pmd.getProjectByName(name)
+    }
+
 }

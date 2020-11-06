@@ -8,7 +8,8 @@ import coverosR3z.domainobjects.*
 class FakeTimeEntryPersistence(
         var minutesRecorded : Int = 0,
         var persistNewTimeEntryBehavior : () -> Unit = {},
-        var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
+        var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
+        var getProjectBehavior : () -> Project = { DEFAULT_PROJECT }) : ITimeEntryPersistence {
 
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
@@ -34,6 +35,10 @@ class FakeTimeEntryPersistence(
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): List<TimeEntry> {
         return listOf()
+    }
+
+    override fun getProjectByName(name: String): Project? {
+        return getProjectBehavior()
     }
 
 }
