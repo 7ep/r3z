@@ -10,7 +10,7 @@ import coverosR3z.persistence.ProjectIntegrityViolationException
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) {
 
-    val log = Logger(cu)
+    private val log = Logger(cu)
 
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         val user = cu.user
