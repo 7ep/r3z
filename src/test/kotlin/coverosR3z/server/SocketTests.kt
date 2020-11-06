@@ -132,7 +132,7 @@ class SocketTests() {
 
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
-        assertEquals(1, headers.size)
+        assertTrue(headers.size > 1)
         val fileWeRead = FileReader.read(pageDesired)
         assertEquals(fileWeRead, body)
     }
@@ -159,7 +159,7 @@ class SocketTests() {
 
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
-        assertEquals(1, headers.size)
+        assertTrue(headers.size > 1)
     }
 
     /**
@@ -182,7 +182,7 @@ class SocketTests() {
 
         // assert all is well
         assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
-        assertEquals(1, headers.size)
+        assertTrue(headers.size > 1)
         assertEquals("Content-Length: 194", headers[0])
         val fileWeRead = FileReader.read("404error.html")
         assertEquals(fileWeRead, body)
@@ -214,7 +214,7 @@ class SocketTests() {
 
             // assert all is well
             assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
-            assertEquals(1, headers.size)
+            assertTrue(headers.size > 1)
             assertEquals("Content-Length: 194", headers[0])
             val fileWeRead = FileReader.read("400error.html")
             assertEquals(fileWeRead, body)
@@ -239,7 +239,7 @@ class SocketTests() {
 
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
-        assertEquals(1, headers.size)
+        assertTrue(headers.size > 1)
         val fileWeRead = FileReader.read("sample.html")
         assertEquals(fileWeRead, body)
     }
@@ -265,7 +265,7 @@ class SocketTests() {
 
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
-        assertEquals(1, headers.size)
+        assertTrue(headers.size > 1)
         assertEquals("<p>Thank you, your time has been recorded</p>", body)
     }
 
