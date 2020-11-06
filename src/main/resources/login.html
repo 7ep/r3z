@@ -1,28 +1,18 @@
 <html>
-<head>
-    <title>demo login</title>
-    <link rel="stylesheet" href="login.css" />
-</head>
-<body>
-    <div class="login-box">
-        <h2>Login</h2>
-        <form>
-            <div class="user-box">
-                <input type="text" name="" required="">
-                <label>Username</label>
-            </div>
-            <div class="user-box">
-                <input type="password" name="" required="">
-                <label>Password</label>
-            </div>
-            <a href="#">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                Submit
-            </a>
-        </form>
-    </div>
-</body>
+    <head>
+        <title>login</title>
+    </head>
+    <body>
+            <h2>Login</h2>
+            <form action="login" method="post">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" />
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" />
+
+                <button>Login</button>
+            </form>
+    </body>
 </html>
