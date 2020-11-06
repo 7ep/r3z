@@ -1,6 +1,5 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.authentication.CurrentUser
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 import kotlin.random.Random
