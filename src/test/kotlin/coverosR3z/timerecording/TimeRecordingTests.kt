@@ -183,7 +183,6 @@ class TimeRecordingTests {
     /**
      * a basic happy path
      */
-
     @Test fun `can create project`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 persistNewProjectBehavior = { Project(1, "test project") })
@@ -191,6 +190,17 @@ class TimeRecordingTests {
         val expected = utils.createProject(ProjectName("test project"))
         val actual = Project(1, "test project")
         assertEquals(expected, actual)
+    }
+
+    /**
+     * Trying to create an already-existing project should throw exception
+     */
+    @Test fun testCannotCreateMultipleProjectsWithSameName() {
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                getProjectBehavior = { Project(1, "test project") })
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
+        val ex  = assertThrows(java.lang.IllegalArgumentException::class.java) {utils.createProject(ProjectName("test project"))}
+        assertEquals("Cannot create a new project if one already exists by that same name", ex.message)
     }
 
 }
