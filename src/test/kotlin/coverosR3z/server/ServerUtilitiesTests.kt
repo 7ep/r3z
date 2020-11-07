@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.getTime
 import coverosR3z.server.ServerUtilities.Companion.Action
 import coverosR3z.server.ServerUtilities.Companion.ActionType
+import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.parseClientRequest
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import org.junit.Assert.*
@@ -149,6 +150,83 @@ class ServerUtilitiesTests {
         assertEquals(expected, result)
     }
 
+    /**
+     * Check to make sure we can extract the length of the
+     * body of a POST from the Content-Length header it sends
+     * us.
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength() {
+        val headers = listOf("Content-Length: 20")
+        val expectedLength = 20
+        val result = extractLengthOfPostBodyFromHeaders(headers)
+        assertEquals("we should extract out the length from the header provided", expectedLength, result)
+    }
+
+    /**
+     * Make sure we extract properly with multiple headers
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_MultipleHeaders() {
+        val headers = listOf("Content-Length: 20", "Content-Type: Blah")
+        val expectedLength = 20
+        val result = extractLengthOfPostBodyFromHeaders(headers)
+        assertEquals("we should extract out the length from the header provided", expectedLength, result)
+    }
+
+    /**
+     * What if we receive multiple Content-Length headers? Complain!
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_MultipleContentLengthHeaders() {
+        val headers = listOf("Content-Length: 20", "Content-Length: 15")
+        val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("Exception occurred for these headers: Content-Length: 20;Content-Length: 15.  Inner exception message: Collection contains more than one matching element.", exception.message)
+    }
+
+    /**
+     * We'll throw an exception for now if we don't get this
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_NotFound() {
+        val headers = listOf("Content-Type: Blah")
+        val exception = assertThrows(NoSuchElementException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("Did not find a necessary Content-Length header in headers. Headers: Content-Type: Blah", exception.message)
+    }
+
+    /**
+     * We'll throw an exception if we read no headers at all
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_NoHeaders() {
+        val headers = emptyList<String>()
+        val exception = assertThrows(IllegalArgumentException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("We received no headers", exception.message)
+    }
+
+    /**
+     * If the Content-Length has an unparsable length...
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_Unparsable() {
+        val headers = listOf("Content-Length: aaaa", "Content-Type: Blah")
+        val exception = assertThrows(IllegalArgumentException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("The value for content-length was not parsable as an integer. Headers: Content-Length: aaaa;Content-Type: Blah", exception.message)
+    }
+
+    /**
+     * If the Content-Length has length too high...
+     *
+     * what *is* the greatest length we should take? Off-hand I'd
+     * say it doesn't make sense for us to take large data from a user.
+     * Probably no more than 500 characters, for now.
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_TooHigh() {
+        val headers = listOf("Content-Length: 501", "Content-Type: Blah")
+        val exception = assertThrows(IllegalStateException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("Content-length was too large.  Maximum is 500 characters", exception.message)
+    }
 
 
 }
