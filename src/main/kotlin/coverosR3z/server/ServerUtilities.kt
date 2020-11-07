@@ -10,6 +10,8 @@ import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
+import java.lang.Exception
+import java.lang.NumberFormatException
 import java.time.LocalDate
 
 /**
@@ -83,12 +85,10 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
      * The user has sent us data, we have to process it
      */
     private fun handlePost(server : IOHolder) {
-        val headers: List<String> = getHeaders(server) // we may also use this, eventually
-        val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
-        // TODO following should be made safe / clean
-        val length: Int = contentLengthRegex.matchEntire(lengthHeader)!!.groups[1]!!.value.toInt()
+        val headers: List<String> = getHeaders(server)
+        val length: Int = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
-        val data = parsePostedData(body) // we may use this, eventually
+        val data = parsePostedData(body)
         // enter the time *****
         //**************************************************************************
         //    D A N G E R    Z O N E - BEGINS
@@ -145,6 +145,42 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
     }
 
     companion object {
+
+        /**
+         * Given the list of headers, find the one with the length of the
+         * body of the POST and return that value as a simple [Int]
+         */
+        fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
+            require(headers.isNotEmpty()) {"We received no headers"}
+            try {
+                val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
+                val length = contentLengthRegex.matchEntire(lengthHeader)!!.groups[1]!!.value.toInt()
+                // arbitrarily setting to 500 for now
+                val maxContentLength = 500
+                check(length <= maxContentLength) {"Content-length was too large.  Maximum is $maxContentLength characters"}
+                return length
+            } catch (ex : NoSuchElementException) {
+                throw NoSuchElementException("Did not find a necessary Content-Length header in headers. Headers: ${headers.joinToString(";")}")
+            } catch (ex : NumberFormatException) {
+                throw NumberFormatException("The value for content-length was not parsable as an integer. Headers: ${headers.joinToString(";")}")
+            } catch (ex : Exception) {
+                throw Exception("Exception occurred for these headers: ${headers.joinToString(";")}.  Inner exception message: ${ex.message}", ex)
+            }
+        }
+
+        /**
+         * Given the list of headers, find the one with the security
+         * cookie and return its value for further processing
+         */
+        fun extractSecurityCookieFromHeaders(headers: List<String>): Int {
+            require(headers.isNotEmpty()) {"We received no headers"}
+            return try {
+                val cookieHeader: String = headers.single { it.startsWith("Cookie") }
+                contentLengthRegex.matchEntire(cookieHeader)!!.groups[1]!!.value.toInt()
+            } catch (ex : NoSuchElementException) {
+                throw NoSuchElementException("Did not find a necessary Content-Length header in headers: ${headers.joinToString(";")}")
+            }
+        }
 
         /**
          * Parse data formatted by application/x-www-form-urlencoded
