@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>your time entries</title>
+        <title>Company Employees</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
         table,
@@ -18,23 +18,19 @@
     </head>
     <body>
         <p>
-            Here are your entries, <span id="username">{{username}}</span>
+            Here are the employees at your company, <span id="username">{{username}}</span>
         </p>
         <table>
             <thead>
                 <tr>
-                    <th>Project</th>
-                    <th>Time</th>
-                    <th>Details</th>
-                    <th>Date</th>
+                    <th>Identifier</th>
+                    <th>Name</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Project_a</td>
-                    <td>20</td>
-                    <td>These are some details</td>
-                    <td>Jan 1, 1978</td>
+                    <td>1</td>
+                    <td>Some employee</td>
                 </tr>
             </tbody>
         </table>
