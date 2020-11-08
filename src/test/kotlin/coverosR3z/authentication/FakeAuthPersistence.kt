@@ -4,6 +4,9 @@ import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
 
+/**
+ * Used as a mock object for testing
+ */
 class FakeAuthPersistence(
         var createUserBehavior : () -> Unit = {},
         var isUserRegisteredBehavior : () -> Boolean = {false},

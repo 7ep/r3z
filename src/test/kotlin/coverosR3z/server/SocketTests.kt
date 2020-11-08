@@ -1,9 +1,10 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.logging.logDebug
-import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -17,8 +18,8 @@ lateinit var clientSocket : Socket
 lateinit var serverSocket : Socket
 lateinit var halfOpenServerSocket : ServerSocket
 lateinit var serverThread: Thread
-lateinit var server : IOHolder
-lateinit var client : IOHolder
+lateinit var server : SocketWrapper
+lateinit var client : SocketWrapper
 lateinit var su: ServerUtilities
 
 class ServerSocketInitializer(): Runnable {
@@ -31,7 +32,8 @@ class ServerSocketInitializer(): Runnable {
 
 class SocketTests() {
 
-    val pmd = PureMemoryDatabase()
+    val tru = FakeTimeRecordingUtilities()
+    val au = FakeAuthenticationUtilities()
 
     companion object{
         @BeforeClass @JvmStatic
@@ -49,9 +51,9 @@ class SocketTests() {
 
     @Before
     fun init() {
-        server = IOHolder(serverSocket)
-        su = ServerUtilities(server, pmd)
-        client = IOHolder(clientSocket)
+        server = SocketWrapper(serverSocket)
+        su = ServerUtilities(server, au, tru)
+        client = SocketWrapper(clientSocket)
     }
 
     @Test
@@ -316,22 +318,6 @@ class SocketTests() {
         assertTrue(headers.size > 1)
         assertEquals("<p>Thank you, your time has been recorded</p>", body)
     }
-
-    @Ignore("This is to assist in manual testing only")
-    @Test
-    fun testingRealConnectionWithBrowser() {
-        // handle the GET
-        val halfOpenServerSocket = ServerSocket(8080)
-        // Following line runs when we connect with the browser
-        while (true) {
-            val serverSocket = halfOpenServerSocket.accept()
-            val server = IOHolder(serverSocket)
-            val su = ServerUtilities(server, pmd)
-            su.serverHandleRequest()
-        }
-    }
-
-
 
 
 }

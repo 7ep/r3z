@@ -4,7 +4,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
 
 
-class AuthenticationUtilities(private val ap : IAuthPersistence){
+class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
 
     private val blacklistedPasswords = listOf("password")
 
@@ -12,7 +12,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence){
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
-    fun register(username: String, password: String, employeeId: Int? = null) : RegistrationResult {
+    override fun register(username: String, password: String, employeeId: Int?) : RegistrationResult {
         val passwordResult = analyzePassword(password)
         val usernameResult = analyzeUsername(username)
 
@@ -65,7 +65,11 @@ class AuthenticationUtilities(private val ap : IAuthPersistence){
     }
 
 
-    fun login(username: String, password: String): Pair<LoginResult, User> {
+    /**
+     * Takes a user's username and password and returns a result, and a user
+     * as well if the [LoginResult] was successful.
+     */
+    override fun login(username: String, password: String): Pair<LoginResult, User> {
         val user = ap.getUser(UserName(username))
 
         if (user == null) {
