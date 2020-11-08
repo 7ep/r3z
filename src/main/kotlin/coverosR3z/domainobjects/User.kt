@@ -68,6 +68,11 @@ data class Hash private constructor(val value: String) {
 
         /**
          * Creates a random string to salt our hashes so they're yummy.
+         *
+         * By adding a large value to the password before hashing it,
+         * we put a huge impediment in place to using dictionary
+         * attacks on our user's password hashes.
+         *
          * See https://en.wikipedia.org/wiki/Salt_(cryptography)
          */
         fun getSalt(): String {

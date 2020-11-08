@@ -8,11 +8,11 @@ import coverosR3z.logging.Logger
 import coverosR3z.persistence.EmployeeIntegrityViolationException
 import coverosR3z.persistence.ProjectIntegrityViolationException
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) {
+class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) : ITimeRecordingUtilities {
 
     private val log = Logger(cu)
 
-    fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
+    override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         val user = cu.user
         // ensure time entry user is the logged in user, or
         // is the system
@@ -67,7 +67,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      * Business code for creating a new project in the
      * system (persists it to the database)
      */
-    fun createProject(projectName: ProjectName) : Project {
+    override fun createProject(projectName: ProjectName) : Project {
         require(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
         require(persistence.getProjectByName(projectName.value) == null) {"Cannot create a new project if one already exists by that same name"}
         log.info("Creating a new project, ${projectName.value}")
@@ -83,18 +83,18 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      * Business code for creating a new employee in the
      * system (persists it to the database)
      */
-    fun createEmployee(employeename: EmployeeName) : Employee {
+    override fun createEmployee(employeename: EmployeeName) : Employee {
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
         log.info("Creating a new employee, ${employeename.value}")
 
         return persistence.persistNewEmployee(employeename)
     }
 
-    fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
         return persistence.readTimeEntriesOnDate(employee, date)
     }
 
-    fun getAllEntriesForEmployee(employee: Employee): List<TimeEntry> {
+    override fun getAllEntriesForEmployee(employee: Employee): List<TimeEntry> {
         return persistence.readTimeEntries(employee)
     }
 }
