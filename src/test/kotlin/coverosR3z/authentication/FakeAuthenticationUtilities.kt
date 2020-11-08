@@ -7,7 +7,9 @@ import coverosR3z.domainobjects.*
  */
 class FakeAuthenticationUtilities (
         var registerBehavior : () -> RegistrationResult = {RegistrationResult.SUCCESS},
-        var loginBehavior : () -> Pair<LoginResult, User> = {Pair(LoginResult.SUCCESS, SYSTEM_USER)}) : IAuthenticationUtilities {
+        var loginBehavior : () -> Pair<LoginResult, User> = {Pair(LoginResult.SUCCESS, SYSTEM_USER)},
+        var getUserForSessionBehavior: () -> User? = {null}
+    ) : IAuthenticationUtilities {
 
     override fun register(username: String, password: String, employeeId: Int?): RegistrationResult {
        return registerBehavior()
@@ -15,6 +17,10 @@ class FakeAuthenticationUtilities (
 
     override fun login(username: String, password: String): Pair<LoginResult, User> {
         return loginBehavior()
+    }
+
+    override fun getUserForSession(sessionToken: String): User? {
+        return getUserForSessionBehavior()
     }
 
 

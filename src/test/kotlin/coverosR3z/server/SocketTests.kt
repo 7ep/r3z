@@ -314,9 +314,9 @@ class SocketTests() {
         val body = client.read(length)
 
         // assert all is well
-        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
-        assertEquals("<p>Thank you, your time has been recorded</p>", body)
+        assertEquals("<p>Unauthorized</p>", body)
     }
 
 

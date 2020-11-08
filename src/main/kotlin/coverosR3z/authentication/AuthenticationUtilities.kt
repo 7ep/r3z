@@ -87,4 +87,8 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return Pair(LoginResult.SUCCESS, user)
     }
 
+    override fun getUserForSession(sessionToken: String): User? {
+        return ap.getUserForSession(sessionToken)
+    }
+
 }

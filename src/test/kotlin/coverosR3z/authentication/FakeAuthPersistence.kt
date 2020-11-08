@@ -10,7 +10,8 @@ import coverosR3z.domainobjects.UserName
 class FakeAuthPersistence(
         var createUserBehavior : () -> Unit = {},
         var isUserRegisteredBehavior : () -> Boolean = {false},
-        var getUserBehavior: () -> User? = {null}
+        var getUserBehavior: () -> User? = {null},
+        var getUserForSessionBehavior: () -> User? = {null}
 ) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: String, employeeId: Int?) {
@@ -23,6 +24,10 @@ class FakeAuthPersistence(
 
     override fun getUser(name: UserName): User? {
         return getUserBehavior()
+    }
+
+    override fun getUserForSession(sessionToken: String): User? {
+        return getUserForSessionBehavior()
     }
 
 }

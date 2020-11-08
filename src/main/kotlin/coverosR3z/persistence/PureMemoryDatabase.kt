@@ -18,6 +18,12 @@ class PureMemoryDatabase {
     private val projects : MutableSet<Project> = mutableSetOf()
     private val timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf()
 
+    /**
+     * a map between randomly-created letter-number strings, and a given
+     * user.  If a user exists in this data, it means they are currently authenticated.
+     */
+    private val sessions : MutableMap<String, User> = mutableMapOf()
+
     fun addTimeEntry(timeEntry : TimeEntryPreDatabase) {
         var employeeTimeEntries = timeEntries[timeEntry.employee]
         if (employeeTimeEntries == null) {
@@ -126,6 +132,24 @@ class PureMemoryDatabase {
         result = 31 * result + projects.hashCode()
         result = 31 * result + timeEntries.hashCode()
         return result
+    }
+
+    fun addNewSession(sessionToken: String, user: User) {
+        require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
+        sessions[sessionToken] = user
+    }
+
+    fun getUserBySessionToken(sessionToken: String): User? {
+        return sessions[sessionToken]
+    }
+
+    fun removeSessionByToken(sessionToken: String) {
+        checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
+        sessions.remove(sessionToken)
+    }
+
+    fun getUserForSession(sessionToken: String): User? {
+        return sessions[sessionToken]
     }
 
 

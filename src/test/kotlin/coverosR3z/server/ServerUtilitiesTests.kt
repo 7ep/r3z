@@ -11,16 +11,25 @@ import coverosR3z.server.ServerUtilities.Companion.parseClientRequest
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 class ServerUtilitiesTests {
 
-    private val sw = FakeSocketWrapper()
-    private val au = FakeAuthenticationUtilities()
-    private val tru = FakeTimeRecordingUtilities()
-    val su = ServerUtilities(sw, au, tru)
+    private lateinit var sw : FakeSocketWrapper
+    private lateinit var au : FakeAuthenticationUtilities
+    private lateinit var tru : FakeTimeRecordingUtilities
+    private lateinit var su : ServerUtilities
+
+    @Before
+    fun init() {
+        sw = FakeSocketWrapper()
+        au = FakeAuthenticationUtilities()
+        tru = FakeTimeRecordingUtilities()
+        su = ServerUtilities(sw, au, tru)
+    }
 
     /**
      * When the client POSTs data to us, it's coming
@@ -289,6 +298,7 @@ class ServerUtilitiesTests {
     fun testShouldExtractUserFromAuthToken() {
         val authCookie = "abc123"
         val expectedUser = DEFAULT_USER
+        au.getUserForSessionBehavior = { DEFAULT_USER}
         val user = su.extractUserFromAuthToken(authCookie)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }

@@ -31,6 +31,7 @@ enum class ResponseStatus(val value: String) {
     OK("200 OK"),
     NOT_FOUND("404 NOT FOUND"),
     BAD_REQUEST("400 BAD REQUEST"),
+    UNAUTHORIZED("401 UNAUTHORIZED")
 }
 /**
  * This is our regex for looking at a client's request
@@ -107,7 +108,7 @@ class ServerUtilities(private val server: ISocketWrapper,
                 "createproject" -> handleCreatingProject(user, data)
             }
         } else {
-            returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.OK, ContentType.TEXT_HTML))
+            returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML))
         }
     }
 
@@ -139,7 +140,8 @@ class ServerUtilities(private val server: ISocketWrapper,
      * returns null otherwise
      */
     fun extractUserFromAuthToken(authCookie: String?): User? {
-        TODO("Not yet implemented")
+        if (authCookie.isNullOrBlank()) return null
+        return au.getUserForSession(authCookie)
     }
 
     /**

@@ -19,4 +19,8 @@ class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence
         return pmd.getUserByName(name)
     }
 
+    override fun getUserForSession(sessionToken: String): User? {
+        return pmd.getUserForSession(sessionToken)
+    }
+
 }

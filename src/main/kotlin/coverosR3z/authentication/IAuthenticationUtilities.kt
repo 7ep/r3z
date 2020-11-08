@@ -17,4 +17,9 @@ interface IAuthenticationUtilities {
      */
     fun login(username: String, password: String): Pair<LoginResult, User>
 
+    /**
+     * Whether the token associates to a valid session
+     */
+    fun getUserForSession(sessionToken: String): User?
+
 }

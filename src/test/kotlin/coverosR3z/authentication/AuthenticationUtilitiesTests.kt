@@ -1,9 +1,7 @@
 package coverosR3z.authentication
 
-import coverosR3z.createTimeEntryPreDatabase
+import coverosR3z.*
 import coverosR3z.domainobjects.*
-import coverosR3z.timerecording.FakeTimeEntryPersistence
-import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -137,7 +135,7 @@ class AuthenticationUtilitiesTests {
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.analyzeUsername("matt")
+        val result = authUtils.analyzeUsername(DEFAULT_USER.name)
 
         assertEquals(RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED, result)
     }
@@ -147,9 +145,8 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should create a cryptographically secure hash from a password`() {
-        val password = "password123"
-        val result = Hash.createHash(password)
-        assertEquals("ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f", result.value)
+        val result = Hash.createHash(DEFAULT_PASSWORD)
+        assertEquals(DEFAULT_PASSWORD_HASH, result.value)
     }
 
     @Test
@@ -169,9 +166,9 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `password hash should be salted`() {
-        val first = Hash.createHash("password123")
+        val first = Hash.createHash(DEFAULT_PASSWORD)
         val salt : String = Hash.getSalt()
-        val second = Hash.createHash("password123" + salt)
+        val second = Hash.createHash(DEFAULT_PASSWORD + salt)
         assertNotEquals(first, second)
     }
 
@@ -191,13 +188,9 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        val salt = Hash.getSalt()
-        val wellSeasoned = "password123$salt"
-        val fap = FakeAuthPersistence(
-                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
-        )
-        val au = AuthenticationUtilities(fap)
-        val (status, _) = au.login("matt", "password123")
+        val wellSeasoned = "$DEFAULT_PASSWORD$DEFAULT_SALT"
+        ap.getUserBehavior= { User(1, DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
 
@@ -206,14 +199,9 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-
-        val salt = Hash.getSalt()
-        val wellSeasoned = "password123$salt"
-        val fap = FakeAuthPersistence(
-                getUserBehavior= { User(1, "matt", Hash.createHash(wellSeasoned), salt, null) }
-        )
-        val au = AuthenticationUtilities(fap)
-        val (status, _) = au.login("matt", "wrong")
+        val wellSeasoned = "$DEFAULT_PASSWORD$DEFAULT_SALT"
+        ap.getUserBehavior = { User(1, DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        val (status, _) = authUtils.login(DEFAULT_USER.name, "wrong")
         assertEquals(LoginResult.FAILURE, status)
     }
 
@@ -223,11 +211,21 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get descriptive failure with nonreal user`() {
-        val fap = FakeAuthPersistence(
-                getUserBehavior= { null }
-        )
-        val au = AuthenticationUtilities(fap)
-        val (status, _) = au.login("matt", "arbitrary")
+        ap.getUserBehavior = {null}
+        val (status, _) = authUtils.login(DEFAULT_USER.name, "arbitrary")
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
+
+    /**
+     * We will give the user a token - a string - they can use to
+     * instantly confirm they are authenticated with us.
+     *
+     * They hold this value in the cookie we hand them.
+     */
+    @Test
+    fun testShouldConfirmUserAuthenticationBySessionToken() {
+        ap.getUserForSessionBehavior = { DEFAULT_USER}
+        assertEquals(DEFAULT_USER, authUtils.getUserForSession(DEFAULT_SESSION_TOKEN))
+    }
+
 }
