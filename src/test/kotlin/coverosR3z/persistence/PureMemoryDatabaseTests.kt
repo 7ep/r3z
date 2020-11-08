@@ -8,6 +8,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.lang.IllegalArgumentException
 
 class PureMemoryDatabaseTests {
 
@@ -154,6 +155,46 @@ class PureMemoryDatabaseTests {
     fun testShouldReturnEmptyListIfNoEntries() {
         val result = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(emptyList<TimeEntry>() , result)
+    }
+
+    /**
+     * If a user successfully authenticates, we should create a session entry,
+     */
+    @Test
+    fun testShouldAddSession() {
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
+        assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
+    }
+
+    /**
+     * If we try to add a session for a user when one already exists, throw exception
+     */
+    @Test
+    fun testShouldAddSession_Duplicate() {
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
+        val ex = assertThrows(IllegalArgumentException::class.java) {pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)}
+        assertEquals("a session already exists for user (${DEFAULT_USER.name})", ex.message)
+    }
+
+    /**
+     * When a user is no longer authenticated, we enact that
+     * by removing their entry from the sessions.
+     */
+    @Test
+    fun testShouldRemoveSession() {
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
+        assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
+        pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)
+        assertNull(pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
+    }
+
+    /**
+     * If we try to remove a session but it doesn't exist, throw an exception
+     */
+    @Test
+    fun testShouldComplainIfTryingToRemoveNonexistentSession() {
+        val ex = assertThrows(java.lang.IllegalStateException::class.java) {pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)}
+        assertEquals("Tried to delete session (${DEFAULT_SESSION_TOKEN}) but it didn't exist in session database", ex.message)
     }
 
     /*

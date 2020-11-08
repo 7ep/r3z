@@ -4,7 +4,9 @@ import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.domainobjects.*
 
-
+/**
+ * Used as a mock object for testing
+ */
 class FakeTimeEntryPersistence(
         var minutesRecorded : Int = 0,
         var persistNewTimeEntryBehavior : () -> Unit = {},

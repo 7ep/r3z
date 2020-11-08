@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+import coverosR3z.DEFAULT_USER
+import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.getTime
 import coverosR3z.server.ServerUtilities.Companion.Action
 import coverosR3z.server.ServerUtilities.Companion.ActionType
@@ -7,12 +9,27 @@ import coverosR3z.server.ServerUtilities.Companion.extractAuthCookieFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.parseClientRequest
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 class ServerUtilitiesTests {
+
+    private lateinit var sw : FakeSocketWrapper
+    private lateinit var au : FakeAuthenticationUtilities
+    private lateinit var tru : FakeTimeRecordingUtilities
+    private lateinit var su : ServerUtilities
+
+    @Before
+    fun init() {
+        sw = FakeSocketWrapper()
+        au = FakeAuthenticationUtilities()
+        tru = FakeTimeRecordingUtilities()
+        su = ServerUtilities(sw, au, tru)
+    }
 
     /**
      * When the client POSTs data to us, it's coming
@@ -271,6 +288,19 @@ class ServerUtilitiesTests {
         val headers = listOf("Content-Length: 501", "Content-Type: Blah")
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
         assertEquals("Exception occurred for these headers: Content-Length: 501;Content-Type: Blah.  Inner exception message: Content-length was too large.  Maximum is 500 characters", exception.message)
+    }
+
+    /**
+     * We keep a mapping between users and sessions in the database. It should
+     * be easily possible to pass in the session id and get the user.
+     */
+    @Test
+    fun testShouldExtractUserFromAuthToken() {
+        val authCookie = "abc123"
+        val expectedUser = DEFAULT_USER
+        au.getUserForSessionBehavior = { DEFAULT_USER}
+        val user = su.extractUserFromAuthToken(authCookie)
+        assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }
 
 

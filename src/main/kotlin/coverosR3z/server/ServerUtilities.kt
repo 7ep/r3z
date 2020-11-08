@@ -1,17 +1,12 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.AuthenticationPersistence
-import coverosR3z.authentication.AuthenticationUtilities
-import coverosR3z.authentication.CurrentUser
+import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
-import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
-import coverosR3z.timerecording.TimeEntryPersistence
-import coverosR3z.timerecording.TimeRecordingUtilities
+import coverosR3z.timerecording.ITimeRecordingUtilities
 import java.lang.NumberFormatException
-import java.time.LocalDate
 
 /**
  * Data for shipping to the client
@@ -36,6 +31,7 @@ enum class ResponseStatus(val value: String) {
     OK("200 OK"),
     NOT_FOUND("404 NOT FOUND"),
     BAD_REQUEST("400 BAD REQUEST"),
+    UNAUTHORIZED("401 UNAUTHORIZED")
 }
 /**
  * This is our regex for looking at a client's request
@@ -64,7 +60,9 @@ val cookieRegex = "Cookie: (.*)$".toRegex()
  */
 val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
 
-class ServerUtilities(private val server: IOHolder, private val pmd : PureMemoryDatabase) {
+class ServerUtilities(private val server: ISocketWrapper,
+                      private val au : IAuthenticationUtilities,
+                      private val tru : ITimeRecordingUtilities) {
 
     /**
      * Serve prepared response object to the client
@@ -77,7 +75,7 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
 
         val action: Action = parseClientRequest(serverInput)
         if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {
-            handlePost(server) // a POST will have a body
+            handlePost(server, action) // a POST will have a body
         } else {
             handleGet(action) // there is nothing more to get for a GET
         }
@@ -94,45 +92,56 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
     /**
      * The user has sent us data, we have to process it
      */
-    private fun handlePost(server : IOHolder) {
+    private fun handlePost(server: ISocketWrapper, action: Action) {
         val headers: List<String> = getHeaders(server)
-        val length: Int = extractLengthOfPostBodyFromHeaders(headers)
         val authCookie : String? = extractAuthCookieFromHeaders(headers)
-        val body = server.read(length)
-        val data = parsePostedData(body)
-        // enter the time *****
-        //**************************************************************************
-        //    D A N G E R    Z O N E - BEGINS
-        //**************************************************************************
+        val user : User? = extractUserFromAuthToken(authCookie)
+        if (user != null) {
+            val length: Int = extractLengthOfPostBodyFromHeaders(headers)
+            val body = server.read(length)
+            val data = parsePostedData(body)
+            when (action.filename) {
+                "entertime" -> handleTakingTimeEntry(user, data)
+                "createemployee" -> handleCreatingNewEmployee(user, data)
+                "login" -> handleLoginForUser(user, data)
+                "register" -> handleRegisterForUser(user, data)
+                "createproject" -> handleCreatingProject(user, data)
+            }
+        } else {
+            returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML))
+        }
+    }
 
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+    private fun handleCreatingProject(user: User, data: Map<String, String>) {
+        TODO("Not yet implemented")
+    }
 
-        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
-        val employee = systemTru.createEmployee(EmployeeName("Jona"))
+    private fun handleRegisterForUser(user: User, data: Map<String, String>) {
+        TODO("Not yet implemented")
+    }
 
-        val password = "password1234567"
-        val username = "jona"
-        au.register(username, password, employee.id)
-        val (_, user) = au.login(username, password)
+    private fun handleLoginForUser(user: User, data: Map<String, String>) {
+        TODO("Not yet implemented")
+    }
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
+    private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) {
+        TODO("Not yet implemented")
+    }
 
-        val project = checkNotNull(data["project_entry"])
-        val createdProject = tru.createProject(ProjectName(project))
+    private fun handleTakingTimeEntry(user: User, data: Map<String, String>) {
+        TODO("Not yet implemented")
+    }
 
-        val timeEntry = TimeEntryPreDatabase(employee,
-                createdProject,
-                Time(checkNotNull(data["time_entry"]).toInt()),
-                Date(LocalDate.now().toEpochDay().toInt()),
-                Details(checkNotNull(data["detail_entry"])))
-
-        tru.recordTime(timeEntry)
-        //**************************************************************************
-        //    D A N G E R    Z O N E - ENDS
-        //**************************************************************************
-
-        returnData(PreparedResponseData("<p>Thank you, your time has been recorded</p>", ResponseStatus.OK, ContentType.TEXT_HTML))
+    /**
+     * Given the auth token extracted from a cookie,
+     * return the user it represents, but only if it
+     * represents a current valid session.
+     *
+     * returns null otherwise
+     */
+    fun extractUserFromAuthToken(authCookie: String?): User? {
+        if (authCookie.isNullOrBlank()) return null
+        return au.getUserForSession(authCookie)
     }
 
     /**
@@ -222,7 +231,7 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
          * Helper method to collect the headers line by line, stopping when it
          * encounters an empty line
          */
-        fun getHeaders(client: IOHolder): List<String> {
+        fun getHeaders(client: ISocketWrapper): List<String> {
             // get the headers
             val headers = mutableListOf<String>()
             while (true) {
