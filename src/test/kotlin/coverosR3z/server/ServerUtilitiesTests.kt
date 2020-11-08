@@ -3,11 +3,13 @@ package coverosR3z.server
 import coverosR3z.getTime
 import coverosR3z.server.ServerUtilities.Companion.Action
 import coverosR3z.server.ServerUtilities.Companion.ActionType
+import coverosR3z.server.ServerUtilities.Companion.extractAuthCookieFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.parseClientRequest
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import org.junit.Assert.*
 import org.junit.Test
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 class ServerUtilitiesTests {
@@ -151,6 +153,49 @@ class ServerUtilitiesTests {
     }
 
     /**
+     * Check to make sure we can extract the auth value
+     * from the Cookie header
+     */
+    @Test
+    fun testShouldExtractAuthCodeFromCookie() {
+        val headers = listOf("Cookie: jenkins-timestamper-offset=18000000; sessionId=38afes7a8; Idea-7de3a10=8972cd6b-ad6d-40c6-9daf-38ef0f149214; jenkins-timestamper=system; jenkins-timestamper-local=true")
+        val expected = "38afes7a8"
+        val result = extractAuthCookieFromHeaders(headers)
+        assertEquals("we should extract out the auth value from the header provided", expected, result)
+    }
+
+    /**
+     * What if we receive multiple Cookie headers? Concatenate!
+     */
+    @Test
+    fun testShouldExtractAuthCodeFromCookie_MultipleCookieHeaders_ShouldConcatenate() {
+        val headers = listOf("Cookie: sessionId=38afes7a8", "Cookie: a=b; jenkins-timestamper-offset=18000000")
+        val expected = "38afes7a8"
+        val result = extractAuthCookieFromHeaders(headers)
+        assertEquals("we should extract out the auth value from the header provided", expected, result)
+    }
+
+    /**
+     * If we don't find a cookie header, no big whoop.
+     */
+    @Test
+    fun testShouldExtractAuthCodeFromCookie_NotFound() {
+        val headers = listOf("Content-Type: Blah")
+        val result = extractAuthCookieFromHeaders(headers)
+        assertNull("If there were no cookie headers, return null", result)
+    }
+
+    /**
+     * If we find a cookie header, but not our auth cookie (sessionId=???), no big whoop
+     */
+    @Test
+    fun testShouldExtractAuthCodeFromCookie_NotFound_NoSessionCookie() {
+        val headers = listOf("Cookie: jenkins-timestamper-offset=18000000; Idea-7de3a10=8972cd6b-ad6d-40c6-9daf-38ef0f149214; jenkins-timestamper=system; jenkins-timestamper-local=true")
+        val result = extractAuthCookieFromHeaders(headers)
+        assertNull("If there were no cookie headers, return null", result)
+    }
+
+    /**
      * Check to make sure we can extract the length of the
      * body of a POST from the Content-Length header it sends
      * us.
@@ -224,8 +269,8 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
         val headers = listOf("Content-Length: 501", "Content-Type: Blah")
-        val exception = assertThrows(IllegalStateException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("Content-length was too large.  Maximum is 500 characters", exception.message)
+        val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("Exception occurred for these headers: Content-Length: 501;Content-Type: Blah.  Inner exception message: Content-length was too large.  Maximum is 500 characters", exception.message)
     }
 
 
