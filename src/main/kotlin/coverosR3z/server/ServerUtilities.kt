@@ -10,7 +10,6 @@ import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import java.lang.Exception
 import java.lang.NumberFormatException
 import java.time.LocalDate
 
@@ -54,6 +53,17 @@ val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
  */
 val contentLengthRegex = "Content-Length: (.*)$".toRegex()
 
+/**
+ * Used to extract cookies from the Cookie header
+ */
+val cookieRegex = "Cookie: (.*)$".toRegex()
+
+/**
+ * Within a cookie header, we want our sessionId cookie, which
+ * this regular expression will find
+ */
+val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
+
 class ServerUtilities(private val server: IOHolder, private val pmd : PureMemoryDatabase) {
 
     /**
@@ -87,6 +97,7 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
     private fun handlePost(server : IOHolder) {
         val headers: List<String> = getHeaders(server)
         val length: Int = extractLengthOfPostBodyFromHeaders(headers)
+        val authCookie : String? = extractAuthCookieFromHeaders(headers)
         val body = server.read(length)
         val data = parsePostedData(body)
         // enter the time *****
@@ -154,9 +165,10 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
             require(headers.isNotEmpty()) {"We received no headers"}
             try {
                 val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
-                val length = contentLengthRegex.matchEntire(lengthHeader)!!.groups[1]!!.value.toInt()
+                val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
                 // arbitrarily setting to 500 for now
                 val maxContentLength = 500
+                checkNotNull(length) {"The length was null for this input: $lengthHeader"}
                 check(length <= maxContentLength) {"Content-length was too large.  Maximum is $maxContentLength characters"}
                 return length
             } catch (ex : NoSuchElementException) {
@@ -164,21 +176,25 @@ class ServerUtilities(private val server: IOHolder, private val pmd : PureMemory
             } catch (ex : NumberFormatException) {
                 throw NumberFormatException("The value for content-length was not parsable as an integer. Headers: ${headers.joinToString(";")}")
             } catch (ex : Exception) {
-                throw Exception("Exception occurred for these headers: ${headers.joinToString(";")}.  Inner exception message: ${ex.message}", ex)
+                throw Exception("Exception occurred for these headers: ${headers.joinToString(";")}.  Inner exception message: ${ex.message}")
             }
         }
 
         /**
-         * Given the list of headers, find the one with the security
+         * Given the list of headers, find the one with the authentication
          * cookie and return its value for further processing
          */
-        fun extractSecurityCookieFromHeaders(headers: List<String>): Int {
-            require(headers.isNotEmpty()) {"We received no headers"}
+        fun extractAuthCookieFromHeaders(headers: List<String>): String? {
+            if (headers.isEmpty()) return null
+
             return try {
-                val cookieHeader: String = headers.single { it.startsWith("Cookie") }
-                contentLengthRegex.matchEntire(cookieHeader)!!.groups[1]!!.value.toInt()
+                val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
+                val concatenatedHeaders = cookieHeaders.joinToString(";") { cookieRegex.matchEntire(it)?.groups?.get(1)?.value ?: "" }
+                val splitUpCookies = concatenatedHeaders.split(";").map{it.trim()}
+                val sessionCookies = splitUpCookies.mapNotNull { sessionIdCookieRegex.matchEntire(it)?.groups?.get(1)?.value }
+                sessionCookies.singleOrNull()
             } catch (ex : NoSuchElementException) {
-                throw NoSuchElementException("Did not find a necessary Content-Length header in headers: ${headers.joinToString(";")}")
+                throw NoSuchElementException("Did not find a necessary Cookie header in headers. Headers: ${headers.joinToString(";")}")
             }
         }
 
