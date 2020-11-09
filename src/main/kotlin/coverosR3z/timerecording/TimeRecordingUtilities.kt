@@ -17,6 +17,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
+            log.info("time was not recorded successfully: current user $user does not have access to modify time for ${entry.employee}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
         log.info("Starting to record time for $entry")
@@ -85,9 +86,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
-        log.info("Creating a new employee, ${employeename.value}")
 
-        return persistence.persistNewEmployee(employeename)
+        val newEmployee = persistence.persistNewEmployee(employeename)
+        log.info("Created a new employee, $newEmployee")
+        return newEmployee
     }
 
     override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {

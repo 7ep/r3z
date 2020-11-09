@@ -42,6 +42,11 @@ data class User(val id: Int, val name: String, val hash: Hash, val salt: String,
         require(id < maxUserCount) { maxUserMsg }
         require(id > 0) { minIdMsg }
     }
+
+    override fun toString(): String {
+        return "User(id=$id, name='$name')"
+    }
+
 }
 
 /**
