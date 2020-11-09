@@ -85,3 +85,25 @@ Developer handbook
         1) Calls from the outside world (e.g. the web) call into any of the
         "-Utilities" files.  They must not call directly to the "-Persistence"
         files or straight to the PureMemoryDatabase
+
+
+    Pure Memory Database
+    --------------------
+
+    When dealing with the layer of the Pure Memory Database, some general design
+    considerations must be maintained.
+    1. The code in this layer is *solely* dedicated to CRUD details.  The only other
+       logic to include is checking invariants - that is, making sure that certain
+       fundamental truths are held true, for data that is readily available at this
+       level.  There is no *exact* right way to do this, but in general we don't want
+       general business logic occurring here.  For example, this is ok:
+
+           fun addNewSession(sessionToken: String, user: User, time: DateTime) {
+               require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
+               sessions[sessionToken] = Pair(user, time)
+           }
+
+           fun removeSessionByToken(sessionToken: String) {
+               checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
+               sessions.remove(sessionToken)
+           }

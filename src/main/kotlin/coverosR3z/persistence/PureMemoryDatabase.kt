@@ -22,7 +22,7 @@ class PureMemoryDatabase {
      * a map between randomly-created letter-number strings, and a given
      * user.  If a user exists in this data, it means they are currently authenticated.
      */
-    private val sessions : MutableMap<String, User> = mutableMapOf()
+    private val sessions : MutableMap<String, Pair<User, DateTime>> = mutableMapOf()
 
     fun addTimeEntry(timeEntry : TimeEntryPreDatabase) {
         var employeeTimeEntries = timeEntries[timeEntry.employee]
@@ -134,22 +134,18 @@ class PureMemoryDatabase {
         return result
     }
 
-    fun addNewSession(sessionToken: String, user: User) {
+    fun addNewSession(sessionToken: String, user: User, time: DateTime) {
         require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
-        sessions[sessionToken] = user
+        sessions[sessionToken] = Pair(user, time)
     }
 
     fun getUserBySessionToken(sessionToken: String): User? {
-        return sessions[sessionToken]
+        return sessions[sessionToken]?.first
     }
 
     fun removeSessionByToken(sessionToken: String) {
         checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
         sessions.remove(sessionToken)
-    }
-
-    fun getUserForSession(sessionToken: String): User? {
-        return sessions[sessionToken]
     }
 
 

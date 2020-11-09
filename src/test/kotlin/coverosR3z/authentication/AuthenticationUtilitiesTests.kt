@@ -224,8 +224,20 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testShouldConfirmUserAuthenticationBySessionToken() {
-        ap.getUserForSessionBehavior = { DEFAULT_USER}
+        ap.getUserForSessionBehavior = { DEFAULT_USER }
         assertEquals(DEFAULT_USER, authUtils.getUserForSession(DEFAULT_SESSION_TOKEN))
+    }
+
+    /**
+     * Creating a session is just a matter of storing a new
+     * entry in the sessions data structure, with the session
+     * identifier - a randomly generated string - and the user
+     * who is considered authenticated.
+     */
+    @Test
+    fun testShouldCreateNewSession() {
+        val newSessionId = authUtils.createNewSession(DEFAULT_USER)
+        assertEquals(32, newSessionId?.length)
     }
 
 }

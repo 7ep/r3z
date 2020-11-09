@@ -17,6 +17,7 @@ import java.lang.IllegalArgumentException
 
 val A_RANDOM_DAY_IN_JUNE_2020 = Date(2020, Month.JUN, 25)
 val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
+val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = "12345"
 val DEFAULT_PASSWORD = "password1234"
