@@ -8,7 +8,8 @@ import coverosR3z.domainobjects.*
 class FakeAuthenticationUtilities (
         var registerBehavior : () -> RegistrationResult = {RegistrationResult.SUCCESS},
         var loginBehavior : () -> Pair<LoginResult, User> = {Pair(LoginResult.SUCCESS, SYSTEM_USER)},
-        var getUserForSessionBehavior: () -> User? = {null}
+        var getUserForSessionBehavior: () -> User? = {null},
+        var createNewSessionBehavior: () -> String? = {""}
     ) : IAuthenticationUtilities {
 
     override fun register(username: String, password: String, employeeId: Int?): RegistrationResult {
@@ -21,6 +22,10 @@ class FakeAuthenticationUtilities (
 
     override fun getUserForSession(sessionToken: String): User? {
         return getUserForSessionBehavior()
+    }
+
+    override fun createNewSession(user: User, time: DateTime, rand: () -> String): String? {
+        return createNewSessionBehavior()
     }
 
 

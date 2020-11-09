@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.generateRandomString
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -73,12 +74,16 @@ data class Hash private constructor(val value: String) {
          * we put a huge impediment in place to using dictionary
          * attacks on our user's password hashes.
          *
+         * You may pass in a different generator than the default secure
+         * random string generator, perhaps for testing.
+         *
          * See https://en.wikipedia.org/wiki/Salt_(cryptography)
          */
-        fun getSalt(): String {
-            val randomBytes : ByteArray = Random.nextBytes(16)
-            return randomBytes.joinToString("") {"%02x".format(it)}
+        fun getSalt(generator : () -> String = { generateRandomString(16) }): String {
+            return generator()
         }
+
+
 
     }
 }

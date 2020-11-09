@@ -162,7 +162,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldAddSession() {
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
     }
 
@@ -171,8 +171,8 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldAddSession_Duplicate() {
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
-        val ex = assertThrows(IllegalArgumentException::class.java) {pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)}
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
+        val ex = assertThrows(IllegalArgumentException::class.java) {pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)}
         assertEquals("a session already exists for user (${DEFAULT_USER.name})", ex.message)
     }
 
@@ -182,7 +182,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldRemoveSession() {
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER)
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
         pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)
         assertNull(pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
