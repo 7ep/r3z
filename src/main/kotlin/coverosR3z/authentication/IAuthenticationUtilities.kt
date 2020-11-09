@@ -1,8 +1,12 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.LoginResult
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.generateRandomString
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 interface IAuthenticationUtilities {
     /**
@@ -18,8 +22,16 @@ interface IAuthenticationUtilities {
     fun login(username: String, password: String): Pair<LoginResult, User>
 
     /**
-     * Whether the token associates to a valid session
+     * Returns the user if there is a valid session,
+     * otherwise returns null
      */
     fun getUserForSession(sessionToken: String): User?
+
+    /**
+     * Adds a new session to the sessions data structure, with
+     * the user and a generated session value
+     */
+    fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = {generateRandomString(16)}) : String?
+
 
 }

@@ -1,5 +1,6 @@
 package coverosR3z.authentication
 
+import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.UserName
 import coverosR3z.domainobjects.User
@@ -20,7 +21,11 @@ class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence
     }
 
     override fun getUserForSession(sessionToken: String): User? {
-        return pmd.getUserForSession(sessionToken)
+        return pmd.getUserBySessionToken(sessionToken)
+    }
+
+    override fun addNewSession(sessionId: String, user: User, time: DateTime) {
+        pmd.addNewSession(sessionId, user, time)
     }
 
 }

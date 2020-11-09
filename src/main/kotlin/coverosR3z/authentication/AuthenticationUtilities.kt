@@ -91,4 +91,19 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return ap.getUserForSession(sessionToken)
     }
 
+    /**
+     * Generates a new session entry for a user, which indicates they are
+     * authenticated.  In so doing, we set the date and time when this is
+     * happening, and create a secure random session value (a string)
+     *
+     * @param user the user for whom this session is being created
+     * @param time the exact time and date this is being created (optional, has default)
+     * @param rand the generator for a random string (optional, has default)
+     */
+    override fun createNewSession(user: User, time : DateTime, rand : () -> String): String? {
+        val sessionId = rand()
+        ap.addNewSession(sessionId, user, time)
+        return sessionId
+    }
+
 }

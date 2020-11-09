@@ -140,8 +140,11 @@ class ServerUtilities(private val server: ISocketWrapper,
      * returns null otherwise
      */
     fun extractUserFromAuthToken(authCookie: String?): User? {
-        if (authCookie.isNullOrBlank()) return null
-        return au.getUserForSession(authCookie)
+        return if (authCookie.isNullOrBlank()) {
+            null
+        } else {
+            au.getUserForSession(authCookie)
+        }
     }
 
     /**
