@@ -219,9 +219,14 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength() {
+        //arrange
         val headers = listOf("Content-Length: 20")
         val expectedLength = 20
+
+        //act
         val result = extractLengthOfPostBodyFromHeaders(headers)
+
+        //assert
         assertEquals("we should extract out the length from the header provided", expectedLength, result)
     }
 
@@ -232,7 +237,9 @@ class ServerUtilitiesTests {
     fun testShouldExtractLengthFromContentLength_MultipleHeaders() {
         val headers = listOf("Content-Length: 20", "Content-Type: Blah")
         val expectedLength = 20
+
         val result = extractLengthOfPostBodyFromHeaders(headers)
+
         assertEquals("we should extract out the length from the header provided", expectedLength, result)
     }
 
@@ -242,7 +249,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractLengthFromContentLength_MultipleContentLengthHeaders() {
         val headers = listOf("Content-Length: 20", "Content-Length: 15")
+
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+
         assertEquals("Exception occurred for these headers: Content-Length: 20;Content-Length: 15.  Inner exception message: Collection contains more than one matching element.", exception.message)
     }
 
@@ -262,8 +271,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractLengthFromContentLength_NoHeaders() {
         val headers = emptyList<String>()
+
         val exception = assertThrows(IllegalArgumentException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("We received no headers", exception.message)
+        assertEquals("We must receive at least one header at this point or the request is invalid", exception.message)
     }
 
     /**
@@ -286,8 +296,22 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
         val headers = listOf("Content-Length: 501", "Content-Type: Blah")
+
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("Exception occurred for these headers: Content-Length: 501;Content-Type: Blah.  Inner exception message: Content-length was too large.  Maximum is 500 characters", exception.message)
+        assertEquals("Exception occurred for these headers: Content-Length: 501;Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed 500 characters", exception.message)
+    }
+
+    /**
+     * If the Content-Length has a negative value
+     *
+     * Content-Length cannot be negative
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_Negative() {
+        val headers = listOf("Content-Length: -1", "Content-Type: Blah")
+
+        val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
+        assertEquals("Exception occurred for these headers: Content-Length: -1;Content-Type: Blah.  Inner exception message: Content-length cannot be negative", exception.message)
     }
 
     /**

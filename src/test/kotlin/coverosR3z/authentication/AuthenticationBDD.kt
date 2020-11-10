@@ -31,7 +31,7 @@ class AuthenticationBDD {
     }
 
     @Test
-    fun `I should be able to register a employee with a valid password`() {
+    fun `I should be able to register a user with a valid password`() {
         // Given I am not currently registered
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)
