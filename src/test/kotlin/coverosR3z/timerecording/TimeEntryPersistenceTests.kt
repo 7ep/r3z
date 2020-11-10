@@ -48,7 +48,7 @@ class TimeEntryPersistenceTests {
      * the database, we should get an exception back from the database
      */
     @Test fun `Can't record a time entry that has a nonexistent project id`() {
-        assertThrows(ProjectIntegrityViolationException::class.java) {
+        assertThrows(IllegalStateException::class.java) {
             tep.persistNewTimeEntry(createTimeEntryPreDatabase())
         }
     }

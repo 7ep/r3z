@@ -95,20 +95,18 @@ class ServerUtilities(private val server: ISocketWrapper,
     private fun handlePost(server: ISocketWrapper, action: Action) {
         val headers: List<String> = getHeaders(server)
         val authCookie : String? = extractAuthCookieFromHeaders(headers)
-        val user : User? = extractUserFromAuthToken(authCookie)
-        if (user != null) {
-            val length: Int = extractLengthOfPostBodyFromHeaders(headers)
-            val body = server.read(length)
-            val data = parsePostedData(body)
-            when (action.filename) {
-                "entertime" -> handleTakingTimeEntry(user, data)
-                "createemployee" -> handleCreatingNewEmployee(user, data)
-                "login" -> handleLoginForUser(user, data)
-                "register" -> handleRegisterForUser(user, data)
-                "createproject" -> handleCreatingProject(user, data)
-            }
-        } else {
-            returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML))
+        val user : User = extractUserFromAuthToken(authCookie)
+        val length: Int = extractLengthOfPostBodyFromHeaders(headers)
+        val body = server.read(length)
+        val data = parsePostedData(body)
+
+        when (action.filename) {
+            "entertime" -> handleTakingTimeEntry(user, data)
+            "createemployee" -> handleCreatingNewEmployee(user, data)
+            "login" -> handleLoginForUser(user, data)
+            "register" -> handleRegisterForUser(user, data)
+            "createproject" -> handleCreatingProject(user, data)
+            else -> returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML))
         }
     }
 
@@ -139,9 +137,9 @@ class ServerUtilities(private val server: ISocketWrapper,
      *
      * returns null otherwise
      */
-    fun extractUserFromAuthToken(authCookie: String?): User? {
+    fun extractUserFromAuthToken(authCookie: String?): User {
         return if (authCookie.isNullOrBlank()) {
-            null
+            NO_USER
         } else {
             au.getUserForSession(authCookie)
         }
@@ -354,18 +352,23 @@ class ServerUtilities(private val server: ISocketWrapper,
                     file = checkNotNull(result.groups[2]).value
                     logDebug("Client wants this file: $file")
 
-                    if (file.takeLast(4) == ".utl") {
-                        logDebug("file requested is a template")
-                        responseType = ActionType.TEMPLATE
-                    } else if (file.takeLast(4) == ".css") {
-                        logDebug("file requested is a CSS style sheet")
-                        responseType = ActionType.CSS
-                    } else if (file.takeLast(3) == ".js") {
-                        logDebug("file requested is a JavaScript file")
-                        responseType = ActionType.JS
-                    } else {
-                        logDebug("file requested is a text file")
-                        responseType = ActionType.READ_FILE
+                    when {
+                        file.takeLast(4) == ".utl" -> {
+                            logDebug("file requested is a template")
+                            responseType = ActionType.TEMPLATE
+                        }
+                        file.takeLast(4) == ".css" -> {
+                            logDebug("file requested is a CSS style sheet")
+                            responseType = ActionType.CSS
+                        }
+                        file.takeLast(3) == ".js" -> {
+                            logDebug("file requested is a JavaScript file")
+                            responseType = ActionType.JS
+                        }
+                        else -> {
+                            logDebug("file requested is a text file")
+                            responseType = ActionType.READ_FILE
+                        }
                     }
                 }
             }

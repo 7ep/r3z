@@ -11,7 +11,7 @@ class FakeTimeEntryPersistence(
         var minutesRecorded : Int = 0,
         var persistNewTimeEntryBehavior : () -> Unit = {},
         var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
-        var getProjectBehavior : () -> Project? = {null}) : ITimeEntryPersistence {
+        var getProjectBehavior : () -> Project = { NO_PROJECT }) : ITimeEntryPersistence {
 
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
@@ -39,7 +39,7 @@ class FakeTimeEntryPersistence(
         return listOf()
     }
 
-    override fun getProjectByName(name: String): Project? {
+    override fun getProjectByName(name: String): Project {
         return getProjectBehavior()
     }
 
