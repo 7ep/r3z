@@ -172,14 +172,15 @@ class ServerUtilities(private val server: ISocketWrapper,
          * body of the POST and return that value as a simple [Int]
          */
         fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
-            require(headers.isNotEmpty()) {"We received no headers"}
+            require(headers.isNotEmpty()) {"We must receive at least one header at this point or the request is invalid"}
             try {
                 val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
                 val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
                 // arbitrarily setting to 500 for now
                 val maxContentLength = 500
-                checkNotNull(length) {"The length was null for this input: $lengthHeader"}
-                check(length <= maxContentLength) {"Content-length was too large.  Maximum is $maxContentLength characters"}
+                checkNotNull(length) {"The length must not be null for this input.  It was: $lengthHeader"}
+                check(length <= maxContentLength) {"The Content-length is not allowed to exceed $maxContentLength characters"}
+                check(length >= 0) {"Content-length cannot be negative"}
                 return length
             } catch (ex : NoSuchElementException) {
                 throw NoSuchElementException("Did not find a necessary Content-Length header in headers. Headers: ${headers.joinToString(";")}")
