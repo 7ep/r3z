@@ -211,7 +211,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get descriptive failure with nonreal user`() {
-        ap.getUserBehavior = {null}
+        ap.getUserBehavior = { NO_USER }
         val (status, _) = authUtils.login(DEFAULT_USER.name, "arbitrary")
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }

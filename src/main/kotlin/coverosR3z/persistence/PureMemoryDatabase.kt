@@ -87,23 +87,23 @@ class PureMemoryDatabase {
         return employeesEntries.filter{ te -> te.employee.id == employee.id && te.date == date}
     }
 
-    fun getUserByName(name: UserName) : User? {
-        return users.singleOrNull { u -> u.name == name.value }
+    fun getUserByName(name: UserName) : User {
+        return users.singleOrNull { u -> u.name == name.value } ?: NO_USER
     }
 
-    fun getProjectById(id: Int) : Project? {
+    fun getProjectById(id: Int) : Project {
         require(id > 0)
-        return projects.singleOrNull { p -> p.id == id }
+        return projects.singleOrNull { p -> p.id == id } ?: NO_PROJECT
     }
 
-    fun getProjectByName(name: String): Project? {
+    fun getProjectByName(name: String): Project {
         require(name.isNotEmpty())
-        return projects.singleOrNull { p -> p.name == name }
+        return projects.singleOrNull { p -> p.name == name } ?: NO_PROJECT
     }
 
-    fun getEmployeeById(id: Int): Employee? {
+    fun getEmployeeById(id: Int): Employee {
         require(id > 0)
-        return employees.singleOrNull { u -> u.id == id}
+        return employees.singleOrNull { u -> u.id == id} ?: NO_EMPLOYEE
     }
 
     fun getAllEmployees() : List<Employee> {
@@ -139,8 +139,8 @@ class PureMemoryDatabase {
         sessions[sessionToken] = Pair(user, time)
     }
 
-    fun getUserBySessionToken(sessionToken: String): User? {
-        return sessions[sessionToken]?.first
+    fun getUserBySessionToken(sessionToken: String): User {
+        return sessions[sessionToken]?.first ?: NO_USER
     }
 
     fun removeSessionByToken(sessionToken: String) {

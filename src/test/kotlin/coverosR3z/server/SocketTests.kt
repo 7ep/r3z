@@ -308,7 +308,7 @@ class SocketTests() {
         su.serverHandleRequest()
 
         // client - read status line
-        val statusline = client.readLine() // freezes here
+        val statusline = client.readLine()
         val headers = getHeaders(client)
         val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
         val body = client.read(length)

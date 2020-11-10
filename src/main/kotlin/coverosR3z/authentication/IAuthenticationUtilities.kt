@@ -25,7 +25,7 @@ interface IAuthenticationUtilities {
      * Returns the user if there is a valid session,
      * otherwise returns null
      */
-    fun getUserForSession(sessionToken: String): User?
+    fun getUserForSession(sessionToken: String): User
 
     /**
      * Adds a new session to the sessions data structure, with

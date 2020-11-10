@@ -1,9 +1,6 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.DateTime
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.UserName
-import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
 
 class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence {
@@ -13,14 +10,14 @@ class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence
     }
 
     override fun isUserRegistered(name: UserName): Boolean {
-        return pmd.getUserByName(name) != null
+        return pmd.getUserByName(name) != NO_USER
     }
 
-    override fun getUser(name: UserName) : User? {
+    override fun getUser(name: UserName) : User {
         return pmd.getUserByName(name)
     }
 
-    override fun getUserForSession(sessionToken: String): User? {
+    override fun getUserForSession(sessionToken: String): User {
         return pmd.getUserBySessionToken(sessionToken)
     }
 

@@ -7,6 +7,11 @@ private const val maxEmployeeMsg = "No way this company has more than 100 millio
 private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All employees must have a non-empty name"
 
+/**
+ * This is used to represent no employee - just to avoid using null for an employee
+ * It's a typed null, essentially
+ */
+val NO_EMPLOYEE = Employee(maxEmployeeCount-1, "THIS REPRESENTS NO EMPLOYEE")
 
 /**
  * Holds a employee's name before we have a whole object, like [Employee]

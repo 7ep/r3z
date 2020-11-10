@@ -25,7 +25,7 @@ class PureMemoryDatabaseTests {
 
         val project = pmd.getProjectById(DEFAULT_PROJECT.id)
 
-        assertEquals(1, project!!.id)
+        assertEquals(1, project.id)
     }
 
     @Test
@@ -34,7 +34,7 @@ class PureMemoryDatabaseTests {
 
         val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id)
 
-        assertEquals(1, employee!!.id)
+        assertEquals(1, employee.id)
     }
 
     @Test
@@ -185,7 +185,7 @@ class PureMemoryDatabaseTests {
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
         pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)
-        assertNull(pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
+        assertEquals(NO_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
     }
 
     /**

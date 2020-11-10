@@ -2,9 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
-import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.persistence.EmployeeIntegrityViolationException
 
 class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
@@ -19,8 +17,8 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      * this timeentry don't exist in the list of projects / employees
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        pmd.getProjectById(entry.project.id) ?: throw ProjectIntegrityViolationException()
-        pmd.getEmployeeById(entry.employee.id) ?: throw EmployeeIntegrityViolationException()
+        check(pmd.getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
+        check(pmd.getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -51,7 +49,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return pmd.getAllTimeEntriesForEmployeeOnDate(employee, date)
     }
 
-    override fun getProjectByName(name: String): Project? {
+    override fun getProjectByName(name: String): Project {
         return pmd.getProjectByName(name)
     }
 
