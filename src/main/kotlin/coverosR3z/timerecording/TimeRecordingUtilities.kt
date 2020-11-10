@@ -22,31 +22,30 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         }
         log.info("Starting to record time for $entry")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
-        try {
+        return try {
             persistence.persistNewTimeEntry(entry)
             log.info("recorded time sucessfully")
-            return RecordTimeResult(StatusEnum.SUCCESS)
+            RecordTimeResult(StatusEnum.SUCCESS)
         } catch (ex : ProjectIntegrityViolationException) {
             log.info("time was not recorded successfully: project id did not match a valid project")
-            return RecordTimeResult(StatusEnum.INVALID_PROJECT)
+            RecordTimeResult(StatusEnum.INVALID_PROJECT)
         } catch (ex : EmployeeIntegrityViolationException) {
             log.info("time was not recorded successfully: employee id did not match a valid employee")
-            return RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
+            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
         }
     }
 
     private fun `confirm the employee has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
         log.info("checking that the employee has a total (new plus existing) of less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        var minutesRecorded : Int
-        try {
-            minutesRecorded = persistence.queryMinutesRecorded(entry.employee, entry.date)
+        val minutesRecorded = try {
+            persistence.queryMinutesRecorded(entry.employee, entry.date)
         } catch (ex : EmployeeNotRegisteredException) {
             // if we hit here, it means the employee doesn't exist yet.  For these purposes, that is
             // fine, we are just checking here that if a employee *does* exist, they don't have too many minutes.
             // if they don't exist, just move on through.
             log.info("employee ${entry.employee} was not registered in the database.  returning 0 minutes recorded.")
-            minutesRecorded = 0
+            0
         }
 
         val twentyFourHours = 24 * 60
@@ -70,7 +69,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
-        require(persistence.getProjectByName(projectName.value) == null) {"Cannot create a new project if one already exists by that same name"}
+        require(persistence.getProjectByName(projectName.value) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
         log.info("Creating a new project, ${projectName.value}")
 
         return persistence.persistNewProject(projectName)

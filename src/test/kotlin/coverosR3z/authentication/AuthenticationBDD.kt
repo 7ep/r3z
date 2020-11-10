@@ -112,9 +112,7 @@ class AuthenticationBDD {
                  |_|
      alt-text: Helper Methods
      */
-    fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-        // We need to use cua for this test, sharing a pmd with auth persistence
-        // and time recording persistence, in order to avoid recordTime throwing a USER_EMPLOYEE_MISMATCH status
+    private fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val (tru, _) = initializeAUserAndLogin()
         val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
 

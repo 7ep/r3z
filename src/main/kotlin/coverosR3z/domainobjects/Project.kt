@@ -7,6 +7,12 @@ private const val maxProjectErrorMsg = "100 million projects seems too unlikely"
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
 
 /**
+ * This is used to represent no project - just to avoid using null for a project
+ * It's a typed null, essentially
+ */
+val NO_PROJECT = Project(maximumProjectsCount-1, "THIS REPRESENTS NO PROJECT")
+
+/**
  * When we just have a name (like when adding a new project, or searching)
  */
 @Serializable
@@ -29,9 +35,3 @@ data class Project(val id: Int, val name: String) {
 
 }
 
-@Serializable
-data class ProjectId(val id: Int) {
-    init {
-        require(id < maximumProjectsCount) { maxProjectErrorMsg }
-    }
-}

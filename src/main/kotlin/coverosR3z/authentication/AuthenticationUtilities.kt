@@ -72,7 +72,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
     override fun login(username: String, password: String): Pair<LoginResult, User> {
         val user = ap.getUser(UserName(username))
 
-        if (user == null) {
+        if (user == NO_USER) {
             logInfo("Login failed: user $user is not registered.")
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
@@ -87,7 +87,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return Pair(LoginResult.SUCCESS, user)
     }
 
-    override fun getUserForSession(sessionToken: String): User? {
+    override fun getUserForSession(sessionToken: String): User {
         return ap.getUserForSession(sessionToken)
     }
 

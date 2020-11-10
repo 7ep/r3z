@@ -3,7 +3,6 @@ package coverosR3z.domainobjects
 import coverosR3z.misc.generateRandomString
 import kotlinx.serialization.Serializable
 import java.security.MessageDigest
-import kotlin.random.Random
 
 private const val maxUserCount = 100_000_000
 private const val maxUserMsg = "No way this company has more than 100 million users"
@@ -13,6 +12,7 @@ private val md = MessageDigest.getInstance("SHA-256")
 
 /**
  * This is used to represent no user - just to avoid using null for a user
+ * It's a typed null, essentially
  */
 val NO_USER = User(maxUserCount-1, "NO_USER", Hash.createHash(""), "THIS REPRESENTS NO USER", -1)
 
