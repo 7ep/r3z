@@ -1,11 +1,9 @@
 package coverosR3z.server
 
 import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.domainobjects.LoginResult
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.ProjectName
-import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logInfo
 import coverosR3z.server.TargetPage.*
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
@@ -99,10 +97,14 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (user == NO_USER) {
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
-            au.register(username, password)
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            val result = au.register(username, password)
+            if (result == RegistrationResult.SUCCESS) {
+                PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            } else {
+                PreparedResponseData(FileReader.readNotNull("failure.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            }
         } else {
-            handleUnauthorized()
+            redirectToHomepage()
         }
     }
 
@@ -115,11 +117,16 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 val newSessionToken: String = au.createNewSession(loginUser)
                 PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
             } else {
+                logInfo("User ($username) failed to login")
                 handleUnauthorized()
             }
         } else {
-            handleUnauthorized()
+            redirectToHomepage()
         }
+    }
+
+    private fun redirectToHomepage(): PreparedResponseData {
+        return PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: enter_time.html"))
     }
 
     private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
@@ -235,6 +242,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
                 if (verb == "POST") {
                     logDebug("Handling POST from client")
+                    file = checkNotNull(result.groups[2]).value
                     responseType = ActionType.HANDLE_POST_FROM_CLIENT
 
                 } else {
