@@ -3,7 +3,7 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.getTime
-import coverosR3z.server.ServerUtilities.Companion.extractAuthCookieFromHeaders
+import coverosR3z.server.ServerUtilities.Companion.extractSessionTokenFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.parseFirstLine
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
@@ -16,17 +16,15 @@ import java.lang.IllegalArgumentException
 
 class ServerUtilitiesTests {
 
-    private lateinit var sw : FakeSocketWrapper
     private lateinit var au : FakeAuthenticationUtilities
     private lateinit var tru : FakeTimeRecordingUtilities
     private lateinit var su : ServerUtilities
 
     @Before
     fun init() {
-        sw = FakeSocketWrapper()
         au = FakeAuthenticationUtilities()
         tru = FakeTimeRecordingUtilities()
-        su = ServerUtilities(sw, au, tru)
+        su = ServerUtilities(au, tru)
     }
 
     /**
@@ -175,7 +173,7 @@ class ServerUtilitiesTests {
     fun testShouldExtractAuthCodeFromCookie() {
         val headers = listOf("Cookie: jenkins-timestamper-offset=18000000; sessionId=38afes7a8; Idea-7de3a10=8972cd6b-ad6d-40c6-9daf-38ef0f149214; jenkins-timestamper=system; jenkins-timestamper-local=true")
         val expected = "38afes7a8"
-        val result = extractAuthCookieFromHeaders(headers)
+        val result = extractSessionTokenFromHeaders(headers)
         assertEquals("we should extract out the auth value from the header provided", expected, result)
     }
 
@@ -186,7 +184,7 @@ class ServerUtilitiesTests {
     fun testShouldExtractAuthCodeFromCookie_MultipleCookieHeaders_ShouldConcatenate() {
         val headers = listOf("Cookie: sessionId=38afes7a8", "Cookie: a=b; jenkins-timestamper-offset=18000000")
         val expected = "38afes7a8"
-        val result = extractAuthCookieFromHeaders(headers)
+        val result = extractSessionTokenFromHeaders(headers)
         assertEquals("we should extract out the auth value from the header provided", expected, result)
     }
 
@@ -196,7 +194,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractAuthCodeFromCookie_NotFound() {
         val headers = listOf("Content-Type: Blah")
-        val result = extractAuthCookieFromHeaders(headers)
+        val result = extractSessionTokenFromHeaders(headers)
         assertNull("If there were no cookie headers, return null", result)
     }
 
@@ -206,7 +204,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldExtractAuthCodeFromCookie_NotFound_NoSessionCookie() {
         val headers = listOf("Cookie: jenkins-timestamper-offset=18000000; Idea-7de3a10=8972cd6b-ad6d-40c6-9daf-38ef0f149214; jenkins-timestamper=system; jenkins-timestamper-local=true")
-        val result = extractAuthCookieFromHeaders(headers)
+        val result = extractSessionTokenFromHeaders(headers)
         assertNull("If there were no cookie headers, return null", result)
     }
 
@@ -321,7 +319,7 @@ class ServerUtilitiesTests {
         val authCookie = "abc123"
         val expectedUser = DEFAULT_USER
         au.getUserForSessionBehavior = { DEFAULT_USER}
-        val user = su.extractUserFromAuthToken(authCookie)
+        val user = ServerUtilities.extractUserFromAuthToken(authCookie, au)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }
 

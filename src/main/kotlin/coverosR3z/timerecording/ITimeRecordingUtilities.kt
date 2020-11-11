@@ -1,8 +1,11 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 
 interface ITimeRecordingUtilities {
+    fun changeUser(cu : CurrentUser) : ITimeRecordingUtilities
+
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult
 
     /**
