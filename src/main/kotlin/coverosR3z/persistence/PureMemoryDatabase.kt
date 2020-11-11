@@ -127,13 +127,6 @@ class PureMemoryDatabase {
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = employees.hashCode()
-        result = 31 * result + projects.hashCode()
-        result = 31 * result + timeEntries.hashCode()
-        return result
-    }
-
     fun addNewSession(sessionToken: String, user: User, time: DateTime) {
         require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
         sessions[sessionToken] = Pair(user, time)
