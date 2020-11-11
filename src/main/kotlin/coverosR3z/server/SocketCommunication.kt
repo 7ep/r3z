@@ -25,7 +25,7 @@ class SocketCommunication(val port : Int) {
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         while (true) {
             logInfo("waiting for socket connection")
-            val server = SocketWrapper(halfOpenServerSocket.accept())
+            val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
             logInfo("client from ${server.socket.inetAddress?.hostAddress} has connected")
             handleRequest(server, au, tru)
         }

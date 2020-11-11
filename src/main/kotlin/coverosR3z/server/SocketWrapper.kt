@@ -10,25 +10,25 @@ import java.net.Socket
  * Provides access to the reading and writing functions on a socket
  * in a standardized, tightly-controlled way
  */
-class SocketWrapper(val socket: Socket) : ISocketWrapper {
+class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrapper {
     private val writer: OutputStream = socket.getOutputStream()
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
     override fun write(input: String) {
-        logDebug("$socket is sending $input")
+        logDebug("${name ?: socket} is sending $input")
         writer.write(input.toByteArray())
     }
 
     override fun readLine(): String {
         val readResult = reader.readLine()
-        logDebug("$socket read this line: $readResult")
+        logDebug("${name ?: socket} read this line: $readResult")
         return readResult
     }
 
     override fun read(len : Int) : String {
         val cbuf = CharArray(len)
         reader.read(cbuf, 0, len)
-        logDebug("$socket read $len bytes of this: ${cbuf.joinToString("")}")
+        logDebug("$name read $len bytes of this: ${cbuf.joinToString("")}")
         return cbuf.joinToString("")
     }
 }
