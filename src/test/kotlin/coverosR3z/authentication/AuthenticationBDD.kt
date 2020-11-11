@@ -3,6 +3,11 @@ package coverosR3z.authentication
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.server.ActionType
+import coverosR3z.server.PreparedResponseData
+import coverosR3z.server.RequestData
+import coverosR3z.server.ServerUtilities
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
@@ -116,12 +121,16 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
         val regStatus = au.register("matt", "asdfoiajwefowejf")
         assertEquals(RegistrationResult.SUCCESS, regStatus)
+        val tru = FakeTimeRecordingUtilities()
+        val su = ServerUtilities(au,tru)
+        val postedData = mapOf("username" to "matt", "password" to "asdfoiajwefowejf")
+        val requestData = RequestData(ActionType.HANDLE_POST_FROM_CLIENT, "login",postedData, NO_USER)
 
         // When I enter valid credentials
-
-
+        val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)
 
         // Then the system sends a Set-Cookie header like "sessionId=abc123"
+//        assertEquals(responseData.headers.single(h -> h == "Set-Cookie: sessionId=abc123"))
     }
 
     /*
