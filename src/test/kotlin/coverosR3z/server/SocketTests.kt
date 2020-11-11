@@ -1,14 +1,18 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.logging.logDebug
 import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import org.junit.*
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.ServerSocket
@@ -21,7 +25,6 @@ lateinit var halfOpenServerSocket : ServerSocket
 lateinit var serverThread: Thread
 lateinit var server : SocketWrapper
 lateinit var client : SocketWrapper
-lateinit var su: ServerUtilities
 
 class ServerSocketInitializer(): Runnable {
 
@@ -53,7 +56,6 @@ class SocketTests() {
     @Before
     fun init() {
         server = SocketWrapper(serverSocket)
-        su = ServerUtilities(server, au, tru)
         client = SocketWrapper(clientSocket)
     }
 
@@ -122,8 +124,7 @@ class SocketTests() {
         val pageDesired = "sample.html"
         client.write("GET /$pageDesired HTTP/1.1\n\n")
 
-        // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -141,6 +142,21 @@ class SocketTests() {
     }
 
     /**
+     * Just for the test code - very similar to what is happening in [SocketCommunication],
+     * except that this way we have access to the inside variables
+     */
+    private fun executeServerProcess() {
+        // server - handle the request
+        val requestData = ServerUtilities.parseClientRequest(server, au)
+
+        // now that we know who the user is (if they authenticated) we can update the current user
+        val truWithUser = tru.changeUser(CurrentUser(requestData.user))
+
+        val responseData = ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
+        ServerUtilities.returnData(server, responseData)
+    }
+
+    /**
      * What if we ask for nothing? like, GET / HTTP/1.1
      */
     @Test
@@ -149,7 +165,7 @@ class SocketTests() {
         client.write("GET / HTTP/1.1\n\n")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -175,7 +191,7 @@ class SocketTests() {
         client.write("GET /doesnotexist HTTP/1.1\n\n")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -207,7 +223,7 @@ class SocketTests() {
             client.write(request)
 
             // server - handle the request
-            su.serverHandleRequest()
+            executeServerProcess()
 
             // client - read status line
             val statusline = client.readLine()
@@ -232,7 +248,7 @@ class SocketTests() {
         client.write("GET /sample_template.utl HTTP/1.1\n\n")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -255,7 +271,7 @@ class SocketTests() {
         client.write("GET /sample.css HTTP/1.1\n\n")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -279,7 +295,7 @@ class SocketTests() {
         client.write("GET /sample.js HTTP/1.1\n\n")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()
@@ -306,7 +322,7 @@ class SocketTests() {
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
         // server - handle the request
-        su.serverHandleRequest()
+        executeServerProcess()
 
         // client - read status line
         val statusline = client.readLine()

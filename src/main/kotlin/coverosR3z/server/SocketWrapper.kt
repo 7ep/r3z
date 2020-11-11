@@ -10,7 +10,7 @@ import java.net.Socket
  * Provides access to the reading and writing functions on a socket
  * in a standardized, tightly-controlled way
  */
-class SocketWrapper(private val socket: Socket) : ISocketWrapper {
+class SocketWrapper(val socket: Socket) : ISocketWrapper {
     private val writer: OutputStream = socket.getOutputStream()
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 

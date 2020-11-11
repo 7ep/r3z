@@ -10,61 +10,14 @@ import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
 
 
-class ServerUtilities(private val server: ISocketWrapper,
-                      private val au : IAuthenticationUtilities,
-                      private val tru : ITimeRecordingUtilities) {
-
+class ServerUtilities(private val au: IAuthenticationUtilities,
+                      private val tru: ITimeRecordingUtilities) {
 
     /**
-     * Serve prepared response object to the client
+     * Examine the request and take proper action, returning a
+     * proper response
      */
-    fun serverHandleRequest() {
-        // read a line the client is sending us (the request,
-        // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
-        val requestData = parseClientRequest()
-        val responseData = prepareResponse(requestData)
-        returnData(responseData)
-    }
-
-    /**
-     * Based on the request from the client, come up with an [RequestData]
-     * of what we should do next
-     */
-    private fun parseClientRequest(): RequestData {
-        // read the first line for the fundamental request
-        val clientRequest = server.readLine()
-        val (responseType, file) = parseFirstLine(clientRequest)
-        val headers = getHeaders(server)
-        val user = obtainAuthentication(headers)
-        val data = extractDataIfPost(responseType, headers)
-        return RequestData(responseType, file, data, user)
-    }
-
-    /**
-     * read the body if one exists and convert it to a string -> string map
-     */
-    private fun extractDataIfPost(responseType: ActionType, headers: List<String>): Map<String, String> {
-        return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
-            val length = extractLengthOfPostBodyFromHeaders(headers)
-            val body = server.read(length)
-            parsePostedData(body)
-        } else {
-            emptyMap()
-        }
-    }
-
-    /**
-     * Return a valid user if the headers have a cookie that
-     * corresponds to a session.
-     *
-     * Otherwise, returns [NO_USER]
-     */
-    private fun obtainAuthentication(headers: List<String>): User {
-        val authCookie: String? = extractAuthCookieFromHeaders(headers)
-        return extractUserFromAuthToken(authCookie)
-    }
-
-    private fun prepareResponse(requestData: RequestData): PreparedResponseData {
+    fun handleRequestAndRespond(requestData: RequestData): PreparedResponseData {
         return when (requestData.type) {
             ActionType.BAD_REQUEST -> handleBadRequest()
 
@@ -74,41 +27,6 @@ class ServerUtilities(private val server: ISocketWrapper,
             ActionType.TEMPLATE -> handleReadingFiles(requestData)
 
             ActionType.HANDLE_POST_FROM_CLIENT ->  handlePost(requestData)
-        }
-    }
-
-    /**
-     * sends data as the body of a response from server
-     */
-    private fun returnData(data: PreparedResponseData) {
-        logDebug("Assembling data just before shipping to client")
-        val status = "HTTP/1.1 ${data.responseStatus.value}"
-        logDebug("status: $status")
-        val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
-        val contentTypeHeader = "Content-Type: ${data.type.value}"
-
-        logDebug("contentLengthHeader: $contentLengthHeader")
-        logDebug("contentTypeHeader: $contentTypeHeader")
-        val input = "$status\n" +
-                "$contentLengthHeader\n" +
-                "$contentTypeHeader\n" +
-                "\n" +
-                data.fileContents
-        server.write(input)
-    }
-
-    /**
-     * Given the auth token extracted from a cookie,
-     * return the user it represents, but only if it
-     * represents a current valid session.
-     *
-     * returns null otherwise
-     */
-    fun extractUserFromAuthToken(authCookie: String?): User {
-        return if (authCookie.isNullOrBlank()) {
-            NO_USER
-        } else {
-            au.getUserForSession(authCookie)
         }
     }
 
@@ -248,6 +166,49 @@ class ServerUtilities(private val server: ISocketWrapper,
         private val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
 
         /**
+         * Based on the request from the client, come up with an [RequestData]
+         * of what we should do next
+         */
+        fun parseClientRequest(server: ISocketWrapper, au: IAuthenticationUtilities): RequestData {
+            // read the first line for the fundamental request
+            val clientRequest = server.readLine()
+            val (responseType, file) = parseFirstLine(clientRequest)
+            val headers = getHeaders(server)
+            val token = extractSessionTokenFromHeaders(headers)
+            val user = extractUserFromAuthToken(token, au)
+            val data = extractDataIfPost(server, responseType, headers)
+            return RequestData(responseType, file, data, user)
+        }
+
+        /**
+         * read the body if one exists and convert it to a string -> string map
+         */
+        private fun extractDataIfPost(server: ISocketWrapper, responseType: ActionType, headers: List<String>): Map<String, String> {
+            return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
+                val length = extractLengthOfPostBodyFromHeaders(headers)
+                val body = server.read(length)
+                parsePostedData(body)
+            } else {
+                emptyMap()
+            }
+        }
+
+        /**
+         * Given the auth token extracted from a cookie,
+         * return the user it represents, but only if it
+         * represents a current valid session.
+         *
+         * returns [NO_USER] otherwise
+         */
+        fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities): User {
+            return if (authCookie.isNullOrBlank()) {
+                NO_USER
+            } else {
+                au.getUserForSession(authCookie)
+            }
+        }
+
+        /**
          * The first line of the request is the basic request
          * from the client.  See [pageExtractorRegex]
          */
@@ -324,8 +285,10 @@ class ServerUtilities(private val server: ISocketWrapper,
         /**
          * Given the list of headers, find the one with the authentication
          * cookie and return its value for further processing
+         *
+         * This value corresponds to the identifier for a session in the database
          */
-        fun extractAuthCookieFromHeaders(headers: List<String>): String? {
+        fun extractSessionTokenFromHeaders(headers: List<String>): String? {
             if (headers.isEmpty()) return null
 
             val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
@@ -371,6 +334,26 @@ class ServerUtilities(private val server: ISocketWrapper,
                 }
             }
             return headers
+        }
+
+        /**
+         * sends data as the body of a response from server
+         */
+        fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
+            logDebug("Assembling data just before shipping to client")
+            val status = "HTTP/1.1 ${data.responseStatus.value}"
+            logDebug("status: $status")
+            val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
+            val contentTypeHeader = "Content-Type: ${data.type.value}"
+
+            logDebug("contentLengthHeader: $contentLengthHeader")
+            logDebug("contentTypeHeader: $contentTypeHeader")
+            val input = "$status\n" +
+                    "$contentLengthHeader\n" +
+                    "$contentTypeHeader\n" +
+                    "\n" +
+                    data.fileContents
+            server.write(input)
         }
     }
 

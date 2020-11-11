@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
+import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 
 /**
@@ -15,6 +16,10 @@ class FakeTimeRecordingUtilities(
         var getAllEntriesForEmployeeBehavior : () -> List<TimeEntry> = {emptyList() },
 
         ) : ITimeRecordingUtilities {
+
+    override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
+        TODO("Not yet implemented")
+    }
 
     override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         return recordTimeBehavior()

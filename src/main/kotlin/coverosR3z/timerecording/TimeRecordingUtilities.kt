@@ -12,6 +12,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
 
     private val log = Logger(cu)
 
+    override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
+        return TimeRecordingUtilities(persistence, cu)
+    }
+
     override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
         val user = cu.user
         // ensure time entry user is the logged in user, or
