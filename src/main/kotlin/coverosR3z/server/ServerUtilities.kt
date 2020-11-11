@@ -1,68 +1,19 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.*
-import coverosR3z.domainobjects.*
+import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.domainobjects.NO_USER
+import coverosR3z.domainobjects.ProjectName
+import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
-import java.lang.NumberFormatException
 
-/**
- * Data for shipping to the client
- */
-data class PreparedResponseData(val fileContents: String, val responseStatus: ResponseStatus, val type: ContentType)
-
-/**
- * These are mime types (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
- * which we'll use when conversing with clients to describe data
- */
-enum class ContentType(val value: String) {
-
-    // Text MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#text
-    TEXT_HTML("text/html"),
-    TEXT_CSS("text/css"),
-
-    // Application MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#application
-    APPLICATION_JAVASCRIPT("application/javascript"),
-}
-
-enum class ResponseStatus(val value: String) {
-    OK("200 OK"),
-    NOT_FOUND("404 NOT FOUND"),
-    BAD_REQUEST("400 BAD REQUEST"),
-    UNAUTHORIZED("401 UNAUTHORIZED")
-}
-/**
- * This is our regex for looking at a client's request
- * and determining what to send them.  For example,
- * if they send GET /sample.html HTTP/1.1, we send them sample.html
- *
- * On the other hand if it's not a well formed request, or
- * if we don't have that file, we reply with an error page
- */
-val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
-
-/**
- * Used for extracting the length of the body, in POSTs and
- * responses from servers
- */
-val contentLengthRegex = "Content-Length: (.*)$".toRegex()
-
-/**
- * Used to extract cookies from the Cookie header
- */
-val cookieRegex = "Cookie: (.*)$".toRegex()
-
-/**
- * Within a cookie header, we want our sessionId cookie, which
- * this regular expression will find
- */
-val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
 
 class ServerUtilities(private val server: ISocketWrapper,
                       private val au : IAuthenticationUtilities,
                       private val tru : ITimeRecordingUtilities) {
+
 
     /**
      * Serve prepared response object to the client
@@ -70,78 +21,59 @@ class ServerUtilities(private val server: ISocketWrapper,
     fun serverHandleRequest() {
         // read a line the client is sending us (the request,
         // per HTTP/1.1 protocol), e.g. GET /index.html HTTP/1.1
-        val serverInput = server.readLine()
-        logDebug("request from client: $serverInput")
-
-        val action: Action = parseClientRequest(serverInput)
-        if (action.type == ActionType.HANDLE_POST_FROM_CLIENT) {
-            handlePost(server, action) // a POST will have a body
-        } else {
-            handleGet(action) // there is nothing more to get for a GET
-        }
-    }
-
-    /**
-     * The user is asking us for something here
-     */
-    private fun handleGet(action: Action) {
-        val responseData = prepareDataForServing(action)
+        val requestData = parseClientRequest()
+        val responseData = prepareResponse(requestData)
         returnData(responseData)
     }
 
     /**
-     * The user has sent us data, we have to process it
+     * Based on the request from the client, come up with an [RequestData]
+     * of what we should do next
      */
-    private fun handlePost(server: ISocketWrapper, action: Action) {
-        val headers: List<String> = getHeaders(server)
-        val authCookie : String? = extractAuthCookieFromHeaders(headers)
-        val user : User = extractUserFromAuthToken(authCookie)
-        val length: Int = extractLengthOfPostBodyFromHeaders(headers)
-        val body = server.read(length)
-        val data = parsePostedData(body)
-
-        when (action.filename) {
-            "entertime" -> handleTakingTimeEntry(user, data)
-            "createemployee" -> handleCreatingNewEmployee(user, data)
-            "login" -> handleLoginForUser(user, data)
-            "register" -> handleRegisterForUser(user, data)
-            "createproject" -> handleCreatingProject(user, data)
-            else -> returnData(PreparedResponseData("<p>Unauthorized</p>", ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML))
-        }
-    }
-
-    private fun handleCreatingProject(user: User, data: Map<String, String>) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleRegisterForUser(user: User, data: Map<String, String>) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleLoginForUser(user: User, data: Map<String, String>) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleTakingTimeEntry(user: User, data: Map<String, String>) {
-        TODO("Not yet implemented")
+    private fun parseClientRequest(): RequestData {
+        // read the first line for the fundamental request
+        val clientRequest = server.readLine()
+        val (responseType, file) = parseFirstLine(clientRequest)
+        val headers = getHeaders(server)
+        val user = obtainAuthentication(headers)
+        val data = extractDataIfPost(responseType, headers)
+        return RequestData(responseType, file, data, user)
     }
 
     /**
-     * Given the auth token extracted from a cookie,
-     * return the user it represents, but only if it
-     * represents a current valid session.
-     *
-     * returns null otherwise
+     * read the body if one exists and convert it to a string -> string map
      */
-    fun extractUserFromAuthToken(authCookie: String?): User {
-        return if (authCookie.isNullOrBlank()) {
-            NO_USER
+    private fun extractDataIfPost(responseType: ActionType, headers: List<String>): Map<String, String> {
+        return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
+            val length = extractLengthOfPostBodyFromHeaders(headers)
+            val body = server.read(length)
+            parsePostedData(body)
         } else {
-            au.getUserForSession(authCookie)
+            emptyMap()
+        }
+    }
+
+    /**
+     * Return a valid user if the headers have a cookie that
+     * corresponds to a session.
+     *
+     * Otherwise, returns [NO_USER]
+     */
+    private fun obtainAuthentication(headers: List<String>): User {
+        val authCookie: String? = extractAuthCookieFromHeaders(headers)
+        return extractUserFromAuthToken(authCookie)
+    }
+
+    private fun prepareResponse(requestData: RequestData): PreparedResponseData {
+        return when (requestData.type) {
+            ActionType.BAD_REQUEST -> handleBadRequest()
+
+            ActionType.READ_FILE,
+            ActionType.CSS,
+            ActionType.JS,
+            ActionType.TEMPLATE -> handleReadingFiles(requestData)
+
+            ActionType.HANDLE_POST_FROM_CLIENT ->  handlePost(requestData)
         }
     }
 
@@ -165,7 +97,205 @@ class ServerUtilities(private val server: ISocketWrapper,
         server.write(input)
     }
 
+    /**
+     * Given the auth token extracted from a cookie,
+     * return the user it represents, but only if it
+     * represents a current valid session.
+     *
+     * returns null otherwise
+     */
+    fun extractUserFromAuthToken(authCookie: String?): User {
+        return if (authCookie.isNullOrBlank()) {
+            NO_USER
+        } else {
+            au.getUserForSession(authCookie)
+        }
+    }
+
+    private fun handleReadingFiles(requestData: RequestData): PreparedResponseData {
+        val fileContents = FileReader.read(requestData.filename)
+        return if (fileContents == null) {
+            logDebug("unable to read a file named ${requestData.filename}")
+            handleNotFound()
+        } else {
+            if (requestData.type == ActionType.TEMPLATE) {
+                logDebug("Sending file for rendering")
+                val renderedFile = renderTemplate(fileContents)
+                handleReadRegularHtmlFile(renderedFile)
+            } else {
+                when (requestData.type) {
+                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_CSS)
+                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.APPLICATION_JAVASCRIPT)
+                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
+                }
+            }
+
+        }
+    }
+
+    private fun renderTemplate(template: String): String {
+        val te = TemplatingEngine()
+        // TODO: replace following code ASAP
+        val mapping = mapOf("username" to "Jona")
+        return te.render(template, mapping)
+    }
+
+    /**
+     * The user has sent us data, we have to process it
+     */
+    fun handlePost(rd: RequestData) : PreparedResponseData {
+        return when (rd.filename) {
+            "entertime" -> handleTakingTimeEntry(rd.user, rd.data)
+            "createemployee" -> handleCreatingNewEmployee(rd.user, rd.data)
+            "login" -> handleLoginForUser(rd.user, rd.data)
+            "register" -> handleRegisterForUser(rd.user, rd.data)
+            "createproject" -> handleCreatingProject(rd.user, rd.data)
+            else -> handleUnauthorized()
+        }
+    }
+
+    private fun handleBadRequest(): PreparedResponseData {
+        return PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, ContentType.TEXT_HTML)
+    }
+
+    private fun handleNotFound(): PreparedResponseData {
+        return PreparedResponseData(FileReader.readNotNull("404error.html"), ResponseStatus.NOT_FOUND, ContentType.TEXT_HTML)
+    }
+
+    private fun handleUnauthorized() : PreparedResponseData {
+        return PreparedResponseData(FileReader.readNotNull("401error.html"), ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML)
+    }
+
+    private fun handleCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
+        return if (user == NO_USER) {
+            handleUnauthorized()
+        } else {
+            tru.createProject(ProjectName(checkNotNull(data["projectname"])))
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+        }
+    }
+
+    private fun handleRegisterForUser(user: User, data: Map<String, String>) : PreparedResponseData {
+        return if (user == NO_USER) {
+            val username = checkNotNull(data["username"])
+            val password = checkNotNull(data["password"])
+            au.register(username, password)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+        } else {
+            handleUnauthorized()
+        }
+    }
+
+    private fun handleLoginForUser(user: User, data: Map<String, String>) : PreparedResponseData {
+        return if (user == NO_USER) {
+            val username = checkNotNull(data["username"])
+            val password = checkNotNull(data["password"])
+            au.login(username, password)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+        } else {
+            handleUnauthorized()
+        }
+    }
+
+    private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
+        return if (user == NO_USER) {
+            handleUnauthorized()
+        } else {
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+        }
+    }
+
+    private fun handleTakingTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
+        return if (user == NO_USER) {
+            handleUnauthorized()
+        } else {
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+        }
+    }
+
+    private fun handleReadRegularHtmlFile(renderedFile: String): PreparedResponseData {
+        return PreparedResponseData(renderedFile, ResponseStatus.OK, ContentType.TEXT_HTML)
+    }
+
+
     companion object {
+
+        /**
+         * This is our regex for looking at a client's request
+         * and determining what to send them.  For example,
+         * if they send GET /sample.html HTTP/1.1, we send them sample.html
+         *
+         * On the other hand if it's not a well formed request, or
+         * if we don't have that file, we reply with an error page
+         */
+        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
+
+        /**
+         * Used for extracting the length of the body, in POSTs and
+         * responses from servers
+         */
+        val contentLengthRegex = "Content-Length: (.*)$".toRegex()
+
+        /**
+         * Used to extract cookies from the Cookie header
+         */
+        private val cookieRegex = "Cookie: (.*)$".toRegex()
+
+        /**
+         * Within a cookie header, we want our sessionId cookie, which
+         * this regular expression will find
+         */
+        private val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
+
+        /**
+         * The first line of the request is the basic request
+         * from the client.  See [pageExtractorRegex]
+         */
+        fun parseFirstLine(clientRequest: String): Pair<ActionType, String> {
+            logDebug("request from client: $clientRequest")
+            val result = pageExtractorRegex.matchEntire(clientRequest)
+            val responseType: ActionType
+            var file = ""
+
+            if (result == null) {
+                logDebug("Unable to parse client request")
+                responseType = ActionType.BAD_REQUEST
+            } else {
+                // determine which file the client is requesting
+                val verb = checkNotNull(result.groups[1]).value
+                logDebug("verb from client was: $verb")
+
+                if (verb == "POST") {
+                    logDebug("Handling POST from client")
+                    responseType = ActionType.HANDLE_POST_FROM_CLIENT
+
+                } else {
+                    logDebug("Handling GET from client")
+                    file = checkNotNull(result.groups[2]).value
+                    logDebug("Client wants this file: $file")
+
+                    when {
+                        file.takeLast(4) == ".utl" -> {
+                            logDebug("file requested is a template")
+                            responseType = ActionType.TEMPLATE
+                        }
+                        file.takeLast(4) == ".css" -> {
+                            logDebug("file requested is a CSS style sheet")
+                            responseType = ActionType.CSS
+                        }
+                        file.takeLast(3) == ".js" -> {
+                            logDebug("file requested is a JavaScript file")
+                            responseType = ActionType.JS
+                        }
+                        else -> {
+                            logDebug("file requested is a text file")
+                            responseType = ActionType.READ_FILE
+                        }
+                    }
+                }
+            }
+            return Pair(responseType, file)
+        }
 
         /**
          * Given the list of headers, find the one with the length of the
@@ -233,11 +363,11 @@ class ServerUtilities(private val server: ISocketWrapper,
          * Helper method to collect the headers line by line, stopping when it
          * encounters an empty line
          */
-        fun getHeaders(client: ISocketWrapper): List<String> {
+        fun getHeaders(socket: ISocketWrapper): List<String> {
             // get the headers
             val headers = mutableListOf<String>()
             while (true) {
-                val header = client.readLine()
+                val header = socket.readLine()
                 if (header.isNotEmpty()) {
                     headers.add(header)
                 } else {
@@ -246,144 +376,6 @@ class ServerUtilities(private val server: ISocketWrapper,
             }
             return headers
         }
-
-        private fun prepareDataForServing(action: Action): PreparedResponseData {
-            return when (action.type) {
-                ActionType.BAD_REQUEST -> handleBadRequest()
-
-                ActionType.READ_FILE,
-                ActionType.CSS,
-                ActionType.JS,
-                ActionType.TEMPLATE -> handleReadingFiles(action)
-
-                ActionType.HANDLE_POST_FROM_CLIENT ->  TODO("Not yet implemented")
-            }
-        }
-
-        private fun handleBadRequest() = PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, ContentType.TEXT_HTML)
-
-        private fun handleReadingFiles(action: Action): PreparedResponseData {
-            val fileContents = FileReader.read(action.filename)
-            return if (fileContents == null) {
-                logDebug("unable to read a file named ${action.filename}")
-                val unfound = FileReader.readNotNull("404error.html")
-                PreparedResponseData(unfound, ResponseStatus.NOT_FOUND, ContentType.TEXT_HTML)
-            } else {
-                if (action.type == ActionType.TEMPLATE) {
-                    logDebug("Sending file for rendering")
-                    val renderedFile = renderTemplate(fileContents)
-                    PreparedResponseData(renderedFile,ResponseStatus.OK, ContentType.TEXT_HTML)
-                } else {
-                    when (action.type) {
-                        ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_CSS)
-                        ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.APPLICATION_JAVASCRIPT)
-                        else -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
-                    }
-                }
-
-            }
-        }
-
-
-        /**
-         * Possible behaviors of the server
-         */
-        enum class ActionType {
-            /**
-             * Just read a file, plain and simple
-             */
-            READ_FILE,
-
-            /**
-             * This file will require rendering
-             */
-            TEMPLATE,
-
-            /**
-             * The server has sent us data with a post.
-             * We have to handle it before we respond
-             */
-            HANDLE_POST_FROM_CLIENT,
-
-            /**
-             * The client sent us a bad (malformed) request
-             */
-            BAD_REQUEST,
-
-            /**
-             * Cascading style sheet
-             */
-            CSS,
-
-            /**
-             * A JavaScript file
-             */
-            JS,
-        }
-
-        /**
-         * Encapsulates the proper action by the server, based on what
-         * the client wants from us
-         */
-        data class Action(val type: ActionType, val filename: String = "", val data : Map<String, String> = emptyMap())
-
-        /**
-         * Based on the request from the client, come up with an [Action]
-         * of what we should do next
-         */
-        fun parseClientRequest(clientRequest: String): Action {
-            val result = pageExtractorRegex.matchEntire(clientRequest)
-            val responseType: ActionType
-            var file = ""
-
-            if (result == null) {
-                logDebug("Unable to parse client request")
-                responseType = ActionType.BAD_REQUEST
-            } else {
-                // determine which file the client is requesting
-                val verb = checkNotNull(result.groups[1]).value
-                logDebug("verb from client was: $verb")
-
-                if (verb == "POST") {
-                    logDebug("Handling POST from client")
-                    responseType = ActionType.HANDLE_POST_FROM_CLIENT
-
-                } else {
-                    logDebug("Handling GET from client")
-                    file = checkNotNull(result.groups[2]).value
-                    logDebug("Client wants this file: $file")
-
-                    when {
-                        file.takeLast(4) == ".utl" -> {
-                            logDebug("file requested is a template")
-                            responseType = ActionType.TEMPLATE
-                        }
-                        file.takeLast(4) == ".css" -> {
-                            logDebug("file requested is a CSS style sheet")
-                            responseType = ActionType.CSS
-                        }
-                        file.takeLast(3) == ".js" -> {
-                            logDebug("file requested is a JavaScript file")
-                            responseType = ActionType.JS
-                        }
-                        else -> {
-                            logDebug("file requested is a text file")
-                            responseType = ActionType.READ_FILE
-                        }
-                    }
-                }
-            }
-
-            return Action(responseType, file)
-        }
-
-        private fun renderTemplate(template: String): String {
-            val te = TemplatingEngine()
-            // TODO: replace following code ASAP
-            val mapping = mapOf("username" to "Jona")
-            return te.render(template, mapping)
-        }
-
     }
 
 }

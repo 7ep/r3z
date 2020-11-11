@@ -2,6 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.logging.logDebug
+import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -197,10 +198,10 @@ class SocketTests() {
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
         // send a request to the server for something that doesn't exist
         val badRequests = listOf(
-                "GET BLAHBLAHBLAH HTTP/1.1\n",
-                "GET\n",
-                "BLAHBLAHBLAH HTTP/1.1\n",
-                "HTTPBYRON/1.1\n",
+                "GET BLAHBLAHBLAH HTTP/1.1\n\n",
+                "GET\n\n",
+                "BLAHBLAHBLAH HTTP/1.1\n\n",
+                "HTTP/1.1\n\n",
         )
         for (request in badRequests) {
             client.write(request)
@@ -316,7 +317,7 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
-        assertEquals("<p>Unauthorized</p>", body)
+        assertEquals(FileReader.readNotNull("401error.html"), body)
     }
 
 
