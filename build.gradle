@@ -43,8 +43,8 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // or "kotlin-stdlib-jdk8"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC" // JVM dependency
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 
     // Selenium - used for testing commonly-used browsers
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
