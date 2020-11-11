@@ -5,10 +5,10 @@ import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
+import coverosR3z.server.TargetPage.*
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
-
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
                       private val tru: ITimeRecordingUtilities) {
@@ -58,16 +58,17 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return te.render(template, mapping)
     }
 
+
     /**
      * The user has sent us data, we have to process it
      */
     fun handlePost(rd: RequestData) : PreparedResponseData {
         return when (rd.filename) {
-            "entertime" -> handleTakingTimeEntry(rd.user, rd.data)
-            "createemployee" -> handleCreatingNewEmployee(rd.user, rd.data)
-            "login" -> handleLoginForUser(rd.user, rd.data)
-            "register" -> handleRegisterForUser(rd.user, rd.data)
-            "createproject" -> handleCreatingProject(rd.user, rd.data)
+            ENTER_TIME.value -> handleTakingTimeEntry(rd.user, rd.data)
+            CREATE_EMPLOYEE.value -> handleCreatingNewEmployee(rd.user, rd.data)
+            LOGIN.value -> handleLoginForUser(rd.user, rd.data)
+            REGISTER.value -> handleRegisterForUser(rd.user, rd.data)
+            CREATE_PROJECT.value -> handleCreatingProject(rd.user, rd.data)
             else -> handleUnauthorized()
         }
     }
