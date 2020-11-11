@@ -43,13 +43,13 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
-        val matt = tru.createEmployee(EmployeeName("Matt"))
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
         // When I register a new user
-        au.register("matt", "asdfoiajwefowejf", matt.id)
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
 
         // Then the system records that the registration succeeded
-        assertTrue("The user should be registered", au.isUserRegistered("matt"))
+        assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name))
     }
 
     @Test
@@ -57,10 +57,10 @@ class AuthenticationBDD {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf")
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // When I try to register again
-        val result = au.register("matt", "asdfoiajwefowejf")
+        val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // Then the system records that the registration failed
         assertEquals("The user shouldn't be allowed to register again", RegistrationResult.FAILURE, result)
@@ -71,14 +71,14 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register("matt", "asdfoiajwefowejf")
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // When I enter valid credentials
-        val (_, mattUser) = au.login("matt", "asdfoiajwefowejf")
+        val (_, resultantUser) = au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // Then the system knows who I am
-        val user = authPersistence.getUser(UserName("matt"))
-        assertEquals(user, mattUser)
+        val user = authPersistence.getUser(UserName(DEFAULT_USER.name))
+        assertEquals(user, resultantUser)
     }
 
     @Test
@@ -86,11 +86,11 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        val regStatus = au.register("matt", "asdfoiajwefowejf")
+        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // When I login with the wrong credentials
-        val (status, _) = au.login("matt", "I'm not even trying to be a good password")
+        val (status, _) = au.login(DEFAULT_USER.name, "I'm not even trying to be a good password")
 
         // Then the system denies me access
         assertEquals(LoginResult.FAILURE, status)
@@ -103,7 +103,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // When I register with too short of a a password
-        val regStatus = au.register("matt", "too short")
+        val regStatus = au.register(DEFAULT_USER.name, "too short")
 
         // Then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.FAILURE, regStatus)
@@ -119,11 +119,11 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        val regStatus = au.register("matt", "asdfoiajwefowejf")
+        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(RegistrationResult.SUCCESS, regStatus)
         val tru = FakeTimeRecordingUtilities()
         val su = ServerUtilities(au,tru)
-        val postedData = mapOf("username" to "matt", "password" to "asdfoiajwefowejf")
+        val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
         val requestData = RequestData(ActionType.HANDLE_POST_FROM_CLIENT, "login",postedData, NO_USER)
 
         // When I enter valid credentials
