@@ -107,3 +107,35 @@ Developer handbook
                checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
                sessions.remove(sessionToken)
            }
+
+
+    Authentication
+    --------------
+
+    When a user logs in, we set a cookie on their browser that represents the identifier
+    to a session in the database.  As long as they have that cookie, effectively it's like
+    their browser is telling us a correct password every time they come to a page.
+
+    As far as authentication goes, there are several kinds of pages.  For example, there
+    are
+    1) pages that require a valid session token to see them at all.
+    2) There are pages like the public homepage, registration page, and login, that should cause a user to be
+    redirected to an authenticated homepage if they are holding a valid session token.
+    3) There are pages that require both a valid session token *and* special authorization
+    to be on that page, like an administrator's page.  Finally, there is
+    4) a logout page that explicitly removes the session token cookie and deletes the session from the database.
+
+    There are three key pieces to the authentication puzzle: The token (i.e. the cookie), the session
+    entry in the database, and the page you are requesting.
+
+    "valid token" means a cookie that correlates to an existing current session in the database
+    "invalid token" means a cookie that doesn't have a correlating session
+
+        Timeouts and sessions
+        ---------------------
+
+        A question to consider: if a user doesn't explicitly log out, does anything happen to
+        their session?  Does it simply remain valid indefinitely? One possibility is to "timeout"
+        the session - if it hasn't been accessed within some duration, it is considered "dead"
+        and will be removed the next time it is accessed.  On the other hand, is there any problem
+        with keeping sessions active indefinitely?
