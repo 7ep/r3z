@@ -14,11 +14,11 @@ class FakeTimeRecordingUtilities(
         var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
         var getEntriesForEmployeeOnDateBehavior : () -> List<TimeEntry> = { emptyList() },
         var getAllEntriesForEmployeeBehavior : () -> List<TimeEntry> = {emptyList() },
-
+        var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() }
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        TODO("Not yet implemented")
+        return changeUserBehavior()
     }
 
     override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
