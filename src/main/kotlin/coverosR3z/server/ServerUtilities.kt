@@ -328,15 +328,11 @@ class ServerUtilities(private val server: ISocketWrapper,
         fun extractAuthCookieFromHeaders(headers: List<String>): String? {
             if (headers.isEmpty()) return null
 
-            return try {
-                val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
-                val concatenatedHeaders = cookieHeaders.joinToString(";") { cookieRegex.matchEntire(it)?.groups?.get(1)?.value ?: "" }
-                val splitUpCookies = concatenatedHeaders.split(";").map{it.trim()}
-                val sessionCookies = splitUpCookies.mapNotNull { sessionIdCookieRegex.matchEntire(it)?.groups?.get(1)?.value }
-                sessionCookies.singleOrNull()
-            } catch (ex : NoSuchElementException) {
-                throw NoSuchElementException("Did not find a necessary Cookie header in headers. Headers: ${headers.joinToString(";")}")
-            }
+            val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
+            val concatenatedHeaders = cookieHeaders.joinToString(";") { cookieRegex.matchEntire(it)?.groups?.get(1)?.value ?: "" }
+            val splitUpCookies = concatenatedHeaders.split(";").map{it.trim()}
+            val sessionCookies = splitUpCookies.mapNotNull { sessionIdCookieRegex.matchEntire(it)?.groups?.get(1)?.value }
+            return sessionCookies.singleOrNull()
         }
 
         /**
