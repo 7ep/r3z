@@ -31,7 +31,7 @@ interface IAuthenticationUtilities {
      * Adds a new session to the sessions data structure, with
      * the user and a generated session value
      */
-    fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = {generateRandomString(16)}) : String?
+    fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = {generateRandomString(16)}) : String
 
 
 }

@@ -237,7 +237,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun testShouldCreateNewSession() {
         val newSessionId = authUtils.createNewSession(DEFAULT_USER)
-        assertEquals(32, newSessionId?.length)
+        assertEquals(32, newSessionId.length)
     }
 
 }

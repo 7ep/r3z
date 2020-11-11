@@ -114,21 +114,9 @@ class PureMemoryDatabase {
         return projects.toList()
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as PureMemoryDatabase
-
-        if (employees != other.employees) return false
-        if (projects != other.projects) return false
-        if (timeEntries != other.timeEntries) return false
-
-        return true
-    }
 
     fun addNewSession(sessionToken: String, user: User, time: DateTime) {
-        require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
+        require (sessions[sessionToken] == null) {"There must not already exist a session for (${user.name}) if we are to create one"}
         sessions[sessionToken] = Pair(user, time)
     }
 
@@ -137,8 +125,32 @@ class PureMemoryDatabase {
     }
 
     fun removeSessionByToken(sessionToken: String) {
-        checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
+        checkNotNull(sessions[sessionToken]) {"There must exist a session in the database for ($sessionToken) in order to delete it"}
         sessions.remove(sessionToken)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PureMemoryDatabase
+
+        if (employees != other.employees) return false
+        if (users != other.users) return false
+        if (projects != other.projects) return false
+        if (timeEntries != other.timeEntries) return false
+        if (sessions != other.sessions) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = employees.hashCode()
+        result = 31 * result + users.hashCode()
+        result = 31 * result + projects.hashCode()
+        result = 31 * result + timeEntries.hashCode()
+        result = 31 * result + sessions.hashCode()
+        return result
     }
 
 
