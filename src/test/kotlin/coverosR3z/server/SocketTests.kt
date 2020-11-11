@@ -55,8 +55,8 @@ class SocketTests() {
 
     @Before
     fun init() {
-        server = SocketWrapper(serverSocket)
-        client = SocketWrapper(clientSocket)
+        server = SocketWrapper(serverSocket, "server")
+        client = SocketWrapper(clientSocket, "client")
     }
 
     @Test
