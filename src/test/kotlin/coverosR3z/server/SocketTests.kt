@@ -317,7 +317,7 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        client.write("POST /entertime HTTP/1.1\n")
+        client.write("POST /${TargetPage.ENTER_TIME.value} HTTP/1.1\n")
         client.write("Content-Length: 63\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
