@@ -104,6 +104,26 @@ class AuthenticationBDD {
         assertEquals(RegistrationResult.FAILURE, regStatus)
     }
 
+    /**
+     * When I login correctly, the system should reply with a header that sets
+     * a cookie like sessionId=abc123, where abc123 is the session identifier in
+     * the database
+     */
+    @Test
+    fun `when I login through the web interface, I receive a response that sets a valid cookie`() {
+        // Given I have registered
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        val au = AuthenticationUtilities(authPersistence)
+        val regStatus = au.register("matt", "asdfoiajwefowejf")
+        assertEquals(RegistrationResult.SUCCESS, regStatus)
+
+        // When I enter valid credentials
+
+
+
+        // Then the system sends a Set-Cookie header like "sessionId=abc123"
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
