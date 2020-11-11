@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
+import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
 
 
@@ -100,8 +101,9 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
      * @param time the exact time and date this is being created (optional, has default)
      * @param rand the generator for a random string (optional, has default)
      */
-    override fun createNewSession(user: User, time : DateTime, rand : () -> String): String? {
+    override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
         val sessionId = rand()
+        logDebug("New session ID ($sessionId) generated for user ($user)")
         ap.addNewSession(sessionId, user, time)
         return sessionId
     }

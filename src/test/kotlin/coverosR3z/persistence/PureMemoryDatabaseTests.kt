@@ -173,7 +173,7 @@ class PureMemoryDatabaseTests {
     fun testShouldAddSession_Duplicate() {
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         val ex = assertThrows(IllegalArgumentException::class.java) {pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)}
-        assertEquals("a session already exists for user (${DEFAULT_USER.name})", ex.message)
+        assertEquals("There must not already exist a session for (${DEFAULT_USER.name}) if we are to create one", ex.message)
     }
 
     /**
@@ -194,7 +194,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testShouldComplainIfTryingToRemoveNonexistentSession() {
         val ex = assertThrows(java.lang.IllegalStateException::class.java) {pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)}
-        assertEquals("Tried to delete session (${DEFAULT_SESSION_TOKEN}) but it didn't exist in session database", ex.message)
+        assertEquals("There must exist a session in the database for (${DEFAULT_SESSION_TOKEN}) in order to delete it", ex.message)
     }
 
     /*

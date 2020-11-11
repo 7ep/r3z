@@ -3,10 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.server.ActionType
-import coverosR3z.server.PreparedResponseData
-import coverosR3z.server.RequestData
-import coverosR3z.server.ServerUtilities
+import coverosR3z.server.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
@@ -110,12 +107,13 @@ class AuthenticationBDD {
     }
 
     /**
-     * When I login correctly, the system should reply with a header that sets
+     * When I login correctly with my browser, the system should reply with a header that sets
      * a cookie like sessionId=abc123, where abc123 is the session identifier in
-     * the database
+     * the database.  This is effectively a machine-generated password that I can then
+     * use across the system to hit authenticated pages
      */
     @Test
-    fun `when I login through the web interface, I receive a response that sets a valid cookie`() {
+    fun `when I login successfully, persistent authentication is enabled`() {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
@@ -124,13 +122,13 @@ class AuthenticationBDD {
         val tru = FakeTimeRecordingUtilities()
         val su = ServerUtilities(au,tru)
         val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
-        val requestData = RequestData(ActionType.HANDLE_POST_FROM_CLIENT, "login",postedData, NO_USER)
+        val requestData = RequestData(ActionType.HANDLE_POST_FROM_CLIENT, TargetPage.LOGIN.value,postedData, NO_USER)
 
         // When I enter valid credentials
         val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)
 
-        // Then the system sends a Set-Cookie header like "sessionId=abc123"
-//        assertEquals(responseData.headers.single(h -> h == "Set-Cookie: sessionId=abc123"))
+        // Then the system provides a cookie to enable authenticated use
+        assertTrue("headers should contain cookie.  Headers were: ${responseData.headers}", responseData.headers.any{h -> h.startsWith("Set-Cookie: sessionId=")})
     }
 
     /*

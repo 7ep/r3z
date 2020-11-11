@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.domainobjects.LoginResult
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
@@ -42,9 +43,9 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 handleReadRegularHtmlFile(renderedFile)
             } else {
                 when (requestData.type) {
-                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_CSS)
-                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.APPLICATION_JAVASCRIPT)
-                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, ContentType.TEXT_HTML)
+                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
+                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
                 }
             }
 
@@ -74,15 +75,15 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     }
 
     private fun handleBadRequest(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, ContentType.TEXT_HTML)
+        return PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleNotFound(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("404error.html"), ResponseStatus.NOT_FOUND, ContentType.TEXT_HTML)
+        return PreparedResponseData(FileReader.readNotNull("404error.html"), ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleUnauthorized() : PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("401error.html"), ResponseStatus.UNAUTHORIZED, ContentType.TEXT_HTML)
+        return PreparedResponseData(FileReader.readNotNull("401error.html"), ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
@@ -90,7 +91,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             handleUnauthorized()
         } else {
             tru.createProject(ProjectName(checkNotNull(data["projectname"])))
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         }
     }
 
@@ -99,7 +100,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
             au.register(username, password)
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
         }
@@ -109,8 +110,13 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (user == NO_USER) {
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
-            au.login(username, password)
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+            val (loginResult, loginUser) = au.login(username, password)
+            if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
+                val newSessionToken: String = au.createNewSession(loginUser)
+                PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
+            } else {
+                handleUnauthorized()
+            }
         } else {
             handleUnauthorized()
         }
@@ -120,7 +126,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (user == NO_USER) {
             handleUnauthorized()
         } else {
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         }
     }
 
@@ -128,12 +134,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (user == NO_USER) {
             handleUnauthorized()
         } else {
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, ContentType.TEXT_HTML)
+            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         }
     }
 
     private fun handleReadRegularHtmlFile(renderedFile: String): PreparedResponseData {
-        return PreparedResponseData(renderedFile, ResponseStatus.OK, ContentType.TEXT_HTML)
+        return PreparedResponseData(renderedFile, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
     }
 
 
@@ -345,13 +351,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val status = "HTTP/1.1 ${data.responseStatus.value}"
             logDebug("status: $status")
             val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
-            val contentTypeHeader = "Content-Type: ${data.type.value}"
-
+            val otherHeaders = data.headers.joinToString("\n") + "\n"
             logDebug("contentLengthHeader: $contentLengthHeader")
-            logDebug("contentTypeHeader: $contentTypeHeader")
+            logDebug("other headers:\n $otherHeaders")
             val input = "$status\n" +
                     "$contentLengthHeader\n" +
-                    "$contentTypeHeader\n" +
+                    otherHeaders +
                     "\n" +
                     data.fileContents
             server.write(input)
