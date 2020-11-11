@@ -3,11 +3,9 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.getTime
-import coverosR3z.server.ServerUtilities.Companion.Action
-import coverosR3z.server.ServerUtilities.Companion.ActionType
 import coverosR3z.server.ServerUtilities.Companion.extractAuthCookieFromHeaders
 import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
-import coverosR3z.server.ServerUtilities.Companion.parseClientRequest
+import coverosR3z.server.ServerUtilities.Companion.parseFirstLine
 import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
@@ -97,9 +95,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
         val input = "POST /entertime HTTP/1.1"
-        val expected = Action(ActionType.HANDLE_POST_FROM_CLIENT, "")
+        val expected = Pair(ActionType.HANDLE_POST_FROM_CLIENT, "")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -110,9 +108,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_GET() {
         val input = "GET /test HTTP/1.1"
-        val expected = Action(ActionType.READ_FILE, "test")
+        val expected = Pair(ActionType.READ_FILE, "test")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -123,9 +121,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
         val input = "GET /test.utl HTTP/1.1"
-        val expected = Action(ActionType.TEMPLATE, "test.utl")
+        val expected = Pair(ActionType.TEMPLATE, "test.utl")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -136,9 +134,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
         val input = "INVALID /test.utl HTTP/1.1"
-        val expected = Action(ActionType.BAD_REQUEST, "")
+        val expected = Pair(ActionType.BAD_REQUEST, "")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -149,9 +147,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_CSS() {
         val input = "GET /test.css HTTP/1.1"
-        val expected = Action(ActionType.CSS, "test.css")
+        val expected = Pair(ActionType.CSS, "test.css")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -162,9 +160,9 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_JS() {
         val input = "GET /test.js HTTP/1.1"
-        val expected = Action(ActionType.JS, "test.js")
+        val expected = Pair(ActionType.JS, "test.js")
 
-        val result = parseClientRequest(input)
+        val result = parseFirstLine(input)
 
         assertEquals(expected, result)
     }
@@ -326,6 +324,5 @@ class ServerUtilitiesTests {
         val user = su.extractUserFromAuthToken(authCookie)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }
-
 
 }
