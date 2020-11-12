@@ -196,10 +196,13 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             // read the first line for the fundamental request
             val clientRequest = server.readLine()
             val (responseType, file) = parseFirstLine(clientRequest)
+
             val headers = getHeaders(server)
+
             val token = extractSessionTokenFromHeaders(headers)
             val user = extractUserFromAuthToken(token, au)
             val data = extractDataIfPost(server, responseType, headers)
+
             return RequestData(responseType, file, data, user)
         }
 
