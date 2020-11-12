@@ -30,6 +30,15 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     }
 
     private fun handleReadingFiles(requestData: RequestData): PreparedResponseData {
+        // if we're already authenticated and someone tries to go
+        // to a page requiring authentication
+        if (requestData.user != NO_USER &&
+                requestData.filename == "login.html" ||
+                requestData.filename == "register.html" ||
+                requestData.filename == "enter_time.html") {
+            redirectToHomepage()
+        }
+
         val fileContents = FileReader.read(requestData.filename)
         return if (fileContents == null) {
             logDebug("unable to read a file named ${requestData.filename}")
