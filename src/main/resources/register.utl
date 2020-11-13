@@ -12,6 +12,12 @@
             <label for="password">Password</label>
             <input type="password" name="password" id="password" />
 
+            <label for="employee">Employee</label>
+            <select id="employee" name="employee">
+                <option value="alice">alice</option>
+                <option selected disabled hidden>Choose here</option>
+            </select>
+
             <button>Register</button>
         </form>
     </body>
