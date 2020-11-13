@@ -158,7 +158,7 @@ class SocketTests() {
         client.write("\n")
 
         val parseClientRequest = ServerUtilities.parseClientRequest(server, au)
-        assertEquals("For this slightly malformed GET, we should receive certain data", expectedRequest, parseClientRequest)
+        assertEquals("For this GET, we should receive certain data", expectedRequest, parseClientRequest)
     }
 
 

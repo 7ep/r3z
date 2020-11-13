@@ -242,51 +242,23 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * from the client.  See [pageExtractorRegex]
          */
         fun parseFirstLine(clientRequest: String): Pair<Verb, String> {
-            return Pair(Verb.GET, "")
-//            logDebug("request from client: $clientRequest")
-//            val result = pageExtractorRegex.matchEntire(clientRequest)
-//            val responseType: ActionType
-//            var file = ""
-//
-//            if (result == null) {
-//                logDebug("Unable to parse client request")
-//                responseType = ActionType.BAD_REQUEST
-//            } else {
-//                // determine which file the client is requesting
-//                val verb = checkNotNull(result.groups[1]).value
-//                logDebug("verb from client was: $verb")
-//
-//                if (verb == "POST") {
-//                    logDebug("Handling POST from client")
-//                    file = checkNotNull(result.groups[2]).value
-//                    responseType = ActionType.HANDLE_POST_FROM_CLIENT
-//
-//                } else {
-//                    logDebug("Handling GET from client")
-//                    file = checkNotNull(result.groups[2]).value
-//                    logDebug("Client wants this file: $file")
-//
-//                    when {
-//                        file.takeLast(4) == ".utl" -> {
-//                            logDebug("file requested is a template")
-//                            responseType = ActionType.TEMPLATE
-//                        }
-//                        file.takeLast(4) == ".css" -> {
-//                            logDebug("file requested is a CSS style sheet")
-//                            responseType = ActionType.CSS
-//                        }
-//                        file.takeLast(3) == ".js" -> {
-//                            logDebug("file requested is a JavaScript file")
-//                            responseType = ActionType.JS
-//                        }
-//                        else -> {
-//                            logDebug("file requested is a text file")
-//                            responseType = ActionType.READ_FILE
-//                        }
-//                    }
-//                }
-//            }
-//            return Pair(responseType, file)
+            logDebug("request from client: $clientRequest")
+            val result = pageExtractorRegex.matchEntire(clientRequest)
+            val verb: Verb
+            var file = ""
+
+            if (result == null) {
+                logDebug("Unable to parse client request")
+                verb = Verb.INVALID
+            } else {
+                // determine which file the client is requesting
+                verb = Verb.valueOf(checkNotNull(result.groups[1]).value)
+                logDebug("verb from client was: $verb")
+                file = checkNotNull(result.groups[2]).value
+                logDebug("path from client was: $file")
+            }
+
+            return Pair(verb, file)
         }
 
         /**
