@@ -1,14 +1,14 @@
 package coverosR3z.server
 
 import com.gargoylesoftware.htmlunit.WebClient
-import com.gargoylesoftware.htmlunit.html.DomElement
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import coverosR3z.main
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
+import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
+
 
 /**
  * As a user of r3z
@@ -57,7 +57,56 @@ class ServerBDD {
      */
     @Test
     fun `Smoke test - traverse through application, many pitstops`() {
-        TODO()
+        // Given I am a Chrome browser user
+        // Start selenium
+        val driver = ChromeDriver()
+
+        // Hit the homepage
+        driver.get("localhost:8080/${NamedPaths.HOMEPAGE.path}")
+        assertEquals("Homepage", driver.title)
+
+        // register
+        driver.get("localhost:8080/${NamedPaths.REGISTER.path}")
+        val user = "user1"
+        driver.findElementById("username").sendKeys(user)
+        val password = "password123456"
+        driver.findElementById("password").sendKeys(password)
+        driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'alice']")).click()
+        driver.findElementById("register_button").click()
+
+        // login
+        driver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+        driver.findElementById("username").sendKeys(user)
+        driver.findElementById("password").sendKeys(password)
+        driver.findElementById("login_button").click()
+
+        // hit authenticated homepage
+        driver.get("localhost:8080/${NamedPaths.AUTHHOMEPAGE.path}")
+        assertEquals("Authenticated Homepage", driver.title)
+
+        // hit the 404 error
+        driver.get("localhost:8080/idontexist")
+        assertEquals("404 error", driver.title)
+
+        // enter a new project
+        driver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
+        val projecta = "projecta"
+        driver.findElementById("project_name").sendKeys(projecta)
+        driver.findElementById("project_create_button").click()
+
+        // enter a new employee
+        driver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
+        driver.findElementById("employee_name").sendKeys(user)
+        driver.findElementById("employee_create_button").click()
+
+        // enter time
+        driver.get("localhost:8080/${NamedPaths.ENTER_TIME.path}")
+        driver.findElementById("project_entry").sendKeys("1")
+        driver.findElementById("time_entry").sendKeys("120")
+        driver.findElementById("detail_entry").sendKeys("work on the lab")
+        driver.findElementById("enter_time_button").click()
+
+        driver.quit()
     }
 
     /**
