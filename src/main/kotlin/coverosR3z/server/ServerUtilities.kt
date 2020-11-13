@@ -54,6 +54,20 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
+    /**
+     * The user has sent us data, we have to process it
+     */
+    fun handlePost(rd: RequestData) : PreparedResponseData {
+        return when (rd.path) {
+            ENTER_TIME.value -> handlePOSTTimeEntry(rd.user, rd.data)
+            CREATE_EMPLOYEE.value -> handlePOSTNewEmployee(rd.user, rd.data)
+            LOGIN.value -> handlePOSTLogin(rd.user, rd.data)
+            REGISTER.value -> handlePOSTRegister(rd.user, rd.data)
+            CREATE_PROJECT.value -> handlePOSTCreatingProject(rd.user, rd.data)
+            else -> handleNotFound()
+        }
+    }
+
     private fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             simpleRead(CREATE_PROJECT.assocFile)
@@ -99,20 +113,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             PreparedResponseData(rendered, ResponseStatus.OK)
         } else {
             redirectTo(ENTER_TIME.value)
-        }
-    }
-
-    /**
-     * The user has sent us data, we have to process it
-     */
-    fun handlePost(rd: RequestData) : PreparedResponseData {
-        return when (rd.path) {
-            ENTER_TIME.value -> handlePOSTTimeEntry(rd.user, rd.data)
-            CREATE_EMPLOYEE.value -> handlePOSTNewEmployee(rd.user, rd.data)
-            LOGIN.value -> handlePOSTLogin(rd.user, rd.data)
-            REGISTER.value -> handlePOSTRegister(rd.user, rd.data)
-            CREATE_PROJECT.value -> handlePOSTCreatingProject(rd.user, rd.data)
-            else -> handleNotFound()
         }
     }
 
