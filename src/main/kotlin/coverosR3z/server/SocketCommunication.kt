@@ -28,6 +28,7 @@ class SocketCommunication(val port : Int) {
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
             logInfo("client from ${server.socket.inetAddress?.hostAddress} has connected")
             handleRequest(server, au, tru)
+            server.close()
         }
     }
 

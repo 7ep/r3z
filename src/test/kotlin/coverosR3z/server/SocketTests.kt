@@ -3,7 +3,6 @@ package coverosR3z.server
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
-import coverosR3z.logging.logDebug
 import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
@@ -281,7 +280,7 @@ class SocketTests() {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        client.write("POST /${TargetPage.ENTER_TIME.value} HTTP/1.1\n")
+        client.write("POST /${NamedPaths.ENTER_TIME.value} HTTP/1.1\n")
         client.write("Content-Length: 63\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 

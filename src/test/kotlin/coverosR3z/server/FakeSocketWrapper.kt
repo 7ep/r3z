@@ -17,4 +17,8 @@ class FakeSocketWrapper (
     override fun read(len: Int): String {
         return readBehavior()
     }
+
+    override fun close() {
+        // do nothing seems fine
+    }
 }
