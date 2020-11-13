@@ -40,7 +40,7 @@ class ServerBDD {
         val driver = ChromeDriver()
 
         // When I go to the homepage
-        driver.get("localhost:8080/sample_template.utl")
+        driver.get("localhost:8080/homepage")
 
         // Then I see it successfully in the browser
         assertEquals("demo", driver.title)
@@ -50,7 +50,6 @@ class ServerBDD {
     /**
      * HtmlUnit is a Java-based headless browser
      */
-    @Ignore
     @Test
     fun `happy path - I should be able to see a page without javascript`() {
         // Given I am on a browser without javascript
@@ -60,11 +59,11 @@ class ServerBDD {
         driver.options.isJavaScriptEnabled = false
 
         // When I go to the homepage
-        val page : HtmlPage = driver.getPage("http://localhost:8080/sample_template.utl")
+        val page : HtmlPage = driver.getPage("http://localhost:8080/homepage")
         // Then I see it successfully in the browser
-        val result: DomElement = page.getElementById("username")
+        val titleText = page.titleText
 
-        assertEquals("Jona", result.textContent)
+        assertEquals("Homepage", titleText)
         driver.close()
     }
 
