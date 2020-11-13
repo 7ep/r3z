@@ -115,7 +115,7 @@ class AuthenticationBDD {
     @Test
     fun `when I login successfully, persistent authentication is enabled`() {
         // Given I have registered
-        val (su, requestData) = registerUser()
+        val (su, requestData, _) = registerUser()
 
         // When I enter valid credentials
         val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)
@@ -143,8 +143,9 @@ class AuthenticationBDD {
             return Pair(tru, sarah)
         }
 
-        fun registerUser(): Pair<ServerUtilities, RequestData> {
-            val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+        fun registerUser(): Triple<ServerUtilities, RequestData, PureMemoryDatabase> {
+            val pmd = PureMemoryDatabase()
+            val authPersistence = AuthenticationPersistence(pmd)
             val au = AuthenticationUtilities(authPersistence)
             val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
             assertEquals(RegistrationResult.SUCCESS, regStatus)
@@ -152,7 +153,7 @@ class AuthenticationBDD {
             val su = ServerUtilities(au, tru)
             val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
             val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.value, postedData, NO_USER)
-            return Pair(su, requestData)
+            return Triple(su, requestData, pmd)
         }
     }
 
