@@ -27,8 +27,9 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
 
     override fun read(len : Int) : String {
         val cbuf = CharArray(len)
-        reader.read(cbuf, 0, len)
-        logDebug("$name read $len bytes of this: ${cbuf.joinToString("")}")
-        return cbuf.joinToString("")
+        val lengthRead = reader.read(cbuf, 0, len)
+        val body = cbuf.slice(0 until lengthRead).joinToString("")
+        logDebug("$name actually read $lengthRead bytes.  body: $body")
+        return body
     }
 }
