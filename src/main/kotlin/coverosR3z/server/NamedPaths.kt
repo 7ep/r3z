@@ -10,7 +10,7 @@ enum class NamedPaths(val value: String, val assocFile : String = "") {
     ENTER_TIME("entertime", "enter_time.utl"),
     CREATE_EMPLOYEE("createemployee", "create_employee.html"),
     LOGIN("login", "login.html"),
-    REGISTER("register", "register.html"),
+    REGISTER("register", "register.utl"),
     CREATE_PROJECT("createproject", "create_project.html"),
     HOMEPAGE("homepage", "homepage.html"),
     AUTHHOMEPAGE("authhomepage", "homepage.utl"),
