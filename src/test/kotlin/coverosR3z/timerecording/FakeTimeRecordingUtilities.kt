@@ -14,7 +14,9 @@ class FakeTimeRecordingUtilities(
         var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
         var getEntriesForEmployeeOnDateBehavior : () -> List<TimeEntry> = { emptyList() },
         var getAllEntriesForEmployeeBehavior : () -> List<TimeEntry> = {emptyList() },
-        var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() }
+        var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
+        var listAllProjectsBehavior : () -> List<Project> = {emptyList()} ,
+        var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -39,6 +41,14 @@ class FakeTimeRecordingUtilities(
 
     override fun getAllEntriesForEmployee(employee: Employee): List<TimeEntry> {
         return getAllEntriesForEmployeeBehavior()
+    }
+
+    override fun listAllProjects(): List<Project> {
+        return listAllProjectsBehavior()
+    }
+
+    override fun findProjectById(id: Int): Project {
+        return findProjectByIdBehavior()
     }
 
 }

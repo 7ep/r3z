@@ -5,6 +5,7 @@ import coverosR3z.*
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -197,10 +198,50 @@ class TimeRecordingTests {
      */
     @Test fun testCannotCreateMultipleProjectsWithSameName() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                getProjectBehavior = { Project(1, "test project") })
+                getProjectByNameBehavior = { Project(1, "test project") })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
         val ex  = assertThrows(java.lang.IllegalArgumentException::class.java) {utils.createProject(ProjectName("test project"))}
         assertEquals("Cannot create a new project if one already exists by that same name", ex.message)
+    }
+
+    /**
+     * List all of two projects
+     */
+    @Test fun testCanListAllProjects() {
+        val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
+        val expectedList = mutableListOf<Project>()
+        expectedList.add(utils.createProject(DEFAULT_PROJECT_NAME))
+        expectedList.add(utils.createProject(ProjectName("second")))
+        val allProjects : List<Project> = utils.listAllProjects()
+        assertEquals(expectedList, allProjects)
+    }
+
+    /**
+     * List all and no projects in database - [emptyList]
+     */
+    @Test fun testCanListAllProjects_NoProjects() {
+        val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
+        val allProjects : List<Project> = utils.listAllProjects()
+        assertEquals(emptyList<Project>(), allProjects)
+    }
+
+    /**
+     * happy path
+     */
+    @Test fun testCanGetProjectById() {
+        val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
+        val createdProject = utils.createProject(DEFAULT_PROJECT_NAME)
+        val foundProject = utils.findProjectById(createdProject.id)
+        assertEquals(createdProject, foundProject)
+    }
+
+    /**
+     * what if the project doesn't exist? [NO_PROJECT]
+     */
+    @Test fun testCanGetProjectById_NotFound() {
+        val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
+        val foundProject = utils.findProjectById(1)
+        assertEquals(NO_PROJECT, foundProject)
     }
 
 }
