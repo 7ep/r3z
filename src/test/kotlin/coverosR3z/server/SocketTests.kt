@@ -114,33 +114,6 @@ class SocketTests() {
         assertEquals(webpage, body)
     }
 
-    /**
-     * This takes [testShouldGetHtmlFileResponseFromServer] and
-     * refactors it a bit so we can more easily separate the
-     * client and server code
-     */
-    @Test
-    fun testShouldGetHtmlFileResponseFromServer_MaybeRefactored() {
-        // client - send a request to the server for the page we want
-        val pageDesired = "sample.html"
-        client.write("GET /$pageDesired HTTP/1.1\n\n")
-
-        executeServerProcess()
-
-        // client - read status line
-        val statusline = client.readLine()
-        // client - read the headers
-        val headers = getHeaders(client)
-        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
-        // client - read the body
-        val body = client.read(length)
-
-        // assert all is well
-        assertEquals("HTTP/1.1 200 OK", statusline)
-        assertTrue(headers.size > 1)
-        val fileWeRead = FileReader.read(pageDesired)
-        assertEquals(fileWeRead, body)
-    }
 
     /**
      * Let's make sure our parsing process, which relies on a
@@ -193,30 +166,6 @@ class SocketTests() {
         ServerUtilities.returnData(server, responseData)
     }
 
-    /**
-     * What if we ask for nothing? like, GET / HTTP/1.1
-     */
-    @Test
-    fun testShouldGetHtmlFileResponseFromServer_AskForNothing() {
-        // client - send a request to the server for the page we want
-        client.write("GET / HTTP/1.1\n\n")
-
-        // server - handle the request
-        executeServerProcess()
-
-        // client - read status line
-        val statusline = client.readLine()
-        // client - read the headers
-        val headers = getHeaders(client)
-        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
-        // client - read the body
-        val body = client.read(length)
-        logDebug(body)
-
-        // assert all is well
-        assertEquals("HTTP/1.1 200 OK", statusline)
-        assertTrue(headers.size > 1)
-    }
 
     /**
      * What should the server return if we ask for something
@@ -277,28 +226,6 @@ class SocketTests() {
         }
     }
 
-    /**
-     * When we ask for a file that requires reading a template
-     */
-    @Test
-    fun testShouldGetHtmlFileResponseFromServer_template() {
-        client.write("GET /sample_template.utl HTTP/1.1\n\n")
-
-        // server - handle the request
-        executeServerProcess()
-
-        // client - read status line
-        val statusline = client.readLine()
-        val headers = getHeaders(client)
-        val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
-        val body = client.read(length)
-
-        // assert all is well
-        assertEquals("HTTP/1.1 200 OK", statusline)
-        assertTrue(headers.size > 1)
-        val fileWeRead = FileReader.read("sample.html")
-        assertEquals(fileWeRead, body)
-    }
 
     /**
      * When we ask for a file that requires reading a CSS file
