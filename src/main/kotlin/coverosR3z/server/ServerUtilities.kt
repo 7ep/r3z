@@ -35,11 +35,11 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handleGet(rd: RequestData): PreparedResponseData {
         return when (rd.path){
             "" -> simpleRead(HOMEPAGE.assocFile)
-            ENTER_TIME.value -> showEnterTimePage(rd)
-            CREATE_EMPLOYEE.value -> showCreateEmployeePage(rd)
-            LOGIN.value -> showLoginPage(rd)
-            REGISTER.value -> showRegisterPage(rd)
-            CREATE_PROJECT.value -> showCreateProjectPage(rd)
+            ENTER_TIME.value -> doGETEnterTimePage(rd)
+            CREATE_EMPLOYEE.value -> doGETCreateEmployeePage(rd)
+            LOGIN.value -> doGETLoginPage(rd)
+            REGISTER.value -> doGETRegisterPage(rd)
+            CREATE_PROJECT.value -> doGETCreateProjectPage(rd)
             else -> {
                 val fileContents = FileReader.read(rd.path)
                 if (fileContents == null) {
@@ -54,23 +54,23 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun showCreateProjectPage(rd: RequestData): PreparedResponseData {
+    private fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             simpleRead(CREATE_PROJECT.assocFile)
         } else {
-            redirectTo(HOMEPAGE.assocFile)
+            redirectTo(HOMEPAGE.value)
         }
     }
 
-    private fun showRegisterPage(rd: RequestData): PreparedResponseData {
+    private fun doGETRegisterPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            redirectTo(AUTHHOMEPAGE.assocFile)
+            redirectTo(AUTHHOMEPAGE.value)
         } else {
             simpleRead(REGISTER.assocFile)
         }
     }
 
-    private fun showCreateEmployeePage(rd: RequestData): PreparedResponseData {
+    private fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             val contents = FileReader.readNotNull(CREATE_EMPLOYEE.assocFile)
             val te = TemplatingEngine()
@@ -78,19 +78,19 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val rendered = te.render(contents, mapping)
             PreparedResponseData(rendered, ResponseStatus.OK)
         } else {
-            redirectTo(HOMEPAGE.assocFile)
+            redirectTo(HOMEPAGE.value)
         }
     }
 
-    private fun showLoginPage(rd: RequestData): PreparedResponseData {
+    private fun doGETLoginPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            redirectTo(AUTHHOMEPAGE.assocFile)
+            redirectTo(AUTHHOMEPAGE.value)
         } else {
             simpleRead(LOGIN.assocFile)
         }
     }
 
-    private fun showEnterTimePage(rd : RequestData): PreparedResponseData {
+    private fun doGETEnterTimePage(rd : RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             val contents = FileReader.readNotNull(ENTER_TIME.assocFile)
             val te = TemplatingEngine()
@@ -98,7 +98,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val rendered = te.render(contents, mapping)
             PreparedResponseData(rendered, ResponseStatus.OK)
         } else {
-            redirectTo(ENTER_TIME.assocFile)
+            redirectTo(ENTER_TIME.value)
         }
     }
 
@@ -107,37 +107,38 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
      */
     fun handlePost(rd: RequestData) : PreparedResponseData {
         return when (rd.path) {
-            ENTER_TIME.value -> handleTakingTimeEntry(rd.user, rd.data)
-            CREATE_EMPLOYEE.value -> handleCreatingNewEmployee(rd.user, rd.data)
-            LOGIN.value -> handleLoginForUser(rd.user, rd.data)
-            REGISTER.value -> handleRegisterForUser(rd.user, rd.data)
-            CREATE_PROJECT.value -> handleCreatingProject(rd.user, rd.data)
-            else -> handleUnauthorized()
+            ENTER_TIME.value -> handlePOSTTimeEntry(rd.user, rd.data)
+            CREATE_EMPLOYEE.value -> handlePOSTNewEmployee(rd.user, rd.data)
+            LOGIN.value -> handlePOSTLogin(rd.user, rd.data)
+            REGISTER.value -> handlePOSTRegister(rd.user, rd.data)
+            CREATE_PROJECT.value -> handlePOSTCreatingProject(rd.user, rd.data)
+            else -> handleNotFound()
         }
     }
 
     private fun handleBadRequest(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("400error.html"), ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(FileReader.readNotNull(BAD_REQUEST.assocFile), ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleNotFound(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("404error.html"), ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(FileReader.readNotNull(NOT_FOUND.assocFile), ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleUnauthorized() : PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("401error.html"), ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(FileReader.readNotNull(UNAUTHORIZED.assocFile), ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
     }
 
-    private fun handleCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
-        return if (user == NO_USER) {
-            handleUnauthorized()
-        } else {
+    private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
+        val isAuthenticated = user != NO_USER
+        return if (isAuthenticated) {
             tru.createProject(ProjectName(checkNotNull(data["projectname"])))
             PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        } else {
+            handleUnauthorized()
         }
     }
 
-    private fun handleRegisterForUser(user: User, data: Map<String, String>) : PreparedResponseData {
+    private fun handlePOSTRegister(user: User, data: Map<String, String>) : PreparedResponseData {
         return if (user == NO_USER) {
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
@@ -148,12 +149,13 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 PreparedResponseData(FileReader.readNotNull("failure.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
             }
         } else {
-            redirectTo(HOMEPAGE.value)
+            redirectTo(AUTHHOMEPAGE.value)
         }
     }
 
-    private fun handleLoginForUser(user: User, data: Map<String, String>) : PreparedResponseData {
-        return if (user == NO_USER) {
+    private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
+        val isUnauthenticated = user == NO_USER
+        return if (isUnauthenticated) {
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
             val (loginResult, loginUser) = au.login(username, password)
@@ -165,7 +167,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 handleUnauthorized()
             }
         } else {
-            redirectTo(HOMEPAGE.assocFile)
+            redirectTo(AUTHHOMEPAGE.value)
         }
     }
 
@@ -176,19 +178,22 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: $path"))
     }
 
-    private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
-        return if (user == NO_USER) {
-            handleUnauthorized()
-        } else {
+    private fun handlePOSTNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
+        val isAuthenticated = user != NO_USER
+        return if (isAuthenticated) {
+            tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"])))
             PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        } else {
+            handleUnauthorized()
         }
     }
 
-    private fun handleTakingTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
-        return if (user == NO_USER) {
-            handleUnauthorized()
-        } else {
+    private fun handlePOSTTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
+        val isAuthenticated = user != NO_USER
+        return if (isAuthenticated) {
             PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        } else {
+            handleUnauthorized()
         }
     }
 
