@@ -34,7 +34,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun handleGet(rd: RequestData): PreparedResponseData {
         return when (rd.path){
-            "" -> simpleRead(HOMEPAGE.assocFile)
+            "", HOMEPAGE.value -> simpleRead(HOMEPAGE.assocFile)
             ENTER_TIME.value -> doGETEnterTimePage(rd)
             CREATE_EMPLOYEE.value -> doGETCreateEmployeePage(rd)
             LOGIN.value -> doGETLoginPage(rd)
