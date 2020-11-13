@@ -14,7 +14,7 @@
 
             <label for="employee">Employee</label>
             <select id="employee" name="employee">
-                <option value="alice">alice</option>
+                <option value="1">alice</option>
                 <option selected disabled hidden>Choose here</option>
             </select>
 

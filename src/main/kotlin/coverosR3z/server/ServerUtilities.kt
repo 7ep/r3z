@@ -8,6 +8,7 @@ import coverosR3z.server.NamedPaths.*
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
+import java.time.LocalDate
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
                       private val tru: ITimeRecordingUtilities) {
@@ -134,7 +135,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (isAuthenticated(rd)) {
             redirectTo(AUTHHOMEPAGE.value)
         } else {
-            simpleRead(REGISTER.assocFile)
+            val employees = tru.listAllEmployees()
+            val contents = FileReader.readNotNull(REGISTER.assocFile)
+            val te = TemplatingEngine()
+            val mapping = mapOf("username" to rd.user.name)
+            val rendered = te.render(contents, mapping)
+            PreparedResponseData(rendered, ResponseStatus.OK)
         }
     }
 
@@ -142,7 +148,8 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (user == NO_USER) {
             val username = checkNotNull(data["username"])
             val password = checkNotNull(data["password"])
-            val result = au.register(username, password)
+            val employeeId = checkNotNull(data["employee"])
+            val result = au.register(username, password, employeeId.toInt())
             if (result == RegistrationResult.SUCCESS) {
                 PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
             } else {
@@ -191,6 +198,22 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
+            val projectId = checkNotNull(data["project_id"]).toInt()
+            val time = Time(checkNotNull(data["time"]).toInt())
+            val details = Details(checkNotNull(data["detail_entry"]))
+
+            val project = tru.findProjectById(projectId)
+            val employee = tru.findEmployeeById(checkNotNull(user.employeeId))
+
+            val timeEntry = TimeEntryPreDatabase(
+                    employee,
+                    project,
+                    time,
+                    Date(LocalDate.now().toEpochDay().toInt()),
+                    details)
+
+            tru.recordTime(timeEntry)
+
             PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
