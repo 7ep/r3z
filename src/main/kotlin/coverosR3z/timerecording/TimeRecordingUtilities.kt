@@ -102,4 +102,12 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     override fun getAllEntriesForEmployee(employee: Employee): List<TimeEntry> {
         return persistence.readTimeEntries(employee)
     }
+
+    override fun listAllProjects(): List<Project> {
+        return persistence.getAllProjects()
+    }
+
+    override fun findProjectById(id: Int): Project {
+        return persistence.getProjectById(id)
+    }
 }

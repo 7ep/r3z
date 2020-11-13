@@ -115,14 +115,7 @@ class AuthenticationBDD {
     @Test
     fun `when I login successfully, persistent authentication is enabled`() {
         // Given I have registered
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
-        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
-        assertEquals(RegistrationResult.SUCCESS, regStatus)
-        val tru = FakeTimeRecordingUtilities()
-        val su = ServerUtilities(au,tru)
-        val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
-        val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.value,postedData, NO_USER)
+        val (su, requestData) = registerUser()
 
         // When I enter valid credentials
         val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)
@@ -130,6 +123,8 @@ class AuthenticationBDD {
         // Then the system provides a cookie to enable authenticated use
         assertTrue("headers should contain cookie.  Headers were: ${responseData.headers}", responseData.headers.any{h -> h.startsWith("Set-Cookie: sessionId=")})
     }
+
+
 
     /*
      _ _       _                  __ __        _    _           _
@@ -139,11 +134,26 @@ class AuthenticationBDD {
                  |_|
      alt-text: Helper Methods
      */
-    private fun initializeTwoUsersAndLogin() : Pair<TimeRecordingUtilities, Employee>{
-        val (tru, _) = initializeAUserAndLogin()
-        val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
 
-        return Pair(tru, sarah)
+    companion object {
+        private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
+            val (tru, _) = initializeAUserAndLogin()
+            val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
+
+            return Pair(tru, sarah)
+        }
+
+        fun registerUser(): Pair<ServerUtilities, RequestData> {
+            val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
+            val au = AuthenticationUtilities(authPersistence)
+            val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+            assertEquals(RegistrationResult.SUCCESS, regStatus)
+            val tru = FakeTimeRecordingUtilities()
+            val su = ServerUtilities(au, tru)
+            val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
+            val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.value, postedData, NO_USER)
+            return Pair(su, requestData)
+        }
     }
 
 

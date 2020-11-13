@@ -14,5 +14,7 @@ interface ITimeEntryPersistence {
     fun readTimeEntries(employee: Employee): List<TimeEntry>
     fun readTimeEntriesOnDate(employee: Employee, date: Date): List<TimeEntry>
     fun getProjectByName(name : String) : Project
+    fun getProjectById(id: Int): Project
+    fun getAllProjects(): List<Project>
 
 }
