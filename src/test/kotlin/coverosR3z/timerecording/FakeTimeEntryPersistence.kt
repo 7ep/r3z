@@ -53,4 +53,8 @@ class FakeTimeEntryPersistence(
         return listOf()
     }
 
+    override fun getAllEmployees(): List<Employee> {
+        return listOf()
+    }
+
 }

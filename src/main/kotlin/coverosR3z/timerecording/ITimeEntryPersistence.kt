@@ -16,5 +16,5 @@ interface ITimeEntryPersistence {
     fun getProjectByName(name : String) : Project
     fun getProjectById(id: Int): Project
     fun getAllProjects(): List<Project>
-
+    fun getAllEmployees(): List<Employee>
 }
