@@ -17,4 +17,5 @@ interface ITimeEntryPersistence {
     fun getProjectById(id: Int): Project
     fun getAllProjects(): List<Project>
     fun getAllEmployees(): List<Employee>
+    fun getEmployeeById(id: Int): Employee
 }

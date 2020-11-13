@@ -32,7 +32,6 @@ class ServerBDD {
      *  remain "graceful degradation". This also helps keep up mobile-first,
      *  easily accessible, and highly performant.
      */
-    @Ignore
     @Test
     fun `happy path - I should be able to see a page - Chrome`() {
         // Given I am a Chrome browser user
@@ -43,8 +42,22 @@ class ServerBDD {
         driver.get("localhost:8080/homepage")
 
         // Then I see it successfully in the browser
-        assertEquals("demo", driver.title)
+        assertEquals("Homepage", driver.title)
         driver.quit()
+    }
+
+    /**
+     * In this system-wide smoke test we will exercise many parts of the application.
+     * We will:
+     * - register a user and login
+     * - register an employee
+     * - create a project
+     * - hit the authenticated homepage
+     * - enter time
+     */
+    @Test
+    fun `Smoke test - traverse through application, many pitstops`() {
+        TODO()
     }
 
     /**
