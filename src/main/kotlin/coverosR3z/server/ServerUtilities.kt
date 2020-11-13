@@ -17,46 +17,48 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
      * proper response
      */
     fun handleRequestAndRespond(requestData: RequestData): PreparedResponseData {
-        return when (requestData.type) {
-            ActionType.BAD_REQUEST -> handleBadRequest()
-
-            ActionType.READ_FILE,
-            ActionType.CSS,
-            ActionType.JS,
-            ActionType.TEMPLATE -> handleReadingFiles(requestData)
-
-            ActionType.HANDLE_POST_FROM_CLIENT ->  handlePost(requestData)
-        }
+        return PreparedResponseData("", ResponseStatus.OK, emptyList())
+//        return when (requestData.type) {
+//            ActionType.BAD_REQUEST -> handleBadRequest()
+//
+//            ActionType.READ_FILE,
+//            ActionType.CSS,
+//            ActionType.JS,
+//            ActionType.TEMPLATE -> handleReadingFiles(requestData)
+//
+//            ActionType.HANDLE_POST_FROM_CLIENT ->  handlePost(requestData)
+//        }
     }
 
     private fun handleReadingFiles(requestData: RequestData): PreparedResponseData {
-        // if we're already authenticated and someone tries to go
-        // to a page requiring authentication
-        if (requestData.user != NO_USER &&
-                requestData.filename == "login.html" ||
-                requestData.filename == "register.html" ||
-                requestData.filename == "enter_time.html") {
-            redirectToHomepage()
-        }
-
-        val fileContents = FileReader.read(requestData.filename)
-        return if (fileContents == null) {
-            logDebug("unable to read a file named ${requestData.filename}")
-            handleNotFound()
-        } else {
-            if (requestData.type == ActionType.TEMPLATE) {
-                logDebug("Sending file for rendering")
-                val renderedFile = renderTemplate(fileContents)
-                handleReadRegularHtmlFile(renderedFile)
-            } else {
-                when (requestData.type) {
-                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
-                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
-                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-                }
-            }
-
-        }
+        return PreparedResponseData("", ResponseStatus.OK, emptyList())
+//        // if we're already authenticated and someone tries to go
+//        // to a page requiring authentication
+//        if (requestData.user != NO_USER &&
+//                requestData.path == "login.html" ||
+//                requestData.path == "register.html" ||
+//                requestData.path == "enter_time.html") {
+//            redirectToHomepage()
+//        }
+//
+//        val fileContents = FileReader.read(requestData.path)
+//        return if (fileContents == null) {
+//            logDebug("unable to read a file named ${requestData.path}")
+//            handleNotFound()
+//        } else {
+//            if (requestData.type == ActionType.TEMPLATE) {
+//                logDebug("Sending file for rendering")
+//                val renderedFile = renderTemplate(fileContents)
+//                handleReadRegularHtmlFile(renderedFile)
+//            } else {
+//                when (requestData.type) {
+//                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
+//                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+//                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+//                }
+//            }
+//
+//        }
     }
 
     private fun renderTemplate(template: String): String {
@@ -71,7 +73,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
      * The user has sent us data, we have to process it
      */
     fun handlePost(rd: RequestData) : PreparedResponseData {
-        return when (rd.filename) {
+        return when (rd.path) {
             ENTER_TIME.value -> handleTakingTimeEntry(rd.user, rd.data)
             CREATE_EMPLOYEE.value -> handleCreatingNewEmployee(rd.user, rd.data)
             LOGIN.value -> handleLoginForUser(rd.user, rd.data)
@@ -201,7 +203,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
             val token = extractSessionTokenFromHeaders(headers)
             val user = extractUserFromAuthToken(token, au)
-            val data = extractDataIfPost(server, responseType, headers)
+            val data = extractDataIfPost(server, headers)
 
             return RequestData(responseType, file, data, user)
         }
@@ -209,14 +211,15 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         /**
          * read the body if one exists and convert it to a string -> string map
          */
-        private fun extractDataIfPost(server: ISocketWrapper, responseType: ActionType, headers: List<String>): Map<String, String> {
-            return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
-                val length = extractLengthOfPostBodyFromHeaders(headers)
-                val body = server.read(length)
-                parsePostedData(body)
-            } else {
-                emptyMap()
-            }
+        private fun extractDataIfPost(server: ISocketWrapper, headers: List<String>): Map<String, String> {
+            return emptyMap()
+//            return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
+//                val length = extractLengthOfPostBodyFromHeaders(headers)
+//                val body = server.read(length)
+//                parsePostedData(body)
+//            } else {
+//                emptyMap()
+//            }
         }
 
         /**
@@ -238,51 +241,52 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * The first line of the request is the basic request
          * from the client.  See [pageExtractorRegex]
          */
-        fun parseFirstLine(clientRequest: String): Pair<ActionType, String> {
-            logDebug("request from client: $clientRequest")
-            val result = pageExtractorRegex.matchEntire(clientRequest)
-            val responseType: ActionType
-            var file = ""
-
-            if (result == null) {
-                logDebug("Unable to parse client request")
-                responseType = ActionType.BAD_REQUEST
-            } else {
-                // determine which file the client is requesting
-                val verb = checkNotNull(result.groups[1]).value
-                logDebug("verb from client was: $verb")
-
-                if (verb == "POST") {
-                    logDebug("Handling POST from client")
-                    file = checkNotNull(result.groups[2]).value
-                    responseType = ActionType.HANDLE_POST_FROM_CLIENT
-
-                } else {
-                    logDebug("Handling GET from client")
-                    file = checkNotNull(result.groups[2]).value
-                    logDebug("Client wants this file: $file")
-
-                    when {
-                        file.takeLast(4) == ".utl" -> {
-                            logDebug("file requested is a template")
-                            responseType = ActionType.TEMPLATE
-                        }
-                        file.takeLast(4) == ".css" -> {
-                            logDebug("file requested is a CSS style sheet")
-                            responseType = ActionType.CSS
-                        }
-                        file.takeLast(3) == ".js" -> {
-                            logDebug("file requested is a JavaScript file")
-                            responseType = ActionType.JS
-                        }
-                        else -> {
-                            logDebug("file requested is a text file")
-                            responseType = ActionType.READ_FILE
-                        }
-                    }
-                }
-            }
-            return Pair(responseType, file)
+        fun parseFirstLine(clientRequest: String): Pair<Verb, String> {
+            return Pair(Verb.GET, "")
+//            logDebug("request from client: $clientRequest")
+//            val result = pageExtractorRegex.matchEntire(clientRequest)
+//            val responseType: ActionType
+//            var file = ""
+//
+//            if (result == null) {
+//                logDebug("Unable to parse client request")
+//                responseType = ActionType.BAD_REQUEST
+//            } else {
+//                // determine which file the client is requesting
+//                val verb = checkNotNull(result.groups[1]).value
+//                logDebug("verb from client was: $verb")
+//
+//                if (verb == "POST") {
+//                    logDebug("Handling POST from client")
+//                    file = checkNotNull(result.groups[2]).value
+//                    responseType = ActionType.HANDLE_POST_FROM_CLIENT
+//
+//                } else {
+//                    logDebug("Handling GET from client")
+//                    file = checkNotNull(result.groups[2]).value
+//                    logDebug("Client wants this file: $file")
+//
+//                    when {
+//                        file.takeLast(4) == ".utl" -> {
+//                            logDebug("file requested is a template")
+//                            responseType = ActionType.TEMPLATE
+//                        }
+//                        file.takeLast(4) == ".css" -> {
+//                            logDebug("file requested is a CSS style sheet")
+//                            responseType = ActionType.CSS
+//                        }
+//                        file.takeLast(3) == ".js" -> {
+//                            logDebug("file requested is a JavaScript file")
+//                            responseType = ActionType.JS
+//                        }
+//                        else -> {
+//                            logDebug("file requested is a text file")
+//                            responseType = ActionType.READ_FILE
+//                        }
+//                    }
+//                }
+//            }
+//            return Pair(responseType, file)
         }
 
         /**

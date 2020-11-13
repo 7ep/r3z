@@ -122,7 +122,7 @@ class AuthenticationBDD {
         val tru = FakeTimeRecordingUtilities()
         val su = ServerUtilities(au,tru)
         val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
-        val requestData = RequestData(ActionType.HANDLE_POST_FROM_CLIENT, TargetPage.LOGIN.value,postedData, NO_USER)
+        val requestData = RequestData(Verb.POST, TargetPage.LOGIN.value,postedData, NO_USER)
 
         // When I enter valid credentials
         val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)

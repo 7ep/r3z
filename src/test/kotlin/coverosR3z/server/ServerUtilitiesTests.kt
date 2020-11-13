@@ -93,7 +93,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
         val input = "POST /${TargetPage.ENTER_TIME.value} HTTP/1.1"
-        val expected = Pair(ActionType.HANDLE_POST_FROM_CLIENT, TargetPage.ENTER_TIME.value)
+        val expected = Pair(Verb.POST, TargetPage.ENTER_TIME.value)
 
         val result = parseFirstLine(input)
 
@@ -106,7 +106,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_GET() {
         val input = "GET /test HTTP/1.1"
-        val expected = Pair(ActionType.READ_FILE, "test")
+        val expected = Pair(Verb.GET, "test")
 
         val result = parseFirstLine(input)
 
@@ -119,7 +119,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
         val input = "GET /test.utl HTTP/1.1"
-        val expected = Pair(ActionType.TEMPLATE, "test.utl")
+        val expected = Pair(Verb.GET, "test.utl")
 
         val result = parseFirstLine(input)
 
@@ -132,7 +132,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
         val input = "INVALID /test.utl HTTP/1.1"
-        val expected = Pair(ActionType.BAD_REQUEST, "")
+        val expected = Pair(Verb.INVALID, "")
 
         val result = parseFirstLine(input)
 
@@ -145,7 +145,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_CSS() {
         val input = "GET /test.css HTTP/1.1"
-        val expected = Pair(ActionType.CSS, "test.css")
+        val expected = Pair(Verb.GET, "test.css")
 
         val result = parseFirstLine(input)
 
@@ -158,7 +158,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_JS() {
         val input = "GET /test.js HTTP/1.1"
-        val expected = Pair(ActionType.JS, "test.js")
+        val expected = Pair(Verb.GET, "test.js")
 
         val result = parseFirstLine(input)
 

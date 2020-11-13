@@ -8,7 +8,7 @@ import coverosR3z.domainobjects.User
  * the client wants from us
  */
 data class RequestData(
-        val type: ActionType,
-        val filename: String = "",
+        val verb: Verb,
+        val path: String = "",
         val data : Map<String, String> = emptyMap(),
         val user : User = NO_USER)

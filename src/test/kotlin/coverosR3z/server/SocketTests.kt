@@ -2,6 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.domainobjects.NO_USER
 import coverosR3z.logging.logDebug
 import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
@@ -140,6 +141,26 @@ class SocketTests() {
         val fileWeRead = FileReader.read(pageDesired)
         assertEquals(fileWeRead, body)
     }
+
+    /**
+     * Let's make sure our parsing process, which relies on a
+     * particular protocol being held between the client and
+     * server, holds true.
+     * Hello?  Hello!
+     */
+    @Test
+    fun testParsingProcess() {
+        val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER)
+        client.write("GET /page HTTP/1.1\n")
+        client.write("Cookie: blah\n")
+        client.write("Cookie: sessionId=foo\n")
+        client.write("Content-Length: 100\n")
+        client.write("\n")
+
+        val parseClientRequest = ServerUtilities.parseClientRequest(server, au)
+        assertEquals("For this slightly malformed GET, we should receive certain data", expectedRequest, parseClientRequest)
+    }
+
 
     /**
      * Just for the test code - very similar to what is happening in [SocketCommunication],
