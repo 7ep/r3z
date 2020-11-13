@@ -7,5 +7,5 @@ enum class Verb {
     /**
      * Used for when we get a malformed request
      */
-    INVALID
+    INVALID,
 }
