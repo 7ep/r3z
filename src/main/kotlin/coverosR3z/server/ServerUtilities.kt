@@ -17,57 +17,40 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
      * proper response
      */
     fun handleRequestAndRespond(requestData: RequestData): PreparedResponseData {
-        return PreparedResponseData("", ResponseStatus.OK, emptyList())
-//        return when (requestData.type) {
-//            ActionType.BAD_REQUEST -> handleBadRequest()
-//
-//            ActionType.READ_FILE,
-//            ActionType.CSS,
-//            ActionType.JS,
-//            ActionType.TEMPLATE -> handleReadingFiles(requestData)
-//
-//            ActionType.HANDLE_POST_FROM_CLIENT ->  handlePost(requestData)
-//        }
+        return when (requestData.verb) {
+            Verb.POST -> handlePost(requestData)
+            Verb.GET -> handleGet(requestData)
+            Verb.INVALID -> handleBadRequest()
+        }
     }
 
-    private fun handleReadingFiles(requestData: RequestData): PreparedResponseData {
-        return PreparedResponseData("", ResponseStatus.OK, emptyList())
-//        // if we're already authenticated and someone tries to go
-//        // to a page requiring authentication
-//        if (requestData.user != NO_USER &&
-//                requestData.path == "login.html" ||
-//                requestData.path == "register.html" ||
-//                requestData.path == "enter_time.html") {
-//            redirectToHomepage()
-//        }
-//
-//        val fileContents = FileReader.read(requestData.path)
-//        return if (fileContents == null) {
-//            logDebug("unable to read a file named ${requestData.path}")
-//            handleNotFound()
-//        } else {
-//            if (requestData.type == ActionType.TEMPLATE) {
-//                logDebug("Sending file for rendering")
-//                val renderedFile = renderTemplate(fileContents)
-//                handleReadRegularHtmlFile(renderedFile)
-//            } else {
-//                when (requestData.type) {
-//                    ActionType.CSS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
-//                    ActionType.JS -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
-//                    else -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-//                }
-//            }
-//
-//        }
+    private fun handleGet(rd: RequestData): PreparedResponseData {
+        return when (rd.path){
+            "" -> simpleRead("homepage.html")
+            ENTER_TIME.value -> simpleRead("enter_time.html")
+            CREATE_EMPLOYEE.value -> simpleRead("create_employee.html")
+            LOGIN.value -> simpleRead("login.html")
+            REGISTER.value -> simpleRead("register.html")
+            CREATE_PROJECT.value -> simpleRead("create_project.html")
+            else -> {
+                val fileContents = FileReader.read(rd.path)
+                if (fileContents == null) {
+                    logDebug("unable to read a file named ${rd.path}")
+                    handleNotFound()
+                } else when {
+                    rd.path.takeLast(4) == ".css" -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
+                    rd.path.takeLast(3) == ".js" -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+                    else -> handleNotFound()
+                }
+            }
+        }
     }
 
-    private fun renderTemplate(template: String): String {
-        val te = TemplatingEngine()
-        // TODO: replace following code ASAP
-        val mapping = mapOf("username" to "Jona")
-        return te.render(template, mapping)
-    }
-
+    /**
+     * When you just want to simply read an ordinary file
+     */
+    private fun simpleRead(path : String) =
+            PreparedResponseData(FileReader.readNotNull(path), ResponseStatus.OK, emptyList())
 
     /**
      * The user has sent us data, we have to process it
