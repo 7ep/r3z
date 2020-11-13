@@ -92,8 +92,8 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
-        val input = "POST /${NamedPaths.ENTER_TIME.value} HTTP/1.1"
-        val expected = Pair(Verb.POST, NamedPaths.ENTER_TIME.value)
+        val input = "POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1"
+        val expected = Pair(Verb.POST, NamedPaths.ENTER_TIME.path)
 
         val result = parseFirstLine(input)
 

@@ -28,7 +28,7 @@
             </p>
 
             <p>
-                <button>Enter time</button>
+                <button id="enter_time_button">Enter time</button>
             </p>
 
         </form>
