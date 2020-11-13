@@ -4,13 +4,21 @@ import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
-import coverosR3z.server.TargetPage.*
+import coverosR3z.server.NamedPaths.*
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
                       private val tru: ITimeRecordingUtilities) {
+
+    val isAuthenticated = {rd : RequestData -> rd.user != NO_USER}
+
+    /**
+     * When you just want to simply read an ordinary file
+     */
+    private fun simpleRead(path : String) =
+            PreparedResponseData(FileReader.readNotNull(path), ResponseStatus.OK)
 
     /**
      * Examine the request and take proper action, returning a
@@ -26,12 +34,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun handleGet(rd: RequestData): PreparedResponseData {
         return when (rd.path){
-            "" -> simpleRead("homepage.html")
-            ENTER_TIME.value -> simpleRead("enter_time.html")
-            CREATE_EMPLOYEE.value -> simpleRead("create_employee.html")
-            LOGIN.value -> simpleRead("login.html")
-            REGISTER.value -> simpleRead("register.html")
-            CREATE_PROJECT.value -> simpleRead("create_project.html")
+            "" -> simpleRead(HOMEPAGE.assocFile)
+            ENTER_TIME.value -> showEnterTimePage(rd)
+            CREATE_EMPLOYEE.value -> showCreateEmployeePage(rd)
+            LOGIN.value -> showLoginPage(rd)
+            REGISTER.value -> showRegisterPage(rd)
+            CREATE_PROJECT.value -> showCreateProjectPage(rd)
             else -> {
                 val fileContents = FileReader.read(rd.path)
                 if (fileContents == null) {
@@ -46,11 +54,53 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    /**
-     * When you just want to simply read an ordinary file
-     */
-    private fun simpleRead(path : String) =
-            PreparedResponseData(FileReader.readNotNull(path), ResponseStatus.OK, emptyList())
+    private fun showCreateProjectPage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            simpleRead(CREATE_PROJECT.assocFile)
+        } else {
+            redirectTo(HOMEPAGE.assocFile)
+        }
+    }
+
+    private fun showRegisterPage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            redirectTo(AUTHHOMEPAGE.assocFile)
+        } else {
+            simpleRead(REGISTER.assocFile)
+        }
+    }
+
+    private fun showCreateEmployeePage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            val contents = FileReader.readNotNull(CREATE_EMPLOYEE.assocFile)
+            val te = TemplatingEngine()
+            val mapping = mapOf("username" to rd.user.name)
+            val rendered = te.render(contents, mapping)
+            PreparedResponseData(rendered, ResponseStatus.OK)
+        } else {
+            redirectTo(HOMEPAGE.assocFile)
+        }
+    }
+
+    private fun showLoginPage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            redirectTo(AUTHHOMEPAGE.assocFile)
+        } else {
+            simpleRead(LOGIN.assocFile)
+        }
+    }
+
+    private fun showEnterTimePage(rd : RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            val contents = FileReader.readNotNull(ENTER_TIME.assocFile)
+            val te = TemplatingEngine()
+            val mapping = mapOf("username" to rd.user.name)
+            val rendered = te.render(contents, mapping)
+            PreparedResponseData(rendered, ResponseStatus.OK)
+        } else {
+            redirectTo(ENTER_TIME.assocFile)
+        }
+    }
 
     /**
      * The user has sent us data, we have to process it
@@ -98,7 +148,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 PreparedResponseData(FileReader.readNotNull("failure.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
             }
         } else {
-            redirectToHomepage()
+            redirectTo(HOMEPAGE.value)
         }
     }
 
@@ -115,12 +165,15 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 handleUnauthorized()
             }
         } else {
-            redirectToHomepage()
+            redirectTo(HOMEPAGE.assocFile)
         }
     }
 
-    private fun redirectToHomepage(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: enter_time.html"))
+    /**
+     * Use this to redirect to any particular page
+     */
+    private fun redirectTo(path: String): PreparedResponseData {
+        return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: $path"))
     }
 
     private fun handleCreatingNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
@@ -139,11 +192,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun handleReadRegularHtmlFile(renderedFile: String): PreparedResponseData {
-        return PreparedResponseData(renderedFile, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-    }
-
-
     companion object {
 
         /**
@@ -154,7 +202,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * On the other hand if it's not a well formed request, or
          * if we don't have that file, we reply with an error page
          */
-        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1".toRegex()
+        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1|1.0".toRegex()
 
         /**
          * Used for extracting the length of the body, in POSTs and

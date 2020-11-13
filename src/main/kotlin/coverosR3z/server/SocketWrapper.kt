@@ -32,4 +32,9 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         logDebug("$name actually read $lengthRead bytes.  body: $body")
         return body
     }
+
+    override fun close() {
+        socket.close()
+    }
+
 }
