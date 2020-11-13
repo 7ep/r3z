@@ -23,5 +23,5 @@ interface ITimeRecordingUtilities {
     fun getAllEntriesForEmployee(employee: Employee): List<TimeEntry>
     fun listAllProjects(): List<Project>
     fun findProjectById(id: Int): Project
-
+    fun listAllEmployees(): List<Employee>
 }
