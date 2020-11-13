@@ -76,14 +76,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun doGETRegisterPage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            redirectTo(AUTHHOMEPAGE.value)
-        } else {
-            simpleRead(REGISTER.assocFile)
-        }
-    }
-
     private fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             val contents = FileReader.readNotNull(CREATE_EMPLOYEE.assocFile)
@@ -135,6 +127,14 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
+        }
+    }
+
+    private fun doGETRegisterPage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            redirectTo(AUTHHOMEPAGE.value)
+        } else {
+            simpleRead(REGISTER.assocFile)
         }
     }
 
