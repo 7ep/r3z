@@ -197,29 +197,28 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         fun parseClientRequest(server: ISocketWrapper, au: IAuthenticationUtilities): RequestData {
             // read the first line for the fundamental request
             val clientRequest = server.readLine()
-            val (responseType, file) = parseFirstLine(clientRequest)
+            val (verb, path) = parseFirstLine(clientRequest)
 
             val headers = getHeaders(server)
 
             val token = extractSessionTokenFromHeaders(headers)
             val user = extractUserFromAuthToken(token, au)
-            val data = extractDataIfPost(server, headers)
+            val data = extractDataIfPost(server,verb, headers)
 
-            return RequestData(responseType, file, data, user)
+            return RequestData(verb, path, data, user)
         }
 
         /**
          * read the body if one exists and convert it to a string -> string map
          */
-        private fun extractDataIfPost(server: ISocketWrapper, headers: List<String>): Map<String, String> {
-            return emptyMap()
-//            return if (responseType == ActionType.HANDLE_POST_FROM_CLIENT) {
-//                val length = extractLengthOfPostBodyFromHeaders(headers)
-//                val body = server.read(length)
-//                parsePostedData(body)
-//            } else {
-//                emptyMap()
-//            }
+        private fun extractDataIfPost(server: ISocketWrapper, verb : Verb,  headers: List<String>): Map<String, String> {
+            return if (verb == Verb.POST) {
+                val length = extractLengthOfPostBodyFromHeaders(headers)
+                val body = server.read(length)
+                parsePostedData(body)
+            } else {
+                emptyMap()
+            }
         }
 
         /**

@@ -161,6 +161,22 @@ class SocketTests() {
         assertEquals("For this GET, we should receive certain data", expectedRequest, parseClientRequest)
     }
 
+    /**
+     * Like [testParsingProcess] but with a POST, and data
+     */
+    @Test
+    fun testParsingProcess_POST() {
+        val expectedRequest = RequestData(Verb.POST, "page", mapOf("foo" to "bar", "baz" to "feh"), NO_USER)
+        client.write("POST /page HTTP/1.1\n")
+        client.write("Cookie: blah\n")
+        client.write("Cookie: sessionId=foo\n")
+        client.write("Content-Length: 100\n")
+        client.write("\n")
+        client.write("foo=bar&baz=feh")
+
+        val parseClientRequest = ServerUtilities.parseClientRequest(server, au)
+        assertEquals("For this POST, we should receive certain data", expectedRequest, parseClientRequest)
+    }
 
     /**
      * Just for the test code - very similar to what is happening in [SocketCommunication],
