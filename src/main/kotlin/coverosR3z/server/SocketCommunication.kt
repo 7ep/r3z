@@ -17,8 +17,10 @@ import java.net.ServerSocket
  */
 class SocketCommunication(val port : Int) {
 
+    lateinit var halfOpenServerSocket : ServerSocket
+
     fun startServer() {
-        val halfOpenServerSocket = ServerSocket(port)
+        halfOpenServerSocket = ServerSocket(port)
         val pmd = PureMemoryDatabase()
         val cu = CurrentUser(SYSTEM_USER)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)

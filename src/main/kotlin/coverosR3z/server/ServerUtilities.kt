@@ -8,6 +8,7 @@ import coverosR3z.server.NamedPaths.*
 import coverosR3z.templating.FileReader
 import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
+import coverosR3z.webcontent.entertime
 import java.time.LocalDate
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
@@ -108,13 +109,9 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun doGETEnterTimePage(rd : RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            val contents = FileReader.readNotNull(ENTER_TIME.assocFile)
-            val te = TemplatingEngine()
-            val mapping = mapOf("username" to rd.user.name)
-            val rendered = te.render(contents, mapping)
-            PreparedResponseData(rendered, ResponseStatus.OK)
+            PreparedResponseData(entertime(rd.user.name), ResponseStatus.OK)
         } else {
-            redirectTo(ENTER_TIME.path)
+            redirectTo(HOMEPAGE.path)
         }
     }
 
