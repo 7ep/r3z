@@ -5,6 +5,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
@@ -42,6 +43,7 @@ class BrowserBDD {
     /**
      * HtmlUnit is a Java-based headless browser
      */
+    @Ignore("This is manually run as a development testing tool")
     @Test
     fun `happy path - I should be able to see a page without javascript`() {
         // Given I am on a browser without javascript
@@ -68,6 +70,7 @@ class BrowserBDD {
      * - hit the authenticated homepage
      * - enter time
      */
+    @Ignore("This is manually run as a development testing tool")
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
