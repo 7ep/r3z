@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
+import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
@@ -24,6 +25,7 @@ class SocketCommunication(val port : Int) {
         val pmd = PureMemoryDatabase()
         val cu = CurrentUser(SYSTEM_USER)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+        tru.createEmployee(EmployeeName("Administrator"))
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         while (true) {
             logInfo("waiting for socket connection")

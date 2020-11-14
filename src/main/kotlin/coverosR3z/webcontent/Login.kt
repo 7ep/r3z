@@ -1,3 +1,6 @@
+package coverosR3z.webcontent
+
+val loginHTML = """
 <html>
     <head>
         <title>login</title>
@@ -15,4 +18,5 @@
                 <button id="login_button">Login</button>
             </form>
     </body>
-</html>
+</html>        
+"""

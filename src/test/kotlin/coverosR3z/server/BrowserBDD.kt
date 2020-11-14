@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import com.gargoylesoftware.htmlunit.WebClient
+import com.gargoylesoftware.htmlunit.html.HtmlInput
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -8,7 +9,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
-import java.net.SocketException
 
 
 /**
@@ -69,6 +69,116 @@ class BrowserBDD {
      * - hit the authenticated homepage
      * - enter time
      */
+//    @Test
+//    fun `Smoke test - traverse through application with HtmlUnit, many pitstops`() {
+//        // Given I am a HtmlUnit browser user
+//        // start the browser
+//        val driver = WebClient()
+//        // prevent javascript from running.  We want these tests to really zip.
+//        driver.options.isJavaScriptEnabled = false
+//        var currentPage : HtmlPage
+//
+//        // Hit the homepage
+//        currentPage = driver.getPage("localhost:8080/${NamedPaths.HOMEPAGE.path}")
+//        assertEquals("Homepage", currentPage.titleText)
+//
+//        // register
+//        currentPage = driver.getPage("localhost:8080/${NamedPaths.REGISTER.path}")
+//        val user = "user1"
+//        currentPage.getHtmlElementById<HtmlInput>("username").textContent=user
+//        val password = "password123456"
+//        driver.findElementById("password").sendKeys(password)
+//        driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'Administrator']")).click()
+//        driver.findElementById("register_button").click()
+//
+//        // login
+//        driver.getPage("localhost:8080/${NamedPaths.LOGIN.path}")
+//        driver.findElementById("username").sendKeys(user)
+//        driver.findElementById("password").sendKeys(password)
+//        driver.findElementById("login_button").click()
+//
+//        // hit authenticated homepage
+//        driver.getPage("localhost:8080/${NamedPaths.AUTHHOMEPAGE.path}")
+//        assertEquals("Authenticated Homepage", driver.title)
+//
+//        // hit the 404 error
+//        driver.getPage("localhost:8080/idontexist")
+//        assertEquals("404 error", driver.title)
+//
+//        // enter a few new projects
+//        val projects = listOf("BDD", "FTA", "STF", "TaxAct", "Vibrent")
+//        for (project in projects) {
+//            driver.getPage("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
+//            driver.findElementById("project_name").sendKeys(project)
+//            driver.findElementById("project_create_button").click()
+//        }
+//
+//        // enter a new employee
+//        val employees = listOf("matt", "mitch", "byron", "jenna", "jona")
+//        for (employee in employees) {
+//            driver.getPage("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
+//            driver.findElementById("employee_name").sendKeys(employee)
+//            driver.findElementById("employee_create_button").click()
+//        }
+//
+//        // view the employees
+//        driver.getPage("localhost:8080/${NamedPaths.EMPLOYEES.path}")
+//
+//        // logout
+//        driver.getPage("localhost:8080/logout")
+//
+//        // register a user for each employee
+//        for (e in employees) {
+//            driver.getPage("localhost:8080/${NamedPaths.REGISTER.path}")
+//            driver.findElementById("username").sendKeys(e)
+//            val password = "password123456"
+//            driver.findElementById("password").sendKeys(password)
+//            driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$e']")).click()
+//            driver.findElementById("register_button").click()
+//        }
+//
+//        // loop through each user and login in
+//        for (e in employees) {
+//            // login
+//            driver.getPage("localhost:8080/${NamedPaths.LOGIN.path}")
+//            driver.findElementById("username").sendKeys(e)
+//            driver.findElementById("password").sendKeys(password)
+//            driver.findElementById("login_button").click()
+//
+//            // enter times
+//            for (p in projects) {
+//                driver.getPage("localhost:8080/${NamedPaths.ENTER_TIME.path}")
+//                driver.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
+//                driver.findElementById("time_entry").sendKeys("60")
+//                driver.findElementById("detail_entry").sendKeys("foo foo foo foo la la la la la la")
+//                driver.findElementById("enter_time_button").click()
+//            }
+//
+//            // logout
+//            driver.getPage("localhost:8080/logout")
+//        }
+//
+//        // login
+//        driver.getPage("localhost:8080/${NamedPaths.LOGIN.path}")
+//        driver.findElementById("username").sendKeys(user)
+//        driver.findElementById("password").sendKeys(password)
+//        driver.findElementById("login_button").click()
+//
+//        // view the time entries for the last person
+//        driver.getPage("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
+//
+//        driver.close()
+//    }
+
+    /**
+     * In this system-wide smoke test we will exercise many parts of the application.
+     * We will:
+     * - register a user and login
+     * - register an employee
+     * - create a project
+     * - hit the authenticated homepage
+     * - enter time
+     */
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
@@ -85,7 +195,7 @@ class BrowserBDD {
         chromeDriver.findElementById("username").sendKeys(user)
         val password = "password123456"
         chromeDriver.findElementById("password").sendKeys(password)
-        chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'alice']")).click()
+        chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'Administrator']")).click()
         chromeDriver.findElementById("register_button").click()
 
         // login
@@ -102,24 +212,67 @@ class BrowserBDD {
         chromeDriver.get("localhost:8080/idontexist")
         assertEquals("404 error", chromeDriver.title)
 
-        // enter a new project
-        chromeDriver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
-        val projecta = "projecta"
-        chromeDriver.findElementById("project_name").sendKeys(projecta)
-        chromeDriver.findElementById("project_create_button").click()
+        // enter a few new projects
+        val projects = listOf("BDD", "FTA", "STF", "TaxAct", "Vibrent")
+        for (project in projects) {
+            chromeDriver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
+            chromeDriver.findElementById("project_name").sendKeys(project)
+            chromeDriver.findElementById("project_create_button").click()
+        }
 
         // enter a new employee
-        chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
-        chromeDriver.findElementById("employee_name").sendKeys(user)
-        chromeDriver.findElementById("employee_create_button").click()
+        val employees = listOf("matt", "mitch", "byron", "jenna", "jona")
+        for (employee in employees) {
+            chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
+            chromeDriver.findElementById("employee_name").sendKeys(employee)
+            chromeDriver.findElementById("employee_create_button").click()
+        }
 
-        // enter time
-        chromeDriver.get("localhost:8080/${NamedPaths.ENTER_TIME.path}")
-        // projecta's id is 1, we have to pass that.
-        chromeDriver.findElementById("project_entry").sendKeys("1")
-        chromeDriver.findElementById("time_entry").sendKeys("120")
-        chromeDriver.findElementById("detail_entry").sendKeys("work on the lab")
-        chromeDriver.findElementById("enter_time_button").click()
+        // view the employees
+        chromeDriver.get("localhost:8080/${NamedPaths.EMPLOYEES.path}")
+
+        // logout
+        chromeDriver.get("localhost:8080/logout")
+
+        // register a user for each employee
+        for (e in employees) {
+            chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
+            chromeDriver.findElementById("username").sendKeys(e)
+            chromeDriver.findElementById("password").sendKeys(password)
+            chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$e']")).click()
+            chromeDriver.findElementById("register_button").click()
+        }
+
+        // loop through each user and login in
+        for (e in employees) {
+            // login
+            chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+            chromeDriver.findElementById("username").sendKeys(e)
+            chromeDriver.findElementById("password").sendKeys(password)
+            chromeDriver.findElementById("login_button").click()
+
+            // enter times
+            for (p in projects) {
+                chromeDriver.get("localhost:8080/${NamedPaths.ENTER_TIME.path}")
+                chromeDriver.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
+                chromeDriver.findElementById("time_entry").sendKeys("60")
+                chromeDriver.findElementById("detail_entry").sendKeys("foo foo foo foo la la la la la la")
+                chromeDriver.findElementById("enter_time_button").click()
+            }
+
+            // logout
+            chromeDriver.get("localhost:8080/logout")
+        }
+
+        // login
+        chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+        chromeDriver.findElementById("username").sendKeys(user)
+        chromeDriver.findElementById("password").sendKeys(password)
+        chromeDriver.findElementById("login_button").click()
+
+        // view the time entries for the last person
+        chromeDriver.get("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
+
         chromeDriver.quit()
     }
 

@@ -4,17 +4,38 @@ package coverosR3z.server
  * An enumeration of the possible well-known paths requestable by clients
  *
  * @param path is the string that we see as the path in the URL, e.g. GET /entertime
- * @param assocFile is the file we read to send to the user
  */
-enum class NamedPaths(val path: String, val assocFile : String = "") {
-    ENTER_TIME("entertime", "enter_time.utl"),
-    CREATE_EMPLOYEE("createemployee", "create_employee.html"),
-    LOGIN("login", "login.html"),
-    REGISTER("register", "register.utl"),
-    CREATE_PROJECT("createproject", "create_project.html"),
-    HOMEPAGE("homepage", "homepage.html"),
-    AUTHHOMEPAGE("homepage", "homepage.utl"),
-    BAD_REQUEST("badrequest", "400error.html"),
-    NOT_FOUND("notfound", "404error.html"),
-    UNAUTHORIZED("unauthorized", "401error.html"),
+enum class NamedPaths(val path: String) {
+    // enter time
+    ENTER_TIME("entertime"),
+    ENTER_TIMEJS("entertime.js"),
+    ENTER_TIMECSS("entertime.css"),
+
+    // existing time entries
+    TIMEENTRIES("timeentries"),
+
+    // create employee
+    CREATE_EMPLOYEE("createemployee"),
+
+    // existing employees
+    EMPLOYEES("employees"),
+
+    // login
+    LOGIN("login"),
+
+    // logout
+    LOGOUT("logout"),
+
+    // register
+    REGISTER("register"),
+    REGISTERCSS("register.css"),
+
+    // create project
+    CREATE_PROJECT("createproject"),
+
+    // unauthenticated homepage
+    HOMEPAGE("homepage"),
+
+    // authenticated homepage
+    AUTHHOMEPAGE("homepage"),
 }

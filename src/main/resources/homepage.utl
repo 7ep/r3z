@@ -1,9 +1,0 @@
-<html>
-    <head>
-    </head>
-        <title>Authenticated Homepage</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    <body>
-       <p>You are on the authenticated homepage</p>
-    </body>
-</html>

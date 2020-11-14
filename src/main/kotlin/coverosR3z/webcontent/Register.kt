@@ -1,3 +1,39 @@
+package coverosR3z.webcontent
+
+import coverosR3z.domainobjects.Employee
+
+fun registerHTML(employees: List<Employee>) : String {
+    return """
+<html>
+    <head>
+        <title>register</title>
+        <link rel="stylesheet" href="entertime.css" />
+    </head>
+    <body>
+        <h2>Register</h2>
+        <form action="register" method="post">
+
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" />
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" />
+
+            <label for="employee">Employee</label>
+            <select id="employee" name="employee">
+""" + employees.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
+            """
+                <option selected disabled hidden>Choose here</option>
+            </select>
+
+            <button id="register_button">Register</button>
+        </form>
+    </body>
+</html>
+"""
+}
+
+val registerCSS = """
 body, html {
 	 background-color: #ebecf0;
 }
@@ -90,4 +126,5 @@ body, html {
 	 margin: 0;
 	 flex: 1;
 }
- 
+     
+"""

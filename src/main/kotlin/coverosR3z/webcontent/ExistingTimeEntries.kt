@@ -1,3 +1,9 @@
+package coverosR3z.webcontent
+
+import coverosR3z.domainobjects.TimeEntry
+
+fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
+    return """
 <html>
     <head>
         <title>your time entries</title>
@@ -18,7 +24,7 @@
     </head>
     <body>
         <p>
-            Here are your entries, <span id="username">{{username}}</span>
+            Here are your entries, <span id="username">$username</span>
         </p>
         <table>
             <thead>
@@ -30,14 +36,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Project_a</td>
-                    <td>20</td>
-                    <td>These are some details</td>
-                    <td>Jan 1, 1978</td>
-                </tr>
+                
+""" +
+            te.joinToString("") { "<tr><td>${it.project.name}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
+"""    
             </tbody>
         </table>
 
     </body>
 </html>
+"""
+}

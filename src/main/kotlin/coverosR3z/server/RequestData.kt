@@ -11,4 +11,7 @@ data class RequestData(
         val verb: Verb,
         val path: String = "",
         val data : Map<String, String> = emptyMap(),
-        val user : User = NO_USER)
+        val user : User = NO_USER,
+        val sessionToken : String = "") {
+
+}
