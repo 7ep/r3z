@@ -7,6 +7,9 @@ import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.templating.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.webcontent.badRequestHTML
+import coverosR3z.webcontent.notFoundHTML
+import coverosR3z.webcontent.unauthorizedHTML
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -122,7 +125,7 @@ class SocketTests() {
      */
     @Test
     fun testParsingProcess() {
-        val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER)
+        val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER, "foo")
         client.write("GET /page HTTP/1.1\n")
         client.write("Cookie: blah\n")
         client.write("Cookie: sessionId=foo\n")
@@ -138,7 +141,7 @@ class SocketTests() {
      */
     @Test
     fun testParsingProcess_POST() {
-        val expectedRequest = RequestData(Verb.POST, "page", mapOf("foo" to "bar", "baz" to "feh"), NO_USER)
+        val expectedRequest = RequestData(Verb.POST, "page", mapOf("foo" to "bar", "baz" to "feh"), NO_USER, "foo")
         client.write("POST /page HTTP/1.1\n")
         client.write("Cookie: blah\n")
         client.write("Cookie: sessionId=foo\n")
@@ -187,9 +190,7 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
         assertTrue(headers.size > 1)
-        assertEquals("Content-Length: 194", headers[0])
-        val fileWeRead = FileReader.read("404error.html")
-        assertEquals(fileWeRead, body)
+        assertEquals(notFoundHTML, body)
     }
 
     /**
@@ -219,9 +220,7 @@ class SocketTests() {
             // assert all is well
             assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
             assertTrue(headers.size > 1)
-            assertEquals("Content-Length: 194", headers[0])
-            val fileWeRead = FileReader.read("400error.html")
-            assertEquals(fileWeRead, body)
+            assertEquals(badRequestHTML, body)
         }
     }
 
@@ -296,7 +295,7 @@ class SocketTests() {
         // assert all is well
         assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
-        assertEquals(FileReader.readNotNull("401error.html"), body)
+        assertEquals(unauthorizedHTML, body)
     }
 
 

@@ -6,9 +6,8 @@ import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.templating.FileReader
-import coverosR3z.templating.TemplatingEngine
 import coverosR3z.timerecording.ITimeRecordingUtilities
-import coverosR3z.webcontent.entertime
+import coverosR3z.webcontent.*
 import java.time.LocalDate
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
@@ -17,10 +16,23 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     val isAuthenticated = {rd : RequestData -> rd.user != NO_USER}
 
     /**
-     * When you just want to simply read an ordinary file
+     * If you are responding with a success message and it is HTML
      */
-    private fun simpleRead(path : String) =
-            PreparedResponseData(FileReader.readNotNull(path), ResponseStatus.OK)
+    private fun okHTML(contents : String) =
+            ok(contents, listOf(ContentType.TEXT_HTML.ct))
+    /**
+     * If you are responding with a success message and it is CSS
+     */
+    private fun okCSS(contents : String) =
+            ok(contents, listOf(ContentType.TEXT_CSS.ct))
+    /**
+     * If you are responding with a success message and it is JavaScript
+     */
+    private fun okJS (contents : String) =
+            ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+
+    private fun ok (contents: String, ct : List<String>) =
+            PreparedResponseData(contents, ResponseStatus.OK, ct)
 
     /**
      * Examine the request and take proper action, returning a
@@ -38,21 +50,35 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return when (rd.path){
             "", HOMEPAGE.path -> doGetHomePage(rd)
             ENTER_TIME.path -> doGETEnterTimePage(rd)
+            ENTER_TIMEJS.path -> okJS(enterTimeJS)
+            ENTER_TIMECSS.path -> okCSS(enterTimeCSS)
+            TIMEENTRIES.path -> doGetTimeEntriesPage(rd)
             CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
+            EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name, tru.listAllEmployees()))
             LOGIN.path -> doGETLoginPage(rd)
             REGISTER.path -> doGETRegisterPage(rd)
+            REGISTERCSS.path -> okCSS(registerCSS)
             CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
+            LOGOUT.path -> doGETLogout(rd)
             else -> {
                 val fileContents = FileReader.read(rd.path)
                 if (fileContents == null) {
                     logDebug("unable to read a file named ${rd.path}")
                     handleNotFound()
                 } else when {
-                    rd.path.takeLast(4) == ".css" -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.TEXT_CSS.ct))
-                    rd.path.takeLast(3) == ".js" -> PreparedResponseData(fileContents, ResponseStatus.OK, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+                    rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
+                    rd.path.takeLast(3) == ".js" -> okJS(fileContents)
                     else -> handleNotFound()
                 }
             }
+        }
+    }
+
+    private fun doGetTimeEntriesPage(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            okHTML(existingTimeEntriesHTML(rd.user.name, tru.getAllEntriesForEmployee(rd.user.employeeId ?: NO_EMPLOYEE.id)))
+        } else {
+            redirectTo(HOMEPAGE.path)
         }
     }
 
@@ -70,9 +96,18 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
+    private fun doGETLogout(rd: RequestData): PreparedResponseData {
+        return if (isAuthenticated(rd)) {
+            au.logout(rd.sessionToken)
+            PreparedResponseData(logoutHTML, ResponseStatus.OK, emptyList())
+        } else {
+            redirectTo(HOMEPAGE.path)
+        }
+    }
+
     private fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            simpleRead(CREATE_PROJECT.assocFile)
+            okHTML(createProjectHTML(rd.user.name))
         } else {
             redirectTo(HOMEPAGE.path)
         }
@@ -81,19 +116,15 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun doGetHomePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            simpleRead(AUTHHOMEPAGE.assocFile)
+            okHTML(authHomePageHTML(rd.user.name))
         } else {
-            simpleRead(HOMEPAGE.assocFile)
+            okHTML(homepageHTML)
         }
     }
 
     private fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            val contents = FileReader.readNotNull(CREATE_EMPLOYEE.assocFile)
-            val te = TemplatingEngine()
-            val mapping = mapOf("username" to rd.user.name)
-            val rendered = te.render(contents, mapping)
-            PreparedResponseData(rendered, ResponseStatus.OK)
+            okHTML(createEmployeeHTML(rd.user.name))
         } else {
             redirectTo(HOMEPAGE.path)
         }
@@ -103,35 +134,35 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return if (isAuthenticated(rd)) {
             redirectTo(AUTHHOMEPAGE.path)
         } else {
-            simpleRead(LOGIN.assocFile)
+            okHTML(loginHTML)
         }
     }
 
     private fun doGETEnterTimePage(rd : RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            PreparedResponseData(entertime(rd.user.name), ResponseStatus.OK)
+            okHTML(entertimeHTML(rd.user.name, tru.listAllProjects()))
         } else {
             redirectTo(HOMEPAGE.path)
         }
     }
 
     private fun handleBadRequest(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull(BAD_REQUEST.assocFile), ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleNotFound(): PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull(NOT_FOUND.assocFile), ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handleUnauthorized() : PreparedResponseData {
-        return PreparedResponseData(FileReader.readNotNull(UNAUTHORIZED.assocFile), ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
+        return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
     }
 
     private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
             tru.createProject(ProjectName(checkNotNull(data["project_name"])))
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
         }
@@ -142,11 +173,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             redirectTo(AUTHHOMEPAGE.path)
         } else {
             val employees = tru.listAllEmployees()
-            val contents = FileReader.readNotNull(REGISTER.assocFile)
-            val te = TemplatingEngine()
-            val mapping = mapOf("username" to rd.user.name)
-            val rendered = te.render(contents, mapping)
-            PreparedResponseData(rendered, ResponseStatus.OK)
+            PreparedResponseData(registerHTML(employees), ResponseStatus.OK)
         }
     }
 
@@ -157,9 +184,9 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val employeeId = checkNotNull(data["employee"])
             val result = au.register(username, password, employeeId.toInt())
             if (result == RegistrationResult.SUCCESS) {
-                PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+                okHTML(successHTML)
             } else {
-                PreparedResponseData(FileReader.readNotNull("failure.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+                PreparedResponseData(failureHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
             }
         } else {
             redirectTo(AUTHHOMEPAGE.path)
@@ -174,7 +201,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             val (loginResult, loginUser) = au.login(username, password)
             if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
                 val newSessionToken: String = au.createNewSession(loginUser)
-                PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
+                PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
             } else {
                 logInfo("User ($username) failed to login")
                 handleUnauthorized()
@@ -195,7 +222,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
             tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"])))
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
         }
@@ -220,7 +247,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
             tru.recordTime(timeEntry)
 
-            PreparedResponseData(FileReader.readNotNull("success.html"), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
         }
@@ -266,11 +293,11 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
             val headers = getHeaders(server)
 
-            val token = extractSessionTokenFromHeaders(headers)
+            val token = extractSessionTokenFromHeaders(headers) ?: ""
             val user = extractUserFromAuthToken(token, au)
             val data = extractDataIfPost(server,verb, headers)
 
-            return RequestData(verb, path, data, user)
+            return RequestData(verb, path, data, user, token)
         }
 
         /**

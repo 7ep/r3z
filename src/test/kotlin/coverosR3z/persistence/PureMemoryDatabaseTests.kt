@@ -218,7 +218,7 @@ class PureMemoryDatabaseTests {
     private fun accumulateMinutesPerEachEmployee(allEmployees: List<Employee>) {
         val (timeToAccumulate) = getTime {
             val minutesPerEmployeeTotal =
-                    allEmployees.map { u -> pmd.getAllTimeEntriesForEmployee(u).sumBy { te -> te.time.numberOfMinutes } }
+                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
             logInfo("the time ${allEmployees[0]} spent was ${minutesPerEmployeeTotal[0]}")
             logInfo("the time ${allEmployees[1]} spent was ${minutesPerEmployeeTotal[1]}")

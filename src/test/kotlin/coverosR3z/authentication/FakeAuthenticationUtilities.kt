@@ -9,7 +9,8 @@ class FakeAuthenticationUtilities (
     var registerBehavior : () -> RegistrationResult = {RegistrationResult.SUCCESS},
     var loginBehavior : () -> Pair<LoginResult, User> = {Pair(LoginResult.SUCCESS, SYSTEM_USER)},
     var getUserForSessionBehavior: () -> User = { NO_USER },
-    var createNewSessionBehavior: () -> String = {""}
+    var createNewSessionBehavior: () -> String = {""},
+    var logoutBehavior: () -> Unit = {},
     ) : IAuthenticationUtilities {
 
     override fun register(username: String, password: String, employeeId: Int?): RegistrationResult {
@@ -26,6 +27,10 @@ class FakeAuthenticationUtilities (
 
     override fun createNewSession(user: User, time: DateTime, rand: () -> String): String {
         return createNewSessionBehavior()
+    }
+
+    override fun logout(sessionToken: String) {
+        logoutBehavior()
     }
 
 

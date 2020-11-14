@@ -16,10 +16,10 @@ class DateTime(private val epochSecond : Long) {
     constructor(year: Int, month: Month, day: Int, hour: Int, minute: Int, second: Int)
             : this(LocalDateTime.of(year, month.ord, day, hour, minute, second).toEpochSecond(ZoneOffset.UTC))
 
-    private fun stringValue() : String { return LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()}
+    val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
 
     init {
-        require(epochSecond in 1577836800..4102444800) {"no way on earth people are using this before 2020 or past 2100, you had a date of ${stringValue()}"}
+        require(epochSecond in 1577836800..4102444800) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
     }
 
     /**
@@ -42,7 +42,7 @@ class DateTime(private val epochSecond : Long) {
     }
 
     override fun toString(): String {
-        return "Date(epochDay=$epochSecond, ${stringValue()})"
+        return "Date(epochDay=$epochSecond, $stringValue)"
     }
 
 }

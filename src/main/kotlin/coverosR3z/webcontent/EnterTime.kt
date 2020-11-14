@@ -1,4 +1,56 @@
-img {
+package coverosR3z.webcontent
+
+import coverosR3z.domainobjects.Project
+
+fun entertimeHTML(username: String, projects : List<Project>) : String {
+    return """
+    <html>
+    <head>
+        <title>enter time</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="entertime.css" />
+        <script src="entertime.js"></script>
+    </head>
+    <body>
+        <form action="entertime" method="post">
+
+            <p>
+                Hello there, <span id="username">$username</span>!
+            </p>
+
+            <p>
+                <label for="project_entry">Project:</label>
+                <select name="project_entry" id="project_entry"/>
+""" +
+
+            projects.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
+
+            """             <option selected disabled hidden>Choose here</option>
+            </select>
+            </p>
+
+            <p>
+                <label for="time_entry">Time:</label>
+                <input name="time_entry" id="time_entry" type="text" />
+            </p>
+
+            <p>
+                <label for="detail_entry">Details:</label>
+                <input name="detail_entry" id="detail_entry" type="text" />
+            </p>
+
+            <p>
+                <button id="enter_time_button">Enter time</button>
+            </p>
+
+        </form>
+    </body>
+</html>
+"""
+}
+
+val enterTimeCSS = """
+    img {
   height: 200px;
 }
 
@@ -184,3 +236,8 @@ div.banner h2.titleheader a:visited {
         line-height: initial;
     }
  }
+"""
+
+val enterTimeJS = """
+    console.log("Hello from JavaScript land")
+"""

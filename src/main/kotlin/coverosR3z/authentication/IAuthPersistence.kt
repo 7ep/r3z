@@ -11,4 +11,5 @@ interface IAuthPersistence {
     fun getUser(name: UserName) : User
     fun getUserForSession(sessionToken: String): User
     fun addNewSession(sessionId: String, user: User, time: DateTime)
+    fun deleteSession(sessionToken: String)
 }

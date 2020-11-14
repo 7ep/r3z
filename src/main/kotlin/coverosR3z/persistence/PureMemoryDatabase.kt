@@ -76,9 +76,11 @@ class PureMemoryDatabase {
                 .sumBy { te -> te.time.numberOfMinutes }
     }
 
+    /**
+     * Return the list of entries for this employee, or just return an empty list otherwise
+     */
     fun getAllTimeEntriesForEmployee(employee: Employee): List<TimeEntry> {
-        val employees = checkNotNull(timeEntries[employee]) {"This employee, ${employee.name}, does not exist in the map of time entries"}
-        return employees.filter{ te -> te.employee.id == employee.id}
+        return timeEntries[employee]?.filter{ te -> te.employee.id == employee.id} ?: emptyList()
     }
 
     fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
@@ -102,7 +104,7 @@ class PureMemoryDatabase {
     }
 
     fun getEmployeeById(id: Int): Employee {
-        require(id > 0)
+        require(id > 0) {"all employees must have an id greater than zero"}
         return employees.singleOrNull { u -> u.id == id} ?: NO_EMPLOYEE
     }
 

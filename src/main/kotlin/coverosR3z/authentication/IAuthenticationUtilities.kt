@@ -33,5 +33,10 @@ interface IAuthenticationUtilities {
      */
     fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = {generateRandomString(16)}) : String
 
+    /**
+     * Wipes out the session entry for this user
+     */
+    fun logout(sessionToken: String)
+
 
 }

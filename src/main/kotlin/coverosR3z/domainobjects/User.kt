@@ -14,7 +14,7 @@ private val md = MessageDigest.getInstance("SHA-256")
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(maxUserCount-1, "NO_USER", Hash.createHash(""), "THIS REPRESENTS NO USER", -1)
+val NO_USER = User(maxUserCount-1, "NO_USER", Hash.createHash(""), "THIS REPRESENTS NO USER", NO_EMPLOYEE.id)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
