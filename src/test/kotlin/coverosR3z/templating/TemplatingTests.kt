@@ -1,7 +1,7 @@
 package coverosR3z.templating
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import coverosR3z.getTime
+import org.junit.Assert.*
 import org.junit.Test
 
 class TemplatingTests {
@@ -54,7 +54,7 @@ class TemplatingTests {
         val toRender = "<body>this should {{fail}}</body>"
 
         val exception = assertThrows(InvalidTemplateException::class.java) {te.render(toRender, mapOf())}
-        assertEquals(exception.message, "Invalid syntax; all double bracketed values must have corresponding mappings.")
+        assertEquals("Invalid syntax; all double bracketed values must have corresponding mappings.", exception.message)
     }
 
     @Test
@@ -64,5 +64,88 @@ class TemplatingTests {
         val expected = FileReader.read("multiple_values.html")
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `PERFORMANCE - templating`() {
+        val numLoops = 10_000
+        val maxTime = 1000
+        val (time, _) = getTime {
+            for(i in 1..numLoops) {
+                val toRender = FileReader.readNotNull("multiple_values_template.utl")
+                te.render(toRender, mapOf("username" to "Byron", "company" to "Coveros"))
+            }
+        }
+
+        assertTrue("Should render a $numLoops loops in less than $maxTime millis", time < maxTime)
+    }
+
+    /**
+     * Use some hand-written code to generate html output
+     */
+    @Test
+    fun testTemplateByCode() {
+        val actual = foo("Coveros", "Byron")
+        val expected = FileReader.read("multiple_values.html")
+
+        assertEquals(expected, actual)
+    }
+
+    fun foo(company: String, username: String) : String {
+        return """
+<html>
+    <head>
+    </head>
+        <title>demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="main.css">
+    <body>
+        <h1>$company</h1>
+        <form action="entertime">
+
+            <p>
+                Hello there, $username!
+            </p>
+
+            <p>
+                <label for="project_entry">Project:</label>
+                <input id="project_entry" type="text" />
+            </p>
+
+            <p>
+                <label for="time_entry">Time:</label>
+                <input id="time_entry" type="text" />
+            </p>
+
+            <p>
+                <label for="detail_entry">Details:</label>
+                <input id="detail_entry" type="text" />
+            </p>
+
+            <p>
+                <button>Enter time</button>
+            </p>
+
+        </form>
+    </body>
+</html>
+"""
+    }
+
+    /**
+     * This one results in the same output but uses code
+     * instead of a file read with a regular expression text replacement
+     */
+    @Test
+    fun `PERFORMANCE - templating by code`() {
+        val numLoops = 100_000
+        val maxTime = 1000
+        val (time, _) = getTime {
+            for(i in 1..numLoops) {
+                foo("Coveros", "Byron")
+            }
+        }
+
+        assertTrue("Should render a $numLoops loops in less than $maxTime millis", time < maxTime)
     }
 }
