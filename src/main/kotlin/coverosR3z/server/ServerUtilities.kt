@@ -269,12 +269,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * Used for extracting the length of the body, in POSTs and
          * responses from servers
          */
-        val contentLengthRegex = "Content-Length: (.*)$".toRegex()
+        val contentLengthRegex = "[cC]ontent-[lL]ength: (.*)$".toRegex()
 
         /**
          * Used to extract cookies from the Cookie header
          */
-        private val cookieRegex = "Cookie: (.*)$".toRegex()
+        private val cookieRegex = "[cC]ookie: (.*)$".toRegex()
 
         /**
          * Within a cookie header, we want our sessionId cookie, which
@@ -359,7 +359,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
             require(headers.isNotEmpty()) {"We must receive at least one header at this point or the request is invalid"}
             try {
-                val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
+                val lengthHeader: String = headers.single { it.toLowerCase().startsWith("content-length") }
                 val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
                 // arbitrarily setting to 500 for now
                 val maxContentLength = 500
@@ -385,7 +385,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         fun extractSessionTokenFromHeaders(headers: List<String>): String? {
             if (headers.isEmpty()) return null
 
-            val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
+            val cookieHeaders = headers.filter { it.toLowerCase().startsWith("cookie:") }
             val concatenatedHeaders = cookieHeaders.joinToString(";") { cookieRegex.matchEntire(it)?.groups?.get(1)?.value ?: "" }
             val splitUpCookies = concatenatedHeaders.split(";").map{it.trim()}
             val sessionCookies = splitUpCookies.mapNotNull { sessionIdCookieRegex.matchEntire(it)?.groups?.get(1)?.value }
