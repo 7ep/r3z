@@ -41,7 +41,7 @@ class SocketCommunication(val port : Int) {
     }
 
     companion object {
-        fun handleRequest(server: SocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
+        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
             val requestData = ServerUtilities.parseClientRequest(server, au)
 
             // now that we know who the user is (if they authenticated) we can update the current user
