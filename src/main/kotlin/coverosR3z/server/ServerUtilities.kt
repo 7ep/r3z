@@ -263,7 +263,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * On the other hand if it's not a well formed request, or
          * if we don't have that file, we reply with an error page
          */
-        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1|1.0".toRegex()
+        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/(?:1.1|1.0)".toRegex()
 
         /**
          * Used for extracting the length of the body, in POSTs and
