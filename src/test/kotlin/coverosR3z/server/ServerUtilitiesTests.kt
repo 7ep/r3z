@@ -178,6 +178,17 @@ class ServerUtilitiesTests {
     }
 
     /**
+     * check lowercase works also
+     */
+    @Test
+    fun testShouldExtractAuthCodeFromCookie_lowercase() {
+        val headers = listOf("cookie: jenkins-timestamper-offset=18000000; sessionId=38afes7a8; Idea-7de3a10=8972cd6b-ad6d-40c6-9daf-38ef0f149214; jenkins-timestamper=system; jenkins-timestamper-local=true")
+        val expected = "38afes7a8"
+        val result = extractSessionTokenFromHeaders(headers)
+        assertEquals("we should extract out the auth value from the header provided", expected, result)
+    }
+
+    /**
      * What if we receive multiple Cookie headers? Concatenate!
      */
     @Test
@@ -217,6 +228,22 @@ class ServerUtilitiesTests {
     fun testShouldExtractLengthFromContentLength() {
         //arrange
         val headers = listOf("Content-Length: 20")
+        val expectedLength = 20
+
+        //act
+        val result = extractLengthOfPostBodyFromHeaders(headers)
+
+        //assert
+        assertEquals("we should extract out the length from the header provided", expectedLength, result)
+    }
+
+    /**
+     * Make sure it still works with lower-case
+     */
+    @Test
+    fun testShouldExtractLengthFromContentLength_lowercase() {
+        //arrange
+        val headers = listOf("Content-length: 20")
         val expectedLength = 20
 
         //act

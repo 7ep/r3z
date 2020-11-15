@@ -6,125 +6,134 @@ fun registerHTML(employees: List<Employee>) : String {
     return """
 <html>
     <head>
+        <link rel="stylesheet" href="register.css">
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
         <title>register</title>
         <link rel="stylesheet" href="entertime.css" />
     </head>
     <body>
-        <h2>Register</h2>
-        <form action="register" method="post">
-
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username" />
-
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" />
-
-            <label for="employee">Employee</label>
-            <select id="employee" name="employee">
-""" + employees.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
-            """
-                <option selected disabled hidden>Choose here</option>
-            </select>
-
-            <button id="register_button">Register</button>
-        </form>
+    <body>
+      <div class="main">
+        <p class="sign" align="center">Register</p>
+        <form class="form1" method="post" action="register">
+          <input class="un" type="text" align="center" name="username" id="username" placeholder="Username">
+          <input class="pass" type="password" align="center" name="password" id="password" placeholder="Password">
+           <select class="un" id="employee" name="employee">
+"""+employees.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
+"""
+            <option selected disabled hidden>Choose here</option>
+          </select>
+          <button id="register_button" class="submit" align="center">Register</button>
+          </form>
+        </div>
     </body>
 </html>
 """
 }
 
 val registerCSS = """
-body, html {
-	 background-color: #ebecf0;
-}
- body, p, input, select, textarea, button {
-	 font-family: 'Montserrat', sans-serif;
-	 letter-spacing: -0.2px;
-	 font-size: 16px;
-}
- div, p {
-	 color: #babecc;
-	 text-shadow: 1px 1px 1px #fff;
-}
- form {
-	 padding: 16px;
-	 width: 320px;
-	 margin: 0 auto;
-}
- .segment {
-	 padding: 32px 0;
-	 text-align: center;
-}
- button, input {
-	 border: 0;
-	 outline: 0;
-	 font-size: 16px;
-	 border-radius: 320px;
-	 padding: 16px;
-	 background-color: #ebecf0;
-	 text-shadow: 1px 1px 0 #fff;
-}
- label {
-	 display: block;
-	 margin-bottom: 24px;
-	 width: 100%;
-}
- input {
-	 margin-right: 8px;
-	 box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
-	 width: 100%;
-	 box-sizing: border-box;
-	 transition: all 0.2s ease-in-out;
-	 appearance: none;
-	 -webkit-appearance: none;
-}
- input:focus {
-	 box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
-}
- button {
-	 color: #61677c;
-	 font-weight: bold;
-	 box-shadow: -5px -5px 20px #fff, 5px 5px 20px #babecc;
-	 transition: all 0.2s ease-in-out;
-	 cursor: pointer;
-	 font-weight: 600;
-}
- button:hover {
-	 box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
-}
- button:active {
-	 box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
-}
- button .icon {
-	 margin-right: 8px;
-}
- button.unit {
-	 border-radius: 8px;
-	 line-height: 0;
-	 width: 48px;
-	 height: 48px;
-	 display: inline-flex;
-	 justify-content: center;
-	 align-items: center;
-	 margin: 0 8px;
-	 font-size: 19.2px;
-}
- button.unit .icon {
-	 margin-right: 0;
-}
- button.red {
-	 display: block;
-	 width: 100%;
-	 color: #ae1100;
-}
- .input-group {
-	 display: flex;
-	 align-items: center;
-	 justify-content: flex-start;
-}
- .input-group label {
-	 margin: 0;
-	 flex: 1;
-}
-     
+     body {
+        background-color: #F3EBF6;
+        font-family: 'Ubuntu', sans-serif;
+    }
+    
+    .main {
+        background-color: #FFFFFF;
+        width: 400px;
+        height: 400px;
+        margin: 7em auto;
+        border-radius: 1.5em;
+        box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+    }
+    
+    .sign {
+        padding-top: 40px;
+        color: #8C55AA;
+        font-family: 'Ubuntu', sans-serif;
+        font-weight: bold;
+        font-size: 23px;
+    }
+    
+    .un {
+    width: 76%;
+    color: rgb(38, 50, 56);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    background: rgba(136, 126, 126, 0.04);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 50px;
+    margin-left: 46px;
+    text-align: center;
+    margin-bottom: 27px;
+    font-family: 'Ubuntu', sans-serif;
+    }
+    
+    form.form1 {
+        padding-top: 40px;
+    }
+    
+    .pass {
+            width: 76%;
+    color: rgb(38, 50, 56);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    background: rgba(136, 126, 126, 0.04);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 50px;
+    margin-left: 46px;
+    text-align: center;
+    margin-bottom: 27px;
+    font-family: 'Ubuntu', sans-serif;
+    }
+    
+   
+    .un:focus, .pass:focus {
+        border: 2px solid rgba(0, 0, 0, 0.18) !important;
+        
+    }
+    
+    .submit {
+      cursor: pointer;
+        border-radius: 5em;
+        color: #fff;
+        background: linear-gradient(to right, #9C27B0, #E040FB);
+        border: 0;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        font-family: 'Ubuntu', sans-serif;
+        margin-left: 35%;
+        font-size: 13px;
+        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    }
+    
+    .forgot {
+        text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
+        color: #E1BEE7;
+        padding-top: 15px;
+    }
+    
+    a {
+        text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
+        color: #E1BEE7;
+        text-decoration: none
+    }
+    
+    @media (max-width: 600px) {
+        .main {
+            border-radius: 0px;
+        }
 """

@@ -161,7 +161,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
-            tru.createProject(ProjectName(checkNotNull(data["project_name"])))
+            tru.createProject(ProjectName(checkNotNull(data["project_name"]){"project_name must not be missing"}))
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
@@ -179,9 +179,9 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun handlePOSTRegister(user: User, data: Map<String, String>) : PreparedResponseData {
         return if (user == NO_USER) {
-            val username = checkNotNull(data["username"])
-            val password = checkNotNull(data["password"])
-            val employeeId = checkNotNull(data["employee"])
+            val username = checkNotNull(data["username"]) {"username must not be missing"}
+            val password = checkNotNull(data["password"])  {"password must not be missing"}
+            val employeeId = checkNotNull(data["employee"])  {"employee must not be missing"}
             val result = au.register(username, password, employeeId.toInt())
             if (result == RegistrationResult.SUCCESS) {
                 okHTML(successHTML)
@@ -196,8 +196,8 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
         val isUnauthenticated = user == NO_USER
         return if (isUnauthenticated) {
-            val username = checkNotNull(data["username"])
-            val password = checkNotNull(data["password"])
+            val username = checkNotNull(data["username"]) {"username must not be missing"}
+            val password = checkNotNull(data["password"]) {"password must not be missing"}
             val (loginResult, loginUser) = au.login(username, password)
             if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
                 val newSessionToken: String = au.createNewSession(loginUser)
@@ -221,7 +221,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
-            tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"])))
+            tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"]){"The employee_name must not be missing"}))
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
@@ -231,12 +231,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
-            val projectId = checkNotNull(data["project_entry"]).toInt()
-            val time = Time(checkNotNull(data["time_entry"]).toInt())
-            val details = Details(checkNotNull(data["detail_entry"]))
+            val projectId = checkNotNull(data["project_entry"]){"project_entry must not be null"}.toInt()
+            val time = Time(checkNotNull(data["time_entry"]){"time_entry must not be null"}.toInt())
+            val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be null"})
 
             val project = tru.findProjectById(projectId)
-            val employee = tru.findEmployeeById(checkNotNull(user.employeeId))
+            val employee = tru.findEmployeeById(checkNotNull(user.employeeId){"employeeId must not be null"})
 
             val timeEntry = TimeEntryPreDatabase(
                     employee,
@@ -263,18 +263,18 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
          * On the other hand if it's not a well formed request, or
          * if we don't have that file, we reply with an error page
          */
-        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/1.1|1.0".toRegex()
+        private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/(?:1.1|1.0)".toRegex()
 
         /**
          * Used for extracting the length of the body, in POSTs and
          * responses from servers
          */
-        val contentLengthRegex = "Content-Length: (.*)$".toRegex()
+        val contentLengthRegex = "[cC]ontent-[lL]ength: (.*)$".toRegex()
 
         /**
          * Used to extract cookies from the Cookie header
          */
-        private val cookieRegex = "Cookie: (.*)$".toRegex()
+        private val cookieRegex = "[cC]ookie: (.*)$".toRegex()
 
         /**
          * Within a cookie header, we want our sessionId cookie, which
@@ -343,9 +343,9 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                 verb = Verb.INVALID
             } else {
                 // determine which file the client is requesting
-                verb = Verb.valueOf(checkNotNull(result.groups[1]).value)
+                verb = Verb.valueOf(checkNotNull(result.groups[1]){"The HTTP verb must not be missing"}.value)
                 logDebug("verb from client was: $verb")
-                file = checkNotNull(result.groups[2]).value
+                file = checkNotNull(result.groups[2]){"The requested path must not be missing"}.value
                 logDebug("path from client was: $file")
             }
 
@@ -359,7 +359,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
             require(headers.isNotEmpty()) {"We must receive at least one header at this point or the request is invalid"}
             try {
-                val lengthHeader: String = headers.single { it.startsWith("Content-Length") }
+                val lengthHeader: String = headers.single { it.toLowerCase().startsWith("content-length") }
                 val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
                 // arbitrarily setting to 500 for now
                 val maxContentLength = 500
@@ -385,7 +385,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         fun extractSessionTokenFromHeaders(headers: List<String>): String? {
             if (headers.isEmpty()) return null
 
-            val cookieHeaders = headers.filter { it.startsWith("Cookie:") }
+            val cookieHeaders = headers.filter { it.toLowerCase().startsWith("cookie:") }
             val concatenatedHeaders = cookieHeaders.joinToString(";") { cookieRegex.matchEntire(it)?.groups?.get(1)?.value ?: "" }
             val splitUpCookies = concatenatedHeaders.split(";").map{it.trim()}
             val sessionCookies = splitUpCookies.mapNotNull { sessionIdCookieRegex.matchEntire(it)?.groups?.get(1)?.value }
