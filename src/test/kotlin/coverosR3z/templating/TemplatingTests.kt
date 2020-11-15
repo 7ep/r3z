@@ -1,6 +1,6 @@
 package coverosR3z.templating
 
-import coverosR3z.getTime
+import coverosR3z.misc.FileReader
 import org.junit.Assert.*
 import org.junit.Test
 
