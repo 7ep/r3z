@@ -14,3 +14,6 @@ out
 
 # Ignore Mac's baloney
 .DS_Store
+
+# Not even totally sure what is adding this, but we don't need it
+debug.log
