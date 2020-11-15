@@ -103,7 +103,7 @@ class BrowserBDD {
         assertEquals("404 error", chromeDriver.title)
 
         // enter a few new projects
-        val projects = listOf("BDD", "FTA", "STF", "TaxAct", "Vibrent")
+        val projects = listOf("BDD", "FTA")
         for (project in projects) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
             chromeDriver.findElementById("project_name").sendKeys(project)
@@ -111,7 +111,7 @@ class BrowserBDD {
         }
 
         // enter a new employee
-        val employees = listOf("matt", "mitch", "byron", "jenna", "jona")
+        val employees = listOf("matt", "byron")
         for (employee in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
             chromeDriver.findElementById("employee_name").sendKeys(employee)
