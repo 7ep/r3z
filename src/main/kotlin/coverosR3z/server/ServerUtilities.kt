@@ -5,7 +5,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
 import coverosR3z.server.NamedPaths.*
-import coverosR3z.templating.FileReader
+import coverosR3z.misc.FileReader
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.*
 import java.time.LocalDate

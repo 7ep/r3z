@@ -1,4 +1,4 @@
-package coverosR3z.templating
+package coverosR3z.misc
 
 class FileReader {
     companion object {

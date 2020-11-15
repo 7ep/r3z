@@ -1,11 +1,10 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
-import coverosR3z.templating.FileReader
+import coverosR3z.misc.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.webcontent.badRequestHTML
 import coverosR3z.webcontent.notFoundHTML
