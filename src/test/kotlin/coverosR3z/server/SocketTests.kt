@@ -154,22 +154,6 @@ class SocketTests() {
     }
 
     /**
-     * Just for the test code - very similar to what is happening in [SocketCommunication],
-     * except that this way we have access to the inside variables
-     */
-    private fun executeServerProcess() {
-        // server - handle the request
-        val requestData = ServerUtilities.parseClientRequest(server, au)
-
-        // now that we know who the user is (if they authenticated) we can update the current user
-        val truWithUser = tru.changeUser(CurrentUser(requestData.user))
-
-        val responseData = ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
-        ServerUtilities.returnData(server, responseData)
-    }
-
-
-    /**
      * What should the server return if we ask for something
      * the server doesn't have?
      */
@@ -179,7 +163,7 @@ class SocketTests() {
         client.write("GET /doesnotexist HTTP/1.1\n\n")
 
         // server - handle the request
-        executeServerProcess()
+        SocketCommunication.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -209,7 +193,7 @@ class SocketTests() {
             client.write(request)
 
             // server - handle the request
-            executeServerProcess()
+            SocketCommunication.handleRequest(server, au, tru)
 
             // client - read status line
             val statusline = client.readLine()
@@ -233,7 +217,7 @@ class SocketTests() {
         client.write("GET /sample.css HTTP/1.1\n\n")
 
         // server - handle the request
-        executeServerProcess()
+        SocketCommunication.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -257,7 +241,7 @@ class SocketTests() {
         client.write("GET /sample.js HTTP/1.1\n\n")
 
         // server - handle the request
-        executeServerProcess()
+        SocketCommunication.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -284,7 +268,7 @@ class SocketTests() {
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
         // server - handle the request
-        executeServerProcess()
+        SocketCommunication.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()

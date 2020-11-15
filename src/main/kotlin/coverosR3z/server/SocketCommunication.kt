@@ -3,10 +3,12 @@ package coverosR3z.server
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
+import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
@@ -39,7 +41,7 @@ class SocketCommunication(val port : Int) {
     }
 
     companion object {
-        fun handleRequest(server: SocketWrapper, au: AuthenticationUtilities, tru: TimeRecordingUtilities) {
+        fun handleRequest(server: SocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
             val requestData = ServerUtilities.parseClientRequest(server, au)
 
             // now that we know who the user is (if they authenticated) we can update the current user
