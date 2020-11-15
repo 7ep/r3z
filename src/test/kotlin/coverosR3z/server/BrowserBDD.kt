@@ -70,7 +70,7 @@ class BrowserBDD {
      * - hit the authenticated homepage
      * - enter time
      */
-    @Ignore("This is manually run as a development testing tool")
+//    @Ignore("This is manually run as a development testing tool")
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
