@@ -23,7 +23,7 @@ fun registerHTML(employees: List<Employee>) : String {
 """
             <option selected disabled hidden>Choose here</option>
           </select>
-          <button class="submit" align="center">Sign in</button>
+          <button id="register_button" class="submit" align="center">Register</button>
           </form>
         </div>
     </body>
