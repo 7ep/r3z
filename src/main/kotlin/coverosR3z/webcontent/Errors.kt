@@ -35,3 +35,19 @@ val unauthorizedHTML = """
     </body>
 </html>        
 """
+
+fun generalMessageHTML(msg : String) : String {
+    return """
+<html>
+    <head>
+    </head>
+        <title>general error page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <body>
+       <p><a href="homepage">Homepage</a></p>
+       <p>Error message: $msg</p>
+       <p></p>
+    </body>
+</html>        
+"""
+}
