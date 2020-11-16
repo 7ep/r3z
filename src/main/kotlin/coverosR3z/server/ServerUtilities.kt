@@ -4,36 +4,15 @@ import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
-import coverosR3z.server.NamedPaths.*
 import coverosR3z.misc.FileReader
-import coverosR3z.misc.checkParseToInt
+import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.*
 import java.time.LocalDate
 
+
 class ServerUtilities(private val au: IAuthenticationUtilities,
                       private val tru: ITimeRecordingUtilities) {
-
-    val isAuthenticated = {rd : RequestData -> rd.user != NO_USER}
-
-    /**
-     * If you are responding with a success message and it is HTML
-     */
-    private fun okHTML(contents : String) =
-            ok(contents, listOf(ContentType.TEXT_HTML.ct))
-    /**
-     * If you are responding with a success message and it is CSS
-     */
-    private fun okCSS(contents : String) =
-            ok(contents, listOf(ContentType.TEXT_CSS.ct))
-    /**
-     * If you are responding with a success message and it is JavaScript
-     */
-    private fun okJS (contents : String) =
-            ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
-
-    private fun ok (contents: String, ct : List<String>) =
-            PreparedResponseData(contents, ResponseStatus.OK, ct)
 
     /**
      * Examine the request and take proper action, returning a
@@ -57,7 +36,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
             EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name, tru.listAllEmployees()))
             LOGIN.path -> doGETLoginPage(rd)
-            REGISTER.path -> doGETRegisterPage(rd)
+            REGISTER.path -> doGETRegisterPage(tru, rd)
             REGISTERCSS.path -> okCSS(registerCSS)
             CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
             LOGOUT.path -> doGETLogout(rd)
@@ -86,12 +65,12 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     /**
      * The user has sent us data, we have to process it
      */
-    fun handlePost(rd: RequestData) : PreparedResponseData {
+    private fun handlePost(rd: RequestData) : PreparedResponseData {
         return when (rd.path) {
             ENTER_TIME.path -> handlePOSTTimeEntry(rd.user, rd.data)
             CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(rd.user, rd.data)
             LOGIN.path -> handlePOSTLogin(rd.user, rd.data)
-            REGISTER.path -> handlePOSTRegister(rd.user, rd.data)
+            REGISTER.path -> handlePOSTRegister(au, rd.user, rd.data)
             CREATE_PROJECT.path -> handlePOSTCreatingProject(rd.user, rd.data)
             else -> handleNotFound()
         }
@@ -169,35 +148,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun doGETRegisterPage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            redirectTo(AUTHHOMEPAGE.path)
-        } else {
-            val employees = tru.listAllEmployees()
-            PreparedResponseData(registerHTML(employees), ResponseStatus.OK)
-        }
-    }
 
-    private fun handlePOSTRegister(user: User, data: Map<String, String>) : PreparedResponseData {
-        return if (user == NO_USER) {
-            val username = checkNotNull(data["username"]) {"username must not be missing"}
-            check(username.isNotBlank()) {"The username must not be blank"}
-            val password = checkNotNull(data["password"])  {"password must not be missing"}
-            check(password.isNotBlank()) {"The password must not be blank"}
-            val employeeId = checkNotNull(data["employee"])  {"employee must not be missing"}
-            check(employeeId.isNotBlank()) {"The employee must not be blank"}
-            val employeeIdInt = checkParseToInt(employeeId){"Must be able to convert $employeeId to an int"}
-            check(employeeIdInt > 0) {"The employee id must be greater than zero"}
-            val result = au.register(username, password, employeeIdInt)
-            if (result == RegistrationResult.SUCCESS) {
-                okHTML(successHTML)
-            } else {
-                PreparedResponseData(failureHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-            }
-        } else {
-            redirectTo(AUTHHOMEPAGE.path)
-        }
-    }
 
 
     private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
@@ -216,13 +167,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         } else {
             redirectTo(AUTHHOMEPAGE.path)
         }
-    }
-
-    /**
-     * Use this to redirect to any particular page
-     */
-    private fun redirectTo(path: String): PreparedResponseData {
-        return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: $path"))
     }
 
     private fun handlePOSTNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
@@ -261,6 +205,34 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     }
 
     companion object {
+
+        val isAuthenticated = {rd : RequestData -> rd.user != NO_USER}
+
+        /**
+         * If you are responding with a success message and it is HTML
+         */
+        fun okHTML(contents : String) =
+                ok(contents, listOf(ContentType.TEXT_HTML.ct))
+        /**
+         * If you are responding with a success message and it is CSS
+         */
+        fun okCSS(contents : String) =
+                ok(contents, listOf(ContentType.TEXT_CSS.ct))
+        /**
+         * If you are responding with a success message and it is JavaScript
+         */
+        fun okJS (contents : String) =
+                ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+
+        private fun ok (contents: String, ct : List<String>) =
+                PreparedResponseData(contents, ResponseStatus.OK, ct)
+
+        /**
+         * Use this to redirect to any particular page
+         */
+        fun redirectTo(path: String): PreparedResponseData {
+            return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: $path"))
+        }
 
         /**
          * This is our regex for looking at a client's request
