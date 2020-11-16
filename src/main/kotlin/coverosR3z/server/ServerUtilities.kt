@@ -1,9 +1,6 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.authentication.doGETRegisterPage
-import coverosR3z.authentication.handlePOSTRegister
-import coverosR3z.authentication.registerCSS
+import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
@@ -32,10 +29,10 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handleGet(rd: RequestData): PreparedResponseData {
         return when (rd.path){
             "", HOMEPAGE.path -> doGetHomePage(rd)
-            ENTER_TIME.path -> doGETEnterTimePage(rd)
+            ENTER_TIME.path -> doGETEnterTimePage(tru, rd)
             ENTER_TIMEJS.path -> okJS(enterTimeJS)
             ENTER_TIMECSS.path -> okCSS(enterTimeCSS)
-            TIMEENTRIES.path -> doGetTimeEntriesPage(rd)
+            TIMEENTRIES.path -> doGetTimeEntriesPage(tru, rd)
             CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
             EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name, tru.listAllEmployees()))
             LOGIN.path -> doGETLoginPage(rd)
@@ -54,14 +51,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
                     else -> handleNotFound()
                 }
             }
-        }
-    }
-
-    private fun doGetTimeEntriesPage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            okHTML(existingTimeEntriesHTML(rd.user.name, tru.getAllEntriesForEmployee(rd.user.employeeId ?: NO_EMPLOYEE.id)))
-        } else {
-            redirectTo(HOMEPAGE.path)
         }
     }
 
@@ -118,14 +107,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             redirectTo(AUTHHOMEPAGE.path)
         } else {
             okHTML(loginHTML)
-        }
-    }
-
-    private fun doGETEnterTimePage(rd : RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            okHTML(entertimeHTML(rd.user.name, tru.listAllProjects()))
-        } else {
-            redirectTo(HOMEPAGE.path)
         }
     }
 
