@@ -6,6 +6,7 @@ import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.misc.FileReader
+import coverosR3z.misc.checkParseToInt
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.*
 import java.time.LocalDate
@@ -180,9 +181,14 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePOSTRegister(user: User, data: Map<String, String>) : PreparedResponseData {
         return if (user == NO_USER) {
             val username = checkNotNull(data["username"]) {"username must not be missing"}
+            check(username.isNotBlank()) {"The username must not be blank"}
             val password = checkNotNull(data["password"])  {"password must not be missing"}
+            check(password.isNotBlank()) {"The password must not be blank"}
             val employeeId = checkNotNull(data["employee"])  {"employee must not be missing"}
-            val result = au.register(username, password, employeeId.toInt())
+            check(employeeId.isNotBlank()) {"The employee must not be blank"}
+            val employeeIdInt = checkParseToInt(employeeId){"Must be able to convert $employeeId to an int"}
+            check(employeeIdInt > 0) {"The employee id must be greater than zero"}
+            val result = au.register(username, password, employeeIdInt)
             if (result == RegistrationResult.SUCCESS) {
                 okHTML(successHTML)
             } else {
@@ -192,6 +198,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             redirectTo(AUTHHOMEPAGE.path)
         }
     }
+
 
     private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
         val isUnauthenticated = user == NO_USER

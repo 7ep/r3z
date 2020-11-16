@@ -1,5 +1,6 @@
 package coverosR3z.misc
 
+import java.lang.IllegalStateException
 import kotlin.random.Random
 
 /**
@@ -10,4 +11,16 @@ import kotlin.random.Random
 fun generateRandomString(size : Int): String {
     val randomBytes: ByteArray = Random.nextBytes(size)
     return randomBytes.joinToString("") { "%02x".format(it) }
+}
+
+/**
+ * Returns the value parsed as an int.  If this fails, returns
+ * an [IllegalStateException] with the message
+ */
+fun checkParseToInt(value: String, msg: () -> String): Int {
+    return try {
+        value.toInt()
+    } catch (ex: java.lang.NumberFormatException) {
+        throw IllegalStateException(msg())
+    }
 }

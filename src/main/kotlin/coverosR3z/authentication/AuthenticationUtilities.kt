@@ -8,6 +8,8 @@ import coverosR3z.logging.logInfo
 class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
 
     private val blacklistedPasswords = listOf("password")
+    private val minPasswordSize = 12
+    private val maxPasswordSize = 255
 
     /**
      * Register a user through auth persistent, providing a username, password, and
@@ -39,8 +41,8 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
     fun analyzeUsername(username: String): RegistrationUsernameResult {
         return when {
             username.isEmpty() -> RegistrationUsernameResult.EMPTY_USERNAME
-            username.length < 3 -> RegistrationUsernameResult.USERNAME_TOO_SHORT
-            username.length > 50 -> RegistrationUsernameResult.USERNAME_TOO_LONG
+            username.length < minUserNameSize -> RegistrationUsernameResult.USERNAME_TOO_SHORT
+            username.length > maxUserNameSize -> RegistrationUsernameResult.USERNAME_TOO_LONG
             ap.isUserRegistered(UserName(username)) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
             else -> RegistrationUsernameResult.SUCCESS
         }
@@ -53,8 +55,8 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
     fun analyzePassword(password: String): RegistrationPasswordResult {
         return when {
             password.isEmpty() -> RegistrationPasswordResult.EMPTY_PASSWORD
-            password.length < 12 -> RegistrationPasswordResult.PASSWORD_TOO_SHORT
-            password.length > 255 -> RegistrationPasswordResult.PASSWORD_TOO_LONG
+            password.length < minPasswordSize -> RegistrationPasswordResult.PASSWORD_TOO_SHORT
+            password.length > maxPasswordSize -> RegistrationPasswordResult.PASSWORD_TOO_LONG
             blacklistedPasswords.contains(password) -> RegistrationPasswordResult.BLACKLISTED_PASSWORD
             else -> RegistrationPasswordResult.SUCCESS
         }
