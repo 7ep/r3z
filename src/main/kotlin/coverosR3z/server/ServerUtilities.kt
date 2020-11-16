@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.doGETRegisterPage
 import coverosR3z.authentication.handlePOSTRegister
+import coverosR3z.authentication.registerCSS
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
