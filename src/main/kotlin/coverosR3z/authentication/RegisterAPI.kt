@@ -1,10 +1,10 @@
-package coverosR3z.server
+package coverosR3z.authentication
 
-import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.RegistrationResult
 import coverosR3z.domainobjects.User
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.failureHTML
 import coverosR3z.webcontent.registerHTML

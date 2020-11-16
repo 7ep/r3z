@@ -5,6 +5,7 @@ import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.authentication.handlePOSTRegister
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -51,7 +52,7 @@ class RegisterAPITests {
         val data = mapOf("username" to "",
                       "password" to DEFAULT_PASSWORD,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("The username must not be blank", ex.message)
     }
 
@@ -60,7 +61,7 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to "",
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("The password must not be blank", ex.message)
     }
 
@@ -69,7 +70,7 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
                       "employee" to "")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("The employee must not be blank", ex.message)
     }
 
@@ -79,7 +80,7 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
                       "employee" to employee)
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("Must be able to convert $employee to an int", ex.message)
     }
 
@@ -103,7 +104,7 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name,
               "password" to DEFAULT_PASSWORD,
               "employee" to "-10")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("The employee id must be greater than zero", ex.message)
     }
 
@@ -114,7 +115,7 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingUsername() {
         val data = mapOf("password" to DEFAULT_PASSWORD,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("username must not be missing", ex.message)
     }
 
@@ -125,7 +126,7 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingPassword() {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("password must not be missing", ex.message)
     }
 
@@ -136,7 +137,7 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingEmployee() {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD)
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("employee must not be missing", ex.message)
     }
 
