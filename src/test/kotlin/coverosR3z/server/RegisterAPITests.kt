@@ -5,6 +5,7 @@ import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.domainobjects.NO_USER
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.*
@@ -34,12 +35,10 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleValidInputs() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
+        val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
-                      "employee" to DEFAULT_EMPLOYEE.id.toString()))
-        val responseData = su.handleRequestAndRespond(rd)
+                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+        val responseData = handlePOSTRegister(au, NO_USER, data)
         assertTrue("The system should indicate success.  File was ${responseData.fileContents}",
                 responseData.fileContents.contains("SUCCESS"))
     }
@@ -49,46 +48,38 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_blankName() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to "",
+        val data = mapOf("username" to "",
                       "password" to DEFAULT_PASSWORD,
-                      "employee" to DEFAULT_EMPLOYEE.id.toString()))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("The username must not be blank", ex.message)
     }
 
     @Test
     fun testShouldHandleInvalidInputs_blankPassword() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
+        val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to "",
-                      "employee" to DEFAULT_EMPLOYEE.id.toString()))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("The password must not be blank", ex.message)
     }
 
     @Test
     fun testShouldHandleInvalidInputs_blankEmployee() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
+        val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
-                      "employee" to ""))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+                      "employee" to "")
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("The employee must not be blank", ex.message)
     }
 
     @Test
     fun testShouldHandleInvalidInputs_nonNumericEmployee() {
         val employee = "abc"
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
+        val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
-                      "employee" to employee))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+                      "employee" to employee)
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("Must be able to convert $employee to an int", ex.message)
     }
 
@@ -97,12 +88,10 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_ZeroEmployee() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
-                      "password" to DEFAULT_PASSWORD,
-                      "employee" to "0"))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+        val data = mapOf("username" to DEFAULT_USER.name,
+              "password" to DEFAULT_PASSWORD,
+              "employee" to "0")
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
         assertEquals("The employee id must be greater than zero", ex.message)
     }
 
@@ -111,12 +100,10 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_NegativeEmployee() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
-                      "password" to DEFAULT_PASSWORD,
-                      "employee" to "-10"))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+        val data = mapOf("username" to DEFAULT_USER.name,
+              "password" to DEFAULT_PASSWORD,
+              "employee" to "-10")
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("The employee id must be greater than zero", ex.message)
     }
 
@@ -125,11 +112,9 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_missingUsername() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("password" to DEFAULT_PASSWORD,
-                      "employee" to DEFAULT_EMPLOYEE.id.toString()))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+        val data = mapOf("password" to DEFAULT_PASSWORD,
+                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("username must not be missing", ex.message)
     }
 
@@ -138,11 +123,9 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_missingPassword() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
-                      "employee" to DEFAULT_EMPLOYEE.id.toString()))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+        val data = mapOf("username" to DEFAULT_USER.name,
+                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("password must not be missing", ex.message)
     }
 
@@ -151,11 +134,9 @@ class RegisterAPITests {
      */
     @Test
     fun testShouldHandleInvalidInputs_missingEmployee() {
-        val rd = RequestData(Verb.POST,
-                NamedPaths.REGISTER.path,
-                mapOf("username" to DEFAULT_USER.name,
-                      "password" to DEFAULT_PASSWORD))
-        val ex = assertThrows(IllegalStateException::class.java){su.handleRequestAndRespond(rd)}
+        val data = mapOf("username" to DEFAULT_USER.name,
+                      "password" to DEFAULT_PASSWORD)
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTRegister(au, NO_USER, data)}
         assertEquals("employee must not be missing", ex.message)
     }
 
