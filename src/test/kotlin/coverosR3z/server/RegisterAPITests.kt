@@ -13,9 +13,9 @@ import org.junit.Test
 import java.lang.IllegalStateException
 
 /**
- * Tests related to registering a user
+ * Tests related to registering a user through the API
  */
-class RegisterTests {
+class RegisterAPITests {
 
     lateinit var au : IAuthenticationUtilities
     lateinit var tru : ITimeRecordingUtilities
