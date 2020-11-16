@@ -1,6 +1,31 @@
-package coverosR3z.webcontent
+package coverosR3z.authentication
 
+import coverosR3z.domainobjects.NO_EMPLOYEE
 import coverosR3z.domainobjects.Project
+import coverosR3z.domainobjects.TimeEntry
+import coverosR3z.server.NamedPaths
+import coverosR3z.server.PreparedResponseData
+import coverosR3z.server.RequestData
+import coverosR3z.server.ServerUtilities
+import coverosR3z.timerecording.ITimeRecordingUtilities
+
+fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
+    return if (ServerUtilities.isAuthenticated(rd)) {
+        ServerUtilities.okHTML(existingTimeEntriesHTML(rd.user.name, tru.getAllEntriesForEmployee(rd.user.employeeId
+                ?: NO_EMPLOYEE.id)))
+    } else {
+        ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+    }
+}
+
+fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): PreparedResponseData {
+    return if (ServerUtilities.isAuthenticated(rd)) {
+        ServerUtilities.okHTML(entertimeHTML(rd.user.name, tru.listAllProjects()))
+    } else {
+        ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+    }
+}
+
 
 fun entertimeHTML(username: String, projects : List<Project>) : String {
     return """
@@ -241,3 +266,50 @@ div.banner h2.titleheader a:visited {
 val enterTimeJS = """
     console.log("Hello from JavaScript land")
 """
+
+
+fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
+    return """
+<html>
+    <head>
+        <title>your time entries</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        table,
+        td {
+            border: 1px solid #333;
+        }
+
+        thead,
+        tfoot {
+            background-color: #333;
+            color: #fff;
+        }
+
+        </style>
+    </head>
+    <body>
+        <p>
+            Here are your entries, <span id="username">$username</span>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Time</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+""" +
+            te.joinToString("") { "<tr><td>${it.project.name}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
+            """    
+            </tbody>
+        </table>
+
+    </body>
+</html>
+"""
+}
