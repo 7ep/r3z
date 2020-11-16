@@ -5,6 +5,10 @@ import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 
 private const val maxUserCount = 100_000_000
+const val maxUserNameSize = 50
+const val minUserNameSize = 3
+private const val tooLargeNameMsg = "Username is too large. Max is $maxUserNameSize"
+private const val tooSmallNameMsg = "Username is too small. Min is $minUserNameSize"
 private const val maxUserMsg = "No way this company has more than 100 million users"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
@@ -31,6 +35,8 @@ val SYSTEM_USER = User(maxUserCount-2, "SYSTEM", Hash.createHash(""), "THIS REPR
 data class UserName(val value: String){
     init {
         require(value.isNotBlank()) {nameCannotBeEmptyMsg}
+        require(value.length <= maxUserNameSize) {tooLargeNameMsg}
+        require(value.length >= minUserNameSize) { tooSmallNameMsg}
     }
 }
 

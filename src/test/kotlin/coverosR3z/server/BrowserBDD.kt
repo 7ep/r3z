@@ -2,6 +2,7 @@ package coverosR3z.server
 
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
+import coverosR3z.DEFAULT_USER
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
@@ -103,7 +104,7 @@ class BrowserBDD {
         assertEquals("404 error", chromeDriver.title)
 
         // enter a few new projects
-        val projects = listOf("BDD", "FTA")
+        val projects = listOf("BDD")
         for (project in projects) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
             chromeDriver.findElementById("project_name").sendKeys(project)
@@ -111,7 +112,7 @@ class BrowserBDD {
         }
 
         // enter a new employee
-        val employees = listOf("matt", "byron")
+        val employees = listOf(DEFAULT_USER.name)
         for (employee in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
             chromeDriver.findElementById("employee_name").sendKeys(employee)

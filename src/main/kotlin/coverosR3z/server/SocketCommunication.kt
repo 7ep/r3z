@@ -29,6 +29,7 @@ class SocketCommunication(val port : Int) {
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         tru.createEmployee(EmployeeName("Administrator"))
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        logInfo("System is ready")
         while (true) {
                 logInfo("waiting for socket connection")
                 val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
