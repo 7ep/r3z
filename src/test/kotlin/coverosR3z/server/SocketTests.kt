@@ -6,9 +6,6 @@ import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
 import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.misc.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.webcontent.badRequestHTML
-import coverosR3z.webcontent.notFoundHTML
-import coverosR3z.webcontent.unauthorizedHTML
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

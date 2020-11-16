@@ -8,8 +8,6 @@ import coverosR3z.misc.FileReader
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.*
-import java.time.LocalDate
-
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
                       private val tru: ITimeRecordingUtilities) {
@@ -59,7 +57,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
      */
     private fun handlePost(rd: RequestData) : PreparedResponseData {
         return when (rd.path) {
-            ENTER_TIME.path -> handlePOSTTimeEntry(rd.user, rd.data)
+            ENTER_TIME.path -> handlePOSTTimeEntry(tru, rd.user, rd.data)
             CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(rd.user, rd.data)
             LOGIN.path -> handlePOSTLogin(rd.user, rd.data)
             REGISTER.path -> handlePOSTRegister(au, rd.user, rd.data)
@@ -110,18 +108,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun handleBadRequest(): PreparedResponseData {
-        return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
-    }
-
-    private fun handleNotFound(): PreparedResponseData {
-        return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
-    }
-
-    private fun handleUnauthorized() : PreparedResponseData {
-        return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
-    }
-
     private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
@@ -131,9 +117,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             handleUnauthorized()
         }
     }
-
-
-
 
     private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
         val isUnauthenticated = user == NO_USER
@@ -157,31 +140,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
             tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"]){"The employee_name must not be missing"}))
-            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-        } else {
-            handleUnauthorized()
-        }
-    }
-
-    private fun handlePOSTTimeEntry(user: User, data: Map<String, String>) : PreparedResponseData {
-        val isAuthenticated = user != NO_USER
-        return if (isAuthenticated) {
-            val projectId = checkNotNull(data["project_entry"]){"project_entry must not be null"}.toInt()
-            val time = Time(checkNotNull(data["time_entry"]){"time_entry must not be null"}.toInt())
-            val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be null"})
-
-            val project = tru.findProjectById(projectId)
-            val employee = tru.findEmployeeById(checkNotNull(user.employeeId){"employeeId must not be null"})
-
-            val timeEntry = TimeEntryPreDatabase(
-                    employee,
-                    project,
-                    time,
-                    Date(LocalDate.now().toEpochDay().toInt()),
-                    details)
-
-            tru.recordTime(timeEntry)
-
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()

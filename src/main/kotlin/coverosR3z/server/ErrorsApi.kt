@@ -1,4 +1,16 @@
-package coverosR3z.webcontent
+package coverosR3z.server
+
+fun handleBadRequest(): PreparedResponseData {
+    return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
+}
+
+fun handleNotFound(): PreparedResponseData {
+    return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
+}
+
+fun handleUnauthorized() : PreparedResponseData {
+    return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
+}
 
 val badRequestHTML = """
 <html>

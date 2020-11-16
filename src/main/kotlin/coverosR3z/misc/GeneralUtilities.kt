@@ -17,7 +17,7 @@ fun generateRandomString(size : Int): String {
  * Returns the value parsed as an int.  If this fails, returns
  * an [IllegalStateException] with the message
  */
-fun checkParseToInt(value: String, msg: () -> String): Int {
+fun checkParseToInt(value: String, msg: () -> String = {"Must be able to parse $value as integer"}): Int {
     return try {
         value.toInt()
     } catch (ex: java.lang.NumberFormatException) {

@@ -21,13 +21,11 @@ class RegisterAPITests {
 
     lateinit var au : IAuthenticationUtilities
     lateinit var tru : ITimeRecordingUtilities
-    lateinit var su : ServerUtilities
 
     @Before
     fun init() {
         au = FakeAuthenticationUtilities()
         tru = FakeTimeRecordingUtilities()
-        su = ServerUtilities(au, tru)
     }
 
     /**
@@ -39,9 +37,18 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name,
                       "password" to DEFAULT_PASSWORD,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val responseData = handlePOSTRegister(au, NO_USER, data)
-        assertTrue("The system should indicate success.  File was ${responseData.fileContents}",
-                responseData.fileContents.contains("SUCCESS"))
+        val responseData = handlePOSTRegister(au, NO_USER, data).fileContents
+        assertTrue("The system should indicate success.  File was $responseData",
+                responseData.contains("SUCCESS"))
+    }
+
+    /**
+     * If already authenticated, redirect to the AUTHHOMEPAGE
+     */
+    @Test
+    fun testShouldHandleInvalidInputs_alreadyAuthenticated() {
+        val responseData = handlePOSTRegister(au, DEFAULT_USER, emptyMap())
+        assertEquals(ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path), responseData)
     }
 
     /**
@@ -81,7 +88,7 @@ class RegisterAPITests {
                       "password" to DEFAULT_PASSWORD,
                       "employee" to employee)
         val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("Must be able to convert $employee to an int", ex.message)
+        assertEquals("Must be able to parse $employee as integer", ex.message)
     }
 
     /**

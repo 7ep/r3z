@@ -1,13 +1,11 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.NO_EMPLOYEE
-import coverosR3z.domainobjects.Project
-import coverosR3z.domainobjects.TimeEntry
-import coverosR3z.server.NamedPaths
-import coverosR3z.server.PreparedResponseData
-import coverosR3z.server.RequestData
-import coverosR3z.server.ServerUtilities
+import coverosR3z.domainobjects.*
+import coverosR3z.misc.checkParseToInt
+import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
+import coverosR3z.webcontent.successHTML
+import java.time.LocalDate
 
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (ServerUtilities.isAuthenticated(rd)) {
@@ -23,6 +21,35 @@ fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): Prepare
         ServerUtilities.okHTML(entertimeHTML(rd.user.name, tru.listAllProjects()))
     } else {
         ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+    }
+}
+
+
+fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
+    val isAuthenticated = user != NO_USER
+    return if (isAuthenticated) {
+        val projectIdString = checkNotNull(data["project_entry"]){"project_entry must not be missing"}
+        val projectId = ProjectId(checkParseToInt(projectIdString))
+        val timeString = checkNotNull(data["time_entry"]){"time_entry must not be missing"}
+        val time = Time(checkParseToInt(timeString))
+        val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be missing"})
+
+        val project = tru.findProjectById(projectId.id)
+        val employeeId = checkNotNull(user.employeeId){"employeeId must not be missing"}
+        val employee = tru.findEmployeeById(employeeId)
+
+        val timeEntry = TimeEntryPreDatabase(
+                employee,
+                project,
+                time,
+                Date(LocalDate.now().toEpochDay().toInt()),
+                details)
+
+        tru.recordTime(timeEntry)
+
+        PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+    } else {
+        handleUnauthorized()
     }
 }
 

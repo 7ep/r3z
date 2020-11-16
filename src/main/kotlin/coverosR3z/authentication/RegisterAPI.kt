@@ -28,7 +28,7 @@ fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<Strin
         check(password.isNotBlank()) {"The password must not be blank"}
         val employeeId = checkNotNull(data["employee"])  {"employee must not be missing"}
         check(employeeId.isNotBlank()) {"The employee must not be blank"}
-        val employeeIdInt = checkParseToInt(employeeId){"Must be able to convert $employeeId to an int"}
+        val employeeIdInt = checkParseToInt(employeeId)
         check(employeeIdInt > 0) {"The employee id must be greater than zero"}
         val result = au.register(username, password, employeeIdInt)
         if (result == RegistrationResult.SUCCESS) {
