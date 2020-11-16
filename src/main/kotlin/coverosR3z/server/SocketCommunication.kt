@@ -8,9 +8,11 @@ import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.server.ServerUtilities.Companion.okHTML
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
+import coverosR3z.webcontent.generalMessageHTML
 import java.net.ServerSocket
 
 /**
@@ -43,13 +45,19 @@ class SocketCommunication(val port : Int) {
 
     companion object {
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
-            val requestData = ServerUtilities.parseClientRequest(server, au)
+            val responseData = try {
+                val requestData = ServerUtilities.parseClientRequest(server, au)
 
-            // now that we know who the user is (if they authenticated) we can update the current user
-            val truWithUser = tru.changeUser(CurrentUser(requestData.user))
+                // now that we know who the user is (if they authenticated) we can update the current user
+                val truWithUser = tru.changeUser(CurrentUser(requestData.user))
 
-            val responseData = ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
+                ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
+            } catch (ex : Exception) {
+                okHTML(generalMessageHTML(ex.stackTraceToString()))
+            }
+
             ServerUtilities.returnData(server, responseData)
+
         }
     }
 
