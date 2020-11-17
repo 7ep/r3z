@@ -75,7 +75,13 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     companion object {
 
-        val isAuthenticated = {rd : RequestData -> rd.user != NO_USER}
+        fun isAuthenticated(u : User) : Boolean {
+            return u != NO_USER
+        }
+
+        fun isAuthenticated(rd : RequestData) : Boolean {
+            return rd.user != NO_USER
+        }
 
         /**
          * If you are responding with a success message and it is HTML

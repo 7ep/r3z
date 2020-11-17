@@ -2,14 +2,13 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
-import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.server.*
+import coverosR3z.server.ServerUtilities.Companion.isAuthenticated
 import coverosR3z.webcontent.successHTML
 
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
-    val isAuthenticated = user != NO_USER
-    return if (isAuthenticated) {
+    return if (isAuthenticated(user)) {
         tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"]){"The employee_name must not be missing"}))
         PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
     } else {
@@ -18,7 +17,7 @@ fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<St
 }
 
 fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
-    return if (ServerUtilities.isAuthenticated(rd)) {
+    return if (isAuthenticated(rd)) {
         ServerUtilities.okHTML(createEmployeeHTML(rd.user.name.value))
     } else {
         ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
