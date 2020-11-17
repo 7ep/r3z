@@ -23,9 +23,9 @@ class PureMemoryDatabaseTests {
     fun `should be able to add a new project`() {
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
 
-        val project = pmd.getProjectById(DEFAULT_PROJECT.id)
+        val project = pmd.getProjectById(DEFAULT_PROJECT.id.value)
 
-        assertEquals(1, project.id)
+        assertEquals(ProjectId(1), project.id)
     }
 
     @Test

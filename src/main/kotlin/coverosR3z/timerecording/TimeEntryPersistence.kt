@@ -17,7 +17,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      * this timeentry don't exist in the list of projects / employees
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(pmd.getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
+        check(pmd.getProjectById(entry.project.id.value) != NO_PROJECT) {"a time entry with no project is invalid"}
         check(pmd.getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
     }
 
@@ -25,7 +25,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         logInfo("Recording a new project, ${projectName.value}, to the database")
         val newId = pmd.addNewProject(projectName)
         check(newId > 0) {"A valid project will receive a positive id"}
-        return Project(newId, projectName.value)
+        return Project(ProjectId(newId), ProjectName(projectName.value))
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {

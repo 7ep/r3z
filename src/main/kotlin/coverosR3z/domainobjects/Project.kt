@@ -11,7 +11,7 @@ private const val minIdMsg = "Valid identifier values are 1 or above"
  * This is used to represent no project - just to avoid using null for a project
  * It's a typed null, essentially
  */
-val NO_PROJECT = Project(maximumProjectsCount-1, "THIS REPRESENTS NO PROJECT")
+val NO_PROJECT = Project(ProjectId(maximumProjectsCount-1), ProjectName("THIS REPRESENTS NO PROJECT"))
 
 /**
  * When we just have a name (like when adding a new project, or searching)
@@ -23,23 +23,17 @@ data class ProjectName(val value: String) {
     }
 }
 
+@Serializable
+data class ProjectId(val value: Int) {
+    init {
+        require(value > 0) {minIdMsg}
+        require(value < maximumProjectsCount) { maxProjectErrorMsg }
+    }
+}
+
 /**
  * A full Project object
  */
 @Serializable
-data class Project(val id: Int, val name: String) {
+data class Project(val id: ProjectId, val name: ProjectName)
 
-    init {
-        require(name.isNotEmpty()) {emptyProjectNameMsg}
-        require(id < maximumProjectsCount) { maxProjectErrorMsg }
-    }
-
-}
-
-@Serializable
-data class ProjectId(val id: Int) {
-    init {
-        require(id > 0) {minIdMsg}
-        require(id < maximumProjectsCount) { maxProjectErrorMsg }
-    }
-}
