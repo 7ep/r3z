@@ -40,6 +40,7 @@ private fun handleGet(sd : ServerData): PreparedResponseData {
         REGISTERCSS.path -> okCSS(registerCSS)
         CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
         LOGOUT.path -> doGETLogout(au, rd)
+        SHUTDOWN_SERVER.path -> handleGETShutdownServer(rd.user)
         else -> {
             val fileContents = FileReader.read(rd.path)
             if (fileContents == null) {
@@ -71,6 +72,15 @@ private fun handlePost(sd : ServerData) : PreparedResponseData {
         REGISTER.path -> handlePOSTRegister(au, user, data)
         CREATE_PROJECT.path -> handlePOSTCreatingProject(tru, user, data)
         else -> handleNotFound()
+    }
+}
+
+fun handleGETShutdownServer(user: User): PreparedResponseData {
+    return if (isAuthenticated(user)) {
+        SocketCommunication.shouldContinue = false
+        okHTML(successHTML)
+    } else {
+        redirectTo(homepageHTML)
     }
 }
 
