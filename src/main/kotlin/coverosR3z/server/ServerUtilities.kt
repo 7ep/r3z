@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logInfo
 import coverosR3z.misc.FileReader
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
@@ -144,6 +145,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             // read the first line for the fundamental request
             val clientRequest = server.readLine()
             val (verb, path) = parseFirstLine(clientRequest)
+            logInfo("Client requested $verb $path")
 
             val headers = getHeaders(server)
 

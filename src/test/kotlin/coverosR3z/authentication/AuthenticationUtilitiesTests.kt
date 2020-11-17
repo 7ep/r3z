@@ -100,6 +100,13 @@ class AuthenticationUtilitiesTests {
         assertEquals(RegistrationUsernameResult.USERNAME_TOO_SHORT, result)
     }
 
+    @Test
+    fun `An empty username should be indicated as such`() {
+        val result = authUtils.analyzeUsername("")
+
+        assertEquals(RegistrationUsernameResult.EMPTY_USERNAME, result)
+    }
+
     /**
      * Three-character usernames would be ok - maybe initials
      */

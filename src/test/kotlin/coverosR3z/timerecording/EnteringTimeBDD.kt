@@ -66,24 +66,6 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
-    @Test
-    @Ignore("Not yet done with this BDD test")
-    fun `I should be able to enter time through the web interface`() {
-        // Given I have worked 3 hours on "project a"
-        val (su, requestData, pmd) = registerUser()
-
-        // When I enter my time
-        su.handleRequestAndRespond(requestData)
-
-        // Then the system records the time properly
-        try {
-            assertEquals(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("")),
-                    pmd.getAllTimeEntriesForEmployee(DEFAULT_EMPLOYEE).single())
-        } catch (ex : Exception) {
-            logInfo("This BDD test is allowed to fail for now")
-        }
-    }
-
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
