@@ -5,7 +5,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.misc.FileReader
 import coverosR3z.server.NamedPaths.*
-import coverosR3z.timerecording.ITimeRecordingUtilities
+import coverosR3z.timerecording.*
 import coverosR3z.webcontent.*
 
 class ServerUtilities(private val au: IAuthenticationUtilities,
@@ -36,7 +36,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             REGISTER.path -> doGETRegisterPage(tru, rd)
             REGISTERCSS.path -> okCSS(registerCSS)
             CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
-            LOGOUT.path -> doGETLogout(rd)
+            LOGOUT.path -> doGETLogout(au, rd)
             else -> {
                 val fileContents = FileReader.read(rd.path)
                 if (fileContents == null) {
@@ -57,65 +57,19 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
     private fun handlePost(rd: RequestData) : PreparedResponseData {
         return when (rd.path) {
             ENTER_TIME.path -> handlePOSTTimeEntry(tru, rd.user, rd.data)
-            CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(rd.user, rd.data)
+            CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(tru, rd.user, rd.data)
             LOGIN.path -> handlePOSTLogin(au, rd.user, rd.data)
             REGISTER.path -> handlePOSTRegister(au, rd.user, rd.data)
-            CREATE_PROJECT.path -> handlePOSTCreatingProject(rd.user, rd.data)
+            CREATE_PROJECT.path -> handlePOSTCreatingProject(tru, rd.user, rd.data)
             else -> handleNotFound()
         }
     }
-
-    private fun doGETLogout(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            au.logout(rd.sessionToken)
-            PreparedResponseData(logoutHTML, ResponseStatus.OK, emptyList())
-        } else {
-            redirectTo(HOMEPAGE.path)
-        }
-    }
-
-    private fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            okHTML(createProjectHTML(rd.user.name.value))
-        } else {
-            redirectTo(HOMEPAGE.path)
-        }
-    }
-
 
     private fun doGetHomePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
             okHTML(authHomePageHTML(rd.user.name.value))
         } else {
             okHTML(homepageHTML)
-        }
-    }
-
-    private fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            okHTML(createEmployeeHTML(rd.user.name.value))
-        } else {
-            redirectTo(HOMEPAGE.path)
-        }
-    }
-
-    private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
-        val isAuthenticated = user != NO_USER
-        return if (isAuthenticated) {
-            tru.createProject(ProjectName(checkNotNull(data["project_name"]){"project_name must not be missing"}))
-            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-        } else {
-            handleUnauthorized()
-        }
-    }
-
-    private fun handlePOSTNewEmployee(user: User, data: Map<String, String>) : PreparedResponseData {
-        val isAuthenticated = user != NO_USER
-        return if (isAuthenticated) {
-            tru.createEmployee(EmployeeName(checkNotNull(data["employee_name"]){"The employee_name must not be missing"}))
-            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
-        } else {
-            handleUnauthorized()
         }
     }
 
