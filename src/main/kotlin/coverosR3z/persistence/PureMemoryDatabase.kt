@@ -48,7 +48,7 @@ class PureMemoryDatabase {
 
     fun addNewEmployee(employeename: EmployeeName) : Int {
         val newIndex = employees.size + 1
-        employees.add(Employee(newIndex, employeename.value))
+        employees.add(Employee(EmployeeId(newIndex), EmployeeName(employeename.value)))
         return newIndex
     }
 
@@ -105,7 +105,7 @@ class PureMemoryDatabase {
 
     fun getEmployeeById(id: Int): Employee {
         require(id > 0) {"all employees must have an id greater than zero"}
-        return employees.singleOrNull { u -> u.id == id} ?: NO_EMPLOYEE
+        return employees.singleOrNull { u -> u.id.value == id} ?: NO_EMPLOYEE
     }
 
     fun getAllEmployees() : List<Employee> {

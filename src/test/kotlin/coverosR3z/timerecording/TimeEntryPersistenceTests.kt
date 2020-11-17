@@ -25,17 +25,15 @@ class TimeEntryPersistenceTests {
     }
 
     @Test fun `can get all time entries by a employee`() {
-        val employeeName = EmployeeName("test")
-        val employee = Employee(1, employeeName.value)
-        tep.persistNewEmployee(employeeName)
+        tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newProject: Project = tep.persistNewProject(ProjectName("test project"))
-        val entry1 = createTimeEntryPreDatabase(employee = employee, project = newProject)
-        val entry2 = createTimeEntryPreDatabase(employee = employee, project = newProject)
+        val entry1 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject)
+        val entry2 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject)
         tep.persistNewTimeEntry(entry1)
         tep.persistNewTimeEntry(entry2)
         val expectedResult = listOf(entry1, entry2)
 
-        val actualResult = tep.readTimeEntries(employee)
+        val actualResult = tep.readTimeEntries(DEFAULT_EMPLOYEE)
 
         val msg = "what we entered and what we get back should be identical, instead got"
         val listOfResultsMinusId = actualResult.map { r -> TimeEntryPreDatabase(r.employee, r.project, r.time, r.date, r.details) }.toList()
@@ -119,7 +117,7 @@ class TimeEntryPersistenceTests {
     @Test
     fun `If a employee worked 8 hours a day for two days, we should get just 8 hours when checking one of those days`() {
         val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName(DEFAULT_EMPLOYEE.name))
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         tep.persistNewTimeEntry(
                 createTimeEntryPreDatabase(
                         employee = newEmployee,

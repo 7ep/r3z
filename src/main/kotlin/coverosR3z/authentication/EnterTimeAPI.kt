@@ -10,7 +10,7 @@ import java.time.LocalDate
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (ServerUtilities.isAuthenticated(rd)) {
         ServerUtilities.okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId
-                ?: NO_EMPLOYEE.id)))
+                ?: NO_EMPLOYEE.id.value)))
     } else {
         ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
     }

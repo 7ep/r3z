@@ -36,7 +36,7 @@ class RegisterAPITests {
     fun testShouldHandleValidInputs() {
         val data = mapOf("username" to DEFAULT_USER.name.value,
                       "password" to DEFAULT_PASSWORD,
-                      "employee" to DEFAULT_EMPLOYEE.id.toString())
+                      "employee" to DEFAULT_EMPLOYEE.id.value.toString())
         val responseData = handlePOSTRegister(au, NO_USER, data).fileContents
         assertTrue("The system should indicate success.  File was $responseData",
                 responseData.contains("SUCCESS"))

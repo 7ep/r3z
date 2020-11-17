@@ -43,7 +43,7 @@ class AuthenticationBDD {
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
         // When I register a new user
-        au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD, employee.id)
+        au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD, employee.id.value)
 
         // Then the system records that the registration succeeded
         assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name.value))

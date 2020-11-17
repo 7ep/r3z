@@ -23,8 +23,8 @@ val DEFAULT_SALT = Salt("12345")
 val DEFAULT_PASSWORD = "password1234"
 val DEFAULT_PASSWORD_HASH = "b9c950640e1b3740e98acb93e669c65766f6670dd1609ba91ff41052ba48c6f3"
 val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), Hash.createHash(DEFAULT_PASSWORD + DEFAULT_SALT), DEFAULT_SALT, 1)
-val DEFAULT_EMPLOYEE = Employee(1, "DefaultEmployee")
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
+val DEFAULT_EMPLOYEE = Employee(EmployeeId(1), DEFAULT_EMPLOYEE_NAME)
 val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
@@ -91,7 +91,7 @@ fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
         val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
 
-        au.register("alice", DEFAULT_PASSWORD, aliceEmployee.id)
+        au.register("alice", DEFAULT_PASSWORD, aliceEmployee.id.value)
         val (_, aliceUser) = au.login("alice", DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(aliceUser))

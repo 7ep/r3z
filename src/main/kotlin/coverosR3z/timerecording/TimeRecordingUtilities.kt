@@ -20,7 +20,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         val user = cu.user
         // ensure time entry user is the logged in user, or
         // is the system
-        if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
+        if (user != SYSTEM_USER && user.employeeId != entry.employee.id.value) {
             log.info("time was not recorded successfully: current user $user does not have access to modify time for ${entry.employee}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }

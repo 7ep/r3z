@@ -58,7 +58,7 @@ fun registerHTML(employees: List<Employee>) : String {
           <input class="un" type="text" align="center" name="username" id="username" placeholder="Username">
           <input class="pass" type="password" align="center" name="password" id="password" placeholder="Password">
            <select class="un" id="employee" name="employee">
-"""+employees.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
+"""+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
             """
             <option selected disabled hidden>Choose here</option>
           </select>
