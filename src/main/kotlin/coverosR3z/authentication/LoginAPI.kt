@@ -21,15 +21,15 @@ fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, 
             handleUnauthorized()
         }
     } else {
-        ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     }
 }
 
 fun doGETLoginPage(rd: RequestData): PreparedResponseData {
-    return if (ServerUtilities.isAuthenticated(rd)) {
-        ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+    return if (isAuthenticated(rd)) {
+        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     } else {
-        ServerUtilities.okHTML(loginHTML)
+        okHTML(loginHTML)
     }
 }
 
