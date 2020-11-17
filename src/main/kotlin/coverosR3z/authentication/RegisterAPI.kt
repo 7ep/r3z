@@ -12,8 +12,8 @@ import coverosR3z.webcontent.successHTML
 
 
 fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
-    return if (ServerUtilities.isAuthenticated(rd)) {
-        ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+    return if (isAuthenticated(rd)) {
+        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     } else {
         val employees = tru.listAllEmployees()
         PreparedResponseData(registerHTML(employees), ResponseStatus.OK)
@@ -32,12 +32,12 @@ fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<Strin
         check(employeeIdInt > 0) {"The employee id must be greater than zero"}
         val result = au.register(username, password, employeeIdInt)
         if (result == RegistrationResult.SUCCESS) {
-            ServerUtilities.okHTML(successHTML)
+            okHTML(successHTML)
         } else {
             PreparedResponseData(failureHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         }
     } else {
-        ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     }
 }
 
