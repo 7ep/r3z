@@ -47,9 +47,9 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         } catch (ex: Exception) {
             logInfo("Analysis of username failed during registration.  Message: ${ex.message ?: "(NO MESSAGE)"}")
             when (ex.message){
-                "Username is too small. Min is $minUserNameSize" -> RegistrationUsernameResult.USERNAME_TOO_SHORT
-                "Username is too large. Max is $maxUserNameSize" -> RegistrationUsernameResult.USERNAME_TOO_LONG
-                "All users must have a non-empty name" -> RegistrationUsernameResult.EMPTY_USERNAME
+                tooSmallUsernameMsg -> RegistrationUsernameResult.USERNAME_TOO_SHORT
+                tooLargeUsernameMsg -> RegistrationUsernameResult.USERNAME_TOO_LONG
+                usernameCannotBeEmptyMsg -> RegistrationUsernameResult.EMPTY_USERNAME
                else -> RegistrationUsernameResult.FAILED_UNKNOWN
             }
         }

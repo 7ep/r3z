@@ -7,11 +7,11 @@ import java.security.MessageDigest
 private const val maxUserCount = 100_000_000
 const val maxUserNameSize = 50
 const val minUserNameSize = 3
-private const val tooLargeNameMsg = "Username is too large. Max is $maxUserNameSize"
-private const val tooSmallNameMsg = "Username is too small. Min is $minUserNameSize"
+const val tooLargeUsernameMsg = "Username is too large. Max is $maxUserNameSize"
+const val tooSmallUsernameMsg = "Username is too small. Min is $minUserNameSize"
 private const val maxUserMsg = "No way this company has more than 100 million users"
 private const val minIdMsg = "Valid identifier values are 1 or above"
-private const val nameCannotBeEmptyMsg = "All users must have a non-empty name"
+const val usernameCannotBeEmptyMsg = "All users must have a non-empty name"
 private val md = MessageDigest.getInstance("SHA-256")
 
 /**
@@ -34,9 +34,9 @@ val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHa
 @Serializable
 data class UserName(val value: String){
     init {
-        require(value.isNotBlank()) {nameCannotBeEmptyMsg}
-        require(value.length <= maxUserNameSize) {tooLargeNameMsg}
-        require(value.length >= minUserNameSize) { tooSmallNameMsg}
+        require(value.isNotBlank()) {usernameCannotBeEmptyMsg}
+        require(value.length <= maxUserNameSize) {tooLargeUsernameMsg}
+        require(value.length >= minUserNameSize) { tooSmallUsernameMsg}
     }
 }
 

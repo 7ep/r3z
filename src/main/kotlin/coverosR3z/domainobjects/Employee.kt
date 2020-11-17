@@ -7,7 +7,7 @@ private const val maxEmployeeNameSize = 30
 private const val maxEmployeeNameSizeMsg = "Max size of employee name is $maxEmployeeNameSize"
 private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
 private const val minIdMsg = "Valid identifier values are 1 or above"
-private const val nameCannotBeEmptyMsg = "All employees must have a non-empty name"
+private const val employeeNameCannotBeEmptyMsg = "All employees must have a non-empty name"
 
 /**
  * This is used to represent no employee - just to avoid using null for an employee
@@ -21,7 +21,7 @@ val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount-1), EmployeeName("THIS RE
 @Serializable
 data class EmployeeName(val value: String) {
     init {
-        require(value.isNotEmpty()) {nameCannotBeEmptyMsg}
+        require(value.isNotEmpty()) {employeeNameCannotBeEmptyMsg}
         require(value.length <= maxEmployeeNameSize) {maxEmployeeNameSizeMsg}
     }
 }
