@@ -48,7 +48,7 @@ class RegisterAPITests {
     @Test
     fun testShouldHandleInvalidInputs_alreadyAuthenticated() {
         val responseData = handlePOSTRegister(au, DEFAULT_USER, emptyMap())
-        assertEquals(ServerUtilities.redirectTo(NamedPaths.AUTHHOMEPAGE.path), responseData)
+        assertEquals(redirectTo(NamedPaths.AUTHHOMEPAGE.path), responseData)
     }
 
     /**

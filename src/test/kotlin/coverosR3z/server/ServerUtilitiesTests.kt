@@ -3,10 +3,6 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.getTime
-import coverosR3z.server.ServerUtilities.Companion.extractSessionTokenFromHeaders
-import coverosR3z.server.ServerUtilities.Companion.extractLengthOfPostBodyFromHeaders
-import coverosR3z.server.ServerUtilities.Companion.parseFirstLine
-import coverosR3z.server.ServerUtilities.Companion.parsePostedData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
@@ -18,13 +14,11 @@ class ServerUtilitiesTests {
 
     private lateinit var au : FakeAuthenticationUtilities
     private lateinit var tru : FakeTimeRecordingUtilities
-    private lateinit var su : ServerUtilities
 
     @Before
     fun init() {
         au = FakeAuthenticationUtilities()
         tru = FakeTimeRecordingUtilities()
-        su = ServerUtilities(au, tru)
     }
 
     /**
@@ -346,7 +340,7 @@ class ServerUtilitiesTests {
         val authCookie = "abc123"
         val expectedUser = DEFAULT_USER
         au.getUserForSessionBehavior = { DEFAULT_USER}
-        val user = ServerUtilities.extractUserFromAuthToken(authCookie, au)
+        val user = extractUserFromAuthToken(authCookie, au)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }
 
