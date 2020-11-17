@@ -4,7 +4,6 @@ import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
 import coverosR3z.server.*
-import coverosR3z.server.ServerUtilities.Companion.isAuthenticated
 import coverosR3z.webcontent.successHTML
 
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
@@ -18,9 +17,9 @@ fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<St
 
 fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
-        ServerUtilities.okHTML(createEmployeeHTML(rd.user.name.value))
+        okHTML(createEmployeeHTML(rd.user.name.value))
     } else {
-        ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+        redirectTo(NamedPaths.HOMEPAGE.path)
     }
 }
 

@@ -9,7 +9,6 @@ import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.Logger
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.server.ServerUtilities.Companion.okHTML
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
@@ -46,18 +45,18 @@ class SocketCommunication(val port : Int) {
     companion object {
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
             val responseData = try {
-                val requestData = ServerUtilities.parseClientRequest(server, au)
+                val requestData = parseClientRequest(server, au)
 
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(requestData.user)
                 val truWithUser = tru.changeUser(cu)
                 Logger(cu).info("client requested ${requestData.verb} ${requestData.path}")
-                ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
+                handleRequestAndRespond(ServerData(au, tru, requestData))
             } catch (ex : Exception) {
                 okHTML(generalMessageHTML(ex.stackTraceToString()))
             }
 
-            ServerUtilities.returnData(server, responseData)
+            returnData(server, responseData)
 
         }
     }
