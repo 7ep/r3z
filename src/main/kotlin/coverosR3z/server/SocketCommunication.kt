@@ -6,6 +6,7 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.logging.Logger
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.server.ServerUtilities.Companion.okHTML
@@ -48,8 +49,9 @@ class SocketCommunication(val port : Int) {
                 val requestData = ServerUtilities.parseClientRequest(server, au)
 
                 // now that we know who the user is (if they authenticated) we can update the current user
-                val truWithUser = tru.changeUser(CurrentUser(requestData.user))
-
+                val cu = CurrentUser(requestData.user)
+                val truWithUser = tru.changeUser(cu)
+                Logger(cu).info("client requested ${requestData.verb} ${requestData.path}")
                 ServerUtilities(au, truWithUser).handleRequestAndRespond(requestData)
             } catch (ex : Exception) {
                 okHTML(generalMessageHTML(ex.stackTraceToString()))

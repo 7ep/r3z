@@ -145,7 +145,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             // read the first line for the fundamental request
             val clientRequest = server.readLine()
             val (verb, path) = parseFirstLine(clientRequest)
-            logInfo("Client requested $verb $path")
 
             val headers = getHeaders(server)
 
