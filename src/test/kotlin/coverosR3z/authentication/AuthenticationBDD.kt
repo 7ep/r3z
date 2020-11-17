@@ -115,10 +115,10 @@ class AuthenticationBDD {
     @Test
     fun `when I login successfully, persistent authentication is enabled`() {
         // Given I have registered
-        val (su, requestData, _) = registerUser()
+        val (au, requestData, _) = registerUser()
 
         // When I enter valid credentials
-        val responseData: PreparedResponseData = su.handleRequestAndRespond(requestData)
+        val responseData: PreparedResponseData = handleRequestAndRespond(ServerData(au, FakeTimeRecordingUtilities(), requestData))
 
         // Then the system provides a cookie to enable authenticated use
         assertTrue("headers should contain cookie.  Headers were: ${responseData.headers}", responseData.headers.any{h -> h.startsWith("Set-Cookie: sessionId=")})
@@ -143,17 +143,15 @@ class AuthenticationBDD {
             return Pair(tru, sarah)
         }
 
-        fun registerUser(): Triple<ServerUtilities, RequestData, PureMemoryDatabase> {
+        fun registerUser(): Triple<IAuthenticationUtilities, RequestData, PureMemoryDatabase> {
             val pmd = PureMemoryDatabase()
             val authPersistence = AuthenticationPersistence(pmd)
             val au = AuthenticationUtilities(authPersistence)
             val regStatus = au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
             assertEquals(RegistrationResult.SUCCESS, regStatus)
-            val tru = FakeTimeRecordingUtilities()
-            val su = ServerUtilities(au, tru)
             val postedData = mapOf("username" to DEFAULT_USER.name.value, "password" to DEFAULT_PASSWORD)
             val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.path, postedData, NO_USER)
-            return Triple(su, requestData, pmd)
+            return Triple(au, requestData, pmd)
         }
     }
 

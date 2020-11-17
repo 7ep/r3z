@@ -2,8 +2,6 @@ package coverosR3z.server
 
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
-import coverosR3z.server.ServerUtilities.Companion.contentLengthRegex
-import coverosR3z.server.ServerUtilities.Companion.getHeaders
 import coverosR3z.misc.FileReader
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.AfterClass
@@ -128,7 +126,7 @@ class SocketTests() {
         client.write("Content-Length: 100\n")
         client.write("\n")
 
-        val parseClientRequest = ServerUtilities.parseClientRequest(server, au)
+        val parseClientRequest = parseClientRequest(server, au)
         assertEquals("For this GET, we should receive certain data", expectedRequest, parseClientRequest)
     }
 
@@ -145,7 +143,7 @@ class SocketTests() {
         client.write("\n")
         client.write("foo=bar&baz=feh")
 
-        val parseClientRequest = ServerUtilities.parseClientRequest(server, au)
+        val parseClientRequest = parseClientRequest(server, au)
         assertEquals("For this POST, we should receive certain data", expectedRequest, parseClientRequest)
     }
 
