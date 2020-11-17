@@ -30,7 +30,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = recordSomeEntriesInDatabase()
 
         // When I request my time entries
-        val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id.value)
 
         // Then I see all of them
         allEntriesArePresent(entries, dbEntries)

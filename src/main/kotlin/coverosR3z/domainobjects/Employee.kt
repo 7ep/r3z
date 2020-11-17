@@ -11,7 +11,7 @@ private const val nameCannotBeEmptyMsg = "All employees must have a non-empty na
  * This is used to represent no employee - just to avoid using null for an employee
  * It's a typed null, essentially
  */
-val NO_EMPLOYEE = Employee(maxEmployeeCount-1, "THIS REPRESENTS NO EMPLOYEE")
+val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount-1), EmployeeName("THIS REPRESENTS NO EMPLOYEE"))
 
 /**
  * Holds a employee's name before we have a whole object, like [Employee]
@@ -24,15 +24,14 @@ data class EmployeeName(val value: String) {
 }
 
 @Serializable
-data class Employee(val id: Int, val name: String) {
-
+data class EmployeeId(val value: Int) {
     init {
-        require(name.isNotEmpty()) {nameCannotBeEmptyMsg}
-        require(id < maxEmployeeCount) { maxEmployeeMsg }
-        require(id > 0) { minIdMsg }
+        require(value < maxEmployeeCount) { maxEmployeeMsg }
+        require(value > 0) { minIdMsg }
     }
-
 }
 
+@Serializable
+data class Employee(val id: EmployeeId, val name: EmployeeName)
 
 

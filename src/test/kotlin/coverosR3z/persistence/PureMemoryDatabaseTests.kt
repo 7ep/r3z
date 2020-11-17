@@ -32,9 +32,9 @@ class PureMemoryDatabaseTests {
     fun `should be able to add a new employee`() {
         pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
 
-        val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id)
+        val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id.value)
 
-        assertEquals(1, employee.id)
+        assertEquals(1, employee.id.value)
     }
 
     @Test
@@ -144,7 +144,7 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun `should not be able to get minutes recorded for an unregistered employee`() {
-        assertThrows(EmployeeNotRegisteredException::class.java) {pmd.getMinutesRecordedOnDate(Employee(7, "Harold"), A_RANDOM_DAY_IN_JUNE_2020)}
+        assertThrows(EmployeeNotRegisteredException::class.java) {pmd.getMinutesRecordedOnDate(Employee(EmployeeId(7), EmployeeName("Harold")), A_RANDOM_DAY_IN_JUNE_2020)}
     }
 
     /**
