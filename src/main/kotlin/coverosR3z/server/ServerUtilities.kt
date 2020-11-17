@@ -8,20 +8,26 @@ import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
 import coverosR3z.webcontent.*
 
+data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
+
 /**
  * Examine the request and take proper action, returning a
  * proper response
  */
-fun handleRequestAndRespond(requestData: RequestData): PreparedResponseData {
-    return when (requestData.verb) {
-        Verb.POST -> handlePost(requestData)
-        Verb.GET -> handleGet(requestData)
+fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
+    return when (sd.rd.verb) {
+        Verb.POST -> handlePost(sd)
+        Verb.GET -> handleGet(sd)
         Verb.INVALID -> handleBadRequest()
     }
 }
 
-private fun handleGet(rd: RequestData): PreparedResponseData {
-    return when (rd.path){
+private fun handleGet(sd : ServerData): PreparedResponseData {
+    val path = sd.rd.path
+    val au = sd.au
+    val tru = sd.tru
+    val rd = sd.rd
+    return when (path){
         "", HOMEPAGE.path -> doGetHomePage(rd)
         ENTER_TIME.path -> doGETEnterTimePage(tru, rd)
         ENTER_TIMEJS.path -> okJS(enterTimeJS)
@@ -51,13 +57,19 @@ private fun handleGet(rd: RequestData): PreparedResponseData {
 /**
  * The user has sent us data, we have to process it
  */
-private fun handlePost(rd: RequestData) : PreparedResponseData {
-    return when (rd.path) {
-        ENTER_TIME.path -> handlePOSTTimeEntry(tru, rd.user, rd.data)
-        CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(tru, rd.user, rd.data)
-        LOGIN.path -> handlePOSTLogin(au, rd.user, rd.data)
-        REGISTER.path -> handlePOSTRegister(au, rd.user, rd.data)
-        CREATE_PROJECT.path -> handlePOSTCreatingProject(tru, rd.user, rd.data)
+private fun handlePost(sd : ServerData) : PreparedResponseData {
+    val path = sd.rd.path
+    val au = sd.au
+    val tru = sd.tru
+    val rd = sd.rd
+    val user = rd.user
+    val data = rd.data
+    return when (path) {
+        ENTER_TIME.path -> handlePOSTTimeEntry(tru, user, data)
+        CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(tru, user, data)
+        LOGIN.path -> handlePOSTLogin(au, user, data)
+        REGISTER.path -> handlePOSTRegister(au, user, data)
+        CREATE_PROJECT.path -> handlePOSTCreatingProject(tru, user, data)
         else -> handleNotFound()
     }
 }
