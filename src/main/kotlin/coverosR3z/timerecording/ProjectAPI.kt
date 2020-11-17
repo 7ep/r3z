@@ -18,10 +18,10 @@ fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Ma
 
 
 fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
-    return if (ServerUtilities.isAuthenticated(rd)) {
-        ServerUtilities.okHTML(createProjectHTML(rd.user.name.value))
+    return if (isAuthenticated(rd)) {
+        okHTML(createProjectHTML(rd.user.name.value))
     } else {
-        ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+        redirectTo(NamedPaths.HOMEPAGE.path)
     }
 }
 
