@@ -3,7 +3,6 @@ package coverosR3z.server
 import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
-import coverosR3z.logging.logInfo
 import coverosR3z.misc.FileReader
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -59,7 +58,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         return when (rd.path) {
             ENTER_TIME.path -> handlePOSTTimeEntry(tru, rd.user, rd.data)
             CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(rd.user, rd.data)
-            LOGIN.path -> handlePOSTLogin(rd.user, rd.data)
+            LOGIN.path -> handlePOSTLogin(au, rd.user, rd.data)
             REGISTER.path -> handlePOSTRegister(au, rd.user, rd.data)
             CREATE_PROJECT.path -> handlePOSTCreatingProject(rd.user, rd.data)
             else -> handleNotFound()
@@ -100,14 +99,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
         }
     }
 
-    private fun doGETLoginPage(rd: RequestData): PreparedResponseData {
-        return if (isAuthenticated(rd)) {
-            redirectTo(AUTHHOMEPAGE.path)
-        } else {
-            okHTML(loginHTML)
-        }
-    }
-
     private fun handlePOSTCreatingProject(user: User, data: Map<String, String>) : PreparedResponseData {
         val isAuthenticated = user != NO_USER
         return if (isAuthenticated) {
@@ -115,24 +106,6 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
         } else {
             handleUnauthorized()
-        }
-    }
-
-    private fun handlePOSTLogin(user: User, data: Map<String, String>) : PreparedResponseData {
-        val isUnauthenticated = user == NO_USER
-        return if (isUnauthenticated) {
-            val username = checkNotNull(data["username"]) {"username must not be missing"}
-            val password = checkNotNull(data["password"]) {"password must not be missing"}
-            val (loginResult, loginUser) = au.login(username, password)
-            if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
-                val newSessionToken: String = au.createNewSession(loginUser)
-                PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
-            } else {
-                logInfo("User ($username) failed to login")
-                handleUnauthorized()
-            }
-        } else {
-            redirectTo(AUTHHOMEPAGE.path)
         }
     }
 
