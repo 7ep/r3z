@@ -13,6 +13,7 @@ import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
+import java.util.concurrent.Executors
 
 /**
  * This is the top-level class that handles communication with clients.
@@ -31,18 +32,25 @@ class SocketCommunication(val port : Int) {
         tru.createEmployee(EmployeeName("Administrator"))
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         logInfo("System is ready")
-        while (true) {
-                logInfo("waiting for socket connection")
-                val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-                Thread {
-                    logInfo("client from ${server.socket.inetAddress?.hostAddress} has connected")
-                    handleRequest(server, au, tru)
-                    server.close()
-                }.start()
+
+        val cachedThreadPool = Executors.newCachedThreadPool()
+        while (shouldContinue) {
+            logInfo("waiting for socket connection")
+            val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
+            val thread = Thread {
+                logInfo("client from ${server.socket.inetAddress?.hostAddress} has connected")
+                handleRequest(server, au, tru)
+                server.close()
+            }
+            cachedThreadPool.submit(thread)
         }
+        halfOpenServerSocket.close()
     }
 
     companion object {
+
+        var shouldContinue = true
+
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
             val responseData = try {
                 val requestData = parseClientRequest(server, au)
@@ -51,7 +59,7 @@ class SocketCommunication(val port : Int) {
                 val cu = CurrentUser(requestData.user)
                 val truWithUser = tru.changeUser(cu)
                 Logger(cu).info("client requested ${requestData.verb} ${requestData.path}")
-                handleRequestAndRespond(ServerData(au, tru, requestData))
+                handleRequestAndRespond(ServerData(au, truWithUser, requestData))
             } catch (ex : Exception) {
                 okHTML(generalMessageHTML(ex.stackTraceToString()))
             }

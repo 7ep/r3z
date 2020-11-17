@@ -16,12 +16,12 @@ import java.net.ServerSocket
 import java.net.Socket
 
 
-lateinit var clientSocket : Socket
-lateinit var serverSocket : Socket
-lateinit var halfOpenServerSocket : ServerSocket
-lateinit var serverThread: Thread
-lateinit var server : SocketWrapper
-lateinit var client : SocketWrapper
+private lateinit var clientSocket : Socket
+private lateinit var serverSocket : Socket
+private lateinit var halfOpenServerSocket : ServerSocket
+private lateinit var serverThread: Thread
+private lateinit var server : SocketWrapper
+private lateinit var client : SocketWrapper
 
 class ServerSocketInitializer(): Runnable {
 

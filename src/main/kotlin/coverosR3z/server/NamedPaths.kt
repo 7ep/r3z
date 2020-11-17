@@ -38,4 +38,9 @@ enum class NamedPaths(val path: String) {
 
     // authenticated homepage
     AUTHHOMEPAGE("homepage"),
+
+    /**
+     * A special page, this shuts the server down
+     */
+    SHUTDOWN_SERVER("shutdown"),
 }

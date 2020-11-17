@@ -6,10 +6,10 @@ import coverosR3z.DEFAULT_USER
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
+import java.net.Socket
 
 
 /**
@@ -36,7 +36,8 @@ class BrowserBDD {
         @AfterClass @JvmStatic
         fun cleanup() {
             // stop the server
-            sc.halfOpenServerSocket.close()
+            val client = SocketWrapper(Socket("localhost", 8080), "client")
+            client.write("GET /${NamedPaths.SHUTDOWN_SERVER.path} HTTP/1.1\n")
             serverThread.join()
         }
     }
