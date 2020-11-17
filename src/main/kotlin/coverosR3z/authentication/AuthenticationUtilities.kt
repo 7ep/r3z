@@ -39,12 +39,19 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
     }
 
     fun analyzeUsername(username: String): RegistrationUsernameResult {
-        return when {
-            username.isEmpty() -> RegistrationUsernameResult.EMPTY_USERNAME
-            username.length < minUserNameSize -> RegistrationUsernameResult.USERNAME_TOO_SHORT
-            username.length > maxUserNameSize -> RegistrationUsernameResult.USERNAME_TOO_LONG
-            ap.isUserRegistered(UserName(username)) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
-            else -> RegistrationUsernameResult.SUCCESS
+        return try {
+            when {
+                ap.isUserRegistered(UserName(username)) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
+                else -> RegistrationUsernameResult.SUCCESS
+            }
+        } catch (ex: Exception) {
+            logInfo("Analysis of username failed during registration.  Message: ${ex.message ?: "(NO MESSAGE)"}")
+            when (ex.message){
+                "Username is too small. Min is $minUserNameSize" -> RegistrationUsernameResult.USERNAME_TOO_SHORT
+                "Username is too large. Max is $maxUserNameSize" -> RegistrationUsernameResult.USERNAME_TOO_LONG
+                "All users must have a non-empty name" -> RegistrationUsernameResult.EMPTY_USERNAME
+               else -> RegistrationUsernameResult.FAILED_UNKNOWN
+            }
         }
     }
 
