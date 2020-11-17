@@ -14,7 +14,7 @@ class FakeAuthPersistence(
     var deleteSessionBehavior : () -> Unit = {},
 ) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: String, employeeId: Int?) {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: Int?) {
         createUserBehavior()
     }
 

@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (ServerUtilities.isAuthenticated(rd)) {
-        ServerUtilities.okHTML(existingTimeEntriesHTML(rd.user.name, tru.getAllEntriesForEmployee(rd.user.employeeId
+        ServerUtilities.okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId
                 ?: NO_EMPLOYEE.id)))
     } else {
         ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
@@ -18,7 +18,7 @@ fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): Prepare
 
 fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): PreparedResponseData {
     return if (ServerUtilities.isAuthenticated(rd)) {
-        ServerUtilities.okHTML(entertimeHTML(rd.user.name, tru.listAllProjects()))
+        ServerUtilities.okHTML(entertimeHTML(rd.user.name.value, tru.listAllProjects()))
     } else {
         ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
     }
