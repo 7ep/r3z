@@ -8,12 +8,12 @@ import coverosR3z.domainobjects.SYSTEM_USER
  */
 class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     fun info(msg : String) {
-        println("INFO: ${cu.user.name}: $msg")
+        println("INFO: ${cu.user.name.value}: $msg")
     }
 }
 
 fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
-    println("INFO: ${cu.user.name}: $msg")
+    println("INFO: ${cu.user.name.value}: $msg")
 }
 
 /**
