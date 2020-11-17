@@ -139,3 +139,10 @@ Developer handbook
         the session - if it hasn't been accessed within some duration, it is considered "dead"
         and will be removed the next time it is accessed.  On the other hand, is there any problem
         with keeping sessions active indefinitely?
+
+
+    API
+    ---
+
+    Some of the files have the acronym API in their name.  That means they are the HTTP endpoints for
+    the web application and contain code and template text for those.
