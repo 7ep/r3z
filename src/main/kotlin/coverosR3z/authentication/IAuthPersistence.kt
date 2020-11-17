@@ -1,12 +1,9 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.DateTime
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.UserName
-import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.*
 
 interface IAuthPersistence {
-    fun createUser(name: UserName, hash: Hash, salt: String, employeeId: Int? = null)
+    fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: Int? = null)
     fun isUserRegistered(name : UserName) : Boolean
     fun getUser(name: UserName) : User
     fun getUserForSession(sessionToken: String): User

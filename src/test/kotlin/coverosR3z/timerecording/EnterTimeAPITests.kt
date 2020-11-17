@@ -4,10 +4,7 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.handlePOSTTimeEntry
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.User
-import coverosR3z.domainobjects.maximumProjectsCount
+import coverosR3z.domainobjects.*
 import coverosR3z.server.handleUnauthorized
 import org.junit.Assert.*
 import org.junit.Before
@@ -72,7 +69,9 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_missingEmployee() {
         val data = mapOf("project_entry" to "1", "time_entry" to "60", "detail_entry" to "not much to say")
         val employeeId = null
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, User(1, "name", Hash.createHash(""), "", employeeId),data)}
+        val ex = assertThrows(IllegalStateException::class.java){
+            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(""), Salt(""), employeeId),data)
+        }
         assertEquals("employeeId must not be missing", ex.message)
     }
 

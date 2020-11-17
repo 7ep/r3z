@@ -115,7 +115,7 @@ class BrowserBDD {
         val employees = listOf(DEFAULT_USER.name)
         for (employee in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
-            chromeDriver.findElementById("employee_name").sendKeys(employee)
+            chromeDriver.findElementById("employee_name").sendKeys(employee.value)
             chromeDriver.findElementById("employee_create_button").click()
         }
 
@@ -128,9 +128,9 @@ class BrowserBDD {
         // register a user for each employee
         for (e in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
-            chromeDriver.findElementById("username").sendKeys(e)
+            chromeDriver.findElementById("username").sendKeys(e.value)
             chromeDriver.findElementById("password").sendKeys(password)
-            chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$e']")).click()
+            chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '${e.value}']")).click()
             chromeDriver.findElementById("register_button").click()
         }
 
@@ -138,7 +138,7 @@ class BrowserBDD {
         for (e in employees) {
             // login
             chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
-            chromeDriver.findElementById("username").sendKeys(e)
+            chromeDriver.findElementById("username").sendKeys(e.value)
             chromeDriver.findElementById("password").sendKeys(password)
             chromeDriver.findElementById("login_button").click()
 

@@ -52,9 +52,9 @@ class PureMemoryDatabase {
         return newIndex
     }
 
-    fun addNewUser(userName: UserName, hash: Hash, salt: String, employeeId: Int?) : Int {
+    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: Int?) : Int {
         val newIndex = users.size + 1
-        users.add(User(newIndex, userName.value, hash, salt, employeeId))
+        users.add(User(UserId(newIndex), userName, hash, salt, employeeId))
         return newIndex
     }
 
@@ -90,7 +90,7 @@ class PureMemoryDatabase {
     }
 
     fun getUserByName(name: UserName) : User {
-        return users.singleOrNull { u -> u.name == name.value } ?: NO_USER
+        return users.singleOrNull { u -> u.name == name } ?: NO_USER
     }
 
     fun getProjectById(id: Int) : Project {

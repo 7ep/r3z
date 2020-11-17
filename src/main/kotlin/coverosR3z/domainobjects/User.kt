@@ -18,7 +18,7 @@ private val md = MessageDigest.getInstance("SHA-256")
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(maxUserCount-1, "NO_USER", Hash.createHash(""), "THIS REPRESENTS NO USER", NO_EMPLOYEE.id)
+val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(""), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -26,7 +26,7 @@ val NO_USER = User(maxUserCount-1, "NO_USER", Hash.createHash(""), "THIS REPRESE
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(maxUserCount-2, "SYSTEM", Hash.createHash(""), "THIS REPRESENTS ACTIONS BY THE SYSTEM", null)
+val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(""), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -41,16 +41,21 @@ data class UserName(val value: String){
 }
 
 @Serializable
-data class User(val id: Int, val name: String, val hash: Hash, val salt: String, val employeeId: Int?) {
-
+data class UserId(val value: Int) {
     init {
-        require(name.isNotBlank()) {nameCannotBeEmptyMsg}
-        require(id < maxUserCount) { maxUserMsg }
-        require(id > 0) { minIdMsg }
+        require(value < maxUserCount) { maxUserMsg }
+        require(value > 0) { minIdMsg }
     }
+}
+
+@Serializable
+data class Salt(val value: String)
+
+@Serializable
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: Int?) {
 
     override fun toString(): String {
-        return "User(id=$id, name='$name')"
+        return "User(id=${id.value}, name='${name.value}')"
     }
 
 }
@@ -90,11 +95,9 @@ data class Hash private constructor(val value: String) {
          *
          * See https://en.wikipedia.org/wiki/Salt_(cryptography)
          */
-        fun getSalt(generator : () -> String = { generateRandomString(16) }): String {
-            return generator()
+        fun getSalt(generator : () -> String = { generateRandomString(16) }): Salt {
+            return Salt(generator())
         }
-
-
 
     }
 }

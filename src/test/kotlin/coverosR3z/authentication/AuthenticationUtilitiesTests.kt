@@ -135,7 +135,7 @@ class AuthenticationUtilitiesTests {
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.analyzeUsername(DEFAULT_USER.name)
+        val result = authUtils.analyzeUsername(DEFAULT_USER.name.value)
 
         assertEquals(RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED, result)
     }
@@ -167,8 +167,8 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `password hash should be salted`() {
         val first = Hash.createHash(DEFAULT_PASSWORD)
-        val salt : String = Hash.getSalt()
-        val second = Hash.createHash(DEFAULT_PASSWORD + salt)
+        val salt = Hash.getSalt()
+        val second = Hash.createHash(DEFAULT_PASSWORD + salt.value)
         assertNotEquals(first, second)
     }
 
@@ -189,8 +189,8 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `should get success with valid login`() {
         val wellSeasoned = "$DEFAULT_PASSWORD$DEFAULT_SALT"
-        ap.getUserBehavior= { User(1, DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
-        val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        val (status, _) = authUtils.login(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
 
@@ -200,8 +200,8 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `should get failure with wrong password`() {
         val wellSeasoned = "$DEFAULT_PASSWORD$DEFAULT_SALT"
-        ap.getUserBehavior = { User(1, DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
-        val (status, _) = authUtils.login(DEFAULT_USER.name, "wrong")
+        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        val (status, _) = authUtils.login(DEFAULT_USER.name.value, "wrong")
         assertEquals(LoginResult.FAILURE, status)
     }
 
@@ -212,7 +212,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `should get descriptive failure with nonreal user`() {
         ap.getUserBehavior = { NO_USER }
-        val (status, _) = authUtils.login(DEFAULT_USER.name, "arbitrary")
+        val (status, _) = authUtils.login(DEFAULT_USER.name.value, "arbitrary")
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
 

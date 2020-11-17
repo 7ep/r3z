@@ -32,7 +32,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
             ENTER_TIMECSS.path -> okCSS(enterTimeCSS)
             TIMEENTRIES.path -> doGetTimeEntriesPage(tru, rd)
             CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
-            EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name, tru.listAllEmployees()))
+            EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
             LOGIN.path -> doGETLoginPage(rd)
             REGISTER.path -> doGETRegisterPage(tru, rd)
             REGISTERCSS.path -> okCSS(registerCSS)
@@ -77,7 +77,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            okHTML(createProjectHTML(rd.user.name))
+            okHTML(createProjectHTML(rd.user.name.value))
         } else {
             redirectTo(HOMEPAGE.path)
         }
@@ -86,7 +86,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun doGetHomePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            okHTML(authHomePageHTML(rd.user.name))
+            okHTML(authHomePageHTML(rd.user.name.value))
         } else {
             okHTML(homepageHTML)
         }
@@ -94,7 +94,7 @@ class ServerUtilities(private val au: IAuthenticationUtilities,
 
     private fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
         return if (isAuthenticated(rd)) {
-            okHTML(createEmployeeHTML(rd.user.name))
+            okHTML(createEmployeeHTML(rd.user.name.value))
         } else {
             redirectTo(HOMEPAGE.path)
         }

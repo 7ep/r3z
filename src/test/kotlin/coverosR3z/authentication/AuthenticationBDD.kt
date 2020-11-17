@@ -43,10 +43,10 @@ class AuthenticationBDD {
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
         // When I register a new user
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
+        au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD, employee.id)
 
         // Then the system records that the registration succeeded
-        assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name))
+        assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name.value))
     }
 
     @Test
@@ -54,10 +54,10 @@ class AuthenticationBDD {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
 
         // When I try to register again
-        val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val result = au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
 
         // Then the system records that the registration failed
         assertEquals("The user shouldn't be allowed to register again", RegistrationResult.FAILURE, result)
@@ -68,13 +68,13 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
 
         // When I enter valid credentials
-        val (_, resultantUser) = au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val (_, resultantUser) = au.login(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
 
         // Then the system knows who I am
-        val user = authPersistence.getUser(UserName(DEFAULT_USER.name))
+        val user = authPersistence.getUser(DEFAULT_USER.name)
         assertEquals(user, resultantUser)
     }
 
@@ -83,11 +83,11 @@ class AuthenticationBDD {
         // Given I have registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
-        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val regStatus = au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
         assertEquals(RegistrationResult.SUCCESS, regStatus)
 
         // When I login with the wrong credentials
-        val (status, _) = au.login(DEFAULT_USER.name, "I'm not even trying to be a good password")
+        val (status, _) = au.login(DEFAULT_USER.name.value, "I'm not even trying to be a good password")
 
         // Then the system denies me access
         assertEquals(LoginResult.FAILURE, status)
@@ -100,7 +100,7 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // When I register with too short of a a password
-        val regStatus = au.register(DEFAULT_USER.name, "too short")
+        val regStatus = au.register(DEFAULT_USER.name.value, "too short")
 
         // Then the system denies the registration on the basis of a bad password
         assertEquals(RegistrationResult.FAILURE, regStatus)
@@ -147,11 +147,11 @@ class AuthenticationBDD {
             val pmd = PureMemoryDatabase()
             val authPersistence = AuthenticationPersistence(pmd)
             val au = AuthenticationUtilities(authPersistence)
-            val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+            val regStatus = au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD)
             assertEquals(RegistrationResult.SUCCESS, regStatus)
             val tru = FakeTimeRecordingUtilities()
             val su = ServerUtilities(au, tru)
-            val postedData = mapOf("username" to DEFAULT_USER.name, "password" to DEFAULT_PASSWORD)
+            val postedData = mapOf("username" to DEFAULT_USER.name.value, "password" to DEFAULT_PASSWORD)
             val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.path, postedData, NO_USER)
             return Triple(su, requestData, pmd)
         }
