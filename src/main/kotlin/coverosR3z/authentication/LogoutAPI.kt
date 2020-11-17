@@ -3,11 +3,11 @@ package coverosR3z.authentication
 import coverosR3z.server.*
 
 fun doGETLogout(au: IAuthenticationUtilities, rd: RequestData): PreparedResponseData {
-    return if (ServerUtilities.isAuthenticated(rd)) {
+    return if (isAuthenticated(rd)) {
         au.logout(rd.sessionToken)
         PreparedResponseData(logoutHTML, ResponseStatus.OK, emptyList())
     } else {
-        ServerUtilities.redirectTo(NamedPaths.HOMEPAGE.path)
+        redirectTo(NamedPaths.HOMEPAGE.path)
     }
 }
 
