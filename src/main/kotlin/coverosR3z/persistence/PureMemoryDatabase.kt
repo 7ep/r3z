@@ -42,7 +42,7 @@ class PureMemoryDatabase {
 
     fun addNewProject(projectName: ProjectName) : Int {
         val newIndex = projects.size + 1
-        projects.add(Project(newIndex, projectName.value))
+        projects.add(Project(ProjectId(newIndex), ProjectName(projectName.value)))
         return newIndex
     }
 
@@ -95,12 +95,12 @@ class PureMemoryDatabase {
 
     fun getProjectById(id: Int) : Project {
         require(id > 0)
-        return projects.singleOrNull { p -> p.id == id } ?: NO_PROJECT
+        return projects.singleOrNull { p -> p.id.value == id } ?: NO_PROJECT
     }
 
     fun getProjectByName(name: String): Project {
         require(name.isNotEmpty())
-        return projects.singleOrNull { p -> p.name == name } ?: NO_PROJECT
+        return projects.singleOrNull { p -> p.name.value == name } ?: NO_PROJECT
     }
 
     fun getEmployeeById(id: Int): Employee {

@@ -37,7 +37,7 @@ class TimeRecordingTests {
                 minutesRecorded = 60,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase(project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(project= Project(ProjectId(1), ProjectName("an invalid project")))
         val expectedResult = RecordTimeResult(StatusEnum.INVALID_PROJECT)
 
         val actualResult = utils.recordTime(entry)
@@ -57,7 +57,7 @@ class TimeRecordingTests {
                 minutesRecorded = twentyFourHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase(time= Time(1), project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(time= Time(1), project= Project(ProjectId(1), ProjectName("an invalid project")))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -74,7 +74,7 @@ class TimeRecordingTests {
                 minutesRecorded = twentyThreeHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase(time= Time(60 * 2), project= Project(1, "an invalid project"))
+        val entry = createTimeEntryPreDatabase(time= Time(60 * 2), project= Project(ProjectId(1), ProjectName("an invalid project")))
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
     }
@@ -124,9 +124,9 @@ class TimeRecordingTests {
 
     @Test
     fun `a project should have a name and an id`() {
-        val project = Project(1, "some project name")
-        assertEquals(1, project.id)
-        assertEquals("some project name", project.name)
+        val project = Project(ProjectId(1), ProjectName("some project name"))
+        assertEquals(ProjectId(1), project.id)
+        assertEquals(ProjectName("some project name"), project.name)
     }
 
     @Test
@@ -186,11 +186,10 @@ class TimeRecordingTests {
      */
     @Test fun `can create project`() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                persistNewProjectBehavior = { Project(1, "test project") })
+                persistNewProjectBehavior = { DEFAULT_PROJECT })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val expected = utils.createProject(ProjectName("test project"))
-        val actual = Project(1, "test project")
-        assertEquals(expected, actual)
+        val expected = utils.createProject(DEFAULT_PROJECT_NAME)
+        assertEquals(expected, DEFAULT_PROJECT)
     }
 
     /**
@@ -198,9 +197,9 @@ class TimeRecordingTests {
      */
     @Test fun testCannotCreateMultipleProjectsWithSameName() {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                getProjectByNameBehavior = { Project(1, "test project") })
+                getProjectByNameBehavior = { DEFAULT_PROJECT })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val ex  = assertThrows(java.lang.IllegalArgumentException::class.java) {utils.createProject(ProjectName("test project"))}
+        val ex  = assertThrows(java.lang.IllegalArgumentException::class.java) {utils.createProject(DEFAULT_PROJECT_NAME)}
         assertEquals("Cannot create a new project if one already exists by that same name", ex.message)
     }
 
@@ -231,7 +230,7 @@ class TimeRecordingTests {
     @Test fun testCanGetProjectById() {
         val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
         val createdProject = utils.createProject(DEFAULT_PROJECT_NAME)
-        val foundProject = utils.findProjectById(createdProject.id)
+        val foundProject = utils.findProjectById(createdProject.id.value)
         assertEquals(createdProject, foundProject)
     }
 

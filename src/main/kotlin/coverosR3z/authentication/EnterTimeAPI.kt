@@ -34,7 +34,7 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
         val time = Time(checkParseToInt(timeString))
         val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be missing"})
 
-        val project = tru.findProjectById(projectId.id)
+        val project = tru.findProjectById(projectId.value)
         val employeeId = checkNotNull(user.employeeId){"employeeId must not be missing"}
         val employee = tru.findEmployeeById(employeeId)
 
@@ -75,7 +75,7 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
                 <select name="project_entry" id="project_entry"/>
 """ +
 
-            projects.joinToString("") { "<option value =\"${it.id}\">${it.name}</option>\n" } +
+            projects.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
 
             """             <option selected disabled hidden>Choose here</option>
             </select>
@@ -101,7 +101,7 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
 """
 }
 
-val enterTimeCSS = """
+const val enterTimeCSS = """
     img {
   height: 200px;
 }

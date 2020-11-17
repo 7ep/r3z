@@ -26,8 +26,8 @@ val DEFAULT_USER = User(1, "DefaultUser", Hash.createHash(DEFAULT_PASSWORD + DEF
 val DEFAULT_EMPLOYEE = Employee(1, "DefaultEmployee")
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
 val DEFAULT_TIME = Time(60)
-val DEFAULT_PROJECT = Project(1, "Default_Project")
 val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
+val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
 val DEFAULT_SESSION_TOKEN = "abc123"
 
 fun createTimeEntryPreDatabase(

@@ -70,7 +70,7 @@ fun registerHTML(employees: List<Employee>) : String {
 """
 }
 
-val registerCSS = """
+const val registerCSS = """
      body {
         background-color: #F3EBF6;
         font-family: 'Ubuntu', sans-serif;
