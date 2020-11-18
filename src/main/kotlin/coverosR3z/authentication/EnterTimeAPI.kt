@@ -331,7 +331,7 @@ fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
             <tbody>
                 
 """ +
-            te.joinToString("") { "<tr><td>${it.project.name}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
+            te.joinToString("") { "<tr><td>${it.project.name.value}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
             """    
             </tbody>
         </table>
