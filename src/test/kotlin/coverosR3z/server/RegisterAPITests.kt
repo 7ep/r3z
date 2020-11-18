@@ -31,6 +31,7 @@ class RegisterAPITests {
     /**
      * If our code received all the expected
      * values properly, it shouldn't complain
+     * Basically a happy path
      */
     @Test
     fun testShouldHandleValidInputs() {
