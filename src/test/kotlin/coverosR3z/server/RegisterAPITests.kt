@@ -7,6 +7,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.handlePOSTRegister
 import coverosR3z.domainobjects.NO_USER
+import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.*
@@ -60,8 +61,8 @@ class RegisterAPITests {
         val data = mapOf("username" to "",
                       "password" to DEFAULT_PASSWORD,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("The username must not be blank", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
 
     @Test
