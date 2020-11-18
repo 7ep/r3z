@@ -44,10 +44,10 @@ fun registerHTML(employees: List<Employee>) : String {
       <link rel="stylesheet" href="register.css">
       <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
       <title>register</title>
-      <link rel="stylesheet" href="entertime.css" />
+      <link rel="stylesheet" href="register.css" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <header>r3z</header>
+  <header><a href="homepage">r3z</a></header>
   <body>
     <br>
     <h2>Register a User</h2>
@@ -100,6 +100,14 @@ const val registerCSS = """
       font-size: 160%;
       margin: 10px;
     }
+    a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    a:visited {
+      color: #ffffff;
+    }
+    
     form {
       font-size: 90%;
       border: 2px solid #858585;
