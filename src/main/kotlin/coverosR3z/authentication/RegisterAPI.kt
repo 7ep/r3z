@@ -40,135 +40,109 @@ fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<Strin
 fun registerHTML(employees: List<Employee>) : String {
     return """
 <html>
-    <head>
-        <link rel="stylesheet" href="register.css">
-        <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-        <title>register</title>
-        <link rel="stylesheet" href="entertime.css" />
-    </head>
-    <body>
-    <body>
-      <div class="main">
-        <p class="sign" align="center">Register</p>
-        <form class="form1" method="post" action="register">
-          <input class="un" type="text" align="center" name="username" id="username" placeholder="Username">
-          <input class="pass" type="password" align="center" name="password" id="password" placeholder="Password">
-           <select class="un" id="employee" name="employee">
+  <head>
+      <link rel="stylesheet" href="register.css">
+      <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+      <title>register</title>
+      <link rel="stylesheet" href="entertime.css" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <header>r3z</header>
+  <body>
+    <br>
+    <h2>Register a User</h2>
+    
+    <form  method="post" action="register">
+      <div class="container"> 
+        <label>Username</label>
+        <input class="input" type="text" name="username" id="username">
+        <label>Password</label>
+        <input class="input" type="password" name="password" id="password">
+        <label>Employee</label>
+        <select class="input" id="employee" name="employee">
 """+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
             """
-            <option selected disabled hidden>Choose here</option>
-          </select>
-          <button id="register_button" class="submit" align="center">Register</button>
-          </form>
-        </div>
-    </body>
-</html>
+          <option value ="1">Administrator</option>
+          <option selected disabled hidden>Choose here</option>
+        </select>
+        <button id="register_button" class="submit">Register</button>
+      </div>
+    </form>
+  </body>
+</html
 """
 }
 
 const val registerCSS = """
-     body {
-        background-color: #F3EBF6;
-        font-family: 'Ubuntu', sans-serif;
+    header {
+      color: #ffffff;
+      background-color: #809EE4;
+      font-size: 30px;
+      margin: 0;
+      top: 0;
+      height: 40px;
+      padding: 4px;
     }
     
-    .main {
-        background-color: #FFFFFF;
-        width: 400px;
-        height: 400px;
-        margin: 7em auto;
-        border-radius: 1.5em;
-        box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+    body {
+      color: #333333;
+      background-color: #F3F6FA;
+      font-family: "helvetica", sans-serif;
+      padding-top: 40px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-flow: column wrap;
     }
     
-    .sign {
-        padding-top: 40px;
-        color: #8C55AA;
-        font-family: 'Ubuntu', sans-serif;
-        font-weight: bold;
-        font-size: 23px;
+    h2 {
+      text-align: center;
+      font-size: 160%;
+      margin: 10px;
+    }
+    form {
+      font-size: 90%;
+      border: 2px solid #858585;
+      padding: 10px;
+      border-radius: .5em;
+      width: 90%;
+      max-width: 350px;
+      margin: auto;
     }
     
-    .un {
-    width: 76%;
-    color: rgb(38, 50, 56);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    background: rgba(136, 126, 126, 0.04);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    outline: none;
-    box-sizing: border-box;
-    border: 2px solid rgba(0, 0, 0, 0.02);
-    margin-bottom: 50px;
-    margin-left: 46px;
-    text-align: center;
-    margin-bottom: 27px;
-    font-family: 'Ubuntu', sans-serif;
+    input {
+      height: 1.7em;
+      margin-bottom: 1em;
     }
     
-    form.form1 {
-        padding-top: 40px;
-    }
-    
-    .pass {
-            width: 76%;
-    color: rgb(38, 50, 56);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    background: rgba(136, 126, 126, 0.04);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    outline: none;
-    box-sizing: border-box;
-    border: 2px solid rgba(0, 0, 0, 0.02);
-    margin-bottom: 50px;
-    margin-left: 46px;
-    text-align: center;
-    margin-bottom: 27px;
-    font-family: 'Ubuntu', sans-serif;
-    }
-    
-   
-    .un:focus, .pass:focus {
-        border: 2px solid rgba(0, 0, 0, 0.18) !important;
-        
-    }
-    
-    .submit {
+    button {
       cursor: pointer;
-        border-radius: 5em;
-        color: #fff;
-        background: linear-gradient(to right, #9C27B0, #E040FB);
-        border: 0;
-        padding-left: 40px;
-        padding-right: 40px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        font-family: 'Ubuntu', sans-serif;
-        margin-left: 35%;
-        font-size: 13px;
-        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+      font-size: 120%;;
+      margin: 8px 0 1px 0;
+      padding: 2%;
+      color: #ffff;
+      background-color: #5E64E3;
+      border: none;
+      border-radius: .5em;
+      width: 100%;
+      position: center;
+    }
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
     }
     
-    .forgot {
-        text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
-        color: #E1BEE7;
-        padding-top: 15px;
+    .container {
+      line-height: 1.5;
+      margin: .2em 0 .2em 0;
+      text-align: left;
     }
     
-    a {
-        text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
-        color: #E1BEE7;
-        text-decoration: none
+    .input {
+      border: 1.5px solid #6b6969;
+      border-radius: .3em;
+      width: 100%;
+      background-color: inherit;
+      color: #5f5f5f;
     }
-    
-    @media (max-width: 600px) {
-        .main {
-            border-radius: 0px;
-        }
 """
