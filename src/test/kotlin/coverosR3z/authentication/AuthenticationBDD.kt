@@ -7,8 +7,7 @@ import coverosR3z.server.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 /**
@@ -47,6 +46,18 @@ class AuthenticationBDD {
 
         // Then the system records that the registration succeeded
         assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name.value))
+    }
+
+    @Test
+    fun `I should not be able to register two users with the same employee id`() {
+        // Given I have already registered to an employee
+        val (au, employee) = registerOnce()
+
+        // When I register a new user to that same employee
+        val result = au.register("anotheruser", DEFAULT_PASSWORD, employee.id.value)
+
+        // Then the system disallows the registration to proceed
+        assertEquals(RegistrationResult.FAILURE, result)
     }
 
     @Test
@@ -136,6 +147,19 @@ class AuthenticationBDD {
      */
 
     companion object {
+
+
+        private fun registerOnce(): Pair<AuthenticationUtilities, Employee> {
+            val pmd = PureMemoryDatabase()
+            val authPersistence = AuthenticationPersistence(pmd)
+            val au = AuthenticationUtilities(authPersistence)
+
+            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+            val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+            au.register(DEFAULT_USER.name.value, DEFAULT_PASSWORD, employee.id.value)
+            return Pair(au, employee)
+        }
+
         private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
             val (tru, _) = initializeAUserAndLogin()
             val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2

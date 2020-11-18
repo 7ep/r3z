@@ -35,9 +35,6 @@ class BrowserBDD {
 
         @AfterClass @JvmStatic
         fun cleanup() {
-            // stop the server
-            val client = SocketWrapper(Socket("localhost", 8080), "client")
-            client.write("GET /${NamedPaths.SHUTDOWN_SERVER.path} HTTP/1.1\n")
             serverThread.join()
         }
     }
@@ -164,6 +161,9 @@ class BrowserBDD {
 
         // view the time entries for the last person
         chromeDriver.get("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
+
+        // stop the server
+        chromeDriver.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")
 
         chromeDriver.quit()
     }
