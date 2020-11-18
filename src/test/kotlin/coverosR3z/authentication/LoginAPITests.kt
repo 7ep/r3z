@@ -42,9 +42,10 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_missingUser() {
-        val data = mapOf("password" to DEFAULT_PASSWORD)
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
-        assertEquals("blah blah blah", ex.message)
+        val data = mapOf(
+                "password" to DEFAULT_PASSWORD)
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
+        assertEquals("username must not be missing", ex.message)
     }
 
 }
