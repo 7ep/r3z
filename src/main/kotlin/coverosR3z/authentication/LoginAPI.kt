@@ -13,6 +13,7 @@ fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, 
     return if (isUnauthenticated) {
         val username = UserName(checkNotNull(data["username"]) {"username must not be missing"})
         val password = checkNotNull(data["password"]) {"password must not be missing"}
+        check(password.isNotBlank()) {"The password must not be blank"}
         val (loginResult, loginUser) = au.login(username.value, password)
         if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
             val newSessionToken: String = au.createNewSession(loginUser)
