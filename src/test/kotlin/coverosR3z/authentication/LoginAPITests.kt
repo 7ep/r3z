@@ -38,14 +38,26 @@ class LoginAPITests {
     }
 
     /**
-     * Happy path - all values provided as needed
+     * Error path - username is not passed in
      */
     @Test
     fun testHandlePostLogin_missingUser() {
         val data = mapOf(
                 "password" to DEFAULT_PASSWORD)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
-        assertEquals("username must not be missing", ex.message)
+        assertEquals("username not be missing", ex.message)
+    }
+
+    /**
+     * Error path - username is blank
+     */
+    @Test
+    fun testHandlePostLogin_blankUser() {
+        val data = mapOf(
+                "username" to "",
+                "password" to DEFAULT_PASSWORD)
+        val ex = assertThrows(IllegalStateException::class.java) { handlePOSTLogin(au, NO_USER, data).fileContents }
+        assertEquals("username must not be blank", ex.message)
     }
 
 }
