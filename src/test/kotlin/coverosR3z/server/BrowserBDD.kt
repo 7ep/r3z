@@ -162,8 +162,10 @@ class BrowserBDD {
         // view the time entries for the last person
         chromeDriver.get("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
 
-        // stop the server
+        // stop the server with two calls.  Once to tell it the next call is the
+        // last, and the second to be that next call.
         chromeDriver.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")
+        chromeDriver.get("localhost:8080/")
 
         chromeDriver.quit()
     }
