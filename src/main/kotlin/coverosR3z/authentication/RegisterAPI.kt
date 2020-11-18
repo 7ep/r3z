@@ -62,7 +62,6 @@ fun registerHTML(employees: List<Employee>) : String {
         <select class="input" id="employee" name="employee">
 """+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
             """
-          <option value ="1">Administrator</option>
           <option selected disabled hidden>Choose here</option>
         </select>
         <button id="register_button" class="submit">Register</button>
