@@ -11,6 +11,16 @@ import coverosR3z.webcontent.*
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
 
 /**
+ *   HTTP/1.1 defines the sequence CR LF as the end-of-line marker for all
+ *  protocol elements except the entity-body (see appendix 19.3 for
+ *  tolerant applications). The end-of-line marker within an entity-body
+ *  is defined by its associated media type, as described in section 3.7.
+ *
+ *  See https://tools.ietf.org/html/rfc2616
+ */
+const val CRLF = "\r\n"
+
+/**
  * Examine the request and take proper action, returning a
  * proper response
  */
@@ -310,13 +320,14 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
     val status = "HTTP/1.1 ${data.responseStatus.value}"
     logDebug("status: $status")
     val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
-    val otherHeaders = data.headers.joinToString("\n") + "\n"
+
+    val otherHeaders = data.headers.joinToString(CRLF) + CRLF
     logDebug("contentLengthHeader: $contentLengthHeader")
     logDebug("other headers:\n $otherHeaders")
-    val input = "$status\n" +
-            "$contentLengthHeader\n" +
+    val input = "$status$CRLF" +
+            "$contentLengthHeader$CRLF" +
             otherHeaders +
-            "\n" +
+            CRLF +
             data.fileContents
     server.write(input)
 }

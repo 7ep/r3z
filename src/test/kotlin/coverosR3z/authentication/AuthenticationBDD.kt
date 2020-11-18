@@ -49,18 +49,6 @@ class AuthenticationBDD {
     }
 
     @Test
-    fun `I should not be able to register two users with the same employee id`() {
-        // Given I have already registered to an employee
-        val (au, employee) = registerOnce()
-
-        // When I register a new user to that same employee
-        val result = au.register("anotheruser", DEFAULT_PASSWORD, employee.id.value)
-
-        // Then the system disallows the registration to proceed
-        assertEquals(RegistrationResult.FAILURE, result)
-    }
-
-    @Test
     fun `I should not be able to register a user if they are already registered`() {
         // Given I have previously been registered
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
