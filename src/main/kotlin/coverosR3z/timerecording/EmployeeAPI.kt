@@ -88,7 +88,7 @@ fun existingEmployeesHTML(username : String, employees : List<Employee>) : Strin
             <tbody>
                 
 """ +
-            employees.joinToString("") { "<tr><td>${it.id}</td><td>${it.name}</td></tr>\n" } +
+            employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${it.name.value}</td></tr>\n" } +
             """
             </tbody>
         </table>
