@@ -220,8 +220,8 @@ class PureMemoryDatabaseTests {
             val minutesPerEmployeeTotal =
                     allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
-            logInfo("the time ${allEmployees[0]} spent was ${minutesPerEmployeeTotal[0]}")
-            logInfo("the time ${allEmployees[1]} spent was ${minutesPerEmployeeTotal[1]}")
+            logInfo("the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}")
+            logInfo("the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}")
         }
 
         logInfo("It took $timeToAccumulate milliseconds to accumulate the minutes per employee")
