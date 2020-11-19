@@ -8,6 +8,7 @@ private const val maxProjectErrorMsg = "No project id allowed over $maximumProje
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 const val projectIdNotNullMsg = "The project id must not be null"
+const val projectNameNotNullMsg = "The project name must not be null"
 const val projectIdNotBlankMsg = "The project id must not be blank"
 
 /**
@@ -23,6 +24,13 @@ val NO_PROJECT = Project(ProjectId(maximumProjectsCount-1), ProjectName("THIS RE
 data class ProjectName(val value: String) {
     init {
         require(value.isNotEmpty()) {emptyProjectNameMsg}
+    }
+
+    companion object {
+        fun make(value: String?) : ProjectName {
+            val valueNotNull = checkNotNull(value) {projectNameNotNullMsg}
+            return ProjectName(valueNotNull)
+        }
     }
 }
 
