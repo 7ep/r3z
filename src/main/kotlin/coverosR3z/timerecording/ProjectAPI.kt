@@ -9,7 +9,7 @@ import coverosR3z.webcontent.successHTML
 fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
     return if (isAuthenticated) {
-        tru.createProject(ProjectName(checkNotNull(data["project_name"]){"project_name must not be missing"}))
+        tru.createProject(ProjectName.make(data["project_name"]))
         PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
     } else {
         handleUnauthorized()
