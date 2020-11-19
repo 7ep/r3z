@@ -3,8 +3,8 @@ package coverosR3z.authentication
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
+import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.passwordMustNotBeBlankMsg
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert
@@ -46,7 +46,7 @@ class LoginAPITests {
         val data = mapOf(
                 "password" to DEFAULT_PASSWORD.value)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
-        assertEquals("username must not be missing", ex.message)
+        assertEquals(usernameNotNullMsg, ex.message)
     }
 
     /**
@@ -69,7 +69,7 @@ class LoginAPITests {
         val data = mapOf(
             "username" to DEFAULT_USER.name.value)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
-        assertEquals("password must not be missing", ex.message)
+        assertEquals(passwordMustNotBeNullMsg, ex.message)
     }
 
     /**
@@ -80,8 +80,8 @@ class LoginAPITests {
         val data = mapOf(
             "username" to DEFAULT_USER.name.value,
             "password" to "")
-        val ex = assertThrows(java.lang.IllegalStateException::class.java) { handlePOSTLogin(au, NO_USER, data).fileContents }
-        assertEquals("The password must not be blank", ex.message)
+        val ex = assertThrows(java.lang.IllegalArgumentException::class.java) { handlePOSTLogin(au, NO_USER, data).fileContents }
+        assertEquals(passwordMustNotBeBlankMsg, ex.message)
 
     }
 

@@ -2,5 +2,5 @@ package coverosR3z.domainobjects
 
 enum class RegistrationResult {
     SUCCESS,
-    FAILURE
+    USERNAME_ALREADY_REGISTERED
 }

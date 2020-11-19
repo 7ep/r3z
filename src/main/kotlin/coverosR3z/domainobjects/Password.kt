@@ -1,9 +1,9 @@
 package coverosR3z.domainobjects
 
-private const val passwordMustNotBeNullMsg = "password must not be null"
+const val passwordMustNotBeNullMsg = "password must not be null"
 const val passwordMustNotBeBlankMsg = "password must not be blank"
 private const val minPasswordSize = 12
-private const val passwordMustBeLargeEnoughMsg = "password length must be greater than $minPasswordSize"
+const val passwordMustBeLargeEnoughMsg = "password length must be greater than $minPasswordSize"
 private const val maxPasswordSize = 255
 const val passwordMustNotBeTooLargeMsg = "password length must be smaller than $maxPasswordSize"
 

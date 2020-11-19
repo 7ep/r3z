@@ -49,10 +49,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `A 255-character password should succeed`() {
         val password = Password("a".repeat(255))
-
-        val result = authUtils.analyzePassword(password)
-
-        assertEquals(RegistrationPasswordResult.SUCCESS, result)
+        assertEquals(password.value, "a".repeat(255))
     }
 
 
@@ -60,9 +57,7 @@ class AuthenticationUtilitiesTests {
     fun `A 50-character username should succeed`() {
         val username = UserName("a".repeat(50))
 
-        val result = authUtils.analyzeUsername(username)
-
-        assertEquals(RegistrationUsernameResult.SUCCESS, result)
+        assertEquals(username.value, "a".repeat(50))
     }
 
     /**
@@ -70,11 +65,8 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `A 11 character password should fail`() {
-        val password = Password("a".repeat(11))
-
-        val result = authUtils.analyzePassword(password)
-
-        assertEquals(RegistrationPasswordResult.PASSWORD_TOO_SHORT, result)
+        val ex = assertThrows(IllegalArgumentException::class.java){Password("a".repeat(11))}
+        assertEquals(passwordMustBeLargeEnoughMsg, ex.message)
     }
 
     /**
@@ -99,36 +91,30 @@ class AuthenticationUtilitiesTests {
     fun `A 3-character username should be considered ok`() {
         val username = UserName("aaa")
 
-        val result = authUtils.analyzeUsername(username)
-
-        assertEquals(RegistrationUsernameResult.SUCCESS, result)
+        assertEquals(username.value, "aaa")
     }
 
     @Test
     fun `An 12 character password is a-ok`() {
         val password = Password("a".repeat(12))
 
-        val result = authUtils.analyzePassword(password)
-
-        assertEquals(RegistrationPasswordResult.SUCCESS, result)
+        assertEquals(password.value, "a".repeat(12))
     }
 
     @Test
     fun `A password greater than 12 chars should pass`() {
         val password = Password("a".repeat(13))
 
-        val result = authUtils.analyzePassword(password)
-
-        assertEquals(RegistrationPasswordResult.SUCCESS, result)
+        assertEquals(password.value, "a".repeat(13))
     }
 
     @Test
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.analyzeUsername(DEFAULT_USER.name)
+        val result = authUtils.register(DEFAULT_USER.name, DEFAULT_PASSWORD, null)
 
-        assertEquals(RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED, result)
+        assertEquals(RegistrationResult.USERNAME_ALREADY_REGISTERED, result)
     }
 
     /**
@@ -143,13 +129,13 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `Should throw exception if we pass in an empty string`() {
         val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered(UserName("")) }
-        assertEquals("no username was provided to check", thrown.message)
+        assertEquals(usernameCannotBeEmptyMsg, thrown.message)
     }
 
     @Test
     fun `Should throw exception if we pass in all whitespace`() {
         val thrown = assertThrows(IllegalArgumentException::class.java) { authUtils.isUserRegistered(UserName("   ")) }
-        assertEquals("no username was provided to check", thrown.message)
+        assertEquals(usernameCannotBeEmptyMsg, thrown.message)
     }
 
     /**
@@ -192,7 +178,7 @@ class AuthenticationUtilitiesTests {
     fun `should get failure with wrong password`() {
         val wellSeasoned = DEFAULT_PASSWORD.addSalt(DEFAULT_SALT)
         ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
-        val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrong"))
+        val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }
 
@@ -203,7 +189,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun `should get descriptive failure with nonreal user`() {
         ap.getUserBehavior = { NO_USER }
-        val (status, _) = authUtils.login(DEFAULT_USER.name, Password("arbitrary"))
+        val (status, _) = authUtils.login(DEFAULT_USER.name, Password("arbitraryarbitrary"))
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
 

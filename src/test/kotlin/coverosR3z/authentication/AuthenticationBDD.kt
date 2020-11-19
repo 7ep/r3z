@@ -9,6 +9,7 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
+import java.lang.IllegalArgumentException
 
 /**
  *
@@ -59,7 +60,7 @@ class AuthenticationBDD {
         val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
 
         // Then the system records that the registration failed
-        assertEquals("The user shouldn't be allowed to register again", RegistrationResult.FAILURE, result)
+        assertEquals("The user shouldn't be allowed to register again", RegistrationResult.USERNAME_ALREADY_REGISTERED, result)
     }
 
     @Test
@@ -99,10 +100,11 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence)
 
         // When I register with too short of a a password
-        val regStatus = au.register(DEFAULT_USER.name, Password("too short"))
+        val data = mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1")
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTRegister(au, NO_USER, data)}
 
         // Then the system denies the registration on the basis of a bad password
-        assertEquals(RegistrationResult.FAILURE, regStatus)
+        assertEquals(passwordMustBeLargeEnoughMsg, ex.message)
     }
 
     /**

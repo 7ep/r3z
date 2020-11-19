@@ -19,7 +19,7 @@ private val md = MessageDigest.getInstance("SHA-256")
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(Password("")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
+val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(Password("NO_USER_PASSWORD")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -27,7 +27,7 @@ val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(Password("")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
+val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(Password("SYSTEM_USER_PASSWORD")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
 
 /**
  * Holds a username before we have a whole object, like [User]
