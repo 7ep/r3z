@@ -4,6 +4,7 @@ import coverosR3z.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.domainobjects.employeeNameNotNullMsg
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -57,6 +58,6 @@ class EmployeeAPITests {
     fun testHandlePOSTNewEmployee_noBody() {
         val data = emptyMap<String,String>()
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
-        assertEquals("The employee_name must not be missing", ex.message)
+        assertEquals(employeeNameNotNullMsg, ex.message)
     }
 }

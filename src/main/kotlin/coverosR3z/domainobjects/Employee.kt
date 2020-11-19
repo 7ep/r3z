@@ -10,6 +10,7 @@ private const val maxEmployeeMsg = "No way this company has more than 100 millio
 const val minEmployeeIdMsg = "Valid identifier values are 1 or above"
 private const val employeeNameCannotBeEmptyMsg = "All employees must have a non-empty name"
 const val employeeIdNotNullMsg = "The employee id must not be null"
+const val employeeNameNotNullMsg = "The employee name must not be null"
 const val employeeIdCannotBeBlank = "The employee id must not be blank"
 
 /**
@@ -26,6 +27,13 @@ data class EmployeeName(val value: String) {
     init {
         require(value.isNotEmpty()) {employeeNameCannotBeEmptyMsg}
         require(value.length <= maxEmployeeNameSize) {maxEmployeeNameSizeMsg}
+    }
+
+    companion object {
+        fun make(value: String?) : EmployeeName {
+            val valueNotNull = checkNotNull(value) {employeeNameNotNullMsg}
+            return EmployeeName(valueNotNull)
+        }
     }
 }
 
