@@ -32,7 +32,7 @@ class LoginAPITests {
     fun testHandlePostLogin_happyPath() {
         val data = mapOf(
                 "username" to DEFAULT_USER.name.value,
-                "password" to DEFAULT_PASSWORD)
+                "password" to DEFAULT_PASSWORD.value)
         val responseData = handlePOSTLogin(au, NO_USER, data).fileContents
         Assert.assertTrue("The system should indicate success.  File was $responseData",
                 responseData.contains("SUCCESS"))
@@ -44,7 +44,7 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_missingUser() {
         val data = mapOf(
-                "password" to DEFAULT_PASSWORD)
+                "password" to DEFAULT_PASSWORD.value)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data).fileContents}
         assertEquals("username must not be missing", ex.message)
     }
@@ -56,7 +56,7 @@ class LoginAPITests {
     fun testHandlePostLogin_blankUser() {
         val data = mapOf(
                 "username" to "",
-                "password" to DEFAULT_PASSWORD)
+                "password" to DEFAULT_PASSWORD.value)
         val ex = assertThrows(IllegalArgumentException::class.java) { handlePOSTLogin(au, NO_USER, data).fileContents }
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }

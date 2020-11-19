@@ -23,7 +23,7 @@ class PureMemoryDatabaseTests {
     fun `should be able to add a new project`() {
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
 
-        val project = pmd.getProjectById(DEFAULT_PROJECT.id.value)
+        val project = pmd.getProjectById(DEFAULT_PROJECT.id)
 
         assertEquals(ProjectId(1), project.id)
     }
@@ -32,7 +32,7 @@ class PureMemoryDatabaseTests {
     fun `should be able to add a new employee`() {
         pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
 
-        val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id.value)
+        val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id)
 
         assertEquals(1, employee.id.value)
     }

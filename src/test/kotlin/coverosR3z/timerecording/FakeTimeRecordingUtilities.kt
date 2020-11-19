@@ -41,7 +41,7 @@ class FakeTimeRecordingUtilities(
         return getEntriesForEmployeeOnDateBehavior()
     }
 
-    override fun getAllEntriesForEmployee(employeeId: Int): List<TimeEntry> {
+    override fun getAllEntriesForEmployee(employeeId: EmployeeId): List<TimeEntry> {
         return getAllEntriesForEmployeeBehavior()
     }
 
@@ -49,11 +49,11 @@ class FakeTimeRecordingUtilities(
         return listAllProjectsBehavior()
     }
 
-    override fun findProjectById(id: Int): Project {
+    override fun findProjectById(id: ProjectId): Project {
         return findProjectByIdBehavior()
     }
 
-    override fun findEmployeeById(id: Int): Employee {
+    override fun findEmployeeById(id: EmployeeId): Employee {
         return findEmployeeByIdBehavior()
     }
 

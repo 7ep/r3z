@@ -12,13 +12,14 @@ const val tooSmallUsernameMsg = "Username is too small. Min is $minUserNameSize"
 private const val maxUserMsg = "No way this company has more than 100 million users"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 const val usernameCannotBeEmptyMsg = "All users must have a non-empty name"
+const val usernameNotNullMsg = "Username must not be null"
 private val md = MessageDigest.getInstance("SHA-256")
 
 /**
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(""), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id.value)
+val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(Password("")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -26,7 +27,7 @@ val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(""), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
+val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(Password("")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -37,6 +38,13 @@ data class UserName(val value: String){
         require(value.isNotBlank()) {usernameCannotBeEmptyMsg}
         require(value.length <= maxUserNameSize) {tooLargeUsernameMsg}
         require(value.length >= minUserNameSize) { tooSmallUsernameMsg}
+    }
+
+    companion object {
+        fun make(value: String?) : UserName {
+            val valueNotNull = checkNotNull(value) {usernameNotNullMsg}
+            return UserName(valueNotNull)
+        }
     }
 }
 
@@ -52,7 +60,7 @@ data class UserId(val value: Int) {
 data class Salt(val value: String)
 
 @Serializable
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: Int?) {
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) {
 
     override fun toString(): String {
         return "User(id=${id.value}, name='${name.value}')"
@@ -77,8 +85,8 @@ data class Hash private constructor(val value: String) {
         /**
          * Hash the input string with the provided SHA-256 algorithm, and return a string representation
          */
-        fun createHash(password: String): Hash {
-            md.update(password.toByteArray())
+        fun createHash(password: Password): Hash {
+            md.update(password.value.toByteArray())
             val hashed : ByteArray = md.digest()
             return Hash(hashed.joinToString("") {"%02x".format(it)})
         }

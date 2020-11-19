@@ -13,11 +13,11 @@ class FakeAuthenticationUtilities (
     var logoutBehavior: () -> Unit = {},
     ) : IAuthenticationUtilities {
 
-    override fun register(username: String, password: String, employeeId: Int?): RegistrationResult {
+    override fun register(username: UserName, password: Password, employeeId: EmployeeId?): RegistrationResult {
        return registerBehavior()
     }
 
-    override fun login(username: String, password: String): Pair<LoginResult, User> {
+    override fun login(username: UserName, password: Password): Pair<LoginResult, User> {
         return loginBehavior()
     }
 

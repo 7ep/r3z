@@ -8,14 +8,13 @@ import coverosR3z.logging.logInfo
 class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
 
     private val blacklistedPasswords = listOf("password")
-    private val minPasswordSize = 12
-    private val maxPasswordSize = 255
+
 
     /**
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
-    override fun register(username: String, password: String, employeeId: Int?) : RegistrationResult {
+    override fun register(username: UserName, password: Password, employeeId: EmployeeId?) : RegistrationResult {
         val passwordResult = analyzePassword(password)
         val usernameResult = analyzeUsername(username)
 
@@ -31,17 +30,17 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         }else{
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
-            ap.createUser(UserName(username), Hash.createHash(password + salt), salt, employeeId)
+            ap.createUser(username, Hash.createHash(password.addSalt(salt)), salt, employeeId)
             logInfo("User registration successful for $username")
         }
 
         return registrationResult
     }
 
-    fun analyzeUsername(username: String): RegistrationUsernameResult {
+    fun analyzeUsername(username: UserName): RegistrationUsernameResult {
         return try {
             when {
-                ap.isUserRegistered(UserName(username)) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
+                ap.isUserRegistered(username) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
                 else -> RegistrationUsernameResult.SUCCESS
             }
         } catch (ex: Exception) {
@@ -59,35 +58,30 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
      * Examine the password the registrant wishes to use for
      * meeting our quality characteristics
      */
-    fun analyzePassword(password: String): RegistrationPasswordResult {
+    fun analyzePassword(password: Password): RegistrationPasswordResult {
         return when {
-            password.isEmpty() -> RegistrationPasswordResult.EMPTY_PASSWORD
-            password.length < minPasswordSize -> RegistrationPasswordResult.PASSWORD_TOO_SHORT
-            password.length > maxPasswordSize -> RegistrationPasswordResult.PASSWORD_TOO_LONG
-            blacklistedPasswords.contains(password) -> RegistrationPasswordResult.BLACKLISTED_PASSWORD
+            blacklistedPasswords.contains(password.value) -> RegistrationPasswordResult.BLACKLISTED_PASSWORD
             else -> RegistrationPasswordResult.SUCCESS
         }
     }
 
-    fun isUserRegistered(username: String) : Boolean {
-        require(username.isNotBlank()){"no username was provided to check"}
-        return ap.isUserRegistered(UserName(username))
+    fun isUserRegistered(username: UserName) : Boolean {
+        return ap.isUserRegistered(username)
     }
-
 
     /**
      * Takes a user's username and password and returns a result, and a user
      * as well if the [LoginResult] was successful.
      */
-    override fun login(username: String, password: String): Pair<LoginResult, User> {
-        val user = ap.getUser(UserName(username))
+    override fun login(username: UserName, password: Password): Pair<LoginResult, User> {
+        val user = ap.getUser(username)
 
         if (user == NO_USER) {
             logInfo("Login failed: user $user is not registered.")
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
-        val hashedSaltedPassword = Hash.createHash(password + user.salt)
+        val hashedSaltedPassword = Hash.createHash(password.addSalt(user.salt))
         if (user.hash != hashedSaltedPassword) {
             logInfo("Login failed for user $user: Incorrect password.")
             return Pair(LoginResult.FAILURE, NO_USER)

@@ -5,7 +5,7 @@ import coverosR3z.persistence.PureMemoryDatabase
 
 class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: Int?) {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) {
         pmd.addNewUser(name, hash, salt, employeeId)
     }
 

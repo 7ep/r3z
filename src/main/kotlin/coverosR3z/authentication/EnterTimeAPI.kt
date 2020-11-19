@@ -10,7 +10,7 @@ import java.time.LocalDate
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId
-                ?: NO_EMPLOYEE.id.value)))
+                ?: NO_EMPLOYEE.id)))
     } else {
         redirectTo(NamedPaths.HOMEPAGE.path)
     }
@@ -34,9 +34,8 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
         val time = Time(checkParseToInt(timeString))
         val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be missing"})
 
-        val project = tru.findProjectById(projectId.value)
-        val employeeId = checkNotNull(user.employeeId){"employeeId must not be missing"}
-        val employee = tru.findEmployeeById(employeeId)
+        val project = tru.findProjectById(projectId)
+        val employee = tru.findEmployeeById(checkNotNull(user.employeeId){employeeIdNotNullMsg})
 
         val timeEntry = TimeEntryPreDatabase(
                 employee,

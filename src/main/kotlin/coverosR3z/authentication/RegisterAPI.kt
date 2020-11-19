@@ -19,14 +19,10 @@ fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedRe
 
 fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (user == NO_USER) {
-        val username = UserName(checkNotNull(data["username"]) {"username must not be missing"})
-        val password = checkNotNull(data["password"])  {"password must not be missing"}
-        check(password.isNotBlank()) {"The password must not be blank"}
-        val employeeId = checkNotNull(data["employee"])  {"employee must not be missing"}
-        check(employeeId.isNotBlank()) {"The employee must not be blank"}
-        val employeeIdInt = checkParseToInt(employeeId)
-        check(employeeIdInt > 0) {"The employee id must be greater than zero"}
-        val result = au.register(username.value, password, employeeIdInt)
+        val username = UserName.make(data["username"])
+        val password = Password.make(data["password"])
+        val employeeId = EmployeeId.make(data["employee"])
+        val result = au.register(username, password, employeeId)
         if (result == RegistrationResult.SUCCESS) {
             okHTML(successHTML)
         } else {

@@ -9,7 +9,6 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.json.Json
 import org.junit.Assert
-import java.lang.IllegalArgumentException
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -20,9 +19,9 @@ val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
 val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = Salt("12345")
-val DEFAULT_PASSWORD = "password1234"
+val DEFAULT_PASSWORD = Password("password1234")
 val DEFAULT_PASSWORD_HASH = "b9c950640e1b3740e98acb93e669c65766f6670dd1609ba91ff41052ba48c6f3"
-val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), Hash.createHash(DEFAULT_PASSWORD + DEFAULT_SALT), DEFAULT_SALT, 1)
+val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), Hash.createHash(DEFAULT_PASSWORD.addSalt(DEFAULT_SALT)), DEFAULT_SALT, EmployeeId(1))
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
 val DEFAULT_EMPLOYEE = Employee(EmployeeId(1), DEFAULT_EMPLOYEE_NAME)
 val DEFAULT_TIME = Time(60)
@@ -91,13 +90,13 @@ fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
         val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
 
-        au.register("alice", DEFAULT_PASSWORD, aliceEmployee.id.value)
-        val (_, aliceUser) = au.login("alice", DEFAULT_PASSWORD)
+        au.register(UserName("alice"), DEFAULT_PASSWORD, aliceEmployee.id)
+        val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(aliceUser))
 
         // Perform some quick checks
-        Assert.assertTrue("Registration must have succeeded", au.isUserRegistered("alice"))
+        Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))
 
         tru.createProject(DEFAULT_PROJECT_NAME)
 

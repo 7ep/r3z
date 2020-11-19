@@ -91,13 +91,14 @@ class EnteringTimeBDD {
 
         val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
         val alice = systemTru.createEmployee(EmployeeName("Alice"))
+        val userName = UserName("alice_1")
 
-        au.register("alice_1", DEFAULT_PASSWORD, alice.id.value)
-        val (_, user) = au.login("alice_1", DEFAULT_PASSWORD)
+        au.register(userName, DEFAULT_PASSWORD, alice.id)
+        val (_, user) = au.login(userName, DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
 
-        assertTrue("Registration must have succeeded", au.isUserRegistered("alice_1"))
+        assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
 
         val newProject = systemTru.createProject(DEFAULT_PROJECT_NAME)
 
@@ -117,11 +118,12 @@ class EnteringTimeBDD {
         val systemTru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(SYSTEM_USER))
         val newProject = systemTru.createProject(ProjectName("A"))
         val newEmployee = systemTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val newUsername = UserName(newEmployee.name.value)
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))
 
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        au.register(newEmployee.name.value, DEFAULT_PASSWORD, newEmployee.id.value)
-        val (_, user) = au.login(newEmployee.name.value, DEFAULT_PASSWORD)
+        au.register(newUsername, DEFAULT_PASSWORD, newEmployee.id)
+        val (_, user) = au.login(newUsername, DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
         tru.recordTime(existingTimeForTheDay)
