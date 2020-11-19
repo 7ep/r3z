@@ -12,7 +12,7 @@ import java.lang.IllegalArgumentException
 
 class PureMemoryDatabaseTests {
 
-    lateinit var pmd: PureMemoryDatabase
+    private lateinit var pmd: PureMemoryDatabase
 
     @Before
     fun init() {

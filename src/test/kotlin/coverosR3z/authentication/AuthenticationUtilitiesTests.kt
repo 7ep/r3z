@@ -8,8 +8,8 @@ import org.junit.Test
 import java.lang.IllegalArgumentException
 
 class AuthenticationUtilitiesTests {
-    lateinit var authUtils : AuthenticationUtilities
-    lateinit var ap : FakeAuthPersistence
+    private lateinit var authUtils : AuthenticationUtilities
+    private lateinit var ap : FakeAuthPersistence
 
     @Before
     fun init() {

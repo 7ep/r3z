@@ -2,9 +2,9 @@ package coverosR3z.timerecording
 
 import coverosR3z.*
 import coverosR3z.domainobjects.*
-import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 

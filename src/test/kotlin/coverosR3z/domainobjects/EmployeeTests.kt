@@ -6,7 +6,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.lang.AssertionError
 
 class EmployeeTests {
 

@@ -12,7 +12,7 @@ fun handleUnauthorized() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
 }
 
-val badRequestHTML = """
+const val badRequestHTML = """
 <html>
     <head>
     </head>
@@ -24,7 +24,7 @@ val badRequestHTML = """
 </html>
 """
 
-val notFoundHTML = """
+const val notFoundHTML = """
 <html>
     <head>
     </head>
@@ -36,7 +36,7 @@ val notFoundHTML = """
 </html>
 """
 
-val unauthorizedHTML = """
+const val unauthorizedHTML = """
 <html>
     <head>
     </head>

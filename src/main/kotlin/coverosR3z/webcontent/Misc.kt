@@ -1,6 +1,6 @@
 package coverosR3z.webcontent
 
-val successHTML = """
+const val successHTML = """
     <html>
     <head>
     </head>
@@ -13,7 +13,7 @@ val successHTML = """
 </html>
 """
 
-val failureHTML = """
+const val failureHTML = """
 <html>
     <head>
     </head>

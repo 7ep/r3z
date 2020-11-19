@@ -6,11 +6,9 @@ import coverosR3z.DEFAULT_USER
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
-import java.net.Socket
 
 
 /**
@@ -21,8 +19,8 @@ import java.net.Socket
 class BrowserBDD {
 
     companion object {
-        lateinit var sc : SocketCommunication
-        lateinit var serverThread : Thread
+        private lateinit var sc : SocketCommunication
+        private lateinit var serverThread : Thread
 
         @BeforeClass @JvmStatic
         fun setup() {
@@ -111,7 +109,7 @@ class BrowserBDD {
         }
 
         // enter a new employee
-        val employees = listOf(DEFAULT_USER.name.value, )
+        val employees = listOf(DEFAULT_USER.name.value)
         for (employee in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
             chromeDriver.findElementById("employee_name").sendKeys(employee)
