@@ -1,14 +1,25 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.checkParseToInt
 import kotlinx.serialization.Serializable
 
 const val MAX_DETAILS_LENGTH = 500
+const val timeNotNullMsg = "time_entry must not be null"
+const val detailsNotNullMsg = "details must not be null"
+const val timeNotBlankMsg = "time_entry must not be blank"
 
 @Serializable
 data class Details(val value : String = "") {
     init {
         require(value.length <= MAX_DETAILS_LENGTH) { "no reason why details for a time entry would ever need to be this big. " +
                 "if you have more to say than the lord's prayer, you're probably doing it wrong." }
+    }
+
+    companion object {
+        fun make(value : String?) : Details {
+            val valueNotNull = checkNotNull(value) {detailsNotNullMsg}
+            return Details(valueNotNull)
+        }
     }
 }
 
@@ -20,6 +31,15 @@ data class Time(val numberOfMinutes : Int) {
     init {
         require(numberOfMinutes > 0) {"Doesn't make sense to have zero or negative time"}
         require(numberOfMinutes <= 60*24) {"Entries do not span multiple days, thus must be <=24 hrs"}
+    }
+
+    companion object {
+        fun make(value: String?) : Time {
+            val time = checkNotNull(value) {timeNotNullMsg}
+            require(time.isNotBlank()) {timeNotBlankMsg}
+            val timeInt = checkParseToInt(time)
+            return Time(timeInt)
+        }
     }
 }
 
