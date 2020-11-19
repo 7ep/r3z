@@ -26,6 +26,7 @@ fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
 
 fun createEmployeeHTML(username : String) : String {
     return """
+<!DOCTYPE html>        
 <html>
     <head>
         <title>create employee</title>
@@ -56,6 +57,7 @@ fun createEmployeeHTML(username : String) : String {
 
 fun existingEmployeesHTML(username : String, employees : List<Employee>) : String {
     return """
+<!DOCTYPE html>        
 <html>
     <head>
         <title>Company Employees</title>

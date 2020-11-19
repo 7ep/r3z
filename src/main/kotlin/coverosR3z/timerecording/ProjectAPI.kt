@@ -28,6 +28,7 @@ fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
 
 fun createProjectHTML(username : String) : String {
     return """
+<!DOCTYPE html>        
 <html>
     <head>
         <title>create project</title>

@@ -12,6 +12,7 @@ fun doGETLogout(au: IAuthenticationUtilities, rd: RequestData): PreparedResponse
 }
 
 const val logoutHTML = """
+<!DOCTYPE html>    
 <html>
     <head>
         <title>Logout</title>

@@ -2,6 +2,7 @@ package coverosR3z.webcontent
 
 fun authHomePageHTML(username : String) : String {
     return """
+        <!DOCTYPE html>
         <html>
     <head>
     </head>

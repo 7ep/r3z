@@ -53,6 +53,7 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
 
 fun entertimeHTML(username: String, projects : List<Project>) : String {
     return """
+    <!DOCTYPE html>        
     <html>
     <head>
         <title>enter time</title>
@@ -294,6 +295,7 @@ const val enterTimeJS = """
 
 fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
     return """
+<!DOCTYPE html>        
 <html>
     <head>
         <title>your time entries</title>
