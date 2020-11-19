@@ -48,13 +48,13 @@ fun registerHTML(employees: List<Employee>) : String {
     <br>
     <h2>Register a User</h2>
     
-    <form  method="post" action="register">
+    <form method="post" action="register">
       <div class="container"> 
-        <label>Username</label>
+        <label for="username">Username</label>
         <input class="input" type="text" name="username" id="username">
-        <label>Password</label>
+        <label for="password">Password</label>
         <input class="input" type="password" name="password" id="password">
-        <label>Employee</label>
+        <label for="employee">Employee</label>
         <select class="input" id="employee" name="employee">
 """+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
             """

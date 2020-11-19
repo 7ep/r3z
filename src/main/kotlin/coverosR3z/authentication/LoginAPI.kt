@@ -48,9 +48,9 @@ const val loginHTML = """
     
     <form  method="post" action="login">
       <div class="container"> 
-        <label>Username</label>
+        <label for="username">Username</label>
         <input class="input" type="text" name="username" id="username">
-        <label>Password</label>
+        <label for="password">Password</label>
         <input class="input" type="password" name="password" id="password">
         <button id="login_button" class="submit">Login</button>
       </div>
