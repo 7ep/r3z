@@ -6,6 +6,7 @@ import coverosR3z.DEFAULT_USER
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
@@ -42,6 +43,7 @@ class BrowserBDD {
      * HtmlUnit is a Java-based headless browser
      */
     @Test
+    @Ignore
     fun `happy path - I should be able to see a page without javascript`() {
         // Given I am on a browser without javascript
         // start the HTMLUnit browser
@@ -68,6 +70,7 @@ class BrowserBDD {
      * - enter time
      */
     @Test
+    @Ignore
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
         // start the Chromedriver

@@ -13,6 +13,7 @@ fun handleUnauthorized() : PreparedResponseData {
 }
 
 const val badRequestHTML = """
+<!DOCTYPE html>    
 <html>
     <head>
     </head>
@@ -25,6 +26,7 @@ const val badRequestHTML = """
 """
 
 const val notFoundHTML = """
+<!DOCTYPE html>    
 <html>
     <head>
     </head>
@@ -37,6 +39,7 @@ const val notFoundHTML = """
 """
 
 const val unauthorizedHTML = """
+<!DOCTYPE html>    
 <html>
     <head>
     </head>
@@ -50,6 +53,7 @@ const val unauthorizedHTML = """
 
 fun generalMessageHTML(msg : String) : String {
     return """
+<!DOCTYPE html>        
 <html>
     <head>
     </head>

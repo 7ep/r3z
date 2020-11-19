@@ -34,6 +34,7 @@ fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<Strin
 
 fun registerHTML(employees: List<Employee>) : String {
     return """
+<!DOCTYPE html>        
 <html>
   <head>
       <link rel="stylesheet" href="register.css">

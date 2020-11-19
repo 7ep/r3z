@@ -46,6 +46,7 @@ private fun handleGet(sd : ServerData): PreparedResponseData {
         CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
         EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
         LOGIN.path -> doGETLoginPage(rd)
+        LOGINCSS.path -> okCSS(loginCSS)
         REGISTER.path -> doGETRegisterPage(tru, rd)
         REGISTERCSS.path -> okCSS(registerCSS)
         CREATE_PROJECT.path -> doGETCreateProjectPage(rd)

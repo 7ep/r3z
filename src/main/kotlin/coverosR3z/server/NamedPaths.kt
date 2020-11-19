@@ -22,6 +22,7 @@ enum class NamedPaths(val path: String) {
 
     // login
     LOGIN("login"),
+    LOGINCSS("login.css"),
 
     // logout
     LOGOUT("logout"),
