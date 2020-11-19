@@ -7,61 +7,20 @@ import coverosR3z.logging.logInfo
 
 class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
 
-    private val blacklistedPasswords = listOf("password")
-
-
     /**
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
     override fun register(username: UserName, password: Password, employeeId: EmployeeId?) : RegistrationResult {
-        val passwordResult = analyzePassword(password)
-        val usernameResult = analyzeUsername(username)
-
-        val registrationResult =
-            if (passwordResult == RegistrationPasswordResult.SUCCESS && usernameResult == RegistrationUsernameResult.SUCCESS) {
-                RegistrationResult.SUCCESS
-            } else {
-                RegistrationResult.FAILURE
-            }
-
-        if(registrationResult == RegistrationResult.FAILURE){
-            logInfo("User registration failed for $username: passwordResult: $passwordResult usernameResult: $usernameResult")
-        }else{
+        return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
             ap.createUser(username, Hash.createHash(password.addSalt(salt)), salt, employeeId)
             logInfo("User registration successful for $username")
-        }
-
-        return registrationResult
-    }
-
-    fun analyzeUsername(username: UserName): RegistrationUsernameResult {
-        return try {
-            when {
-                ap.isUserRegistered(username) -> RegistrationUsernameResult.USERNAME_ALREADY_REGISTERED
-                else -> RegistrationUsernameResult.SUCCESS
-            }
-        } catch (ex: Exception) {
-            logInfo("Analysis of username failed during registration.  Message: ${ex.message ?: "(NO MESSAGE)"}")
-            when (ex.message){
-                tooSmallUsernameMsg -> RegistrationUsernameResult.USERNAME_TOO_SHORT
-                tooLargeUsernameMsg -> RegistrationUsernameResult.USERNAME_TOO_LONG
-                usernameCannotBeEmptyMsg -> RegistrationUsernameResult.EMPTY_USERNAME
-               else -> RegistrationUsernameResult.FAILED_UNKNOWN
-            }
-        }
-    }
-
-    /**
-     * Examine the password the registrant wishes to use for
-     * meeting our quality characteristics
-     */
-    fun analyzePassword(password: Password): RegistrationPasswordResult {
-        return when {
-            blacklistedPasswords.contains(password.value) -> RegistrationPasswordResult.BLACKLISTED_PASSWORD
-            else -> RegistrationPasswordResult.SUCCESS
+            RegistrationResult.SUCCESS
+        } else {
+            logInfo("User ${username.value} was already registered")
+            RegistrationResult.USERNAME_ALREADY_REGISTERED
         }
     }
 

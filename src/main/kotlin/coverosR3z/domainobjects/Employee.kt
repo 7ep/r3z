@@ -2,15 +2,15 @@ package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
 private const val maxEmployeeNameSizeMsg = "Max size of employee name is $maxEmployeeNameSize"
 private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
-private const val minIdMsg = "Valid identifier values are 1 or above"
+const val minEmployeeIdMsg = "Valid identifier values are 1 or above"
 private const val employeeNameCannotBeEmptyMsg = "All employees must have a non-empty name"
 const val employeeIdNotNullMsg = "The employee id must not be null"
+const val employeeIdCannotBeBlank = "The employee id must not be blank"
 
 /**
  * This is used to represent no employee - just to avoid using null for an employee
@@ -35,7 +35,7 @@ data class EmployeeId(val value: Int) {
 
     init {
         require(value < maxEmployeeCount) { maxEmployeeMsg }
-        require(value > 0) { minIdMsg }
+        require(value > 0) { minEmployeeIdMsg }
     }
 
     companion object {
@@ -44,8 +44,9 @@ data class EmployeeId(val value: Int) {
          * You can pass the id as a string and we'll try to parse it
          */
         fun make(value: String?) : EmployeeId {
-            val id = checkNotNull(value) {employeeIdNotNullMsg}
-            val idInt = checkParseToInt(id) {"Must be able to parse $id as an integer"}
+            val id = requireNotNull(value) {employeeIdNotNullMsg}
+            require(id.isNotBlank()) {employeeIdCannotBeBlank}
+            val idInt = checkParseToInt(id)
             return EmployeeId(idInt)
         }
     }

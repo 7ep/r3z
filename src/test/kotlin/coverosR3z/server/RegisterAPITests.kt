@@ -6,8 +6,7 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.handlePOSTRegister
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
+import coverosR3z.domainobjects.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.*
@@ -70,8 +69,8 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name.value,
                       "password" to "",
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("The password must not be blank", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(passwordMustNotBeBlankMsg, ex.message)
     }
 
     @Test
@@ -79,8 +78,8 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name.value,
                       "password" to DEFAULT_PASSWORD.value,
                       "employee" to "")
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("The employee must not be blank", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(employeeIdCannotBeBlank, ex.message)
     }
 
     @Test
@@ -101,8 +100,8 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name.value,
               "password" to DEFAULT_PASSWORD.value,
               "employee" to "0")
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("The employee id must be greater than zero", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(minEmployeeIdMsg, ex.message)
     }
 
     /**
@@ -113,8 +112,8 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name.value,
               "password" to DEFAULT_PASSWORD.value,
               "employee" to "-10")
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("The employee id must be greater than zero", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(minEmployeeIdMsg, ex.message)
     }
 
     /**
@@ -125,7 +124,7 @@ class RegisterAPITests {
         val data = mapOf("password" to DEFAULT_PASSWORD.value,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
         val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("username must not be missing", ex.message)
+        assertEquals(usernameNotNullMsg, ex.message)
     }
 
     /**
@@ -136,7 +135,7 @@ class RegisterAPITests {
         val data = mapOf("username" to DEFAULT_USER.name.value,
                       "employee" to DEFAULT_EMPLOYEE.id.toString())
         val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("password must not be missing", ex.message)
+        assertEquals(passwordMustNotBeNullMsg, ex.message)
     }
 
     /**
@@ -146,8 +145,8 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingEmployee() {
         val data = mapOf("username" to DEFAULT_USER.name.value,
                       "password" to DEFAULT_PASSWORD.value)
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals("employee must not be missing", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals(employeeIdNotNullMsg, ex.message)
     }
 
 
