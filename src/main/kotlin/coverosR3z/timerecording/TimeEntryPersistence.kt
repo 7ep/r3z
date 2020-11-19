@@ -17,8 +17,8 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
      * this timeentry don't exist in the list of projects / employees
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(pmd.getProjectById(entry.project.id.value) != NO_PROJECT) {"a time entry with no project is invalid"}
-        check(pmd.getEmployeeById(entry.employee.id.value) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
+        check(pmd.getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
+        check(pmd.getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -49,11 +49,11 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return pmd.getAllTimeEntriesForEmployeeOnDate(employee, date)
     }
 
-    override fun getProjectByName(name: String): Project {
+    override fun getProjectByName(name: ProjectName): Project {
         return pmd.getProjectByName(name)
     }
 
-    override fun getProjectById(id: Int): Project {
+    override fun getProjectById(id: ProjectId): Project {
         return pmd.getProjectById(id)
     }
 
@@ -65,7 +65,7 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
         return pmd.getAllEmployees()
     }
 
-    override fun getEmployeeById(id: Int): Employee {
+    override fun getEmployeeById(id: EmployeeId): Employee {
         return pmd.getEmployeeById(id)
     }
 

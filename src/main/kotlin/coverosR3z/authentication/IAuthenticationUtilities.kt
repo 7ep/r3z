@@ -1,9 +1,6 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.DateTime
-import coverosR3z.domainobjects.LoginResult
-import coverosR3z.domainobjects.RegistrationResult
-import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.*
 import coverosR3z.misc.generateRandomString
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -13,13 +10,13 @@ interface IAuthenticationUtilities {
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
-    fun register(username: String, password: String, employeeId: Int? = null) : RegistrationResult
+    fun register(username: UserName, password: Password, employeeId: EmployeeId? = null) : RegistrationResult
 
     /**
      * Takes a user's username and password and returns a result, and a user
      * as well if the [LoginResult] was successful.
      */
-    fun login(username: String, password: String): Pair<LoginResult, User>
+    fun login(username: UserName, password: Password): Pair<LoginResult, User>
 
     /**
      * Returns the user if there is a valid session,

@@ -230,7 +230,7 @@ class TimeRecordingTests {
     @Test fun testCanGetProjectById() {
         val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
         val createdProject = utils.createProject(DEFAULT_PROJECT_NAME)
-        val foundProject = utils.findProjectById(createdProject.id.value)
+        val foundProject = utils.findProjectById(createdProject.id)
         assertEquals(createdProject, foundProject)
     }
 
@@ -239,7 +239,7 @@ class TimeRecordingTests {
      */
     @Test fun testCanGetProjectById_NotFound() {
         val utils = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(SYSTEM_USER))
-        val foundProject = utils.findProjectById(1)
+        val foundProject = utils.findProjectById(ProjectId(1))
         assertEquals(NO_PROJECT, foundProject)
     }
 

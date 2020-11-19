@@ -1,9 +1,6 @@
 package coverosR3z.authentication
 
-import coverosR3z.domainobjects.LoginResult
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.User
-import coverosR3z.domainobjects.UserName
+import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
 import coverosR3z.server.*
 import coverosR3z.webcontent.successHTML
@@ -11,10 +8,9 @@ import coverosR3z.webcontent.successHTML
 fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isUnauthenticated = user == NO_USER
     return if (isUnauthenticated) {
-        val username = UserName(checkNotNull(data["username"]) {"username must not be missing"})
-        val password = checkNotNull(data["password"]) {"password must not be missing"}
-        check(password.isNotBlank()) {"The password must not be blank"}
-        val (loginResult, loginUser) = au.login(username.value, password)
+        val username = UserName.make(data["username"])
+        val password = Password.make(data["password"])
+        val (loginResult, loginUser) = au.login(username, password)
         if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
             val newSessionToken: String = au.createNewSession(loginUser)
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))

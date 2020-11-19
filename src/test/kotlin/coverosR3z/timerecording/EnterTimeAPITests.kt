@@ -70,7 +70,7 @@ class EnterTimeAPITests {
         val data = mapOf("project_entry" to "1", "time_entry" to "60", "detail_entry" to "not much to say")
         val employeeId = null
         val ex = assertThrows(IllegalStateException::class.java){
-            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(""), Salt(""), employeeId),data)
+            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(Password("")), Salt(""), employeeId),data)
         }
         assertEquals("employeeId must not be missing", ex.message)
     }

@@ -12,8 +12,8 @@ class FakeTimeEntryPersistence(
         var persistNewTimeEntryBehavior : () -> Unit = {},
         var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
         var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
-        var getProjectByIdBehavior : (id : Int) -> Project = { NO_PROJECT },
-        var getEmployeeByIdBehavior : (id : Int) -> Employee = { NO_EMPLOYEE },
+        var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
+        var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
 ) : ITimeEntryPersistence {
 
 
@@ -42,11 +42,11 @@ class FakeTimeEntryPersistence(
         return listOf()
     }
 
-    override fun getProjectByName(name: String): Project {
+    override fun getProjectByName(name: ProjectName): Project {
         return getProjectByNameBehavior()
     }
 
-    override fun getProjectById(id: Int): Project {
+    override fun getProjectById(id: ProjectId): Project {
         return getProjectByIdBehavior(id)
     }
 
@@ -58,7 +58,7 @@ class FakeTimeEntryPersistence(
         return listOf()
     }
 
-    override fun getEmployeeById(id: Int): Employee {
+    override fun getEmployeeById(id: EmployeeId): Employee {
         return getEmployeeByIdBehavior(id)
     }
 

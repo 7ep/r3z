@@ -52,7 +52,7 @@ class PureMemoryDatabase {
         return newIndex
     }
 
-    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: Int?) : Int {
+    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : Int {
         val newIndex = users.size + 1
         users.add(User(UserId(newIndex), userName, hash, salt, employeeId))
         return newIndex
@@ -93,19 +93,16 @@ class PureMemoryDatabase {
         return users.singleOrNull { u -> u.name == name } ?: NO_USER
     }
 
-    fun getProjectById(id: Int) : Project {
-        require(id > 0)
-        return projects.singleOrNull { p -> p.id.value == id } ?: NO_PROJECT
+    fun getProjectById(id: ProjectId) : Project {
+        return projects.singleOrNull { p -> p.id == id } ?: NO_PROJECT
     }
 
-    fun getProjectByName(name: String): Project {
-        require(name.isNotEmpty())
-        return projects.singleOrNull { p -> p.name.value == name } ?: NO_PROJECT
+    fun getProjectByName(name: ProjectName): Project {
+        return projects.singleOrNull { p -> p.name == name } ?: NO_PROJECT
     }
 
-    fun getEmployeeById(id: Int): Employee {
-        require(id > 0) {"all employees must have an id greater than zero"}
-        return employees.singleOrNull { u -> u.id.value == id} ?: NO_EMPLOYEE
+    fun getEmployeeById(id: EmployeeId): Employee {
+        return employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE
     }
 
     fun getAllEmployees() : List<Employee> {

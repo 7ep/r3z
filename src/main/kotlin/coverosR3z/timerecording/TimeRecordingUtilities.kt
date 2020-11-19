@@ -20,7 +20,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         val user = cu.user
         // ensure time entry user is the logged in user, or
         // is the system
-        if (user != SYSTEM_USER && user.employeeId != entry.employee.id.value) {
+        if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
             log.info("time was not recorded successfully: current user $user does not have access to modify time for ${entry.employee}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
@@ -72,8 +72,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      * system (persists it to the database)
      */
     override fun createProject(projectName: ProjectName) : Project {
-        require(projectName.value.isNotEmpty()) {"Project name cannot be empty"}
-        require(persistence.getProjectByName(projectName.value) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
+        require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
         log.info("Creating a new project, ${projectName.value}")
 
         return persistence.persistNewProject(projectName)
@@ -99,7 +98,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.readTimeEntriesOnDate(employee, date)
     }
 
-    override fun getAllEntriesForEmployee(employeeId: Int): List<TimeEntry> {
+    override fun getAllEntriesForEmployee(employeeId: EmployeeId): List<TimeEntry> {
         val employee = persistence.getEmployeeById(employeeId)
         return persistence.readTimeEntries(employee)
     }
@@ -108,11 +107,11 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.getAllProjects()
     }
 
-    override fun findProjectById(id: Int): Project {
+    override fun findProjectById(id: ProjectId): Project {
         return persistence.getProjectById(id)
     }
 
-    override fun findEmployeeById(id: Int): Employee {
+    override fun findEmployeeById(id: EmployeeId): Employee {
         return persistence.getEmployeeById(id)
     }
 
