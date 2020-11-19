@@ -61,7 +61,7 @@ class SocketCommunication(val port : Int) {
                 Logger(cu).info("client requested ${requestData.verb} ${requestData.path}")
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
             } catch (ex : Exception) {
-                okHTML(generalMessageHTML(ex.stackTraceToString()))
+                okHTML(generalMessageHTML(ex.message ?: "NO ERROR MESSAGE DEFINED"))
             }
 
             returnData(server, responseData)

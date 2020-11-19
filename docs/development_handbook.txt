@@ -1,6 +1,23 @@
 Developer handbook
 ==================
 
+    Types
+    -----
+
+    Throughout the system, there is an attempt to keep raw values - strings, ints
+    floats, and so on - wrapped into custom types - e.g. [Password].
+
+    This is for some practical reasons:
+
+    1. they are better documented as they are used in the code.
+    2. It prevents accidental cross-wiring, like for example: if a method could take
+        a username and password string. Because they are typed - i.e. UserName("user1")
+        and Password("password123"), the values are only allowed to fit in the proper slot.
+    3. It centralizes invariants for types.  For example, if a password must be non-empty,
+       at least 12 characters and less than 255 chars, those requirements can be part of
+       the initialization of the type and then never needs to be called again.
+
+
     Behavior-Driven Development (BDD)
     ---------------------------------
 

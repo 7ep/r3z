@@ -60,13 +60,7 @@ data class UserId(val value: Int) {
 data class Salt(val value: String)
 
 @Serializable
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) {
-
-    override fun toString(): String {
-        return "User(id=${id.value}, name='${name.value}')"
-    }
-
-}
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?)
 
 /**
  * Code analysis might complain about the following, that this

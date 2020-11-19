@@ -21,10 +21,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
-            log.info("time was not recorded successfully: current user $user does not have access to modify time for ${entry.employee}")
+            log.info("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
-        log.info("Starting to record time for $entry")
+        log.info("Recording ${entry.time.numberOfMinutes} minutes on ${entry.project.name.value}")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         return try {
             persistence.persistNewTimeEntry(entry)
@@ -40,7 +40,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     }
 
     private fun `confirm the employee has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
-        log.info("checking that the employee has a total (new plus existing) of less than 24 hours")
+        log.info("confirming total time is less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
         val minutesRecorded = try {
             persistence.queryMinutesRecorded(entry.employee, entry.date)
@@ -56,11 +56,9 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // If the employee is entering in more than 24 hours in a day, that's invalid.
         val existingPlusNewMinutes = minutesRecorded + entry.time.numberOfMinutes
         if (existingPlusNewMinutes > twentyFourHours) {
-            log.info("Employee entered more time than exists in a day: $existingPlusNewMinutes minutes")
+            log.info("More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)")
             throw ExceededDailyHoursAmountException()
         }
-
-        log.info("Employee is entering a total of fewer than 24 hours ($existingPlusNewMinutes minutes / ${existingPlusNewMinutes / 60} hours) for this date (${entry.date})")
     }
 
     /**
@@ -73,7 +71,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        log.info("Creating a new project, ${projectName.value}")
+        log.info("Creating a new project, \"${projectName.value}\"")
 
         return persistence.persistNewProject(projectName)
     }
@@ -90,7 +88,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
 
         val newEmployee = persistence.persistNewEmployee(employeename)
-        log.info("Created a new employee, $newEmployee")
+        log.info("Created a new employee, ${newEmployee.name.value}")
         return newEmployee
     }
 
