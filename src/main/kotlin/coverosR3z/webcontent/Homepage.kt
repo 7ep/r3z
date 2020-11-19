@@ -1,6 +1,6 @@
 package coverosR3z.webcontent
 
-val homepageHTML = """
+const val homepageHTML = """
 <html>
     <head>
     </head>

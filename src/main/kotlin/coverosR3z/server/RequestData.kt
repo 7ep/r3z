@@ -12,6 +12,4 @@ data class RequestData(
         val path: String = "",
         val data : Map<String, String> = emptyMap(),
         val user : User = NO_USER,
-        val sessionToken : String = "") {
-
-}
+        val sessionToken : String = "")

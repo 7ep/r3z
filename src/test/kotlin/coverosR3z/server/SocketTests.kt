@@ -23,7 +23,7 @@ private lateinit var serverThread: Thread
 private lateinit var server : SocketWrapper
 private lateinit var client : SocketWrapper
 
-class ServerSocketInitializer(): Runnable {
+class ServerSocketInitializer: Runnable {
 
     override fun run() {
         halfOpenServerSocket = ServerSocket(12321)
@@ -31,7 +31,7 @@ class ServerSocketInitializer(): Runnable {
     }
 }
 
-class SocketTests() {
+class SocketTests {
 
     val tru = FakeTimeRecordingUtilities()
     val au = FakeAuthenticationUtilities()

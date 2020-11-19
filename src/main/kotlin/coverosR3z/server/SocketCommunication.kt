@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
  */
 class SocketCommunication(val port : Int) {
 
-    lateinit var halfOpenServerSocket : ServerSocket
+    private lateinit var halfOpenServerSocket : ServerSocket
 
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)

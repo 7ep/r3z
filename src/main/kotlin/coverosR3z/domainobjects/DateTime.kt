@@ -16,7 +16,7 @@ class DateTime(private val epochSecond : Long) {
     constructor(year: Int, month: Month, day: Int, hour: Int, minute: Int, second: Int)
             : this(LocalDateTime.of(year, month.ord, day, hour, minute, second).toEpochSecond(ZoneOffset.UTC))
 
-    val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
+    private val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
 
     init {
         require(epochSecond in 1577836800..4102444800) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}

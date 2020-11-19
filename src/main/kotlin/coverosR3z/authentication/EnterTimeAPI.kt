@@ -289,7 +289,7 @@ div.banner h2.titleheader a:visited {
  }
 """
 
-val enterTimeJS = """
+const val enterTimeJS = """
     console.log("Hello from JavaScript land")
 """
 

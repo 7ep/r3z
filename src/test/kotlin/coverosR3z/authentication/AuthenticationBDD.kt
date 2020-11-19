@@ -138,18 +138,6 @@ class AuthenticationBDD {
 
     companion object {
 
-
-        private fun registerOnce(): Pair<AuthenticationUtilities, Employee> {
-            val pmd = PureMemoryDatabase()
-            val authPersistence = AuthenticationPersistence(pmd)
-            val au = AuthenticationUtilities(authPersistence)
-
-            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
-            val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-            au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
-            return Pair(au, employee)
-        }
-
         private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
             val (tru, _) = initializeAUserAndLogin()
             val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2

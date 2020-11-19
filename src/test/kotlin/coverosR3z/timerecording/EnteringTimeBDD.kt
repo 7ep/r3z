@@ -1,16 +1,13 @@
 package coverosR3z.timerecording
 
 import coverosR3z.*
-import coverosR3z.authentication.AuthenticationBDD.Companion.registerUser
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
-import org.junit.Ignore
 import org.junit.Test
 
 
@@ -74,15 +71,6 @@ class EnteringTimeBDD {
                  |_|
      alt-text: Helper Methods
      */
-
-    private fun `given I have worked 1 hour on project "A" on Monday`(): Triple<RecordTimeResult, TimeRecordingUtilities, TimeEntryPreDatabase> {
-        val expectedStatus = RecordTimeResult(StatusEnum.SUCCESS)
-        val tru = createTimeRecordingUtility()
-        val newProject: Project = tru.createProject(ProjectName("A"))
-        val newEmployee: Employee = tru.createEmployee(EmployeeName("B"))
-        val entry = createTimeEntryPreDatabase(project = newProject, employee = newEmployee)
-        return Triple(expectedStatus, tru, entry)
-    }
 
     private fun addingProjectHoursWithNotes(): Triple<TimeRecordingUtilities, TimeEntryPreDatabase, RecordTimeResult> {
         val pmd = PureMemoryDatabase()

@@ -1,7 +1,6 @@
 package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_PASSWORD
-import coverosR3z.DEFAULT_PASSWORD_HASH
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
@@ -11,7 +10,6 @@ import coverosR3z.server.handleUnauthorized
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalStateException
 
 class EnterTimeAPITests {
 
