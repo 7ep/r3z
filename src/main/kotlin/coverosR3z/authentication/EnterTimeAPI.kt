@@ -28,11 +28,9 @@ fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): Prepare
 fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
     return if (isAuthenticated) {
-        val projectIdString = checkNotNull(data["project_entry"]){"project_entry must not be missing"}
-        val projectId = ProjectId(checkParseToInt(projectIdString))
-        val timeString = checkNotNull(data["time_entry"]){"time_entry must not be missing"}
-        val time = Time(checkParseToInt(timeString))
-        val details = Details(checkNotNull(data["detail_entry"]){"detail_entry must not be missing"})
+        val projectId = ProjectId.make(data["project_entry"])
+        val time = Time.make(data["time_entry"])
+        val details = Details.make(data["detail_entry"])
 
         val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(user.employeeId){employeeIdNotNullMsg})

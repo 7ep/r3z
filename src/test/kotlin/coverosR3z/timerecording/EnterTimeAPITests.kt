@@ -39,7 +39,7 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_missingProject() {
         val data = mapOf("time_entry" to "60", "detail_entry" to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
-        assertEquals("project_entry must not be missing", ex.message)
+        assertEquals(projectIdNotNullMsg, ex.message)
     }
 
     /**
@@ -49,7 +49,7 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_missingTimeEntry() {
         val data = mapOf("project_entry" to "1", "detail_entry" to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
-        assertEquals("time_entry must not be missing", ex.message)
+        assertEquals(timeNotNullMsg, ex.message)
     }
 
     /**
@@ -59,7 +59,7 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_missingDetailEntry() {
         val data = mapOf("project_entry" to "1", "time_entry" to "60")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
-        assertEquals("detail_entry must not be missing", ex.message)
+        assertEquals(detailsNotNullMsg, ex.message)
     }
 
     /**
