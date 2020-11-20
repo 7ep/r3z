@@ -64,7 +64,7 @@ fun registerHTML(employees: List<Employee>) : String {
       </div>
     </form>
   </body>
-</html
+</html>
 """
 }
 
