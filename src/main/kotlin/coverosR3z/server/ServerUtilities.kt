@@ -130,7 +130,7 @@ fun okJS (contents : ByteArray) =
         ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
 
 fun okJPG (contents : ByteArray) =
-    ok(contents, listOf(ContentType.APPLICATION_JPEG.ct))
+    ok(contents, listOf(ContentType.IMAGE_JPEG.ct))
 
 private fun ok (contents: ByteArray, ct : List<String>) =
         PreparedResponseData(contents, ResponseStatus.OK, ct)
@@ -329,11 +329,10 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
     val otherHeaders = data.headers.joinToString(CRLF) + CRLF
     logDebug("contentLengthHeader: $contentLengthHeader")
     logDebug("other headers:\n $otherHeaders")
-    val input = "$status$CRLF" +
+    server.write("$status$CRLF" +
             "$contentLengthHeader$CRLF" +
             otherHeaders +
-            CRLF +
-            toStr(data.fileContents)
-    server.write(input)
+            CRLF)
+    server.writeBytes(data.fileContents)
 }
 
