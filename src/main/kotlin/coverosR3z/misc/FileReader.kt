@@ -1,15 +1,23 @@
 package coverosR3z.misc
 
+fun toBytes(value : String) : ByteArray {
+    return value.toByteArray(Charsets.UTF_8)
+}
+
+fun toStr(value : ByteArray) : String {
+    return value.toString(Charsets.UTF_8)
+}
+
 class FileReader {
     companion object {
 
         /**
          * Read in template file as a string
          */
-        fun read(filename: String) : String? {
-            val foo = this::class.java.classLoader.getResource(filename)
+        fun read(filename: String) : ByteArray? {
+            val file = this::class.java.classLoader.getResource(filename)
                     ?: return null
-            return foo.readBytes().toString(Charsets.UTF_8)
+            return file.readBytes()
         }
 
         /**
@@ -17,12 +25,6 @@ class FileReader {
          */
         fun exists(filename: String) : Boolean {
             return this::class.java.classLoader.getResource(filename) != null
-        }
-
-        fun readBytes(filename: String): ByteArray {
-            val foo = this::class.java.classLoader.getResource(filename)
-                ?: return null
-            return foo.readBytes()
         }
     }
 }

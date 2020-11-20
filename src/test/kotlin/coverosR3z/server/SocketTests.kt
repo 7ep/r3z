@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.misc.FileReader
+import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -224,7 +225,7 @@ class SocketTests {
         assertTrue(headers.size > 1)
         assertEquals("Content-Type: text/css", headers[1])
         val fileWeRead = FileReader.read("sample.css")
-        assertEquals(fileWeRead, body)
+        assertEquals(toStr(fileWeRead!!), body)
     }
 
     /**

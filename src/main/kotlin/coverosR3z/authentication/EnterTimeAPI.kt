@@ -2,6 +2,7 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.toBytes
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.successHTML
@@ -51,8 +52,8 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
 }
 
 
-fun entertimeHTML(username: String, projects : List<Project>) : String {
-    return """
+fun entertimeHTML(username: String, projects : List<Project>) : ByteArray {
+    return toBytes("""
     <!DOCTYPE html>        
     <html>
     <head>
@@ -96,10 +97,10 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
         </form>
     </body>
 </html>
-"""
+""")
 }
 
-const val enterTimeCSS = """
+val enterTimeCSS = toBytes("""
     img {
   height: 200px;
 }
@@ -286,15 +287,15 @@ div.banner h2.titleheader a:visited {
         line-height: initial;
     }
  }
-"""
+""")
 
-const val enterTimeJS = """
+val enterTimeJS = toBytes("""
     console.log("Hello from JavaScript land")
-"""
+""")
 
 
-fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
-    return """
+fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : ByteArray {
+    return toBytes("""
 <!DOCTYPE html>        
 <html>
     <head>
@@ -337,5 +338,5 @@ fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
 
     </body>
 </html>
-"""
+""")
 }

@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.logging.logDebug
+import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -26,9 +27,9 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
     }
 
     override fun read(len : Int) : String {
-        val cbuf = CharArray(len)
-        val lengthRead = reader.read(cbuf, 0, len)
-        val body = cbuf.slice(0 until lengthRead).joinToString("")
+        val buf = CharArray(len)
+        val lengthRead = reader.read(buf, 0, len)
+        val body = buf.slice(0 until lengthRead).joinToString("")
         logDebug("$name actually read $lengthRead bytes.  body: $body")
         return body
     }

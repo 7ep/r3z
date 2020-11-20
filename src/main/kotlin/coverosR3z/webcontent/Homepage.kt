@@ -1,6 +1,8 @@
 package coverosR3z.webcontent
 
-const val homepageHTML = """
+import coverosR3z.misc.toBytes
+
+val homepageHTML = toBytes("""
 <!DOCTYPE html>    
 <html>
     <head>
@@ -17,4 +19,4 @@ const val homepageHTML = """
         </div>
     </body>
 </html>
-"""
+""")

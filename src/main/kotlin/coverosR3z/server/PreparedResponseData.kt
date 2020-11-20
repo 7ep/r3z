@@ -1,16 +1,19 @@
 package coverosR3z.server
 
+import coverosR3z.misc.toBytes
+
 /**
  * Data for shipping to the client
  */
-data class PreparedResponseData(val fileContents: String, val responseStatus: ResponseStatus, val headers : List<String> = emptyList())
+data class PreparedResponseData(val fileContents: ByteArray, val responseStatus: ResponseStatus, val headers : List<String> = emptyList()){
+    constructor(fileContents: String, responseStatus: ResponseStatus, headers : List<String> = emptyList())
+            : this(toBytes(fileContents), responseStatus, headers)
 
-data class PreparedResponseDataBytes(val fileContents: ByteArray, val responseStatus: ResponseStatus, val headers : List<String> = emptyList()) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as PreparedResponseDataBytes
+        other as PreparedResponseData
 
         if (!fileContents.contentEquals(other.fileContents)) return false
         if (responseStatus != other.responseStatus) return false
