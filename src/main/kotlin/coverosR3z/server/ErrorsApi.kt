@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+import coverosR3z.misc.toBytes
+
 fun handleBadRequest(): PreparedResponseData {
     return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
 }
@@ -12,7 +14,7 @@ fun handleUnauthorized() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
 }
 
-const val badRequestHTML = """
+val badRequestHTML = toBytes("""
 <!DOCTYPE html>    
 <html>
     <head>
@@ -23,9 +25,9 @@ const val badRequestHTML = """
        <p>400 error - BAD REQUEST</p>
     </body>
 </html>
-"""
+""")
 
-const val notFoundHTML = """
+val notFoundHTML = toBytes("""
 <!DOCTYPE html>    
 <html>
     <head>
@@ -36,9 +38,9 @@ const val notFoundHTML = """
        <p>404 error - NOT FOUND</p>
     </body>
 </html>
-"""
+""")
 
-const val unauthorizedHTML = """
+val unauthorizedHTML = toBytes("""
 <!DOCTYPE html>    
 <html>
     <head>
@@ -49,10 +51,10 @@ const val unauthorizedHTML = """
        <p>401 error - UNAUTHORIZED</p>
     </body>
 </html>        
-"""
+""")
 
-fun generalMessageHTML(msg : String) : String {
-    return """
+fun generalMessageHTML(msg : String) : ByteArray {
+    return toBytes("""
 <!DOCTYPE html>        
 <html>
     <head>
@@ -65,5 +67,5 @@ fun generalMessageHTML(msg : String) : String {
        <p></p>
     </body>
 </html>        
-"""
+""")
 }

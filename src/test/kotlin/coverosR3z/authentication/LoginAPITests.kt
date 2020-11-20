@@ -3,6 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert
@@ -32,7 +33,7 @@ class LoginAPITests {
                 "password" to DEFAULT_PASSWORD.value)
         val responseData = handlePOSTLogin(au, NO_USER, data).fileContents
         Assert.assertTrue("The system should indicate success.  File was $responseData",
-                responseData.contains("SUCCESS"))
+                toStr(responseData).contains("SUCCESS"))
     }
 
     /**

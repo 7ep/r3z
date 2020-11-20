@@ -4,6 +4,7 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.misc.FileReader
+import coverosR3z.misc.toStr
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
 import coverosR3z.webcontent.*
@@ -24,7 +25,7 @@ const val CRLF = "\r\n"
  * Examine the request and take proper action, returning a
  * proper response
  */
-fun handleRequestAndRespond(sd : ServerData): Any {
+fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
     return when (sd.rd.verb) {
         Verb.POST -> handlePost(sd)
         Verb.GET -> handleGet(sd)
@@ -32,7 +33,7 @@ fun handleRequestAndRespond(sd : ServerData): Any {
     }
 }
 
-private fun handleGet(sd : ServerData): Any {
+private fun handleGet(sd : ServerData): PreparedResponseData {
     val path = sd.rd.path
     val au = sd.au
     val tru = sd.tru
@@ -46,27 +47,21 @@ private fun handleGet(sd : ServerData): Any {
         CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
         EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
         LOGIN.path -> doGETLoginPage(rd)
-        LOGINCSS.path -> okCSS(loginCSS)
         REGISTER.path -> doGETRegisterPage(tru, rd)
-        REGISTERCSS.path -> okCSS(registerCSS)
         CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
         LOGOUT.path -> doGETLogout(au, rd)
         SHUTDOWN_SERVER.path -> handleGETShutdownServer(rd.user)
         else -> {
-            if (rd.path.takeLast(4) in listOf(".jpg.", "jpeg")) {
-                okJPG(FileReader.readBytes(rd.path))
-            }
-            else {
-                val fileContents = FileReader.read(rd.path)
+            val fileContents = FileReader.read(rd.path)
 
-                if (fileContents == null) {
-                    logDebug("unable to read a file named ${rd.path}")
-                    handleNotFound()
-                } else when {
-                    rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
-                    rd.path.takeLast(3) == ".js" -> okJS(fileContents)
-                    else -> handleNotFound()
-                }
+            if (fileContents == null) {
+                logDebug("unable to read a file named ${rd.path}")
+                handleNotFound()
+            } else when {
+                rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
+                rd.path.takeLast(3) == ".js" -> okJS(fileContents)
+                rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
+                else -> handleNotFound()
             }
         }
     }
@@ -97,7 +92,7 @@ fun handleGETShutdownServer(user: User): PreparedResponseData {
         SocketCommunication.shouldContinue = false
         okHTML(successHTML)
     } else {
-        redirectTo(homepageHTML)
+        redirectTo(HOMEPAGE.path)
     }
 }
 
@@ -121,27 +116,24 @@ fun isAuthenticated(rd : RequestData) : Boolean {
 /**
  * If you are responding with a success message and it is HTML
  */
-fun okHTML(contents : String) =
+fun okHTML(contents : ByteArray) =
         ok(contents, listOf(ContentType.TEXT_HTML.ct))
 /**
  * If you are responding with a success message and it is CSS
  */
-fun okCSS(contents : String) =
+fun okCSS(contents : ByteArray) =
         ok(contents, listOf(ContentType.TEXT_CSS.ct))
 /**
  * If you are responding with a success message and it is JavaScript
  */
-fun okJS (contents : String) =
+fun okJS (contents : ByteArray) =
         ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
 
 fun okJPG (contents : ByteArray) =
     ok(contents, listOf(ContentType.APPLICATION_JPEG.ct))
 
-private fun ok (contents: String, ct : List<String>) =
+private fun ok (contents: ByteArray, ct : List<String>) =
         PreparedResponseData(contents, ResponseStatus.OK, ct)
-
-private fun ok (contents: ByteArray, ct: List<String>) =
-    PreparedResponseDataBytes(contents, ResponseStatus.OK, ct)
 
 /**
  * Use this to redirect to any particular page
@@ -332,7 +324,7 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
     logDebug("Assembling data just before shipping to client")
     val status = "HTTP/1.1 ${data.responseStatus.value}"
     logDebug("status: $status")
-    val contentLengthHeader = "Content-Length: ${data.fileContents.length}"
+    val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
 
     val otherHeaders = data.headers.joinToString(CRLF) + CRLF
     logDebug("contentLengthHeader: $contentLengthHeader")
@@ -341,7 +333,7 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
             "$contentLengthHeader$CRLF" +
             otherHeaders +
             CRLF +
-            data.fileContents
+            toStr(data.fileContents)
     server.write(input)
 }
 

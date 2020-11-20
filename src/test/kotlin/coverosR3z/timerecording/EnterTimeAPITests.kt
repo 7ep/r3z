@@ -6,6 +6,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.handlePOSTTimeEntry
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.toStr
 import coverosR3z.server.handleUnauthorized
 import org.junit.Assert.*
 import org.junit.Before
@@ -29,7 +30,7 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry() {
         val data = mapOf("project_entry" to "1", "time_entry" to "60", "detail_entry" to "not much to say")
         val response = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
-        assertTrue("we should have gotten the success page.  Got: $response", response.contains("SUCCESS"))
+        assertTrue("we should have gotten the success page.  Got: $response", toStr(response).contains("SUCCESS"))
     }
 
     /**

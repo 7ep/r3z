@@ -7,6 +7,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.handlePOSTRegister
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.*
@@ -40,7 +41,7 @@ class RegisterAPITests {
                       "employee" to DEFAULT_EMPLOYEE.id.value.toString())
         val responseData = handlePOSTRegister(au, NO_USER, data).fileContents
         assertTrue("The system should indicate success.  File was $responseData",
-                responseData.contains("SUCCESS"))
+                toStr(responseData).contains("SUCCESS"))
     }
 
     /**
