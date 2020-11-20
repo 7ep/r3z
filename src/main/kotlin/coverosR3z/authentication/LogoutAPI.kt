@@ -17,7 +17,7 @@ const val logoutHTML = """
     <head>
         <title>Logout</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="enter_time.css" />
+        <link rel="stylesheet" href="general.css" />
     </head>
     <body>
             <p>
