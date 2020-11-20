@@ -93,7 +93,7 @@ class SocketTests {
 
     @Test
     fun testShouldGetHtmlFileResponseFromServer() {
-        val webpage = FileReader.read("sample.html")
+        val webpage = toStr(FileReader.read("sample.html")!!)
         client.write("GET / HTTP/1.1\n")
         val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
@@ -169,7 +169,7 @@ class SocketTests {
         // assert all is well
         assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
         assertTrue(headers.size > 1)
-        assertEquals(notFoundHTML, body)
+        assertEquals(toStr(notFoundHTML), body)
     }
 
     /**
@@ -199,7 +199,7 @@ class SocketTests {
             // assert all is well
             assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
             assertTrue(headers.size > 1)
-            assertEquals(badRequestHTML, body)
+            assertEquals(toStr(badRequestHTML), body)
         }
     }
 
@@ -249,7 +249,7 @@ class SocketTests {
         assertTrue(headers.size > 1)
         assertEquals("Content-Type: application/javascript", headers[1])
         val fileWeRead = FileReader.read("sample.js")
-        assertEquals(fileWeRead, body)
+        assertEquals(toStr(fileWeRead!!), body)
     }
 
 
@@ -274,7 +274,7 @@ class SocketTests {
         // assert all is well
         assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
-        assertEquals(unauthorizedHTML, body)
+        assertEquals(toStr(unauthorizedHTML), body)
     }
 
 

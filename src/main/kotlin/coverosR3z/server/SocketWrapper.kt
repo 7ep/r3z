@@ -20,6 +20,10 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         writer.write(input.toByteArray())
     }
 
+    override fun writeBytes(input: ByteArray) {
+        writer.write(input)
+    }
+
     override fun readLine(): String {
         val readResult = reader.readLine() ?: ""
         logDebug("${name ?: socket} read this line: $readResult")

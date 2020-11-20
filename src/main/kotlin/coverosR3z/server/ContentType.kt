@@ -11,7 +11,7 @@ enum class ContentType(value: String) {
 
     // Application MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#application
     APPLICATION_JAVASCRIPT("application/javascript"),
-    APPLICATION_JPEG("image/jpeg");
+    IMAGE_JPEG("image/jpeg");
 
     /**
      * Returns this enum as a full header
