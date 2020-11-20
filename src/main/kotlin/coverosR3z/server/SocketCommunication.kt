@@ -51,6 +51,18 @@ class SocketCommunication(val port : Int) {
 
         var shouldContinue = true
 
+        /**
+         * Given the command-line arguments, returns the first value
+         * as an integer for use as a port number, or defaults to 8080
+         */
+        fun extractFirstArgumentAsPort(args: Array<String>): Int {
+            return if (args.isEmpty() || args[0].isBlank()) {
+                8080
+            } else {
+                args[0].toIntOrNull() ?: 8080
+            }
+        }
+
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
             val responseData = try {
                 val requestData = parseClientRequest(server, au)
