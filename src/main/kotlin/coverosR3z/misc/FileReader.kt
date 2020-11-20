@@ -18,5 +18,11 @@ class FileReader {
         fun exists(filename: String) : Boolean {
             return this::class.java.classLoader.getResource(filename) != null
         }
+
+        fun readBytes(filename: String): ByteArray {
+            val foo = this::class.java.classLoader.getResource(filename)
+                ?: return null
+            return foo.readBytes()
+        }
     }
 }

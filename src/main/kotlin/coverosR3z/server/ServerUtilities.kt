@@ -24,7 +24,7 @@ const val CRLF = "\r\n"
  * Examine the request and take proper action, returning a
  * proper response
  */
-fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
+fun handleRequestAndRespond(sd : ServerData): Any {
     return when (sd.rd.verb) {
         Verb.POST -> handlePost(sd)
         Verb.GET -> handleGet(sd)
@@ -32,7 +32,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
     }
 }
 
-private fun handleGet(sd : ServerData): PreparedResponseData {
+private fun handleGet(sd : ServerData): Any {
     val path = sd.rd.path
     val au = sd.au
     val tru = sd.tru
@@ -53,14 +53,20 @@ private fun handleGet(sd : ServerData): PreparedResponseData {
         LOGOUT.path -> doGETLogout(au, rd)
         SHUTDOWN_SERVER.path -> handleGETShutdownServer(rd.user)
         else -> {
-            val fileContents = FileReader.read(rd.path)
-            if (fileContents == null) {
-                logDebug("unable to read a file named ${rd.path}")
-                handleNotFound()
-            } else when {
-                rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
-                rd.path.takeLast(3) == ".js" -> okJS(fileContents)
-                else -> handleNotFound()
+            if (rd.path.takeLast(4) in listOf(".jpg.", "jpeg")) {
+                okJPG(FileReader.readBytes(rd.path))
+            }
+            else {
+                val fileContents = FileReader.read(rd.path)
+
+                if (fileContents == null) {
+                    logDebug("unable to read a file named ${rd.path}")
+                    handleNotFound()
+                } else when {
+                    rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
+                    rd.path.takeLast(3) == ".js" -> okJS(fileContents)
+                    else -> handleNotFound()
+                }
             }
         }
     }
@@ -128,8 +134,14 @@ fun okCSS(contents : String) =
 fun okJS (contents : String) =
         ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
 
+fun okJPG (contents : ByteArray) =
+    ok(contents, listOf(ContentType.APPLICATION_JPEG.ct))
+
 private fun ok (contents: String, ct : List<String>) =
         PreparedResponseData(contents, ResponseStatus.OK, ct)
+
+private fun ok (contents: ByteArray, ct: List<String>) =
+    PreparedResponseDataBytes(contents, ResponseStatus.OK, ct)
 
 /**
  * Use this to redirect to any particular page
