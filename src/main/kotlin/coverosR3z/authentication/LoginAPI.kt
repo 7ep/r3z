@@ -36,13 +36,12 @@ const val loginHTML = """
 <!DOCTYPE html>
 <html>
   <head>
-      <link rel="stylesheet" href="login.css">
       <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
       <title>register</title>
-       <link rel="stylesheet" href="login.css" />
+      <link rel="stylesheet" href="general.css" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <header><a href="homepage">r3z</a></header>
+  <header><a class="home-button" href="homepage">r3z</a></header>
   <body>
     <br>
     <h2>Login</h2>
