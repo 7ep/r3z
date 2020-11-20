@@ -1,10 +1,15 @@
 package coverosR3z
 
+import coverosR3z.logging.logInfo
 import coverosR3z.server.SocketCommunication
+import coverosR3z.server.SocketCommunication.Companion.extractFirstArgumentAsPort
 
 /**
  * Entry point for the application.  KISS.
  */
-fun main() {
-    SocketCommunication(8080).startServer()
+fun main(args: Array<String>) {
+    val port = extractFirstArgumentAsPort(args)
+    logInfo("starting server on port $port")
+    SocketCommunication(port).startServer()
 }
+
