@@ -1,12 +1,8 @@
-package coverosR3z.server
+package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
-import coverosR3z.DEFAULT_USER
-import org.junit.AfterClass
 import org.junit.Assert.assertEquals
-import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
@@ -17,33 +13,12 @@ import org.openqa.selenium.chrome.ChromeDriver
  * I want to access it through a browser
  * So that it is convenient
  */
-class BrowserBDD {
-
-    companion object {
-        private lateinit var sc : SocketCommunication
-        private lateinit var serverThread : Thread
-
-        @BeforeClass @JvmStatic
-        fun setup() {
-            // start the server
-            serverThread = Thread{
-                    sc = SocketCommunication(8080)
-                    sc.startServer()
-            }
-            serverThread.start()
-        }
-
-        @AfterClass @JvmStatic
-        fun cleanup() {
-            serverThread.join()
-        }
-    }
+class UITests {
 
     /**
      * HtmlUnit is a Java-based headless browser
      */
     @Test
-    @Ignore
     fun `happy path - I should be able to see a page without javascript`() {
         // Given I am on a browser without javascript
         // start the HTMLUnit browser
@@ -70,18 +45,17 @@ class BrowserBDD {
      * - enter time
      */
     @Test
-    @Ignore
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
         // start the Chromedriver
         val chromeDriver = ChromeDriver()
 
         // Hit the homepage
-        chromeDriver.get("localhost:8080/${NamedPaths.HOMEPAGE.path}")
+        chromeDriver.get("localhost:8080/homepage")
         assertEquals("Homepage", chromeDriver.title)
 
         // register
-        chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
+        chromeDriver.get("localhost:8080/register")
         val user = "user1"
         chromeDriver.findElementById("username").sendKeys(user)
         val password = "password123456"
@@ -90,13 +64,13 @@ class BrowserBDD {
         chromeDriver.findElementById("register_button").click()
 
         // login
-        chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+        chromeDriver.get("localhost:8080/login")
         chromeDriver.findElementById("username").sendKeys(user)
         chromeDriver.findElementById("password").sendKeys(password)
         chromeDriver.findElementById("login_button").click()
 
         // hit authenticated homepage
-        chromeDriver.get("localhost:8080/${NamedPaths.AUTHHOMEPAGE.path}")
+        chromeDriver.get("localhost:8080/homepage")
         assertEquals("Authenticated Homepage", chromeDriver.title)
 
         // hit the 404 error
@@ -106,28 +80,28 @@ class BrowserBDD {
         // enter a few new projects
         val projects = listOf("BDD", "FTA")
         for (project in projects) {
-            chromeDriver.get("localhost:8080/${NamedPaths.CREATE_PROJECT.path}")
+            chromeDriver.get("localhost:8080/createproject")
             chromeDriver.findElementById("project_name").sendKeys(project)
             chromeDriver.findElementById("project_create_button").click()
         }
 
         // enter a new employee
-        val employees = listOf(DEFAULT_USER.name.value)
+        val employees = listOf("alice")
         for (employee in employees) {
-            chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
+            chromeDriver.get("localhost:8080/createemployee")
             chromeDriver.findElementById("employee_name").sendKeys(employee)
             chromeDriver.findElementById("employee_create_button").click()
         }
 
         // view the employees
-        chromeDriver.get("localhost:8080/${NamedPaths.EMPLOYEES.path}")
+        chromeDriver.get("localhost:8080/employees")
 
         // logout
         chromeDriver.get("localhost:8080/logout")
 
         // register a user for each employee
         for (e in employees) {
-            chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
+            chromeDriver.get("localhost:8080/register")
             chromeDriver.findElementById("username").sendKeys(e)
             chromeDriver.findElementById("password").sendKeys(password)
             chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '${e}']")).click()
@@ -137,14 +111,14 @@ class BrowserBDD {
         // loop through each user and login in
         for (e in employees) {
             // login
-            chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+            chromeDriver.get("localhost:8080/login")
             chromeDriver.findElementById("username").sendKeys(e)
             chromeDriver.findElementById("password").sendKeys(password)
             chromeDriver.findElementById("login_button").click()
 
             // enter times
             for (p in projects) {
-                chromeDriver.get("localhost:8080/${NamedPaths.ENTER_TIME.path}")
+                chromeDriver.get("localhost:8080/entertime")
                 chromeDriver.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
                 chromeDriver.findElementById("time_entry").sendKeys("60")
                 chromeDriver.findElementById("detail_entry").sendKeys("foo foo foo foo la la la la la la")
@@ -156,18 +130,13 @@ class BrowserBDD {
         }
 
         // login
-        chromeDriver.get("localhost:8080/${NamedPaths.LOGIN.path}")
+        chromeDriver.get("localhost:8080/login")
         chromeDriver.findElementById("username").sendKeys(user)
         chromeDriver.findElementById("password").sendKeys(password)
         chromeDriver.findElementById("login_button").click()
 
         // view the time entries for the last person
-        chromeDriver.get("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
-
-        // stop the server with two calls.  Once to tell it the next call is the
-        // last, and the second to be that next call.
-        chromeDriver.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")
-        chromeDriver.get("localhost:8080/")
+        chromeDriver.get("localhost:8080/timeentries")
 
         chromeDriver.quit()
     }

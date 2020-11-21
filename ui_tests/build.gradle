@@ -1,0 +1,56 @@
+plugins {
+    // lets us use kotlin
+    id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
+}
+
+// enables us to use Kotlin on the JVM
+apply plugin: 'kotlin'
+
+group 'com.coveros.r3z.uitests'
+version ''
+
+sourceSets {
+    test.kotlin.srcDirs = test.java.srcDirs = ['src']
+    test.resources.srcDirs = ['resources']
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    // Selenium - used for testing commonly-used browsers
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+
+    // HtmlUnit is a browser that is controlled directly by Java.  It has no UI, and
+    // runs really, *really* fast.
+    // https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit
+    testImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.44.0'
+
+    // junit, for running unit tests
+    // https://mvnrepository.com/artifact/junit/junit/4.13.1
+    testImplementation ("junit:junit:4.13.1")
+}
+
+// this causes the tests to run each time.  Without this,
+// it would be necessary to run the gradle command with a --rerun-tasks option
+test.outputs.upToDateWhen {false}
+
+test {
+    testLogging {
+        exceptionFormat "full" // default is "short"
+        // uncomment the following to see the unit test progress in the output
+        //events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+
+        // set to false to disable detailed failure logs
+        showExceptions true
+
+        // enable to see standard out and error streams inline with the test results
+        showStandardStreams true
+    }
+
+    // Fail the 'test' task on the first test failure
+    failFast = true
+}
