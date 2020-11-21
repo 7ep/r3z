@@ -12,7 +12,7 @@ fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedRe
         redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     } else {
         val employees = tru.listAllEmployees()
-        PreparedResponseData(registerHTML(employees), ResponseStatus.OK)
+        okHTML(registerHTML(employees))
     }
 }
 
@@ -25,7 +25,7 @@ fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<Strin
         if (result == RegistrationResult.SUCCESS) {
             okHTML(successHTML)
         } else {
-            PreparedResponseData(failureHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+            okHTML(failureHTML)
         }
     } else {
         redirectTo(NamedPaths.AUTHHOMEPAGE.path)

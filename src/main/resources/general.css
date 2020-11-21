@@ -9,8 +9,8 @@ header {
 }
 
 body {
-  color: #ebebeb;
-  /* background-color: #F3F6FA; */
+  color: #885555;
+  background-color: rgb(75 109 154);
   font-family: "helvetica", sans-serif;
   padding-top: 40px;
   margin: 0;
@@ -45,6 +45,8 @@ form {
   border: 2px solid #e2e2e2;
   margin: auto;
   border-radius: .5em;
+  background-color: white;
+  opacity: 82%;
 }
 
 form.transbox {

@@ -9,7 +9,7 @@ import coverosR3z.webcontent.successHTML
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (isAuthenticated(user)) {
         tru.createEmployee(EmployeeName.make(data["employee_name"]))
-        PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        okHTML(successHTML)
     } else {
         handleUnauthorized()
     }

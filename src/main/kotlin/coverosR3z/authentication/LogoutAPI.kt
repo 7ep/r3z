@@ -5,7 +5,7 @@ import coverosR3z.server.*
 fun doGETLogout(au: IAuthenticationUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         au.logout(rd.sessionToken)
-        PreparedResponseData(logoutHTML, ResponseStatus.OK, emptyList())
+        okHTML(logoutHTML)
     } else {
         redirectTo(NamedPaths.HOMEPAGE.path)
     }

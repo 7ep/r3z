@@ -10,7 +10,7 @@ fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Ma
     val isAuthenticated = user != NO_USER
     return if (isAuthenticated) {
         tru.createProject(ProjectName.make(data["project_name"]))
-        PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        okHTML(successHTML)
     } else {
         handleUnauthorized()
     }

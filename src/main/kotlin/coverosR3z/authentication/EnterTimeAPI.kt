@@ -43,7 +43,7 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
 
         tru.recordTime(timeEntry)
 
-        PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct))
+        okHTML(successHTML)
     } else {
         handleUnauthorized()
     }
