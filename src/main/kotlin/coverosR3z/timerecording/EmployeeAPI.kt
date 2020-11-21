@@ -3,7 +3,6 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
-import coverosR3z.misc.toBytes
 import coverosR3z.server.*
 import coverosR3z.webcontent.successHTML
 
@@ -25,8 +24,8 @@ fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
 }
 
 
-fun createEmployeeHTML(username : String) : ByteArray {
-    return toBytes("""
+fun createEmployeeHTML(username : String) : String {
+    return """
 <!DOCTYPE html>        
 <html>
     <head>
@@ -52,12 +51,12 @@ fun createEmployeeHTML(username : String) : ByteArray {
     </form>
     </body>
 </html>        
-""")
+"""
 }
 
 
-fun existingEmployeesHTML(username : String, employees : List<Employee>) : ByteArray {
-    return toBytes("""
+fun existingEmployeesHTML(username : String, employees : List<Employee>) : String {
+    return """
 <!DOCTYPE html>        
 <html>
     <head>
@@ -98,5 +97,5 @@ fun existingEmployeesHTML(username : String, employees : List<Employee>) : ByteA
 
     </body>
 </html>
-        """)
+"""
 }

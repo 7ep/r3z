@@ -169,7 +169,7 @@ class SocketTests {
         // assert all is well
         assertEquals("HTTP/1.1 404 NOT FOUND", statusline)
         assertTrue(headers.size > 1)
-        assertEquals(toStr(notFoundHTML), body)
+        assertEquals(notFoundHTML, body)
     }
 
     /**
@@ -199,7 +199,7 @@ class SocketTests {
             // assert all is well
             assertEquals("HTTP/1.1 400 BAD REQUEST", statusline)
             assertTrue(headers.size > 1)
-            assertEquals(toStr(badRequestHTML), body)
+            assertEquals(badRequestHTML, body)
         }
     }
 
@@ -274,7 +274,7 @@ class SocketTests {
         // assert all is well
         assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
-        assertEquals(toStr(unauthorizedHTML), body)
+        assertEquals(unauthorizedHTML, body)
     }
 
 

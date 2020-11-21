@@ -1,8 +1,6 @@
 package coverosR3z.webcontent
 
-import coverosR3z.misc.toBytes
-
-val successHTML = toBytes("""
+const val successHTML = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -14,9 +12,9 @@ val successHTML = toBytes("""
         <p><a href="homepage">Homepage</a></p>
     </body>
 </html>
-""")
+"""
 
-val failureHTML = toBytes("""
+const val failureHTML = """
 <!DOCTYPE html>    
 <html>
     <head>
@@ -27,4 +25,4 @@ val failureHTML = toBytes("""
        <p>FAILURE</p>
     </body>
 </html>        
-""")
+"""

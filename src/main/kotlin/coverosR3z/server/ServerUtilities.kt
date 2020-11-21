@@ -1,13 +1,16 @@
 package coverosR3z.server
 
 import coverosR3z.authentication.*
-import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.NO_USER
+import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
 import coverosR3z.misc.FileReader
-import coverosR3z.misc.toStr
+import coverosR3z.misc.toBytes
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
-import coverosR3z.webcontent.*
+import coverosR3z.webcontent.authHomePageHTML
+import coverosR3z.webcontent.homepageHTML
+import coverosR3z.webcontent.successHTML
 
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
 
@@ -58,8 +61,8 @@ private fun handleGet(sd : ServerData): PreparedResponseData {
                 logDebug("unable to read a file named ${rd.path}")
                 handleNotFound()
             } else when {
-                rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
-                rd.path.takeLast(3) == ".js" -> okJS(fileContents)
+                rd.path.takeLast(4) == ".css" -> ok(fileContents, listOf(ContentType.TEXT_CSS.ct))
+                rd.path.takeLast(3) == ".js" -> ok(fileContents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
                 rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
                 else -> handleNotFound()
             }
@@ -116,18 +119,19 @@ fun isAuthenticated(rd : RequestData) : Boolean {
 /**
  * If you are responding with a success message and it is HTML
  */
-fun okHTML(contents : ByteArray) =
-        ok(contents, listOf(ContentType.TEXT_HTML.ct))
+fun okHTML(contents : String) =
+        ok(toBytes(contents), listOf(ContentType.TEXT_HTML.ct))
+
 /**
  * If you are responding with a success message and it is CSS
  */
-fun okCSS(contents : ByteArray) =
-        ok(contents, listOf(ContentType.TEXT_CSS.ct))
+fun okCSS(contents : String) =
+        ok(toBytes(contents), listOf(ContentType.TEXT_CSS.ct))
 /**
  * If you are responding with a success message and it is JavaScript
  */
-fun okJS (contents : ByteArray) =
-        ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+fun okJS (contents : String) =
+        ok(toBytes(contents), listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
 
 fun okJPG (contents : ByteArray) =
     ok(contents, listOf(ContentType.IMAGE_JPEG.ct))

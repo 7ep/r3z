@@ -1,9 +1,7 @@
 package coverosR3z.webcontent
 
-import coverosR3z.misc.toBytes
-
-fun authHomePageHTML(username : String) : ByteArray {
-    return toBytes("""
+fun authHomePageHTML(username : String) : String {
+    return """
         <!DOCTYPE html>
         <html>
     <head>
@@ -20,5 +18,5 @@ fun authHomePageHTML(username : String) : ByteArray {
        <p><a href="logout">Logout</a></p>
     </body>
 </html>
-""")
+"""
 }

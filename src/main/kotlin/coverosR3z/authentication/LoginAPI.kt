@@ -2,8 +2,6 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
-import coverosR3z.misc.FileReader
-import coverosR3z.misc.toBytes
 import coverosR3z.server.*
 import coverosR3z.webcontent.successHTML
 
@@ -33,7 +31,7 @@ fun doGETLoginPage(rd: RequestData): PreparedResponseData {
     }
 }
 
-val loginHTML = toBytes("""
+const val loginHTML = """
 <!DOCTYPE html>
 <html>
   <head>
@@ -58,4 +56,4 @@ val loginHTML = toBytes("""
     </form>
   </body>
 </html>      
-""")
+"""

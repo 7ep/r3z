@@ -1,8 +1,6 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
-import coverosR3z.misc.FileReader
-import coverosR3z.misc.toBytes
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.webcontent.failureHTML

@@ -3,7 +3,6 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
-import coverosR3z.misc.toBytes
 import coverosR3z.server.*
 import coverosR3z.webcontent.successHTML
 
@@ -27,8 +26,8 @@ fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
 }
 
 
-fun createProjectHTML(username : String) : ByteArray {
-    return toBytes("""
+fun createProjectHTML(username : String) : String {
+    return """
 <!DOCTYPE html>        
 <html>
     <head>
@@ -54,5 +53,5 @@ fun createProjectHTML(username : String) : ByteArray {
         </form>
     </body>
 </html>
-""")
+"""
 }
