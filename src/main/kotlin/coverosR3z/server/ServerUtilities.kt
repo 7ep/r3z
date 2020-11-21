@@ -70,8 +70,8 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
                 logDebug("unable to read a file named ${rd.path}")
                 handleNotFound()
             } else when {
-                rd.path.takeLast(4) == ".css" -> ok(fileContents, listOf(ContentType.TEXT_CSS.ct))
-                rd.path.takeLast(3) == ".js" -> ok(fileContents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+                rd.path.takeLast(4) == ".css" -> ok(fileContents, listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details))
+                rd.path.takeLast(3) == ".js" -> ok(fileContents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details))
                 rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
                 else -> handleNotFound()
             }
@@ -115,15 +115,15 @@ fun okHTML(contents : String) =
  * If you are responding with a success message and it is CSS
  */
 fun okCSS(contents : String) =
-        ok(toBytes(contents), listOf(ContentType.TEXT_CSS.ct))
+        ok(toBytes(contents), listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details))
 /**
  * If you are responding with a success message and it is JavaScript
  */
 fun okJS (contents : String) =
-        ok(toBytes(contents), listOf(ContentType.APPLICATION_JAVASCRIPT.ct))
+        ok(toBytes(contents), listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details))
 
 fun okJPG (contents : ByteArray) =
-    ok(contents, listOf(ContentType.IMAGE_JPEG.ct))
+    ok(contents, listOf(ContentType.IMAGE_JPEG.ct, CacheControl.AGGRESSIVE_CACHE.details))
 
 private fun ok (contents: ByteArray, ct : List<String>) =
         PreparedResponseData(contents, ResponseStatus.OK, ct)
