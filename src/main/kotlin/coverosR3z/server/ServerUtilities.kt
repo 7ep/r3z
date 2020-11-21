@@ -29,31 +29,40 @@ const val CRLF = "\r\n"
  * proper response
  */
 fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
-    return when (sd.rd.verb) {
-        Verb.POST -> handlePost(sd)
-        Verb.GET -> handleGet(sd)
-        Verb.INVALID -> handleBadRequest()
-    }
-}
-
-private fun handleGet(sd : ServerData): PreparedResponseData {
+    val verb = sd.rd.verb
     val path = sd.rd.path
     val au = sd.au
     val tru = sd.tru
     val rd = sd.rd
-    return when (path){
-        "", HOMEPAGE.path -> doGetHomePage(rd)
-        ENTER_TIME.path -> doGETEnterTimePage(tru, rd)
-        ENTER_TIMEJS.path -> okJS(enterTimeJS)
-        ENTER_TIMECSS.path -> okCSS(enterTimeCSS)
-        TIMEENTRIES.path -> doGetTimeEntriesPage(tru, rd)
-        CREATE_EMPLOYEE.path -> doGETCreateEmployeePage(rd)
-        EMPLOYEES.path -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
-        LOGIN.path -> doGETLoginPage(rd)
-        REGISTER.path -> doGETRegisterPage(tru, rd)
-        CREATE_PROJECT.path -> doGETCreateProjectPage(rd)
-        LOGOUT.path -> doGETLogout(au, rd)
-        SHUTDOWN_SERVER.path -> handleGETShutdownServer(rd.user)
+    val user = rd.user
+    val data = rd.data
+
+    if (verb == Verb.INVALID) {
+        return handleBadRequest()
+    }
+
+    return when (Pair(verb, path)){
+        Pair(Verb.GET, ""),
+        Pair(Verb.GET, HOMEPAGE.path)  -> doGetHomePage(rd)
+        Pair(Verb.GET, ENTER_TIME.path) -> doGETEnterTimePage(tru, rd)
+        Pair(Verb.GET, ENTER_TIMEJS.path) -> okJS(enterTimeJS)
+        Pair(Verb.GET, ENTER_TIMECSS.path) -> okCSS(enterTimeCSS)
+        Pair(Verb.GET, TIMEENTRIES.path) -> doGetTimeEntriesPage(tru, rd)
+        Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETCreateEmployeePage(rd)
+        Pair(Verb.GET, EMPLOYEES.path) -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
+        Pair(Verb.GET, LOGIN.path) -> doGETLoginPage(rd)
+        Pair(Verb.GET, REGISTER.path) -> doGETRegisterPage(tru, rd)
+        Pair(Verb.GET, CREATE_PROJECT.path) -> doGETCreateProjectPage(rd)
+        Pair(Verb.GET, LOGOUT.path) -> doGETLogout(au, rd)
+        Pair(Verb.GET, SHUTDOWN_SERVER.path) -> handleGETShutdownServer(rd.user)
+
+        // posts
+        Pair(Verb.POST, ENTER_TIME.path) -> handlePOSTTimeEntry(tru, user, data)
+        Pair(Verb.POST, CREATE_EMPLOYEE.path) -> handlePOSTNewEmployee(tru, user, data)
+        Pair(Verb.POST, LOGIN.path) -> handlePOSTLogin(au, user, data)
+        Pair(Verb.POST, REGISTER.path) -> handlePOSTRegister(au, user, data)
+        Pair(Verb.POST, CREATE_PROJECT.path) -> handlePOSTCreatingProject(tru, user, data)
+
         else -> {
             val fileContents = FileReader.read(rd.path)
 
@@ -67,26 +76,6 @@ private fun handleGet(sd : ServerData): PreparedResponseData {
                 else -> handleNotFound()
             }
         }
-    }
-}
-
-/**
- * The user has sent us data, we have to process it
- */
-private fun handlePost(sd : ServerData) : PreparedResponseData {
-    val path = sd.rd.path
-    val au = sd.au
-    val tru = sd.tru
-    val rd = sd.rd
-    val user = rd.user
-    val data = rd.data
-    return when (path) {
-        ENTER_TIME.path -> handlePOSTTimeEntry(tru, user, data)
-        CREATE_EMPLOYEE.path -> handlePOSTNewEmployee(tru, user, data)
-        LOGIN.path -> handlePOSTLogin(au, user, data)
-        REGISTER.path -> handlePOSTRegister(au, user, data)
-        CREATE_PROJECT.path -> handlePOSTCreatingProject(tru, user, data)
-        else -> handleNotFound()
     }
 }
 
