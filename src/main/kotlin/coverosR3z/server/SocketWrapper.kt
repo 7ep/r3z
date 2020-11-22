@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logTrace
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -15,7 +16,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
     override fun write(input: String) {
-        logDebug("${name ?: socket} is sending $input")
+        logTrace("${name ?: socket} is sending $input")
         writer.write(input.toByteArray())
     }
 

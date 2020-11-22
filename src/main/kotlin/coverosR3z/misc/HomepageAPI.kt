@@ -17,7 +17,7 @@ fun doGetHomePage(rd: RequestData): PreparedResponseData {
 fun authHomePageHTML(username : String) : String {
     return """
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
     <head>
     </head>
         <title>Authenticated Homepage</title>
@@ -37,7 +37,7 @@ fun authHomePageHTML(username : String) : String {
 
 const val homepageHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
       <link rel="stylesheet" href="general.css" />
     </head>

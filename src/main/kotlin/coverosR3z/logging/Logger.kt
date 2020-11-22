@@ -20,5 +20,12 @@ fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  * Used to log finicky details of technical solutions
  */
 fun logDebug(msg : String) {
+    println("DEBUG: $msg")
+}
+
+/**
+ * Logs nearly extraneous levels of detail.
+ */
+fun logTrace(msg: String) {
 //    println("DEBUG: $msg")
 }

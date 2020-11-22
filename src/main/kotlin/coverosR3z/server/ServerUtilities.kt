@@ -20,6 +20,8 @@ data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingU
  */
 const val CRLF = "\r\n"
 
+val caching = CacheControl.AGGRESSIVE_MINUTE_CACHE.details
+
 /**
  * Examine the request and take proper action, returning a
  * proper response
@@ -75,17 +77,20 @@ private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
     return if (fileContents == null) {
         logDebug("unable to read a file named ${rd.path}")
         handleNotFound()
-    } else when {
-        rd.path.takeLast(4) == ".css" -> ok(
-            fileContents,
-            listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details)
-        )
-        rd.path.takeLast(3) == ".js" -> ok(
-            fileContents,
-            listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details)
-        )
-        rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
-        else -> handleNotFound()
+    } else {
+        when {
+            rd.path.takeLast(4) == ".css" -> ok(
+                fileContents,
+                listOf(ContentType.TEXT_CSS.value, caching)
+            )
+            rd.path.takeLast(3) == ".js" -> ok(
+                fileContents,
+                listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching)
+            )
+            rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
+            rd.path.takeLast(5) == ".webp" -> okWEBP(fileContents)
+            else -> handleNotFound()
+        }
     }
 }
 
@@ -111,21 +116,24 @@ fun isAuthenticated(rd : RequestData) : Boolean {
  * If you are responding with a success message and it is HTML
  */
 fun okHTML(contents : String) =
-        ok(toBytes(contents), listOf(ContentType.TEXT_HTML.ct))
+        ok(toBytes(contents), listOf(ContentType.TEXT_HTML.value))
 
 /**
  * If you are responding with a success message and it is CSS
  */
 fun okCSS(contents : String) =
-        ok(toBytes(contents), listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details))
+        ok(toBytes(contents), listOf(ContentType.TEXT_CSS.value, caching))
 /**
  * If you are responding with a success message and it is JavaScript
  */
 fun okJS (contents : String) =
-        ok(toBytes(contents), listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details))
+        ok(toBytes(contents), listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
 
 fun okJPG (contents : ByteArray) =
-    ok(contents, listOf(ContentType.IMAGE_JPEG.ct, CacheControl.AGGRESSIVE_CACHE.details))
+    ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
+
+fun okWEBP (contents : ByteArray) =
+        ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
 
 private fun ok (contents: ByteArray, ct : List<String>) =
         PreparedResponseData(contents, ResponseStatus.OK, ct)
@@ -134,7 +142,7 @@ private fun ok (contents: ByteArray, ct : List<String>) =
  * Use this to redirect to any particular page
  */
 fun redirectTo(path: String): PreparedResponseData {
-    return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.ct, "Location: $path"))
+    return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
 }
 
 /**
@@ -321,12 +329,13 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
     logDebug("status: $status")
     val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
 
-    val otherHeaders = data.headers.joinToString(CRLF) + CRLF
+    val otherHeaders = data.headers.joinToString(CRLF)
     logDebug("contentLengthHeader: $contentLengthHeader")
-    logDebug("other headers:\n $otherHeaders")
+    data.headers.forEach{logDebug("sending header: $it")}
     server.write("$status$CRLF" +
             "$contentLengthHeader$CRLF" +
             otherHeaders +
+            CRLF +
             CRLF)
     server.writeBytes(data.fileContents)
 }

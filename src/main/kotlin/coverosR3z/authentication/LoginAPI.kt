@@ -13,7 +13,7 @@ fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, 
         val (loginResult, loginUser) = au.login(username, password)
         if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
             val newSessionToken: String = au.createNewSession(loginUser)
-            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.ct, "Set-Cookie: sessionId=$newSessionToken"))
+            PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.value, "Set-Cookie: sessionId=$newSessionToken"))
         } else {
             logInfo("User ($username) failed to login")
             handleUnauthorized()

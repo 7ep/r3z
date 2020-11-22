@@ -65,7 +65,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
      */
     override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
         val sessionId = rand()
-        logDebug("New session ID ($sessionId) generated for user ($user)")
+        logDebug("New session ID ($sessionId) generated for user (${user.name.value})")
         ap.addNewSession(sessionId, user, time)
         return sessionId
     }

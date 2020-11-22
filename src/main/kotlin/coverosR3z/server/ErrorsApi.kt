@@ -1,15 +1,15 @@
 package coverosR3z.server
 
 fun handleBadRequest(): PreparedResponseData {
-    return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.ct))
+    return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleNotFound(): PreparedResponseData {
-    return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.ct))
+    return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleUnauthorized() : PreparedResponseData {
-    return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.ct))
+    return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
 const val badRequestHTML = """

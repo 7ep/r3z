@@ -82,7 +82,7 @@ class UITests {
         assertEquals("404 error", chromeDriver.title)
 
         // enter a few new projects
-        val projects = listOf("BDD", "FTA")
+        val projects = listOf("BDD", "FTA", "STF", "EAW", "TDD")
         for (project in projects) {
             chromeDriver.get("$server:$port/createproject")
             chromeDriver.findElementById("project_name").sendKeys(project)
@@ -90,7 +90,7 @@ class UITests {
         }
 
         // enter a new employee
-        val employees = listOf("alice")
+        val employees = listOf("alice", "bob", "carol", "david", "edward")
         for (employee in employees) {
             chromeDriver.get("$server:$port/createemployee")
             chromeDriver.findElementById("employee_name").sendKeys(employee)

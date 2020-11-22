@@ -10,7 +10,12 @@ enum class CacheControl(value: String) {
      * we won't hear from the client again once they request any data
      * marked with this.
      */
-    AGGRESSIVE_CACHE("public, max-age=604800, immutable");
+    AGGRESSIVE_CACHE("public, max-age=${60 * 60 * 24 * 7}, immutable"),
+
+    /**
+     * Tell clients to cache for one minute
+     */
+    AGGRESSIVE_MINUTE_CACHE("public, max-age=60, immutable");
 
     /**
      * Returns this enum as a full header
