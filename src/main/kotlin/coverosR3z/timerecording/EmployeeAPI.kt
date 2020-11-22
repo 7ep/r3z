@@ -4,7 +4,7 @@ import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
 import coverosR3z.server.*
-import coverosR3z.webcontent.successHTML
+import coverosR3z.misc.successHTML
 
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (isAuthenticated(user)) {

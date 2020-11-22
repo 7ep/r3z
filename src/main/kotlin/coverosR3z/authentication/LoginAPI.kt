@@ -3,7 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logInfo
 import coverosR3z.server.*
-import coverosR3z.webcontent.successHTML
+import coverosR3z.misc.successHTML
 
 fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isUnauthenticated = user == NO_USER

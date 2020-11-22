@@ -4,13 +4,9 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
-import coverosR3z.misc.FileReader
-import coverosR3z.misc.toBytes
+import coverosR3z.misc.*
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
-import coverosR3z.webcontent.authHomePageHTML
-import coverosR3z.webcontent.homepageHTML
-import coverosR3z.webcontent.successHTML
 
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
 
@@ -64,18 +60,32 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, CREATE_PROJECT.path) -> handlePOSTCreatingProject(tru, user, data)
 
         else -> {
-            val fileContents = FileReader.read(rd.path)
-
-            if (fileContents == null) {
-                logDebug("unable to read a file named ${rd.path}")
-                handleNotFound()
-            } else when {
-                rd.path.takeLast(4) == ".css" -> ok(fileContents, listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details))
-                rd.path.takeLast(3) == ".js" -> ok(fileContents, listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details))
-                rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
-                else -> handleNotFound()
-            }
+            handleUnknownFiles(rd)
         }
+    }
+}
+
+/**
+ * If the user asks for a path we don't know about, try reading
+ * that file from our resources directory
+ */
+private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
+    val fileContents = FileReader.read(rd.path)
+
+    return if (fileContents == null) {
+        logDebug("unable to read a file named ${rd.path}")
+        handleNotFound()
+    } else when {
+        rd.path.takeLast(4) == ".css" -> ok(
+            fileContents,
+            listOf(ContentType.TEXT_CSS.ct, CacheControl.AGGRESSIVE_CACHE.details)
+        )
+        rd.path.takeLast(3) == ".js" -> ok(
+            fileContents,
+            listOf(ContentType.APPLICATION_JAVASCRIPT.ct, CacheControl.AGGRESSIVE_CACHE.details)
+        )
+        rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
+        else -> handleNotFound()
     }
 }
 
@@ -85,14 +95,6 @@ fun handleGETShutdownServer(user: User): PreparedResponseData {
         okHTML(successHTML)
     } else {
         redirectTo(HOMEPAGE.path)
-    }
-}
-
-private fun doGetHomePage(rd: RequestData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        okHTML(authHomePageHTML(rd.user.name.value))
-    } else {
-        okHTML(homepageHTML)
     }
 }
 

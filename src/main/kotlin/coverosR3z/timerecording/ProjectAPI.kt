@@ -4,7 +4,7 @@ import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
 import coverosR3z.server.*
-import coverosR3z.webcontent.successHTML
+import coverosR3z.misc.successHTML
 
 fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
