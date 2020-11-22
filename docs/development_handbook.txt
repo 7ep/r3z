@@ -21,7 +21,7 @@ Developer handbook
     Behavior-Driven Development (BDD)
     ---------------------------------
 
-    BDD files will have a suffix of "BDD".  See "EnteringExpensesBDD" for a sample.
+    BDD files will have a suffix of "BDD".  See "EnteringTimeBDD" for a sample.
 
 
     Test Helpers
