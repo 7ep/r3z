@@ -10,7 +10,7 @@ enum class ContentType(val value: String) {
     TEXT_CSS("Content-Type: text/css"),
 
     // Application MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#application
-    APPLICATION_JAVASCRIPT("application/javascript"),
+    APPLICATION_JAVASCRIPT("Content-Type: application/javascript"),
     IMAGE_JPEG("Content-Type: image/jpeg"),
     IMAGE_WEBP("Content-Type: image/webp")
 
