@@ -1,0 +1,28 @@
+package coverosR3z.domainobjects
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Test
+
+class DateTimeTests {
+
+    /**
+     * Super basic.  Two identical datetimes should be equal
+     */
+    @Test
+    fun testShouldEqual() {
+        val d1 = DateTime(2020, Month.NOV, 21, 11, 2, 3)
+        val d2 = DateTime(2020, Month.NOV, 21, 11, 2, 3)
+        assertEquals(d1, d2)
+    }
+
+    /**
+     * Super basic.  Two non-identical datetimes should not be equal
+     */
+    @Test
+    fun testShouldNotEqual() {
+        val d1 = DateTime(2020, Month.NOV, 21, 11, 2, 2)
+        val d2 = DateTime(2020, Month.NOV, 21, 11, 2, 3)
+        assertNotEquals(d1, d2)
+    }
+}

@@ -1,6 +1,7 @@
 package coverosR3z.domainobjects
 
 import kotlinx.serialization.builtins.ListSerializer
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -13,6 +14,25 @@ class DateTests {
     // Json also has .Default configuration which provides more reasonable settings,
     // but is subject to change in future versions
 
+    /**
+     * Super basic.  Two identical dates should be equal
+     */
+    @Test
+    fun testShouldEqual() {
+        val d1 = Date(2020, Month.NOV, 21)
+        val d2 = Date(2020, Month.NOV, 21)
+        assertEquals(d1, d2)
+    }
+
+    /**
+     * Super basic.  Two non-identical dates should not be equal
+     */
+    @Test
+    fun testShouldNotEqual() {
+        val d1 = Date(2020, Month.NOV, 21)
+        val d2 = Date(2020, Month.NOV, 22)
+        Assert.assertNotEquals(d1, d2)
+    }
 
     @Test
     fun `can serialize Date with Kotlin serialization`() {

@@ -2,12 +2,10 @@ package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.authentication.handlePOSTTimeEntry
+import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.toStr
-import coverosR3z.server.handleUnauthorized
+import coverosR3z.server.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -165,4 +163,60 @@ class EnterTimeAPITests {
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
+
+    /**
+     * Just to check that we get the proper OK result when we authenticate.
+     */
+    @Test
+    fun testDoGetTimeEntriesPage() {
+        val rd = createRequestData(user = DEFAULT_USER)
+        val result = doGetTimeEntriesPage(tru, rd)
+        assertEquals(ResponseStatus.OK, result.responseStatus)
+    }
+
+    /**
+     * JIf we aren't authenticated, we should get redirected back to
+     * the homepage.  We'll just check a redirect happened.
+     */
+    @Test
+    fun testDoGetTimeEntriesPageUnAuth() {
+        val rd = createRequestData(user = NO_USER)
+        val result = doGetTimeEntriesPage(tru, rd)
+        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+    }
+
+    /**
+     * Just to check that we get the proper OK result when we authenticate.
+     */
+    @Test
+    fun testDoGETEnterTimePage() {
+        val rd = createRequestData(user = DEFAULT_USER)
+        val result = doGETEnterTimePage(tru, rd)
+        assertEquals(ResponseStatus.OK, result.responseStatus)
+    }
+
+    /**
+     * JIf we aren't authenticated, we should get redirected back to
+     * the homepage.  We'll just check a redirect happened.
+     */
+    @Test
+    fun testDoGETEnterTimePageUnAuth() {
+        val rd = createRequestData(user = NO_USER)
+        val result = doGETEnterTimePage(tru, rd)
+        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+    }
+
+    /**
+     * A helper method to make a [RequestData] easier.
+     */
+    private fun createRequestData(
+        verb: Verb = Verb.GET,
+        path: String = "(NOTHING REQUESTED)",
+        data : Map<String, String> = emptyMap(),
+        user : User = NO_USER,
+        sessionToken : String = "NO TOKEN"
+    ): RequestData {
+        return RequestData(verb, path, data, user, sessionToken)
+    }
+
 }
