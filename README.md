@@ -13,6 +13,8 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 * Run the application by running the jar: `java -jar build/libs/r3z.jar`
 * Visit the application with your browser at http://localhost:8080/
 
+
+
 #### Summary:
 
 R3z consists of a web application and tests.  Its goals are: 
@@ -22,6 +24,17 @@ R3z consists of a web application and tests.  Its goals are:
 tool driven or following the more typical big-design-up-front waterfall methods
 * To provide a demonstration of the results of deep agile internally, as well as for clients and partners
 
+What would happen if you built software in the simplest possible way from scratch?
+
+What if our team held quality sacred?
+
+What if we spent all the necessary time to think things through?
+
+What if we incorporated diverse perspectives?
+
+What if testing drove the design?
+
+If we understand that our software is a reflection of our culture, should we not focus on improving that first?
 
 #### Java installation notes
 
