@@ -19,8 +19,9 @@ enum class Month(val ord: Int) {
  *
  * internal data is merely the number of days since the epoch - 1970-01-01
  */
+
 @Serializable
-class Date(val epochDay : Int) {
+class Date(val epochDay : Int) : Comparable<Date> {
     constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
@@ -50,6 +51,10 @@ class Date(val epochDay : Int) {
 
     override fun toString(): String {
         return "Date(epochDay=$epochDay, $stringValue)"
+    }
+
+    override fun compareTo(other: Date): Int {
+        return this.epochDay.compareTo(other.epochDay)
     }
 
 }
