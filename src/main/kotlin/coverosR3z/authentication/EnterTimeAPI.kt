@@ -8,8 +8,7 @@ import java.time.LocalDate
 
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
-        okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId
-                ?: NO_EMPLOYEE.id)))
+        okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId ?: NO_EMPLOYEE.id)))
     } else {
         redirectTo(NamedPaths.HOMEPAGE.path)
     }
@@ -292,7 +291,7 @@ const val enterTimeJS = """
 """
 
 
-fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
+fun existingTimeEntriesHTML(username : String, te : Map<Date, Set<TimeEntry>>) : String {
     return """
 <!DOCTYPE html>        
 <html>
@@ -329,7 +328,7 @@ fun existingTimeEntriesHTML(username : String, te : List<TimeEntry>) : String {
             <tbody>
                 
 """ +
-            te.joinToString("") { "<tr><td>${it.project.name.value}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
+            te.flatMap { it.value }.joinToString("") { "<tr><td>${it.project.name.value}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
             """    
             </tbody>
         </table>

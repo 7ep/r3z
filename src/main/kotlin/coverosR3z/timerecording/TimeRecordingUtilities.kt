@@ -42,19 +42,19 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     private fun `confirm the employee has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
         log.info("confirming total time is less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        val minutesRecorded = try {
+        val minutesRecorded : Time = try {
             persistence.queryMinutesRecorded(entry.employee, entry.date)
         } catch (ex : EmployeeNotRegisteredException) {
             // if we hit here, it means the employee doesn't exist yet.  For these purposes, that is
             // fine, we are just checking here that if a employee *does* exist, they don't have too many minutes.
             // if they don't exist, just move on through.
             log.info("employee ${entry.employee} was not registered in the database.  returning 0 minutes recorded.")
-            0
+            Time(0)
         }
 
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
-        val existingPlusNewMinutes = minutesRecorded + entry.time.numberOfMinutes
+        val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + entry.time.numberOfMinutes
         if (existingPlusNewMinutes > twentyFourHours) {
             log.info("More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)")
             throw ExceededDailyHoursAmountException()
@@ -92,11 +92,11 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return newEmployee
     }
 
-    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
         return persistence.readTimeEntriesOnDate(employee, date)
     }
 
-    override fun getAllEntriesForEmployee(employeeId: EmployeeId): List<TimeEntry> {
+    override fun getAllEntriesForEmployee(employeeId: EmployeeId): Map<Date, Set<TimeEntry>> {
         val employee = persistence.getEmployeeById(employeeId)
         return persistence.readTimeEntries(employee)
     }

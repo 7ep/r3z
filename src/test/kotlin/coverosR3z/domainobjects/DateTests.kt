@@ -77,6 +77,6 @@ class DateTests {
     fun testComparisonsBetweenDates() {
         assertTrue(Date(18262) < Date(18263))
         assertTrue(Date(18262) == Date(18262))
-        assertTrue(Date(18263) == Date(18262))
+        assertTrue(Date(18263) > Date(18262))
     }
 }

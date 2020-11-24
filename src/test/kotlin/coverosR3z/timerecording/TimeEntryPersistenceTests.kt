@@ -27,8 +27,8 @@ class TimeEntryPersistenceTests {
     @Test fun `can get all time entries by a employee`() {
         tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newProject: Project = tep.persistNewProject(ProjectName("test project"))
-        val entry1 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject)
-        val entry2 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject)
+        val entry1 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE)
+        val entry2 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020)
         tep.persistNewTimeEntry(entry1)
         tep.persistNewTimeEntry(entry2)
         val expectedResult = listOf(entry1, entry2)
@@ -36,7 +36,7 @@ class TimeEntryPersistenceTests {
         val actualResult = tep.readTimeEntries(DEFAULT_EMPLOYEE)
 
         val msg = "what we entered and what we get back should be identical, instead got"
-        val listOfResultsMinusId = actualResult.map { r -> TimeEntryPreDatabase(r.employee, r.project, r.time, r.date, r.details) }.toList()
+        val listOfResultsMinusId = actualResult.flatMap { it.value }.map { r -> TimeEntryPreDatabase(r.employee, r.project, r.time, r.date, r.details) }.toList()
         assertEquals(msg, expectedResult, listOfResultsMinusId)
 
     }
@@ -68,7 +68,7 @@ class TimeEntryPersistenceTests {
         )
 
         val query = tep.queryMinutesRecorded(employee=newEmployee, date= A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(60, query)
+        assertEquals(Time(60), query)
     }
 
     @Test
@@ -76,7 +76,7 @@ class TimeEntryPersistenceTests {
         val newEmployee: Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val minutesWorked = tep.queryMinutesRecorded(employee=newEmployee, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals("should be 0 since they didn't work that day", 0, minutesWorked)
+        assertEquals("should be 0 since they didn't work that day", Time(0), minutesWorked)
     }
 
     @Test
@@ -110,7 +110,7 @@ class TimeEntryPersistenceTests {
 
         val query = tep.queryMinutesRecorded(employee=newEmployee, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals("we should get 24 hours worked for this day", 60 * 24, query)
+        assertEquals("we should get 24 hours worked for this day", Time(60 * 24), query)
     }
 
 
@@ -137,7 +137,7 @@ class TimeEntryPersistenceTests {
 
         val query = tep.queryMinutesRecorded(employee=newEmployee, date= A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals("we should get 8 hours worked for this day", 60 * 8, query)
+        assertEquals("we should get 8 hours worked for this day", Time(60 * 8), query)
     }
 
 }

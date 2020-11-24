@@ -8,7 +8,7 @@ import coverosR3z.domainobjects.*
  * Used as a mock object for testing
  */
 class FakeTimeEntryPersistence(
-        var minutesRecorded : Int = 0,
+        var minutesRecorded : Time = Time(0),
         var persistNewTimeEntryBehavior : () -> Unit = {},
         var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
         var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
@@ -30,16 +30,16 @@ class FakeTimeEntryPersistence(
     }
 
 
-    override fun queryMinutesRecorded(employee: Employee, date: Date): Int {
+    override fun queryMinutesRecorded(employee: Employee, date: Date): Time {
         return minutesRecorded
     }
 
-    override fun readTimeEntries(employee: Employee): List<TimeEntry> {
-        return listOf()
+    override fun readTimeEntries(employee: Employee): Map<Date, Set<TimeEntry>> {
+        return mapOf()
     }
 
-    override fun readTimeEntriesOnDate(employee: Employee, date: Date): List<TimeEntry> {
-        return listOf()
+    override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {
+        return setOf()
     }
 
     override fun getProjectByName(name: ProjectName): Project {

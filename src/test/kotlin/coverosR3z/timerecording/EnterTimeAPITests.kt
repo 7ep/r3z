@@ -131,7 +131,7 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_aboveMaxTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to ((60*60*24)+1).toString(), "detail_entry" to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
-        assertEquals("Entries do not span multiple days, thus must be <=24 hrs", ex.message)
+        assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
     }
 
     /**
@@ -141,17 +141,17 @@ class EnterTimeAPITests {
     fun testHandlePOSTTimeEntry_negativeTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to "-60", "detail_entry" to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
-        assertEquals("Doesn't make sense to have zero or negative time", ex.message)
+        assertEquals("${noNegativeTimeMsg}-60", ex.message)
     }
 
     /**
-     * If the time entered is zero
+     * If the time entered is zero, it's fine.
      */
     @Test
     fun testHandlePOSTTimeEntry_zeroTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to "0", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
-        assertEquals("Doesn't make sense to have zero or negative time", ex.message)
+        val result = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
+        assertTrue("we should have gotten the success page.  Got: $result", toStr(result).contains("SUCCESS"))
     }
 
     /**

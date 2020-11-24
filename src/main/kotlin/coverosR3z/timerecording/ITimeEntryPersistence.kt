@@ -10,9 +10,13 @@ interface ITimeEntryPersistence {
     /**
      * Provided a employee and date, give the number of minutes they worked on that date
      */
-    fun queryMinutesRecorded(employee: Employee, date: Date): Int
-    fun readTimeEntries(employee: Employee): List<TimeEntry>
-    fun readTimeEntriesOnDate(employee: Employee, date: Date): List<TimeEntry>
+    fun queryMinutesRecorded(employee: Employee, date: Date): Time
+
+    /**
+     * Get all the time entries for a particular employee
+     */
+    fun readTimeEntries(employee: Employee): Map<Date, Set<TimeEntry>>
+    fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry>
     fun getProjectByName(name : ProjectName) : Project
     fun getProjectById(id: ProjectId): Project
     fun getAllProjects(): List<Project>

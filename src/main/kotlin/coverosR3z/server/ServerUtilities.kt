@@ -23,8 +23,8 @@ const val CRLF = "\r\n"
 val caching = CacheControl.AGGRESSIVE_MINUTE_CACHE.details
 
 /**
- * Examine the request and take proper action, returning a
- * proper response
+ * Examine the request and headers, take proper action, returning a
+ * proper response with headers
  */
 fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
     val verb = sd.rd.verb

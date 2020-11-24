@@ -7,6 +7,8 @@ const val MAX_DETAILS_LENGTH = 500
 const val timeNotNullMsg = "time_entry must not be null"
 const val detailsNotNullMsg = "details must not be null"
 const val timeNotBlankMsg = "time_entry must not be blank"
+const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in minutes: "
+const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
 
 @Serializable
 data class Details(val value : String = "") {
@@ -29,8 +31,8 @@ data class Details(val value : String = "") {
 @Serializable
 data class Time(val numberOfMinutes : Int) {
     init {
-        require(numberOfMinutes > 0) {"Doesn't make sense to have zero or negative time"}
-        require(numberOfMinutes <= 60*24) {"Entries do not span multiple days, thus must be <=24 hrs"}
+        require(numberOfMinutes >= 0) { noNegativeTimeMsg + numberOfMinutes }
+        require(numberOfMinutes <= 60*24) { lessThanTimeInDayMsg + numberOfMinutes }
     }
 
     companion object {

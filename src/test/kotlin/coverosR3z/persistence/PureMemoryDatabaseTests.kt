@@ -41,7 +41,7 @@ class PureMemoryDatabaseTests {
     fun `should be able to add a new time entry`() {
         pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
 
-        val timeEntries = pmd.getAllTimeEntriesForEmployee(DEFAULT_EMPLOYEE)[0]
+        val timeEntries = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020).first()
 
         assertEquals(1, timeEntries.id)
         assertEquals(DEFAULT_EMPLOYEE, timeEntries.employee)
@@ -68,78 +68,12 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun `should be able to get the minutes on a certain date`() {
+        pmd.addNewEmployee(DEFAULT_EMPLOYEE.name)
         pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
 
         val minutes = pmd.getMinutesRecordedOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
-        assertEquals(DEFAULT_TIME.numberOfMinutes, minutes)
-    }
-
-    /**
-     * This is an experimental performance test to see how the system handles
-     * serialization, writing to disk, reading from disk, and deserialization
-     */
-    @Test
-    fun `PERFORMANCE should be possible to quickly serialize our data`() {
-        val numberOfEmployees = 3
-        val numberOfProjects = 6
-        val numberOfDays = 5
-
-        recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
-
-        val (totalTime) = getTime {
-            val pmdJson = jsonSerialzation.encodeToString(PureMemoryDatabase.serializer(), pmd)
-            val deserializedPmd: PureMemoryDatabase = jsonSerialzation.decodeFromString(PureMemoryDatabase.serializer(), pmdJson)
-            assertEquals(pmd, deserializedPmd)
-        }
-        logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
-        assertTrue(totalTime < 100)
-    }
-
-    /**
-     * Here we'll try out disk writing / reading with serialization
-     */
-    @Test
-    fun `PERFORMANCE should be possible to quickly write our data to disk`() {
-        val numberOfEmployees = 10
-        val numberOfProjects = 20
-        val numberOfDays = 5
-        val maxMillisecondsAllowed = 200
-
-        recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
-
-        val (totalTime) = getTime {
-            val (timeToSerialize, pmdJson) = getTime {jsonSerialzationWithPrettyPrint.encodeToString(PureMemoryDatabase.serializer(), pmd)}
-            logInfo("It took $timeToSerialize milliseconds to serialize")
-
-            val (timeToMakeDirs) = getTime {File("build/tmp/").mkdirs()}
-            logInfo("It took $timeToMakeDirs milliseconds to make the directories")
-
-            val (timeToWriteToDisk, dbFile) = getTime {
-                val dbFile = File("build/tmp/pmdrecord.txt")
-                dbFile.writeText(pmdJson)
-                dbFile
-            }
-            logInfo("It took $timeToWriteToDisk milliseconds to write to the disk")
-
-            val (timeToReadText, readFile) = getTime {
-                dbFile.readText()
-            }
-            logInfo("it took $timeToReadText milliseconds to read the text")
-
-            val (timeToDeserialize, deserializedPmd) = getTime {
-                jsonSerialzationWithPrettyPrint.decodeFromString(PureMemoryDatabase.serializer(), readFile)
-            }
-
-            logInfo("it took $timeToDeserialize milliseconds to deserialize back to our database")
-
-            val (timeToAssert) = getTime {assertEquals(pmd, deserializedPmd)}
-            logInfo("it took $timeToAssert milliseconds to assert the databases were equal")
-        }
-
-        logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
-
-        assertTrue("totaltime was suppoed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
+        assertEquals(DEFAULT_TIME, minutes)
     }
 
     @Test
@@ -154,7 +88,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testShouldReturnEmptyListIfNoEntries() {
         val result = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(emptyList<TimeEntry>() , result)
+        assertEquals(emptySet<TimeEntry>() , result)
     }
 
     /**
@@ -197,6 +131,51 @@ class PureMemoryDatabaseTests {
         assertEquals("There must exist a session in the database for (${DEFAULT_SESSION_TOKEN}) in order to delete it", ex.message)
     }
 
+    /**
+     * I wish to make an exact copy of the PMD in completely new memory locations
+     */
+    @Test
+    fun testShouldBePossibleToCopy_different() {
+        val originalPmd = pmd.copy()
+        pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        assertNotEquals("after adding a new employee, the databases should differ", originalPmd, pmd)
+    }
+
+    /**
+     * I wish to make an exact copy of the PMD in completely new memory locations
+     */
+    @Test
+    fun testShouldBePossibleToCopy_similar() {
+        val originalPmd = pmd.copy()
+        assertEquals(originalPmd, pmd)
+    }
+
+    @Test
+    fun testShouldWriteAndReadToDisk() {
+        val numberOfEmployees = 10
+        val numberOfProjects = 20
+        val numberOfDays = 5
+        val maxMillisecondsAllowed = 200
+        val directory = "build/tmp/"
+
+        recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
+
+        val (totalTime) = getTime {
+            val (timeToSerialize, _) = getTime {PureMemoryDatabase.serializeToDisk(pmd, directory)}
+            logInfo("It took $timeToSerialize milliseconds to serialize to disk")
+
+            val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(directory)}
+            logInfo("it took $timeToReadText milliseconds to deserialize from disk")
+
+            val (timeToAssert) = getTime {assertEquals(pmd, deserializedPmd)}
+            logInfo("it took $timeToAssert milliseconds to assert the databases were equal")
+        }
+
+        logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
+
+        assertTrue("totaltime was suppoed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -218,7 +197,7 @@ class PureMemoryDatabaseTests {
     private fun accumulateMinutesPerEachEmployee(allEmployees: List<Employee>) {
         val (timeToAccumulate) = getTime {
             val minutesPerEmployeeTotal =
-                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).sumBy { te -> te.time.numberOfMinutes } }
+                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).flatMap { it.value }.sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
             logInfo("the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}")
             logInfo("the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}")

@@ -1,8 +1,12 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.checkParseToInt
 import kotlinx.serialization.Serializable
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
+private const val dateStringNotNullMsg = "The date string value must not be null"
+private const val dateStringNotBlankMsg = "The date string value must not be blank"
 
 @Serializable
 enum class Month(val ord: Int) {
@@ -55,6 +59,35 @@ class Date(val epochDay : Int) : Comparable<Date> {
 
     override fun compareTo(other: Date): Int {
         return this.epochDay.compareTo(other.epochDay)
+    }
+
+    companion object {
+
+        /**
+         * You can pass the id as a string and we'll try to parse it
+         */
+        fun make(value: String?) : Date {
+            val dateString = requireNotNull(value) {dateStringNotNullMsg}
+            require(dateString.isNotBlank()) {dateStringNotBlankMsg}
+            return checkParseToDate(dateString)
+        }
+
+
+        /**
+         * Assumes a string similar to this: 2020-06-25
+         */
+        private fun checkParseToDate(value: String, msg: () -> String = {"The date string ($value) must be parsable to a date type."}) : Date {
+            return try {
+                val d: List<Int> = value.trim().split("-").map { checkParseToInt(it) }
+                val year = d[0]
+                val month = checkNotNull(Month.from(d[1]))
+                val day = d[2]
+                Date(year, month, day)
+            } catch (ex: Throwable) {
+                throw IllegalStateException(msg(), ex)
+            }
+        }
+
     }
 
 }

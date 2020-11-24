@@ -16,7 +16,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `record time for someone`() {
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = 60)
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = Time(60))
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
         val entry = createTimeEntryPreDatabase()
         val expectedResult = RecordTimeResult(status = StatusEnum.SUCCESS)
@@ -34,7 +34,7 @@ class TimeRecordingTests {
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                minutesRecorded = 60,
+                minutesRecorded = Time(60),
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
         val entry = createTimeEntryPreDatabase(project= Project(ProjectId(1), ProjectName("an invalid project")))
@@ -52,7 +52,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
-        val twentyFourHours: Int = 24 * 60
+        val twentyFourHours = Time(24 * 60)
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyFourHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
@@ -69,7 +69,7 @@ class TimeRecordingTests {
      */
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
-        val twentyThreeHours: Int = 23 * 60
+        val twentyThreeHours = Time(23 * 60)
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
                 minutesRecorded = twentyThreeHours,
                 persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
@@ -165,20 +165,10 @@ class TimeRecordingTests {
         assertEquals(value, details.value)
     }
 
-    @Test fun `there should be no difference between details with no args and details with ""`() {
+    @Test fun `there should be no difference between details with no args and details with empty string`() {
         val actual = Details("")
         val expected = Details()
         assertEquals(expected, actual)
-    }
-
-    @Test fun `Can't record a time entry that has 0 minutes`() {
-        val ex = assertThrows(IllegalArgumentException::class.java ) { Time(0) }
-        assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
-    }
-
-    @Test fun `Can't record a time entry that has -1 minutes`() {
-        val ex = assertThrows(IllegalArgumentException::class.java ) { Time(-1) }
-        assertTrue(ex.message.toString().contains("Doesn't make sense to have zero or negative time"))
     }
 
     /**

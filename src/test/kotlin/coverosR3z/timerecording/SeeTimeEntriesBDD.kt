@@ -33,7 +33,7 @@ class SeeTimeEntriesBDD {
         val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
 
         // Then I see all of them
-        allEntriesArePresent(entries, dbEntries)
+        allEntriesArePresent(entries, dbEntries.flatMap { it.value }.toSet())
     }
 
     @Test
@@ -45,7 +45,7 @@ class SeeTimeEntriesBDD {
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
         // Then I am returned nothing
-        assertEquals(emptyList<TimeEntry>(), dbEntries)
+        assertEquals(emptySet<TimeEntry>(), dbEntries)
     }
 
     /*
@@ -58,12 +58,12 @@ class SeeTimeEntriesBDD {
      */
 
 
-    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>, entryDate: Date) {
+    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>, entryDate: Date) {
         val todayEntries = entries.filter { e -> e.date == entryDate }
         allEntriesArePresent(todayEntries, dbEntries)
     }
 
-    private fun allEntriesArePresent(entries: List<TimeEntryPreDatabase>, dbEntries: List<TimeEntry>) {
+    private fun allEntriesArePresent(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>) {
         assertEquals(entries.size, dbEntries.size)
 
         for (entry in entries) {

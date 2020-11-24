@@ -12,8 +12,8 @@ class FakeTimeRecordingUtilities(
         var recordTimeBehavior : () -> RecordTimeResult = {RecordTimeResult()},
         var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
         var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
-        var getEntriesForEmployeeOnDateBehavior : () -> List<TimeEntry> = { emptyList() },
-        var getAllEntriesForEmployeeBehavior : () -> List<TimeEntry> = {emptyList() },
+        var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
+        var getAllEntriesForEmployeeBehavior : () -> Map<Date, Set<TimeEntry>> = {emptyMap() },
         var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
         var listAllProjectsBehavior : () -> List<Project> = {emptyList()} ,
         var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
@@ -37,11 +37,11 @@ class FakeTimeRecordingUtilities(
         return createEmployeeBehavior()
     }
 
-    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): List<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
         return getEntriesForEmployeeOnDateBehavior()
     }
 
-    override fun getAllEntriesForEmployee(employeeId: EmployeeId): List<TimeEntry> {
+    override fun getAllEntriesForEmployee(employeeId: EmployeeId): Map<Date, Set<TimeEntry>> {
         return getAllEntriesForEmployeeBehavior()
     }
 
