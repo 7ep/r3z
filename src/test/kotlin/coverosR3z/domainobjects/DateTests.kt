@@ -2,8 +2,7 @@ package coverosR3z.domainobjects
 
 import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Test
 import coverosR3z.jsonSerialzation as json
 
@@ -31,7 +30,7 @@ class DateTests {
     fun testShouldNotEqual() {
         val d1 = Date(2020, Month.NOV, 21)
         val d2 = Date(2020, Month.NOV, 22)
-        Assert.assertNotEquals(d1, d2)
+        assertNotEquals(d1, d2)
     }
 
     @Test
@@ -68,5 +67,16 @@ class DateTests {
     fun `failed deserialization should make it clear what went wrong, too high a year`() {
         val ex = assertThrows(IllegalArgumentException::class.java) { json.decodeFromString(Date.serializer(), """{"epochDay":91438}""") }
         assertEquals("no way on earth people are using this before 2020 or past 2100, you had a date of 2220-05-08", ex.message)
+    }
+
+    /**
+     * Date is [Comparable], so we should be able to tell that one date is
+     * before another.
+     */
+    @Test
+    fun testComparisonsBetweenDates() {
+        assertTrue(Date(18262) < Date(18263))
+        assertTrue(Date(18262) == Date(18262))
+        assertTrue(Date(18263) == Date(18262))
     }
 }
