@@ -88,6 +88,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
             }
         }
 
+        fun now(): Date {
+            return Date(LocalDate.now().toEpochDay().toInt())
+        }
+
     }
 
 }

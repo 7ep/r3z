@@ -4,8 +4,7 @@ import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.domainobjects.EmployeeName
-import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.domainobjects.*
 import coverosR3z.logging.Logger
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
@@ -13,6 +12,7 @@ import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
+import java.time.LocalDate
 import java.util.concurrent.Executors
 
 /**
@@ -26,10 +26,22 @@ class SocketCommunication(val port : Int) {
 
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
-        val pmd = PureMemoryDatabase()
         val cu = CurrentUser(SYSTEM_USER)
+        val deserializeFromDisk = PureMemoryDatabase.deserializeFromDisk(PureMemoryDatabase.directory)
+        val pmd: PureMemoryDatabase = if (deserializeFromDisk == null) {
+            val pmd = PureMemoryDatabase()
+            PureMemoryDatabase.serializeToDisk(pmd)
+            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+            val firstEmployee = tru.createEmployee(EmployeeName("Administrator"))
+            val firstProject = tru.createProject(ProjectName("GENERAL_SYSTEM_PROJECT"))
+            tru.recordTime(TimeEntryPreDatabase(firstEmployee, firstProject, Time(0), Date.now(), Details("first time entry")))
+            pmd
+        } else {
+            deserializeFromDisk
+        }
+
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-        tru.createEmployee(EmployeeName("Administrator"))
+
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         logInfo("System is ready")
 

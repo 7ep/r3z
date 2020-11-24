@@ -150,6 +150,9 @@ class PureMemoryDatabaseTests {
         assertEquals(originalPmd, pmd)
     }
 
+    /**
+     * Test writing the whole database and reading the whole database
+     */
     @Test
     fun testShouldWriteAndReadToDisk() {
         val numberOfEmployees = 10
@@ -161,7 +164,7 @@ class PureMemoryDatabaseTests {
         recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
         val (totalTime) = getTime {
-            val (timeToSerialize, _) = getTime {PureMemoryDatabase.serializeToDisk(pmd, directory)}
+            val (timeToSerialize, _) = getTime {PureMemoryDatabase.serializeToDisk(pmd)}
             logInfo("It took $timeToSerialize milliseconds to serialize to disk")
 
             val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(directory)}

@@ -29,3 +29,10 @@ fun logDebug(msg : String) {
 fun logTrace(msg: String) {
 //    println("DEBUG: $msg")
 }
+
+/**
+ * Logs nearly extraneous levels of detail.
+ */
+fun logWarn(msg: String) {
+    println("WARN: $msg")
+}
