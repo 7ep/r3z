@@ -17,3 +17,6 @@ out
 
 # Not even totally sure what is adding this, but we don't need it
 debug.log
+
+# this is the directory created for the database
+db/
