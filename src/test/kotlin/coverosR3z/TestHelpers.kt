@@ -39,22 +39,6 @@ fun createTimeEntryPreDatabase(
 ) = TimeEntryPreDatabase ( employee, project, time, date, details)
 
 /**
- * returns the time spent on the items inside.
- * To use: simply wrap the code with getTime, like this:
- *
- *      val timeTaken = getTime {
- *           foo()
- *           bar()
- *      }
- */
-fun <T>getTime(function: () -> T): Pair<Long, T> {
-        val start = System.currentTimeMillis()
-        val result : T = function()
-        val finish = System.currentTimeMillis()
-        return Pair(finish - start, result)
-}
-
-/**
  * This is useful for tests that require serialization
  * using Kotlin's own serialization framework.
  *

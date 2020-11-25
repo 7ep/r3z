@@ -2,7 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.getTime
+import coverosR3z.misc.getTime
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before

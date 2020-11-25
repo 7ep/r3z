@@ -4,6 +4,7 @@ import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
+import coverosR3z.misc.getTime
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

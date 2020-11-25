@@ -25,3 +25,19 @@ fun checkParseToInt(value: String, msg: () -> String = {"Must be able to parse $
         throw IllegalStateException(msg())
     }
 }
+
+/**
+ * returns the time spent on the items inside.
+ * To use: simply wrap the code with getTime, like this:
+ *
+ *      val timeTaken = getTime {
+ *           foo()
+ *           bar()
+ *      }
+ */
+fun <T>getTime(function: () -> T): Pair<Long, T> {
+    val start = System.currentTimeMillis()
+    val result : T = function()
+    val finish = System.currentTimeMillis()
+    return Pair(finish - start, result)
+}
