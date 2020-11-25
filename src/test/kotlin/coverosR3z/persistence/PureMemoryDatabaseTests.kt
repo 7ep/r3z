@@ -178,7 +178,7 @@ class PureMemoryDatabaseTests {
 
         logInfo("Total time taken for serialization / deserialzation was $totalTime milliseconds")
 
-        assertTrue("totaltime was suppoed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
+        assertTrue("totaltime was supposed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
     }
 
     /**
