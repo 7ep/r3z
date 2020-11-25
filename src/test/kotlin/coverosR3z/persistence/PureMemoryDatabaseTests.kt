@@ -55,9 +55,6 @@ class PureMemoryDatabaseTests {
         val numberOfEmployees = 30
         val numberOfProjects = 30
         val numberOfDays = 31
-        val directory = File("build/db/")
-        directory.deleteRecursively()
-        directory.mkdirs()
 
         val allEmployees = recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
@@ -171,9 +168,6 @@ class PureMemoryDatabaseTests {
         recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
         val (totalTime) = getTime {
-            val (timeToSerialize, _) = getTime {PureMemoryDatabase.serializeToDisk(pmd, directory)}
-            logInfo("It took $timeToSerialize milliseconds to serialize to disk")
-
             val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(directory)}
             logInfo("it took $timeToReadText milliseconds to deserialize from disk")
 
