@@ -27,7 +27,7 @@ class SocketCommunication(val port : Int) {
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
         val cu = CurrentUser(SYSTEM_USER)
-        val dbDirectory = File("db/")
+        val dbDirectory = "db/"
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))

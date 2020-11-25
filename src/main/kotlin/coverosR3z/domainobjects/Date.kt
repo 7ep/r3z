@@ -34,6 +34,14 @@ class Date(val epochDay : Int) : Comparable<Date> {
         require(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
     }
 
+    fun month() : Int {
+        return LocalDate.ofEpochDay(epochDay.toLong()).monthValue
+    }
+
+    fun year() : Int {
+        return LocalDate.ofEpochDay(epochDay.toLong()).year
+    }
+
     /**
      * All we care about is the epoch day, making
      * this as simple as it can get.

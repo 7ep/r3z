@@ -1,18 +1,14 @@
 package coverosR3z.persistence
 
-import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logWarn
-import coverosR3z.timerecording.TimeEntryPersistence
-import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileNotFoundException
-import java.lang.IllegalStateException
 
 /**
  * Why use those heavy-handed database applications when you
@@ -33,7 +29,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                          * user.  If a user exists in this data, it means they are currently authenticated.
                          */
                          private val sessions: MutableMap<String, Session> = mutableMapOf(),
-                         private val dbDirectory : File? = null
+                         private val dbDirectory : String? = null
 ) {
 
 
@@ -177,45 +173,33 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * start.  If you are just going to use the database in memory-only,
          * you may as well just instantiate [PureMemoryDatabase]
          */
-        fun start(dbDirectory: File) : PureMemoryDatabase {
+        fun start(dbDirectory: String) : PureMemoryDatabase {
 
+            // first we assume the database has been previously persisted
             val restoredPMD = deserializeFromDisk(dbDirectory)
 
-            return if (restoredPMD == null) {
-                // if nothing is stored, create some initial data
-                val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
-                serializeToDisk(pmd, dbDirectory)
-                val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
-                val firstEmployee = tru.createEmployee(EmployeeName("Administrator"))
-                val firstProject = tru.createProject(ProjectName("GENERAL_SYSTEM_PROJECT"))
-                tru.recordTime(TimeEntryPreDatabase(firstEmployee, firstProject, Time(0), Date.now(), Details("first time entry")))
-                pmd
-            } else {
-                // otherwise, use the restored data
+            return if (restoredPMD != null) {
+                // return the restored database
                 restoredPMD
+            } else {
+                // if nothing is there, we build a new database
+                // and add a clean set of directories
+                val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
+
+                // create the database directory
+                File(dbDirectory).mkdirs()
+
+                // create an initial employee
+                pmd.addNewEmployee(EmployeeName("Administrator"))
+
+                pmd
             }
         }
 
-        private val jsonSerializer : Json = Json{prettyPrint = true; allowStructuredMapKeys = true}
-        val databaseFileName = "/pmd_records_"
-        val databaseFileSuffix = ".json"
+        private val jsonSerializer : Json = Json{prettyPrint = false; allowStructuredMapKeys = true}
+        private const val databaseFileSuffix = ".json"
 
-        fun serializeToDisk(pmd: PureMemoryDatabase, dbDirectory : File) {
-            dbDirectory.mkdirs()
-
-            serializeProjectsToDisk(pmd, dbDirectory)
-
-            serializeEmployeesToDisk(pmd, dbDirectory)
-
-            serializeSessionsToDisk(pmd, dbDirectory)
-
-            serializeUsersToDisk(pmd, dbDirectory)
-
-            serializeTimeEntriesToDisk(pmd, dbDirectory)
-
-        }
-
-        private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : File?) {
+        private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
             if (dbDirectory == null) {
                 return
             }
@@ -223,7 +207,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             writeDbFile(users, "users", dbDirectory)
         }
 
-        private fun serializeSessionsToDisk(pmd: PureMemoryDatabase, dbDirectory : File?) {
+        private fun serializeSessionsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
             if (dbDirectory == null) {
                 return
             }
@@ -231,7 +215,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             writeDbFile(sessions, "sessions", dbDirectory)
         }
 
-        private fun serializeEmployeesToDisk(pmd: PureMemoryDatabase, dbDirectory : File?) {
+        private fun serializeEmployeesToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
             if (dbDirectory == null) {
                 return
             }
@@ -239,7 +223,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             writeDbFile(employees, "employees", dbDirectory)
         }
 
-        private fun serializeProjectsToDisk(pmd: PureMemoryDatabase, dbDirectory : File?) {
+        private fun serializeProjectsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
             if (dbDirectory == null) {
                 return
             }
@@ -247,36 +231,18 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             writeDbFile(projects, "projects", dbDirectory)
         }
 
-        /**
-         * The time entries data structure is a bit more complex, since we are grouping
-         * it by employee, and then within that, by date, and within that, the set of time
-         * entries for that date.
-         * @param pmd The whole database to serialize
-         */
-        private fun serializeTimeEntriesToDisk(pmd: PureMemoryDatabase, dbDirectory: File?) {
-            if (dbDirectory == null) {
-                return
-            }
-            for (employee in pmd.timeEntries.keys) {
-                for (date: Date in pmd.timeEntries[employee]!!.keys) {
-                    val employeeDateTimeEntries = pmd.timeEntries[employee]?.get(date)?.toSet() ?: emptySet()
-                    writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries, employee, date, dbDirectory)
-                }
-            }
-        }
-
-        private fun writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries: Set<TimeEntry>, employee: Employee, date: Date, dbDirectory : File?) {
+        private fun writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries: Set<TimeEntry>, employee: Employee, filename: String, dbDirectory : String?) {
             if (dbDirectory == null) {
                 return
             }
             val timeentriesSerialized = serializeTimeEntries(employeeDateTimeEntries)
-            val subDirectory = File(dbDirectory.path + "/timeentries/" + "${employee.id.value}/")
-            subDirectory.mkdirs()
-            writeDbFile(timeentriesSerialized, date.stringValue, subDirectory)
+            val subDirectory = dbDirectory + "timeentries/" + "${employee.id.value}/"
+            File(subDirectory).mkdirs()
+            writeDbFile(timeentriesSerialized, filename, subDirectory)
         }
 
-        private fun writeDbFile(value: String, name : String, dbDirectory: File) {
-            val dbFileUsers = File(dbDirectory.path + "/$name" + databaseFileSuffix)
+        private fun writeDbFile(value: String, name : String, dbDirectory: String) {
+            val dbFileUsers = File(dbDirectory + name + databaseFileSuffix)
             dbFileUsers.writeText(value)
         }
 
@@ -301,27 +267,37 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         /**
-         * Deserializes the database from file, or returns a new empty database
+         * Deserializes the database from file, or returns null if no
+         * database directory exists
          */
-        fun deserializeFromDisk(dbDirectory: File) : PureMemoryDatabase? {
-            if (! dbDirectory.exists()) {
+        fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
+            if (! File(dbDirectory).exists()) {
                 return null
             }
 
             try {
-                val projectsFile = readFile(dbDirectory, "projects")
-                val employeesFile = readFile(dbDirectory, "employees")
-                val sessionsFile = readFile(dbDirectory, "sessions")
-                val usersFile = readFile(dbDirectory, "users")
+                val projects = readAndDeserializeProjects(dbDirectory)
+                val sessions = readAndDeserializeSessions(dbDirectory)
+                val users = readAndDeserializeUsers(dbDirectory)
+                val employees = readAndDeserializeEmployees(dbDirectory)
+                val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees)
 
-                val projects = deserializeProjects(projectsFile)
-                val employees = deserializeEmployees(employeesFile)
-                val sessions = deserializeSessions(sessionsFile)
-                val users = deserializeUsers(usersFile)
+                return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions)
+            } catch (ex : FileNotFoundException) {
+                logWarn("database files missing / corrupted: ${ex.message}")
+                logWarn("Highly recommend you wipe out $dbDirectory")
+                logWarn("Program cannot proceed.  Halting.")
+                throw IllegalStateException()
+            }
+        }
 
-                val fullTimeEntries : MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
-                for (employeeDirectory: File in File(dbDirectory.path + "/timeentries/").listFiles()?.filter { it.isDirectory } ?: throw IllegalStateException("no files found in top directory")) {
-                    for (dbTimeEntries : File in employeeDirectory.listFiles()?.filter{ it.isFile } ?: throw IllegalStateException("no files found in employees directory")) {
+        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
+            return try {
+                val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
+                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory }
+                        ?: throw IllegalStateException("no files found in top directory")) {
+                    for (dbTimeEntries: File in employeeDirectory.listFiles()?.filter { it.isFile }
+                            ?: throw IllegalStateException("no files found in employees directory")) {
                         val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
                         val timeEntriesFile = dbTimeEntries.readText()
                         val timeEntries: Set<TimeEntry> = deserializeTimeEntries(timeEntriesFile)
@@ -330,13 +306,50 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                         }
                     }
                 }
+                fullTimeEntries
+            } catch (ex : Exception) {
+                logWarn("Failed at reading time entries.  This was thrown:\n$ex")
+                mutableMapOf()
+            }
+        }
 
-                return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions)
-            } catch (ex : FileNotFoundException) {
-                logWarn("database files missing / corrupted: ${ex.message}")
-                logWarn("Highly recommend you wipe out $dbDirectory")
-                logWarn("Program cannot proceed.  Halting.")
-                throw IllegalStateException()
+        private fun readAndDeserializeUsers(dbDirectory: String): MutableSet<User> {
+            return try {
+                val usersFile = readFile(dbDirectory, "users")
+                deserializeUsers(usersFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("users file missing, creating empty")
+                mutableSetOf()
+            }
+        }
+
+        private fun readAndDeserializeSessions(dbDirectory: String): MutableMap<String, Session> {
+            return try {
+                val sessionsFile = readFile(dbDirectory, "sessions")
+                deserializeSessions(sessionsFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("sessions file missing, creating empty")
+                mutableMapOf()
+            }
+        }
+
+        private fun readAndDeserializeEmployees(dbDirectory: String): MutableSet<Employee> {
+            return try {
+                val employeesFile = readFile(dbDirectory, "employees")
+                deserializeEmployees(employeesFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("employees file missing, creating empty")
+                mutableSetOf()
+            }
+        }
+
+        private fun readAndDeserializeProjects(dbDirectory: String): MutableSet<Project> {
+            return try {
+                val projectsFile = readFile(dbDirectory, "projects")
+                deserializeProjects(projectsFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("projects file missing, creating empty")
+                mutableSetOf()
             }
         }
 
@@ -360,15 +373,15 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return jsonSerializer.decodeFromString(SetSerializer(TimeEntry.serializer()), timeEntriesFile)
         }
 
-        private fun readFile(dbDirectory: File, name : String): String {
-            return File(dbDirectory.path + name + databaseFileSuffix).readText()
+        private fun readFile(dbDirectory: String, name : String): String {
+            return File(dbDirectory + name + databaseFileSuffix).readText()
         }
 
         /**
          * Static version of this code so we can use it during deserialization as well as
          * for regular usage
          */
-        private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>>, dbDirectory: File?,
+        private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>>, dbDirectory: String?,
                                        date: Date, project: Project, employee : Employee, time : Time, details : Details, index : Int?) {
             // get the data for a particular employee
             var employeeTimeEntries = timeEntries[employee]
@@ -399,8 +412,12 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                     date,
                     details))
 
+            // get all the time entries for the month, to serialize
+            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.flatMap { it.value.filter { it.date.month() == date.month()} }.toSet()
+            val filename = "${date.year()}_${date.month()}"
+
             // write it to disk
-            writeTimeEntriesForEmployeeOnDate(employeeTimeDateEntries, employee, date, dbDirectory)
+            writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, employee, filename, dbDirectory)
         }
 
     }

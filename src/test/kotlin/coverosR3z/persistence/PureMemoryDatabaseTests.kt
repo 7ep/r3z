@@ -161,10 +161,10 @@ class PureMemoryDatabaseTests {
         val numberOfProjects = 5
         val numberOfDays = 2
         val maxMillisecondsAllowed = 75
-        val directory = File("build/db/")
-        directory.deleteRecursively()
+        val directory = "build/db/"
+        File(directory).deleteRecursively()
         pmd = PureMemoryDatabase.start(directory)
-        directory.mkdirs()
+        File(directory).mkdirs()
 
         recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
@@ -276,7 +276,7 @@ class PureMemoryDatabaseTests {
 
     private fun persistProjectsToDatabase(numberOfProjects: Int) {
         val (timeToCreateProjects) =
-                getTime { (0..numberOfProjects).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
+                getTime { (1..numberOfProjects).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
         logInfo("It took $timeToCreateProjects milliseconds to create $numberOfProjects projects")
     }
 
@@ -290,7 +290,7 @@ class PureMemoryDatabaseTests {
 
     private fun persistEmployeesToDatabase(numberOfEmployees: Int, lotsOfEmployees: List<String>) {
         val (timeToEnterEmployees) = getTime {
-            for (i in 0..numberOfEmployees) {
+            for (i in 1..numberOfEmployees) {
                 pmd.addNewEmployee(EmployeeName(lotsOfEmployees[i]))
             }
         }
