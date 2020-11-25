@@ -157,10 +157,10 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldWriteAndReadToDisk_PERFORMANCE() {
-        val numberOfEmployees = 10
-        val numberOfProjects = 20
-        val numberOfDays = 5
-        val maxMillisecondsAllowed = 500
+        val numberOfEmployees = 3
+        val numberOfProjects = 5
+        val numberOfDays = 2
+        val maxMillisecondsAllowed = 75
         val directory = File("build/db/")
         directory.deleteRecursively()
         pmd = PureMemoryDatabase.start(directory)

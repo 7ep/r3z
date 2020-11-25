@@ -1,7 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_PASSWORD
-import coverosR3z.DEFAULT_USER
+import coverosR3z.*
 import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.toStr
@@ -12,8 +11,8 @@ import org.junit.Test
 
 class EnterTimeAPITests {
 
-    lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
+    lateinit var au : FakeAuthenticationUtilities
+    lateinit var tru : FakeTimeRecordingUtilities
 
     @Before
     fun init() {
@@ -172,6 +171,22 @@ class EnterTimeAPITests {
         val rd = createRequestData(user = DEFAULT_USER)
         val result = doGetTimeEntriesPage(tru, rd)
         assertEquals(ResponseStatus.OK, result.responseStatus)
+    }
+
+    /**
+     * Checking some of the content
+     */
+    @Test
+    fun testDoGetTimeEntriesPage_content() {
+        val rd = createRequestData(user = DEFAULT_USER)
+        val mapEntries = mapOf(
+            A_RANDOM_DAY_IN_JUNE_2020 to setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))
+        )
+        tru.getAllEntriesForEmployeeBehavior = {mapEntries}
+
+        val result = toStr(doGetTimeEntriesPage(tru, rd).fileContents)
+
+        assertTrue("page should have this content.  Page:\n$result", result.contains("<tr><td>Default_Project</td><td>60</td><td>whatevs</td><td>2020-06-25</td></tr>"))
     }
 
     /**
