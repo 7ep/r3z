@@ -9,6 +9,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileNotFoundException
+import coverosR3z.domainobjects.TimeEntrySerializationSurrogate as Tess
 
 /**
  * Why use those heavy-handed database applications when you
@@ -247,7 +248,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
-            return jsonSerializer.encodeToString(SetSerializer(TimeEntry.serializer()), employeeDateTimeEntries)
+            val minimizedTimeEntries = employeeDateTimeEntries.map { Tess.toSurrogate(it) }.toSet()
+            return jsonSerializer.encodeToString(SetSerializer(Tess.serializer()), minimizedTimeEntries)
         }
 
         private fun serializeUsers(pmd: PureMemoryDatabase): String {
@@ -280,7 +282,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 val sessions = readAndDeserializeSessions(dbDirectory)
                 val users = readAndDeserializeUsers(dbDirectory)
                 val employees = readAndDeserializeEmployees(dbDirectory)
-                val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees)
+                val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
 
                 return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions)
             } catch (ex : FileNotFoundException) {
@@ -291,7 +293,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
         }
 
-        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
+        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
             return try {
                 val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
                 for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory }
@@ -300,7 +302,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                             ?: throw IllegalStateException("no files found in employees directory")) {
                         val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
                         val timeEntriesFile = dbTimeEntries.readText()
-                        val timeEntries: Set<TimeEntry> = deserializeTimeEntries(timeEntriesFile)
+                        val timeEntries: Set<TimeEntry> = deserializeTimeEntries(timeEntriesFile, employees, projects)
                         for (te in timeEntries) {
                             addTimeEntryStatic(fullTimeEntries, dbDirectory, te.date, te.project, employee, te.time, te.details, te.id)
                         }
@@ -369,8 +371,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return jsonSerializer.decodeFromString(SetSerializer(User.serializer()), usersFile).toMutableSet()
         }
 
-        fun deserializeTimeEntries(timeEntriesFile: String): Set<TimeEntry> {
-            return jsonSerializer.decodeFromString(SetSerializer(TimeEntry.serializer()), timeEntriesFile)
+        fun deserializeTimeEntries(timeEntriesFile: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): Set<TimeEntry> {
+            val tessEntries: Set<Tess> = jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntriesFile)
+            return tessEntries.map { Tess.fromSurrogate(it, employees, projects) }.toSet()
         }
 
         private fun readFile(dbDirectory: String, name : String): String {

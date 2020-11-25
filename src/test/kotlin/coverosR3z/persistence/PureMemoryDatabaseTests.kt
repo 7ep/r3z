@@ -160,15 +160,14 @@ class PureMemoryDatabaseTests {
         val numberOfEmployees = 3
         val numberOfProjects = 5
         val numberOfDays = 2
-        val maxMillisecondsAllowed = 75
+        val maxMillisecondsAllowed = 100
         val directory = "build/db/"
         File(directory).deleteRecursively()
         pmd = PureMemoryDatabase.start(directory)
         File(directory).mkdirs()
-
-        recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
-
         val (totalTime) = getTime {
+            recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
+
             val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(directory)}
             logInfo("it took $timeToReadText milliseconds to deserialize from disk")
 
@@ -188,10 +187,12 @@ class PureMemoryDatabaseTests {
     @Test
     fun testSerializingTimeEntries_PERFORMANCE() {
         val numTimeEntries = 1000
-        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries)
+        val projects = mutableSetOf(DEFAULT_PROJECT)
+        val employees = mutableSetOf(DEFAULT_EMPLOYEE)
+        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, projects, employees)
 
         val (timeToSerialize, serializedTimeEntries) = getTime{PureMemoryDatabase.serializeTimeEntries(timeEntries)}
-        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries)}
+        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, employees, projects)}
 
         logInfo("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
         logInfo("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
@@ -209,14 +210,14 @@ class PureMemoryDatabaseTests {
      alt-text: Helper Methods
      */
 
-    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int): MutableSet<TimeEntry> {
+    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int, projects: MutableSet<Project>, employees: MutableSet<Employee>): MutableSet<TimeEntry> {
         val timeEntries: MutableSet<TimeEntry> = mutableSetOf()
         for (i in 1..numTimeEntries) {
             timeEntries.add(
                 TimeEntry(
                     i,
-                    Employee(EmployeeId(i), EmployeeName("tester$i")),
-                    Project(ProjectId(i), ProjectName("someGreatProject$i")),
+                    employees.first(),
+                    projects.first(),
                     Time(100),
                     A_RANDOM_DAY_IN_JUNE_2020,
                     Details("I was lazing on a sunday afternoon")

@@ -65,6 +65,38 @@ data class TimeEntry (
 }
 
 /**
+ * Don't be alarmed, this is just a sneaky way to create far smaller text
+ * files when we serialize [TimeEntry].
+ *
+ * Instead of all the types, we just do what we can to store the raw
+ * values in a particular order, which cuts down the size by like 95%
+ *
+ * So basically, write before serializing we convert our list of time
+ * entries to this, and right after deserializing we convert this to
+ * full time entries. Win-Win!
+ *
+ * We do throw a lot of information away when we convert this over.  We'll
+ * see if that hurts our performance.
+ *
+ * @param v the integer values we are converting
+ * @param dtl the details, as a string
+ */
+@Serializable
+data class TimeEntrySerializationSurrogate(val v: List<Int>, val dtl: String) {
+    companion object {
+
+        fun toSurrogate(te : TimeEntry) : TimeEntrySerializationSurrogate {
+            val values: List<Int> = listOf(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay)
+            return TimeEntrySerializationSurrogate(values, te.details.value)
+        }
+
+        fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: MutableSet<Employee>, projects: MutableSet<Project>) : TimeEntry {
+            return TimeEntry(te.v[0], employees.single { it.id == EmployeeId(te.v[1])}, projects.single { it.id == ProjectId(te.v[2])}, Time(te.v[3]), Date(te.v[4]), Details(te.dtl))
+        }
+    }
+}
+
+/**
  * Same as [TimeEntry] but it has no id because we haven't
  * spoken to the database yet
  */
