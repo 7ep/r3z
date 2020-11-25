@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.misc.FileReader
@@ -254,10 +255,10 @@ class SocketTests {
 
 
     /**
-     * When we POST some data, we should receive a success message back
+     * When we POST some data unauthorized, we should receive that message
      */
     @Test
-    fun testShouldGetSuccessResponseAfterPost() {
+    fun testShouldGetUnauthorizedResponseAfterPost() {
         client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1\n")
         client.write("Content-Length: 63\n\n")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
@@ -271,10 +272,31 @@ class SocketTests {
         val length: Int = contentLengthRegex.matchEntire(headers[0])!!.groups[1]!!.value.toInt()
         val body = client.read(length)
 
-        // assert all is well
+        // assert unauthorized
         assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
         assertTrue(headers.size > 1)
         assertEquals(unauthorizedHTML, body)
+    }
+
+    /**
+     * When we POST some data, we should receive a success message back
+     */
+    @Test
+    fun testShouldGetSuccessResponseAfterPost() {
+        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1\n")
+        client.write("Cookie: sessionId=abc123")
+        client.write("Content-Length: 63\n\n")
+        client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
+        au.getUserForSessionBehavior = { DEFAULT_USER }
+
+        // server - handle the request
+        SocketCommunication.handleRequest(server, au, tru)
+
+        // client - read status line
+        val statusline = client.readLine()
+
+        // assert all is well
+        assertEquals("HTTP/1.1 200 OK", statusline)
     }
 
 
