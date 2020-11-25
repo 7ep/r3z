@@ -156,7 +156,7 @@ class PureMemoryDatabaseTests {
      * Test writing the whole database and reading the whole database
      */
     @Test
-    fun testShouldWriteAndReadToDisk() {
+    fun testShouldWriteAndReadToDisk_PERFORMANCE() {
         val numberOfEmployees = 10
         val numberOfProjects = 20
         val numberOfDays = 5
@@ -181,6 +181,25 @@ class PureMemoryDatabaseTests {
         assertTrue("totaltime was suppoed to take $maxMillisecondsAllowed.  took $totalTime", totalTime < maxMillisecondsAllowed)
     }
 
+    /**
+     * How long does it actually take to serialize and deserialize?
+     * Not very long at all.
+     */
+    @Test
+    fun testSerializingTimeEntries_PERFORMANCE() {
+        val numTimeEntries = 1000
+        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries)
+
+        val (timeToSerialize, serializedTimeEntries) = getTime{PureMemoryDatabase.serializeTimeEntries(timeEntries)}
+        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries)}
+
+        logInfo("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
+        logInfo("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
+
+        assertTrue(timeToSerialize < 150)
+        assertTrue(timeToDeserialize < 150)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -189,6 +208,24 @@ class PureMemoryDatabaseTests {
                  |_|
      alt-text: Helper Methods
      */
+
+    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int): MutableSet<TimeEntry> {
+        val timeEntries: MutableSet<TimeEntry> = mutableSetOf()
+        for (i in 1..numTimeEntries) {
+            timeEntries.add(
+                TimeEntry(
+                    i,
+                    Employee(EmployeeId(i), EmployeeName("tester$i")),
+                    Project(ProjectId(i), ProjectName("someGreatProject$i")),
+                    Time(100),
+                    A_RANDOM_DAY_IN_JUNE_2020,
+                    Details("I was lazing on a sunday afternoon")
+                )
+            )
+        }
+        return timeEntries
+    }
+
     private fun recordManyTimeEntries(numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
         val lotsOfEmployees: List<String> = generateEmployeeNames()
         persistEmployeesToDatabase(numberOfEmployees, lotsOfEmployees)

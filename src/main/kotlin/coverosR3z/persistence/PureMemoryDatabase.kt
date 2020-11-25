@@ -269,7 +269,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             if (dbDirectory == null) {
                 return
             }
-            val timeentriesSerialized = jsonSerializer.encodeToString(SetSerializer(TimeEntry.serializer()), employeeDateTimeEntries)
+            val timeentriesSerialized = serializeTimeEntries(employeeDateTimeEntries)
             val subDirectory = File(dbDirectory.path + "/timeentries/" + "${employee.id.value}/${date.stringValue}/")
             subDirectory.mkdirs()
             writeDbFile(timeentriesSerialized, "timeentries", subDirectory)
@@ -278,6 +278,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         private fun writeDbFile(value: String, name : String, dbDirectory: File) {
             val dbFileUsers = File(dbDirectory.path + databaseFileName + name + databaseFileSuffix)
             dbFileUsers.writeText(value)
+        }
+
+        fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
+            return jsonSerializer.encodeToString(SetSerializer(TimeEntry.serializer()), employeeDateTimeEntries)
         }
 
         private fun serializeUsers(pmd: PureMemoryDatabase): String {
@@ -310,10 +314,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 val sessionsFile = readFile(dbDirectory, "sessions")
                 val usersFile = readFile(dbDirectory, "users")
 
-                val projects = jsonSerializer.decodeFromString( SetSerializer(Project.serializer()), projectsFile).toMutableSet()
-                val employees = jsonSerializer.decodeFromString( SetSerializer(Employee.serializer()), employeesFile).toMutableSet()
-                val sessions = jsonSerializer.decodeFromString( MapSerializer(String.serializer(), Session.serializer()), sessionsFile).toMutableMap()
-                val users = jsonSerializer.decodeFromString( SetSerializer(User.serializer()), usersFile).toMutableSet()
+                val projects = deserializeProjects(projectsFile)
+                val employees = deserializeEmployees(employeesFile)
+                val sessions = deserializeSessions(sessionsFile)
+                val users = deserializeUsers(usersFile)
 
                 val fullTimeEntries : MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
                 for (employeeDirectory: File in File(dbDirectory.path + "/timeentries/").listFiles()?.filter { it.isDirectory } ?: throw IllegalStateException("no files found in top directory")) {
@@ -322,7 +326,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                         val date : Date = Date.make(dateDirectory.name)
                         val dbTimeEntries = File(dateDirectory, databaseFileName + "timeentries" + databaseFileSuffix)
                         val timeEntriesFile = dbTimeEntries.readText()
-                        val timeEntries: Set<TimeEntry> = jsonSerializer.decodeFromString( SetSerializer(TimeEntry.serializer()), timeEntriesFile)
+                        val timeEntries: Set<TimeEntry> = deserializeTimeEntries(timeEntriesFile)
                         for (te in timeEntries) {
                             addTimeEntryStatic(fullTimeEntries, dbDirectory, date, te.project, employee, te.time, te.details, te.id)
                         }
@@ -336,6 +340,26 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 logWarn("Program cannot proceed.  Halting.")
                 throw IllegalStateException()
             }
+        }
+
+        private fun deserializeProjects(projectsFile: String): MutableSet<Project> {
+            return jsonSerializer.decodeFromString(SetSerializer(Project.serializer()), projectsFile).toMutableSet()
+        }
+
+        private fun deserializeEmployees(employeesFile: String): MutableSet<Employee> {
+            return jsonSerializer.decodeFromString(SetSerializer(Employee.serializer()), employeesFile).toMutableSet()
+        }
+
+        private fun deserializeSessions(sessionsFile: String): MutableMap<String, Session> {
+            return jsonSerializer.decodeFromString(MapSerializer(String.serializer(), Session.serializer()), sessionsFile).toMutableMap()
+        }
+
+        private fun deserializeUsers(usersFile: String): MutableSet<User> {
+            return jsonSerializer.decodeFromString(SetSerializer(User.serializer()), usersFile).toMutableSet()
+        }
+
+        fun deserializeTimeEntries(timeEntriesFile: String): Set<TimeEntry> {
+            return jsonSerializer.decodeFromString(SetSerializer(TimeEntry.serializer()), timeEntriesFile)
         }
 
         private fun readFile(dbDirectory: File, name : String): String {
