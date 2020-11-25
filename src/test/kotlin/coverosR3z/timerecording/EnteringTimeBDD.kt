@@ -9,6 +9,7 @@ import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
+import java.io.File
 
 
 /**

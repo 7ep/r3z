@@ -89,7 +89,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_nonNumericProject() {
         val data = mapOf("project_entry" to "aaaaa", "time_entry" to "60", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
     }
 
@@ -99,7 +99,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_negativeProject() {
         val data = mapOf("project_entry" to "-1", "time_entry" to "60", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
 
@@ -109,7 +109,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_zeroProject() {
         val data = mapOf("project_entry" to "0", "time_entry" to "60", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
 
@@ -119,7 +119,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_aboveMaxProject() {
         val data = mapOf("project_entry" to (maximumProjectsCount+1).toString(), "time_entry" to "60", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
     }
 
@@ -130,7 +130,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_aboveMaxTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to ((60*60*24)+1).toString(), "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
     }
 
@@ -140,7 +140,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_negativeTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to "-60", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("${noNegativeTimeMsg}-60", ex.message)
     }
 
@@ -160,7 +160,7 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_nonNumericTime() {
         val data = mapOf("project_entry" to "1", "time_entry" to "aaa", "detail_entry" to "not much to say")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents}
+        val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
 

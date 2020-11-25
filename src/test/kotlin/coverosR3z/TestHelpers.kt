@@ -9,6 +9,7 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import kotlinx.serialization.json.Json
 import org.junit.Assert
+import java.io.File
 
 /**
  * a test helper method to create a [TimeEntry]

@@ -11,8 +11,8 @@ import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
+import java.io.File
 import java.net.ServerSocket
-import java.time.LocalDate
 import java.util.concurrent.Executors
 
 /**
@@ -27,21 +27,9 @@ class SocketCommunication(val port : Int) {
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
         val cu = CurrentUser(SYSTEM_USER)
-        val deserializeFromDisk = PureMemoryDatabase.deserializeFromDisk(PureMemoryDatabase.directory)
-        val pmd: PureMemoryDatabase = if (deserializeFromDisk == null) {
-            val pmd = PureMemoryDatabase()
-            PureMemoryDatabase.serializeToDisk(pmd)
-            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-            val firstEmployee = tru.createEmployee(EmployeeName("Administrator"))
-            val firstProject = tru.createProject(ProjectName("GENERAL_SYSTEM_PROJECT"))
-            tru.recordTime(TimeEntryPreDatabase(firstEmployee, firstProject, Time(0), Date.now(), Details("first time entry")))
-            pmd
-        } else {
-            deserializeFromDisk
-        }
-
+        val dbDirectory = File("db/")
+        val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         logInfo("System is ready")
 
