@@ -1,6 +1,12 @@
 Developer handbook
 ==================
 
+    Guiding ideas
+    -------------
+    1. Take care of the pennies and the pounds will take care of themselves
+    2. A stitch in time saves nine
+
+
     Types
     -----
 
