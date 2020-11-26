@@ -1,0 +1,45 @@
+commit f8309f13d7d01edfdf0bc8bdaac6dbbf3559cf10
+Author: Byron Katz <byron.katz@coveros.com>
+Date:   Fri Jul 17 11:30:46 2020 -0400
+
+    Adding the H2 database back in to check relative perf.
+
+    New code for even-handed equivalent perf tests for the H2 database and the pure memory database.
+
+    results
+    =======
+
+    2,920,000 time entries
+    200 users
+    4 entries a day
+    for 3650 days
+    800 * 3650 = 2,920,000 time entries
+
+    Our pure memory database:
+
+    INFO: It took 3 milliseconds to read all the users
+    INFO: It took 7 milliseconds to create the projects
+    INFO: It took 1 milliseconds to read all the projects
+
+    INFO: It took 6691 milliseconds to enter all the time entries
+    INFO: It took 164 milliseconds to get all the time entries for a user
+
+    INFO: the time User(id=1, name=Aaren) spent was 1752000
+    INFO: the time User(id=2, name=Aarika) spent was 1752000
+
+    INFO: It took 29395 milliseconds to accumulate the minutes per user
+
+    The H2 database:
+
+    INFO: It took 4 milliseconds to read all the users (~2x longer)
+    INFO: It took 369 milliseconds to create the projects (~30x longer)
+    INFO: It took 14 milliseconds to read all the projects (~14 millis longer)
+
+    INFO: It took 68554 milliseconds to enter all the time entries (~10x longer)
+    INFO: It took 4500 milliseconds to get all the time entries for a user (~30x longer)
+
+    INFO: the time User(id=1, name=Aaren) spent was 1752000
+    INFO: the time User(id=2, name=Aarika) spent was 1752000
+
+    INFO: It took 847246 milliseconds to accumulate the minutes per user (~30x longer)
+

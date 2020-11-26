@@ -1,0 +1,88 @@
+Running: testShouldWriteAndReadToDisk_PERFORMANCE
+Date: Nov 25, 2020
+
+val numberOfEmployees = 30
+val numberOfProjects = 20
+val numberOfDays = 50 * 5
+
+Individual files
+
+INFO: SYSTEM: It took 23 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 18 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 13 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 10629 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 2618 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 15 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 13378 milliseconds
+
+INFO: SYSTEM: It took 17 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 13 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 12 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 10200 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 1938 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 11 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 12238 milliseconds
+
+INFO: SYSTEM: It took 22 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 13 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 14 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 10162 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 2001 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 15 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 12281 milliseconds
+
+files grouped by months
+
+NFO: SYSTEM: It took 18 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 13 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 13 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 12133 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 383 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 15 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 12624 milliseconds
+
+INFO: SYSTEM: It took 19 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 18 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 14 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 12779 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 364 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 15 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 13263 milliseconds
+
+INFO: SYSTEM: It took 20 milliseconds to create 400 employeenames
+INFO: SYSTEM: It took 19 milliseconds to enter 30 employees
+INFO: SYSTEM: It took 2 milliseconds to read all the employees
+INFO: SYSTEM: It took 12 milliseconds to create 20 projects
+INFO: SYSTEM: It took 0 milliseconds to read all the projects
+INFO: SYSTEM: It took 12539 milliseconds total to enter 1000 time entries for each of 30 employees
+INFO: SYSTEM: (That's a total of 30,000 time entries)
+WARN: sessions file missing, creating empty
+WARN: users file missing, creating empty
+INFO: SYSTEM: it took 366 milliseconds to deserialize from disk
+INFO: SYSTEM: it took 14 milliseconds to assert the databases were equal
+INFO: SYSTEM: Total time taken for serialization / deserialzation was 13023 milliseconds
