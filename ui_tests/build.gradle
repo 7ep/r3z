@@ -31,6 +31,9 @@ dependencies {
     // junit, for running unit tests
     // https://mvnrepository.com/artifact/junit/junit/4.13.1
     testImplementation ("junit:junit:4.13.1")
+
+    // https://github.com/bonigarcia/webdrivermanager
+    testImplementation("io.github.bonigarcia:webdrivermanager:4.2.2")
 }
 
 // this causes the tests to run each time.  Without this,

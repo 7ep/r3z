@@ -2,7 +2,9 @@ package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
+import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.Assert.assertEquals
+import org.junit.BeforeClass
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
@@ -17,6 +19,13 @@ class UITests {
 
     private val server = "localhost"
     private val port = 8080
+
+    companion object {
+        @BeforeClass @JvmStatic
+        fun setupClass() {
+            WebDriverManager.chromedriver().setup()
+        }
+    }
 
 
     /**
