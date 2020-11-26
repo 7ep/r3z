@@ -64,8 +64,9 @@ You should get something similar to the following:
 Now you are ready!
 
 #### Summary of relevant Gradle commands
-* gradlew test - run all the tests in this code
-* gradlew jar - build the jar
+* `gradlew test` - run all the tests in this code
+* `gradlew jar` - build the jar, in build/libs/
+* `gradlew run` - run the application.  Stop with ctrl+c
 
 > “A complex system that works is
 > invariably found to have evolved

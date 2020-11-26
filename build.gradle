@@ -11,6 +11,8 @@ plugins {
 // enables us to use Kotlin on the JVM
 apply plugin: 'kotlin'
 
+apply plugin: 'application'
+
 group 'com.coveros.r3z'
 version ''
 
@@ -34,6 +36,20 @@ dependencies {
     testImplementation ("junit:junit:4.13.1")
 }
 
+// if you want to run this with gradle, just run
+//      gradlew run
+//
+// and then you can hit http://localhost:8080 to see
+// the application
+application {
+    mainClass = 'coverosR3z.MainKt'
+}
+
+// if you run
+//    gradlew jar
+// you are given a jar file at build/libs/r3z.jar
+// which you can run with
+//     java -jar build/libs/r3z.jar
 jar {
     manifest {
         attributes 'Main-Class': 'coverosR3z.MainKt'
