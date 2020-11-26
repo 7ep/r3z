@@ -24,17 +24,17 @@ R3z consists of a web application and tests.  Its goals are:
 tool driven or following the more typical big-design-up-front waterfall methods
 * To provide a demonstration of the results of deep agile internally, as well as for clients and partners
 
-What would happen if you built software in the simplest possible way from scratch?
+*What would happen if you built software in the simplest possible way from scratch?*
 
-What if our team held quality sacred?
+*What if our team held quality sacred?*
 
-What if we spent all the necessary time to think things through?
+*What if we spent all the necessary time to think things through?*
 
-What if we incorporated diverse perspectives?
+*What if we incorporated diverse perspectives?*
 
-What if testing drove the design?
+*What if testing drove the design?*
 
-If we understand that our software is a reflection of our culture, should we not focus on improving that first?
+*If we understand that our software is a reflection of our culture, should we not focus on improving that first?*
 
 #### Java installation notes
 
@@ -66,3 +66,22 @@ Now you are ready!
 #### Summary of relevant Gradle commands
 * gradlew test - run all the tests in this code
 * gradlew jar - build the jar
+
+> “A complex system that works is
+> invariably found to have evolved
+> from a simple system that
+> worked. The inverse proposition
+> also appears to be true: A
+> complex system designed from
+> scratch never works and cannot
+> be made to work. You have to
+> start over, beginning with a
+> working simple system.”
+>
+> -- “Gall’s law” John Gall
+
+> If you want to build a ship, don't drum up people to collect wood 
+> and don't assign them tasks and work, but rather teach them to long 
+> for the endless immensity of the sea. 
+> 
+> -- Antoine de Saint-Exupery
