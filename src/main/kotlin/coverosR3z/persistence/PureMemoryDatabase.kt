@@ -3,13 +3,14 @@ package coverosR3z.persistence
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logWarn
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileNotFoundException
-import coverosR3z.domainobjects.TimeEntrySerializationSurrogate as Tess
+import coverosR3z.persistence.PureMemoryDatabase.TimeEntrySerializationSurrogate.Companion as Tess
 
 /**
  * Why use those heavy-handed database applications when you
@@ -277,37 +278,32 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 return null
             }
 
-            try {
-                val projects = readAndDeserializeProjects(dbDirectory)
-                val sessions = readAndDeserializeSessions(dbDirectory)
-                val users = readAndDeserializeUsers(dbDirectory)
-                val employees = readAndDeserializeEmployees(dbDirectory)
-                val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
+            val projects = readAndDeserializeProjects(dbDirectory)
+            val sessions = readAndDeserializeSessions(dbDirectory)
+            val users = readAndDeserializeUsers(dbDirectory)
+            val employees = readAndDeserializeEmployees(dbDirectory)
+            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
 
-                return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions)
-            } catch (ex : FileNotFoundException) {
-                logWarn("database files missing / corrupted: ${ex.message}")
-                logWarn("Highly recommend you wipe out $dbDirectory")
-                logWarn("Program cannot proceed.  Halting.")
-                throw IllegalStateException()
-            }
+            return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions)
         }
 
         private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
             return try {
                 val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
-                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory }
-                        ?: throw IllegalStateException("no files found in top directory")) {
-                    for (dbTimeEntries: File in employeeDirectory.listFiles()?.filter { it.isFile }
-                            ?: throw IllegalStateException("no files found in employees directory")) {
-                        val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
-                        val timeEntriesFile = dbTimeEntries.readText()
-                        val timeEntries: Set<TimeEntry> = deserializeTimeEntries(timeEntriesFile, employees, projects)
-                        for (te in timeEntries) {
-                            addTimeEntryStatic(fullTimeEntries, dbDirectory, te.date, te.project, employee, te.time, te.details, te.id)
-                        }
+
+                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory } ?: throw IllegalStateException("no files found in top directory")) {
+                    val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
+                    val simpleTimeEntries = mutableSetOf<TimeEntry>()
+
+                    // loop through all the files of time entries for this employee, collecting them
+                    for (monthlyTimeEntries: File in employeeDirectory.listFiles()?.filter { it.isFile } ?: throw IllegalStateException("no files found in employees directory")) {
+                        simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), setOf(employee), projects))
                     }
+
+                    val orderedTimeEntries: MutableMap<Date, MutableSet<TimeEntry>> = simpleTimeEntries.groupBy{it.date}.mapValues {it.value.toMutableSet()}.toMutableMap()
+                    fullTimeEntries[employee] = orderedTimeEntries
                 }
+
                 fullTimeEntries
             } catch (ex : Exception) {
                 logWarn("Failed at reading time entries.  This was thrown:\n$ex")
@@ -371,8 +367,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return jsonSerializer.decodeFromString(SetSerializer(User.serializer()), usersFile).toMutableSet()
         }
 
-        fun deserializeTimeEntries(timeEntriesFile: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): Set<TimeEntry> {
-            val tessEntries: Set<Tess> = jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntriesFile)
+        fun deserializeTimeEntries(timeEntriesFile: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
+            val tessEntries = jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntriesFile)
             return tessEntries.map { Tess.fromSurrogate(it, employees, projects) }.toSet()
         }
 
@@ -423,6 +419,39 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, employee, filename, dbDirectory)
         }
 
+    }
+
+
+    /**
+     * Don't be alarmed, this is just a sneaky way to create far smaller text
+     * files when we serialize [TimeEntry].
+     *
+     * Instead of all the types, we just do what we can to store the raw
+     * values in a particular order, which cuts down the size by like 95%
+     *
+     * So basically, write before serializing we convert our list of time
+     * entries to this, and right after deserializing we convert this to
+     * full time entries. Win-Win!
+     *
+     * We do throw a lot of information away when we convert this over.  We'll
+     * see if that hurts our performance.
+     *
+     * @param v the integer values we are converting
+     * @param dtl the details, as a string
+     */
+    @Serializable
+    private data class TimeEntrySerializationSurrogate(val v: List<Int>, val dtl: String) {
+        companion object {
+
+            fun toSurrogate(te : TimeEntry) : TimeEntrySerializationSurrogate {
+                val values: List<Int> = listOf(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay)
+                return TimeEntrySerializationSurrogate(values, te.details.value)
+            }
+
+            fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
+                return TimeEntry(te.v[0], employees.single { it.id == EmployeeId(te.v[1])}, projects.single { it.id == ProjectId(te.v[2])}, Time(te.v[3]), Date(te.v[4]), Details(te.dtl))
+            }
+        }
     }
 
 }
