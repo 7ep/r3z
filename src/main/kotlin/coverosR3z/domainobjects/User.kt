@@ -63,16 +63,11 @@ data class Salt(val value: String)
 data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?)
 
 /**
- * Code analysis might complain about the following, that this
- * private constructor is exposed in the copy method, but that's
- * really ok - it's just this way so callers don't accidentally
- * think it's alright to construct a hash directly, it's not really
- * a security problem.  The following suppression annotation is to
- * make the analysis shut up about it.
+ * Don't use the constructor to make a hash typically.  Use
+ * the [createHash] function
  */
-@Suppress("DataClassPrivateConstructor")
 @Serializable
-data class Hash private constructor(val value: String) {
+data class Hash constructor(val value: String) {
 
 
     companion object{

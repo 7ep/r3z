@@ -451,6 +451,85 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
                 return TimeEntry(te.v[0], employees.single { it.id == EmployeeId(te.v[1])}, projects.single { it.id == ProjectId(te.v[2])}, Time(te.v[3]), Date(te.v[4]), Details(te.dtl))
             }
+
+        }
+    }
+
+    /**
+     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     */
+    @Serializable
+    private data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
+        companion object {
+
+            fun toSurrogate(u : User) : UserSurrogate {
+                return UserSurrogate(u.id.value, u.name.value, u.hash.value, u.salt.value, u.employeeId?.value)
+            }
+
+            fun fromSurrogate(us: UserSurrogate) : User {
+                val empId : EmployeeId? = if (us.empId == null) {
+                    null
+                } else {
+                    EmployeeId(us.empId)
+                }
+                return User(UserId(us.id), UserName(us.name), Hash(us.hash), Salt(us.salt), empId)
+            }
+
+        }
+    }
+
+    /**
+     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     */
+    @Serializable
+    private data class EmployeeSurrogate(val id: Int, val name: String) {
+        companion object {
+
+            fun toSurrogate(e : Employee) : EmployeeSurrogate {
+                return EmployeeSurrogate(e.id.value, e.name.value)
+            }
+
+            fun fromSurrogate(es: EmployeeSurrogate) : Employee {
+                return Employee(EmployeeId(es.id), EmployeeName(es.name))
+            }
+
+        }
+    }
+
+    /**
+     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     */
+    @Serializable
+    private data class ProjectSurrogate(val id: Int, val name: String) {
+        companion object {
+
+            fun toSurrogate(p : Project) : ProjectSurrogate {
+                return ProjectSurrogate(p.id.value, p.name.value)
+            }
+
+            fun fromSurrogate(ps: ProjectSurrogate) : Project {
+                return Project(ProjectId(ps.id), ProjectName(ps.name))
+            }
+
+        }
+    }
+
+    /**
+     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     */
+    @Serializable
+    private data class SessionSurrogate(val id: Int, val epochSecond: Long) {
+        companion object {
+
+            fun toSurrogate(s : Session) : SessionSurrogate {
+                return SessionSurrogate(s.user.id.value, s.dt.epochSecond)
+            }
+
+            fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Session {
+                val user = users.single{it.id.value == ss.id}
+                return Session(user, DateTime(ss.epochSecond))
+            }
+
         }
     }
 
