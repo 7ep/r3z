@@ -5,8 +5,6 @@ import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.server.RequestData
 import coverosR3z.server.ResponseStatus
 import coverosR3z.server.Verb
-import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -14,12 +12,10 @@ import org.junit.Test
 class LogoutAPITests {
 
     lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
 
     @Before
     fun init() {
         au = FakeAuthenticationUtilities()
-        tru = FakeTimeRecordingUtilities()
     }
 
     /**
@@ -39,7 +35,7 @@ class LogoutAPITests {
      */
     @Test
     fun testShouldReturnRedirectIfNotAuthenticated() {
-        val response= doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), NO_USER, ""))
+        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), NO_USER, ""))
         assertEquals(ResponseStatus.SEE_OTHER, response.responseStatus)
     }
 }

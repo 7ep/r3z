@@ -89,6 +89,9 @@ private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
             )
             rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
             rd.path.takeLast(5) == ".webp" -> okWEBP(fileContents)
+            rd.path.takeLast(5) == ".html" -> ok(
+                    fileContents,
+                    listOf(ContentType.TEXT_HTML.value, caching))
             else -> handleNotFound()
         }
     }

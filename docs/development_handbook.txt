@@ -7,6 +7,13 @@ Developer handbook
     2. A stitch in time saves nine
 
 
+    Version
+    -------
+
+    Each release gets a new version, using major and minor, like 1.0
+    See version in the build.gradle file for more info
+
+
     Types
     -----
 

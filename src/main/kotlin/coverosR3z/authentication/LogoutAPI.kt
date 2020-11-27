@@ -20,11 +20,13 @@ const val logoutHTML = """
         <link rel="stylesheet" href="general.css" />
     </head>
     <body>
+        <div class="container">
             <p>
                 You are now logged out
             </p>
 
             <p><a href="homepage">Homepage</a></p>
+        </div>
     </body>
 </html>    
 """

@@ -46,13 +46,26 @@ const val loginHTML = """
     <h2>Login</h2>
     
     <form  method="post" action="login">
-      <div class="container"> 
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-        <button id="login_button" class="submit">Login</button>
-      </div>
+      <table> 
+        <tbody>
+            <tr>
+                <td>
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password">
+                </td>
+            </tr>    
+                <td>
+                    <button id="login_button" class="submit">Login</button>
+                </td>
+            </tr>
+        </tbody>
+      </table>
     </form>
   </body>
 </html>      

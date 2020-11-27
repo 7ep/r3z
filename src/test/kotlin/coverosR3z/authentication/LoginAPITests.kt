@@ -4,8 +4,6 @@ import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.toStr
-import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -15,12 +13,10 @@ import org.junit.Test
 class LoginAPITests {
 
     lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
 
     @Before
     fun init() {
         au = FakeAuthenticationUtilities()
-        tru = FakeTimeRecordingUtilities()
     }
 
     /**

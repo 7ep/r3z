@@ -9,7 +9,6 @@ import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
 
 
 /**
@@ -55,7 +54,8 @@ class EnteringTimeBDD {
 
     @Test
     fun `A employee has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
-        val (tru, newProject: Project, newEmployee: Employee) = `given the employee has already entered 24 hours of time entries before`()
+        // given the employee has already entered 24 hours of time entries before
+        val (tru, newProject: Project, newEmployee: Employee) = enterTwentyFourHoursPreviously()
 
         // when they enter in a new time entry for one hour
         val entry = createTimeEntryPreDatabase(time = Time(30), project = newProject, employee = newEmployee)
@@ -101,7 +101,7 @@ class EnteringTimeBDD {
         return Triple(tru, entry, expectedStatus)
     }
 
-    private fun `given the employee has already entered 24 hours of time entries before`(): Triple<TimeRecordingUtilities, Project, Employee> {
+    private fun enterTwentyFourHoursPreviously(): Triple<TimeRecordingUtilities, Project, Employee> {
         val pmd = PureMemoryDatabase()
         val timeEntryPersistence = TimeEntryPersistence(pmd)
         val systemTru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(SYSTEM_USER))

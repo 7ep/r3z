@@ -14,7 +14,13 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.coveros.r3z'
-version ''
+
+// we'll use a variant of semantic versioning.
+//
+// The way it goes is, major, minor.
+// if the major number changes, there's new functionality
+// if the minor changes, it's only bugs fixed, non-functional improvements, or refactorings
+version '1.0'
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
@@ -64,7 +70,12 @@ application {
 //     java -jar build/libs/r3z.jar
 jar {
     manifest {
-        attributes 'Main-Class': 'coverosR3z.MainKt'
+        attributes(
+                'Main-Class': 'coverosR3z.MainKt',
+                "Implementation-Title": "Gradle",
+                "Implementation-Version": archiveVersion,
+                )
+
     }
     from sourceSets.main.output
 
@@ -76,7 +87,7 @@ jar {
 
 test {
     testLogging {
-        exceptionFormat "full" // default is "short"
+        exceptionFormat "full" // options are "full", "short". default is "short"
         // uncomment the following to see the unit test progress in the output
         //events "started", "passed", "skipped", "failed", "standardOut", "standardError"
         events "passed", "skipped", "failed", "standardOut", "standardError"
@@ -117,3 +128,75 @@ jacocoTestReport {
 
 // configure our general testing to always create a report
 check.dependsOn(jacocoTestReport)
+
+/**
+ * Put the current Git commit sha in a file accessible while running.
+ */
+task('writeGitCommitToFile') {
+    File file = new File("src/main/resources/commit.html")
+    String contents = "Version: " + version + "\nCommit sha: " + getCurrentGitHash()
+    file.write(contents)
+}
+
+/**
+ * This gnarly little method gets the current commit.  It's really a simple-minded
+ * approach, which makes it easy to read but maybe likely to fail?  time will tell.
+ */
+static String getCurrentGitHash() {
+    String headFileLocation = ".git/HEAD"
+    String commitLocation
+    int locationOfSpace
+    String currentHead
+    FileReader fr_forGitHead
+    FileReader fr_forGitHash
+    String result
+    boolean shouldExit = false
+
+    try {
+        fr_forGitHead = new FileReader(headFileLocation)
+    } catch (Exception ignored) {
+        return "NO_GIT_HEAD_FOUND"
+    }
+
+    new BufferedReader(fr_forGitHead).with { br ->
+        // get the directory to the current HEAD
+        result = "EMPTY_INITIAL_VALUE"
+        try {
+            currentHead = br.readLine()
+        } catch (Exception ignored) {
+            result = "COULD_NOT_READ_HEAD_FILE"
+            shouldExit = true
+        }
+        finally {
+            br.close()
+        }
+        locationOfSpace = currentHead.indexOf(" ")
+        // extract out the portion that is the directory only
+        // the whole contents go something like: "ref: refs/heads/master"
+        commitLocation = currentHead.substring(locationOfSpace + 1)
+        // read the file at that location (e.g. .git/refs/heads/master )
+    }
+    if (shouldExit) {
+        return result
+    }
+
+    try {
+        fr_forGitHash = new FileReader(".git/" + commitLocation)
+    } catch (Exception ignored) {
+        return "NO_GIT_HASH_FILE_FOUND"
+    }
+
+    new BufferedReader(fr_forGitHash).with { br ->
+        result = "EMPTY_AT_BEGINNING"
+        try {
+            result = br.readLine()
+        } catch (Exception ignored) {
+            result = "COULD_NOT_READ_COMMIT_HASH"
+        } finally {
+            br.close()
+        }
+    }
+    return result
+}
+
+compileKotlin.finalizedBy writeGitCommitToFile

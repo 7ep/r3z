@@ -48,19 +48,36 @@ fun registerHTML(employees: List<Employee>) : String {
     <h2>Register a User</h2>
     
     <form method="post" action="register">
-      <div class="container"> 
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-        <label for="employee">Employee</label>
-        <select id="employee" name="employee">
-"""+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
-            """
-          <option selected disabled hidden>Choose here</option>
-        </select>
-        <button id="register_button" class="submit">Register</button>
-      </div>
+      <table> 
+          <tbody>
+            <tr>
+                <td>
+                    <label for="username">Username</label><br>
+                    <input type="text" name="username" id="username">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="password">Password</label><br>
+                    <input type="password" name="password" id="password">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="employee">Employee</label><br>
+                    <select id="employee" name="employee">
+                       """+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +"""
+                       <option selected disabled hidden>Choose here</option>
+                  </td>
+                </select>
+            </tr>
+            <tr>
+                <td>
+                    <button id="register_button" class="submit">Register</button>
+                </td>
+            </tr>
+        </tbody>
+      </table>
     </form>
   </body>
 </html>

@@ -89,6 +89,9 @@ class BrowserBDD {
         chromeDriver.get("localhost:8080/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Homepage", chromeDriver.title)
 
+        // Hit the current commit page
+        chromeDriver.get("localhost:8080/commit.html")
+
         // register
         chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
         val user = "user1"
@@ -190,6 +193,7 @@ class BrowserBDD {
         chromeDriver.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")
         chromeDriver.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")
 
+        // close Chrome entirely
         chromeDriver.quit()
 
         // start the server
@@ -200,6 +204,7 @@ class BrowserBDD {
             sc.startServer()
         }.start()
 
+        // restart Chrome
         val chromedriver2 = ChromeDriver()
         // Hit the homepage
         chromedriver2.get("localhost:8080/${NamedPaths.HOMEPAGE.path}")
