@@ -5,13 +5,36 @@ import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
 import coverosR3z.misc.getTime
+import coverosR3z.server.SocketCommunication
+import io.github.bonigarcia.wdm.WebDriverManager
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
 
 class PureMemoryDatabaseTests {
+
+    companion object {
+        const val dbDirectory = "build/db/"
+
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            // wipe out the database
+            File(dbDirectory).deleteRecursively()
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun cleanup() {
+            // wipe out the database
+            File(dbDirectory).deleteRecursively()
+        }
+
+    }
 
     private lateinit var pmd: PureMemoryDatabase
 
@@ -160,15 +183,14 @@ class PureMemoryDatabaseTests {
         val numberOfEmployees = 3
         val numberOfProjects = 5
         val numberOfDays = 2
-        val maxMillisecondsAllowed = 100
-        val directory = "build/db/"
-        File(directory).deleteRecursively()
-        pmd = PureMemoryDatabase.start(directory)
-        File(directory).mkdirs()
+        val maxMillisecondsAllowed = 200
+        File(dbDirectory).deleteRecursively()
+        pmd = PureMemoryDatabase.start(dbDirectory)
+        File(dbDirectory).mkdirs()
         val (totalTime) = getTime {
             recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
 
-            val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(directory)}
+            val (timeToReadText, deserializedPmd) = getTime {PureMemoryDatabase.deserializeFromDisk(dbDirectory)}
             logInfo("it took $timeToReadText milliseconds to deserialize from disk")
 
             val (timeToAssert) = getTime {assertEquals(pmd, deserializedPmd)}

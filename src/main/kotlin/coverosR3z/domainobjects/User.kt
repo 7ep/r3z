@@ -1,7 +1,6 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.generateRandomString
-import kotlinx.serialization.Serializable
 import java.security.MessageDigest
 
 private const val maxUserCount = 100_000_000
@@ -32,7 +31,6 @@ val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHa
 /**
  * Holds a username before we have a whole object, like [User]
  */
-@Serializable
 data class UserName(val value: String){
     init {
         require(value.isNotBlank()) {usernameCannotBeEmptyMsg}
@@ -48,7 +46,6 @@ data class UserName(val value: String){
     }
 }
 
-@Serializable
 data class UserId(val value: Int) {
     init {
         require(value < maxUserCount) { maxUserMsg }
@@ -56,17 +53,14 @@ data class UserId(val value: Int) {
     }
 }
 
-@Serializable
 data class Salt(val value: String)
 
-@Serializable
 data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?)
 
 /**
  * Don't use the constructor to make a hash typically.  Use
  * the [createHash] function
  */
-@Serializable
 data class Hash constructor(val value: String) {
 
 

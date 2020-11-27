@@ -20,14 +20,13 @@ import java.util.concurrent.Executors
  * The intention is that this class solely acts to control the socket
  * connections and is unfamiliar with the specifics of what is being transmitted
  */
-class SocketCommunication(val port : Int) {
+class SocketCommunication(val port : Int, val dbDirectory: String) {
 
     private lateinit var halfOpenServerSocket : ServerSocket
 
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
         val cu = CurrentUser(SYSTEM_USER)
-        val dbDirectory = "db/"
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))

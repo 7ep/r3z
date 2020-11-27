@@ -1,6 +1,5 @@
 package coverosR3z.domainobjects
 
-import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -11,7 +10,6 @@ import java.time.ZoneOffset
  *
  * internal data is merely the number of seconds since the epoch - 1970-01-01
  */
-@Serializable
 class DateTime(val epochSecond : Long) : Comparable<DateTime>{
     constructor(year: Int, month: Month, day: Int, hour: Int, minute: Int, second: Int)
             : this(LocalDateTime.of(year, month.ord, day, hour, minute, second).toEpochSecond(ZoneOffset.UTC))

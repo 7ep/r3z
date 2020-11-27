@@ -1,14 +1,12 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
-import kotlinx.serialization.Serializable
 import java.lang.IllegalStateException
 import java.time.LocalDate
 
 private const val dateStringNotNullMsg = "The date string value must not be null"
 private const val dateStringNotBlankMsg = "The date string value must not be blank"
 
-@Serializable
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
@@ -24,7 +22,6 @@ enum class Month(val ord: Int) {
  * internal data is merely the number of days since the epoch - 1970-01-01
  */
 
-@Serializable
 class Date(val epochDay : Int) : Comparable<Date> {
     constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
@@ -71,35 +68,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
 
     companion object {
 
-        /**
-         * You can pass the id as a string and we'll try to parse it
-         */
-        fun make(value: String?) : Date {
-            val dateString = requireNotNull(value) {dateStringNotNullMsg}
-            require(dateString.isNotBlank()) {dateStringNotBlankMsg}
-            return checkParseToDate(dateString)
-        }
-
-
-        /**
-         * Assumes a string similar to this: 2020-06-25
-         */
-        private fun checkParseToDate(value: String, msg: () -> String = {"The date string ($value) must be parsable to a date type."}) : Date {
-            return try {
-                val d: List<Int> = value.trim().split("-").map { checkParseToInt(it) }
-                val year = d[0]
-                val month = checkNotNull(Month.from(d[1]))
-                val day = d[2]
-                Date(year, month, day)
-            } catch (ex: Throwable) {
-                throw IllegalStateException(msg(), ex)
-            }
-        }
-
+        // get the date right now
         fun now(): Date {
             return Date(LocalDate.now().toEpochDay().toInt())
         }
-
     }
 
 }

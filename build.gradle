@@ -34,6 +34,18 @@ dependencies {
     // junit, for running unit tests
     // https://mvnrepository.com/artifact/junit/junit/4.13.1
     testImplementation ("junit:junit:4.13.1")
+
+    // Selenium - used for testing commonly-used browsers
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+
+    // HtmlUnit is a browser that is controlled directly by Java.  It has no UI, and
+    // runs really, *really* fast.
+    // https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit
+    testImplementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.44.0'
+
+    // https://github.com/bonigarcia/webdrivermanager
+    testImplementation("io.github.bonigarcia:webdrivermanager:4.2.2")
 }
 
 // if you want to run this with gradle, just run

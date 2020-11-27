@@ -1,7 +1,6 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
-import kotlinx.serialization.Serializable
 
 const val MAX_DETAILS_LENGTH = 500
 const val timeNotNullMsg = "time_entry must not be null"
@@ -10,7 +9,6 @@ const val timeNotBlankMsg = "time_entry must not be blank"
 const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in minutes: "
 const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
 
-@Serializable
 data class Details(val value : String = "") {
     init {
         require(value.length <= MAX_DETAILS_LENGTH) { "no reason why details for a time entry would ever need to be this big. " +
@@ -28,7 +26,6 @@ data class Details(val value : String = "") {
 /**
  * a length of time, in minutes
  */
-@Serializable
 data class Time(val numberOfMinutes : Int) {
     init {
         require(numberOfMinutes >= 0) { noNegativeTimeMsg + numberOfMinutes }
@@ -50,7 +47,6 @@ data class Time(val numberOfMinutes : Int) {
  * For example, if Matt worked for 2 hours on project "A", and had some details
  * like "this was for Coveros", this object would contain all that.
  */
-@Serializable
 data class TimeEntry (
         val id : Int,
         val employee: Employee,
@@ -68,7 +64,6 @@ data class TimeEntry (
  * Same as [TimeEntry] but it has no id because we haven't
  * spoken to the database yet
  */
-@Serializable
 data class TimeEntryPreDatabase (
         val employee: Employee,
         val project: Project,

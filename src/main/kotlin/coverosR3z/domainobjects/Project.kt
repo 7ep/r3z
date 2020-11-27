@@ -1,7 +1,6 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
-import kotlinx.serialization.Serializable
 
 const val maximumProjectsCount = 100_000_000
 private const val maxProjectErrorMsg = "No project id allowed over $maximumProjectsCount"
@@ -20,7 +19,6 @@ val NO_PROJECT = Project(ProjectId(maximumProjectsCount-1), ProjectName("THIS RE
 /**
  * When we just have a name (like when adding a new project, or searching)
  */
-@Serializable
 data class ProjectName(val value: String) {
     init {
         require(value.isNotEmpty()) {emptyProjectNameMsg}
@@ -34,7 +32,6 @@ data class ProjectName(val value: String) {
     }
 }
 
-@Serializable
 data class ProjectId(val value: Int) {
     init {
         require(value > 0) {minIdMsg}
@@ -54,6 +51,5 @@ data class ProjectId(val value: Int) {
 /**
  * A full Project object
  */
-@Serializable
 data class Project(val id: ProjectId, val name: ProjectName)
 

@@ -10,6 +10,7 @@ import coverosR3z.server.SocketCommunication.Companion.extractFirstArgumentAsPor
 fun main(args: Array<String>) {
     val port = extractFirstArgumentAsPort(args)
     logInfo("starting server on port $port")
-    SocketCommunication(port).startServer()
+    val dbDirectory = "db/"
+    SocketCommunication(port, dbDirectory).startServer()
 }
 

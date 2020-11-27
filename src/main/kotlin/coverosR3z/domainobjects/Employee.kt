@@ -1,7 +1,6 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
-import kotlinx.serialization.Serializable
 
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
@@ -22,7 +21,6 @@ val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount-1), EmployeeName("THIS RE
 /**
  * Holds a employee's name before we have a whole object, like [Employee]
  */
-@Serializable
 data class EmployeeName(val value: String) {
     init {
         require(value.isNotEmpty()) {employeeNameCannotBeEmptyMsg}
@@ -37,7 +35,6 @@ data class EmployeeName(val value: String) {
     }
 }
 
-@Serializable
 data class EmployeeId(val value: Int) {
 
 
@@ -60,7 +57,6 @@ data class EmployeeId(val value: Int) {
     }
 }
 
-@Serializable
 data class Employee(val id: EmployeeId, val name: EmployeeName)
 
 

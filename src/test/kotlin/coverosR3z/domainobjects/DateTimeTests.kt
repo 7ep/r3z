@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
@@ -24,5 +25,17 @@ class DateTimeTests {
         val d1 = DateTime(2020, Month.NOV, 21, 11, 2, 2)
         val d2 = DateTime(2020, Month.NOV, 21, 11, 2, 3)
         assertNotEquals(d1, d2)
+    }
+
+
+    /**
+     * Date is [Comparable], so we should be able to tell that one date is
+     * before another.
+     */
+    @Test
+    fun testComparisonsBetweenDates() {
+        Assert.assertTrue(DateTime(1577836800) < DateTime(1577836801))
+        Assert.assertTrue(DateTime(1577836800) == DateTime(1577836800))
+        Assert.assertTrue(DateTime(1577836801) > DateTime(1577836800))
     }
 }
