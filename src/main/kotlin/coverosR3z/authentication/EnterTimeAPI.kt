@@ -1,10 +1,9 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
-import coverosR3z.misc.successHTML
-import java.time.LocalDate
 
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {

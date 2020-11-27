@@ -4,14 +4,13 @@ import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.Logger
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import java.io.File
 import java.net.ServerSocket
 import java.util.concurrent.Executors
 

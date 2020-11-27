@@ -7,9 +7,7 @@ import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeEntryPersistence
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import kotlinx.serialization.json.Json
 import org.junit.Assert
-import java.io.File
 
 /**
  * a test helper method to create a [TimeEntry]
@@ -37,14 +35,6 @@ fun createTimeEntryPreDatabase(
         details: Details = Details(),
         date: Date = A_RANDOM_DAY_IN_JUNE_2020
 ) = TimeEntryPreDatabase ( employee, project, time, date, details)
-
-/**
- * This is useful for tests that require serialization
- * using Kotlin's own serialization framework.
- *
- * See https://github.com/Kotlin/kotlinx.serialization
- */
-val jsonSerialzation : Json = Json{allowStructuredMapKeys = true}
 
 /**
  * A test helper method to generate a [TimeRecordingUtilities]

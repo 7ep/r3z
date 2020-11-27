@@ -9,8 +9,6 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
-import java.lang.IllegalArgumentException
 
 /**
  *
