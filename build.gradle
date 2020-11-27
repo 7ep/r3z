@@ -20,7 +20,7 @@ group 'com.coveros.r3z'
 // The way it goes is, major, minor.
 // if the major number changes, there's new functionality
 // if the minor changes, it's only bugs fixed, non-functional improvements, or refactorings
-version '1.1'
+version '1.2'
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
@@ -60,7 +60,7 @@ dependencies {
 // and then you can hit http://localhost:8080 to see
 // the application
 application {
-    mainClass = 'coverosR3z.MainKt'
+    mainClass.set('coverosR3z.MainKt')
 }
 
 // if you run
@@ -144,12 +144,12 @@ task('writeGitCommitToFile') {
  */
 static String getCurrentGitHash() {
     String headFileLocation = ".git/HEAD"
-    String commitLocation
+    String commitLocation = ""
     int locationOfSpace
     String currentHead
     FileReader fr_forGitHead
     FileReader fr_forGitHash
-    String result
+    String result = "EMPTY_INITIAL_VALUE"
     boolean shouldExit = false
 
     try {

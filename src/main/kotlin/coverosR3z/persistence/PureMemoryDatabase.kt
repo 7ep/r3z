@@ -177,6 +177,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          */
         fun start(dbDirectory: String) : PureMemoryDatabase {
 
+            /** The version of the database.  Update when we have
+             * real users and we're changing live prod data.
+             */
+            val dbVersion = 1
+
             // first we assume the database has been previously persisted
             val restoredPMD = deserializeFromDisk(dbDirectory)
 
@@ -190,6 +195,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
 
                 // create the database directory
                 File(dbDirectory).mkdirs()
+
+                // Set the version of the database
+                File(dbDirectory + "version.txt").writeText(dbVersion.toString())
 
                 // create an initial employee
                 pmd.addNewEmployee(EmployeeName("Administrator"))
@@ -447,20 +455,23 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * We do throw a lot of information away when we convert this over.  We'll
      * see if that hurts our performance.
      *
-     * @param v the integer values we are converting
-     * @param dtl the details, as a string
+     * @param i the integer identifier of the Time Entry
+     * @param e the [Employee] id
+     * @param p the [Project] id
+     * @param t the [Time], in minutes
+     * @param d the [Date], as epoch days
+     * @param dtl the [Details], as a string
      */
     @Serializable
-    private data class TimeEntrySerializationSurrogate(val v: List<Int>, val dtl: String) {
+    private data class TimeEntrySerializationSurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
         companion object {
 
             fun toSurrogate(te : TimeEntry) : TimeEntrySerializationSurrogate {
-                val values: List<Int> = listOf(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay)
-                return TimeEntrySerializationSurrogate(values, te.details.value)
+                return TimeEntrySerializationSurrogate(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay, te.details.value)
             }
 
             fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-                return TimeEntry(te.v[0], employees.single { it.id == EmployeeId(te.v[1])}, projects.single { it.id == ProjectId(te.v[2])}, Time(te.v[3]), Date(te.v[4]), Details(te.dtl))
+                return TimeEntry(te.i, employees.single { it.id == EmployeeId(te.e)}, projects.single { it.id == ProjectId(te.p)}, Time(te.t), Date(te.d), Details(te.dtl))
             }
 
         }

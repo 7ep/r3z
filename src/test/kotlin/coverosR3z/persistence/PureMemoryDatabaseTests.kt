@@ -27,13 +27,6 @@ class PureMemoryDatabaseTests {
             File(dbDirectory).deleteRecursively()
         }
 
-        @AfterClass
-        @JvmStatic
-        fun cleanup() {
-            // wipe out the database
-            File(dbDirectory).deleteRecursively()
-        }
-
     }
 
     private lateinit var pmd: PureMemoryDatabase
