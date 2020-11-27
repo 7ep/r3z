@@ -20,7 +20,7 @@ group 'com.coveros.r3z'
 // The way it goes is, major, minor.
 // if the major number changes, there's new functionality
 // if the minor changes, it's only bugs fixed, non-functional improvements, or refactorings
-version '1.0'
+version '1.1'
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
