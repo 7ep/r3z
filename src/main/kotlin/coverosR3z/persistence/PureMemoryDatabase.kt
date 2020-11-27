@@ -284,8 +284,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
 
             val projects = readAndDeserializeProjects(dbDirectory)
-            val sessions = readAndDeserializeSessions(dbDirectory)
             val users = readAndDeserializeUsers(dbDirectory)
+            val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
             val employees = readAndDeserializeEmployees(dbDirectory)
             val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
 
@@ -326,10 +326,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
         }
 
-        private fun readAndDeserializeSessions(dbDirectory: String): MutableMap<String, Session> {
+        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): MutableMap<String, Session> {
             return try {
                 val sessionsFile = readFile(dbDirectory, "sessions")
-                deserializeSessions(sessionsFile)
+                deserializeSessions(sessionsFile, users)
             } catch (ex: FileNotFoundException) {
                 logWarn("sessions file missing, creating empty")
                 mutableMapOf()
@@ -357,19 +357,25 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeProjects(projectsFile: String): MutableSet<Project> {
-            return jsonSerializer.decodeFromString(SetSerializer(Project.serializer()), projectsFile).toMutableSet()
+            val read: Set<ProjectSurrogate> = jsonSerializer.decodeFromString(SetSerializer(ProjectSurrogate.serializer()), projectsFile)
+            return read.map {ProjectSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
         private fun deserializeEmployees(employeesFile: String): MutableSet<Employee> {
-            return jsonSerializer.decodeFromString(SetSerializer(Employee.serializer()), employeesFile).toMutableSet()
+            val read: Set<EmployeeSurrogate> = jsonSerializer.decodeFromString(SetSerializer(EmployeeSurrogate.serializer()), employeesFile)
+            return read.map {EmployeeSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
-        private fun deserializeSessions(sessionsFile: String): MutableMap<String, Session> {
-            return jsonSerializer.decodeFromString(MapSerializer(String.serializer(), Session.serializer()), sessionsFile).toMutableMap()
+        private fun deserializeSessions(sessionsFile: String, users: Set<User>): MutableMap<String, Session> {
+            val read: Map<String, SessionSurrogate> = jsonSerializer.decodeFromString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), sessionsFile)
+            val newMap = mutableMapOf<String, Session>()
+            read.mapValuesTo(newMap, {SessionSurrogate.fromSurrogate(it.value, users)})
+            return newMap
         }
 
         private fun deserializeUsers(usersFile: String): MutableSet<User> {
-            return jsonSerializer.decodeFromString(SetSerializer(User.serializer()), usersFile).toMutableSet()
+            val read: Set<UserSurrogate> = jsonSerializer.decodeFromString(SetSerializer(UserSurrogate.serializer()), usersFile)
+            return read.map {UserSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
         fun deserializeTimeEntries(timeEntriesFile: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
