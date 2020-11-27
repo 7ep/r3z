@@ -440,7 +440,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * Instead of all the types, we just do what we can to store the raw
      * values in a particular order, which cuts down the size by like 95%
      *
-     * So basically, write before serializing we convert our list of time
+     * So basically, right before serializing we convert our list of time
      * entries to this, and right after deserializing we convert this to
      * full time entries. Win-Win!
      *
