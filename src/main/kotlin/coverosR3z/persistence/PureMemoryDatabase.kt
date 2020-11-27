@@ -254,19 +254,24 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeUsers(pmd: PureMemoryDatabase): String {
-            return jsonSerializer.encodeToString(SetSerializer(User.serializer()), pmd.users)
+            val minimizedUsers = pmd.users.map {UserSurrogate.toSurrogate(it)}.toSet()
+            return jsonSerializer.encodeToString(SetSerializer(UserSurrogate.serializer()), minimizedUsers )
         }
 
         private fun serializeSessions(pmd: PureMemoryDatabase): String {
-            return jsonSerializer.encodeToString(MapSerializer(String.serializer(), Session.serializer()), pmd.sessions)
+            val newMap = mutableMapOf<String, SessionSurrogate>()
+            pmd.sessions.mapValuesTo(newMap, {SessionSurrogate.toSurrogate (it.value)})
+            return jsonSerializer.encodeToString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), newMap)
         }
 
         private fun serializeEmployees(pmd: PureMemoryDatabase): String {
-            return jsonSerializer.encodeToString(SetSerializer(Employee.serializer()), pmd.employees)
+            val minimizedEmployees = pmd.employees.map {EmployeeSurrogate.toSurrogate(it)}.toSet()
+            return jsonSerializer.encodeToString(SetSerializer(EmployeeSurrogate.serializer()), minimizedEmployees)
         }
 
         private fun serializeProjects(pmd: PureMemoryDatabase): String {
-            return jsonSerializer.encodeToString(SetSerializer(Project.serializer()), pmd.projects)
+            val minimizedProjects = pmd.projects.map {ProjectSurrogate.toSurrogate(it)}.toSet()
+            return jsonSerializer.encodeToString(SetSerializer(ProjectSurrogate.serializer()), minimizedProjects)
         }
 
         /**
