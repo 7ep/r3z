@@ -127,7 +127,7 @@ class BrowserBDD {
         }
 
         // enter a new employee
-        val employees = listOf(DEFAULT_USER.name.value)
+        val employees = listOf(DEFAULT_USER.name.value, "<script>alert()</script>")
         for (employee in employees) {
             chromeDriver.get("localhost:8080/${NamedPaths.CREATE_EMPLOYEE.path}")
             chromeDriver.findElementById("employee_name").sendKeys(employee)

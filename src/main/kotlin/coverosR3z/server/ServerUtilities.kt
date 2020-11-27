@@ -297,7 +297,15 @@ fun parsePostedData(input: String): Map<String, String> {
     // Closures for efficiency ahoy, sorry
     try {
         return (input.split("&").associate { field ->
-            field.split("=").let { it[0] to it[1].replace("+", " ") }
+            field.split("=")
+                .let { it[0] to it[1]
+                    .replace("+", " ")
+                    .replace("%3C", "<")
+                    .replace("%3E", ">")
+                    .replace("%28", "(")
+                    .replace("%29", ")")
+                    .replace("%2F", "/")
+                }
         })
     } catch (ex : IndexOutOfBoundsException) {
         throw IllegalArgumentException("We failed to parse \"$input\" as application/x-www-form-urlencoded", ex)

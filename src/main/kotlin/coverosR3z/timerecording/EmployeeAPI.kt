@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
@@ -36,7 +37,7 @@ fun createEmployeeHTML(username : String) : String {
     <form action="createemployee" method="post">
     
         <p>
-            Hello there, <span id="username">$username</span>!
+            Hello there, <span id="username">${safeHtml(username)}</span>!
         </p>
     
         <p>
@@ -78,7 +79,7 @@ fun existingEmployeesHTML(username : String, employees : List<Employee>) : Strin
     </head>
     <body>
         <p>
-            Here are the employees at your company, <span id="username">$username</span>
+            Here are the employees at your company, <span id="username">${safeHtml(username)}</span>
         </p>
         <table>
             <thead>
@@ -90,7 +91,7 @@ fun existingEmployeesHTML(username : String, employees : List<Employee>) : Strin
             <tbody>
                 
 """ +
-            employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${it.name.value}</td></tr>\n" } +
+            employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${safeHtml(it.name.value)}</td></tr>\n" } +
             """
             </tbody>
         </table>

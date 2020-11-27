@@ -25,7 +25,7 @@ fun authHomePageHTML(username : String) : String {
         </head>        
         <body>
             <div class="container">
-                <h2>You are on the authenticated homepage, $username</h2>
+                <h2>You are on the authenticated homepage, ${safeHtml(username)}</h2>
                 <p><a href="createemployee">Create employee</a></p>
                 <p><a href="employees">Show all employees</a></p>
                 <p><a href="createproject">Create project</a></p>

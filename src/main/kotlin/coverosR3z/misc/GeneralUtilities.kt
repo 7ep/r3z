@@ -39,3 +39,34 @@ fun <T>getTime(function: () -> T): Pair<Long, T> {
     val finish = System.currentTimeMillis()
     return Pair(finish - start, result)
 }
+
+/**
+ * Returns text that has three symbols replaced -
+ * the less-than, greater-than, and ampersand.
+ * See https://www.w3.org/International/questions/qa-escapes#use
+ *
+ * This will protect against something like <div>$USERNAME</div> allowing
+ * a username of
+ *      <script>alert(1)</script>
+ * becoming
+ *      <div><script>alert(1)</script</div>
+ * and instead becomes
+ *      <div>&lt;script&gt;alert(1)&lt;/script&gt;</div>
+ *
+ * If the text is going inside an attribute (e.g. <div class="TEXT_GOES_HERE"> )
+ * Then you need to escape slightly differently. In that case see [safeAttr]
+ */
+fun safeHtml(input : String) : String {
+    return input.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+}
+
+/**
+ * Replace dangerous text that would go inside an HTML attribute.
+ * See [safeHtml]
+ */
+fun safeAttr(input : String) : String {
+    return input.replace("\"", "&quot;")
+        .replace("'", "&apos;")
+}

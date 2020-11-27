@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -62,7 +63,7 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
         <form action="entertime" method="post">
 
             <p>
-                Hello there, <span id="username">$username</span>!
+                Hello there, <span id="username">${safeHtml(username)}</span>!
             </p>
 
             <p>
@@ -70,7 +71,7 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
                 <select name="project_entry" id="project_entry"/>
 """ +
 
-            projects.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +
+            projects.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +
 
             """             <option selected disabled hidden>Choose here</option>
             </select>
@@ -326,9 +327,7 @@ fun existingTimeEntriesHTML(username : String, te : Map<Date, Set<TimeEntry>>) :
             </thead>
             <tbody>
                 
-""" +
-            te.flatMap { it.value }.joinToString("") { "<tr><td>${it.project.name.value}</td><td>${it.time.numberOfMinutes}</td><td>${it.details.value}</td><td>${it.date.stringValue}</td></tr>\n" } +
-            """    
+            """ + te.flatMap { it.value }.joinToString("") { "<tr><td>${safeHtml(it.project.name.value)}</td><td>${it.time.numberOfMinutes}</td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
             </tbody>
         </table>
 

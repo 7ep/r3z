@@ -4,6 +4,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.misc.failureHTML
+import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 
 
@@ -66,7 +67,7 @@ fun registerHTML(employees: List<Employee>) : String {
                 <td>
                     <label for="employee">Employee</label><br>
                     <select id="employee" name="employee">
-                       """+employees.joinToString("") { "<option value =\"${it.id.value}\">${it.name.value}</option>\n" } +"""
+                       """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
                        <option selected disabled hidden>Choose here</option>
                   </td>
                 </select>

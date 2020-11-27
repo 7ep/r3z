@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
@@ -38,7 +39,7 @@ fun createProjectHTML(username : String) : String {
         <form action="createproject" method="post">
         
             <p>
-                Hello there, <span id="username">$username</span>!
+                Hello there, <span id="username">${safeHtml(username)}</span>!
             </p>
         
             <p>
