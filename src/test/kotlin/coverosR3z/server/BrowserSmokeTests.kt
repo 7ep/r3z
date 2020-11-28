@@ -41,13 +41,6 @@ class BrowserSmokeTests {
             serverThread.start()
         }
 
-        @AfterClass
-        @JvmStatic
-        fun cleanup() {
-            // wipe out the database
-            File(dbDirectory).deleteRecursively()
-        }
-
     }
 
     /**
@@ -94,9 +87,9 @@ class BrowserSmokeTests {
 
         // register
         chromeDriver.get("localhost:8080/${NamedPaths.REGISTER.path}")
-        val user = "user1"
+        val user = "Henry the Eighth I am I am, Henry the Eighth I am!"
         chromeDriver.findElementById("username").sendKeys(user)
-        val password = "password123456"
+        val password = "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb"
         chromeDriver.findElementById("password").sendKeys(password)
         chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'Administrator']")).click()
         chromeDriver.findElementById("register_button").click()
@@ -154,6 +147,8 @@ class BrowserSmokeTests {
             assertEquals("SUCCESS", chromeDriver.title)
         }
 
+        val details = "!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ"
+
         // loop through each user and login in
         for (e in employees) {
             // login
@@ -168,7 +163,7 @@ class BrowserSmokeTests {
                 chromeDriver.get("localhost:8080/${NamedPaths.ENTER_TIME.path}")
                 chromeDriver.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
                 chromeDriver.findElementById("time_entry").sendKeys("60")
-                chromeDriver.findElementById("detail_entry").sendKeys("foo foo foo foo la la la la la la")
+                chromeDriver.findElementById("detail_entry").sendKeys(details)
                 chromeDriver.findElementById("enter_time_button").click()
                 assertEquals("SUCCESS", chromeDriver.title)
             }
@@ -244,7 +239,7 @@ class BrowserSmokeTests {
         chromedriver2.get("localhost:8080/${NamedPaths.TIMEENTRIES.path}")
         assertEquals("your time entries", chromedriver2.title)
         val allEntries = chromedriver2.findElementByTagName("table").text
-        assertTrue(allEntries.contains("BDD 60 foo foo foo foo la la la la la la"))
+        assertTrue(allEntries.contains(details))
 
         // shut the server down
         chromedriver2.get("localhost:8080/${NamedPaths.SHUTDOWN_SERVER.path}")

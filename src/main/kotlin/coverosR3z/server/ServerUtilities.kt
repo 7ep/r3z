@@ -4,9 +4,13 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
-import coverosR3z.misc.*
+import coverosR3z.misc.FileReader
+import coverosR3z.misc.doGetHomePage
+import coverosR3z.misc.successHTML
+import coverosR3z.misc.toBytes
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
+import java.net.URLDecoder
 
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
 
@@ -254,8 +258,8 @@ fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
     try {
         val lengthHeader: String = headers.single { it.toLowerCase().startsWith("content-length") }
         val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
-        // arbitrarily setting to 500 for now
-        val maxContentLength = 500
+        // arbitrarily setting to 10,000 for now
+        val maxContentLength = 10_000
         checkNotNull(length) {"The length must not be null for this input.  It was: $lengthHeader"}
         check(length <= maxContentLength) {"The Content-length is not allowed to exceed $maxContentLength characters"}
         check(length >= 0) {"Content-length cannot be negative"}
@@ -289,6 +293,8 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  * Parse data formatted by application/x-www-form-urlencoded
  * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
  *
+ * See here for the encoding: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
+ *
  * for example, valuea=3&valueb=this+is+something
  */
 fun parsePostedData(input: String): Map<String, String> {
@@ -298,13 +304,7 @@ fun parsePostedData(input: String): Map<String, String> {
     try {
         return (input.split("&").associate { field ->
             field.split("=")
-                .let { it[0] to it[1]
-                    .replace("+", " ")
-                    .replace("%3C", "<")
-                    .replace("%3E", ">")
-                    .replace("%28", "(")
-                    .replace("%29", ")")
-                    .replace("%2F", "/")
+                .let { it[0] to URLDecoder.decode(it[1], Charsets.UTF_8)
                 }
         })
     } catch (ex : IndexOutOfBoundsException) {

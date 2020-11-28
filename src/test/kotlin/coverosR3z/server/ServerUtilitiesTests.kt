@@ -82,6 +82,46 @@ class ServerUtilitiesTests {
     }
 
     /**
+     * What if someone posts a huge name? Like Henry the Eighth I am I am, Henry the Eighth I am!
+     */
+    @Test
+    fun testShouldParseBigName() {
+        val input = "username=Henry+the+Eighth+I+am+I+am%2C+Henry+the+Eighth+I+am%21&password=l%21Mfr%7EWc9gIz%27pbXs7%5B%5Dl%7C%27lBM4%2FNg3t8nYevRUNQcL_%2BSW%25A522sThETaQlbB%5E%7BqiNJWzpblP%6024N_V8A6%23A-2T%234%7Dc%29DP%25%3Bm1WC_RXlI%7DMyZHo7*Q1%28kC%2BlC%2F9%28%27%2BjMA9%2Ffr%24IZ%2C%5C5%3DBivXp36tb&employee=1"
+        val expected = mapOf("username" to "Henry the Eighth I am I am, Henry the Eighth I am!", "password" to "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb", "employee" to "1")
+
+        val result = parsePostedData(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * What if we need to parse more exotic Unicode chars?
+     */
+    @Test
+    fun testShouldParseUnicodeSymbols() {
+        val input = "username=%09%21%22%23%24%25%26%27%28%29*%2B%2C-.%2FA0123456789A%3A%3B%3C%3D%3E%3F%40UABCDEFGHIJKLMNOPQRSTUVWXYZA%5B%5C%5D%5E_%60LabcdefghijklmnopqrstuvwxyzA%7B%7C%7D%7ECL%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B%C3%8C%C3%8D%C3%8E%C3%8F%C3%90%C3%91%C3%92%C3%93%C3%94%C3%95%C3%96M%C3%97L%C3%98%C3%99%C3%9A%C3%9B%C3%9C%C3%9D%C3%9E%C3%9F%C3%A0%C3%A1%C3%A2%C3%A3%C3%A4%C3%A5%C3%A6%C3%A7%C3%A8%C3%A9%C3%AA%C3%AB%C3%AC%C3%AD%C3%AE%C3%AF%C3%B0%C3%B1%C3%B2%C3%B3%C3%B4%C3%B5%C3%B6M%C3%B7L%C3%B8%C3%B9%C3%BA%C3%BB%C3%BC%C3%BD%C3%BE%C3%BFE%C5%81%C5%82%C5%83%C5%84%C5%85%C5%86%C5%87%C5%88E%C5%8A%C5%8B%C5%8C%C5%8D%C5%8E%C5%8F%C5%90%C5%91%C5%92%C5%93%C5%94%C5%95%C5%96%C5%97%C5%98%C5%99%C5%9A%C5%9B%C5%9C%C5%9D%C5%9E%C5%9F%C5%A0%C5%A1%C5%A2%C5%A3%C5%A4%C5%A5%C5%A6%C5%A7%C5%A8%C5%A9%C5%AA%C5%AB%C5%AC%C5%AD%C5%AE%C5%AF%C5%B0%C5%B1%C5%B4%C5%B5%C5%B6%C5%B7%C5%B8%C5%B9%C5%BA%C5%BB%C5%BC%C5%BD%C5%BE%C5%BF"
+        val expected = mapOf("username" to "\t!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ")
+
+        val result = parsePostedData(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Like [testShouldParseUnicodeSymbols] but on a smaller scale
+     * to help focus
+     */
+    @Test
+    fun testShouldParseSmallUnicodeInput() {
+        val input = "username=%20%C2%A1"
+        val expected = mapOf("username" to " ¡")
+
+        val result = parsePostedData(input)
+
+        assertEquals(expected, result)
+    }
+
+    /**
      * Action for a POST to an endpoint
      */
     @Test
@@ -306,16 +346,16 @@ class ServerUtilitiesTests {
     /**
      * If the Content-Length has length too high...
      *
-     * what *is* the greatest length we should take? Off-hand I'd
-     * say it doesn't make sense for us to take large data from a user.
-     * Probably no more than 500 characters, for now.
+     * Especially when using unicode, the content-length can turn
+     * out to be really high, like double or more the real size of text
+     * because it gets encoded.  Setting it to 10,000
      */
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
-        val headers = listOf("Content-Length: 501", "Content-Type: Blah")
+        val headers = listOf("Content-Length: 10001", "Content-Type: Blah")
 
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("Exception occurred for these headers: Content-Length: 501;Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed 500 characters", exception.message)
+        assertEquals("Exception occurred for these headers: Content-Length: 10001;Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed 10000 characters", exception.message)
     }
 
     /**
