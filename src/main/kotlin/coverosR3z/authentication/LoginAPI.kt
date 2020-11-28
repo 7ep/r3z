@@ -35,7 +35,6 @@ const val loginHTML = """
 <!DOCTYPE html>
 <html>
   <head>
-      <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
       <title>register</title>
       <link rel="stylesheet" href="general.css" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
