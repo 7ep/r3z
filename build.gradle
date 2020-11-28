@@ -6,6 +6,12 @@ plugins {
     id 'jacoco'
 
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+
+    // https://blog.gradle.org/java-toolchains
+    // java toolchains - a gradle 6.7 feature - allows us to
+    // specify an exact version of the JDK to use when compiling,
+    // and will pull it down if not found on the user's machine.
+    id "java-library"
 }
 
 // enables us to use Kotlin on the JVM
@@ -61,6 +67,12 @@ dependencies {
 // the application
 application {
     mainClass.set('coverosR3z.MainKt')
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 // if you run
