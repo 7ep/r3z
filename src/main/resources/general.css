@@ -1,5 +1,5 @@
 header {
-  color: rgb(0 134 159);
+  color: rgb(0, 134, 159);
   background-color: #809EE4;
   font-size: 30px;
   margin: 0;
@@ -10,7 +10,7 @@ header {
 
 body {
   color: #885555;
-  background-color: rgb(75 109 154);
+  background-color: rgb(75, 109, 154);
   font-family: "helvetica", sans-serif;
   padding-top: 40px;
   margin: 0;
