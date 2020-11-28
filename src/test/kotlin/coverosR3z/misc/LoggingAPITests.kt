@@ -26,12 +26,18 @@ class LoggingAPITests {
         resetLogSettingsToDefault()
     }
 
+    /**
+     * Make sure it handles properly if we are authenticated
+     */
     @Test
     fun testShouldGetLoggingPageIfAuthenticated() {
         val result : PreparedResponseData = handleGETLogging(SYSTEM_USER)
         assertEquals(ResponseStatus.OK, result.responseStatus)
     }
 
+    /**
+     * Make sure it handles properly if we are authenticated
+     */
     @Test
     fun testShouldPostLoggingPageIfAuthenticated() {
         val data = mapOf("info" to "true", "warn" to "false", "debug" to "false", "trace" to "false")
@@ -39,20 +45,29 @@ class LoggingAPITests {
         assertEquals(ResponseStatus.OK, result.responseStatus)
     }
 
+    /**
+     * Should redirect to the homepage if unauthenticated
+     */
     @Test
     fun testShouldNotGetLoggingPageIfUnauthenticated() {
         val result : PreparedResponseData = handleGETLogging(NO_USER)
         assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
     }
 
+    /**
+     * Should redirect to the homepage if unauthenticated
+     */
     @Test
     fun testShouldNotPostLoggingPageIfUnauthenticated() {
         val result : PreparedResponseData = handlePOSTLogging(NO_USER, emptyMap())
         assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
     }
 
+    /**
+     * If we
+     */
     @Test
-    fun testShouldChangeConfiguration_infoOnly() {
+    fun testShouldChangeConfiguration_setInfoTrueOnly() {
         val data = mapOf("info" to "true", "warn" to "false", "debug" to "false", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(true, logSettings[LogTypes.INFO])
@@ -62,7 +77,7 @@ class LoggingAPITests {
     }
 
     @Test
-    fun testShouldChangeConfiguration_WarnOnly() {
+    fun testShouldChangeConfiguration_setWarnTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "true", "debug" to "false", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.INFO])
@@ -72,7 +87,7 @@ class LoggingAPITests {
     }
 
     @Test
-    fun testShouldChangeConfiguration_DebugOnly() {
+    fun testShouldChangeConfiguration_setDebugTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "false", "debug" to "true", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.INFO])
@@ -82,7 +97,7 @@ class LoggingAPITests {
     }
 
     @Test
-    fun testShouldChangeConfiguration_TraceOnly() {
+    fun testShouldChangeConfiguration_setTraceTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "true")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.INFO])
@@ -111,6 +126,9 @@ class LoggingAPITests {
         assertEquals(false, logSettings[LogTypes.TRACE])
     }
 
+    /**
+     * We require four inputs from the user.  If any are missing, complain
+     */
     @Test
     fun testShouldComplain_missingInfo() {
         val data = mapOf("warn" to "false", "debug" to "false", "trace" to "false")
@@ -139,6 +157,9 @@ class LoggingAPITests {
         assertEquals(missingLoggingDataInputMsg, ex.message)
     }
 
+    /**
+     * If the user somehow sets the inputs to something other than "true" or "false", complain
+     */
     @Test
     fun testShouldComplainAboutBadInput_info() {
         val data = mapOf("info" to "foo", "warn" to "false", "debug" to "false", "trace" to "false")

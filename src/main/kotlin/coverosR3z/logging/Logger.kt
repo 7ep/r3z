@@ -12,6 +12,10 @@ enum class LogTypes {
 
 val logSettings = mutableMapOf(LogTypes.INFO to true, LogTypes.WARN to true, LogTypes.DEBUG to false, LogTypes.TRACE to false)
 
+/**
+ * Set the system to standard configuration for which
+ * log entries will print
+ */
 fun resetLogSettingsToDefault() {
     logSettings[LogTypes.INFO] = true
     logSettings[LogTypes.DEBUG] = true
@@ -38,7 +42,7 @@ fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  * Used to log finicky details of technical solutions
  */
 fun logDebug(msg : String) {
-    if (logSettings[LogTypes.INFO] == true) {
+    if (logSettings[LogTypes.DEBUG] == true) {
         println("DEBUG: $msg")
     }
 }
@@ -47,8 +51,8 @@ fun logDebug(msg : String) {
  * Logs nearly extraneous levels of detail.
  */
 fun logTrace(msg: String) {
-    if (logSettings[LogTypes.INFO] == true) {
-        println("DEBUG: $msg")
+    if (logSettings[LogTypes.TRACE] == true) {
+        println("TRACE: $msg")
     }
 }
 
@@ -56,7 +60,7 @@ fun logTrace(msg: String) {
  * Logs nearly extraneous levels of detail.
  */
 fun logWarn(msg: String) {
-    if (logSettings[LogTypes.INFO] == true) {
+    if (logSettings[LogTypes.WARN] == true) {
         println("WARN: $msg")
     }
 }
