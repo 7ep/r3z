@@ -38,6 +38,9 @@ enum class NamedPaths(val path: String) {
     // authenticated homepage
     AUTHHOMEPAGE("homepage"),
 
+    // Logging configuration - turn on / off logging
+    LOGGING("logging"),
+
     /**
      * A special page, this shuts the server down
      */

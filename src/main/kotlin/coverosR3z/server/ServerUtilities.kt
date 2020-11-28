@@ -4,10 +4,7 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
-import coverosR3z.misc.FileReader
-import coverosR3z.misc.doGetHomePage
-import coverosR3z.misc.successHTML
-import coverosR3z.misc.toBytes
+import coverosR3z.misc.*
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
 import java.net.URLDecoder
@@ -57,6 +54,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, CREATE_PROJECT.path) -> doGETCreateProjectPage(rd)
         Pair(Verb.GET, LOGOUT.path) -> doGETLogout(au, rd)
         Pair(Verb.GET, SHUTDOWN_SERVER.path) -> handleGETShutdownServer(rd.user)
+        Pair(Verb.GET, LOGGING.path) -> handleGETLogging(user)
 
         // posts
         Pair(Verb.POST, ENTER_TIME.path) -> handlePOSTTimeEntry(tru, user, data)
@@ -64,6 +62,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, LOGIN.path) -> handlePOSTLogin(au, user, data)
         Pair(Verb.POST, REGISTER.path) -> handlePOSTRegister(au, user, data)
         Pair(Verb.POST, CREATE_PROJECT.path) -> handlePOSTCreatingProject(tru, user, data)
+        Pair(Verb.POST, LOGGING.path) -> handlePOSTLogging(user, data)
 
         else -> {
             handleUnknownFiles(rd)

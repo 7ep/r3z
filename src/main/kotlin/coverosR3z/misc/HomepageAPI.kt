@@ -31,6 +31,7 @@ fun authHomePageHTML(username : String) : String {
                 <p><a href="createproject">Create project</a></p>
                 <p><a href="entertime">Enter time</a></p>
                 <p><a href="timeentries">Show all time entries</a></p>
+                <p><a href="logging">Log configuration</a></p>
                 <p><a href="logout">Logout</a></p>
             </div>
         </body>
