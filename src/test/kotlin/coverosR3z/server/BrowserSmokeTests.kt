@@ -17,7 +17,7 @@ import java.io.File
  * I want to access it through a browser
  * So that it is convenient
  */
-class BrowserBDD {
+class BrowserSmokeTests {
 
     companion object {
         private lateinit var sc : SocketCommunication
