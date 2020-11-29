@@ -25,8 +25,8 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_happyPath() {
         val data = mapOf(
-                "username" to DEFAULT_USER.name.value,
-                "password" to DEFAULT_PASSWORD.value)
+                LoginElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
+                LoginElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
         val responseData = handlePOSTLogin(au, NO_USER, data)
         Assert.assertTrue("The system should indicate success.  File was $responseData",
                 toStr(responseData.fileContents).contains("SUCCESS"))
@@ -40,7 +40,7 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_missingUser() {
         val data = mapOf(
-                "password" to DEFAULT_PASSWORD.value)
+                LoginElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data)}
         assertEquals(usernameNotNullMsg, ex.message)
     }
@@ -51,8 +51,8 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_blankUser() {
         val data = mapOf(
-                "username" to "",
-                "password" to DEFAULT_PASSWORD.value)
+                LoginElements.USERNAME_INPUT.elemName to "",
+                LoginElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
         val ex = assertThrows(IllegalArgumentException::class.java) { handlePOSTLogin(au, NO_USER, data) }
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
@@ -63,7 +63,7 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_missingPassword() {
         val data = mapOf(
-            "username" to DEFAULT_USER.name.value)
+            LoginElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value)
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data)}
         assertEquals(passwordMustNotBeNullMsg, ex.message)
     }
@@ -74,8 +74,8 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_blankPassword() {
         val data = mapOf(
-            "username" to DEFAULT_USER.name.value,
-            "password" to "")
+            LoginElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
+            LoginElements.PASSWORD_INPUT.elemName to "")
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java) { handlePOSTLogin(au, NO_USER, data) }
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
 
