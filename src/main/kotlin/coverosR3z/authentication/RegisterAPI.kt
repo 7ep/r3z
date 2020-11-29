@@ -7,6 +7,12 @@ import coverosR3z.misc.failureHTML
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 
+enum class RegisterElements(val elemName: String, val id: String) {
+    USERNAME_INPUT("username", "username"),
+    PASSWORD_INPUT("password", "password"),
+    EMPLOYEE_INPUT("employee", "employee"),
+    REGISTER_BUTTON("", "register_button");
+}
 
 fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
@@ -19,9 +25,9 @@ fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedRe
 
 fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (user == NO_USER) {
-        val username = UserName.make(data["username"])
-        val password = Password.make(data["password"])
-        val employeeId = EmployeeId.make(data["employee"])
+        val username = UserName.make(data[RegisterElements.USERNAME_INPUT.elemName])
+        val password = Password.make(data[RegisterElements.PASSWORD_INPUT.elemName])
+        val employeeId = EmployeeId.make(data[RegisterElements.EMPLOYEE_INPUT.elemName])
         val result = au.register(username, password, employeeId)
         if (result == RegistrationResult.SUCCESS) {
             okHTML(successHTML)
@@ -52,20 +58,20 @@ fun registerHTML(employees: List<Employee>) : String {
           <tbody>
             <tr>
                 <td>
-                    <label for="username">Username</label><br>
-                    <input type="text" name="username" id="username">
+                    <label for="${RegisterElements.USERNAME_INPUT.elemName}">Username</label><br>
+                    <input type="text" name="${RegisterElements.USERNAME_INPUT.elemName}" id="${RegisterElements.USERNAME_INPUT.id}">
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="password">Password</label><br>
-                    <input type="password" name="password" id="password">
+                    <label for="${RegisterElements.PASSWORD_INPUT.elemName}">Password</label><br>
+                    <input type="password" name="${RegisterElements.PASSWORD_INPUT.elemName}" id="${RegisterElements.PASSWORD_INPUT.id}">
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="employee">Employee</label><br>
-                    <select id="employee" name="employee">
+                    <label for="${RegisterElements.EMPLOYEE_INPUT.elemName}">Employee</label><br>
+                    <select id="${RegisterElements.EMPLOYEE_INPUT.id}" name="${RegisterElements.EMPLOYEE_INPUT.elemName}">
                        """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
                        <option selected disabled hidden>Choose here</option>
                   </td>
@@ -73,7 +79,7 @@ fun registerHTML(employees: List<Employee>) : String {
             </tr>
             <tr>
                 <td>
-                    <button id="register_button" class="submit">Register</button>
+                    <button id="${RegisterElements.REGISTER_BUTTON.id}" class="submit">Register</button>
                 </td>
             </tr>
         </tbody>

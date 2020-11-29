@@ -88,15 +88,11 @@ class BrowserSmokeTests {
         // Hit the current commit page
         chromeDriver.get("$domain/commit.html")
 
-        // register
-        chromeDriver.get("$domain/${NamedPaths.REGISTER.path}")
         val user = "Henry the Eighth I am I am, Henry the Eighth I am!"
-        chromeDriver.findElementById("username").sendKeys(user)
         val password = "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb"
-        chromeDriver.findElementById("password").sendKeys(password)
-        chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = 'Administrator']")).click()
-        chromeDriver.findElementById("register_button").click()
-        assertEquals("SUCCESS", chromeDriver.title)
+
+        val rp = RegisterPage(chromeDriver)
+        rp.register(user, password, "Administrator")
 
         // login
         val lp = LoginPage(chromeDriver)
@@ -138,13 +134,8 @@ class BrowserSmokeTests {
         chromeDriver.get("$domain/logout")
 
         // register a user for each employee
-        for (e in employees) {
-            chromeDriver.get("$domain/${NamedPaths.REGISTER.path}")
-            chromeDriver.findElementById("username").sendKeys(e)
-            chromeDriver.findElementById("password").sendKeys(password)
-            chromeDriver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '${e}']")).click()
-            chromeDriver.findElementById("register_button").click()
-            assertEquals("SUCCESS", chromeDriver.title)
+        employees.forEach { e ->
+            rp.register(e, password, e)
         }
 
         val details = "!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ"
@@ -194,6 +185,7 @@ class BrowserSmokeTests {
         // restart Chrome
         val chromedriver2 = ChromeDriver()
         val lp2 = LoginPage(chromedriver2)
+
         // Hit the homepage
         chromedriver2.get("$domain/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Homepage", chromedriver2.title)
@@ -242,7 +234,18 @@ class BrowserSmokeTests {
             assertEquals("SUCCESS", driver.title)
         }
     }
-    
+
+    private class RegisterPage(private val driver : ChromeDriver) {
+
+        fun register(username: String, password : String, employee : String) {
+            driver.get("$domain/${NamedPaths.REGISTER.path}")
+            driver.findElementById("username").sendKeys(username)
+            driver.findElementById("password").sendKeys(password)
+            driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$employee']")).click()
+            driver.findElementById("register_button").click()
+            assertEquals("SUCCESS", driver.title)
+        }
+    }
 
 
 }
