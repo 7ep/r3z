@@ -6,7 +6,9 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.logging.*
+import coverosR3z.logging.logDebug
+import coverosR3z.logging.logStart
+import coverosR3z.logging.systemStartMillis
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
@@ -17,7 +19,7 @@ import java.util.concurrent.Executors
 /**
  * This is the top-level entry into the web server
  */
-class Server(val port : Int, val dbDirectory: String) {
+class Server(val port: Int, val dbDirectory: String) {
 
     private lateinit var halfOpenServerSocket : ServerSocket
 
@@ -27,9 +29,11 @@ class Server(val port : Int, val dbDirectory: String) {
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        logStart("System is ready.  DateTime is ${DateTime(systemStartMillis/1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
+        logStart("System is ready.  DateTime is ${DateTime(systemStartMillis / 1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
 
-        val cachedThreadPool = Executors.newCachedThreadPool()
+        val numCores = Runtime.getRuntime().availableProcessors()
+        logStart("Found $numCores cores.  Starting that many threads")
+        val cachedThreadPool = Executors.newFixedThreadPool(numCores)
         while (shouldContinue) {
             logDebug("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
@@ -68,7 +72,7 @@ class Server(val port : Int, val dbDirectory: String) {
                 val truWithUser = tru.changeUser(cu)
                 logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
-            } catch (ex : Exception) {
+            } catch (ex: Exception) {
                 okHTML(generalMessageHTML(ex.message ?: "NO ERROR MESSAGE DEFINED"))
             }
 
