@@ -1,10 +1,12 @@
-package coverosR3z.server
+package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.EnterTimeElements
 import coverosR3z.authentication.LoginElements
+import coverosR3z.server.NamedPaths
+import coverosR3z.server.Server
 import coverosR3z.timerecording.EmployeeElements
 import coverosR3z.timerecording.ProjectElements
 import io.github.bonigarcia.wdm.WebDriverManager

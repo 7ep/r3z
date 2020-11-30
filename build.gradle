@@ -98,6 +98,17 @@ jar {
 }
 
 test {
+
+    // to run just the non-ui tests, run gradlew test -Pnoui
+    if (project.hasProperty('noui')) {
+        exclude '**/uitests*'
+    }
+
+    // to run just the ui tests, run gradlew test -Pjustui
+    if (project.hasProperty('justui')) {
+        include 'coverosR3z/uitests/**'
+    }
+
     testLogging {
         exceptionFormat "full" // options are "full", "short". default is "short"
         // uncomment the following to see the unit test progress in the output

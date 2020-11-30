@@ -9,8 +9,9 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 * Put Java on your PATH (see [JDK notes](#java-installation-notes))
 * Clone or [download](https://github.com/7ep/r3z/archive/master.zip) this repo. 
  (if you download, unzip the file to a directory.)
-* On the command line in the top directory of this repo, run `gradlew jar` to build the jar file
-* Run the application by running the jar: `java -jar build/libs/r3z.jar`
+* On the command line in the top directory of this repo, 
+    * run `gradlew test` to run all the tests (includes UI tests, you need Chrome)
+    * run `gradlew run` to run the server
 * Visit the application with your browser at http://localhost:8080/
 
 
@@ -65,6 +66,8 @@ Now you are ready!
 
 #### Summary of relevant Gradle commands
 * `gradlew test` - run all the tests in this code
+* `gradlew test -Pnoui` - run all the non-ui tests
+* `gradlew test -Pjustui` - run only the ui tests
 * `gradlew jar` - build the jar, in build/libs/
 * `gradlew run` - run the application.  Stop with ctrl+c
 
