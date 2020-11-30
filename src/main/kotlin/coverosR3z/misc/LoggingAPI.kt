@@ -11,7 +11,7 @@ const val badInputLoggingDataMsg = "input for log setting must be \"true\" or \"
 
 fun handleGETLogging(user: User): PreparedResponseData {
     return if (isAuthenticated(user)) {
-        PreparedResponseData(loggingConfigHtml, ResponseStatus.OK)
+        PreparedResponseData(loggingConfigHtml(), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.value))
     } else {
         redirectTo(NamedPaths.HOMEPAGE.path)
     }
@@ -30,7 +30,7 @@ fun setLogging(lt : LogTypes, data: Map<String, String>) {
         "false" -> logSettings[lt] = false
         else -> throw IllegalArgumentException(badInputLoggingDataMsg)
     }
-    logInfo("Configured logging for ${lt.name}: ${lt.toString().toLowerCase()}")
+    logInfo("Configured logging for ${lt.name}: ${logSettings[lt]}")
 }
 
 fun handlePOSTLogging(user: User, data: Map<String, String>): PreparedResponseData {
@@ -44,7 +44,33 @@ fun handlePOSTLogging(user: User, data: Map<String, String>): PreparedResponseDa
     }
 }
 
-const val loggingConfigHtml = """
+class LogTypeState(private val logRunning : Boolean) {
+
+    fun isOn(isRunning : Boolean = logRunning) : String {
+        return if (isRunning) {
+            "checked"
+        } else {
+            ""
+        }
+    }
+
+    fun isOff() : String {
+        return isOn(!logRunning)
+    }
+
+}
+
+/**
+ *
+ */
+fun checkedIf(lt : LogTypes) : LogTypeState {
+    return LogTypeState(logSettings[lt] == true)
+}
+
+
+
+fun loggingConfigHtml() : String {
+    return """
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -54,45 +80,49 @@ const val loggingConfigHtml = """
     <body>
 
         <form method="post" action="logging">
-            <p>Info logging:</p>
+            <fieldset>
+                <legend>Info logging:</legend>
+                <div>
+                  <input type="radio" id="infotrue" name="info" value="true" ${checkedIf(LogTypes.INFO).isOn()} >
+                  <label for="infotrue">True</label>
+            
+                  <input type="radio" id="infofalse" name="info" value="false" ${checkedIf(LogTypes.INFO).isOff()}>
+                  <label for="infofalse">False</label>
+                </div>
+            </fieldset>
 
-            <div>
-              <input type="radio" id="infotrue" name="info" value="true" checked>
-              <label for="infotrue">True</label>
-        
-              <input type="radio" id="infofalse" name="info" value="false">
-              <label for="infofalse">False</label>
-            </div>
+            <fieldset>
+                <legend>Warn logging:</legend>
+                <div>
+                  <input type="radio" id="warntrue" name="warn" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
+                  <label for="warntrue">True</label>
+            
+                  <input type="radio" id="warnfalse" name="warn" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
+                  <label for="warnfalse">False</label>
+                </div>
+            </fieldset>
 
-            <p>Warn logging:</p>
-
-            <div>
-              <input type="radio" id="warntrue" name="warn" value="true" checked>
-              <label for="warntrue">True</label>
-        
-              <input type="radio" id="warnfalse" name="warn" value="false">
-              <label for="warnfalse">False</label>
-            </div>
-
-            <p>Debug logging:</p>
-
-            <div>
-              <input type="radio" id="debugtrue" name="debug" value="true">
-              <label for="debugtrue">True</label>
-        
-              <input type="radio" id="debugfalse" name="debug" value="false" checked>
-              <label for="debugfalse">False</label>
-            </div>
-
-            <p>Trace logging:</p>
-
-            <div>
-              <input type="radio" id="tracetrue" name="trace" value="true">
-              <label for="tracetrue">True</label>
-        
-              <input type="radio" id="tracefalse" name="trace" value="false" checked>
-              <label for="tracefalse">False</label>
-            </div>
+            <fieldset>
+                <legend>Debug logging:</legend>
+                <div>
+                  <input type="radio" id="debugtrue" name="debug" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
+                  <label for="debugtrue">True</label>
+            
+                  <input type="radio" id="debugfalse" name="debug" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
+                  <label for="debugfalse">False</label>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Trace logging:</legend>
+                <div>
+                  <input type="radio" id="tracetrue" name="trace" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
+                  <label for="tracetrue">True</label>
+            
+                  <input type="radio" id="tracefalse" name="trace" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
+                  <label for="tracefalse">False</label>
+                </div>
+            </fieldset>
             
             <button>Save</button>
         </form>
@@ -102,3 +132,4 @@ const val loggingConfigHtml = """
 </html>
 
 """
+}

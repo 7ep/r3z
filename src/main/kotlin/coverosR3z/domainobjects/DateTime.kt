@@ -1,5 +1,6 @@
 package coverosR3z.domainobjects
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -40,11 +41,19 @@ class DateTime(val epochSecond : Long) : Comparable<DateTime>{
     }
 
     override fun toString(): String {
-        return "Date(epochDay=$epochSecond, $stringValue)"
+        return "DateTime(epochSecond=$epochSecond, $stringValue)"
     }
 
     override fun compareTo(other: DateTime): Int {
         return this.epochSecond.compareTo(other.epochSecond)
+    }
+
+    companion object {
+
+        // get the date right now
+        fun now(): DateTime {
+            return DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
+import coverosR3z.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.logging.logWarn
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
@@ -304,7 +305,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return try {
                 val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
 
-                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory } ?: throw IllegalStateException("no files found in top directory")) {
+                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
                     val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
                     val simpleTimeEntries = mutableSetOf<TimeEntry>()
 
@@ -318,8 +319,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 }
 
                 fullTimeEntries
-            } catch (ex : Exception) {
-                logWarn("Failed at reading time entries.  This was thrown:\n$ex")
+            } catch (ex : NoTimeEntriesOnDiskException) {
+                logWarn("No time entries were found on disk, initializing new empty data")
                 mutableMapOf()
             }
         }

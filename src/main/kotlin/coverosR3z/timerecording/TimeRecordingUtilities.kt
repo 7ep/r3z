@@ -24,23 +24,23 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             log.info("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
-        log.info("Recording ${entry.time.numberOfMinutes} minutes on ${entry.project.name.value}")
+        log.info("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         return try {
             persistence.persistNewTimeEntry(entry)
-            log.info("recorded time sucessfully")
+            log.debug("recorded time sucessfully")
             RecordTimeResult(StatusEnum.SUCCESS)
         } catch (ex : ProjectIntegrityViolationException) {
-            log.info("time was not recorded successfully: project id did not match a valid project")
+            log.debug("time was not recorded successfully: project id did not match a valid project")
             RecordTimeResult(StatusEnum.INVALID_PROJECT)
         } catch (ex : EmployeeIntegrityViolationException) {
-            log.info("time was not recorded successfully: employee id did not match a valid employee")
+            log.debug("time was not recorded successfully: employee id did not match a valid employee")
             RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
         }
     }
 
     private fun `confirm the employee has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
-        log.info("confirming total time is less than 24 hours")
+        log.debug("confirming total time is less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
         val minutesRecorded : Time = try {
             persistence.queryMinutesRecorded(entry.employee, entry.date)
@@ -88,7 +88,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
 
         val newEmployee = persistence.persistNewEmployee(employeename)
-        log.info("Created a new employee, ${newEmployee.name.value}")
+        log.info("Creating a new employee, \"${newEmployee.name.value}\"")
         return newEmployee
     }
 

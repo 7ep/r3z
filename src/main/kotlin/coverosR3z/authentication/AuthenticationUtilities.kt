@@ -16,10 +16,10 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
             ap.createUser(username, Hash.createHash(password.addSalt(salt)), salt, employeeId)
-            logInfo("User registration successful for \"${username.value}\"")
+            logDebug("User registration successful for \"${username.value}\"")
             RegistrationResult.SUCCESS
         } else {
-            logInfo("User ${username.value} could not be registered: already registered")
+            logDebug("User ${username.value} could not be registered: already registered")
             RegistrationResult.USERNAME_ALREADY_REGISTERED
         }
     }
@@ -36,17 +36,17 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         val user = ap.getUser(username)
 
         if (user == NO_USER) {
-            logInfo("Login failed: user ${user.name.value} is not registered.")
+            logDebug("Login failed: user ${user.name.value} is not registered.")
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
         val hashedSaltedPassword = Hash.createHash(password.addSalt(user.salt))
         if (user.hash != hashedSaltedPassword) {
-            logInfo("Login failed for user \"${user.name.value}\": Incorrect password.")
+            logDebug("Login failed for user \"${user.name.value}\": Incorrect password.")
             return Pair(LoginResult.FAILURE, NO_USER)
         }
 
-        logInfo("Login successful for user ${user.name.value}.")
+        logDebug("Login successful for user ${user.name.value}.")
         return Pair(LoginResult.SUCCESS, user)
     }
 

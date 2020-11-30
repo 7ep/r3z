@@ -4,13 +4,21 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.SYSTEM_USER
 
 enum class LogTypes {
+    /**
+     * Generally useful information, particularly for recording business actions by users.  That is, reading these
+     * logs should read like a description of the user carrying out business chores
+     */
     INFO,
     WARN,
     DEBUG,
     TRACE
 }
 
-val logSettings = mutableMapOf(LogTypes.INFO to true, LogTypes.WARN to true, LogTypes.DEBUG to false, LogTypes.TRACE to false)
+val systemStartMillis = System.currentTimeMillis()
+
+fun getCurrentMillis() : Long {
+    return System.currentTimeMillis() - systemStartMillis
+}
 
 /**
  * Set the system to standard configuration for which
@@ -18,10 +26,12 @@ val logSettings = mutableMapOf(LogTypes.INFO to true, LogTypes.WARN to true, Log
  */
 fun resetLogSettingsToDefault() {
     logSettings[LogTypes.INFO] = true
-    logSettings[LogTypes.DEBUG] = true
-    logSettings[LogTypes.WARN] = false
+    logSettings[LogTypes.DEBUG] = false
+    logSettings[LogTypes.WARN] = true
     logSettings[LogTypes.TRACE] = false
 }
+
+val logSettings = mutableMapOf(LogTypes.INFO to true, LogTypes.WARN to true, LogTypes.DEBUG to false, LogTypes.TRACE to false)
 
 /**
  * The class version of logging
@@ -30,20 +40,24 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     fun info(msg : String) {
         logInfo(msg, cu)
     }
+
+    fun debug(msg: String) {
+        logDebug(msg, cu)
+    }
 }
 
 fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (logSettings[LogTypes.INFO] == true) {
-        println("INFO: ${cu.user.name.value}: $msg")
+        println("${getCurrentMillis()} INFO: ${cu.user.name.value}: $msg")
     }
 }
 
 /**
  * Used to log finicky details of technical solutions
  */
-fun logDebug(msg : String) {
+fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (logSettings[LogTypes.DEBUG] == true) {
-        println("DEBUG: $msg")
+        println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: $msg")
     }
 }
 
@@ -52,7 +66,7 @@ fun logDebug(msg : String) {
  */
 fun logTrace(msg: String) {
     if (logSettings[LogTypes.TRACE] == true) {
-        println("TRACE: $msg")
+        println("${getCurrentMillis()} TRACE: $msg")
     }
 }
 
@@ -61,6 +75,10 @@ fun logTrace(msg: String) {
  */
 fun logWarn(msg: String) {
     if (logSettings[LogTypes.WARN] == true) {
-        println("WARN: $msg")
+        println("${getCurrentMillis()} WARN: $msg")
     }
+}
+
+fun logStart(msg: String) {
+    println(msg)
 }

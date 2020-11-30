@@ -4,10 +4,11 @@ import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.logging.Logger
-import coverosR3z.logging.logInfo
+import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.server.handleRequestAndRespond
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
@@ -27,14 +28,14 @@ class Server(val port : Int, val dbDirectory: String) {
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        logInfo("System is ready")
+        logStart("System is ready.  DateTime is ${DateTime(systemStartMillis/1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
         while (shouldContinue) {
-            logInfo("waiting for socket connection")
+            logDebug("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
             val thread = Thread {
-                logInfo("client from ${server.socket.inetAddress?.hostAddress} has connected")
+                logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 handleRequest(server, au, tru)
                 server.close()
             }
@@ -66,7 +67,7 @@ class Server(val port : Int, val dbDirectory: String) {
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(requestData.user)
                 val truWithUser = tru.changeUser(cu)
-                Logger(cu).info("client requested ${requestData.verb} ${requestData.path}")
+                logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
             } catch (ex : Exception) {
                 okHTML(generalMessageHTML(ex.message ?: "NO ERROR MESSAGE DEFINED"))

@@ -1,13 +1,14 @@
 package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
+import coverosR3z.logging.logDebug
 import coverosR3z.logging.logInfo
 import coverosR3z.persistence.PureMemoryDatabase
 
 class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
-        logInfo("persisting a new timeEntry")
+        logDebug("persisting a new timeEntry")
         isEntryValid(entry)
         pmd.addTimeEntry(entry)
     }
@@ -22,14 +23,14 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
-        logInfo("Recording a new project, ${projectName.value}, to the database")
+        logDebug("Recording a new project, ${projectName.value}, to the database")
         val newId = pmd.addNewProject(projectName)
         check(newId > 0) {"A valid project will receive a positive id"}
         return Project(ProjectId(newId), ProjectName(projectName.value))
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
-        logInfo("Recording a new employee, \"${employeename.value}\", to the database")
+        logDebug("Recording a new employee, \"${employeename.value}\", to the database")
 
         val newId = pmd.addNewEmployee(employeename)
 
