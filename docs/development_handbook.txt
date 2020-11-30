@@ -195,3 +195,27 @@ Developer handbook
     to the client browser, using our safeHtml() or safeAttr() code.
 
     As we deal with more parsers, we will need to include more cleaning utilities.
+
+
+    Logging
+    -------
+
+    types of logs:
+
+    INFO - Business-related content.  Be very strict here about what constitutes business.
+
+    DEBUG - Less-relevant business content and the large bulk of technical logging
+
+    TRACE - highly-verbose log entries that are only useful when debugging
+
+    WARN - a warning to operators - something happened that needed resolving, the application
+           probably made the right decision but it's something to be aware of.  For example,
+           if we start and cannot find any time entries on the disk, we'll create an empty
+           data structure for the time entries.  That's probably the right path, but if
+           something went haywire on the disk, if files got accidentally moved around, that
+           might not be the right choice.  Unfortunately, computers are stupid and there
+           has to be a balance trying to accommodate literally every imaginable thing
+           that could ever happen (which is impossible to program).
+
+    Also note: When the server starts, it prints the current DateTime, and all subsequent log entries
+               are how far away we are from that point in time, in milliseconds.
