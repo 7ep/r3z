@@ -1,7 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
-import coverosR3z.logging.logInfo
+import coverosR3z.logging.logDebug
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
@@ -21,7 +21,7 @@ fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, 
             val newSessionToken: String = au.createNewSession(loginUser)
             PreparedResponseData(successHTML, ResponseStatus.OK, listOf(ContentType.TEXT_HTML.value, "Set-Cookie: sessionId=$newSessionToken"))
         } else {
-            logInfo("User ($username) failed to login")
+            logDebug("User ($username) failed to login")
             handleUnauthorized()
         }
     } else {

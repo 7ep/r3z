@@ -79,6 +79,9 @@ fun logWarn(msg: String) {
     }
 }
 
+/**
+ * Logging for actions that always take place at server startup
+ */
 fun logStart(msg: String) {
-    println(msg)
+    println("${getCurrentMillis()} START: $msg")
 }

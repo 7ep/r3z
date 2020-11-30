@@ -162,8 +162,9 @@ class BrowserSmokeTests {
         chromeDriver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
         chromeDriver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
 
-        // close Chrome entirely
-        chromeDriver.quit()
+        // shutting everything down - the browser and the server - and
+        // restarting will prove that the system has the ability to
+        // properly persist and restore the data between server runs
 
         // start the server
         serverThread.join()
@@ -173,42 +174,76 @@ class BrowserSmokeTests {
             sc.startServer()
         }.start()
 
-        // restart Chrome
-        val chromedriver2 = ChromeDriver()
-        val lp2 = LoginPage(chromedriver2)
-        val etp2 = EnterTimePage(chromedriver2)
-
         // Hit the homepage
-        chromedriver2.get("$domain/${NamedPaths.HOMEPAGE.path}")
-        assertEquals("Homepage", chromedriver2.title)
+        chromeDriver.get("$domain/${NamedPaths.HOMEPAGE.path}")
+        assertEquals("Authenticated Homepage", chromeDriver.title)
+
+        // logout
+        chromeDriver.get("$domain/${NamedPaths.LOGOUT.path}")
 
         // loop through each user and login in
         for (e in employees) {
             // login
-            lp2.login(e, password)
+            lp.login(e, password)
 
             // enter times
             for (p in projects) {
-                etp2.enterTime(p, "60", "foo foo foo foo la la la la la la")
+                etp.enterTime(p, "60", "foo foo foo foo la la la la la la")
             }
 
             // logout
-            chromedriver2.get("$domain/logout")
+            chromeDriver.get("$domain/logout")
         }
 
         // login
-        lp2.login(employees[0], password)
+        lp.login(employees[0], password)
 
         // view the time entries for the last person
-        chromedriver2.get("$domain/${NamedPaths.TIMEENTRIES.path}")
-        assertEquals("your time entries", chromedriver2.title)
-        val allEntries = chromedriver2.findElementByTagName("table").text
+        chromeDriver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        assertEquals("your time entries", chromeDriver.title)
+        val allEntries = chromeDriver.findElementByTagName("table").text
         assertTrue(allEntries.contains(details))
 
-        // shut the server down
-        chromedriver2.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
+        // add a new employee
+        val newEmployeeName = "some new employee"
+        eep.enter(newEmployeeName)
 
-        chromedriver2.quit()
+        // we'll shut the server down *again* and restart, and confirm
+        // that our data persists.
+
+        // shut the server down
+        chromeDriver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
+        chromeDriver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
+
+        // shutting everything down - the browser and the server - and
+        // restarting will prove that the system has the ability to
+        // properly persist and restore the data between server runs
+
+        // start the server
+        serverThread.join()
+        Thread {
+            Server.shouldContinue = true
+            sc = Server(8080, dbDirectory)
+            sc.startServer()
+        }.start()
+
+        // Hit the homepage
+        chromeDriver.get("$domain/${NamedPaths.HOMEPAGE.path}")
+        assertEquals("Authenticated Homepage", chromeDriver.title)
+
+        // logout
+        chromeDriver.get("$domain/${NamedPaths.LOGOUT.path}")
+
+        // register as the new employee
+        rp.register("newuser", password, newEmployeeName)
+
+        // login as the new employee
+        lp.login("newuser", password)
+
+        // shut the server down
+        chromeDriver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
+
+        chromeDriver.quit()
     }
 
     private class EnterTimePage(private val driver : ChromeDriver) {
