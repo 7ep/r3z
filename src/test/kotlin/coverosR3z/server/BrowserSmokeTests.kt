@@ -26,7 +26,7 @@ private const val domain = "http://localhost:8080"
 class BrowserSmokeTests {
 
     companion object {
-        private lateinit var sc : SocketCommunication
+        private lateinit var sc : Server
         private lateinit var serverThread : Thread
         const val dbDirectory = "build/db/"
 
@@ -41,7 +41,7 @@ class BrowserSmokeTests {
 
             // start the server
             serverThread = Thread {
-                sc = SocketCommunication(8080, dbDirectory)
+                sc = Server(8080, dbDirectory)
                 sc.startServer()
             }
             serverThread.start()
@@ -168,8 +168,8 @@ class BrowserSmokeTests {
         // start the server
         serverThread.join()
         Thread {
-            SocketCommunication.shouldContinue = true
-            sc = SocketCommunication(8080, dbDirectory)
+            Server.shouldContinue = true
+            sc = Server(8080, dbDirectory)
             sc.startServer()
         }.start()
 

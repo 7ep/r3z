@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
  * The intention is that this class solely acts to control the socket
  * connections and is unfamiliar with the specifics of what is being transmitted
  */
-class SocketCommunication(val port : Int, val dbDirectory: String) {
+class Server(val port : Int, val dbDirectory: String) {
 
     private lateinit var halfOpenServerSocket : ServerSocket
 

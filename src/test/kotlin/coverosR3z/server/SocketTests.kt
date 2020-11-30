@@ -159,7 +159,7 @@ class SocketTests {
         client.write("GET /doesnotexist HTTP/1.1\n\n")
 
         // server - handle the request
-        SocketCommunication.handleRequest(server, au, tru)
+        Server.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -189,7 +189,7 @@ class SocketTests {
             client.write(request)
 
             // server - handle the request
-            SocketCommunication.handleRequest(server, au, tru)
+            Server.handleRequest(server, au, tru)
 
             // client - read status line
             val statusline = client.readLine()
@@ -213,7 +213,7 @@ class SocketTests {
         client.write("GET /sample.css HTTP/1.1\n\n")
 
         // server - handle the request
-        SocketCommunication.handleRequest(server, au, tru)
+        Server.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -237,7 +237,7 @@ class SocketTests {
         client.write("GET /sample.js HTTP/1.1\n\n")
 
         // server - handle the request
-        SocketCommunication.handleRequest(server, au, tru)
+        Server.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -264,7 +264,7 @@ class SocketTests {
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
         // server - handle the request
-        SocketCommunication.handleRequest(server, au, tru)
+        Server.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()
@@ -290,7 +290,7 @@ class SocketTests {
         au.getUserForSessionBehavior = { DEFAULT_USER }
 
         // server - handle the request
-        SocketCommunication.handleRequest(server, au, tru)
+        Server.handleRequest(server, au, tru)
 
         // client - read status line
         val statusline = client.readLine()

@@ -5,9 +5,6 @@ import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logInfo
 import coverosR3z.misc.getTime
-import coverosR3z.server.SocketCommunication
-import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.BeforeClass

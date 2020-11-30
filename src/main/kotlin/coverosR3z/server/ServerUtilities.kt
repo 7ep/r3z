@@ -102,7 +102,7 @@ private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
 
 fun handleGETShutdownServer(user: User): PreparedResponseData {
     return if (isAuthenticated(user)) {
-        SocketCommunication.shouldContinue = false
+        Server.shouldContinue = false
         okHTML(successHTML)
     } else {
         redirectTo(HOMEPAGE.path)
