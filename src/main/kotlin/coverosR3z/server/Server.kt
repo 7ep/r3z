@@ -15,9 +15,7 @@ import java.net.ServerSocket
 import java.util.concurrent.Executors
 
 /**
- * This is the top-level class that handles communication with clients.
- * The intention is that this class solely acts to control the socket
- * connections and is unfamiliar with the specifics of what is being transmitted
+ * This is the top-level entry into the web server
  */
 class Server(val port : Int, val dbDirectory: String) {
 
