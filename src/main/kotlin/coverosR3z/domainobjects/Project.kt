@@ -3,6 +3,8 @@ package coverosR3z.domainobjects
 import coverosR3z.misc.checkParseToInt
 
 const val maximumProjectsCount = 100_000_000
+private const val maxProjectNameSize = 30
+const val maxProjectNameSizeMsg = "Max size of project name is $maxProjectNameSize"
 private const val maxProjectErrorMsg = "No project id allowed over $maximumProjectsCount"
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
 private const val minIdMsg = "Valid identifier values are 1 or above"
@@ -22,6 +24,7 @@ val NO_PROJECT = Project(ProjectId(maximumProjectsCount-1), ProjectName("THIS RE
 data class ProjectName(val value: String) {
     init {
         require(value.isNotEmpty()) {emptyProjectNameMsg}
+        require(value.length <= maxProjectNameSize) { maxProjectNameSizeMsg }
     }
 
     companion object {

@@ -3,7 +3,10 @@ package coverosR3z.server
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import coverosR3z.DEFAULT_USER
+import coverosR3z.authentication.EnterTimeElements
 import coverosR3z.authentication.LoginElements
+import coverosR3z.timerecording.EmployeeElements
+import coverosR3z.timerecording.ProjectElements
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
@@ -80,6 +83,14 @@ class BrowserSmokeTests {
         // Given I am a Chrome browser user
         // start the Chromedriver
         val chromeDriver = ChromeDriver()
+        val rp = RegisterPage(chromeDriver)
+        val lp = LoginPage(chromeDriver)
+        val etp = EnterTimePage(chromeDriver)
+        val eep = EnterEmployeePage(chromeDriver)
+        val epp = EnterProjectPage(chromeDriver)
+        val user = "Henry the Eighth I am I am, Henry the Eighth I am!"
+        val password = "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb"
+        val details = "!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ"
 
         // Hit the homepage
         chromeDriver.get("$domain/${NamedPaths.HOMEPAGE.path}")
@@ -88,14 +99,7 @@ class BrowserSmokeTests {
         // Hit the current commit page
         chromeDriver.get("$domain/commit.html")
 
-        val user = "Henry the Eighth I am I am, Henry the Eighth I am!"
-        val password = "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb"
-
-        val rp = RegisterPage(chromeDriver)
         rp.register(user, password, "Administrator")
-
-        // login
-        val lp = LoginPage(chromeDriver)
         lp.login(user, password)
 
         // hit authenticated homepage
@@ -109,19 +113,13 @@ class BrowserSmokeTests {
         // enter a few new projects
         val projects = listOf("BDD", "FTA")
         for (project in projects) {
-            chromeDriver.get("$domain/${NamedPaths.CREATE_PROJECT.path}")
-            chromeDriver.findElementById("project_name").sendKeys(project)
-            chromeDriver.findElementById("project_create_button").click()
-            assertEquals("SUCCESS", chromeDriver.title)
+            epp.enter(project)
         }
 
         // enter a new employee
         val employees = listOf(DEFAULT_USER.name.value, "<script>alert()</script>")
         for (employee in employees) {
-            chromeDriver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
-            chromeDriver.findElementById("employee_name").sendKeys(employee)
-            chromeDriver.findElementById("employee_create_button").click()
-            assertEquals("SUCCESS", chromeDriver.title)
+            eep.enter(employee)
         }
 
         // view the employees
@@ -134,11 +132,9 @@ class BrowserSmokeTests {
         chromeDriver.get("$domain/logout")
 
         // register a user for each employee
-        employees.forEach { e ->
+        for (e in employees) {
             rp.register(e, password, e)
         }
-
-        val details = "!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ"
 
         // loop through each user and login in
         for (e in employees) {
@@ -147,12 +143,7 @@ class BrowserSmokeTests {
 
             // enter times
             for (p in projects) {
-                chromeDriver.get("$domain/${NamedPaths.ENTER_TIME.path}")
-                chromeDriver.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
-                chromeDriver.findElementById("time_entry").sendKeys("60")
-                chromeDriver.findElementById("detail_entry").sendKeys(details)
-                chromeDriver.findElementById("enter_time_button").click()
-                assertEquals("SUCCESS", chromeDriver.title)
+                etp.enterTime(p, "60", details)
             }
 
             // logout
@@ -185,6 +176,7 @@ class BrowserSmokeTests {
         // restart Chrome
         val chromedriver2 = ChromeDriver()
         val lp2 = LoginPage(chromedriver2)
+        val etp2 = EnterTimePage(chromedriver2)
 
         // Hit the homepage
         chromedriver2.get("$domain/${NamedPaths.HOMEPAGE.path}")
@@ -197,12 +189,7 @@ class BrowserSmokeTests {
 
             // enter times
             for (p in projects) {
-                chromedriver2.get("$domain/${NamedPaths.ENTER_TIME.path}")
-                chromedriver2.findElement(By.id("project_entry")).findElement(By.xpath("//option[. = '$p']")).click()
-                chromedriver2.findElementById("time_entry").sendKeys("60")
-                chromedriver2.findElementById("detail_entry").sendKeys("foo foo foo foo la la la la la la")
-                chromedriver2.findElementById("enter_time_button").click()
-                assertEquals("SUCCESS", chromedriver2.title)
+                etp2.enterTime(p, "60", "foo foo foo foo la la la la la la")
             }
 
             // logout
@@ -223,7 +210,18 @@ class BrowserSmokeTests {
 
         chromedriver2.quit()
     }
-    
+
+    private class EnterTimePage(private val driver : ChromeDriver) {
+
+        fun enterTime(project : String, time : String, details : String) {
+            driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
+            driver.findElement(By.id(EnterTimeElements.PROJECT_INPUT.id)).findElement(By.xpath("//option[. = '$project']")).click()
+            driver.findElementById(EnterTimeElements.TIME_INPUT.id).sendKeys(time)
+            driver.findElementById(EnterTimeElements.DETAIL_INPUT.id).sendKeys(details)
+            driver.findElementById(EnterTimeElements.ENTER_TIME_BUTTON.id).click()
+            assertEquals("SUCCESS", driver.title)
+        }
+    }
     private class LoginPage(private val driver : ChromeDriver) {
         
         fun login(username : String, password : String) {
@@ -243,6 +241,26 @@ class BrowserSmokeTests {
             driver.findElementById("password").sendKeys(password)
             driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$employee']")).click()
             driver.findElementById("register_button").click()
+            assertEquals("SUCCESS", driver.title)
+        }
+    }
+
+    private class EnterEmployeePage(private val driver : ChromeDriver) {
+
+        fun enter(employee: String) {
+            driver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
+            driver.findElementById(EmployeeElements.EMPLOYEE_INPUT.id).sendKeys(employee)
+            driver.findElementById(EmployeeElements.CREATE_BUTTON.id).click()
+            assertEquals("SUCCESS", driver.title)
+        }
+    }
+
+    private class EnterProjectPage(private val driver : ChromeDriver) {
+
+        fun enter(project: String) {
+            driver.get("$domain/${NamedPaths.CREATE_PROJECT.path}")
+            driver.findElementById(ProjectElements.PROJECT_INPUT.id).sendKeys(project)
+            driver.findElementById(ProjectElements.CREATE_BUTTON.id).click()
             assertEquals("SUCCESS", driver.title)
         }
     }

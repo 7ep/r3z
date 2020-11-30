@@ -25,7 +25,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val response = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
         assertTrue("we should have gotten the success page.  Got: $response", toStr(response).contains("SUCCESS"))
     }
@@ -35,7 +35,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_missingProject() {
-        val data = mapOf("time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals(projectIdNotNullMsg, ex.message)
     }
@@ -45,7 +45,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_missingTimeEntry() {
-        val data = mapOf("project_entry" to "1", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals(timeNotNullMsg, ex.message)
     }
@@ -55,7 +55,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_missingDetailEntry() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "60")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "60")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals(detailsNotNullMsg, ex.message)
     }
@@ -65,7 +65,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_missingEmployee() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val employeeId = null
         val ex = assertThrows(IllegalStateException::class.java){
             handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(DEFAULT_PASSWORD), Salt(""), employeeId),data)
@@ -87,7 +87,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_nonNumericProject() {
-        val data = mapOf("project_entry" to "aaaaa", "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "aaaaa", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
     }
@@ -97,7 +97,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_negativeProject() {
-        val data = mapOf("project_entry" to "-1", "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "-1", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
@@ -107,7 +107,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_zeroProject() {
-        val data = mapOf("project_entry" to "0", "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "0", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
@@ -117,7 +117,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_aboveMaxProject() {
-        val data = mapOf("project_entry" to (maximumProjectsCount+1).toString(), "time_entry" to "60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to (maximumProjectsCount+1).toString(), EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
     }
@@ -128,7 +128,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_aboveMaxTime() {
-        val data = mapOf("project_entry" to "1", "time_entry" to ((60*60*24)+1).toString(), "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to ((60*60*24)+1).toString(), EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
     }
@@ -138,7 +138,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_negativeTime() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "-60", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "-60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("${noNegativeTimeMsg}-60", ex.message)
     }
@@ -148,7 +148,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_zeroTime() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "0", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "0", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val result = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
         assertTrue("we should have gotten the success page.  Got: $result", toStr(result).contains("SUCCESS"))
     }
@@ -158,7 +158,7 @@ class EnterTimeAPITests {
      */
     @Test
     fun testHandlePOSTTimeEntry_nonNumericTime() {
-        val data = mapOf("project_entry" to "1", "time_entry" to "aaa", "detail_entry" to "not much to say")
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "aaa", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTTimeEntry(tru, DEFAULT_USER,data)}
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }

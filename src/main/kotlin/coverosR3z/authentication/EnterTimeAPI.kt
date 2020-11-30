@@ -6,6 +6,13 @@ import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 
+enum class EnterTimeElements (val elemName: String, val id: String) {
+    PROJECT_INPUT("project_entry", "project_entry"),
+    TIME_INPUT("time_entry", "time_entry"),
+    DETAIL_INPUT("detail_entry", "detail_entry"),
+    ENTER_TIME_BUTTON("", "enter_time_button"),
+}
+
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId ?: NO_EMPLOYEE.id)))
@@ -26,9 +33,9 @@ fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): Prepare
 fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
     return if (isAuthenticated) {
-        val projectId = ProjectId.make(data["project_entry"])
-        val time = Time.make(data["time_entry"])
-        val details = Details.make(data["detail_entry"])
+        val projectId = ProjectId.make(data[EnterTimeElements.PROJECT_INPUT.elemName])
+        val time = Time.make(data[EnterTimeElements.TIME_INPUT.elemName])
+        val details = Details.make(data[EnterTimeElements.DETAIL_INPUT.elemName])
 
         val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(user.employeeId){employeeIdNotNullMsg})
@@ -69,26 +76,22 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
             <p>
                 <label for="project_entry">Project:</label>
                 <select name="project_entry" id="project_entry"/>
-""" +
-
-            projects.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +
-
-            """             <option selected disabled hidden>Choose here</option>
+                """ + projects.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""             <option selected disabled hidden>Choose here</option>
             </select>
             </p>
 
             <p>
-                <label for="time_entry">Time:</label>
-                <input name="time_entry" id="time_entry" type="text" />
+                <label for="${EnterTimeElements.TIME_INPUT.elemName}">Time:</label>
+                <input name="${EnterTimeElements.TIME_INPUT.elemName}" id="${EnterTimeElements.TIME_INPUT.id}" type="text" />
             </p>
 
             <p>
-                <label for="detail_entry">Details:</label>
-                <input name="detail_entry" id="detail_entry" type="text" />
+                <label for="${EnterTimeElements.DETAIL_INPUT.elemName}">Details:</label>
+                <input name="${EnterTimeElements.DETAIL_INPUT.elemName}" id="${EnterTimeElements.DETAIL_INPUT.id}" type="text" />
             </p>
 
             <p>
-                <button id="enter_time_button">Enter time</button>
+                <button id="${EnterTimeElements.ENTER_TIME_BUTTON.id}">Enter time</button>
             </p>
 
         </form>

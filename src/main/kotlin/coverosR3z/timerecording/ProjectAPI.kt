@@ -7,10 +7,15 @@ import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
+enum class ProjectElements(val elemName: String, val id: String) {
+    PROJECT_INPUT("project_name", "project_name"),
+    CREATE_BUTTON("", "project_create_button"),
+}
+
 fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
-    val isAuthenticated = user != NO_USER
+    val isAuthenticated = isAuthenticated(user)
     return if (isAuthenticated) {
-        tru.createProject(ProjectName.make(data["project_name"]))
+        tru.createProject(ProjectName.make(data[ProjectElements.PROJECT_INPUT.elemName]))
         okHTML(successHTML)
     } else {
         handleUnauthorized()
@@ -43,12 +48,12 @@ fun createProjectHTML(username : String) : String {
             </p>
         
             <p>
-                <label for="project_name">Name:</label>
-                <input name="project_name" id="project_name" type="text" />
+                <label for="${ProjectElements.PROJECT_INPUT.elemName}">Name:</label>
+                <input name="${ProjectElements.PROJECT_INPUT.elemName}" id="${ProjectElements.PROJECT_INPUT.id}" type="text" />
             </p>
         
             <p>
-                <button id="project_create_button">Create new project</button>
+                <button id="${ProjectElements.CREATE_BUTTON.id}">Create new project</button>
             </p>
         
         </form>

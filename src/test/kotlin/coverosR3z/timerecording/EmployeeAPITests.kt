@@ -28,7 +28,7 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee() {
-        val data = mapOf("employee_name" to DEFAULT_EMPLOYEE_NAME.value)
+        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE_NAME.value)
         handlePOSTNewEmployee(tru, DEFAULT_USER, data)
     }
 
@@ -37,7 +37,7 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
-        val data = mapOf("employee_name" to "a".repeat(31))
+        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to "a".repeat(31))
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
         assertEquals("Max size of employee name is 30", ex.message)
     }
@@ -47,7 +47,7 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
-        val data = mapOf("employee_name" to "a".repeat(30))
+        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to "a".repeat(30))
         handlePOSTNewEmployee(tru, DEFAULT_USER, data)
     }
 

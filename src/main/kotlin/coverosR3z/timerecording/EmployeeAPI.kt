@@ -7,9 +7,14 @@ import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
+enum class EmployeeElements(val elemName: String, val id: String) {
+    EMPLOYEE_INPUT("employee_name", "employee_name"),
+    CREATE_BUTTON("", "employee_create_button"),
+}
+
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (isAuthenticated(user)) {
-        tru.createEmployee(EmployeeName.make(data["employee_name"]))
+        tru.createEmployee(EmployeeName.make(data[EmployeeElements.EMPLOYEE_INPUT.elemName]))
         okHTML(successHTML)
     } else {
         handleUnauthorized()
@@ -41,12 +46,12 @@ fun createEmployeeHTML(username : String) : String {
         </p>
     
         <p>
-            <label for="employee_name">Name:</label>
-            <input name="employee_name" id="employee_name" type="text" />
+            <label for="${EmployeeElements.EMPLOYEE_INPUT.elemName}">Name:</label>
+            <input name="${EmployeeElements.EMPLOYEE_INPUT.elemName}" id="${EmployeeElements.EMPLOYEE_INPUT.id}" type="text" />
         </p>
     
         <p>
-            <button id="employee_create_button">Create new employee</button>
+            <button id="${EmployeeElements.CREATE_BUTTON.id}">Create new employee</button>
         </p>
     
     </form>
@@ -89,10 +94,7 @@ fun existingEmployeesHTML(username : String, employees : List<Employee>) : Strin
                 </tr>
             </thead>
             <tbody>
-                
-""" +
-            employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${safeHtml(it.name.value)}</td></tr>\n" } +
-            """
+            """ +employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${safeHtml(it.name.value)}</td></tr>\n" } + """
             </tbody>
         </table>
 
