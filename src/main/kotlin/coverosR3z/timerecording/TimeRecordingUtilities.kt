@@ -48,7 +48,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             // if we hit here, it means the employee doesn't exist yet.  For these purposes, that is
             // fine, we are just checking here that if a employee *does* exist, they don't have too many minutes.
             // if they don't exist, just move on through.
-            log.info("employee ${entry.employee} was not registered in the database.  returning 0 minutes recorded.")
+            log.debug("employee ${entry.employee} was not registered in the database.  returning 0 minutes recorded.")
             Time(0)
         }
 
@@ -56,7 +56,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // If the employee is entering in more than 24 hours in a day, that's invalid.
         val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + entry.time.numberOfMinutes
         if (existingPlusNewMinutes > twentyFourHours) {
-            log.info("More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)")
+            log.debug("More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)")
             throw ExceededDailyHoursAmountException()
         }
     }

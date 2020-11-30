@@ -2,7 +2,7 @@ package coverosR3z.misc
 
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logInfo
+import coverosR3z.logging.logDebug
 import coverosR3z.logging.logSettings
 import coverosR3z.server.*
 
@@ -30,7 +30,7 @@ fun setLogging(lt : LogTypes, data: Map<String, String>) {
         "false" -> logSettings[lt] = false
         else -> throw IllegalArgumentException(badInputLoggingDataMsg)
     }
-    logInfo("Configured logging for ${lt.name}: ${logSettings[lt]}")
+    logDebug("Configured logging for ${lt.name}: ${logSettings[lt]}")
 }
 
 fun handlePOSTLogging(user: User, data: Map<String, String>): PreparedResponseData {
