@@ -51,10 +51,10 @@ class ServerUtilitiesTests {
             "project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
         }
 
-        val time = getTime {parsePostedData(input)}
+        val (time, _) = getTime {parsePostedData(input)}
 
         val maxTime = 100
-        assertTrue("time taken was ${time.first}, should be less than $maxTime", time.first < maxTime)
+        assertTrue("time taken was $time, should be less than $maxTime", time < maxTime)
     }
 
     /**
