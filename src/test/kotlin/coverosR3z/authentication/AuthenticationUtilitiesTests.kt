@@ -122,7 +122,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should create a cryptographically secure hash from a password`() {
-        val result = Hash.createHash(DEFAULT_PASSWORD)
+        val result = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
         assertEquals(DEFAULT_PASSWORD_HASH, result.value)
     }
 
@@ -142,10 +142,10 @@ class AuthenticationUtilitiesTests {
      * Cursory tests to work out the functionality of getSalt
      */
     @Test
-    fun `password hash should be salted`() {
-        val first = Hash.createHash(DEFAULT_PASSWORD)
+    fun `two salts should give differeing hashes`() {
+        val first = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
         val salt = Hash.getSalt()
-        val second = Hash.createHash(DEFAULT_PASSWORD.addSalt(salt))
+        val second = Hash.createHash(DEFAULT_PASSWORD, salt)
         assertNotEquals(first, second)
     }
 
@@ -165,8 +165,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        val wellSeasoned = DEFAULT_PASSWORD.addSalt(DEFAULT_SALT)
-        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, null) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -176,8 +175,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-        val wellSeasoned = DEFAULT_PASSWORD.addSalt(DEFAULT_SALT)
-        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, Hash.createHash(wellSeasoned), DEFAULT_SALT, null) }
+        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, null) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }

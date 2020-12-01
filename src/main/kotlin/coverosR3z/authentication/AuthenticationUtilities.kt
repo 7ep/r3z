@@ -15,7 +15,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
-            ap.createUser(username, Hash.createHash(password.addSalt(salt)), salt, employeeId)
+            ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
             logDebug("User registration successful for \"${username.value}\"")
             RegistrationResult.SUCCESS
         } else {
@@ -40,7 +40,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
-        val hashedSaltedPassword = Hash.createHash(password.addSalt(user.salt))
+        val hashedSaltedPassword = Hash.createHash(password,user.salt)
         if (user.hash != hashedSaltedPassword) {
             logDebug("Login failed for user \"${user.name.value}\": Incorrect password.")
             return Pair(LoginResult.FAILURE, NO_USER)

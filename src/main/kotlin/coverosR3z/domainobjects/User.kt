@@ -1,7 +1,12 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.domainobjects.Hash.Companion.createHash
 import coverosR3z.misc.generateRandomString
 import java.security.MessageDigest
+import java.security.spec.KeySpec
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
+
 
 private const val maxUserCount = 100_000_000
 const val maxUserNameSize = 50
@@ -18,7 +23,7 @@ private val md = MessageDigest.getInstance("SHA-256")
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(Password("NO_USER_PASSWORD")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
+val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Password("NO_USER_PASSWORD"), Salt("THIS REPRESENTS NO USER")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -26,7 +31,7 @@ val NO_USER = User(UserId(maxUserCount-1), UserName("NO_USER"), Hash.createHash(
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount-2), UserName("SYSTEM"), Hash.createHash(Password("SYSTEM_USER_PASSWORD")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
+val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -68,10 +73,11 @@ data class Hash constructor(val value: String) {
         /**
          * Hash the input string with the provided SHA-256 algorithm, and return a string representation
          */
-        fun createHash(password: Password): Hash {
-            md.update(password.value.toByteArray())
-            val hashed : ByteArray = md.digest()
-            return Hash(hashed.joinToString("") {"%02x".format(it)})
+        fun createHash(password: Password, salt : Salt): Hash {
+            val spec: KeySpec = PBEKeySpec(password.value.toCharArray(), salt.value.toByteArray(), 65536, 128)
+            val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+            val hashed: ByteArray = factory.generateSecret(spec).encoded
+            return Hash(hashed.joinToString("") { "%02x".format(it) })
         }
 
         /**
@@ -86,7 +92,7 @@ data class Hash constructor(val value: String) {
          *
          * See https://en.wikipedia.org/wiki/Salt_(cryptography)
          */
-        fun getSalt(generator : () -> String = { generateRandomString(16) }): Salt {
+        fun getSalt(generator: () -> String = { generateRandomString(16) }): Salt {
             return Salt(generator())
         }
 

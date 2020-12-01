@@ -15,10 +15,6 @@ data class Password(val value: String) {
         require(value.length <= maxPasswordSize) {passwordMustNotBeTooLargeMsg}
     }
 
-    fun addSalt(value: Salt) : Password {
-        return Password(this.value + value.value)
-    }
-
     companion object {
         fun make(value: String?) : Password {
             val notNullPassword = checkNotNull(value) { passwordMustNotBeNullMsg}

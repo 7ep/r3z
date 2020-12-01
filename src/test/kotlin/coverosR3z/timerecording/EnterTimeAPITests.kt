@@ -68,7 +68,7 @@ class EnterTimeAPITests {
         val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
         val employeeId = null
         val ex = assertThrows(IllegalStateException::class.java){
-            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(DEFAULT_PASSWORD), Salt(""), employeeId),data)
+            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, employeeId),data)
         }
         assertEquals(employeeIdNotNullMsg, ex.message)
     }
