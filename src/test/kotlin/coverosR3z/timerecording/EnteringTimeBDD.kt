@@ -64,6 +64,14 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
+    @Test
+    fun `An employee should be able to enter time for previous day`() {
+        // given the employee worked 8 hours yesterday
+        // when the employee enters their time
+        // then time is saved
+
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
