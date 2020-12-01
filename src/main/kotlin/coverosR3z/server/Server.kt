@@ -46,8 +46,8 @@ class Server(val port: Int, val dbDirectory: String) {
                     val requestData = handleRequest(server, au, tru)
                     val shouldKeepAlive =  requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")}
                     if (shouldKeepAlive) {
-                        logTrace("Since this is a keep-alive connection, setting a 1-second timeout on read")
-                        server.socket.soTimeout = 1000
+                        logTrace("Since this is a keep-alive connection, setting a 10-second timeout on read")
+                        server.socket.soTimeout = 10 * 1000
                     }
                 } while(shouldContinue && shouldKeepAlive)
 
