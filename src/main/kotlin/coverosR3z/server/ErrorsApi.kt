@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+import coverosR3z.logging.logTrace
+
 fun handleBadRequest(): PreparedResponseData {
     return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
 }
@@ -13,6 +15,7 @@ fun handleUnauthorized() : PreparedResponseData {
 }
 
 fun handleInternalServerError(msg : String) : PreparedResponseData {
+    logTrace("handling internal server error: $msg")
     return PreparedResponseData(internalServerErrorHTML(msg), ResponseStatus.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
 }
 

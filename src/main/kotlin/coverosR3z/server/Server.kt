@@ -15,6 +15,7 @@ import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
+import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
 
 /**
@@ -42,7 +43,7 @@ class Server(val port: Int, val dbDirectory: String) {
             val thread = Thread {
                 logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 do {
-                    val (requestData, _) = handleRequest(server, au, tru)
+                    val requestData = handleRequest(server, au, tru)
                     val shouldKeepAlive =  requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")}
                     if (shouldKeepAlive) {
                         logTrace("Since this is a keep-alive connection, setting a 1-second timeout on read")
@@ -75,22 +76,24 @@ class Server(val port: Int, val dbDirectory: String) {
             }
         }
 
-        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : Pair<RequestData, PreparedResponseData> {
+        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : RequestData {
             lateinit var requestData : RequestData
             val responseData: PreparedResponseData = try {
                 requestData = parseClientRequest(server, au)
-
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(requestData.user)
                 val truWithUser = tru.changeUser(cu)
                 logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
+            } catch (ex : SocketTimeoutException) {
+                logTrace("Socket timed out: ${ex.message}")
+                return requestData
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message ?: "NO ERROR MESSAGE DEFINED")
             }
 
             returnData(server, responseData)
-            return Pair(requestData, responseData)
+            return requestData
         }
     }
 
