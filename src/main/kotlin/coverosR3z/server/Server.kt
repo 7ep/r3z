@@ -43,7 +43,12 @@ class Server(val port: Int, val dbDirectory: String) {
                 logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 do {
                     val (requestData, _) = handleRequest(server, au, tru)
-                } while(shouldContinue && requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")})
+                    val shouldKeepAlive =  requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")}
+                    if (shouldKeepAlive) {
+                        logTrace("Since this is a keep-alive connection, setting a 1-second timeout on read")
+                        server.socket.soTimeout = 1000
+                    }
+                } while(shouldContinue && shouldKeepAlive)
 
                 logTrace("closing server socket")
                 server.close()
