@@ -194,7 +194,7 @@ fun parseClientRequest(server: ISocketWrapper, au: IAuthenticationUtilities): Re
     val user = extractUserFromAuthToken(token, au)
     val data = extractDataIfPost(server,verb, headers)
 
-    return RequestData(verb, path, data, user, token)
+    return RequestData(verb, path, data, user, token, headers)
 }
 
 /**

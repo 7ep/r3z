@@ -11,8 +11,10 @@ import coverosR3z.server.Server
 import coverosR3z.timerecording.EmployeeElements
 import coverosR3z.timerecording.ProjectElements
 import io.github.bonigarcia.wdm.WebDriverManager
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.openqa.selenium.By
@@ -46,18 +48,26 @@ class BrowserSmokeTests {
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
-
-            // wipe out the database
-            File(dbDirectory).deleteRecursively()
-
-            // start the server
-            serverThread = Thread {
-                sc = Server(8080, dbDirectory)
-                sc.startServer()
-            }
-            serverThread.start()
         }
 
+    }
+
+    @Before
+    fun init() {
+        // wipe out the database
+        File(dbDirectory).deleteRecursively()
+
+        // start the server
+        serverThread = Thread {
+            sc = Server(8080, dbDirectory)
+            sc.startServer()
+        }
+        serverThread.start()
+    }
+
+    @After
+    fun clean() {
+        sc.halfOpenServerSocket.close()
     }
 
     /**
@@ -73,7 +83,7 @@ class BrowserSmokeTests {
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
         // start the Chromedriver
-        val driver = ChromeDriver(ChromeOptions().setHeadless(true))
+        val driver = ChromeDriver(ChromeOptions().setHeadless(false))
         bigSmokeTest(driver)
     }
 
@@ -167,22 +177,6 @@ class BrowserSmokeTests {
         driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
         assertEquals("your time entries", driver.title)
 
-        // shut the server down
-        driver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
-        driver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
-
-        // shutting everything down - the browser and the server - and
-        // restarting will prove that the system has the ability to
-        // properly persist and restore the data between server runs
-
-        // start the server
-        serverThread.join()
-        Thread {
-            Server.shouldContinue = true
-            sc = Server(8080, dbDirectory)
-            sc.startServer()
-        }.start()
-
         // Hit the homepage
         driver.get("$domain/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Authenticated Homepage", driver.title)
@@ -217,25 +211,6 @@ class BrowserSmokeTests {
         val newEmployeeName = "some new employee"
         eep.enter(newEmployeeName)
 
-        // we'll shut the server down *again* and restart, and confirm
-        // that our data persists.
-
-        // shut the server down
-        driver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
-        driver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
-
-        // shutting everything down - the browser and the server - and
-        // restarting will prove that the system has the ability to
-        // properly persist and restore the data between server runs
-
-        // start the server
-        serverThread.join()
-        Thread {
-            Server.shouldContinue = true
-            sc = Server(8080, dbDirectory)
-            sc.startServer()
-        }.start()
-
         // Hit the homepage
         driver.get("$domain/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Authenticated Homepage", driver.title)
@@ -248,9 +223,6 @@ class BrowserSmokeTests {
 
         // login as the new employee
         lp.login("newuser", password)
-
-        // shut the server down
-        driver.get("$domain/${NamedPaths.SHUTDOWN_SERVER.path}")
 
         driver.quit()
     }

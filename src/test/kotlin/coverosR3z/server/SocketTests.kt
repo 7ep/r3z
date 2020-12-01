@@ -121,7 +121,7 @@ class SocketTests {
      */
     @Test
     fun testParsingProcess() {
-        val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER, "foo")
+        val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER, "foo", listOf("Cookie: blah", "Cookie: sessionId=foo", "Content-Length: 100"))
         client.write("GET /page HTTP/1.1\n")
         client.write("Cookie: blah\n")
         client.write("Cookie: sessionId=foo\n")
@@ -137,7 +137,14 @@ class SocketTests {
      */
     @Test
     fun testParsingProcess_POST() {
-        val expectedRequest = RequestData(Verb.POST, "page", mapOf("foo" to "bar", "baz" to "feh"), NO_USER, "foo")
+        val expectedRequest = RequestData(
+            Verb.POST,
+            "page",
+            mapOf("foo" to "bar", "baz" to "feh"),
+            NO_USER,
+            "foo",
+            listOf("Cookie: blah", "Cookie: sessionId=foo", "Content-Length: 100")
+        )
         client.write("POST /page HTTP/1.1\n")
         client.write("Cookie: blah\n")
         client.write("Cookie: sessionId=foo\n")

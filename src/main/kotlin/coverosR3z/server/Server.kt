@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
  */
 class Server(val port: Int, val dbDirectory: String) {
 
-    private lateinit var halfOpenServerSocket : ServerSocket
+    lateinit var halfOpenServerSocket : ServerSocket
 
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
@@ -38,9 +38,13 @@ class Server(val port: Int, val dbDirectory: String) {
         while (shouldContinue) {
             logDebug("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
+            // we only wait one second before bailing on this connection
+            server.socket.soTimeout = 1000
             val thread = Thread {
                 logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
-                handleRequest(server, au, tru)
+                do {
+                    val (requestData, _) = handleRequest(server, au, tru)
+                } while(shouldContinue && requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")})
 
                 logTrace("closing server socket")
                 server.close()
@@ -67,9 +71,10 @@ class Server(val port: Int, val dbDirectory: String) {
             }
         }
 
-        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) {
-            val responseData = try {
-                val requestData = parseClientRequest(server, au)
+        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : Pair<RequestData, PreparedResponseData> {
+            lateinit var requestData : RequestData
+            val responseData: PreparedResponseData = try {
+                requestData = parseClientRequest(server, au)
 
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(requestData.user)
@@ -77,11 +82,11 @@ class Server(val port: Int, val dbDirectory: String) {
                 logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
             } catch (ex: Exception) {
-                okHTML(generalMessageHTML(ex.message ?: "NO ERROR MESSAGE DEFINED"))
+                handleInternalServerError(ex.message ?: "NO ERROR MESSAGE DEFINED")
             }
 
             returnData(server, responseData)
-
+            return Pair(requestData, responseData)
         }
     }
 

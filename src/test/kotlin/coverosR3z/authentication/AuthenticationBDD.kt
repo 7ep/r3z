@@ -151,7 +151,13 @@ class AuthenticationBDD {
             val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
             assertEquals(RegistrationResult.SUCCESS, regStatus)
             val postedData = mapOf("username" to DEFAULT_USER.name.value, "password" to DEFAULT_PASSWORD.value)
-            val requestData = RequestData(Verb.POST, NamedPaths.LOGIN.path, postedData, NO_USER)
+            val requestData = RequestData(
+                Verb.POST,
+                NamedPaths.LOGIN.path,
+                postedData,
+                NO_USER,
+                headers = emptyList<String>()
+            )
             return Triple(au, requestData, pmd)
         }
     }

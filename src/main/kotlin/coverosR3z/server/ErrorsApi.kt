@@ -12,6 +12,10 @@ fun handleUnauthorized() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
+fun handleInternalServerError(msg : String) : PreparedResponseData {
+    return PreparedResponseData(internalServerErrorHTML(msg), ResponseStatus.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
+}
+
 const val badRequestHTML = """
 <!DOCTYPE html>    
 <html>
@@ -51,18 +55,18 @@ const val unauthorizedHTML = """
 </html>        
 """
 
-fun generalMessageHTML(msg : String) : String {
+fun internalServerErrorHTML(msg : String) : String {
     return """
-<!DOCTYPE html>        
+<!DOCTYPE html>    
 <html>
     <head>
     </head>
-        <title>general error page</title>
+        <title>500 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     <body>
+       <p>500 error - INTERNAL SERVER ERROR</p>
        <p><a href="homepage">Homepage</a></p>
        <p>Error message: $msg</p>
-       <p></p>
     </body>
 </html>        
 """

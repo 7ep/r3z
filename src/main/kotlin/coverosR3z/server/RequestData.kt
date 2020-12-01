@@ -10,6 +10,8 @@ import coverosR3z.domainobjects.User
 data class RequestData(
         val verb: Verb,
         val path: String = "(NOTHING REQUESTED)",
-        val data : Map<String, String> = emptyMap(),
-        val user : User = NO_USER,
-        val sessionToken : String = "NO TOKEN")
+        val data: Map<String, String> = emptyMap(),
+        val user: User = NO_USER,
+        val sessionToken: String = "NO TOKEN",
+        val headers: List<String> = emptyList()
+)
