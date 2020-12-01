@@ -38,6 +38,7 @@ class Server(val port: Int, val dbDirectory: String) {
         while (shouldContinue) {
             logDebug("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
+            if (!shouldContinue) {break}
             // we only wait one second before bailing on this connection
             server.socket.soTimeout = 1000
             val thread = Thread {

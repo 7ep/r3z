@@ -290,10 +290,10 @@ class SocketTests {
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1\n")
-        client.write("Cookie: sessionId=abc123")
-        client.write("Content-Length: 63\n\n")
-        client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
+        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("Cookie: sessionId=abc123$CRLF")
+        client.write("Content-Length: 63$CRLF$CRLF")
+        client.write("project_entry=1&time_entry=2&detail_entry=nothing+to+say")
         au.getUserForSessionBehavior = { DEFAULT_USER }
 
         // server - handle the request

@@ -11,12 +11,9 @@ import coverosR3z.server.Server
 import coverosR3z.timerecording.EmployeeElements
 import coverosR3z.timerecording.ProjectElements
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
@@ -79,6 +76,7 @@ class BrowserSmokeTests {
      * - hit the authenticated homepage
      * - enter time
      */
+    @Ignore
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
@@ -94,6 +92,7 @@ class BrowserSmokeTests {
         bigSmokeTest(driver)
     }
 
+    @Ignore
     @Test
     fun `Smoke test - with firefox`() {
         // start the Firefox driver
