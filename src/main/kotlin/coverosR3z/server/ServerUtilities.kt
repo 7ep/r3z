@@ -103,7 +103,7 @@ private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
 
 fun handleGETShutdownServer(user: User): PreparedResponseData {
     return if (isAuthenticated(user)) {
-        Server.shouldContinue = false
+        Server.shouldServerKeepRunning = false
         okHTML(successHTML)
     } else {
         redirectTo(HOMEPAGE.path)

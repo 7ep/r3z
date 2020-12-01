@@ -33,13 +33,11 @@ class Server(val port: Int, val dbDirectory: String) {
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
         logStart("System is ready.  DateTime is ${DateTime(systemStartMillis / 1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
 
-        val numCores = Runtime.getRuntime().availableProcessors()
-        logStart("Found $numCores cores.  Starting that many threads")
-        val cachedThreadPool = Executors.newFixedThreadPool(numCores)
-        while (shouldContinue) {
+        val cachedThreadPool = Executors.newCachedThreadPool()
+        while (shouldServerKeepRunning) {
             logDebug("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-            if (!shouldContinue) {break}
+            if (!shouldServerKeepRunning) {break}
             val thread = Thread {
                 logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 do {
@@ -48,7 +46,7 @@ class Server(val port: Int, val dbDirectory: String) {
                     if (shouldKeepAlive) {
                         logTrace("This is a keep-alive connection")
                     }
-                } while(shouldContinue && shouldKeepAlive)
+                } while(shouldServerKeepRunning && shouldKeepAlive)
 
                 logTrace("closing server socket")
                 server.close()
@@ -61,7 +59,7 @@ class Server(val port: Int, val dbDirectory: String) {
 
     companion object {
 
-        var shouldContinue = true
+        var shouldServerKeepRunning = true
 
         /**
          * Given the command-line arguments, returns the first value
