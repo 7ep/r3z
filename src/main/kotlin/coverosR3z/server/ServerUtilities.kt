@@ -4,6 +4,7 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logTrace
 import coverosR3z.misc.*
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
@@ -240,9 +241,9 @@ fun parseFirstLine(clientRequest: String): Pair<Verb, String> {
     } else {
         // determine which file the client is requesting
         verb = Verb.valueOf(checkNotNull(result.groups[1]){"The HTTP verb must not be missing"}.value)
-        logDebug("verb from client was: $verb")
+        logTrace("verb from client was: $verb")
         file = checkNotNull(result.groups[2]){"The requested path must not be missing"}.value
-        logDebug("path from client was: $file")
+        logTrace("path from client was: $file")
     }
 
     return Pair(verb, file)
@@ -334,14 +335,14 @@ fun getHeaders(socket: ISocketWrapper): List<String> {
  * sends data as the body of a response from server
  */
 fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
-    logDebug("Assembling data just before shipping to client")
+    logTrace("Assembling data just before shipping to client")
     val status = "HTTP/1.1 ${data.responseStatus.value}"
-    logDebug("status: $status")
+    logTrace("status: $status")
     val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
 
     val otherHeaders = data.headers.joinToString(CRLF)
-    logDebug("contentLengthHeader: $contentLengthHeader")
-    data.headers.forEach{logDebug("sending header: $it")}
+    logTrace("contentLengthHeader: $contentLengthHeader")
+    data.headers.forEach{logTrace("sending header: $it")}
     server.write("$status$CRLF" +
             "$contentLengthHeader$CRLF" +
             otherHeaders +

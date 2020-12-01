@@ -26,7 +26,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
 
     override fun readLine(): String {
         val readResult = reader.readLine() ?: ""
-        logDebug("${name ?: socket} read this line: $readResult")
+        logTrace("${name ?: socket} read this line: $readResult")
         return readResult
     }
 

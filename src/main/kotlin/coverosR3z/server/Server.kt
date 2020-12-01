@@ -8,6 +8,7 @@ import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logStart
+import coverosR3z.logging.logTrace
 import coverosR3z.logging.systemStartMillis
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -40,10 +41,13 @@ class Server(val port: Int, val dbDirectory: String) {
             val thread = Thread {
                 logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 handleRequest(server, au, tru)
+
+                logTrace("closing server socket")
                 server.close()
             }
             cachedThreadPool.submit(thread)
         }
+        logTrace("Closing the primary server socket")
         halfOpenServerSocket.close()
     }
 
