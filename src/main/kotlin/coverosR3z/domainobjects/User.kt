@@ -71,7 +71,9 @@ data class Hash constructor(val value: String) {
 
     companion object{
         /**
-         * Hash the input string with the provided SHA-256 algorithm, and return a string representation
+         * Hash the input string with the provided PBKDF2 algorithm, and return a string representation
+         *
+         * See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
          */
         fun createHash(password: Password, salt : Salt): Hash {
             val spec: KeySpec = PBEKeySpec(password.value.toCharArray(), salt.value.toByteArray(), 65536, 128)

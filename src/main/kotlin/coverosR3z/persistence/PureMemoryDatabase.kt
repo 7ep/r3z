@@ -209,10 +209,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 logStart("No existing database found, building new database")
                 // if nothing is there, we build a new database
                 // and add a clean set of directories
-                logStart("Creating new PureMemoryDatabase at directory $dbDirectory")
+                logStart("Creating new PureMemoryDatabase")
                 val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
 
-                logStart("creating the database directory")
+                logStart("creating the database directory at \"$dbDirectory\"")
                 File(dbDirectory).mkdirs()
 
                 logStart("Writing the version of the database ($dbVersion) to version.txt")
