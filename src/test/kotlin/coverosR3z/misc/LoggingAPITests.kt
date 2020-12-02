@@ -40,7 +40,7 @@ class LoggingAPITests {
      */
     @Test
     fun testShouldPostLoggingPageIfAuthenticated() {
-        val data = mapOf("info" to "true", "warn" to "false", "debug" to "false", "trace" to "false")
+        val data = allTrue()
         val result : PreparedResponseData = handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(ResponseStatus.OK, result.responseStatus)
     }
@@ -67,8 +67,8 @@ class LoggingAPITests {
      * If we
      */
     @Test
-    fun testShouldChangeConfiguration_setInfoTrueOnly() {
-        val data = mapOf("info" to "true", "warn" to "false", "debug" to "false", "trace" to "false")
+    fun testShouldChangeConfiguration_setAuditTrueOnly() {
+        val data = allFalse(audit = "true")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
@@ -78,7 +78,7 @@ class LoggingAPITests {
 
     @Test
     fun testShouldChangeConfiguration_setWarnTrueOnly() {
-        val data = mapOf("info" to "false", "warn" to "true", "debug" to "false", "trace" to "false")
+        val data = allFalse(warn = "true")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
@@ -88,7 +88,7 @@ class LoggingAPITests {
 
     @Test
     fun testShouldChangeConfiguration_setDebugTrueOnly() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "true", "trace" to "false")
+        val data = allFalse(debug = "true")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
@@ -98,7 +98,7 @@ class LoggingAPITests {
 
     @Test
     fun testShouldChangeConfiguration_setTraceTrueOnly() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "true")
+        val data = allFalse(trace = "true")
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
@@ -108,7 +108,7 @@ class LoggingAPITests {
 
     @Test
     fun testShouldChangeConfiguration_allOn() {
-        val data = mapOf("info" to "true", "warn" to "true", "debug" to "true", "trace" to "true")
+        val data = allTrue()
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
@@ -118,7 +118,7 @@ class LoggingAPITests {
 
     @Test
     fun testShouldChangeConfiguration_allOff() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "false")
+        val data = allFalse()
         handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
@@ -130,63 +130,107 @@ class LoggingAPITests {
      * We require four inputs from the user.  If any are missing, complain
      */
     @Test
-    fun testShouldComplain_missingInfo() {
-        val data = mapOf("warn" to "false", "debug" to "false", "trace" to "false")
+    fun testShouldComplain_missingAudit() {
+        val data = mapOf(
+                LogTypes.WARN.name to "false",
+                LogTypes.DEBUG.name to "true",
+                LogTypes.TRACE.name to "false")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(missingLoggingDataInputMsg, ex.message)
     }
 
     @Test
     fun testShouldComplain_missingWarn() {
-        val data = mapOf("info" to "false", "debug" to "false", "trace" to "false")
+        val data = mapOf(
+                LogTypes.AUDIT.name to "false",
+                LogTypes.DEBUG.name to "true",
+                LogTypes.TRACE.name to "false")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(missingLoggingDataInputMsg, ex.message)
     }
 
     @Test
     fun testShouldComplain_missingDebug() {
-        val data = mapOf("info" to "false", "warn" to "false", "trace" to "false")
+        val data = mapOf(
+                LogTypes.AUDIT.name to "false",
+                LogTypes.WARN.name to "false",
+                LogTypes.TRACE.name to "false")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(missingLoggingDataInputMsg, ex.message)
     }
 
     @Test
     fun testShouldComplain_missingTrace() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "false")
+        val data = mapOf(
+                LogTypes.AUDIT.name to "false",
+                LogTypes.WARN.name to "false",
+                LogTypes.DEBUG.name to "false")
         val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(missingLoggingDataInputMsg, ex.message)
     }
+
+
 
     /**
      * If the user somehow sets the inputs to something other than "true" or "false", complain
      */
     @Test
-    fun testShouldComplainAboutBadInput_info() {
-        val data = mapOf("info" to "foo", "warn" to "false", "debug" to "false", "trace" to "false")
+    fun testShouldComplainAboutBadInput_audit() {
+        val data = allTrue(audit = "foo")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_warn() {
-        val data = mapOf("info" to "false", "warn" to "foo", "debug" to "false", "trace" to "false")
+        val data = allTrue(warn = "foo")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_debug() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "foo", "trace" to "false")
+        val data = allTrue(debug = "foo")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_trace() {
-        val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "foo")
+        val data = allTrue(trace = "foo")
         val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
         assertEquals(badInputLoggingDataMsg, ex.message)
     }
 
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+    private fun allFalse(audit: String = "false",
+                         warn: String = "false",
+                         debug: String = "false",
+                         trace: String = "false"): Map<String, String> {
+        return mapOf(
+                LogTypes.AUDIT.name.toLowerCase() to audit,
+                LogTypes.WARN.name.toLowerCase() to warn,
+                LogTypes.DEBUG.name.toLowerCase() to debug,
+                LogTypes.TRACE.name.toLowerCase() to trace)
+    }
+
+    private fun allTrue(audit: String = "true",
+                        warn: String = "true",
+                        debug: String = "true",
+                        trace: String = "true"): Map<String, String> {
+        return mapOf(
+                LogTypes.AUDIT.name.toLowerCase() to audit,
+                LogTypes.WARN.name.toLowerCase() to warn,
+                LogTypes.DEBUG.name.toLowerCase() to debug,
+                LogTypes.TRACE.name.toLowerCase() to trace)
+    }
 
 }
