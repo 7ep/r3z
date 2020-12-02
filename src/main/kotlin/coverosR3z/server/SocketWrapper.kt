@@ -26,7 +26,12 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
     }
 
     override fun readLine(): String {
-        val readResult = reader.readLine() ?: ""
+        val valueRead = reader.readLine()
+        val readResult = when (valueRead) {
+            "" -> "(EMPTY STRING)"
+            else -> valueRead
+        }
+
         logTrace("${name ?: socket} read this line: $readResult")
         return readResult
     }

@@ -10,8 +10,6 @@ import coverosR3z.server.Server.Companion.extractFirstArgumentAsPort
  * Entry point for the application.  KISS.
  */
 fun main(args: Array<String>) {
-    logSettings[LogTypes.DEBUG] = true
-    logSettings[LogTypes.TRACE] = true
     val port = extractFirstArgumentAsPort(args)
     logStart("starting server on port $port")
     val dbDirectory = "db/"
