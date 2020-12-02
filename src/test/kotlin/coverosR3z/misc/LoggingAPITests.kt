@@ -216,10 +216,10 @@ class LoggingAPITests {
                          debug: String = "false",
                          trace: String = "false"): Map<String, String> {
         return mapOf(
-                LogTypes.AUDIT.name.toLowerCase() to audit,
-                LogTypes.WARN.name.toLowerCase() to warn,
-                LogTypes.DEBUG.name.toLowerCase() to debug,
-                LogTypes.TRACE.name.toLowerCase() to trace)
+                LogTypes.AUDIT.name to audit,
+                LogTypes.WARN.name to warn,
+                LogTypes.DEBUG.name to debug,
+                LogTypes.TRACE.name to trace)
     }
 
     private fun allTrue(audit: String = "true",
@@ -227,10 +227,10 @@ class LoggingAPITests {
                         debug: String = "true",
                         trace: String = "true"): Map<String, String> {
         return mapOf(
-                LogTypes.AUDIT.name.toLowerCase() to audit,
-                LogTypes.WARN.name.toLowerCase() to warn,
-                LogTypes.DEBUG.name.toLowerCase() to debug,
-                LogTypes.TRACE.name.toLowerCase() to trace)
+                LogTypes.AUDIT.name to audit,
+                LogTypes.WARN.name to warn,
+                LogTypes.DEBUG.name to debug,
+                LogTypes.TRACE.name to trace)
     }
 
 }

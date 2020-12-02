@@ -19,10 +19,10 @@ fun handleGETLogging(user: User): PreparedResponseData {
 
 fun setLogging(lt : LogTypes, data: Map<String, String>) {
     /**
-     * The user has sent us a map with four keys - info, warn, debug, trace,
+     * The user has sent us a map with four keys - audit, warn, debug, trace,
      * each of which can be "true" or "false".  This is that value.
      */
-    val userInputLogConfig = checkNotNull(data[lt.toString().toLowerCase()], { missingLoggingDataInputMsg })
+    val userInputLogConfig = checkNotNull(data[lt.toString()], { missingLoggingDataInputMsg })
 
     // depending on what the user chose, we set the configuration for that logging type here
     when (userInputLogConfig) {
@@ -83,21 +83,21 @@ fun loggingConfigHtml() : String {
             <fieldset>
                 <legend>Info logging:</legend>
                 <div>
-                  <input type="radio" id="infotrue" name="info" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
-                  <label for="infotrue">True</label>
+                  <input type="radio" id="audittrue" name="${LogTypes.AUDIT}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
+                  <label for="audittrue">True</label>
             
-                  <input type="radio" id="infofalse" name="info" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
-                  <label for="infofalse">False</label>
+                  <input type="radio" id="auditfalse" name="${LogTypes.AUDIT}" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
+                  <label for="auditfalse">False</label>
                 </div>
             </fieldset>
 
             <fieldset>
                 <legend>Warn logging:</legend>
                 <div>
-                  <input type="radio" id="warntrue" name="warn" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
+                  <input type="radio" id="warntrue" name="${LogTypes.WARN}" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
                   <label for="warntrue">True</label>
             
-                  <input type="radio" id="warnfalse" name="warn" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
+                  <input type="radio" id="warnfalse" name="${LogTypes.WARN}" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
                   <label for="warnfalse">False</label>
                 </div>
             </fieldset>
@@ -105,10 +105,10 @@ fun loggingConfigHtml() : String {
             <fieldset>
                 <legend>Debug logging:</legend>
                 <div>
-                  <input type="radio" id="debugtrue" name="debug" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
+                  <input type="radio" id="debugtrue" name="${LogTypes.DEBUG}" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
                   <label for="debugtrue">True</label>
             
-                  <input type="radio" id="debugfalse" name="debug" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
+                  <input type="radio" id="debugfalse" name="${LogTypes.DEBUG}" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
                   <label for="debugfalse">False</label>
                 </div>
             </fieldset>
@@ -116,10 +116,10 @@ fun loggingConfigHtml() : String {
             <fieldset>
                 <legend>Trace logging:</legend>
                 <div>
-                  <input type="radio" id="tracetrue" name="trace" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
+                  <input type="radio" id="tracetrue" name="${LogTypes.TRACE}" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
                   <label for="tracetrue">True</label>
             
-                  <input type="radio" id="tracefalse" name="trace" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
+                  <input type="radio" id="tracefalse" name="${LogTypes.TRACE}" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
                   <label for="tracefalse">False</label>
                 </div>
             </fieldset>
