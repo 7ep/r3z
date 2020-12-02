@@ -33,7 +33,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         }
 
         logTrace("${name ?: socket} read this line: $readResult")
-        return readResult
+        return valueRead
     }
 
     override fun read(len : Int) : String {
