@@ -156,7 +156,7 @@ class AuthenticationBDD {
                 NamedPaths.LOGIN.path,
                 postedData,
                 NO_USER,
-                headers = emptyList<String>()
+                headers = emptyList()
             )
             return Triple(au, requestData, pmd)
         }

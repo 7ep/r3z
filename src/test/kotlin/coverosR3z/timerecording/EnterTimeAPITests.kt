@@ -228,7 +228,7 @@ class EnterTimeAPITests {
         user : User = NO_USER,
         sessionToken : String = "NO TOKEN"
     ): RequestData {
-        return RequestData(verb, path, data, user, sessionToken, emptyList<String>())
+        return RequestData(verb, path, data, user, sessionToken, emptyList())
     }
 
 }

@@ -1,11 +1,10 @@
 package coverosR3z.timerecording
 
-import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
 import coverosR3z.misc.safeHtml
-import coverosR3z.server.*
 import coverosR3z.misc.successHTML
+import coverosR3z.server.*
 
 enum class ProjectElements(val elemName: String, val id: String) {
     PROJECT_INPUT("project_name", "project_name"),

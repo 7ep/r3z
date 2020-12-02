@@ -21,7 +21,7 @@ import java.util.concurrent.Executors
 /**
  * This is the top-level entry into the web server
  */
-class Server(val port: Int, val dbDirectory: String) {
+class Server(val port: Int, private val dbDirectory: String) {
 
     lateinit var halfOpenServerSocket : ServerSocket
 

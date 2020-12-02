@@ -460,7 +460,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             employeeTimeDateEntries.add(TimeEntry(newIndex, employee, project, time, date, details))
 
             // get all the time entries for the month, to serialize
-            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.flatMap { it.value.filter { it.date.month() == date.month()} }.toSet()
+            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.flatMap { it -> it.value.filter { it.date.month() == date.month()} }.toSet()
             val filename = "${date.year()}_${date.month()}"
             logTrace("filename to store time-entries is $filename")
 

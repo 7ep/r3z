@@ -8,12 +8,7 @@ enum class CacheControl(value: String) {
      * This is a highly aggressive caching approach.  We're basically telling
      * anyone and everyone to cache every single dang thing, which means
      * we won't hear from the client again once they request any data
-     * marked with this.
-     */
-    AGGRESSIVE_CACHE("public, max-age=${60 * 60 * 24 * 7}, immutable"),
-
-    /**
-     * Tell clients to cache for one minute
+     * marked with this, for a period of time
      */
     AGGRESSIVE_MINUTE_CACHE("public, max-age=60, immutable");
 

@@ -1,18 +1,15 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.DEFAULT_PROJECT_NAME
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.domainobjects.employeeNameNotNullMsg
 import coverosR3z.domainobjects.maxProjectNameSizeMsg
 import coverosR3z.domainobjects.projectNameNotNullMsg
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalArgumentException
 
 class ProjectAPITests {
 

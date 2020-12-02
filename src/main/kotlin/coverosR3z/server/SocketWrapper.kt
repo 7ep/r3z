@@ -1,12 +1,10 @@
 package coverosR3z.server
 
-import coverosR3z.logging.logDebug
 import coverosR3z.logging.logTrace
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.net.Socket
-import java.util.*
 
 /**
  * Provides access to the reading and writing functions on a socket

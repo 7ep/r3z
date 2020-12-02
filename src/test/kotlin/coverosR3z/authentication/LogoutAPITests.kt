@@ -24,7 +24,7 @@ class LogoutAPITests {
      */
     @Test
     fun testShouldLogoutIfAuthenticated() {
-        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), SYSTEM_USER, "", emptyList<String>()))
+        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), SYSTEM_USER, "", emptyList()))
         assertEquals(ResponseStatus.OK, response.responseStatus)
     }
 
@@ -35,7 +35,7 @@ class LogoutAPITests {
      */
     @Test
     fun testShouldReturnRedirectIfNotAuthenticated() {
-        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), NO_USER, "", emptyList<String>()))
+        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), NO_USER, "", emptyList()))
         assertEquals(ResponseStatus.SEE_OTHER, response.responseStatus)
     }
 }

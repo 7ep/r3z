@@ -1,7 +1,5 @@
 package coverosR3z
 
-import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logSettings
 import coverosR3z.logging.logStart
 import coverosR3z.server.Server
 import coverosR3z.server.Server.Companion.extractFirstArgumentAsPort

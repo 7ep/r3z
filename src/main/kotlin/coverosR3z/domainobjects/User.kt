@@ -17,7 +17,6 @@ private const val maxUserMsg = "No way this company has more than 100 million us
 private const val minIdMsg = "Valid identifier values are 1 or above"
 const val usernameCannotBeEmptyMsg = "All users must have a non-empty name"
 const val usernameNotNullMsg = "Username must not be null"
-private val md = MessageDigest.getInstance("SHA-256")
 
 /**
  * This is used to represent no user - just to avoid using null for a user

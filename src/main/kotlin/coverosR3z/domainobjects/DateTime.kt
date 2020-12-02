@@ -1,6 +1,5 @@
 package coverosR3z.domainobjects
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 

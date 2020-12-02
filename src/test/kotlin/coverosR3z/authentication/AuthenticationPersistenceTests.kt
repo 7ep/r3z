@@ -3,7 +3,6 @@ package coverosR3z.authentication
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_SALT
 import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.Salt
 import coverosR3z.domainobjects.UserName
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.assertEquals

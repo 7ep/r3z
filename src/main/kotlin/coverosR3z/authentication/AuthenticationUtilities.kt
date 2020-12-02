@@ -2,7 +2,6 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
-import coverosR3z.logging.logInfo
 
 
 class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
