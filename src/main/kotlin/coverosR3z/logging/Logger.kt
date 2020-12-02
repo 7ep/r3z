@@ -8,7 +8,7 @@ enum class LogTypes {
      * Generally useful information, particularly for recording business actions by users.  That is, reading these
      * logs should read like a description of the user carrying out business chores
      */
-    INFO,
+    AUDIT,
     WARN,
     DEBUG,
     TRACE
@@ -23,14 +23,14 @@ fun getCurrentMillis() : Long {
  * log entries will print
  */
 fun resetLogSettingsToDefault() {
-    logSettings[LogTypes.INFO] = true
+    logSettings[LogTypes.AUDIT] = true
     logSettings[LogTypes.DEBUG] = true
     logSettings[LogTypes.WARN] = true
     logSettings[LogTypes.TRACE] = false
 }
 
 val logSettings = mutableMapOf(
-        LogTypes.INFO to true,
+        LogTypes.AUDIT to true,
         LogTypes.WARN to true,
         LogTypes.DEBUG to true,
         LogTypes.TRACE to false)
@@ -39,8 +39,14 @@ val logSettings = mutableMapOf(
  * The class version of logging
  */
 class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
-    fun info(msg : String) {
-        logInfo(msg, cu)
+    /**
+     * Logs here are intended to record business actions
+     * taken by the system, for auditing purposes.  Keep
+     * this logging narrowly focused on business, and
+     * try not to be repetitive.
+     */
+    fun audit(msg : String) {
+        logAudit(msg, cu)
     }
 
     fun debug(msg: String) {
@@ -48,9 +54,12 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     }
 }
 
-fun logInfo(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
-    if (logSettings[LogTypes.INFO] == true) {
-        println("${getCurrentMillis()} INFO: ${cu.user.name.value}: $msg")
+/**
+ * See [Logger.audit]
+ */
+fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
+    if (logSettings[LogTypes.AUDIT] == true) {
+        println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: $msg")
     }
 }
 

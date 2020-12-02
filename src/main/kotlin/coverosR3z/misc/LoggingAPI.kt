@@ -83,10 +83,10 @@ fun loggingConfigHtml() : String {
             <fieldset>
                 <legend>Info logging:</legend>
                 <div>
-                  <input type="radio" id="infotrue" name="info" value="true" ${checkedIf(LogTypes.INFO).isOn()} >
+                  <input type="radio" id="infotrue" name="info" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
                   <label for="infotrue">True</label>
             
-                  <input type="radio" id="infofalse" name="info" value="false" ${checkedIf(LogTypes.INFO).isOff()}>
+                  <input type="radio" id="infofalse" name="info" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
                   <label for="infofalse">False</label>
                 </div>
             </fieldset>

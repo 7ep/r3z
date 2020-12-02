@@ -70,7 +70,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_setInfoTrueOnly() {
         val data = mapOf("info" to "true", "warn" to "false", "debug" to "false", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(true, logSettings[LogTypes.INFO])
+        assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
         assertEquals(false, logSettings[LogTypes.TRACE])
@@ -80,7 +80,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_setWarnTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "true", "debug" to "false", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(false, logSettings[LogTypes.INFO])
+        assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
         assertEquals(false, logSettings[LogTypes.TRACE])
@@ -90,7 +90,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_setDebugTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "false", "debug" to "true", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(false, logSettings[LogTypes.INFO])
+        assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(true, logSettings[LogTypes.DEBUG])
         assertEquals(false, logSettings[LogTypes.TRACE])
@@ -100,7 +100,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_setTraceTrueOnly() {
         val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "true")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(false, logSettings[LogTypes.INFO])
+        assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
         assertEquals(true, logSettings[LogTypes.TRACE])
@@ -110,7 +110,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_allOn() {
         val data = mapOf("info" to "true", "warn" to "true", "debug" to "true", "trace" to "true")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(true, logSettings[LogTypes.INFO])
+        assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
         assertEquals(true, logSettings[LogTypes.DEBUG])
         assertEquals(true, logSettings[LogTypes.TRACE])
@@ -120,7 +120,7 @@ class LoggingAPITests {
     fun testShouldChangeConfiguration_allOff() {
         val data = mapOf("info" to "false", "warn" to "false", "debug" to "false", "trace" to "false")
         handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(false, logSettings[LogTypes.INFO])
+        assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
         assertEquals(false, logSettings[LogTypes.TRACE])

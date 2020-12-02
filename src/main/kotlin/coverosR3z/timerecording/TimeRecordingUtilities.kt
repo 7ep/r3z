@@ -21,10 +21,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
-            log.info("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
+            log.audit("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
-        log.info("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
+        log.audit("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
         `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
         return try {
             persistence.persistNewTimeEntry(entry)
@@ -71,7 +71,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        log.info("Creating a new project, \"${projectName.value}\"")
+        log.audit("Creating a new project, \"${projectName.value}\"")
 
         return persistence.persistNewProject(projectName)
     }
@@ -88,7 +88,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
 
         val newEmployee = persistence.persistNewEmployee(employeename)
-        log.info("Creating a new employee, \"${newEmployee.name.value}\"")
+        log.audit("Creating a new employee, \"${newEmployee.name.value}\"")
         return newEmployee
     }
 
