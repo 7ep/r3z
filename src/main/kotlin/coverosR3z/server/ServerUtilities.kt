@@ -230,7 +230,7 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
  * from the client.  See [pageExtractorRegex]
  */
 fun parseFirstLine(clientRequest: String): Pair<Verb, String> {
-    logDebug("request from client: $clientRequest")
+    logTrace("request from client: $clientRequest")
     val result = pageExtractorRegex.matchEntire(clientRequest)
     val verb: Verb
     var file = ""

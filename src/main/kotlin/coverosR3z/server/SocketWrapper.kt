@@ -40,7 +40,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         val buf = CharArray(len)
         val lengthRead = reader.read(buf, 0, len)
         val body = buf.slice(0 until lengthRead).joinToString("")
-        logDebug("$name actually read $lengthRead bytes.  body: $body")
+        logTrace("$name actually read $lengthRead bytes.  body: $body")
         return body
     }
 

@@ -35,11 +35,11 @@ class Server(val port: Int, val dbDirectory: String) {
 
         val cachedThreadPool = Executors.newCachedThreadPool()
         while (shouldServerKeepRunning) {
-            logDebug("waiting for socket connection")
+            logTrace("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
             if (!shouldServerKeepRunning) {break}
             val thread = Thread {
-                logDebug("client from ${server.socket.inetAddress?.hostAddress} has connected")
+                logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 do {
                     val requestData = handleRequest(server, au, tru)
                     val shouldKeepAlive =  requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")}
