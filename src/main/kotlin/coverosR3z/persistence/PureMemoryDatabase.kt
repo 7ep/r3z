@@ -55,7 +55,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
 
     @Synchronized
     fun addNewProject(projectName: ProjectName) : Int {
+        logTrace("PMD: adding new project, \"${projectName.value}\"")
         val newIndex = projects.size + 1
+        logTrace("PMD: new project index: $newIndex")
         projects.add(Project(ProjectId(newIndex), ProjectName(projectName.value)))
         serializeProjectsToDisk(this, dbDirectory)
         return newIndex
@@ -141,6 +143,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return projects.toList()
     }
 
+    fun getAllSessions(): Map<String, Session> {
+        return sessions.toMap()
+    }
+
 
     @Synchronized
     fun addNewSession(sessionToken: String, user: User, time: DateTime) {
@@ -153,7 +159,6 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return sessions[sessionToken]?.user ?: NO_USER
     }
 
-    @Synchronized
     fun removeSessionByToken(sessionToken: String) {
         checkNotNull(sessions[sessionToken]) {"There must exist a session in the database for ($sessionToken) in order to delete it"}
         sessions.remove(sessionToken)

@@ -3,9 +3,7 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
-import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logInfo
-import coverosR3z.logging.logSettings
 import coverosR3z.misc.getTime
 import org.junit.Assert.*
 import org.junit.Before
@@ -246,6 +244,9 @@ class PureMemoryDatabaseTests {
         assertEquals(numberNewEmployeesAdded, pmd.getAllEmployees().size)
     }
 
+    /**
+     * See [testCorruptingEmployeeDataWithMultiThreading]
+     */
     @Test
     fun testCorruptingUserDataWithMultiThreading() {
         val pmd = PureMemoryDatabase()
@@ -261,6 +262,57 @@ class PureMemoryDatabaseTests {
         assertEquals(numberNewUsersAdded, pmd.getAllUsers().size)
     }
 
+    /**
+     * See [testCorruptingEmployeeDataWithMultiThreading]
+     */
+    @Test
+    fun testCorruptingProjectDataWithMultiThreading() {
+        val pmd = PureMemoryDatabase()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewProjectsAdded = 20
+        repeat(numberNewProjectsAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                pmd.addNewProject(DEFAULT_PROJECT_NAME)
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewProjectsAdded, pmd.getAllProjects().size)
+    }
+
+
+    /**
+     * See [testCorruptingEmployeeDataWithMultiThreading]
+     */
+    @Test
+    fun testCorruptingSessionDataWithMultiThreading() {
+        val pmd = PureMemoryDatabase()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewSessionsAdded = 20
+        for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                pmd.addNewSession(DEFAULT_SESSION_TOKEN+i, DEFAULT_USER, DEFAULT_DATETIME)
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewSessionsAdded, pmd.getAllSessions().size)
+
+        val listOfThreads2 = mutableListOf<Thread>()
+        for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
+            listOfThreads2.add(thread {
+                pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN+i)
+            })
+        }
+        // wait for all those threads
+        listOfThreads2.forEach{it.join()}
+        assertEquals(0, pmd.getAllSessions().size)
+    }
+
+    /**
+     * Time entry recording is fairly involved, we have to lock
+     * a lot.  See [testCorruptingEmployeeDataWithMultiThreading]
+     */
     @Test
     fun testCorruptingTimeEntryDataWithMultiThreading() {
         val pmd = PureMemoryDatabase()
