@@ -186,6 +186,9 @@ private val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
 fun parseClientRequest(server: ISocketWrapper, au: IAuthenticationUtilities): RequestData {
     // read the first line for the fundamental request
     val clientRequest = server.readLine()
+    if (clientRequest.isNullOrBlank()) {
+        return RequestData(Verb.CLIENT_CLOSED_CONNECTION)
+    }
     val (verb, path) = parseFirstLine(clientRequest)
 
     val headers = getHeaders(server)
@@ -322,7 +325,7 @@ fun getHeaders(socket: ISocketWrapper): List<String> {
     val headers = mutableListOf<String>()
     while (true) {
         val header = socket.readLine()
-        if (header.isNotEmpty()) {
+        if (!header.isNullOrBlank()) {
             headers.add(header)
         } else {
             break

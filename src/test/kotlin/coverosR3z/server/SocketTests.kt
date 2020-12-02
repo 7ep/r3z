@@ -3,6 +3,8 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.NO_USER
+import coverosR3z.logging.LogTypes
+import coverosR3z.logging.logSettings
 import coverosR3z.misc.FileReader
 import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -89,7 +91,7 @@ class SocketTests {
         client.readLine()
         val response = client.readLine()
 
-        assertTrue(response.contains("<!DOCTYPE html>"))
+        assertTrue(response!!.contains("<!DOCTYPE html>"))
     }
 
     @Test
@@ -304,6 +306,21 @@ class SocketTests {
 
         // assert all is well
         assertEquals("HTTP/1.1 200 OK", statusline)
+    }
+
+    /**
+     * If we as client are connected but then close the connection from our side,
+     * we should see a CLIENT_CLOSED_CONNECTION remark
+     */
+    @Test
+    fun testShouldIndicateClientClosedConnection() {
+        logSettings[LogTypes.TRACE] = true
+        client.socket.shutdownOutput()
+
+        // server - handle the request
+        val rd = Server.handleRequest(server, au, tru)
+
+        assertEquals(Verb.CLIENT_CLOSED_CONNECTION, rd.verb)
     }
 
 

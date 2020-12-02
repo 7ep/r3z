@@ -14,10 +14,8 @@ enum class LogTypes {
     TRACE
 }
 
-val systemStartMillis = System.currentTimeMillis()
-
 fun getCurrentMillis() : Long {
-    return System.currentTimeMillis() - systemStartMillis
+    return System.currentTimeMillis()
 }
 
 /**

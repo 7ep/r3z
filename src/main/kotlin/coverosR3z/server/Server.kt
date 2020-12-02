@@ -6,10 +6,10 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.logging.getCurrentMillis
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logStart
 import coverosR3z.logging.logTrace
-import coverosR3z.logging.systemStartMillis
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
@@ -31,7 +31,7 @@ class Server(val port: Int, val dbDirectory: String) {
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        logStart("System is ready.  DateTime is ${DateTime(systemStartMillis / 1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
+        logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
         while (shouldServerKeepRunning) {
@@ -77,6 +77,9 @@ class Server(val port: Int, val dbDirectory: String) {
             lateinit var requestData : RequestData
             val responseData: PreparedResponseData = try {
                 requestData = parseClientRequest(server, au)
+                if (requestData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
+                    return requestData
+                }
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(requestData.user)
                 val truWithUser = tru.changeUser(cu)

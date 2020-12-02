@@ -25,10 +25,11 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         writer.write(input)
     }
 
-    override fun readLine(): String {
-        val valueRead = reader.readLine()
-        val readResult = when (valueRead) {
+    override fun readLine(): String? {
+        val valueRead : String? = reader.readLine()
+        val readResult: String = when (valueRead) {
             "" -> "(EMPTY STRING)"
+            null -> "(EOF - client closed connection)"
             else -> valueRead
         }
 
