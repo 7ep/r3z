@@ -26,12 +26,16 @@ fun getCurrentMillis() : Long {
  */
 fun resetLogSettingsToDefault() {
     logSettings[LogTypes.INFO] = true
-    logSettings[LogTypes.DEBUG] = false
+    logSettings[LogTypes.DEBUG] = true
     logSettings[LogTypes.WARN] = true
     logSettings[LogTypes.TRACE] = false
 }
 
-val logSettings = mutableMapOf(LogTypes.INFO to true, LogTypes.WARN to true, LogTypes.DEBUG to false, LogTypes.TRACE to false)
+val logSettings = mutableMapOf(
+        LogTypes.INFO to true,
+        LogTypes.WARN to true,
+        LogTypes.DEBUG to true,
+        LogTypes.TRACE to false)
 
 /**
  * The class version of logging
