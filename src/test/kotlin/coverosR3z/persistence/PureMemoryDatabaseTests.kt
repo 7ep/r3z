@@ -3,7 +3,9 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.EmployeeNotRegisteredException
+import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logInfo
+import coverosR3z.logging.logSettings
 import coverosR3z.misc.getTime
 import org.junit.Assert.*
 import org.junit.Before
@@ -11,6 +13,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
+import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
 
@@ -213,6 +216,66 @@ class PureMemoryDatabaseTests {
         assertTrue(timeToDeserialize < 150)
     }
 
+    /**
+     * This is to test that it is possible to corrupt the data when
+     * multiple threads are changing it
+     *
+     * The idea behind this test is that if we aren't handling
+     * the threading cleanly, we won't get one hundred employees
+     * added, it will be some smaller number.
+     *
+     * When I added the lock, this caused us to have a result
+     * of the proper number of new employees
+     *
+     * To see this fail, just remove the locking mechanism from the
+     * method at [PureMemoryDatabase.addNewEmployee], but you
+     * might need to run it a time or two to see it fail.
+     */
+    @Test
+    fun testCorruptingEmployeeDataWithMultiThreading() {
+        val pmd = PureMemoryDatabase()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewEmployeesAdded = 20
+        repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewEmployeesAdded, pmd.getAllEmployees().size)
+    }
+
+    @Test
+    fun testCorruptingUserDataWithMultiThreading() {
+        val pmd = PureMemoryDatabase()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewUsersAdded = 20
+        repeat(numberNewUsersAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewUsersAdded, pmd.getAllUsers().size)
+    }
+
+    @Test
+    fun testCorruptingTimeEntryDataWithMultiThreading() {
+        val pmd = PureMemoryDatabase()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberTimeEntriesAdded = 20
+        repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                pmd.addTimeEntry(createTimeEntryPreDatabase())
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberTimeEntriesAdded, pmd.getAllTimeEntriesForEmployee(DEFAULT_EMPLOYEE).size)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -252,7 +315,7 @@ class PureMemoryDatabaseTests {
     private fun accumulateMinutesPerEachEmployee(allEmployees: List<Employee>) {
         val (timeToAccumulate) = getTime {
             val minutesPerEmployeeTotal =
-                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).flatMap { it.value }.sumBy { te -> te.time.numberOfMinutes } }
+                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
             logInfo("the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}")
             logInfo("the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}")

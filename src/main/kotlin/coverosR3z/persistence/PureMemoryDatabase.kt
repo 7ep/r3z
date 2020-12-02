@@ -48,10 +48,12 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         )
     }
 
+    @Synchronized
     fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = this.timeEntries) {
-        addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details, null)
+        addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details)
     }
 
+    @Synchronized
     fun addNewProject(projectName: ProjectName) : Int {
         val newIndex = projects.size + 1
         projects.add(Project(ProjectId(newIndex), ProjectName(projectName.value)))
@@ -59,15 +61,21 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return newIndex
     }
 
+    @Synchronized
     fun addNewEmployee(employeename: EmployeeName) : Int {
+        logTrace("PMD: adding new employee, \"${employeename.value}\"")
         val newIndex = employees.size + 1
+        logTrace("PMD: new employee index: $newIndex")
         employees.add(Employee(EmployeeId(newIndex), EmployeeName(employeename.value)))
         serializeEmployeesToDisk(this, dbDirectory)
         return newIndex
     }
 
+    @Synchronized
     fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : Int {
+        logTrace("PMD: adding new user, \"${userName.value}\"")
         val newIndex = users.size + 1
+        logTrace("PMD: new user index: $newIndex")
         users.add(User(UserId(newIndex), userName, hash, salt, employeeId))
         serializeUsersToDisk(this, dbDirectory)
         return newIndex
@@ -97,8 +105,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     /**
      * Return the list of entries for this employee, or just return an empty list otherwise
      */
-    fun getAllTimeEntriesForEmployee(employee: Employee): Map<Date, Set<TimeEntry>> {
-        return timeEntries[employee] ?: emptyMap()
+    fun getAllTimeEntriesForEmployee(employee: Employee): Set<TimeEntry> {
+        return timeEntries[employee]?.flatMap { it.value }?.toSet() ?: emptySet()
     }
 
     fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
@@ -125,11 +133,16 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return employees.toList()
     }
 
+    fun getAllUsers(): List<User> {
+        return users.toList()
+    }
+
     fun getAllProjects(): List<Project> {
         return projects.toList()
     }
 
 
+    @Synchronized
     fun addNewSession(sessionToken: String, user: User, time: DateTime) {
         require (sessions[sessionToken] == null) {"There must not already exist a session for (${user.name}) if we are to create one"}
         sessions[sessionToken] = Session(user, time)
@@ -140,6 +153,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return sessions[sessionToken]?.user ?: NO_USER
     }
 
+    @Synchronized
     fun removeSessionByToken(sessionToken: String) {
         checkNotNull(sessions[sessionToken]) {"There must exist a session in the database for ($sessionToken) in order to delete it"}
         sessions.remove(sessionToken)
@@ -262,7 +276,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun writeDbFile(value: String, name : String, dbDirectory: String) {
-            val dbFileUsers = File(dbDirectory + name + databaseFileSuffix)
+            val pathname = dbDirectory + name + databaseFileSuffix
+            val dbFileUsers = File(pathname)
+            logTrace("about to write to $pathname")
             dbFileUsers.writeText(value)
         }
 
@@ -411,7 +427,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * for regular usage
          */
         private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>>, dbDirectory: String?,
-                                       date: Date, project: Project, employee : Employee, time : Time, details : Details, index : Int?) {
+                                       date: Date, project: Project, employee : Employee, time : Time, details : Details) {
             // get the data for a particular employee
             var employeeTimeEntries = timeEntries[employee]
 
@@ -433,17 +449,15 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
 
             // add the new data
-            employeeTimeDateEntries.add(TimeEntry(
-                    index ?: employeeTimeDateEntries.size + 1,
-                    employee,
-                    project,
-                    time,
-                    date,
-                    details))
+            val newIndex = employeeTimeDateEntries.size + 1
+            logTrace("new time-entry index is $newIndex")
+
+            employeeTimeDateEntries.add(TimeEntry(newIndex, employee, project, time, date, details))
 
             // get all the time entries for the month, to serialize
             val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.flatMap { it.value.filter { it.date.month() == date.month()} }.toSet()
             val filename = "${date.year()}_${date.month()}"
+            logTrace("filename to store time-entries is $filename")
 
             // write it to disk
             writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, employee, filename, dbDirectory)

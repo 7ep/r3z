@@ -294,7 +294,7 @@ const val enterTimeJS = """
 """
 
 
-fun existingTimeEntriesHTML(username : String, te : Map<Date, Set<TimeEntry>>) : String {
+fun existingTimeEntriesHTML(username : String, te : Set<TimeEntry>) : String {
     return """
 <!DOCTYPE html>        
 <html>
@@ -330,7 +330,7 @@ fun existingTimeEntriesHTML(username : String, te : Map<Date, Set<TimeEntry>>) :
             </thead>
             <tbody>
                 
-            """ + te.flatMap { it.value }.joinToString("") { "<tr><td>${safeHtml(it.project.name.value)}</td><td>${it.time.numberOfMinutes}</td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
+            """ + te.joinToString("") { "<tr><td>${safeHtml(it.project.name.value)}</td><td>${it.time.numberOfMinutes}</td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
             </tbody>
         </table>
 

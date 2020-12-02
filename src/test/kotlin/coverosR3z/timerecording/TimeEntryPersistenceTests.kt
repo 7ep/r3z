@@ -36,7 +36,7 @@ class TimeEntryPersistenceTests {
         val actualResult = tep.readTimeEntries(DEFAULT_EMPLOYEE)
 
         val msg = "what we entered and what we get back should be identical, instead got"
-        val listOfResultsMinusId = actualResult.flatMap { it.value }.map { r -> TimeEntryPreDatabase(r.employee, r.project, r.time, r.date, r.details) }.toList()
+        val listOfResultsMinusId = actualResult.map { r -> TimeEntryPreDatabase(r.employee, r.project, r.time, r.date, r.details) }.toList()
         assertEquals(msg, expectedResult, listOfResultsMinusId)
 
     }

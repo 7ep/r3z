@@ -33,7 +33,7 @@ class SeeTimeEntriesBDD {
         val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
 
         // Then I see all of them
-        allEntriesArePresent(entries, dbEntries.flatMap { it.value }.toSet())
+        allEntriesArePresent(entries, dbEntries)
     }
 
     @Test

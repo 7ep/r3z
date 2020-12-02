@@ -13,7 +13,7 @@ class FakeTimeRecordingUtilities(
         var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
         var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
         var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
-        var getAllEntriesForEmployeeBehavior : () -> Map<Date, Set<TimeEntry>> = {emptyMap() },
+        var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = {emptySet() },
         var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
         var listAllProjectsBehavior : () -> List<Project> = {emptyList()} ,
         var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
@@ -41,7 +41,7 @@ class FakeTimeRecordingUtilities(
         return getEntriesForEmployeeOnDateBehavior()
     }
 
-    override fun getAllEntriesForEmployee(employeeId: EmployeeId): Map<Date, Set<TimeEntry>> {
+    override fun getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry> {
         return getAllEntriesForEmployeeBehavior()
     }
 

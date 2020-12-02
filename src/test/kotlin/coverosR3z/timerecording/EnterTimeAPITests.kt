@@ -179,10 +179,7 @@ class EnterTimeAPITests {
     @Test
     fun testDoGetTimeEntriesPage_content() {
         val rd = createRequestData(user = DEFAULT_USER)
-        val mapEntries = mapOf(
-            A_RANDOM_DAY_IN_JUNE_2020 to setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))
-        )
-        tru.getAllEntriesForEmployeeBehavior = {mapEntries}
+        tru.getAllEntriesForEmployeeBehavior = {setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))}
 
         val result = toStr(doGetTimeEntriesPage(tru, rd).fileContents)
 

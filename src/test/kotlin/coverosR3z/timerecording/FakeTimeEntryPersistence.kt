@@ -34,8 +34,8 @@ class FakeTimeEntryPersistence(
         return minutesRecorded
     }
 
-    override fun readTimeEntries(employee: Employee): Map<Date, Set<TimeEntry>> {
-        return mapOf()
+    override fun readTimeEntries(employee: Employee): Set<TimeEntry> {
+        return setOf()
     }
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {

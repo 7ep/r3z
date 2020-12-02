@@ -15,7 +15,7 @@ interface ITimeEntryPersistence {
     /**
      * Get all the time entries for a particular employee
      */
-    fun readTimeEntries(employee: Employee): Map<Date, Set<TimeEntry>>
+    fun readTimeEntries(employee: Employee): Set<TimeEntry>
     fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry>
     fun getProjectByName(name : ProjectName) : Project
     fun getProjectById(id: ProjectId): Project
