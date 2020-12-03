@@ -15,7 +15,7 @@ import org.junit.Test
  * Feature: Entering time
  *
  * Employee story:
- *      As an employee
+ *      As Andrea
  *      I want to record my time
  *      So that I am easily able to document my time in an organized way
  */
@@ -70,6 +70,13 @@ class EnteringTimeBDD {
         // when the employee enters their time
         // then time is saved
 
+    }
+
+    @Test
+    fun `An employee should be able to edit time from a previous time entry` () {
+        //given Andrea has a previous time entry
+        //when she edits her time
+        //then the previous time entry is changed
     }
 
     /*
