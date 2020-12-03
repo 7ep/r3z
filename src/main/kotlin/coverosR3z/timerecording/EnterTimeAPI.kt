@@ -1,10 +1,9 @@
-package coverosR3z.authentication
+package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
-import coverosR3z.timerecording.ITimeRecordingUtilities
 
 enum class EnterTimeElements (val elemName: String, val id: String) {
     PROJECT_INPUT("project_entry", "project_entry"),

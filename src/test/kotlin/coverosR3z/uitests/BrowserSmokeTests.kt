@@ -2,7 +2,7 @@ package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.BrowserVersion.BEST_SUPPORTED
 import coverosR3z.DEFAULT_USER
-import coverosR3z.authentication.EnterTimeElements
+import coverosR3z.timerecording.EnterTimeElements
 import coverosR3z.authentication.LoginElements
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logSettings
