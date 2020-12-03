@@ -1,10 +1,7 @@
-package coverosR3z.misc
+package coverosR3z.logging
 
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logSettings
-import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.server.PreparedResponseData
 import coverosR3z.server.ResponseStatus
 import org.junit.After

@@ -3,6 +3,8 @@ package coverosR3z.server
 import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
+import coverosR3z.logging.handleGETLogging
+import coverosR3z.logging.handlePOSTLogging
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.*

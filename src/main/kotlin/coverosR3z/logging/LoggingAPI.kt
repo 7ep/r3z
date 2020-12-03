@@ -1,9 +1,10 @@
-package coverosR3z.misc
+package coverosR3z.logging
 
 import coverosR3z.domainobjects.User
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logSettings
+import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 
 const val missingLoggingDataInputMsg = "input must not be missing"
