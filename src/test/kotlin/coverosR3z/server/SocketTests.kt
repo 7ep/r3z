@@ -43,6 +43,7 @@ class SocketTests {
     companion object{
         @BeforeClass @JvmStatic
         fun openSockets() {
+            logSettings[LogTypes.TRACE] = true
             serverThread = Thread(ServerSocketInitializer())
             serverThread.start()
             clientSocket = Socket("localhost", 12321)
@@ -62,7 +63,7 @@ class SocketTests {
 
     @Test
     fun testSimpleConversation() {
-        clientSocket.getOutputStream().write("Hello\n".toByteArray())
+        clientSocket.getOutputStream().write("Hello$CRLF".toByteArray())
         val br = BufferedReader(InputStreamReader(serverSocket.inputStream))
         val value = br.readLine()
         assertEquals(value, "Hello")
@@ -70,10 +71,10 @@ class SocketTests {
 
     @Test
     fun test200Response() {
-        client.write("GET / HTTP/1.1\n")
+        client.write("GET / HTTP/1.1$CRLF")
         val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
-            server.write("HTTP/1.1 200 OK\n")
+            server.write("HTTP/1.1 200 OK$CRLF")
         }
         val response = client.readLine()
 
@@ -82,10 +83,10 @@ class SocketTests {
 
     @Test
     fun testShouldGetHtmlResponseFromServer(){
-        client.write("GET / HTTP/1.1\n")
+        client.write("GET / HTTP/1.1$CRLF")
         val serverInput = server.readLine()
         if(serverInput == "GET / HTTP/1.1"){
-            server.write("HTTP/1.1 200 OK\n <!DOCTYPE html>\n (the whole text of the page)\n")
+            server.write("HTTP/1.1 200 OK$CRLF <!DOCTYPE html>$CRLF (the whole text of the page)$CRLF")
         }
 
         client.readLine()
@@ -124,11 +125,11 @@ class SocketTests {
     @Test
     fun testParsingProcess() {
         val expectedRequest = RequestData(Verb.GET, "page", emptyMap(), NO_USER, "foo", listOf("Cookie: blah", "Cookie: sessionId=foo", "Content-Length: 100"))
-        client.write("GET /page HTTP/1.1\n")
-        client.write("Cookie: blah\n")
-        client.write("Cookie: sessionId=foo\n")
-        client.write("Content-Length: 100\n")
-        client.write("\n")
+        client.write("GET /page HTTP/1.1$CRLF")
+        client.write("Cookie: blah$CRLF")
+        client.write("Cookie: sessionId=foo$CRLF")
+        client.write("Content-Length: 100$CRLF")
+        client.write(CRLF)
 
         val parseClientRequest = parseClientRequest(server, au)
         assertEquals("For this GET, we should receive certain data", expectedRequest, parseClientRequest)
@@ -147,11 +148,11 @@ class SocketTests {
             "foo",
             listOf("Cookie: blah", "Cookie: sessionId=foo", "Content-Length: 100")
         )
-        client.write("POST /page HTTP/1.1\n")
-        client.write("Cookie: blah\n")
-        client.write("Cookie: sessionId=foo\n")
-        client.write("Content-Length: 100\n")
-        client.write("\n")
+        client.write("POST /page HTTP/1.1$CRLF")
+        client.write("Cookie: blah$CRLF")
+        client.write("Cookie: sessionId=foo$CRLF")
+        client.write("Content-Length: 100$CRLF")
+        client.write(CRLF)
         client.write("foo=bar&baz=feh")
 
         val parseClientRequest = parseClientRequest(server, au)
@@ -165,7 +166,7 @@ class SocketTests {
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
         // send a request to the server for something that doesn't exist
-        client.write("GET /doesnotexist HTTP/1.1\n\n")
+        client.write("GET /doesnotexist HTTP/1.1$CRLF$CRLF")
 
         // server - handle the request
         Server.handleRequest(server, au, tru)
@@ -189,10 +190,10 @@ class SocketTests {
     fun testShouldGetHtmlFileResponseFromServer_badRequest() {
         // send a request to the server for something that doesn't exist
         val badRequests = listOf(
-                "GET BLAHBLAHBLAH HTTP/1.1\n\n",
-                "GET\n\n",
-                "BLAHBLAHBLAH HTTP/1.1\n\n",
-                "HTTP/1.1\n\n",
+                "GET BLAHBLAHBLAH HTTP/1.1$CRLF$CRLF",
+                "GET$CRLF$CRLF",
+                "BLAHBLAHBLAH HTTP/1.1$CRLF$CRLF",
+                "HTTP/1.1$CRLF$CRLF",
         )
         for (request in badRequests) {
             client.write(request)
@@ -219,7 +220,7 @@ class SocketTests {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_CSS() {
-        client.write("GET /sample.css HTTP/1.1\n\n")
+        client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
 
         // server - handle the request
         Server.handleRequest(server, au, tru)
@@ -243,7 +244,7 @@ class SocketTests {
      */
     @Test
     fun testShouldGetHtmlFileResponseFromServer_JS() {
-        client.write("GET /sample.js HTTP/1.1\n\n")
+        client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
 
         // server - handle the request
         Server.handleRequest(server, au, tru)
@@ -268,8 +269,8 @@ class SocketTests {
      */
     @Test
     fun testShouldGetUnauthorizedResponseAfterPost() {
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1\n")
-        client.write("Content-Length: 63\n\n")
+        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("Content-Length: 63$CRLF$CRLF")
         client.write("project_entry=projecta&time_entry=2&detail_entry=nothing+to+say")
 
         // server - handle the request

@@ -2,6 +2,7 @@ package coverosR3z.authentication
 
 import coverosR3z.*
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.getTime
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -117,13 +118,71 @@ class AuthenticationUtilitiesTests {
         assertEquals(RegistrationResult.USERNAME_ALREADY_REGISTERED, result)
     }
 
-    /**
-     * Say we have "password123", we should get what we know unsalted sha-256 hashes that as
-     */
     @Test
     fun `should create a cryptographically secure hash from a password`() {
         val result = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
         assertEquals(DEFAULT_PASSWORD_HASH, result.value)
+    }
+
+    @Test
+    fun `two different passwords should create different hashes`() {
+        val result = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
+        val result2 = Hash.createHash(Password(DEFAULT_PASSWORD.value + "a"), DEFAULT_SALT)
+        assertNotEquals(result, result2)
+    }
+
+    @Test
+    fun `two large different passwords should create different hashes`() {
+        val result = Hash.createHash(Password("a".repeat(200)), DEFAULT_SALT)
+        val result2 = Hash.createHash(Password("a".repeat(201)), DEFAULT_SALT)
+        assertNotEquals(result, result2)
+    }
+
+    @Test
+    fun `two large equal passwords should create equal hashes`() {
+        val result = Hash.createHash(Password("a".repeat(200)), DEFAULT_SALT)
+        val result2 = Hash.createHash(Password("a".repeat(200)), DEFAULT_SALT)
+        assertEquals(result, result2)
+    }
+
+    @Test
+    fun `two small different passwords should create different hashes`() {
+        val result = Hash.createHash(Password("a".repeat(12)), DEFAULT_SALT)
+        val result2 = Hash.createHash(Password("a".repeat(13)), DEFAULT_SALT)
+        assertNotEquals(result, result2)
+    }
+
+    @Test
+    fun `two small equal passwords should create equal hashes`() {
+        val result = Hash.createHash(Password("a".repeat(12)), DEFAULT_SALT)
+        val result2 = Hash.createHash(Password("a".repeat(12)), DEFAULT_SALT)
+        assertEquals(result, result2)
+    }
+
+    @Test
+    fun `two small different passwords with small salts should create different hashes`() {
+        val result = Hash.createHash(Password("a".repeat(12)), Salt("b"))
+        val result2 = Hash.createHash(Password("a".repeat(13)), Salt("b"))
+        assertNotEquals(result, result2)
+    }
+
+    /**
+     * Contrary to my typical sensibilities, this algorithm we're using for hashing,
+     * (see [Hash.createHash]), goes slowly for security reasons.  According to my
+     * research, by requiring a slow algorithm, an attacker would be very slowed down
+     * in their attempt to brute force their way in.
+     *
+     * In this test we are documenting that slowness.
+     */
+    @Test
+    fun `test I guess this hash algorithm running slowly is part of the appeal`() {
+        val maxMillisAllowed = 1000
+        val (time, _) = getTime{
+            repeat(5) {
+                Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
+            }
+        }
+        assertTrue("We would like to see this run in less than $maxMillisAllowed millis, it took $time", time < maxMillisAllowed)
     }
 
     @Test

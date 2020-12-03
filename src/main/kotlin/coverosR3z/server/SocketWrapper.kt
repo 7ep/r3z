@@ -15,7 +15,8 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
     override fun write(input: String) {
-        logTrace("${name ?: socket} is sending $input")
+        logTrace("${name ?: socket} is sending: ${input.replace("\r", "(CR)").replace("\n", "(LF)")}")
+
         writer.write(input.toByteArray())
     }
 
