@@ -15,7 +15,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
     override fun write(input: String) {
-        logTrace("${name ?: socket} is sending: ${input.replace("\r", "(CR)").replace("\n", "(LF)")}")
+        logTrace{"${name ?: socket} is sending: ${input.replace("\r", "(CR)").replace("\n", "(LF)")}"}
 
         writer.write(input.toByteArray())
     }
@@ -32,7 +32,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
             else -> valueRead
         }
 
-        logTrace("${name ?: socket} read this line: $readResult")
+        logTrace{"${name ?: socket} read this line: $readResult"}
         return valueRead
     }
 
@@ -40,7 +40,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         val buf = CharArray(len)
         val lengthRead = reader.read(buf, 0, len)
         val body = buf.slice(0 until lengthRead).joinToString("")
-        logTrace("$name actually read $lengthRead bytes.  body: $body")
+        logTrace{"$name actually read $lengthRead bytes.  body: $body"}
         return body
     }
 

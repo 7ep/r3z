@@ -84,6 +84,15 @@ fun logTrace(msg: String) {
 /**
  * Logs nearly extraneous levels of detail.
  */
+fun logTrace(msg: () -> String) {
+    if (logSettings[LogTypes.TRACE] == true) {
+        println("${getCurrentMillis()} TRACE: ${msg()}")
+    }
+}
+
+/**
+ * Logs nearly extraneous levels of detail.
+ */
 fun logWarn(msg: String) {
     if (logSettings[LogTypes.WARN] == true) {
         println("${getCurrentMillis()} WARN: $msg")
