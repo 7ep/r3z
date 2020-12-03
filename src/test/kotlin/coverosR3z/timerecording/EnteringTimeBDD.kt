@@ -6,6 +6,7 @@ import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.misc.toStr
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
@@ -67,8 +68,36 @@ class EnteringTimeBDD {
     @Test
     fun `An employee should be able to enter time for previous day`() {
         // given the employee worked 8 hours yesterday
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val alice = systemTru.createEmployee(EmployeeName("Alice"))
+        val userName = UserName("alice_1")
+
+        au.register(userName, DEFAULT_PASSWORD, alice.id)
+        val (_, user) = au.login(userName, DEFAULT_PASSWORD)
+
+        val newProject = systemTru.createProject(DEFAULT_PROJECT_NAME)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
+
+        assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
+
+        val ARBITRARY_TIME = 8*60
+        val ARBITRARY_EMPLOYEE = Employee(EmployeeId(2), EmployeeName("Really don't care"))
+        val entry = createTimeEntryPreDatabase(time = Time(ARBITRARY_TIME), project = newProject, employee = ARBITRARY_EMPLOYEE)
         // when the employee enters their time
+        val data: Map<String, String> = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
+                         EnterTimeElements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
+                         "date" to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
+                         EnterTimeElements.DETAIL_INPUT.elemName to "no problem here")
+        val result = handlePOSTTimeEntry(tru, user, data = data)
+
         // then time is saved
+        assertTrue("we should have gotten the success page.  Got: $result", toStr(result.fileContents).contains("SUCCESS"))
+        //TODO verify that the time entry is actually recorded on the desired date. It is definitely just getting ignored right now
 
     }
 
