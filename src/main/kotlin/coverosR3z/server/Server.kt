@@ -31,7 +31,7 @@ class Server(val port: Int, private val dbDirectory: String) {
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC.  Subsequent entries are offset from this time, in milliseconds")
+        logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
         while (shouldServerKeepRunning) {
