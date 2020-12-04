@@ -10,7 +10,10 @@ enum class Month(val ord: Int) {
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
 
     companion object {
-        fun from(ord: Int): Month? = values().find { it.ord == ord }
+        fun from(ord: Int): Month {
+            check (ord in 1..12) { "Month must comply with arbitrary human divisions of time into 12 similarly sized chunks a year. You tried $ord."}
+            return values().single { it.ord == ord }
+        }
     }
 }
 
@@ -26,7 +29,9 @@ class Date(val epochDay : Int) : Comparable<Date> {
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
 
     init {
-        require(epochDay in 18262..47482) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
+        require(epochDay in LocalDate.of(1980, 1, 1).toEpochDay().toInt()..LocalDate.of(2200, 1, 1).toEpochDay().toInt()) {
+            "no way on earth people are using this before 1980 or past 2200, you had a date of $stringValue"
+        }
     }
 
     fun month() : Int {
@@ -76,8 +81,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
             //ToDo: refactor to incorporate nullity and blankness checks into the checkParseToInt function (duplicated in all usages)
             val valueNotNull = checkNotNull(value){dateNotNullMsg}
             require(valueNotNull.isNotBlank()) {dateNotBlankMsg}
-            val dateInt = checkParseToInt(valueNotNull)
-            return Date(dateInt)
+            val split = value.split("-")
+
+            val buildDate = Date(checkParseToInt(split[0]), Month.from(checkParseToInt(split[1])), checkParseToInt(split[2]))
+            return buildDate
         }
     }
 

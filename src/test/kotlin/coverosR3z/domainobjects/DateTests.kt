@@ -50,4 +50,12 @@ class DateTests {
         assertEquals(makeDate, epochDate)
         assertEquals(ymdDate, epochDate)
     }
+
+    @Test
+    fun testDateParsedCorrectlyFromBrowser() {
+        val dateInFrontendFormat = "2012-07-20"
+        val actual = Date.make(dateInFrontendFormat)
+        val expected = Date(2012, Month.JUL, 20)
+        assertEquals("Date must parse properly when in expected, chrome date widget format", expected, actual)
+    }
 }
