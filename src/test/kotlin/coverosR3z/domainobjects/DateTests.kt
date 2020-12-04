@@ -2,6 +2,7 @@ package coverosR3z.domainobjects
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.time.LocalDate
 
 class DateTests {
 
@@ -34,5 +35,19 @@ class DateTests {
         assertTrue(Date(18262) < Date(18263))
         assertTrue(Date(18262) == Date(18262))
         assertTrue(Date(18263) > Date(18262))
+    }
+
+    /**
+     * Dates created with the epoch date constructor should match Dates
+     * created with the year, month, day, constructor as well as those
+     * created with the make function
+     */
+    @Test
+    fun testDifferentDateConstructors() {
+        val epochDate = Date(33333)
+        val ymdDate = Date(2061, Month.from(4)!!,6)
+        val makeDate = Date.make("33333")
+        assertEquals(makeDate, epochDate)
+        assertEquals(ymdDate, epochDate)
     }
 }

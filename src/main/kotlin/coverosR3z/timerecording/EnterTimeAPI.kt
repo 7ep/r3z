@@ -45,7 +45,7 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
                 employee,
                 project,
                 time,
-                Date.now(),
+                date,
                 details)
 
         tru.recordTime(timeEntry)
