@@ -10,6 +10,7 @@ enum class EnterTimeElements (val elemName: String, val id: String) {
     TIME_INPUT("time_entry", "time_entry"),
     DETAIL_INPUT("detail_entry", "detail_entry"),
     ENTER_TIME_BUTTON("", "enter_time_button"),
+    DATE_INPUT("date_entry", "date_entry")
 }
 
 fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
@@ -35,6 +36,7 @@ fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<Stri
         val projectId = ProjectId.make(data[EnterTimeElements.PROJECT_INPUT.elemName])
         val time = Time.make(data[EnterTimeElements.TIME_INPUT.elemName])
         val details = Details.make(data[EnterTimeElements.DETAIL_INPUT.elemName])
+        val date = Date.make(data[EnterTimeElements.DATE_INPUT.elemName])
 
         val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(user.employeeId){employeeIdNotNullMsg})

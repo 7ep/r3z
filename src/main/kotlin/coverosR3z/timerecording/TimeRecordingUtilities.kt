@@ -92,7 +92,8 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return newEmployee
     }
 
-    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry> {
+        val employee = persistence.getEmployeeById(employeeId)
         return persistence.readTimeEntriesOnDate(employee, date)
     }
 

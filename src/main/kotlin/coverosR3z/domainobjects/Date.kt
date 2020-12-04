@@ -67,6 +67,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
         fun now(): Date {
             return Date(LocalDate.now().toEpochDay().toInt())
         }
+
+        fun make(value: Int): Date {
+            return Date(value)
+        }
     }
 
 }

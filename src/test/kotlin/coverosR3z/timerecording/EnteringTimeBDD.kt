@@ -87,8 +87,10 @@ class EnteringTimeBDD {
         assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
 
         val ARBITRARY_TIME = 8*60
-        val ARBITRARY_EMPLOYEE = Employee(EmployeeId(2), EmployeeName("Really don't care"))
-        val entry = createTimeEntryPreDatabase(time = Time(ARBITRARY_TIME), project = newProject, employee = ARBITRARY_EMPLOYEE)
+//        val ARBITRARY_EMPLOYEE = Employee(EmployeeId(2), EmployeeName("Really don't care"))
+        val entry = createTimeEntryPreDatabase(time = Time(ARBITRARY_TIME),
+            project = newProject,
+            employee = alice)
         // when the employee enters their time
         val data: Map<String, String> = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
                          EnterTimeElements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
@@ -97,8 +99,12 @@ class EnteringTimeBDD {
         val result = handlePOSTTimeEntry(tru, user, data = data)
 
         // then time is saved
-        assertTrue("we should have gotten the success page.  Got: $result", toStr(result.fileContents).contains("SUCCESS"))
-        //TODO verify that the time entry is actually recorded on the desired date. It is definitely just getting ignored right now
+        val message = "we should have gotten the success page.Got: $result"
+        assertTrue(message, toStr(result.fileContents).contains("SUCCESS"))
+        assertTrue(tru.getEntriesForEmployeeOnDate(alice.id, A_RANDOM_DAY_IN_JUNE_2020).any { it.details.value == "no problem here" })
+//        println(tru.getAllEntriesForEmployee(alice.id))
+        //TODO verify that the time entry is actually recorded on the desired date. It is definitely just getting
+        // ignored right now
 
     }
 
