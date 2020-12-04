@@ -27,20 +27,40 @@ private lateinit var serverThread: Thread
 private lateinit var server : SocketWrapper
 private lateinit var client : SocketWrapper
 
+/**
+ * Get a server running, as a thread, so our tests
+ * can run at the same time
+ */
 class ServerSocketInitializer: Runnable {
 
+    /**
+     * Run the server
+     */
     override fun run() {
         halfOpenServerSocket = ServerSocket(12321)
         serverSocket = halfOpenServerSocket.accept()
     }
 }
 
+/**
+ * This series of tests is mostly a relic from using tests
+ * as a driver of design for HTTP protocol through sockets.
+ *
+ * That being the case, changes to this test class should
+ * be minimized, unless we are working out some ideas about
+ * how HTTP protocol works.
+ */
 class SocketTests {
 
     val tru = FakeTimeRecordingUtilities()
     val au = FakeAuthenticationUtilities()
 
     companion object{
+
+        /**
+         * When the class starts, get a server and client socket running
+         * which will be shared amongst the tests
+         */
         @BeforeClass @JvmStatic
         fun openSockets() {
             logSettings[LogTypes.TRACE] = true
@@ -49,12 +69,20 @@ class SocketTests {
             clientSocket = Socket("localhost", 12321)
         }
 
+        /**
+         * Close the server socket, which closes all the sockets
+         */
         @AfterClass @JvmStatic
         fun closeSockets() {
             halfOpenServerSocket.close()
         }
     }
 
+
+    /**
+     * Before each test, hook up fresh input and output streams
+     * for the client and server socket
+     */
     @Before
     fun init() {
         server = SocketWrapper(serverSocket, "server")

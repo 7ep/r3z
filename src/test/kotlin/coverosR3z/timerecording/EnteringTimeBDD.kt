@@ -11,12 +11,13 @@ import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
 
+// personas are listed in the personas.md file
 
 /**
  * Feature: Entering time
  *
  * Employee story:
- *      As Andrea
+ *      As an employee, Andrea
  *      I want to record my time
  *      So that I am easily able to document my time in an organized way
  */
@@ -66,7 +67,7 @@ class EnteringTimeBDD {
     }
 
     @Test
-    fun `An employee should be able to enter time for previous day`() {
+    fun `API_TEST An employee should be able to enter time for previous day`() {
         // given the employee worked 8 hours yesterday
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd)

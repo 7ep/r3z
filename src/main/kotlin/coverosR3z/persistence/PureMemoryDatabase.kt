@@ -54,33 +54,36 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     @Synchronized
-    fun addNewProject(projectName: ProjectName) : Int {
+    fun addNewProject(projectName: ProjectName) : Project {
         logTrace("PMD: adding new project, \"${projectName.value}\"")
         val newIndex = projects.size + 1
         logTrace("PMD: new project index: $newIndex")
-        projects.add(Project(ProjectId(newIndex), ProjectName(projectName.value)))
+        val newProject = Project(ProjectId(newIndex), ProjectName(projectName.value))
+        projects.add(newProject)
         serializeProjectsToDisk(this, dbDirectory)
-        return newIndex
+        return newProject
     }
 
     @Synchronized
-    fun addNewEmployee(employeename: EmployeeName) : Int {
+    fun addNewEmployee(employeename: EmployeeName) : Employee {
         logTrace("PMD: adding new employee, \"${employeename.value}\"")
         val newIndex = employees.size + 1
         logTrace("PMD: new employee index: $newIndex")
-        employees.add(Employee(EmployeeId(newIndex), EmployeeName(employeename.value)))
+        val newEmployee = Employee(EmployeeId(newIndex), EmployeeName(employeename.value))
+        employees.add(newEmployee)
         serializeEmployeesToDisk(this, dbDirectory)
-        return newIndex
+        return newEmployee
     }
 
     @Synchronized
-    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : Int {
+    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
         logTrace("PMD: adding new user, \"${userName.value}\"")
         val newIndex = users.size + 1
         logTrace("PMD: new user index: $newIndex")
-        users.add(User(UserId(newIndex), userName, hash, salt, employeeId))
+        val newUser = User(UserId(newIndex), userName, hash, salt, employeeId)
+        users.add(newUser)
         serializeUsersToDisk(this, dbDirectory)
-        return newIndex
+        return newUser
     }
 
     /**

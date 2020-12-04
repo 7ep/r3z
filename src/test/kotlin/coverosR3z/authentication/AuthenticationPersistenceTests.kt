@@ -1,8 +1,7 @@
 package coverosR3z.authentication
 
-import coverosR3z.DEFAULT_PASSWORD
+import coverosR3z.DEFAULT_HASH
 import coverosR3z.DEFAULT_SALT
-import coverosR3z.domainobjects.Hash
 import coverosR3z.domainobjects.UserName
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.assertEquals
@@ -24,7 +23,7 @@ class AuthenticationPersistenceTests {
     fun `Should be able to create a new user`() {
         val ap : IAuthPersistence = AuthenticationPersistence(PureMemoryDatabase())
 
-        ap.createUser(UserName("jenna"), Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, null)
+        ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, null)
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
     }

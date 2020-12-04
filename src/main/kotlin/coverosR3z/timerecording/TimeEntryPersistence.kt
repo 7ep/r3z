@@ -23,18 +23,12 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
 
     override fun persistNewProject(projectName: ProjectName): Project {
         logDebug("Recording a new project, ${projectName.value}, to the database")
-        val newId = pmd.addNewProject(projectName)
-        check(newId > 0) {"A valid project will receive a positive id"}
-        return Project(ProjectId(newId), ProjectName(projectName.value))
+        return pmd.addNewProject(projectName)
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
         logDebug("Recording a new employee, \"${employeename.value}\", to the database")
-
-        val newId = pmd.addNewEmployee(employeename)
-
-        check(newId > 0) {"A valid employee will receive a positive id"}
-        return Employee(EmployeeId(newId), employeename)
+        return pmd.addNewEmployee(employeename)
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Time {

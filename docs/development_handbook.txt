@@ -202,7 +202,7 @@ Developer handbook
 
     types of logs:
 
-    INFO - Business-related content.  Be very strict here about what constitutes business.
+    AUDIT - Business-related content.  Be very strict here about what constitutes business.
 
     DEBUG - Less-relevant business content and the large bulk of technical logging
 
@@ -217,5 +217,12 @@ Developer handbook
            has to be a balance trying to accommodate literally every imaginable thing
            that could ever happen (which is impossible to program).
 
-    Also note: When the server starts, it prints the current DateTime, and all subsequent log entries
-               are how far away we are from that point in time, in milliseconds.
+
+    notes:
+    1. When the server starts, it prints the current DateTime, and all subsequent log entries
+       are how far away we are from that point in time, in milliseconds.
+    2. In the log API, there are some that expect an input to be a lambda, like logTrace(msg: () -> String)
+       That is a technique so anything we pass in to the function won't be actually run unless
+       the log level is used.  So for example, if we turn off the TRACE level, that means
+       any complex logic we pass in to logTrace{ complex_stuff_here } simply won't get run, helping
+       performance.

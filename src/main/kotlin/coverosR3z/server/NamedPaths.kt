@@ -41,8 +41,4 @@ enum class NamedPaths(val path: String) {
     // Logging configuration - turn on / off logging
     LOGGING("logging"),
 
-    /**
-     * A special page, this shuts the server down
-     */
-    SHUTDOWN_SERVER("shutdown"),
 }

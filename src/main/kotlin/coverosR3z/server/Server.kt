@@ -27,6 +27,7 @@ class Server(val port: Int, private val dbDirectory: String) {
 
     fun startServer() {
         halfOpenServerSocket = ServerSocket(port)
+
         val cu = CurrentUser(SYSTEM_USER)
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
@@ -34,10 +35,9 @@ class Server(val port: Int, private val dbDirectory: String) {
         logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
-        while (shouldServerKeepRunning) {
+        while(true) {
             logTrace("waiting for socket connection")
             val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-            if (!shouldServerKeepRunning) {break}
             val thread = Thread {
                 logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
                 do {
@@ -46,20 +46,16 @@ class Server(val port: Int, private val dbDirectory: String) {
                     if (shouldKeepAlive) {
                         logTrace("This is a keep-alive connection")
                     }
-                } while(shouldServerKeepRunning && shouldKeepAlive)
+                } while(shouldKeepAlive)
 
                 logTrace("closing server socket")
                 server.close()
             }
             cachedThreadPool.submit(thread)
         }
-        logTrace("Closing the primary server socket")
-        halfOpenServerSocket.close()
     }
 
     companion object {
-
-        var shouldServerKeepRunning = true
 
         /**
          * Given the command-line arguments, returns the first value
@@ -85,9 +81,6 @@ class Server(val port: Int, private val dbDirectory: String) {
                 val truWithUser = tru.changeUser(cu)
                 logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, requestData))
-            } catch (ex : SocketTimeoutException) {
-                logTrace("Socket timed out: ${ex.message}")
-                return requestData
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message ?: "NO ERROR MESSAGE DEFINED")
             }

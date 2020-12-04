@@ -56,7 +56,6 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, REGISTER.path) -> doGETRegisterPage(tru, rd)
         Pair(Verb.GET, CREATE_PROJECT.path) -> doGETCreateProjectPage(rd)
         Pair(Verb.GET, LOGOUT.path) -> doGETLogout(au, rd)
-        Pair(Verb.GET, SHUTDOWN_SERVER.path) -> handleGETShutdownServer(rd.user)
         Pair(Verb.GET, LOGGING.path) -> handleGETLogging(user)
 
         // posts
@@ -102,16 +101,6 @@ private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
         }
     }
 }
-
-fun handleGETShutdownServer(user: User): PreparedResponseData {
-    return if (isAuthenticated(user)) {
-        Server.shouldServerKeepRunning = false
-        okHTML(successHTML)
-    } else {
-        redirectTo(HOMEPAGE.path)
-    }
-}
-
 
 fun isAuthenticated(u : User) : Boolean {
     return u != NO_USER

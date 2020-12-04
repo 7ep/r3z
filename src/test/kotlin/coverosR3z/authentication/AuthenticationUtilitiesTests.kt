@@ -120,15 +120,13 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun `should create a cryptographically secure hash from a password`() {
-        val result = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
-        assertEquals(DEFAULT_PASSWORD_HASH, result.value)
+        assertEquals(DEFAULT_HASH_STRING, DEFAULT_HASH.value)
     }
 
     @Test
     fun `two different passwords should create different hashes`() {
-        val result = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
         val result2 = Hash.createHash(Password(DEFAULT_PASSWORD.value + "a"), DEFAULT_SALT)
-        assertNotEquals(result, result2)
+        assertNotEquals(DEFAULT_HASH, result2)
     }
 
     @Test
@@ -179,7 +177,7 @@ class AuthenticationUtilitiesTests {
         val maxMillisAllowed = 1000
         val (time, _) = getTime{
             repeat(5) {
-                Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
+                DEFAULT_HASH
             }
         }
         assertTrue("We would like to see this run in less than $maxMillisAllowed millis, it took $time", time < maxMillisAllowed)
@@ -202,7 +200,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `two salts should give differeing hashes`() {
-        val first = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
+        val first = DEFAULT_HASH
         val salt = Hash.getSalt()
         val second = Hash.createHash(DEFAULT_PASSWORD, salt)
         assertNotEquals(first, second)
@@ -224,7 +222,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, null) }
+        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -234,7 +232,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, null) }
+        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }
