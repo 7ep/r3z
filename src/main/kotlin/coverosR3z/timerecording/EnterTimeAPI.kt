@@ -90,7 +90,12 @@ fun entertimeHTML(username: String, projects : List<Project>) : String {
                 <label for="${EnterTimeElements.DETAIL_INPUT.elemName}">Details:</label>
                 <input name="${EnterTimeElements.DETAIL_INPUT.elemName}" id="${EnterTimeElements.DETAIL_INPUT.id}" type="text" />
             </p>
-
+            
+            <p>
+                <label for="${EnterTimeElements.DATE_INPUT.elemName}">Date:</label>
+                <input name="${EnterTimeElements.DATE_INPUT.elemName}" id="${EnterTimeElements.DATE_INPUT.id}" type="date" />
+            </p>
+            
             <p>
                 <button id="${EnterTimeElements.ENTER_TIME_BUTTON.id}">Enter time</button>
             </p>
