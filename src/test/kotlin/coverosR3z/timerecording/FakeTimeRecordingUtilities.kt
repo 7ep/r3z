@@ -37,7 +37,7 @@ class FakeTimeRecordingUtilities(
         return createEmployeeBehavior()
     }
 
-    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry> {
         return getEntriesForEmployeeOnDateBehavior()
     }
 

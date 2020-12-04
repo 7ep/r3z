@@ -19,7 +19,7 @@ interface ITimeRecordingUtilities {
      * system (persists it to the database)
      */
     fun createEmployee(employeename: EmployeeName) : Employee
-    fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry>
+    fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
     fun getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
     fun listAllProjects(): List<Project>
     fun findProjectById(id: ProjectId): Project

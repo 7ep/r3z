@@ -159,15 +159,26 @@ class EnterTimeAPITests {
     @Test
     fun testHandlePOSTTimeEntry_nonNumericTime() {
         val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "aaa", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say")
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER, data) }
         assertEquals("Must be able to parse aaa as integer", ex.message)
+    }
+
+    @Test
+    fun testHandlePOSTTimeEntry_providedDate() {
+        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1",
+                         EnterTimeElements.TIME_INPUT.elemName to "60",
+                         EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
+                         EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue)
+        val result = handlePOSTTimeEntry(tru, DEFAULT_USER, data)
+        assertTrue("Must be able to find an entry on the provided date",
+                   tru.getEntriesForEmployeeOnDate(DEFAULT_USER.employeeId!!, A_RANDOM_DAY_IN_JUNE_2020).isNotEmpty())
     }
 
     /**
      * Just to check that we get the proper OK result when we authenticate.
      */
     @Test
-    fun testDoGetTimeEntriesPage() {
+    fun testDoGETTimeEntriesPage() {
         val rd = createRequestData(user = DEFAULT_USER)
         val result = doGetTimeEntriesPage(tru, rd)
         assertEquals(ResponseStatus.OK, result.responseStatus)
@@ -177,7 +188,7 @@ class EnterTimeAPITests {
      * Checking some of the content
      */
     @Test
-    fun testDoGetTimeEntriesPage_content() {
+    fun testDoGETTimeEntriesPage_content() {
         val rd = createRequestData(user = DEFAULT_USER)
         tru.getAllEntriesForEmployeeBehavior = {setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))}
 
@@ -191,7 +202,7 @@ class EnterTimeAPITests {
      * the homepage.  We'll just check a redirect happened.
      */
     @Test
-    fun testDoGetTimeEntriesPageUnAuth() {
+    fun testDoGETTimeEntriesPageUnAuth() {
         val rd = createRequestData(user = NO_USER)
         val result = doGetTimeEntriesPage(tru, rd)
         assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
