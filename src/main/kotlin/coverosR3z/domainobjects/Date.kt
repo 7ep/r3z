@@ -1,7 +1,10 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.checkParseToInt
 import java.time.LocalDate
 
+const val dateNotNullMsg = "date must not be null"
+const val dateNotBlankMsg = "date must not be blank"
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
@@ -68,13 +71,14 @@ class Date(val epochDay : Int) : Comparable<Date> {
             return Date(LocalDate.now().toEpochDay().toInt())
         }
 
-        fun make(value: Int): Date {
-            return Date(value)
+        //expecting a date as only digits as an epoch day
+        fun make(value: String?): Date {
+            //ToDo: refactor to incorporate nullity and blankness checks into the checkParseToInt function (duplicated in all usages)
+            val valueNotNull = checkNotNull(value){dateNotNullMsg}
+            require(valueNotNull.isNotBlank()) {dateNotBlankMsg}
+            val dateInt = checkParseToInt(valueNotNull)
+            return Date(dateInt)
         }
     }
 
 }
-
-
-
-
