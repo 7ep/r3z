@@ -6,15 +6,13 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.logging.getCurrentMillis
-import coverosR3z.logging.logDebug
-import coverosR3z.logging.logStart
-import coverosR3z.logging.logTrace
+import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
 
@@ -35,23 +33,30 @@ class Server(val port: Int, private val dbDirectory: String) {
         logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
-        while(true) {
-            logTrace("waiting for socket connection")
-            val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-            val thread = Thread {
-                logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
-                do {
-                    val requestData = handleRequest(server, au, tru)
-                    val shouldKeepAlive =  requestData.headers.any{it.toLowerCase().contains("connection: keep-alive")}
-                    if (shouldKeepAlive) {
-                        logTrace("This is a keep-alive connection")
-                    }
-                } while(shouldKeepAlive)
+        try {
+            while (true) {
+                logTrace("waiting for socket connection")
 
-                logTrace("closing server socket")
-                server.close()
+                val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
+                val thread = Thread {
+                    logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
+                    do {
+                        val requestData = handleRequest(server, au, tru)
+                        val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                        if (shouldKeepAlive) {
+                            logTrace("This is a keep-alive connection")
+                        }
+                    } while (shouldKeepAlive)
+
+                    logTrace("closing server socket")
+                    server.close()
+                }
+                cachedThreadPool.submit(thread)
             }
-            cachedThreadPool.submit(thread)
+        } catch (ex : SocketException) {
+            if (ex.message == "Interrupted function call: accept failed") {
+                logWarn("Server was shutdown while waiting on accept")
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
@@ -33,6 +34,15 @@ fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): Prepare
 fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
     return if (isAuthenticated) {
+        val requiredData = setOf(
+                EnterTimeElements.PROJECT_INPUT.elemName,
+                EnterTimeElements.TIME_INPUT.elemName,
+                EnterTimeElements.DETAIL_INPUT.elemName,
+                EnterTimeElements.DATE_INPUT.elemName,
+        )
+        if (data.keys != requiredData) {
+            throw InexactInputsException("expected inputs: ${requiredData}. received inputs: ${data.keys}")
+        }
         val projectId = ProjectId.make(data[EnterTimeElements.PROJECT_INPUT.elemName])
         val time = Time.make(data[EnterTimeElements.TIME_INPUT.elemName])
         val details = Details.make(data[EnterTimeElements.DETAIL_INPUT.elemName])

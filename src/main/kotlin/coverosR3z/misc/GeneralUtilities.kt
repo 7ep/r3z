@@ -20,8 +20,8 @@ fun checkParseToInt(value: String?,
                     nullMsg: () -> String = {"Must not be a null value"},
                     blankMsg: () -> String = {"Must not be blank"},
                     parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as integer"}): Int {
-    val notNullValue = requireNotNull(value){ nullMsg }
-    require(notNullValue.isNotBlank()) { blankMsg }
+    val notNullValue = requireNotNull(value){ nullMsg() }
+    require(notNullValue.isNotBlank()) { blankMsg() }
     return try {
         notNullValue.toInt()
     } catch (ex: java.lang.NumberFormatException) {

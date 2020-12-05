@@ -49,7 +49,7 @@ data class EmployeeId(val value: Int) {
          * You can pass the id as a string and we'll try to parse it
          */
         fun make(value: String?) : EmployeeId {
-            return EmployeeId(checkParseToInt(value))
+            return EmployeeId(checkParseToInt(value, {employeeIdNotNullMsg}, {employeeIdCannotBeBlank}))
         }
     }
 }

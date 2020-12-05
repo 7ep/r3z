@@ -2,6 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.exceptions.DuplicateInputsException
 import coverosR3z.misc.getTime
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
@@ -45,10 +46,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseData_PERFORMANCE() {
-        var input = ""
+        var input = "project_entry0=projecta&time_entry0=2&detail_entry0=nothing+to+say"
         for (i in 1..1000) {
             input +=
-            "project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
+            "&project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
         }
 
         val (time, _) = getTime {parsePostedData(input)}
@@ -76,9 +77,9 @@ class ServerUtilitiesTests {
     fun testShouldHandleBadInputBadly_InvalidFormat() {
         // input cannot be split at all
         val input = "foo"
-        val ex = assertThrows(IllegalArgumentException::class.java) { parsePostedData(input)}
+        val ex = assertThrows(IllegalStateException::class.java) { parsePostedData(input)}
 
-        assertEquals("We failed to parse \"foo\" as application/x-www-form-urlencoded", ex.message)
+        assertEquals("Splitting on = should return 2 values.  Input was foo", ex.message)
     }
 
     /**
@@ -119,6 +120,18 @@ class ServerUtilitiesTests {
         val result = parsePostedData(input)
 
         assertEquals(expected, result)
+    }
+
+    /**
+     * Should throw an exception if we receive multiple
+     * items with the same name, e.g. foo=123 and foo=abc
+     */
+    @Test
+    fun testShouldParse_FailWhenDuplicates() {
+        val input = "foo=abc&foo=123"
+
+        val ex = assertThrows(DuplicateInputsException::class.java) {parsePostedData(input)}
+        assertEquals("foo was duplicated in the post body - had values of abc and 123", ex.message)
     }
 
     /**

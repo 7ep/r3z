@@ -1,31 +1,14 @@
 package coverosR3z.server
 
 import coverosR3z.DEFAULT_DB_DIRECTORY
+import coverosR3z.logging.LogTypes
+import coverosR3z.logging.logSettings
 import org.junit.Assert.*
 import org.junit.Test
 import java.net.Socket
 import kotlin.concurrent.thread
 
 class ServerTests {
-
-    /**
-     * If we pass in a path of "shutdown" when we are logged in
-     * it should shut the server down
-     */
-    @Test
-    fun testShouldShutdownServer() {
-        val serverObject = Server(8080, DEFAULT_DB_DIRECTORY)
-        val thread: Thread = thread {
-            serverObject.startServer()
-        }
-        val clientSocket = Socket("localhost", 12321)
-        val client = SocketWrapper(clientSocket, "client")
-        client.write("GET /shutdown HTTP/1.1$CRLF")
-        client.write("Cookie: sessionId=blahblahblah$CRLF")
-
-        thread.join()
-        assertTrue(serverObject.halfOpenServerSocket.isClosed)
-    }
 
     /**
      * When we start the server, we pass in a value for the port
@@ -37,20 +20,26 @@ class ServerTests {
     }
 
     /**
-     * If a general unhandled exception happens, we pass its message to the
-     * client as a 500 error
+     * If we try something and are unauthenticated,
+     * receive a 401 error page
      */
     @Test
-    fun testShouldReturnErrorsAs500Page() {
+    fun testShouldReturnUnauthenticatedAs401Page() {
+        logSettings[LogTypes.TRACE] = true
         val serverObject = Server(8080, DEFAULT_DB_DIRECTORY)
         thread { serverObject.startServer() }
-        val clientSocket = Socket("localhost", 12321)
+        val clientSocket = Socket("localhost", 8080)
         val client = SocketWrapper(clientSocket, "client")
-        client.write("INVALID TEXT HERE$CRLF")
+
+        client.write("POST /entertime HTTP/1.1$CRLF")
+        val body = "test=test"
+        client.write("Content-Length: ${body.length}$CRLF$CRLF")
+        client.write(body)
 
         val statusline = client.readLine()
 
         serverObject.halfOpenServerSocket.close()
-        assertEquals(ResponseStatus.INTERNAL_SERVER_ERROR.value, statusline)
+        assertEquals("HTTP/1.1 401 UNAUTHORIZED", statusline)
     }
+
 }
