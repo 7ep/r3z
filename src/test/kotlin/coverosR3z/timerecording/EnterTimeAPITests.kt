@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.*
 import coverosR3z.authentication.*
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.toStr
 import coverosR3z.server.*
 import org.junit.Assert.*
@@ -219,6 +220,60 @@ class EnterTimeAPITests {
         val result = doGETEnterTimePage(tru, rd)
         assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
     }
+
+    /**
+     * What should happen if we send too many inputs to the API?
+     * It should complain.  We want precision.
+     *
+     * In this test we expect project, time, detail, and date to
+     * be sent.  If we get project, time, detail, FOO, and date,
+     * we throw the exception
+     *
+     * See [InexactInputsException]
+     */
+    @Test
+    fun testDoPOST_TooManyInputs() {
+        val data = mapOf(
+                EnterTimeElements.PROJECT_INPUT.elemName to "1",
+                EnterTimeElements.TIME_INPUT.elemName to "60",
+                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+
+        val ex = assertThrows(InexactInputsException::class.java) { handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents }
+        assertEquals("expected inputs: (project, time, detail, date). received inputs: (project, time, detail, foo, date)", ex.message)
+    }
+
+    /**
+     * What should happen if we somehow receive duplicate inputs,
+     * like if we expect an input named "foo" and get two of them
+     * sent our way? Complain, of course.
+     *
+     * In this test we expect project, time, detail, and date to
+     * be sent.  If we get project, project, time, detail, and date,
+     * we throw the exception
+     *
+     * See [InexactInputsException]
+     */
+    @Test
+    fun testDoPOST_DuplicateInputs() {
+        val data = mapOf(
+                EnterTimeElements.PROJECT_INPUT.elemName to "1",
+                EnterTimeElements.TIME_INPUT.elemName to "60",
+                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+
+        val ex = assertThrows(InexactInputsException::class.java) { handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents }
+        assertEquals("expected inputs: (project, time, detail, date). received inputs: (project, project, time, detail, date)", ex.message)
+    }
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
 
     /**
      * A helper method to make a [RequestData] easier.

@@ -16,11 +16,16 @@ fun generateRandomString(size : Int): String {
  * Returns the value parsed as an int.  If this fails, returns
  * an [IllegalStateException] with the message
  */
-fun checkParseToInt(value: String, msg: () -> String = {"Must be able to parse $value as integer"}): Int {
+fun checkParseToInt(value: String?,
+                    nullMsg: () -> String = {"Must not be a null value"},
+                    blankMsg: () -> String = {"Must not be blank"},
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as integer"}): Int {
+    val notNullValue = requireNotNull(value){ nullMsg }
+    require(notNullValue.isNotBlank()) { blankMsg }
     return try {
-        value.toInt()
+        notNullValue.toInt()
     } catch (ex: java.lang.NumberFormatException) {
-        throw IllegalStateException(msg())
+        throw IllegalStateException(parseMsg())
     }
 }
 

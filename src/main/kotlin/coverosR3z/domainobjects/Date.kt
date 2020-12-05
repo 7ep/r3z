@@ -29,8 +29,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
 
     init {
-        require(epochDay in LocalDate.of(1980, 1, 1).toEpochDay().toInt()..LocalDate.of(2200, 1, 1).toEpochDay().toInt()) {
-            "no way on earth people are using this before 1980 or past 2200, you had a date of $stringValue"
+        val beginDate = LocalDate.of(1980, 1, 1).toEpochDay()
+        val endDate = LocalDate.of(2200, 1, 1).toEpochDay()
+        require(epochDay.toLong() in beginDate..endDate) {
+            "no way on earth people are using this before $beginDate or past $endDate, you had a date of $stringValue"
         }
     }
 
@@ -76,15 +78,18 @@ class Date(val epochDay : Int) : Comparable<Date> {
             return Date(LocalDate.now().toEpochDay().toInt())
         }
 
-        //expecting a date as only digits as an epoch day
+        /**
+         * Takes a string value in a format like: "2020-06-20"
+         * and returns a date.
+         */
         fun make(value: String?): Date {
             //ToDo: refactor to incorporate nullity and blankness checks into the checkParseToInt function (duplicated in all usages)
             val valueNotNull = checkNotNull(value){dateNotNullMsg}
             require(valueNotNull.isNotBlank()) {dateNotBlankMsg}
             val split = value.split("-")
+            check(split.count() == 3) {"Input to this function must split to exactly three parts"}
 
-            val buildDate = Date(checkParseToInt(split[0]), Month.from(checkParseToInt(split[1])), checkParseToInt(split[2]))
-            return buildDate
+            return Date(checkParseToInt(split[0]), Month.from(checkParseToInt(split[1])), checkParseToInt(split[2]))
         }
     }
 

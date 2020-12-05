@@ -204,7 +204,7 @@ class PureMemoryDatabaseTests {
         val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, projects, employees)
 
         val (timeToSerialize, serializedTimeEntries) = getTime{PureMemoryDatabase.serializeTimeEntries(timeEntries)}
-        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, employees, projects)}
+        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, "", employees, projects)}
 
         logAudit("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
         logAudit("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
@@ -482,9 +482,30 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
         
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/timeentries/1/2020_11").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6.json").writeText("BAD DATA HERE")
 
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Could not deserialize time entry file 2020_6.json.  deserializer exception message: Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
+    }
+
+    /**
+     * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
+     */
+    @Test
+    fun testPersistence_Read_CorruptedData_Employees_BadData() {
+        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
+        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
+        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+
+        // corrupt the employees data file
+        File("$DEFAULT_DB_DIRECTORY/employees.json").writeText("BAD DATA HERE")
+        
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Could not read employees file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
     }
 
     /**
@@ -492,44 +513,6 @@ class PureMemoryDatabaseTests {
      * that definitely should not be missing?  I think the most appropriate
      * response is to halt and yell for help, because at that point all
      * bets are off, , we won't have enough information to properly recover.
-     */
-    @Test
-    fun testPersistence_Read_CorruptedData_TimeEntries_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-
-        // delete a necessary file
-        File(DEFAULT_DB_DIRECTORY + "/timeentries").deleteRecursively()
-
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
-    }
-
-    /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
-     */
-    @Test
-    fun testPersistence_Read_CorruptedData_Employeess_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-
-        // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/timeentries/1/2020_11").writeText("BAD DATA HERE")
-        
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
-    }
-
-    /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_MissingFile]
      */
     @Test
     fun testPersistence_Read_CorruptedData_Employees_MissingFile() {
@@ -542,16 +525,18 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File(DEFAULT_DB_DIRECTORY + "/employees.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/employees.json").delete()
 
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Unable to find an employee with the id of 2 based on entry in timeentries/", ex.message)
     }
-    
+
     /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
+     * In the time entries directory we store files by employee id.  If we look inside
+     * a directory and find no files, that indicates a data corruption.
      */
     @Test
-    fun testPersistence_Read_CorruptedData_Userss_BadData() {
+    fun testPersistence_Read_CorruptedData_TimeEntries_MissingFile() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -560,14 +545,33 @@ class PureMemoryDatabaseTests {
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
-        // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/timeentries/1/2020_11").writeText("BAD DATA HERE")
+        // delete a necessary time entry file inside this employees' directory
+        File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/").listFiles()?.forEach { it.delete() }
+
+        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+    }
+    
+    /**
+     * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
+     */
+    @Test
+    fun testPersistence_Read_CorruptedData_Users_BadData() {
+        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
+        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
+        pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
+        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+
+        // corrupt the users data file
+        File("$DEFAULT_DB_DIRECTORY/users.json").writeText("BAD DATA HERE")
         
         assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
     }
     
     /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_MissingFile]
+     * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
     @Test
     fun testPersistence_Read_CorruptedData_Users_MissingFile() {
@@ -580,16 +584,17 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File(DEFAULT_DB_DIRECTORY + "/users.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/users.json").delete()
 
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
     /**
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
     @Test
-    fun testPersistence_Read_CorruptedData_Projectss_BadData() {
+    fun testPersistence_Read_CorruptedData_Projects_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -598,14 +603,15 @@ class PureMemoryDatabaseTests {
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
-        // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/timeentries/1/2020_11").writeText("BAD DATA HERE")
+        // corrupt the projects data file
+        File("$DEFAULT_DB_DIRECTORY/projects.json").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Could not read projects file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
     }
     
     /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_MissingFile]
+     * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
     @Test
     fun testPersistence_Read_CorruptedData_Projects_MissingFile() {
@@ -618,9 +624,10 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File(DEFAULT_DB_DIRECTORY + "/projects.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/projects.json").delete()
 
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
     /**
@@ -639,25 +646,6 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/sessions.json").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
-    }
-    
-    /**
-     * See [testPersistence_Read_CorruptedData_TimeEntries_MissingFile]
-     */
-    @Test
-    fun testPersistence_Read_CorruptedData_Sessions_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-
-        // delete a necessary file
-        File(DEFAULT_DB_DIRECTORY + "/sessions.json").delete()
-
         assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
     }
 

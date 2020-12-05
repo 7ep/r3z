@@ -5,7 +5,6 @@ import coverosR3z.misc.checkParseToInt
 const val MAX_DETAILS_LENGTH = 500
 const val timeNotNullMsg = "time_entry must not be null"
 const val detailsNotNullMsg = "details must not be null"
-const val timeNotBlankMsg = "time_entry must not be blank"
 const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in minutes: "
 const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
 
@@ -34,10 +33,7 @@ data class Time(val numberOfMinutes : Int) {
 
     companion object {
         fun make(value: String?) : Time {
-            val time = checkNotNull(value) {timeNotNullMsg}
-            require(time.isNotBlank()) {timeNotBlankMsg}
-            val timeInt = checkParseToInt(time)
-            return Time(timeInt)
+            return Time(checkParseToInt(value))
         }
     }
 }

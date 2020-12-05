@@ -49,10 +49,7 @@ data class EmployeeId(val value: Int) {
          * You can pass the id as a string and we'll try to parse it
          */
         fun make(value: String?) : EmployeeId {
-            val id = requireNotNull(value) {employeeIdNotNullMsg}
-            require(id.isNotBlank()) {employeeIdCannotBeBlank}
-            val idInt = checkParseToInt(id)
-            return EmployeeId(idInt)
+            return EmployeeId(checkParseToInt(value))
         }
     }
 }

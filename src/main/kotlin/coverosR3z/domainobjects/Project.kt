@@ -43,10 +43,7 @@ data class ProjectId(val value: Int) {
 
     companion object {
         fun make(value: String?) : ProjectId {
-            val id = checkNotNull(value) {projectIdNotNullMsg}
-            require(id.isNotBlank()) {projectIdNotBlankMsg}
-            val idInt = checkParseToInt(id)
-            return ProjectId(idInt)
+            return ProjectId(checkParseToInt(value))
         }
     }
 }

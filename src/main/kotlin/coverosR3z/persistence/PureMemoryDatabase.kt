@@ -1,12 +1,14 @@
 package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.logging.logStart
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
@@ -321,7 +323,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * database directory exists
          */
         fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
-            if (! File(dbDirectory).exists()) {
+            val topDirectory = File(dbDirectory)
+            val innerFiles = topDirectory.listFiles()
+            if ((! topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
                 logStart("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
                 return null
             }
@@ -336,16 +340,25 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
+            val timeEntriesDirectory = "timeentries/"
             return try {
                 val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
 
-                for (employeeDirectory: File in File(dbDirectory + "timeentries/").listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
-                    val employee: Employee = employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
+                for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
+                    val employee : Employee = try {
+                        employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
+                    } catch (ex : NoSuchElementException) {
+                        throw DatabaseCorruptedException("Unable to find an employee with the id of ${employeeDirectory.name} based on entry in $timeEntriesDirectory")
+                    }
                     val simpleTimeEntries = mutableSetOf<TimeEntry>()
 
                     // loop through all the files of time entries for this employee, collecting them
-                    for (monthlyTimeEntries: File in employeeDirectory.listFiles()?.filter { it.isFile } ?: throw IllegalStateException("no files found in employees directory")) {
-                        simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), setOf(employee), projects))
+                    val timeEntryFiles = employeeDirectory.listFiles()
+                    if (timeEntryFiles.isNullOrEmpty()) {
+                        throw DatabaseCorruptedException("no time entry files found in employees directory at ${employeeDirectory.path}")
+                    }
+                    for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
+                        simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), monthlyTimeEntries.name, setOf(employee), projects))
                     }
 
                     val orderedTimeEntries: MutableMap<Date, MutableSet<TimeEntry>> = simpleTimeEntries.groupBy{it.date}.mapValues {it.value.toMutableSet()}.toMutableMap()
@@ -400,29 +413,50 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeProjects(projectsFile: String): MutableSet<Project> {
-            val read: Set<ProjectSurrogate> = jsonSerializer.decodeFromString(SetSerializer(ProjectSurrogate.serializer()), projectsFile)
+            val read: Set<ProjectSurrogate> = try {
+               jsonSerializer.decodeFromString(SetSerializer(ProjectSurrogate.serializer()), projectsFile)
+            } catch(ex : SerializationException) {
+                throw DatabaseCorruptedException("Could not read projects file. ${ex.message?.replace("\n"," - ")}")
+            }
             return read.map {ProjectSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
         private fun deserializeEmployees(employeesFile: String): MutableSet<Employee> {
-            val read: Set<EmployeeSurrogate> = jsonSerializer.decodeFromString(SetSerializer(EmployeeSurrogate.serializer()), employeesFile)
+
+            val read: Set<EmployeeSurrogate> = try {
+                jsonSerializer.decodeFromString(SetSerializer(EmployeeSurrogate.serializer()), employeesFile)
+            } catch(ex : SerializationException) {
+                throw DatabaseCorruptedException("Could not read employees file. ${ex.message?.replace("\n"," - ")}")
+            }
             return read.map {EmployeeSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
         private fun deserializeSessions(sessionsFile: String, users: Set<User>): MutableMap<String, Session> {
-            val read: Map<String, SessionSurrogate> = jsonSerializer.decodeFromString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), sessionsFile)
+            val read: Map<String, SessionSurrogate> = try {
+                jsonSerializer.decodeFromString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), sessionsFile)
+            } catch (ex : SerializationException) {
+                throw DatabaseCorruptedException("Could not read sessions file. ${ex.message?.replace("\n"," - ")}")
+            }
             val newMap = mutableMapOf<String, Session>()
             read.mapValuesTo(newMap, {SessionSurrogate.fromSurrogate(it.value, users)})
             return newMap
         }
 
         private fun deserializeUsers(usersFile: String): MutableSet<User> {
-            val read: Set<UserSurrogate> = jsonSerializer.decodeFromString(SetSerializer(UserSurrogate.serializer()), usersFile)
+            val read: Set<UserSurrogate> = try {
+                jsonSerializer.decodeFromString(SetSerializer(UserSurrogate.serializer()), usersFile)
+            } catch (ex : SerializationException) {
+                throw DatabaseCorruptedException("Could not read users file. ${ex.message?.replace("\n"," - ")}")
+            }
             return read.map {UserSurrogate.fromSurrogate(it)}.toMutableSet()
         }
 
-        fun deserializeTimeEntries(timeEntriesFile: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
-            val tessEntries = jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntriesFile)
+        fun deserializeTimeEntries(timeEntries: String, filename: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
+            val tessEntries = try {
+                jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntries)
+            } catch (ex : SerializationException) {
+                throw DatabaseCorruptedException("Could not deserialize time entry file $filename.  deserializer exception message: ${ex.message?.replace("\n"," - ")}")
+            }
             return tessEntries.map { Tess.fromSurrogate(it, employees, projects) }.toSet()
         }
 
@@ -504,7 +538,24 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
 
             fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-                return TimeEntry(te.i, employees.single { it.id == EmployeeId(te.e)}, projects.single { it.id == ProjectId(te.p)}, Time(te.t), Date(te.d), Details(te.dtl))
+                val employee = try {
+                    employees.single { it.id == EmployeeId(te.e) }
+                } catch (ex : NoSuchElementException) {
+                    throw DatabaseCorruptedException("Unable to find an employee with the id of ${te.e}.  Employee set size: ${employees.size}")
+                }
+                val project = try {
+                    projects.single { it.id == ProjectId(te.p) }
+                } catch (ex : NoSuchElementException) {
+                    throw DatabaseCorruptedException("Unable to find a project with the id of ${te.p}.  Project set size: ${projects.size}")
+                }
+                return TimeEntry(
+                        te.i,
+                        employee,
+                        project,
+                        Time(te.t),
+                        Date(te.d),
+                        Details(te.dtl))
+
             }
 
         }
@@ -581,7 +632,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
 
             fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Session {
-                val user = users.single{it.id.value == ss.id}
+                val user = try {
+                    users.single { it.id.value == ss.id }
+                } catch (ex : NoSuchElementException) {
+                    throw DatabaseCorruptedException("Unable to find a user with the id of ${ss.id}.  User set size: ${users.size}")
+                }
                 return Session(user, DateTime(ss.epochSecond))
             }
 
