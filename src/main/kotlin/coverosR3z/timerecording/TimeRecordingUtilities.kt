@@ -2,7 +2,6 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
-import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.logging.Logger
 import coverosR3z.persistence.EmployeeIntegrityViolationException
@@ -25,7 +24,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
         }
         log.audit("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
-        `confirm the employee has a total (new plus existing) of less than 24 hours`(entry)
+        confirmLessThan24Hours(entry)
         return try {
             persistence.persistNewTimeEntry(entry)
             log.debug("recorded time sucessfully")
@@ -39,19 +38,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         }
     }
 
-    private fun `confirm the employee has a total (new plus existing) of less than 24 hours`(entry: TimeEntryPreDatabase) {
+    private fun confirmLessThan24Hours(entry: TimeEntryPreDatabase) {
         log.debug("confirming total time is less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        val minutesRecorded : Time = try {
-            persistence.queryMinutesRecorded(entry.employee, entry.date)
-        } catch (ex : EmployeeNotRegisteredException) {
-            // if we hit here, it means the employee doesn't exist yet.  For these purposes, that is
-            // fine, we are just checking here that if a employee *does* exist, they don't have too many minutes.
-            // if they don't exist, just move on through.
-            log.debug("employee ${entry.employee} was not registered in the database.  returning 0 minutes recorded.")
-            Time(0)
-        }
-
+        val minutesRecorded : Time = persistence.queryMinutesRecorded(entry.employee, entry.date)
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
         val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + entry.time.numberOfMinutes

@@ -12,7 +12,7 @@ import org.junit.Test
 
 class LoginAPITests {
 
-    lateinit var au : IAuthenticationUtilities
+    lateinit var au : FakeAuthenticationUtilities
 
     @Before
     fun init() {
@@ -32,6 +32,19 @@ class LoginAPITests {
                 toStr(responseData.fileContents).contains("SUCCESS"))
         Assert.assertTrue("A cookie should be set if valid login",
                 responseData.headers.any { it.contains("Set-Cookie") })
+    }
+
+    @Test
+    fun testHandlePostLogin_failedLogin() {
+        au.loginBehavior = {Pair(LoginResult.FAILURE, NO_USER)}
+        val data = mapOf(
+                LoginElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
+                LoginElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val responseData = handlePOSTLogin(au, NO_USER, data)
+        Assert.assertTrue("The system should indicate failure.  File was ${toStr(responseData.fileContents)}",
+                toStr(responseData.fileContents).contains("401 error"))
+        Assert.assertTrue("A cookie should be set if valid login",
+                responseData.headers.none { it.contains("Set-Cookie") })
     }
 
     /**

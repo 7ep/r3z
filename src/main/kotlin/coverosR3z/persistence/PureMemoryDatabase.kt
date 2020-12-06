@@ -2,7 +2,6 @@ package coverosR3z.persistence
 
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.DatabaseCorruptedException
-import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.logging.logStart
 import coverosR3z.logging.logTrace
@@ -91,15 +90,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     /**
      * gets the number of minutes a particular [Employee] has worked
      * on a certain date.
-     *
-     * @throws [EmployeeNotRegisteredException] if the employee isn't known.
      */
     fun getMinutesRecordedOnDate(employee: Employee, date: Date): Time {
-        // if we're asking for time on a non-registered employee, throw an exception
-        if (!employees.contains(employee)) {
-            throw EmployeeNotRegisteredException()
-        }
-
         val employeeTimeEntries = timeEntries[employee] ?: return Time(0)
 
         // if the employee hasn't entered any time on this date, return 0 minutes
@@ -538,11 +530,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
 
             fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-                val employee = try {
-                    employees.single { it.id == EmployeeId(te.e) }
-                } catch (ex : NoSuchElementException) {
-                    throw DatabaseCorruptedException("Unable to find an employee with the id of ${te.e}.  Employee set size: ${employees.size}")
-                }
+                val employee = employees.single { it.id == EmployeeId(te.e) }
                 val project = try {
                     projects.single { it.id == ProjectId(te.p) }
                 } catch (ex : NoSuchElementException) {

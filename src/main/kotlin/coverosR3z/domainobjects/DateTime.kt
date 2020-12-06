@@ -35,16 +35,16 @@ class DateTime(val epochSecond : Long) : Comparable<DateTime>{
         return true
     }
 
-    override fun hashCode(): Int {
-        return epochSecond.hashCode()
-    }
-
     override fun toString(): String {
         return "DateTime(epochSecond=$epochSecond, $stringValue)"
     }
 
     override fun compareTo(other: DateTime): Int {
         return this.epochSecond.compareTo(other.epochSecond)
+    }
+
+    override fun hashCode(): Int {
+        return epochSecond.hashCode()
     }
 
     companion object {

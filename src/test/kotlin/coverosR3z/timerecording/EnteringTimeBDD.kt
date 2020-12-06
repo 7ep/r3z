@@ -94,7 +94,7 @@ class EnteringTimeBDD {
         // when the employee enters their time
         val data: Map<String, String> = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
                          EnterTimeElements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
-                         "date" to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
+                         EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
                          EnterTimeElements.DETAIL_INPUT.elemName to "no problem here")
         val result = handlePOSTTimeEntry(tru, user, data = data)
 

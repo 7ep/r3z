@@ -3,7 +3,6 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.DatabaseCorruptedException
-import coverosR3z.exceptions.EmployeeNotRegisteredException
 import coverosR3z.logging.logAudit
 import coverosR3z.misc.getTime
 import org.junit.Assert.*
@@ -89,11 +88,6 @@ class PureMemoryDatabaseTests {
         val minutes = pmd.getMinutesRecordedOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
 
         assertEquals(DEFAULT_TIME, minutes)
-    }
-
-    @Test
-    fun `should not be able to get minutes recorded for an unregistered employee`() {
-        assertThrows(EmployeeNotRegisteredException::class.java) {pmd.getMinutesRecordedOnDate(Employee(EmployeeId(7), EmployeeName("Harold")), A_RANDOM_DAY_IN_JUNE_2020)}
     }
 
     /**
@@ -548,7 +542,8 @@ class PureMemoryDatabaseTests {
         // delete a necessary time entry file inside this employees' directory
         File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/").listFiles()?.forEach { it.delete() }
 
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertEquals("no time entry files found in employees directory at build\\db\\timeentries\\2", ex.message)
     }
     
     /**

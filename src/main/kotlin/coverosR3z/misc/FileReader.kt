@@ -10,7 +10,6 @@ fun toStr(value : ByteArray) : String {
 
 class FileReader {
     companion object {
-
         /**
          * Read in template file as a string
          */
@@ -18,13 +17,6 @@ class FileReader {
             val file = this::class.java.classLoader.getResource(filename)
                     ?: return null
             return file.readBytes()
-        }
-
-        /**
-         * Returns true if the requested file exists in resources
-         */
-        fun exists(filename: String) : Boolean {
-            return this::class.java.classLoader.getResource(filename) != null
         }
     }
 }

@@ -4,6 +4,7 @@ import coverosR3z.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
+import coverosR3z.persistence.EmployeeIntegrityViolationException
 import coverosR3z.persistence.ProjectIntegrityViolationException
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
@@ -43,6 +44,25 @@ class TimeRecordingTests {
         val actualResult = utils.recordTime(entry)
 
         assertEquals("Expect to see a message about invalid project", expectedResult, actualResult)
+    }
+
+    /**
+     * Negative case - what happens if we receive a request to enter
+     * time for an invalid employee?
+     */
+    @Test
+    fun `Should fail to record time for non-existent employee`() {
+        // it's an invalid project because the project doesn't exist
+        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
+                minutesRecorded = Time(60),
+                persistNewTimeEntryBehavior = { throw EmployeeIntegrityViolationException() })
+        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
+        val entry = createTimeEntryPreDatabase()
+        val expectedResult = RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
+
+        val actualResult = utils.recordTime(entry)
+
+        assertEquals("Expect to see a message about invalid employee", expectedResult, actualResult)
     }
 
     /**

@@ -76,7 +76,6 @@ class BrowserSmokeTests {
      * - hit the authenticated homepage
      * - enter time
      */
-    @Ignore
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
@@ -85,6 +84,7 @@ class BrowserSmokeTests {
         bigSmokeTest(driver)
     }
 
+    @Ignore
     @Test
     fun `Smoke test - with htmlunit`() {
         // start the HtmlUnitDriver
@@ -161,7 +161,7 @@ class BrowserSmokeTests {
 
             // enter times
             for (p in projects) {
-                etp.enterTime(p, "60", details)
+                etp.enterTime(p, "60", details, "09282018")
             }
 
             // logout
@@ -190,7 +190,7 @@ class BrowserSmokeTests {
 
             // enter times
             for (p in projects) {
-                etp.enterTime(p, "60", "foo foo foo foo la la la la la la")
+                etp.enterTime(p, "60", "foo foo foo foo la la la la la la", "09282018")
             }
 
             // logout
@@ -228,11 +228,12 @@ class BrowserSmokeTests {
 
     private class EnterTimePage(private val driver: WebDriver) {
 
-        fun enterTime(project: String, time: String, details: String) {
+        fun enterTime(project: String, time: String, details: String, date: String) {
             driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
             driver.findElement(By.id(EnterTimeElements.PROJECT_INPUT.id)).findElement(By.xpath("//option[. = '$project']")).click()
             driver.findElement(By.id(EnterTimeElements.TIME_INPUT.id)).sendKeys(time)
             driver.findElement(By.id(EnterTimeElements.DETAIL_INPUT.id)).sendKeys(details)
+            driver.findElement(By.id(EnterTimeElements.DATE_INPUT.id)).sendKeys(date)
             driver.findElement(By.id(EnterTimeElements.ENTER_TIME_BUTTON.id)).click()
             assertEquals("SUCCESS", driver.title)
         }
