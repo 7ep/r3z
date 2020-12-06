@@ -2,8 +2,8 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.server.RequestData
-import coverosR3z.server.ResponseStatus
+import coverosR3z.server.AnalyzedHttpData
+import coverosR3z.server.StatusCode
 import coverosR3z.server.Verb
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -24,8 +24,8 @@ class LogoutAPITests {
      */
     @Test
     fun testShouldLogoutIfAuthenticated() {
-        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), SYSTEM_USER, "", emptyList()))
-        assertEquals(ResponseStatus.OK, response.responseStatus)
+        val response = doGETLogout(au, AnalyzedHttpData(Verb.GET, "", emptyMap(), SYSTEM_USER, "", emptyList(), null))
+        assertEquals(StatusCode.OK, response.statusCode)
     }
 
     /**
@@ -35,7 +35,7 @@ class LogoutAPITests {
      */
     @Test
     fun testShouldReturnRedirectIfNotAuthenticated() {
-        val response = doGETLogout(au, RequestData(Verb.GET, "", emptyMap(), NO_USER, "", emptyList()))
-        assertEquals(ResponseStatus.SEE_OTHER, response.responseStatus)
+        val response = doGETLogout(au, AnalyzedHttpData(Verb.GET, "", emptyMap(), NO_USER, "", emptyList(), null))
+        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
     }
 }

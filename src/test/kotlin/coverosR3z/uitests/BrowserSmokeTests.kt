@@ -22,6 +22,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import java.io.File
+import kotlin.concurrent.thread
 
 
 private const val domain = "http://localhost:8080"
@@ -35,7 +36,6 @@ class BrowserSmokeTests {
 
     companion object {
         private lateinit var sc : Server
-        private lateinit var serverThread : Thread
         const val dbDirectory = "build/db/"
 
         @BeforeClass
@@ -56,11 +56,10 @@ class BrowserSmokeTests {
         File(dbDirectory).deleteRecursively()
 
         // start the server
-        serverThread = Thread {
+        thread {
             sc = Server(8080, dbDirectory)
             sc.startServer()
         }
-        serverThread.start()
     }
 
     @After
@@ -83,14 +82,14 @@ class BrowserSmokeTests {
         // Given I am a Chrome browser user
         // start the Chromedriver
         val driver = ChromeDriver(ChromeOptions().setHeadless(false))
-        bigSmokeTest(driver)
+        smokeTest(driver)
     }
 
     @Test
     fun `Smoke test - with htmlunit`() {
         // start the HtmlUnitDriver
         val driver = HtmlUnitDriver(BEST_SUPPORTED)
-        bigSmokeTest(driver)
+        smokeTest(driver)
     }
 
     @Ignore
@@ -98,10 +97,10 @@ class BrowserSmokeTests {
     fun `Smoke test - with firefox`() {
         // start the Firefox driver
         val driver = FirefoxDriver()
-        bigSmokeTest(driver)
+        smokeTest(driver)
     }
 
-    private fun bigSmokeTest(driver: WebDriver) {
+    private fun smokeTest(driver: WebDriver) {
         // Because of the way HtmlUnit works, we have to differentiate
         // in how we set date
         val dateString = if (driver is HtmlUnitDriver) {

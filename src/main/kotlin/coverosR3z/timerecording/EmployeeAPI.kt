@@ -3,17 +3,24 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
 enum class EmployeeElements(val elemName: String, val id: String) {
     EMPLOYEE_INPUT("employee_name", "employee_name"),
-    CREATE_BUTTON("", "employee_create_button"),
+    CREATE_BUTTON("", "employee_create_button");
+
 }
+/**
+ * The required inputs for this API
+ */
+val requiredElements = setOf(EmployeeElements.EMPLOYEE_INPUT.elemName)
 
 fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (isAuthenticated(user)) {
+        checkHasExactInputs(data.keys, requiredElements)
         tru.createEmployee(EmployeeName.make(data[EmployeeElements.EMPLOYEE_INPUT.elemName]))
         okHTML(successHTML)
     } else {
@@ -21,7 +28,7 @@ fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<St
     }
 }
 
-fun doGETCreateEmployeePage(rd: RequestData): PreparedResponseData {
+fun doGETCreateEmployeePage(rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(createEmployeeHTML(rd.user.name.value))
     } else {

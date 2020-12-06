@@ -144,19 +144,20 @@ class AuthenticationBDD {
             return Pair(tru, sarah)
         }
 
-        fun registerUser(): Triple<IAuthenticationUtilities, RequestData, PureMemoryDatabase> {
+        fun registerUser(): Triple<IAuthenticationUtilities, AnalyzedHttpData, PureMemoryDatabase> {
             val pmd = PureMemoryDatabase()
             val authPersistence = AuthenticationPersistence(pmd)
             val au = AuthenticationUtilities(authPersistence)
             val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
             assertEquals(RegistrationResult.SUCCESS, regStatus)
             val postedData = mapOf("username" to DEFAULT_USER.name.value, "password" to DEFAULT_PASSWORD.value)
-            val requestData = RequestData(
+            val requestData = AnalyzedHttpData(
                 Verb.POST,
                 NamedPaths.LOGIN.path,
                 postedData,
                 NO_USER,
-                headers = emptyList()
+                headers = emptyList(),
+                rawData = null
             )
             return Triple(au, requestData, pmd)
         }

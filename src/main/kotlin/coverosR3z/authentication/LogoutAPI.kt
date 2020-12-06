@@ -2,7 +2,7 @@ package coverosR3z.authentication
 
 import coverosR3z.server.*
 
-fun doGETLogout(au: IAuthenticationUtilities, rd: RequestData): PreparedResponseData {
+fun doGETLogout(au: IAuthenticationUtilities, rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         au.logout(rd.sessionToken)
         okHTML(logoutHTML)

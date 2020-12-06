@@ -45,7 +45,7 @@ class EnterTimeAPITests {
                 EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
                 EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
         val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
-        assertEquals("expected inputs: [project_entry, time_entry, detail_entry, date_entry]. received inputs: [time_entry, detail_entry, date_entry]", ex.message)
+        assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [time_entry, detail_entry, date_entry]", ex.message)
     }
 
     /**
@@ -58,7 +58,7 @@ class EnterTimeAPITests {
                 EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
                 EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
         val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
-        assertEquals("expected inputs: [project_entry, time_entry, detail_entry, date_entry]. received inputs: [project_entry, detail_entry, date_entry]", ex.message)
+        assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, detail_entry, date_entry]", ex.message)
     }
 
     /**
@@ -72,7 +72,7 @@ class EnterTimeAPITests {
                 EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING,
         )
         val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER, data) }
-        assertEquals("expected inputs: [project_entry, time_entry, detail_entry, date_entry]. received inputs: [project_entry, time_entry, date_entry]", ex.message)
+        assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, date_entry]", ex.message)
     }
 
     /**
@@ -199,7 +199,7 @@ class EnterTimeAPITests {
     fun testDoGETTimeEntriesPage() {
         val rd = createRequestData(user = DEFAULT_USER)
         val result = doGetTimeEntriesPage(tru, rd)
-        assertEquals(ResponseStatus.OK, result.responseStatus)
+        assertEquals(StatusCode.OK, result.statusCode)
     }
 
     /**
@@ -223,7 +223,7 @@ class EnterTimeAPITests {
     fun testDoGETTimeEntriesPageUnAuth() {
         val rd = createRequestData(user = NO_USER)
         val result = doGetTimeEntriesPage(tru, rd)
-        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**
@@ -233,7 +233,7 @@ class EnterTimeAPITests {
     fun testDoGETEnterTimePage() {
         val rd = createRequestData(user = DEFAULT_USER)
         val result = doGETEnterTimePage(tru, rd)
-        assertEquals(ResponseStatus.OK, result.responseStatus)
+        assertEquals(StatusCode.OK, result.statusCode)
     }
 
     /**
@@ -244,7 +244,7 @@ class EnterTimeAPITests {
     fun testDoGETEnterTimePageUnAuth() {
         val rd = createRequestData(user = NO_USER)
         val result = doGETEnterTimePage(tru, rd)
-        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**
@@ -267,7 +267,7 @@ class EnterTimeAPITests {
                 EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
 
         val ex = assertThrows(InexactInputsException::class.java) { handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents }
-        assertEquals("expected inputs: [project_entry, time_entry, detail_entry, date_entry]. received inputs: [project_entry, time_entry, detail_entry, foo, date_entry]", ex.message)
+        assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, detail_entry, foo, date_entry]", ex.message)
     }
 
     /*
@@ -280,7 +280,7 @@ class EnterTimeAPITests {
      */
 
     /**
-     * A helper method to make a [RequestData] easier.
+     * A helper method to make a [AnalyzedHttpData] easier.
      */
     private fun createRequestData(
         verb: Verb = Verb.GET,
@@ -288,8 +288,8 @@ class EnterTimeAPITests {
         data : Map<String, String> = emptyMap(),
         user : User = NO_USER,
         sessionToken : String = "NO TOKEN"
-    ): RequestData {
-        return RequestData(verb, path, data, user, sessionToken, emptyList())
+    ): AnalyzedHttpData {
+        return AnalyzedHttpData(verb, path, data, user, sessionToken, emptyList(), null)
     }
 
 }

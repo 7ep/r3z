@@ -3,7 +3,7 @@ package coverosR3z.logging
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.server.PreparedResponseData
-import coverosR3z.server.ResponseStatus
+import coverosR3z.server.StatusCode
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -29,7 +29,7 @@ class LoggingAPITests {
     @Test
     fun testShouldGetLoggingPageIfAuthenticated() {
         val result : PreparedResponseData = handleGETLogging(SYSTEM_USER)
-        assertEquals(ResponseStatus.OK, result.responseStatus)
+        assertEquals(StatusCode.OK, result.statusCode)
     }
 
     /**
@@ -39,7 +39,7 @@ class LoggingAPITests {
     fun testShouldPostLoggingPageIfAuthenticated() {
         val data = allTrue()
         val result : PreparedResponseData = handlePOSTLogging(SYSTEM_USER, data)
-        assertEquals(ResponseStatus.OK, result.responseStatus)
+        assertEquals(StatusCode.OK, result.statusCode)
     }
 
     /**
@@ -48,7 +48,7 @@ class LoggingAPITests {
     @Test
     fun testShouldNotGetLoggingPageIfUnauthenticated() {
         val result : PreparedResponseData = handleGETLogging(NO_USER)
-        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**
@@ -57,7 +57,7 @@ class LoggingAPITests {
     @Test
     fun testShouldNotPostLoggingPageIfUnauthenticated() {
         val result : PreparedResponseData = handlePOSTLogging(NO_USER, emptyMap())
-        assertEquals(ResponseStatus.SEE_OTHER, result.responseStatus)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**

@@ -4,16 +4,14 @@ import coverosR3z.authentication.*
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.exceptions.DuplicateInputsException
-import coverosR3z.logging.handleGETLogging
-import coverosR3z.logging.handlePOSTLogging
+import coverosR3z.logging.*
 import coverosR3z.logging.logDebug
-import coverosR3z.logging.logTrace
 import coverosR3z.misc.*
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
 import java.net.URLDecoder
 
-data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: RequestData)
+data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: AnalyzedHttpData)
 
 /**
  *   HTTP/1.1 defines the sequence CR LF as the end-of-line marker for all
@@ -77,7 +75,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
  * If the user asks for a path we don't know about, try reading
  * that file from our resources directory
  */
-private fun handleUnknownFiles(rd: RequestData): PreparedResponseData {
+private fun handleUnknownFiles(rd: AnalyzedHttpData): PreparedResponseData {
     val fileContents = FileReader.read(rd.path)
 
     return if (fileContents == null) {
@@ -107,7 +105,7 @@ fun isAuthenticated(u : User) : Boolean {
     return u != NO_USER
 }
 
-fun isAuthenticated(rd : RequestData) : Boolean {
+fun isAuthenticated(rd : AnalyzedHttpData) : Boolean {
     return rd.user != NO_USER
 }
 
@@ -135,13 +133,13 @@ fun okWEBP (contents : ByteArray) =
         ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
 
 private fun ok (contents: ByteArray, ct : List<String>) =
-        PreparedResponseData(contents, ResponseStatus.OK, ct)
+        PreparedResponseData(contents, StatusCode.OK, ct)
 
 /**
  * Use this to redirect to any particular page
  */
 fun redirectTo(path: String): PreparedResponseData {
-    return PreparedResponseData("", ResponseStatus.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
+    return PreparedResponseData("", StatusCode.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
 }
 
 /**
@@ -152,7 +150,14 @@ fun redirectTo(path: String): PreparedResponseData {
  * On the other hand if it's not a well formed request, or
  * if we don't have that file, we reply with an error page
  */
-private val pageExtractorRegex = "(GET|POST) /(.*) HTTP/(?:1.1|1.0)".toRegex()
+val serverStatusLineRegex = "(GET|POST) /(.*) HTTP/(?:1.1|1.0)".toRegex()
+
+/**
+ * This is the regex used to analyze a status line sent by the server and
+ * read by the client.  Servers will send messages like: "HTTP/1.1 200 OK" or "HTTP/1.1 500 Internal Server Error"
+ * See [StatusCode]
+ */
+private val clientStatusLineRegex = "HTTP/(?:1.1|1.0) (\\d{3}) .*$".toRegex()
 
 /**
  * Used for extracting the length of the body, in POSTs and
@@ -172,36 +177,65 @@ private val cookieRegex = "[cC]ookie: (.*)$".toRegex()
 private val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
 
 /**
- * Based on the request from the client, come up with an [RequestData]
- * of what we should do next
+ * Analyze the data following HTTP protocol and create a
+ * [AnalyzedHttpData] to store the vital information
  */
-fun parseClientRequest(server: ISocketWrapper, au: IAuthenticationUtilities): RequestData {
+fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
     // read the first line for the fundamental request
-    val clientRequest = server.readLine()
-    if (clientRequest.isNullOrBlank()) {
-        return RequestData(Verb.CLIENT_CLOSED_CONNECTION)
+    val statusLine = socketWrapper.readLine()
+    logTrace("statusLine: $statusLine")
+    if (statusLine.isNullOrBlank()) {
+        return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION, rawData = null)
     }
-    val (verb, path) = parseFirstLine(clientRequest)
 
-    val headers = getHeaders(server)
+    return when {
+        clientStatusLineRegex.containsMatchIn(statusLine) -> analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper)
+        serverStatusLineRegex.containsMatchIn(statusLine) -> analyzeAsServer(checkNotNull(serverStatusLineRegex.matchEntire(statusLine)), socketWrapper, au)
+        else -> AnalyzedHttpData(Verb.INVALID)
+    }
+
+}
+
+/**
+ * If we are reviewing an HTTP message as a server
+ */
+private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
+    val (verb, path) = parseStatusLineAsServer(statusLineMatches)
+    val headers = getHeaders(socketWrapper)
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
     val user = extractUserFromAuthToken(token, au)
-    val data = extractDataIfPost(server,verb, headers)
+    val (data, rawData) = extractData(socketWrapper, headers)
 
-    return RequestData(verb, path, data, user, token, headers)
+    return AnalyzedHttpData(verb, path, data, user, token, headers, rawData)
+}
+
+/**
+ * If we are reviewing an HTTP message as a client
+ */
+private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper): AnalyzedHttpData {
+    val statusCode = parseStatusLineAsClient(statusLineMatches)
+    val headers = getHeaders(socketWrapper)
+    val rawData = if (headers.any { it.toLowerCase().startsWith("content-length")}) {
+        val length = extractLengthOfPostBodyFromHeaders(headers)
+        socketWrapper.read(length)
+    } else {
+        null
+    }
+
+    return AnalyzedHttpData(statusCode = statusCode, headers = headers, rawData = rawData)
 }
 
 /**
  * read the body if one exists and convert it to a string -> string map
  */
-private fun extractDataIfPost(server: ISocketWrapper, verb : Verb,  headers: List<String>): Map<String, String> {
-    return if (verb == Verb.POST) {
+private fun extractData(server: ISocketWrapper, headers: List<String>) : Pair<Map<String, String>, String?> {
+    return if (headers.any { it.toLowerCase().startsWith("content-length")}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
-        parsePostedData(body)
+        Pair(parsePostedData(body), body)
     } else {
-        emptyMap()
+        Pair(emptyMap(), null)
     }
 }
 
@@ -221,27 +255,24 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
 }
 
 /**
- * The first line of the request is the basic request
- * from the client.  See [pageExtractorRegex]
+ * The first line tells us a lot. See [serverStatusLineRegex]
  */
-fun parseFirstLine(clientRequest: String): Pair<Verb, String> {
-    logTrace("request from client: $clientRequest")
-    val result = pageExtractorRegex.matchEntire(clientRequest)
-    val verb: Verb
-    var file = ""
-
-    if (result == null) {
-        logDebug("Unable to parse client request")
-        verb = Verb.INVALID
-    } else {
-        // determine which file the client is requesting
-        verb = Verb.valueOf(checkNotNull(result.groups[1]){"The HTTP verb must not be missing"}.value)
-        logTrace("verb from client was: $verb")
-        file = checkNotNull(result.groups[2]){"The requested path must not be missing"}.value
-        logTrace("path from client was: $file")
-    }
-
+fun parseStatusLineAsServer(matchResult: MatchResult): Pair<Verb, String> {
+    val verb: Verb = Verb.valueOf(checkNotNull(matchResult.groups[1]){"The HTTP verb must not be missing"}.value)
+    logTrace("verb from client was: $verb")
+    val file = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
+    logTrace("path from client was: $file")
     return Pair(verb, file)
+}
+
+/**
+ * The first line tells us a lot. See [clientStatusLineRegex]
+ * Also see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+ */
+fun parseStatusLineAsClient(matchResult: MatchResult): StatusCode {
+    val statusCode: StatusCode = StatusCode.fromCode(checkNotNull(matchResult.groups[1]){"The status code must not be missing"}.value)
+    logTrace("status code from client was: $statusCode")
+    return statusCode
 }
 
 /**
@@ -337,7 +368,7 @@ fun getHeaders(socket: ISocketWrapper): List<String> {
  */
 fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
     logTrace("Assembling data just before shipping to client")
-    val status = "HTTP/1.1 ${data.responseStatus.value}"
+    val status = "HTTP/1.1 ${data.statusCode.value}"
     logTrace("status: $status")
     val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
 

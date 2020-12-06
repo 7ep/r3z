@@ -3,20 +3,20 @@ package coverosR3z.server
 import coverosR3z.logging.logTrace
 
 fun handleBadRequest(): PreparedResponseData {
-    return PreparedResponseData(badRequestHTML, ResponseStatus.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
+    return PreparedResponseData(badRequestHTML, StatusCode.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleNotFound(): PreparedResponseData {
-    return PreparedResponseData(notFoundHTML, ResponseStatus.NOT_FOUND, listOf(ContentType.TEXT_HTML.value))
+    return PreparedResponseData(notFoundHTML, StatusCode.NOT_FOUND, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleUnauthorized() : PreparedResponseData {
-    return PreparedResponseData(unauthorizedHTML, ResponseStatus.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
+    return PreparedResponseData(unauthorizedHTML, StatusCode.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleInternalServerError(msg : String) : PreparedResponseData {
     logTrace("handling internal server error: $msg")
-    return PreparedResponseData(internalServerErrorHTML(msg), ResponseStatus.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
+    return PreparedResponseData(internalServerErrorHTML(msg), StatusCode.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
 }
 
 const val badRequestHTML = """

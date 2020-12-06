@@ -14,7 +14,7 @@ enum class RegisterElements(val elemName: String, val id: String) {
     REGISTER_BUTTON("", "register_button");
 }
 
-fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
+fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         redirectTo(NamedPaths.AUTHHOMEPAGE.path)
     } else {

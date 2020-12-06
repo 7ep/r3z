@@ -139,10 +139,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
-        val input = "POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1"
+        val input = serverStatusLineRegex.matchEntire("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1")
         val expected = Pair(Verb.POST, NamedPaths.ENTER_TIME.path)
 
-        val result = parseFirstLine(input)
+        val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
     }
@@ -152,10 +152,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_GET() {
-        val input = "GET /test HTTP/1.1"
+        val input = serverStatusLineRegex.matchEntire("GET /test HTTP/1.1")
         val expected = Pair(Verb.GET, "test")
 
-        val result = parseFirstLine(input)
+        val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
     }
@@ -165,23 +165,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
-        val input = "GET /test.utl HTTP/1.1"
+        val input = serverStatusLineRegex.matchEntire("GET /test.utl HTTP/1.1")
         val expected = Pair(Verb.GET, "test.utl")
 
-        val result = parseFirstLine(input)
-
-        assertEquals(expected, result)
-    }
-
-    /**
-     * Action for an invalid request
-     */
-    @Test
-    fun testShouldParseMultipleClientRequestTypes_BadRequest() {
-        val input = "INVALID /test.utl HTTP/1.1"
-        val expected = Pair(Verb.INVALID, "")
-
-        val result = parseFirstLine(input)
+        val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
     }
@@ -191,10 +178,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_CSS() {
-        val input = "GET /test.css HTTP/1.1"
+        val input = serverStatusLineRegex.matchEntire("GET /test.css HTTP/1.1")
         val expected = Pair(Verb.GET, "test.css")
 
-        val result = parseFirstLine(input)
+        val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
     }
@@ -204,10 +191,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_JS() {
-        val input = "GET /test.js HTTP/1.1"
+        val input = serverStatusLineRegex.matchEntire("GET /test.js HTTP/1.1")
         val expected = Pair(Verb.GET, "test.js")
 
-        val result = parseFirstLine(input)
+        val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
     }

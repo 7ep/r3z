@@ -73,24 +73,24 @@ class Server(val port: Int, private val dbDirectory: String) {
             }
         }
 
-        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : RequestData {
-            lateinit var requestData : RequestData
+        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : AnalyzedHttpData {
+            lateinit var analyzedHttpData : AnalyzedHttpData
             val responseData: PreparedResponseData = try {
-                requestData = parseClientRequest(server, au)
-                if (requestData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
-                    return requestData
+                analyzedHttpData = parseHttpMessage(server, au)
+                if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
+                    return analyzedHttpData
                 }
                 // now that we know who the user is (if they authenticated) we can update the current user
-                val cu = CurrentUser(requestData.user)
+                val cu = CurrentUser(analyzedHttpData.user)
                 val truWithUser = tru.changeUser(cu)
-                logDebug("client requested ${requestData.verb} ${requestData.path}", cu)
-                handleRequestAndRespond(ServerData(au, truWithUser, requestData))
+                logDebug("client requested ${analyzedHttpData.verb} ${analyzedHttpData.path}", cu)
+                handleRequestAndRespond(ServerData(au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message ?: "NO ERROR MESSAGE DEFINED")
             }
 
             returnData(server, responseData)
-            return requestData
+            return analyzedHttpData
         }
     }
 

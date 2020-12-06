@@ -22,7 +22,7 @@ fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Ma
 }
 
 
-fun doGETCreateProjectPage(rd: RequestData): PreparedResponseData {
+fun doGETCreateProjectPage(rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(createProjectHTML(rd.user.name.value))
     } else {

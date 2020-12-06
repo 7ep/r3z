@@ -1,5 +1,7 @@
 package coverosR3z.misc
 
+import coverosR3z.exceptions.InexactInputsException
+import coverosR3z.timerecording.EmployeeElements
 import kotlin.random.Random
 
 /**
@@ -26,6 +28,18 @@ fun checkParseToInt(value: String?,
         notNullValue.toInt()
     } catch (ex: java.lang.NumberFormatException) {
         throw IllegalStateException(parseMsg())
+    }
+}
+
+/**
+ * Given a set of keys needed by an API (see files ending in "API") and the
+ * actual data received, throw an error if it doesn't precisely match
+ * @param receivedKeys the data sent to the API
+ * @param requiredKeys the exact keys required
+ */
+fun checkHasExactInputs(receivedKeys: Set<String>, requiredKeys: Set<String>) {
+    if (receivedKeys != requiredKeys) {
+        throw InexactInputsException("expected keys: ${requiredKeys}. received keys: $receivedKeys")
     }
 }
 

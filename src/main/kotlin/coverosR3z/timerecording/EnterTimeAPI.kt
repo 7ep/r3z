@@ -1,7 +1,7 @@
 package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
-import coverosR3z.exceptions.InexactInputsException
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
@@ -13,8 +13,14 @@ enum class EnterTimeElements (val elemName: String, val id: String) {
     ENTER_TIME_BUTTON("", "enter_time_button"),
     DATE_INPUT("date_entry", "date_entry")
 }
+val requiredData = setOf(
+    EnterTimeElements.PROJECT_INPUT.elemName,
+    EnterTimeElements.TIME_INPUT.elemName,
+    EnterTimeElements.DETAIL_INPUT.elemName,
+    EnterTimeElements.DATE_INPUT.elemName,
+)
 
-fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): PreparedResponseData {
+fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(existingTimeEntriesHTML(rd.user.name.value, tru.getAllEntriesForEmployee(rd.user.employeeId ?: NO_EMPLOYEE.id)))
     } else {
@@ -22,7 +28,7 @@ fun doGetTimeEntriesPage(tru: ITimeRecordingUtilities, rd: RequestData): Prepare
     }
 }
 
-fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): PreparedResponseData {
+fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(entertimeHTML(rd.user.name.value, tru.listAllProjects()))
     } else {
@@ -33,16 +39,9 @@ fun doGETEnterTimePage(tru : ITimeRecordingUtilities, rd : RequestData): Prepare
 
 fun handlePOSTTimeEntry(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = user != NO_USER
+
     return if (isAuthenticated) {
-        val requiredData = setOf(
-                EnterTimeElements.PROJECT_INPUT.elemName,
-                EnterTimeElements.TIME_INPUT.elemName,
-                EnterTimeElements.DETAIL_INPUT.elemName,
-                EnterTimeElements.DATE_INPUT.elemName,
-        )
-        if (data.keys != requiredData) {
-            throw InexactInputsException("expected inputs: ${requiredData}. received inputs: ${data.keys}")
-        }
+        checkHasExactInputs(data.keys, requiredData)
         val projectId = ProjectId.make(data[EnterTimeElements.PROJECT_INPUT.elemName])
         val time = Time.make(data[EnterTimeElements.TIME_INPUT.elemName])
         val details = Details.make(data[EnterTimeElements.DETAIL_INPUT.elemName])

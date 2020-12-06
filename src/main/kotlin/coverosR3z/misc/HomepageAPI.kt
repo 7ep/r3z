@@ -1,12 +1,12 @@
 package coverosR3z.misc
 
 import coverosR3z.server.PreparedResponseData
-import coverosR3z.server.RequestData
+import coverosR3z.server.AnalyzedHttpData
 import coverosR3z.server.isAuthenticated
 import coverosR3z.server.okHTML
 
 
-fun doGetHomePage(rd: RequestData): PreparedResponseData {
+fun doGetHomePage(rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         okHTML(authHomePageHTML(rd.user.name.value))
     } else {

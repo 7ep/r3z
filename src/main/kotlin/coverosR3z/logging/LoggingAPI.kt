@@ -9,7 +9,7 @@ const val badInputLoggingDataMsg = "input for log setting must be \"true\" or \"
 
 fun handleGETLogging(user: User): PreparedResponseData {
     return if (isAuthenticated(user)) {
-        PreparedResponseData(loggingConfigHtml(), ResponseStatus.OK, listOf(ContentType.TEXT_HTML.value))
+        PreparedResponseData(loggingConfigHtml(), StatusCode.OK, listOf(ContentType.TEXT_HTML.value))
     } else {
         redirectTo(NamedPaths.HOMEPAGE.path)
     }

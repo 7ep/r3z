@@ -5,6 +5,7 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.employeeNameNotNullMsg
+import coverosR3z.exceptions.InexactInputsException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -57,7 +58,7 @@ class EmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = emptyMap<String,String>()
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
-        assertEquals(employeeNameNotNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
+        assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }
 }
