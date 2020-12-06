@@ -217,6 +217,24 @@ class ServerTests {
     }
 
     /**
+     * If the body doesn't have properly URL formed text. Like not including a key
+     * and a value separated by an =
+     */
+    @Test
+    fun testShouldGetInternalServerError_improperlyFormedBody() {
+        au.getUserForSessionBehavior = { DEFAULT_USER }
+        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("Cookie: sessionId=abc123$CRLF")
+        val body = "test foo bar"
+        client.write("Content-Length: ${body.length}$CRLF$CRLF")
+        client.write(body)
+
+        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
+
+        assertEquals(StatusCode.INTERNAL_SERVER_ERROR, result.statusCode)
+    }
+
+    /**
      * If we as client are connected but then close the connection from our side,
      * we should see a CLIENT_CLOSED_CONNECTION remark
      */

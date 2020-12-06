@@ -17,7 +17,9 @@ class DateTime(val epochSecond : Long) : Comparable<DateTime>{
     private val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
 
     init {
-        require(epochSecond in 1577836800..4102444800) {"no way on earth people are using this before 2020 or past 2100, you had a date of $stringValue"}
+        val beginTime = LocalDateTime.of(1980, java.time.Month.JANUARY, 1, 0, 0).toEpochSecond(ZoneOffset.UTC)
+        val endTime = LocalDateTime.of(2200, java.time.Month.JANUARY, 1, 0, 0).toEpochSecond(ZoneOffset.UTC)
+        require(epochSecond in beginTime..endTime) {"no way on earth people are using this before $beginTime or past $endTime, you had a date of $stringValue"}
     }
 
     /**

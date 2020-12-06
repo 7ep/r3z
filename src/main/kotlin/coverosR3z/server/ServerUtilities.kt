@@ -327,22 +327,17 @@ fun parsePostedData(input: String): Map<String, String> {
     require(input.isNotEmpty()) {"The input to parse was empty"}
     // Need to split up '&' separated fields into keys and values and pack into a kotlin map
     // Closures for efficiency ahoy, sorry
-    try {
-        val postedPairs = mutableMapOf<String, String>()
-        val splitByAmpersand = input.split("&")
-        for(s : String in splitByAmpersand) {
-            val pair = s.split("=")
-            check(pair.size == 2) {"Splitting on = should return 2 values.  Input was $s"}
-            val result = postedPairs.put(pair[0], URLDecoder.decode(pair[1], Charsets.UTF_8))
-            if (result != null) {
-                throw DuplicateInputsException("${pair[0]} was duplicated in the post body - had values of $result and ${pair[1]}")
-            }
+    val postedPairs = mutableMapOf<String, String>()
+    val splitByAmpersand = input.split("&")
+    for(s : String in splitByAmpersand) {
+        val pair = s.split("=")
+        check(pair.size == 2) {"Splitting on = should return 2 values.  Input was $s"}
+        val result = postedPairs.put(pair[0], URLDecoder.decode(pair[1], Charsets.UTF_8))
+        if (result != null) {
+            throw DuplicateInputsException("${pair[0]} was duplicated in the post body - had values of $result and ${pair[1]}")
         }
-        return postedPairs
-    } catch (ex : IndexOutOfBoundsException) {
-        throw IllegalArgumentException("We failed to parse \"$input\" as application/x-www-form-urlencoded", ex)
     }
-
+    return postedPairs
 }
 
 /**
