@@ -2,7 +2,6 @@ package coverosR3z.domainobjects
 
 import coverosR3z.domainobjects.Hash.Companion.createHash
 import coverosR3z.misc.generateRandomString
-import java.security.MessageDigest
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec

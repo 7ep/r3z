@@ -13,7 +13,6 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
 import java.net.SocketException
-import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
 
 /**

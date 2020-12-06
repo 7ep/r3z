@@ -2,9 +2,7 @@ package coverosR3z.domainobjects
 
 import org.junit.Assert.*
 import org.junit.Test
-import java.lang.IllegalStateException
 import java.time.DateTimeException
-import java.time.LocalDate
 
 class DateTests {
 
