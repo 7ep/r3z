@@ -28,28 +28,10 @@ class LoggingAPITests {
      * Make sure it handles properly if we are authenticated
      */
     @Test
-    fun testShouldGetLoggingPageIfAuthenticated() {
-        val result : PreparedResponseData = handleGETLogging(SYSTEM_USER)
-        assertEquals(StatusCode.OK, result.statusCode)
-    }
-
-    /**
-     * Make sure it handles properly if we are authenticated
-     */
-    @Test
     fun testShouldPostLoggingPageIfAuthenticated() {
         val data = allTrue()
         val result : PreparedResponseData = handlePOSTLogging(SYSTEM_USER, data)
         assertEquals(StatusCode.OK, result.statusCode)
-    }
-
-    /**
-     * Should redirect to the homepage if unauthenticated
-     */
-    @Test
-    fun testShouldNotGetLoggingPageIfUnauthenticated() {
-        val result : PreparedResponseData = handleGETLogging(NO_USER)
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**

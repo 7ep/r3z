@@ -36,13 +36,7 @@ fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, 
     }
 }
 
-fun doGETLoginPage(rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
-    } else {
-        okHTML(loginHTML)
-    }
-}
+fun generateLoginPage(): String = loginHTML
 
 val loginHTML = """
 <!DOCTYPE html>

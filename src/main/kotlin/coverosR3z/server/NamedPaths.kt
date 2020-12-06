@@ -8,8 +8,6 @@ package coverosR3z.server
 enum class NamedPaths(val path: String) {
     // enter time
     ENTER_TIME("entertime"),
-    ENTER_TIMEJS("entertime.js"),
-    ENTER_TIMECSS("entertime.css"),
 
     // existing time entries
     TIMEENTRIES("timeentries"),

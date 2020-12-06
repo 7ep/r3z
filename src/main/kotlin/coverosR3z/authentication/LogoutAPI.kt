@@ -2,13 +2,9 @@ package coverosR3z.authentication
 
 import coverosR3z.server.*
 
-fun doGETLogout(au: IAuthenticationUtilities, rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        au.logout(rd.sessionToken)
-        okHTML(logoutHTML)
-    } else {
-        redirectTo(NamedPaths.HOMEPAGE.path)
-    }
+fun generateLogoutPage(au: IAuthenticationUtilities, sessionToken : String): String {
+    au.logout(sessionToken)
+    return logoutHTML
 }
 
 const val logoutHTML = """

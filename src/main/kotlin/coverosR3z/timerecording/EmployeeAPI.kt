@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
 import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.UserName
 import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.server.*
@@ -28,14 +29,11 @@ fun handlePOSTNewEmployee(tru: ITimeRecordingUtilities, user: User, data: Map<St
     }
 }
 
-fun doGETCreateEmployeePage(rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        okHTML(createEmployeeHTML(rd.user.name.value))
-    } else {
-        redirectTo(NamedPaths.HOMEPAGE.path)
-    }
-}
+fun generateCreateEmployeePage(username : UserName): String =
+    createEmployeeHTML(username.value)
 
+fun generateExistingEmployeesPage(username : UserName, tru: ITimeRecordingUtilities): String =
+    existingEmployeesHTML(username.value, tru.listAllEmployees())
 
 fun createEmployeeHTML(username : String) : String {
     return """

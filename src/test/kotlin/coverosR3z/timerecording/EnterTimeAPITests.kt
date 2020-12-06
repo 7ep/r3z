@@ -190,61 +190,19 @@ class EnterTimeAPITests {
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
 
-    //ToDo Add negative tests for date (outside of date range, malformed, etc.)
+    //TODO Add negative tests for date (outside of date range, malformed, etc.)
 
-    /**
-     * Just to check that we get the proper OK result when we authenticate.
-     */
-    @Test
-    fun testDoGETTimeEntriesPage() {
-        val rd = createRequestData(user = DEFAULT_USER)
-        val result = doGetTimeEntriesPage(tru, rd)
-        assertEquals(StatusCode.OK, result.statusCode)
-    }
 
     /**
      * Checking some of the content
      */
     @Test
     fun testDoGETTimeEntriesPage_content() {
-        val rd = createRequestData(user = DEFAULT_USER)
         tru.getAllEntriesForEmployeeBehavior = {setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))}
 
-        val result = toStr(doGetTimeEntriesPage(tru, rd).fileContents)
+        val result = generateTimeEntriesPage(tru, DEFAULT_USER)
 
         assertTrue("page should have this content.  Page:\n$result", result.contains("<tr><td>Default_Project</td><td>60</td><td>whatevs</td><td>2020-06-25</td></tr>"))
-    }
-
-    /**
-     * JIf we aren't authenticated, we should get redirected back to
-     * the homepage.  We'll just check a redirect happened.
-     */
-    @Test
-    fun testDoGETTimeEntriesPageUnAuth() {
-        val rd = createRequestData(user = NO_USER)
-        val result = doGetTimeEntriesPage(tru, rd)
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-    }
-
-    /**
-     * Just to check that we get the proper OK result when we authenticate.
-     */
-    @Test
-    fun testDoGETEnterTimePage() {
-        val rd = createRequestData(user = DEFAULT_USER)
-        val result = doGETEnterTimePage(tru, rd)
-        assertEquals(StatusCode.OK, result.statusCode)
-    }
-
-    /**
-     * JIf we aren't authenticated, we should get redirected back to
-     * the homepage.  We'll just check a redirect happened.
-     */
-    @Test
-    fun testDoGETEnterTimePageUnAuth() {
-        val rd = createRequestData(user = NO_USER)
-        val result = doGETEnterTimePage(tru, rd)
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**

@@ -22,14 +22,7 @@ private val requiredInputs = setOf(
     RegisterElements.USERNAME_INPUT.elemName,
 )
 
-fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        redirectTo(NamedPaths.AUTHHOMEPAGE.path)
-    } else {
-        val employees = tru.listAllEmployees()
-        okHTML(registerHTML(employees))
-    }
-}
+fun generateRegisterUserPage(tru: ITimeRecordingUtilities): String = registerHTML(tru.listAllEmployees())
 
 fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (user == NO_USER) {

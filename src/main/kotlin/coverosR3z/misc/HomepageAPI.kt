@@ -1,18 +1,14 @@
 package coverosR3z.misc
 
+import coverosR3z.domainobjects.UserName
 import coverosR3z.server.PreparedResponseData
 import coverosR3z.server.AnalyzedHttpData
 import coverosR3z.server.isAuthenticated
 import coverosR3z.server.okHTML
 
 
-fun doGetHomePage(rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        okHTML(authHomePageHTML(rd.user.name.value))
-    } else {
-        okHTML(homepageHTML)
-    }
-}
+fun generateAuthHomepage(username : UserName) : String = authHomePageHTML(username.value)
+fun generateUnAuthenticatedHomepage() : String = homepageHTML
 
 fun authHomePageHTML(username : String) : String {
     return """

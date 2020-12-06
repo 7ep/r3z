@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
+import coverosR3z.domainobjects.UserName
 import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
@@ -28,13 +29,7 @@ fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Ma
 }
 
 
-fun doGETCreateProjectPage(rd: AnalyzedHttpData): PreparedResponseData {
-    return if (isAuthenticated(rd)) {
-        okHTML(createProjectHTML(rd.user.name.value))
-    } else {
-        redirectTo(NamedPaths.HOMEPAGE.path)
-    }
-}
+fun generateCreateProjectPage(username: UserName): String = createProjectHTML(username.value)
 
 
 fun createProjectHTML(username : String) : String {

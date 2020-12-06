@@ -15,13 +15,7 @@ private val requiredData = setOf(
     LogTypes.TRACE.toString(),
 )
 
-fun handleGETLogging(user: User): PreparedResponseData {
-    return if (isAuthenticated(user)) {
-        PreparedResponseData(loggingConfigHtml(), StatusCode.OK, listOf(ContentType.TEXT_HTML.value))
-    } else {
-        redirectTo(NamedPaths.HOMEPAGE.path)
-    }
-}
+fun generateLoggingConfigPage(): String = loggingConfigHtml()
 
 fun setLogging(lt : LogTypes, data: Map<String, String>) {
     /**

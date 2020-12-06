@@ -44,18 +44,16 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
 
     return when (Pair(verb, path)){
         Pair(Verb.GET, ""),
-        Pair(Verb.GET, HOMEPAGE.path)  -> doGetHomePage(rd)
-        Pair(Verb.GET, ENTER_TIME.path) -> doGETEnterTimePage(tru, rd)
-        Pair(Verb.GET, ENTER_TIMEJS.path) -> okJS(enterTimeJS)
-        Pair(Verb.GET, ENTER_TIMECSS.path) -> okCSS(enterTimeCSS)
-        Pair(Verb.GET, TIMEENTRIES.path) -> doGetTimeEntriesPage(tru, rd)
-        Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETCreateEmployeePage(rd)
-        Pair(Verb.GET, EMPLOYEES.path) -> okHTML(existingEmployeesHTML(rd.user.name.value, tru.listAllEmployees()))
-        Pair(Verb.GET, LOGIN.path) -> doGETLoginPage(rd)
-        Pair(Verb.GET, REGISTER.path) -> doGETRegisterPage(tru, rd)
-        Pair(Verb.GET, CREATE_PROJECT.path) -> doGETCreateProjectPage(rd)
-        Pair(Verb.GET, LOGOUT.path) -> doGETLogout(au, rd)
-        Pair(Verb.GET, LOGGING.path) -> handleGETLogging(user)
+        Pair(Verb.GET, HOMEPAGE.path)  -> doGETAuthAndUnauth(user, { generateAuthHomepage(user.name)}, { generateUnAuthenticatedHomepage()}) // doGetHomePage(rd)
+        Pair(Verb.GET, ENTER_TIME.path) -> doGETRequireAuth(user) { generateEnterTimePage(tru, user.name) }
+        Pair(Verb.GET, TIMEENTRIES.path) -> doGETRequireAuth(user) { generateTimeEntriesPage(tru, user) }
+        Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETRequireAuth(user) { generateCreateEmployeePage(user.name) }
+        Pair(Verb.GET, EMPLOYEES.path) -> doGETRequireAuth(user) { generateExistingEmployeesPage(user.name, tru) }
+        Pair(Verb.GET, LOGIN.path) -> doGETRequireUnauthenticated(user) { generateLoginPage() }
+        Pair(Verb.GET, REGISTER.path) -> doGETRequireUnauthenticated(user) { generateRegisterUserPage(tru) }
+        Pair(Verb.GET, CREATE_PROJECT.path) -> doGETRequireAuth(user) { generateCreateProjectPage(user.name) }
+        Pair(Verb.GET, LOGOUT.path) -> doGETRequireAuth(user) { generateLogoutPage(au, rd.sessionToken) }
+        Pair(Verb.GET, LOGGING.path) -> doGETRequireAuth(user) { generateLoggingConfigPage() }
 
         // posts
         Pair(Verb.POST, ENTER_TIME.path) -> handlePOSTTimeEntry(tru, user, data)
@@ -68,6 +66,45 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         else -> {
             handleUnknownFiles(rd)
         }
+    }
+}
+
+/**
+ * If we are authenticated, runs some calculations.  Otherwise
+ * redirects to the homepage.
+ * @param generator the code to run to generate a string to return for this GET
+ */
+fun doGETRequireAuth(user : User, generator : () -> String): PreparedResponseData {
+    return if (isAuthenticated(user)) {
+        okHTML(generator())
+    } else {
+        redirectTo(HOMEPAGE.path)
+    }
+}
+
+/**
+ * This is the method for when we want to go either one direction
+ * if authenticated or another if unauthenticated.  Most likely
+ * example: the homepage
+ */
+fun doGETAuthAndUnauth(user : User, generatorAuthenticated : () -> String, generatorUnauth : () -> String): PreparedResponseData {
+    return if (isAuthenticated(user)) {
+        okHTML(generatorAuthenticated())
+    } else {
+        okHTML(generatorUnauth())
+    }
+}
+
+/**
+ * This is for those odd cases where you aren't allowed to go
+ * there if you *are* authenticated, like the login page or
+ * register user page
+ */
+fun doGETRequireUnauthenticated(user : User, generator : () -> String): PreparedResponseData {
+    return if (! isAuthenticated(user)) {
+        okHTML(generator())
+    } else {
+        redirectTo(HOMEPAGE.path)
     }
 }
 
