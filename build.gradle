@@ -97,6 +97,10 @@ jar {
 
 test {
 
+    jacoco {
+      includes = ['coverosR3z.*']
+    }
+
     // to run just the non-ui tests, run gradlew test -Pnoui
     if (project.hasProperty('noui')) {
         exclude '**/uitests*'
