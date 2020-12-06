@@ -7,31 +7,37 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logSettings
 import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.toStr
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
 import java.net.Socket
 import kotlin.concurrent.thread
 
 class ServerTests {
 
     private lateinit var client : SocketWrapper
-    private lateinit var serverObject : Server
-    private lateinit var au : FakeAuthenticationUtilities
+
+    companion object {
+
+        private lateinit var serverObject : Server
+        private lateinit var au : FakeAuthenticationUtilities
+
+        @JvmStatic @BeforeClass
+        fun beforeClass() {
+            serverObject = Server(8080, DEFAULT_DB_DIRECTORY)
+            au = FakeAuthenticationUtilities()
+            thread { serverObject.startServer(au) }
+        }
+
+        @JvmStatic @AfterClass
+        fun afterClass() {
+            serverObject.halfOpenServerSocket.close()
+        }
+    }
 
     @Before
     fun init() {
-        serverObject = Server(8080, DEFAULT_DB_DIRECTORY)
-        au = FakeAuthenticationUtilities()
-        thread { serverObject.startServer(au) }
         val clientSocket = Socket("localhost", 8080)
         client = SocketWrapper(clientSocket, "client")
-    }
-
-    @After
-    fun cleanup() {
-        serverObject.halfOpenServerSocket.close()
     }
 
     /**
@@ -39,7 +45,16 @@ class ServerTests {
      */
     @Test
     fun testShouldParsePortFromCLI() {
-        val port : Int = Server.extractFirstArgumentAsPort(arrayOf("8080"))
+        val port : Int = Server.extractFirstArgumentAsPort(arrayOf("12345"))
+        assertEquals(12345, port)
+    }
+
+    /**
+     * If we provide no port number, it defaults to 8080
+     */
+    @Test
+    fun testShouldParsePortFromCLI_nothingProvided() {
+        val port : Int = Server.extractFirstArgumentAsPort(arrayOf())
         assertEquals(8080, port)
     }
 
@@ -182,6 +197,23 @@ class ServerTests {
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
+    }
+
+    /**
+     * When we POST some data that lacks all the types needed, get a 500 error
+     */
+    @Test
+    fun testShouldGetInternalServerError() {
+        au.getUserForSessionBehavior = { DEFAULT_USER }
+        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("Cookie: sessionId=abc123$CRLF")
+        val body = "project_entry=1&time_entry=2"
+        client.write("Content-Length: ${body.length}$CRLF$CRLF")
+        client.write(body)
+
+        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
+
+        assertEquals(StatusCode.INTERNAL_SERVER_ERROR, result.statusCode)
     }
 
     /**
