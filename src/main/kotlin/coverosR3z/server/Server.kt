@@ -22,13 +22,13 @@ class Server(val port: Int, private val dbDirectory: String) {
 
     lateinit var halfOpenServerSocket : ServerSocket
 
-    fun startServer() {
+    fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
 
         val cu = CurrentUser(SYSTEM_USER)
         val pmd = PureMemoryDatabase.start(dbDirectory)
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
         logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
