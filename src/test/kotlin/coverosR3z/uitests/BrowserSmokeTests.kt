@@ -50,23 +50,6 @@ class BrowserSmokeTests {
 
     }
 
-    @Before
-    fun init() {
-        // wipe out the database
-        File(dbDirectory).deleteRecursively()
-
-        // start the server
-        thread {
-            sc = Server(8080, dbDirectory)
-            sc.startServer()
-        }
-    }
-
-    @After
-    fun clean() {
-        sc.halfOpenServerSocket.close()
-    }
-
     /**
      * In this system-wide smoke test we will exercise many parts of the application.
      * We will:
@@ -76,28 +59,28 @@ class BrowserSmokeTests {
      * - hit the authenticated homepage
      * - enter time
      */
-    @Ignore
     @Test
-    fun `Smoke test - traverse through application with Chrome, many pitstops`() {
-        // Given I am a Chrome browser user
-        // start the Chromedriver
-        val driver = ChromeDriver(ChromeOptions().setHeadless(false))
-        smokeTest(driver)
-    }
+    fun `Smoke test`() {
+        val drivers = listOf(
+            HtmlUnitDriver(BEST_SUPPORTED),
+//            FirefoxDriver(),
+//            ChromeDriver(ChromeOptions().setHeadless(false))
+        )
 
-    @Test
-    fun `Smoke test - with htmlunit`() {
-        // start the HtmlUnitDriver
-        val driver = HtmlUnitDriver(BEST_SUPPORTED)
-        smokeTest(driver)
-    }
+        for (driver in drivers) {
+            // wipe out the database
+            File(dbDirectory).deleteRecursively()
 
-    @Ignore
-    @Test
-    fun `Smoke test - with firefox`() {
-        // start the Firefox driver
-        val driver = FirefoxDriver()
-        smokeTest(driver)
+            // start the server
+            thread {
+                sc = Server(8080, dbDirectory)
+                sc.startServer()
+            }
+
+            smokeTest(driver)
+
+            sc.halfOpenServerSocket.close()
+        }
     }
 
     private fun smokeTest(driver: WebDriver) {
