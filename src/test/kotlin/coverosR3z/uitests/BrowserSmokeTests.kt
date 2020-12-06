@@ -1,6 +1,7 @@
 package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.BrowserVersion.BEST_SUPPORTED
+import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_USER
 import coverosR3z.timerecording.EnterTimeElements
 import coverosR3z.authentication.LoginElements
@@ -76,6 +77,7 @@ class BrowserSmokeTests {
      * - hit the authenticated homepage
      * - enter time
      */
+    @Ignore
     @Test
     fun `Smoke test - traverse through application with Chrome, many pitstops`() {
         // Given I am a Chrome browser user
@@ -84,7 +86,6 @@ class BrowserSmokeTests {
         bigSmokeTest(driver)
     }
 
-    @Ignore
     @Test
     fun `Smoke test - with htmlunit`() {
         // start the HtmlUnitDriver
@@ -101,6 +102,13 @@ class BrowserSmokeTests {
     }
 
     private fun bigSmokeTest(driver: WebDriver) {
+        // Because of the way HtmlUnit works, we have to differentiate
+        // in how we set date
+        val dateString = if (driver is HtmlUnitDriver) {
+            DEFAULT_DATE_STRING
+        } else {
+            "09282018"
+        }
         val rp = RegisterPage(driver)
         val lp = LoginPage(driver)
         val etp = EnterTimePage(driver)
@@ -161,7 +169,7 @@ class BrowserSmokeTests {
 
             // enter times
             for (p in projects) {
-                etp.enterTime(p, "60", details, "09282018")
+                etp.enterTime(p, "60", details, dateString)
             }
 
             // logout
@@ -182,46 +190,6 @@ class BrowserSmokeTests {
 
         // logout
         driver.get("$domain/${NamedPaths.LOGOUT.path}")
-
-        // loop through each user and login in
-        for (e in employees) {
-            // login
-            lp.login(e, password)
-
-            // enter times
-            for (p in projects) {
-                etp.enterTime(p, "60", "foo foo foo foo la la la la la la", "09282018")
-            }
-
-            // logout
-            driver.get("$domain/logout")
-        }
-
-        // login
-        lp.login(employees[0], password)
-
-        // view the time entries for the last person
-        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
-        assertEquals("your time entries", driver.title)
-        val allEntries = driver.findElement(By.ByTagName("table")).text
-        assertTrue(allEntries.contains(details))
-
-        // add a new employee
-        val newEmployeeName = "some new employee"
-        eep.enter(newEmployeeName)
-
-        // Hit the homepage
-        driver.get("$domain/${NamedPaths.HOMEPAGE.path}")
-        assertEquals("Authenticated Homepage", driver.title)
-
-        // logout
-        driver.get("$domain/${NamedPaths.LOGOUT.path}")
-
-        // register as the new employee
-        rp.register("newuser", password, newEmployeeName)
-
-        // login as the new employee
-        lp.login("newuser", password)
 
         driver.quit()
     }
