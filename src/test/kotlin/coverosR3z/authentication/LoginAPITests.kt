@@ -3,6 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.toStr
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -54,8 +55,8 @@ class LoginAPITests {
     fun testHandlePostLogin_missingUser() {
         val data = mapOf(
                 LoginElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data)}
-        assertEquals(usernameNotNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogin(au, NO_USER, data)}
+        assertEquals("expected keys: [username, password]. received keys: [password]", ex.message)
     }
 
     /**
@@ -77,8 +78,8 @@ class LoginAPITests {
     fun testHandlePostLogin_missingPassword() {
         val data = mapOf(
             LoginElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value)
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogin(au, NO_USER, data)}
-        assertEquals(passwordMustNotBeNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogin(au, NO_USER, data)}
+        assertEquals("expected keys: [username, password]. received keys: [username]", ex.message)
     }
 
     /**

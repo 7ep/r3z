@@ -2,6 +2,7 @@ package coverosR3z.logging
 
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.server.PreparedResponseData
 import coverosR3z.server.StatusCode
 import org.junit.After
@@ -132,8 +133,8 @@ class LoggingAPITests {
                 LogTypes.WARN.name to "false",
                 LogTypes.DEBUG.name to "true",
                 LogTypes.TRACE.name to "false")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
-        assertEquals(missingLoggingDataInputMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
+        assertEquals("expected keys: [AUDIT, DEBUG, WARN, TRACE]. received keys: [WARN, DEBUG, TRACE]", ex.message)
     }
 
     @Test
@@ -142,8 +143,8 @@ class LoggingAPITests {
                 LogTypes.AUDIT.name to "false",
                 LogTypes.DEBUG.name to "true",
                 LogTypes.TRACE.name to "false")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
-        assertEquals(missingLoggingDataInputMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
+        assertEquals("expected keys: [AUDIT, DEBUG, WARN, TRACE]. received keys: [AUDIT, DEBUG, TRACE]", ex.message)
     }
 
     @Test
@@ -152,8 +153,8 @@ class LoggingAPITests {
                 LogTypes.AUDIT.name to "false",
                 LogTypes.WARN.name to "false",
                 LogTypes.TRACE.name to "false")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
-        assertEquals(missingLoggingDataInputMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
+        assertEquals("expected keys: [AUDIT, DEBUG, WARN, TRACE]. received keys: [AUDIT, WARN, TRACE]", ex.message)
     }
 
     @Test
@@ -162,8 +163,8 @@ class LoggingAPITests {
                 LogTypes.AUDIT.name to "false",
                 LogTypes.WARN.name to "false",
                 LogTypes.DEBUG.name to "false")
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
-        assertEquals(missingLoggingDataInputMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTLogging(SYSTEM_USER, data)}
+        assertEquals("expected keys: [AUDIT, DEBUG, WARN, TRACE]. received keys: [AUDIT, WARN, DEBUG]", ex.message)
     }
 
 

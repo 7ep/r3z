@@ -1,11 +1,19 @@
 package coverosR3z.logging
 
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 
 const val missingLoggingDataInputMsg = "input must not be missing"
 const val badInputLoggingDataMsg = "input for log setting must be \"true\" or \"false\""
+
+private val requiredData = setOf(
+    LogTypes.AUDIT.toString(),
+    LogTypes.DEBUG.toString(),
+    LogTypes.WARN.toString(),
+    LogTypes.TRACE.toString(),
+)
 
 fun handleGETLogging(user: User): PreparedResponseData {
     return if (isAuthenticated(user)) {
@@ -33,6 +41,7 @@ fun setLogging(lt : LogTypes, data: Map<String, String>) {
 
 fun handlePOSTLogging(user: User, data: Map<String, String>): PreparedResponseData {
     return if (isAuthenticated(user)) {
+        checkHasExactInputs(data.keys, requiredData)
         for (lt in LogTypes.values()) {
             setLogging(lt, data)
         }

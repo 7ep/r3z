@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.ProjectName
 import coverosR3z.domainobjects.User
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
@@ -11,9 +12,14 @@ enum class ProjectElements(val elemName: String, val id: String) {
     CREATE_BUTTON("", "project_create_button"),
 }
 
+private val requiredInputs = setOf(
+    ProjectElements.PROJECT_INPUT.elemName
+)
+
 fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isAuthenticated = isAuthenticated(user)
     return if (isAuthenticated) {
+        checkHasExactInputs(data.keys, requiredInputs)
         tru.createProject(ProjectName.make(data[ProjectElements.PROJECT_INPUT.elemName]))
         okHTML(successHTML)
     } else {

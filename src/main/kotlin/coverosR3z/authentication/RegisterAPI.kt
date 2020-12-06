@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.server.*
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.misc.failureHTML
@@ -14,6 +15,13 @@ enum class RegisterElements(val elemName: String, val id: String) {
     REGISTER_BUTTON("", "register_button");
 }
 
+private val requiredInputs = setOf(
+    RegisterElements.USERNAME_INPUT.elemName,
+    RegisterElements.PASSWORD_INPUT.elemName,
+    RegisterElements.EMPLOYEE_INPUT.elemName,
+    RegisterElements.USERNAME_INPUT.elemName,
+)
+
 fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: AnalyzedHttpData): PreparedResponseData {
     return if (isAuthenticated(rd)) {
         redirectTo(NamedPaths.AUTHHOMEPAGE.path)
@@ -25,6 +33,7 @@ fun doGETRegisterPage(tru: ITimeRecordingUtilities, rd: AnalyzedHttpData): Prepa
 
 fun handlePOSTRegister(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     return if (user == NO_USER) {
+        checkHasExactInputs(data.keys, requiredInputs)
         val username = UserName.make(data[RegisterElements.USERNAME_INPUT.elemName])
         val password = Password.make(data[RegisterElements.PASSWORD_INPUT.elemName])
         val employeeId = EmployeeId.make(data[RegisterElements.EMPLOYEE_INPUT.elemName])

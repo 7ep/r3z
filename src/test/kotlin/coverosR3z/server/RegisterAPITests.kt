@@ -8,6 +8,7 @@ import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.RegisterElements
 import coverosR3z.authentication.handlePOSTRegister
 import coverosR3z.domainobjects.*
+import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -125,8 +126,8 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingUsername() {
         val data = mapOf(RegisterElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
                       RegisterElements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals(usernameNotNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals("expected keys: [username, password, employee]. received keys: [password, employee]", ex.message)
     }
 
     /**
@@ -136,8 +137,8 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingPassword() {
         val data = mapOf(RegisterElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
                       RegisterElements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals(passwordMustNotBeNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals("expected keys: [username, password, employee]. received keys: [username, employee]", ex.message)
     }
 
     /**
@@ -147,8 +148,8 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingEmployee() {
         val data = mapOf(RegisterElements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
                       RegisterElements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTRegister(au, NO_USER, data) }
-        assertEquals(employeeIdNotNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTRegister(au, NO_USER, data) }
+        assertEquals("expected keys: [username, password, employee]. received keys: [username, password]", ex.message)
     }
 
 

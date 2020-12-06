@@ -6,6 +6,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.maxProjectNameSizeMsg
 import coverosR3z.domainobjects.projectNameNotNullMsg
+import coverosR3z.exceptions.InexactInputsException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -57,7 +58,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_noBody() {
         val data = emptyMap<String,String>()
-        val ex = assertThrows(IllegalStateException::class.java){handlePOSTCreatingProject(tru, DEFAULT_USER, data)}
-        assertEquals(projectNameNotNullMsg, ex.message)
+        val ex = assertThrows(InexactInputsException::class.java){handlePOSTCreatingProject(tru, DEFAULT_USER, data)}
+        assertEquals("expected keys: [project_name]. received keys: []", ex.message)
     }
 }

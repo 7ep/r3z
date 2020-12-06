@@ -2,6 +2,7 @@ package coverosR3z.authentication
 
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
+import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.server.*
 import coverosR3z.misc.successHTML
 
@@ -11,9 +12,15 @@ enum class LoginElements(val elemName: String, val id: String) {
     LOGIN_BUTTON("", "login_button");
 }
 
+private val requiredInputs = setOf(
+    LoginElements.USERNAME_INPUT.elemName,
+    LoginElements.PASSWORD_INPUT.elemName,
+)
+
 fun handlePOSTLogin(au: IAuthenticationUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
     val isUnauthenticated = user == NO_USER
     return if (isUnauthenticated) {
+        checkHasExactInputs(data.keys, requiredInputs)
         val username = UserName.make(data[LoginElements.USERNAME_INPUT.elemName])
         val password = Password.make(data[LoginElements.PASSWORD_INPUT.elemName])
         val (loginResult, loginUser) = au.login(username, password)

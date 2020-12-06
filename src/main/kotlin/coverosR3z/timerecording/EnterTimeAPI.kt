@@ -13,7 +13,8 @@ enum class EnterTimeElements (val elemName: String, val id: String) {
     ENTER_TIME_BUTTON("", "enter_time_button"),
     DATE_INPUT("date_entry", "date_entry")
 }
-val requiredData = setOf(
+
+private val requiredData = setOf(
     EnterTimeElements.PROJECT_INPUT.elemName,
     EnterTimeElements.TIME_INPUT.elemName,
     EnterTimeElements.DETAIL_INPUT.elemName,
