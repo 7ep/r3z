@@ -83,7 +83,7 @@ class Server(val port: Int, private val dbDirectory: String) {
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(analyzedHttpData.user)
                 val truWithUser = tru.changeUser(cu)
-                logDebug("client requested ${analyzedHttpData.verb} ${analyzedHttpData.path}", cu)
+                logDebug("client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message ?: "NO ERROR MESSAGE DEFINED")
