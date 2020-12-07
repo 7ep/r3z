@@ -82,10 +82,9 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
  * @param generator the code to run to generate a string to return for this GET
  */
 fun doGETRequireAuth(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
-    return if (authStatus == AuthStatus.AUTHENTICATED) {
-        okHTML(generator())
-    } else {
-        redirectTo(HOMEPAGE.path)
+    return when (authStatus) {
+        AuthStatus.AUTHENTICATED -> okHTML(generator())
+        AuthStatus.UNAUTHENTICATED -> redirectTo(HOMEPAGE.path)
     }
 }
 
@@ -95,10 +94,9 @@ fun doGETRequireAuth(authStatus : AuthStatus, generator : () -> String): Prepare
  * example: the homepage
  */
 fun doGETAuthAndUnauth(authStatus : AuthStatus, generatorAuthenticated : () -> String, generatorUnauth : () -> String): PreparedResponseData {
-    return if (authStatus == AuthStatus.AUTHENTICATED) {
-        okHTML(generatorAuthenticated())
-    } else {
-        okHTML(generatorUnauth())
+    return when (authStatus) {
+        AuthStatus.AUTHENTICATED -> okHTML(generatorAuthenticated())
+        AuthStatus.UNAUTHENTICATED -> okHTML(generatorUnauth())
     }
 }
 
@@ -108,10 +106,9 @@ fun doGETAuthAndUnauth(authStatus : AuthStatus, generatorAuthenticated : () -> S
  * register user page
  */
 fun doGETRequireUnauthenticated(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
-    return if (authStatus == AuthStatus.UNAUTHENTICATED) {
-        okHTML(generator())
-    } else {
-        redirectTo(HOMEPAGE.path)
+    return when (authStatus) {
+        AuthStatus.UNAUTHENTICATED -> okHTML(generator())
+        AuthStatus.AUTHENTICATED -> redirectTo(HOMEPAGE.path)
     }
 }
 
@@ -124,11 +121,12 @@ fun doPOSTAuthenticated(authStatus : AuthStatus,
                         requiredInputs : Set<String>,
                         data : Map<String, String>,
                         handler: () -> PreparedResponseData) : PreparedResponseData {
-    return if (authStatus == AuthStatus.AUTHENTICATED) {
-        checkHasExactInputs(data.keys, requiredInputs)
-        handler()
-    } else {
-        handleUnauthorized()
+    return when (authStatus) {
+        AuthStatus.AUTHENTICATED -> {
+            checkHasExactInputs(data.keys, requiredInputs)
+            handler()
+        }
+        AuthStatus.UNAUTHENTICATED -> handleUnauthorized()
     }
 }
 
@@ -141,11 +139,12 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
                         requiredInputs : Set<String>,
                         data : Map<String, String>,
                         handler: () -> PreparedResponseData) : PreparedResponseData {
-    return if (authStatus == AuthStatus.UNAUTHENTICATED) {
-        checkHasExactInputs(data.keys, requiredInputs)
-        handler()
-    } else {
-        redirectTo(AUTHHOMEPAGE.path)
+    return when (authStatus) {
+        AuthStatus.UNAUTHENTICATED -> {
+            checkHasExactInputs(data.keys, requiredInputs)
+            handler()
+        }
+        AuthStatus.AUTHENTICATED -> redirectTo(AUTHHOMEPAGE.path)
     }
 }
 
