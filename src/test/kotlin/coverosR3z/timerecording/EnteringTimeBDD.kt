@@ -92,11 +92,11 @@ class EnteringTimeBDD {
             project = newProject,
             employee = alice)
         // when the employee enters their time
-        val data: Map<String, String> = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
-                         EnterTimeElements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
-                         EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
-                         EnterTimeElements.DETAIL_INPUT.elemName to "no problem here")
-        val result = handlePOSTTimeEntry(tru, user, data = data)
+        val data: Map<String, String> = mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
+                         EnterTimeAPI.Elements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
+                         EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
+                         EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "no problem here")
+        val result = EnterTimeAPI.handlePOST(tru, user.employeeId, data = data)
 
         // then time is saved
         val message = "we should have gotten the success page.Got: $result"

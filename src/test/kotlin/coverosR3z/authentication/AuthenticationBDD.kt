@@ -100,7 +100,7 @@ class AuthenticationBDD {
 
         // When I register with too short of a a password
         val data = mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1")
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTRegister(au, NO_USER, data)}
+        val ex = assertThrows(IllegalArgumentException::class.java){RegisterAPI.handlePOST(au, data)}
 
         // Then the system denies the registration on the basis of a bad password
         assertEquals(passwordMustBeLargeEnoughMsg, ex.message)

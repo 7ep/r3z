@@ -7,6 +7,8 @@ import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.maxProjectNameSizeMsg
 import coverosR3z.domainobjects.projectNameNotNullMsg
 import coverosR3z.exceptions.InexactInputsException
+import coverosR3z.server.AuthStatus
+import coverosR3z.server.doPOSTAuthenticated
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -29,8 +31,8 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject() {
-        val data = mapOf(ProjectElements.PROJECT_INPUT.elemName to DEFAULT_PROJECT_NAME.value)
-        handlePOSTCreatingProject(tru, DEFAULT_USER, data)
+        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to DEFAULT_PROJECT_NAME.value)
+        ProjectAPI.handlePOST(tru, data)
     }
 
     /**
@@ -38,8 +40,8 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_HugeName() {
-        val data = mapOf(ProjectElements.PROJECT_INPUT.elemName to "a".repeat(31))
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTCreatingProject(tru, DEFAULT_USER, data)}
+        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to "a".repeat(31))
+        val ex = assertThrows(IllegalArgumentException::class.java){ProjectAPI.handlePOST(tru, data)}
         assertEquals(maxProjectNameSizeMsg, ex.message)
     }
 
@@ -48,8 +50,8 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_BigName() {
-        val data = mapOf(ProjectElements.PROJECT_INPUT.elemName to "a".repeat(30))
-        handlePOSTCreatingProject(tru, DEFAULT_USER, data)
+        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to "a".repeat(30))
+        ProjectAPI.handlePOST(tru, data)
     }
 
     /**
@@ -58,7 +60,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_noBody() {
         val data = emptyMap<String,String>()
-        val ex = assertThrows(InexactInputsException::class.java){handlePOSTCreatingProject(tru, DEFAULT_USER, data)}
+        val ex = assertThrows(InexactInputsException::class.java){  doPOSTAuthenticated(AuthStatus.AUTHENTICATED, ProjectAPI.requiredInputs, data) { ProjectAPI.handlePOST(tru, data) }  }
         assertEquals("expected keys: [project_name]. received keys: []", ex.message)
     }
 }

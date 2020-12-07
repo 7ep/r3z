@@ -25,6 +25,11 @@ const val CRLF = "\r\n"
 
 val caching = CacheControl.AGGRESSIVE_MINUTE_CACHE.details
 
+enum class AuthStatus {
+    AUTHENTICATED,
+    UNAUTHENTICATED
+}
+
 /**
  * Examine the request and headers, take proper action, returning a
  * proper response with headers
@@ -42,26 +47,28 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         return handleBadRequest()
     }
 
+    val authStatus : AuthStatus = isAuthenticated(user)
+
     return when (Pair(verb, path)){
         Pair(Verb.GET, ""),
-        Pair(Verb.GET, HOMEPAGE.path)  -> doGETAuthAndUnauth(user, { generateAuthHomepage(user.name)}, { generateUnAuthenticatedHomepage()}) // doGetHomePage(rd)
-        Pair(Verb.GET, ENTER_TIME.path) -> doGETRequireAuth(user) { generateEnterTimePage(tru, user.name) }
-        Pair(Verb.GET, TIMEENTRIES.path) -> doGETRequireAuth(user) { generateTimeEntriesPage(tru, user) }
-        Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETRequireAuth(user) { generateCreateEmployeePage(user.name) }
-        Pair(Verb.GET, EMPLOYEES.path) -> doGETRequireAuth(user) { generateExistingEmployeesPage(user.name, tru) }
-        Pair(Verb.GET, LOGIN.path) -> doGETRequireUnauthenticated(user) { generateLoginPage() }
-        Pair(Verb.GET, REGISTER.path) -> doGETRequireUnauthenticated(user) { generateRegisterUserPage(tru) }
-        Pair(Verb.GET, CREATE_PROJECT.path) -> doGETRequireAuth(user) { generateCreateProjectPage(user.name) }
-        Pair(Verb.GET, LOGOUT.path) -> doGETRequireAuth(user) { generateLogoutPage(au, rd.sessionToken) }
-        Pair(Verb.GET, LOGGING.path) -> doGETRequireAuth(user) { generateLoggingConfigPage() }
+        Pair(Verb.GET, HOMEPAGE.path)  -> doGETAuthAndUnauth(authStatus, { generateAuthHomepage(user.name)}, { generateUnAuthenticatedHomepage()})
+        Pair(Verb.GET, ENTER_TIME.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateEnterTimePage(tru, user.name) }
+        Pair(Verb.GET, TIMEENTRIES.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateTimeEntriesPage(tru, user) }
+        Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateCreateEmployeePage(user.name) }
+        Pair(Verb.GET, EMPLOYEES.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateExistingEmployeesPage(user.name, tru) }
+        Pair(Verb.GET, LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }
+        Pair(Verb.GET, REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
+        Pair(Verb.GET, CREATE_PROJECT.path) -> doGETRequireAuth(authStatus) { ProjectAPI.generateCreateProjectPage(user.name) }
+        Pair(Verb.GET, LOGOUT.path) -> doGETRequireAuth(authStatus) { generateLogoutPage(au, rd.sessionToken) }
+        Pair(Verb.GET, LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
 
         // posts
-        Pair(Verb.POST, ENTER_TIME.path) -> handlePOSTTimeEntry(tru, user, data)
-        Pair(Verb.POST, CREATE_EMPLOYEE.path) -> handlePOSTNewEmployee(tru, user, data)
-        Pair(Verb.POST, LOGIN.path) -> handlePOSTLogin(au, user, data)
-        Pair(Verb.POST, REGISTER.path) -> handlePOSTRegister(au, user, data)
-        Pair(Verb.POST, CREATE_PROJECT.path) -> handlePOSTCreatingProject(tru, user, data)
-        Pair(Verb.POST, LOGGING.path) -> handlePOSTLogging(user, data)
+        Pair(Verb.POST, ENTER_TIME.path) -> doPOSTAuthenticated(authStatus, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, user.employeeId, data) }
+        Pair(Verb.POST, CREATE_EMPLOYEE.path) -> doPOSTAuthenticated(authStatus, EmployeeAPI.requiredInputs, data) { EmployeeAPI.handlePOST(tru, data) }
+        Pair(Verb.POST, LOGIN.path) -> doPOSTRequireUnauthenticated(authStatus, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
+        Pair(Verb.POST, REGISTER.path) -> doPOSTRequireUnauthenticated(authStatus, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }
+        Pair(Verb.POST, CREATE_PROJECT.path) -> doPOSTAuthenticated(authStatus, ProjectAPI.requiredInputs, data) { ProjectAPI.handlePOST(tru, data) }
+        Pair(Verb.POST, LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
 
         else -> {
             handleUnknownFiles(rd)
@@ -74,8 +81,8 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
  * redirects to the homepage.
  * @param generator the code to run to generate a string to return for this GET
  */
-fun doGETRequireAuth(user : User, generator : () -> String): PreparedResponseData {
-    return if (isAuthenticated(user)) {
+fun doGETRequireAuth(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
+    return if (authStatus == AuthStatus.AUTHENTICATED) {
         okHTML(generator())
     } else {
         redirectTo(HOMEPAGE.path)
@@ -87,8 +94,8 @@ fun doGETRequireAuth(user : User, generator : () -> String): PreparedResponseDat
  * if authenticated or another if unauthenticated.  Most likely
  * example: the homepage
  */
-fun doGETAuthAndUnauth(user : User, generatorAuthenticated : () -> String, generatorUnauth : () -> String): PreparedResponseData {
-    return if (isAuthenticated(user)) {
+fun doGETAuthAndUnauth(authStatus : AuthStatus, generatorAuthenticated : () -> String, generatorUnauth : () -> String): PreparedResponseData {
+    return if (authStatus == AuthStatus.AUTHENTICATED) {
         okHTML(generatorAuthenticated())
     } else {
         okHTML(generatorUnauth())
@@ -100,11 +107,45 @@ fun doGETAuthAndUnauth(user : User, generatorAuthenticated : () -> String, gener
  * there if you *are* authenticated, like the login page or
  * register user page
  */
-fun doGETRequireUnauthenticated(user : User, generator : () -> String): PreparedResponseData {
-    return if (! isAuthenticated(user)) {
+fun doGETRequireUnauthenticated(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
+    return if (authStatus == AuthStatus.UNAUTHENTICATED) {
         okHTML(generator())
     } else {
         redirectTo(HOMEPAGE.path)
+    }
+}
+
+/**
+ * Handle the (pretty ordinary) situation where a user POSTS data to us
+ * and they have to be authenticated to do so
+ * @param handler the method run to handle the POST
+ */
+fun doPOSTAuthenticated(authStatus : AuthStatus,
+                        requiredInputs : Set<String>,
+                        data : Map<String, String>,
+                        handler: () -> PreparedResponseData) : PreparedResponseData {
+    return if (authStatus == AuthStatus.AUTHENTICATED) {
+        checkHasExactInputs(data.keys, requiredInputs)
+        handler()
+    } else {
+        handleUnauthorized()
+    }
+}
+
+/**
+ * Handle the (rare) situation where a user POSTS data to us
+ * and they *must NOT be* authenticated.  Like on the register user page.
+ * @param handler the method run to handle the POST
+ */
+fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
+                        requiredInputs : Set<String>,
+                        data : Map<String, String>,
+                        handler: () -> PreparedResponseData) : PreparedResponseData {
+    return if (authStatus == AuthStatus.UNAUTHENTICATED) {
+        checkHasExactInputs(data.keys, requiredInputs)
+        handler()
+    } else {
+        redirectTo(AUTHHOMEPAGE.path)
     }
 }
 
@@ -138,12 +179,12 @@ private fun handleUnknownFiles(rd: AnalyzedHttpData): PreparedResponseData {
     }
 }
 
-fun isAuthenticated(u : User) : Boolean {
-    return u != NO_USER
-}
-
-fun isAuthenticated(rd : AnalyzedHttpData) : Boolean {
-    return rd.user != NO_USER
+fun isAuthenticated(u : User) : AuthStatus {
+    return if (u != NO_USER) {
+        AuthStatus.AUTHENTICATED
+    } else {
+        AuthStatus.UNAUTHENTICATED
+    }
 }
 
 /**

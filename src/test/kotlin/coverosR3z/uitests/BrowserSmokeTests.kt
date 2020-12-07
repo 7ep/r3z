@@ -3,23 +3,20 @@ package coverosR3z.uitests
 import com.gargoylesoftware.htmlunit.BrowserVersion.BEST_SUPPORTED
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_USER
-import coverosR3z.timerecording.EnterTimeElements
-import coverosR3z.authentication.LoginElements
+import coverosR3z.authentication.LoginAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logSettings
 import coverosR3z.server.NamedPaths
 import coverosR3z.server.Server
-import coverosR3z.timerecording.EmployeeElements
-import coverosR3z.timerecording.ProjectElements
+import coverosR3z.timerecording.EmployeeAPI
+import coverosR3z.timerecording.EnterTimeAPI
+import coverosR3z.timerecording.ProjectAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import java.io.File
 import kotlin.concurrent.thread
@@ -180,11 +177,11 @@ class BrowserSmokeTests {
 
         fun enterTime(project: String, time: String, details: String, date: String) {
             driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
-            driver.findElement(By.id(EnterTimeElements.PROJECT_INPUT.id)).findElement(By.xpath("//option[. = '$project']")).click()
-            driver.findElement(By.id(EnterTimeElements.TIME_INPUT.id)).sendKeys(time)
-            driver.findElement(By.id(EnterTimeElements.DETAIL_INPUT.id)).sendKeys(details)
-            driver.findElement(By.id(EnterTimeElements.DATE_INPUT.id)).sendKeys(date)
-            driver.findElement(By.id(EnterTimeElements.ENTER_TIME_BUTTON.id)).click()
+            driver.findElement(By.id(EnterTimeAPI.Elements.PROJECT_INPUT.id)).findElement(By.xpath("//option[. = '$project']")).click()
+            driver.findElement(By.id(EnterTimeAPI.Elements.TIME_INPUT.id)).sendKeys(time)
+            driver.findElement(By.id(EnterTimeAPI.Elements.DETAIL_INPUT.id)).sendKeys(details)
+            driver.findElement(By.id(EnterTimeAPI.Elements.DATE_INPUT.id)).sendKeys(date)
+            driver.findElement(By.id(EnterTimeAPI.Elements.ENTER_TIME_BUTTON.id)).click()
             assertEquals("SUCCESS", driver.title)
         }
     }
@@ -192,9 +189,9 @@ class BrowserSmokeTests {
         
         fun login(username: String, password: String) {
             driver.get("$domain/${NamedPaths.LOGIN.path}")
-            driver.findElement(By.id(LoginElements.USERNAME_INPUT.id)).sendKeys(username)
-            driver.findElement(By.id(LoginElements.PASSWORD_INPUT.id)).sendKeys(password)
-            driver.findElement(By.id(LoginElements.LOGIN_BUTTON.id)).click()
+            driver.findElement(By.id(LoginAPI.Elements.USERNAME_INPUT.id)).sendKeys(username)
+            driver.findElement(By.id(LoginAPI.Elements.PASSWORD_INPUT.id)).sendKeys(password)
+            driver.findElement(By.id(LoginAPI.Elements.LOGIN_BUTTON.id)).click()
             assertEquals("SUCCESS", driver.title)
         }
     }
@@ -215,8 +212,8 @@ class BrowserSmokeTests {
 
         fun enter(employee: String) {
             driver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
-            driver.findElement(By.id(EmployeeElements.EMPLOYEE_INPUT.id)).sendKeys(employee)
-            driver.findElement(By.id(EmployeeElements.CREATE_BUTTON.id)).click()
+            driver.findElement(By.id(EmployeeAPI.Elements.EMPLOYEE_INPUT.id)).sendKeys(employee)
+            driver.findElement(By.id(EmployeeAPI.Elements.CREATE_BUTTON.id)).click()
             assertEquals("SUCCESS", driver.title)
         }
     }
@@ -225,8 +222,8 @@ class BrowserSmokeTests {
 
         fun enter(project: String) {
             driver.get("$domain/${NamedPaths.CREATE_PROJECT.path}")
-            driver.findElement(By.id(ProjectElements.PROJECT_INPUT.id)).sendKeys(project)
-            driver.findElement(By.id(ProjectElements.CREATE_BUTTON.id)).click()
+            driver.findElement(By.id(ProjectAPI.Elements.PROJECT_INPUT.id)).sendKeys(project)
+            driver.findElement(By.id(ProjectAPI.Elements.CREATE_BUTTON.id)).click()
             assertEquals("SUCCESS", driver.title)
         }
     }

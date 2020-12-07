@@ -25,13 +25,13 @@ class EnterTimeAPITests {
      * If we pass in valid information, it should indicate success
      */
     @Test
-    fun testHandlePOSTTimeEntry() {
+    fun testEnterTimeAPI() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "60",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val response = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+        val response = EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId ,data).fileContents
         assertTrue("we should have gotten the success page.  Got: $response", toStr(response).contains("SUCCESS"))
     }
 
@@ -39,12 +39,12 @@ class EnterTimeAPITests {
      * If we are missing required data
      */
     @Test
-    fun testHandlePOSTTimeEntry_missingProject() {
+    fun testEnterTimeAPI_missingProject() {
         val data = mapOf(
-                EnterTimeElements.TIME_INPUT.elemName to "60",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [time_entry, detail_entry, date_entry]", ex.message)
     }
 
@@ -52,12 +52,12 @@ class EnterTimeAPITests {
      * If we are missing required data
      */
     @Test
-    fun testHandlePOSTTimeEntry_missingTimeEntry() {
+    fun testEnterTimeAPI_missingTimeEntry() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, detail_entry, date_entry]", ex.message)
     }
 
@@ -65,13 +65,13 @@ class EnterTimeAPITests {
      * If we are missing required data
      */
     @Test
-    fun testHandlePOSTTimeEntry_missingDetailEntry() {
+    fun testEnterTimeAPI_missingDetailEntry() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "60",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING,
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING,
         )
-        val ex = assertThrows(InexactInputsException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER, data) }
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, date_entry]", ex.message)
     }
 
@@ -79,35 +79,26 @@ class EnterTimeAPITests {
      * If we are missing required data
      */
     @Test
-    fun testHandlePOSTTimeEntry_missingEmployee() {
+    fun testEnterTimeAPI_missingEmployee() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "60",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
         val employeeId = null
         val ex = assertThrows(IllegalStateException::class.java){
-            handlePOSTTimeEntry(tru, User(UserId(1), UserName("name"), DEFAULT_HASH, DEFAULT_SALT, employeeId),data)
+            EnterTimeAPI.handlePOST(tru, employeeId, data)
         }
         assertEquals(employeeIdNotNullMsg, ex.message)
-    }
-
-    /**
-     * If we aren't authenticated, react appropriately
-     */
-    @Test
-    fun testHandlePOSTTimeEntry_unauthenticated() {
-        val response = handlePOSTTimeEntry(tru, NO_USER, emptyMap())
-        assertEquals(handleUnauthorized(), response)
     }
 
     /**
      * If we pass in something that cannot be parsed as an integer as the project id
      */
     @Test
-    fun testHandlePOSTTimeEntry_nonNumericProject() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "aaaaa", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_nonNumericProject() {
+        val data = mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "aaaaa", EnterTimeAPI.Elements.TIME_INPUT.elemName to "60", EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say", EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalStateException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
     }
 
@@ -115,9 +106,13 @@ class EnterTimeAPITests {
      * If we pass in a negative number as the project id
      */
     @Test
-    fun testHandlePOSTTimeEntry_negativeProject() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "-1", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_negativeProject() {
+        val data = mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "-1",
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
 
@@ -125,9 +120,13 @@ class EnterTimeAPITests {
      * If we pass in 0 as the project id
      */
     @Test
-    fun testHandlePOSTTimeEntry_zeroProject() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "0", EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_zeroProject() {
+        val data = mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "0",
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
 
@@ -135,9 +134,13 @@ class EnterTimeAPITests {
      * If the project id passed is above the maximum id
      */
     @Test
-    fun testHandlePOSTTimeEntry_aboveMaxProject() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to (maximumProjectsCount+1).toString(), EnterTimeElements.TIME_INPUT.elemName to "60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_aboveMaxProject() {
+        val data = mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to (maximumProjectsCount+1).toString(),
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
     }
 
@@ -146,9 +149,13 @@ class EnterTimeAPITests {
      * If the time entered is more than a day's worth
      */
     @Test
-    fun testHandlePOSTTimeEntry_aboveMaxTime() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to ((60*60*24)+1).toString(), EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_aboveMaxTime() {
+        val data = mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to ((60*60*24)+1).toString(),
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
     }
 
@@ -156,9 +163,13 @@ class EnterTimeAPITests {
      * If the time entered is negative
      */
     @Test
-    fun testHandlePOSTTimeEntry_negativeTime() {
-        val data = mapOf(EnterTimeElements.PROJECT_INPUT.elemName to "1", EnterTimeElements.TIME_INPUT.elemName to "-60", EnterTimeElements.DETAIL_INPUT.elemName to "not much to say", EnterTimeElements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER,data) }
+    fun testEnterTimeAPI_negativeTime() {
+        val data = mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to "-60",
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
+        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("${noNegativeTimeMsg}-60", ex.message)
     }
 
@@ -166,13 +177,13 @@ class EnterTimeAPITests {
      * If the time entered is zero, it's fine.
      */
     @Test
-    fun testHandlePOSTTimeEntry_zeroTime() {
+    fun testEnterTimeAPI_zeroTime() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "0",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val result = handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "0",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+        val result = EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data).fileContents
         assertTrue("we should have gotten the success page.  Got: $result", toStr(result).contains("SUCCESS"))
     }
 
@@ -180,13 +191,13 @@ class EnterTimeAPITests {
      * If the time entered is non-numeric, like "a"
      */
     @Test
-    fun testHandlePOSTTimeEntry_nonNumericTime() {
+    fun testEnterTimeAPI_nonNumericTime() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "aaa",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val ex = assertThrows(IllegalStateException::class.java){ handlePOSTTimeEntry(tru, DEFAULT_USER, data) }
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "aaa",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+        val ex = assertThrows(IllegalStateException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
 
@@ -200,7 +211,7 @@ class EnterTimeAPITests {
     fun testDoGETTimeEntriesPage_content() {
         tru.getAllEntriesForEmployeeBehavior = {setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))}
 
-        val result = generateTimeEntriesPage(tru, DEFAULT_USER)
+        val result = EnterTimeAPI.generateTimeEntriesPage(tru, DEFAULT_USER)
 
         assertTrue("page should have this content.  Page:\n$result", result.contains("<tr><td>Default_Project</td><td>60</td><td>whatevs</td><td>2020-06-25</td></tr>"))
     }
@@ -218,13 +229,13 @@ class EnterTimeAPITests {
     @Test
     fun testDoPOST_TooManyInputs() {
         val data = mapOf(
-                EnterTimeElements.PROJECT_INPUT.elemName to "1",
-                EnterTimeElements.TIME_INPUT.elemName to "60",
-                EnterTimeElements.DETAIL_INPUT.elemName to "not much to say",
+                EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
+                EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
                 "foo" to "bar",
-                EnterTimeElements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
+                EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
 
-        val ex = assertThrows(InexactInputsException::class.java) { handlePOSTTimeEntry(tru, DEFAULT_USER,data).fileContents }
+        val ex = assertThrows(InexactInputsException::class.java) { doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, detail_entry, foo, date_entry]", ex.message)
     }
 

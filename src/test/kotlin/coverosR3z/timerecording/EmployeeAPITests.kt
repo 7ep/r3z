@@ -4,7 +4,6 @@ import coverosR3z.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.domainobjects.employeeNameNotNullMsg
 import coverosR3z.exceptions.InexactInputsException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -29,8 +28,8 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee() {
-        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE_NAME.value)
-        handlePOSTNewEmployee(tru, DEFAULT_USER, data)
+        val data = mapOf(EmployeeAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE_NAME.value)
+        EmployeeAPI.handlePOST(tru, data)
     }
 
     /**
@@ -38,8 +37,8 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
-        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to "a".repeat(31))
-        val ex = assertThrows(IllegalArgumentException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
+        val data = mapOf(EmployeeAPI.Elements.EMPLOYEE_INPUT.elemName to "a".repeat(31))
+        val ex = assertThrows(IllegalArgumentException::class.java){EmployeeAPI.handlePOST(tru, data)}
         assertEquals("Max size of employee name is 30", ex.message)
     }
 
@@ -48,8 +47,8 @@ class EmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
-        val data = mapOf(EmployeeElements.EMPLOYEE_INPUT.elemName to "a".repeat(30))
-        handlePOSTNewEmployee(tru, DEFAULT_USER, data)
+        val data = mapOf(EmployeeAPI.Elements.EMPLOYEE_INPUT.elemName to "a".repeat(30))
+        EmployeeAPI.handlePOST(tru, data)
     }
 
     /**
@@ -58,7 +57,7 @@ class EmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = emptyMap<String,String>()
-        val ex = assertThrows(InexactInputsException::class.java){handlePOSTNewEmployee(tru, DEFAULT_USER, data)}
+        val ex = assertThrows(InexactInputsException::class.java){EmployeeAPI.handlePOST(tru, data)}
         assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }
 }

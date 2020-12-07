@@ -1,39 +1,34 @@
 package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.ProjectName
-import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
-import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 
-enum class ProjectElements(val elemName: String, val id: String) {
-    PROJECT_INPUT("project_name", "project_name"),
-    CREATE_BUTTON("", "project_create_button"),
-}
+class ProjectAPI {
 
-private val requiredInputs = setOf(
-    ProjectElements.PROJECT_INPUT.elemName
-)
-
-fun handlePOSTCreatingProject(tru: ITimeRecordingUtilities, user: User, data: Map<String, String>) : PreparedResponseData {
-    val isAuthenticated = isAuthenticated(user)
-    return if (isAuthenticated) {
-        checkHasExactInputs(data.keys, requiredInputs)
-        tru.createProject(ProjectName.make(data[ProjectElements.PROJECT_INPUT.elemName]))
-        okHTML(successHTML)
-    } else {
-        handleUnauthorized()
+    enum class Elements(val elemName: String, val id: String) {
+        PROJECT_INPUT("project_name", "project_name"),
+        CREATE_BUTTON("", "project_create_button"),
     }
-}
+
+    companion object {
+
+        val requiredInputs = setOf(
+            Elements.PROJECT_INPUT.elemName
+        )
+
+        fun handlePOST(tru: ITimeRecordingUtilities, data: Map<String, String>) : PreparedResponseData {
+            tru.createProject(ProjectName.make(data[Elements.PROJECT_INPUT.elemName]))
+            return okHTML(successHTML)
+        }
+
+        fun generateCreateProjectPage(username: UserName): String = createProjectHTML(username.value)
 
 
-fun generateCreateProjectPage(username: UserName): String = createProjectHTML(username.value)
-
-
-fun createProjectHTML(username : String) : String {
-    return """
+        fun createProjectHTML(username : String) : String {
+            return """
 <!DOCTYPE html>        
 <html>
     <head>
@@ -48,16 +43,19 @@ fun createProjectHTML(username : String) : String {
             </p>
         
             <p>
-                <label for="${ProjectElements.PROJECT_INPUT.elemName}">Name:</label>
-                <input name="${ProjectElements.PROJECT_INPUT.elemName}" id="${ProjectElements.PROJECT_INPUT.id}" type="text" />
+                <label for="${Elements.PROJECT_INPUT.elemName}">Name:</label>
+                <input name="${Elements.PROJECT_INPUT.elemName}" id="${Elements.PROJECT_INPUT.id}" type="text" />
             </p>
         
             <p>
-                <button id="${ProjectElements.CREATE_BUTTON.id}">Create new project</button>
+                <button id="${Elements.CREATE_BUTTON.id}">Create new project</button>
             </p>
         
         </form>
     </body>
 </html>
 """
+        }
+    }
 }
+
