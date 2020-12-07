@@ -35,7 +35,7 @@ class LoginAPI {
 
         fun generateLoginPage(): String = loginHTML
 
-        val loginHTML = """
+        private val loginHTML = """
         <!DOCTYPE html>
         <html>
           <head>

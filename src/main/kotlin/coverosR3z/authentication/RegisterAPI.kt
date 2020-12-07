@@ -36,7 +36,7 @@ class RegisterAPI {
         }
     }
 
-    fun registerHTML(employees: List<Employee>) : String {
+    private fun registerHTML(employees: List<Employee>) : String {
         return """
     <!DOCTYPE html>        
     <html>

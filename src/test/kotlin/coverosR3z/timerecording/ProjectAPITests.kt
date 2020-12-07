@@ -1,11 +1,9 @@
 package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_PROJECT_NAME
-import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.maxProjectNameSizeMsg
-import coverosR3z.domainobjects.projectNameNotNullMsg
 import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.server.AuthStatus
 import coverosR3z.server.doPOSTAuthenticated

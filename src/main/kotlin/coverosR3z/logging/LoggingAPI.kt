@@ -12,10 +12,11 @@ class LoggingAPI {
         DEBUG_INPUT("debug", "debug"),
         WARN_INPUT("warn", "warn"),
         TRACE_INPUT("trace", "trace"),
+        SAVE_BUTTON("", "save"),
     }
 
     companion object {
-        const val missingLoggingDataInputMsg = "input must not be missing"
+        private const val missingLoggingDataInputMsg = "input must not be missing"
         const val badInputLoggingDataMsg = "input for log setting must be \"true\" or \"false\""
 
         val requiredInputs = setOf(
@@ -27,7 +28,7 @@ class LoggingAPI {
 
         fun generateLoggingConfigPage(): String = loggingConfigHtml()
 
-        fun setLogging(lt : LogTypes, data: Map<String, String>) {
+        private fun setLogging(lt : LogTypes, data: Map<String, String>) {
             /**
              * The user has sent us a map with four keys - audit, warn, debug, trace,
              * each of which can be "true" or "false".  This is that value.
@@ -75,7 +76,7 @@ class LoggingAPI {
 
 
 
-        fun loggingConfigHtml() : String {
+        private fun loggingConfigHtml() : String {
             return """
         <!DOCTYPE html>
         <html lang="en">
@@ -89,48 +90,48 @@ class LoggingAPI {
                     <fieldset>
                         <legend>Info logging:</legend>
                         <div>
-                          <input type="radio" id="audittrue" name="${Elements.AUDIT_INPUT.elemName}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
-                          <label for="audittrue">True</label>
+                          <input type="radio" id="${Elements.AUDIT_INPUT.id}true" name="${Elements.AUDIT_INPUT.elemName}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
+                          <label for="${Elements.AUDIT_INPUT.id}true">True</label>
                     
-                          <input type="radio" id="auditfalse" name="${Elements.AUDIT_INPUT.elemName}" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
-                          <label for="auditfalse">False</label>
+                          <input type="radio" id="${Elements.AUDIT_INPUT.id}false" name="${Elements.AUDIT_INPUT.elemName}" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
+                          <label for="${Elements.AUDIT_INPUT.id}false">False</label>
                         </div>
                     </fieldset>
         
                     <fieldset>
                         <legend>Warn logging:</legend>
                         <div>
-                          <input type="radio" id="warntrue" name="${Elements.WARN_INPUT.elemName}" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
-                          <label for="warntrue">True</label>
+                          <input type="radio" id="${Elements.WARN_INPUT.id}true" name="${Elements.WARN_INPUT.elemName}" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
+                          <label for="${Elements.WARN_INPUT.id}true">True</label>
                     
-                          <input type="radio" id="warnfalse" name="${Elements.WARN_INPUT.elemName}" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
-                          <label for="warnfalse">False</label>
+                          <input type="radio" id="${Elements.WARN_INPUT.id}false" name="${Elements.WARN_INPUT.elemName}" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
+                          <label for="${Elements.WARN_INPUT.id}false">False</label>
                         </div>
                     </fieldset>
         
                     <fieldset>
                         <legend>Debug logging:</legend>
                         <div>
-                          <input type="radio" id="debugtrue" name="${Elements.DEBUG_INPUT.elemName}" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
-                          <label for="debugtrue">True</label>
+                          <input type="radio" id="${Elements.DEBUG_INPUT.id}true" name="${Elements.DEBUG_INPUT.elemName}" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
+                          <label for="${Elements.DEBUG_INPUT.id}true">True</label>
                     
-                          <input type="radio" id="debugfalse" name="${Elements.DEBUG_INPUT.elemName}" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
-                          <label for="debugfalse">False</label>
+                          <input type="radio" id="${Elements.DEBUG_INPUT.id}false" name="${Elements.DEBUG_INPUT.elemName}" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
+                          <label for="${Elements.DEBUG_INPUT.id}false">False</label>
                         </div>
                     </fieldset>
                     
                     <fieldset>
                         <legend>Trace logging:</legend>
                         <div>
-                          <input type="radio" id="tracetrue" name="${Elements.TRACE_INPUT.elemName}" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
-                          <label for="tracetrue">True</label>
+                          <input type="radio" id="${Elements.TRACE_INPUT.id}true" name="${Elements.TRACE_INPUT.elemName}" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
+                          <label for="${Elements.TRACE_INPUT.id}true">True</label>
                     
-                          <input type="radio" id="tracefalse" name="${Elements.TRACE_INPUT.elemName}" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
-                          <label for="tracefalse">False</label>
+                          <input type="radio" id="${Elements.TRACE_INPUT.id}false" name="${Elements.TRACE_INPUT.elemName}" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
+                          <label for="${Elements.TRACE_INPUT.id}false">False</label>
                         </div>
                     </fieldset>
                     
-                    <button>Save</button>
+                    <button id="${Elements.SAVE_BUTTON.id}">Save</button>
                 </form>
         
         

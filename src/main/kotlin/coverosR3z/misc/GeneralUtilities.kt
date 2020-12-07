@@ -1,6 +1,7 @@
 package coverosR3z.misc
 
 import coverosR3z.exceptions.InexactInputsException
+import java.lang.IllegalArgumentException
 import kotlin.random.Random
 
 /**
@@ -26,7 +27,7 @@ fun checkParseToInt(value: String?,
     return try {
         notNullValue.toInt()
     } catch (ex: java.lang.NumberFormatException) {
-        throw IllegalStateException(parseMsg())
+        throw IllegalArgumentException(parseMsg())
     }
 }
 

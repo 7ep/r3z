@@ -4,17 +4,17 @@ import com.gargoylesoftware.htmlunit.BrowserVersion.BEST_SUPPORTED
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.LoginAPI
-import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logSettings
+import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.NamedPaths
 import coverosR3z.server.Server
 import coverosR3z.timerecording.EmployeeAPI
 import coverosR3z.timerecording.EnterTimeAPI
 import coverosR3z.timerecording.ProjectAPI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.BeforeClass
+import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
@@ -38,8 +38,6 @@ class BrowserSmokeTests {
         @BeforeClass
         @JvmStatic
         fun setup() {
-            logSettings[LogTypes.DEBUG] = true
-            logSettings[LogTypes.TRACE] = true
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
@@ -76,7 +74,7 @@ class BrowserSmokeTests {
 
             smokeTest(driver)
 
-            sc.halfOpenServerSocket.close()
+            Server.halfOpenServerSocket.close()
         }
     }
 
@@ -111,6 +109,14 @@ class BrowserSmokeTests {
         // register and login
         rp.register(user, password, "Administrator")
         lp.login(user, password)
+
+        // go to the logging config page and turn everything on
+        driver.get("$domain/${NamedPaths.LOGGING.path}")
+        driver.findElement(By.id(LoggingAPI.Elements.AUDIT_INPUT.id + "true")).click()
+        driver.findElement(By.id(LoggingAPI.Elements.WARN_INPUT.id + "true")).click()
+        driver.findElement(By.id(LoggingAPI.Elements.DEBUG_INPUT.id + "true")).click()
+        driver.findElement(By.id(LoggingAPI.Elements.TRACE_INPUT.id + "true")).click()
+        driver.findElement(By.id(LoggingAPI.Elements.SAVE_BUTTON.id)).click()
 
         // hit authenticated homepage
         driver.get("$domain/${NamedPaths.AUTHHOMEPAGE.path}")

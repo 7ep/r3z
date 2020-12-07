@@ -1,15 +1,15 @@
 package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_EMPLOYEE_NAME
-import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.exceptions.InexactInputsException
+import coverosR3z.server.AuthStatus
+import coverosR3z.server.doPOSTAuthenticated
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalArgumentException
 
 class EmployeeAPITests {
 
@@ -57,7 +57,7 @@ class EmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = emptyMap<String,String>()
-        val ex = assertThrows(InexactInputsException::class.java){EmployeeAPI.handlePOST(tru, data)}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EmployeeAPI.requiredInputs, data) { EmployeeAPI.handlePOST(tru, data) } }
         assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }
 }

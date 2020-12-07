@@ -20,8 +20,6 @@ import java.util.concurrent.Executors
  */
 class Server(val port: Int, private val dbDirectory: String) {
 
-    lateinit var halfOpenServerSocket : ServerSocket
-
     fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
 
@@ -60,6 +58,8 @@ class Server(val port: Int, private val dbDirectory: String) {
     }
 
     companion object {
+
+        lateinit var halfOpenServerSocket : ServerSocket
 
         /**
          * Given the command-line arguments, returns the first value

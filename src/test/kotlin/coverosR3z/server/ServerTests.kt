@@ -3,6 +3,7 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_DB_DIRECTORY
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.LoginAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.logSettings
 import coverosR3z.misc.FileReader.Companion.read
@@ -30,7 +31,7 @@ class ServerTests {
 
         @JvmStatic @AfterClass
         fun afterClass() {
-            serverObject.halfOpenServerSocket.close()
+            Server.halfOpenServerSocket.close()
         }
     }
 
@@ -246,6 +247,26 @@ class ServerTests {
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(Verb.CLIENT_CLOSED_CONNECTION, result.verb)
+    }
+
+    /**
+     * On some pages, like register and login, you are *supposed* to be
+     * unauthenticated to post to them.  If you *are* authenticated and
+     * post to those pages, you should get redirected to the authenticated
+     * homepage
+     */
+    @Test
+    fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
+        au.getUserForSessionBehavior = { DEFAULT_USER }
+        client.write("POST /${NamedPaths.LOGIN.path} HTTP/1.1$CRLF")
+        client.write("Cookie: sessionId=abc123$CRLF")
+        val body = "${LoginAPI.Elements.USERNAME_INPUT.elemName}=alice&${LoginAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
+        client.write("Content-Length: ${body.length}$CRLF$CRLF")
+        client.write(body)
+
+        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
+
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
 }

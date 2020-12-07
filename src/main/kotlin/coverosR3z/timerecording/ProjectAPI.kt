@@ -27,7 +27,7 @@ class ProjectAPI {
         fun generateCreateProjectPage(username: UserName): String = createProjectHTML(username.value)
 
 
-        fun createProjectHTML(username : String) : String {
+        private fun createProjectHTML(username : String) : String {
             return """
 <!DOCTYPE html>        
 <html>

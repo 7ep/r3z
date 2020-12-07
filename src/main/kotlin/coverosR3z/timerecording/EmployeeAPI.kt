@@ -2,12 +2,11 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.Employee
 import coverosR3z.domainobjects.EmployeeName
-import coverosR3z.domainobjects.User
 import coverosR3z.domainobjects.UserName
-import coverosR3z.misc.checkHasExactInputs
 import coverosR3z.misc.safeHtml
-import coverosR3z.server.*
 import coverosR3z.misc.successHTML
+import coverosR3z.server.PreparedResponseData
+import coverosR3z.server.okHTML
 
 class EmployeeAPI {
 
@@ -24,7 +23,6 @@ class EmployeeAPI {
         val requiredInputs = setOf(Elements.EMPLOYEE_INPUT.elemName)
 
         fun handlePOST(tru: ITimeRecordingUtilities, data: Map<String, String>) : PreparedResponseData {
-            checkHasExactInputs(data.keys, requiredInputs)
             tru.createEmployee(EmployeeName.make(data[Elements.EMPLOYEE_INPUT.elemName]))
             return okHTML(successHTML)
         }
@@ -35,7 +33,7 @@ class EmployeeAPI {
         fun generateExistingEmployeesPage(username : UserName, tru: ITimeRecordingUtilities): String =
             existingEmployeesHTML(username.value, tru.listAllEmployees())
 
-        fun createEmployeeHTML(username : String) : String {
+        private fun createEmployeeHTML(username : String) : String {
             return """
         <!DOCTYPE html>        
         <html>
@@ -66,7 +64,7 @@ class EmployeeAPI {
         }
 
 
-        fun existingEmployeesHTML(username : String, employees : List<Employee>) : String {
+        private fun existingEmployeesHTML(username : String, employees : List<Employee>) : String {
             return """
         <!DOCTYPE html>        
         <html>

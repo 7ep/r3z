@@ -98,7 +98,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_nonNumericProject() {
         val data = mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "aaaaa", EnterTimeAPI.Elements.TIME_INPUT.elemName to "60", EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say", EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
-        val ex = assertThrows(IllegalStateException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
+        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
     }
 
@@ -197,7 +197,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.TIME_INPUT.elemName to "aaa",
                 EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING)
-        val ex = assertThrows(IllegalStateException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
+        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data) } }
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
 
@@ -247,18 +247,5 @@ class EnterTimeAPITests {
                  |_|
      alt-text: Helper Methods
      */
-
-    /**
-     * A helper method to make a [AnalyzedHttpData] easier.
-     */
-    private fun createRequestData(
-        verb: Verb = Verb.GET,
-        path: String = "(NOTHING REQUESTED)",
-        data : Map<String, String> = emptyMap(),
-        user : User = NO_USER,
-        sessionToken : String = "NO TOKEN"
-    ): AnalyzedHttpData {
-        return AnalyzedHttpData(verb, path, data, user, sessionToken, emptyList(), null)
-    }
 
 }

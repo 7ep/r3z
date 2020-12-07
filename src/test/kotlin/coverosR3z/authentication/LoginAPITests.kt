@@ -2,7 +2,10 @@ package coverosR3z.authentication
 
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.LoginResult
+import coverosR3z.domainobjects.NO_USER
+import coverosR3z.domainobjects.passwordMustNotBeBlankMsg
+import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
 import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.toStr
 import coverosR3z.server.AuthStatus
@@ -12,7 +15,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalStateException
 
 class LoginAPITests {
 

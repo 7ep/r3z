@@ -161,13 +161,10 @@ private fun handleUnknownFiles(rd: AnalyzedHttpData): PreparedResponseData {
     } else {
         when {
             rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
-
             rd.path.takeLast(3) == ".js" -> okJS(fileContents)
             rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
             rd.path.takeLast(5) == ".webp" -> okWEBP(fileContents)
-            rd.path.takeLast(5) == ".html" -> ok(
-                    fileContents,
-                    listOf(ContentType.TEXT_HTML.value, caching))
+            rd.path.takeLast(5) == ".html" -> okHTML(fileContents)
             else -> handleNotFound()
         }
     }
@@ -188,15 +185,21 @@ fun okHTML(contents : String) =
         ok(toBytes(contents), listOf(ContentType.TEXT_HTML.value))
 
 /**
+ * If you are responding with a success message and it is HTML
+ */
+fun okHTML(contents : ByteArray) =
+        ok(contents, listOf(ContentType.TEXT_HTML.value))
+
+/**
  * If you are responding with a success message and it is CSS
  */
 fun okCSS(contents : ByteArray) =
-        ok(toBytes(toStr(contents)), listOf(ContentType.TEXT_CSS.value, caching))
+        ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
 /**
  * If you are responding with a success message and it is JavaScript
  */
 fun okJS (contents : ByteArray) =
-        ok(toBytes(toStr(contents)), listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
+        ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
 
 fun okJPG (contents : ByteArray) =
     ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))

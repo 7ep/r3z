@@ -2,6 +2,7 @@ package coverosR3z.domainobjects
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.lang.IllegalArgumentException
 import java.time.DateTimeException
 
 class DateTests {
@@ -51,7 +52,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_nonInteger() {
-        val ex = assertThrows(IllegalStateException::class.java) {Date.make("2020-Jan-06")}
+        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("2020-Jan-06")}
         assertEquals("Must be able to parse Jan as integer", ex.message)
     }
 
@@ -69,7 +70,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespace() {
-        val ex = assertThrows(IllegalStateException::class.java) {Date.make("   2020-01-32   ")}
+        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("   2020-01-32   ")}
         assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
     }
 
@@ -78,7 +79,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespaceInside() {
-        val ex = assertThrows(IllegalStateException::class.java) {Date.make("   2020-    01-32   ")}
+        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("   2020-    01-32   ")}
         assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
     }
 
@@ -92,6 +93,26 @@ class DateTests {
         val actual = Date.make(dateInFrontendFormat)
         val expected = Date(2012, Month.JUL, 20)
         assertEquals("Date must parse properly when in expected, chrome date widget format", expected, actual)
+    }
+
+    @Test
+    fun testDate_Ancient() {
+        assertThrows(IllegalArgumentException::class.java) {Date(1979, Month.DEC, 31)}
+    }
+
+    @Test
+    fun testDate_AncientOK() {
+        assertEquals(Date(1980, Month.JAN, 1), Date(1980, Month.JAN, 1))
+    }
+
+    @Test
+    fun testDate_DistantFuture() {
+        assertThrows(IllegalArgumentException::class.java) {Date(2200, Month.JAN, 2)}
+    }
+
+    @Test
+    fun testDate_DistantFutureOK() {
+        assertEquals(Date(2200, Month.JAN, 1), Date(2200, Month.JAN, 1))
     }
 
 }

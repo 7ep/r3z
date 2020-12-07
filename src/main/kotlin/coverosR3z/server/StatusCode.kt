@@ -1,7 +1,5 @@
 package coverosR3z.server
 
-import coverosR3z.domainobjects.Month
-
 enum class StatusCode(val value: String, val code: String) {
     OK("200 OK", "200"),
     NOT_FOUND("404 NOT FOUND", "404"),

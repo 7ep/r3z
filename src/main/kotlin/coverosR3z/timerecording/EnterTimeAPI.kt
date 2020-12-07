@@ -55,7 +55,7 @@ class EnterTimeAPI {
         }
 
 
-        fun entertimeHTML(username: String, projects : List<Project>) : String {
+        private fun entertimeHTML(username: String, projects : List<Project>) : String {
             return """
             <!DOCTYPE html>        
             <html>
@@ -105,7 +105,7 @@ class EnterTimeAPI {
         }
 
 
-        fun existingTimeEntriesHTML(username : String, te : Set<TimeEntry>) : String {
+        private fun existingTimeEntriesHTML(username : String, te : Set<TimeEntry>) : String {
             return """
         <!DOCTYPE html>        
         <html>

@@ -6,7 +6,10 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.RegisterAPI
-import coverosR3z.domainobjects.*
+import coverosR3z.domainobjects.employeeIdCannotBeBlank
+import coverosR3z.domainobjects.minEmployeeIdMsg
+import coverosR3z.domainobjects.passwordMustNotBeBlankMsg
+import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
 import coverosR3z.exceptions.InexactInputsException
 import coverosR3z.misc.toStr
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -14,7 +17,6 @@ import coverosR3z.timerecording.ITimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.lang.IllegalStateException
 
 /**
  * Tests related to registering a user through the API
@@ -82,7 +84,7 @@ class RegisterAPITests {
         val data = mapOf(RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to employee)
-        val ex = assertThrows(IllegalStateException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
         assertEquals("Must be able to parse $employee as integer", ex.message)
     }
 
