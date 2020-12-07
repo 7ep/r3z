@@ -1,3 +1,5 @@
 1. coding is complete
 2. code reviewed
-3. automation runs successfully
+3. user story checklist considered
+4. automation runs successfully
+

@@ -17,6 +17,9 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import java.io.File
 import kotlin.concurrent.thread
@@ -57,9 +60,9 @@ class BrowserSmokeTests {
     @Test
     fun `Smoke test`() {
         val drivers = listOf(
-            HtmlUnitDriver(BEST_SUPPORTED),
-//            FirefoxDriver(),
-//            ChromeDriver(ChromeOptions().setHeadless(false))
+                {HtmlUnitDriver(BEST_SUPPORTED)},
+//                {FirefoxDriver()},
+//                {ChromeDriver(ChromeOptions().setHeadless(false))}
         )
 
         for (driver in drivers) {
@@ -72,7 +75,7 @@ class BrowserSmokeTests {
                 sc.startServer()
             }
 
-            smokeTest(driver)
+            smokeTest(driver())
 
             Server.halfOpenServerSocket.close()
         }
@@ -81,10 +84,10 @@ class BrowserSmokeTests {
     private fun smokeTest(driver: WebDriver) {
         // Because of the way HtmlUnit works, we have to differentiate
         // in how we set date
-        val dateString = if (driver is HtmlUnitDriver) {
-            DEFAULT_DATE_STRING
+        val dateString = if (driver is ChromeDriver) {
+            "06122020"
         } else {
-            "09282018"
+            DEFAULT_DATE_STRING
         }
         val rp = RegisterPage(driver)
         val lp = LoginPage(driver)
