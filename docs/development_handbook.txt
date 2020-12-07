@@ -180,6 +180,13 @@ Developer handbook
     Some of the files have the acronym API in their name.  That means they are the HTTP endpoints for
     the web application and contain code and template text for those.
 
+    Some important information for working with endpoints:
+    1. Make sure to examine handleRequestAndRespond, which is the method that chooses how to interact
+       with many of the API calls, like what kind of authentication is necessary
+    2. Examine the files with a suffix of API.kt - For example, EnterTimeAPI.kt
+    3. Methods that handle POST are typically called handlePOST
+    4. Methods that handle GET are typically called generate + ____ + Page, like generateTimeEntriesPage
+
 
     Parsers and clean text
     ----------------------
