@@ -104,11 +104,24 @@ class BrowserSmokeTests {
         // Hit the current commit page
         driver.get("$domain/commit.html")
 
+        // try to go to enter time page before logging in - redirect to homepage
+        driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
+        assertEquals("Homepage", driver.title)
+
+        // register and login
         rp.register(user, password, "Administrator")
         lp.login(user, password)
 
         // hit authenticated homepage
         driver.get("$domain/${NamedPaths.AUTHHOMEPAGE.path}")
+        assertEquals("Authenticated Homepage", driver.title)
+
+        // try login while authenticated - goes to auth homepage
+        driver.get("$domain/${NamedPaths.LOGIN.path}")
+        assertEquals("Authenticated Homepage", driver.title)
+
+        // try register while authenticated - goes to auth homepage
+        driver.get("$domain/${NamedPaths.REGISTER.path}")
         assertEquals("Authenticated Homepage", driver.title)
 
         // hit the 404 error
