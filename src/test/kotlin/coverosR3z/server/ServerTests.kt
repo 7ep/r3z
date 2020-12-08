@@ -24,7 +24,7 @@ class ServerTests {
 
         @JvmStatic @BeforeClass
         fun beforeClass() {
-            serverObject = Server(8080, DEFAULT_DB_DIRECTORY)
+            serverObject = Server(12345, DEFAULT_DB_DIRECTORY)
             au = FakeAuthenticationUtilities()
             thread { serverObject.startServer(au) }
         }
@@ -37,7 +37,7 @@ class ServerTests {
 
     @Before
     fun init() {
-        val clientSocket = Socket("localhost", 8080)
+        val clientSocket = Socket("localhost", 12345)
         client = SocketWrapper(clientSocket, "client")
     }
 
@@ -51,12 +51,12 @@ class ServerTests {
     }
 
     /**
-     * If we provide no port number, it defaults to 8080
+     * If we provide no port number, it defaults to 12345
      */
     @Test
     fun testShouldParsePortFromCLI_nothingProvided() {
         val port : Int = Server.extractFirstArgumentAsPort(arrayOf())
-        assertEquals(8080, port)
+        assertEquals(12345, port)
     }
 
     /**

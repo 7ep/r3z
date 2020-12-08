@@ -8,7 +8,7 @@ class MainTests {
 
     @Test
     fun testMain() {
-        thread{main(arrayOf("8080"))}
+        thread{main(arrayOf("12345"))}
         Thread.sleep(200)
         Server.halfOpenServerSocket.close()
     }

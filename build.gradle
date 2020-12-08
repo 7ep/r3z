@@ -71,7 +71,7 @@ dependencies {
 // if you want to run this with gradle, just run
 //      gradlew run
 //
-// and then you can hit http://localhost:8080 to see
+// and then you can hit http://localhost:12345 to see
 // the application
 application {
     mainClass.set('coverosR3z.MainKt')

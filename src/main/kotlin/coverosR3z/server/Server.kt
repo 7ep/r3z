@@ -63,13 +63,13 @@ class Server(val port: Int, private val dbDirectory: String) {
 
         /**
          * Given the command-line arguments, returns the first value
-         * as an integer for use as a port number, or defaults to 8080
+         * as an integer for use as a port number, or defaults to 12345
          */
         fun extractFirstArgumentAsPort(args: Array<String>): Int {
             return if (args.isEmpty() || args[0].isBlank()) {
-                8080
+                12345
             } else {
-                args[0].toIntOrNull() ?: 8080
+                args[0].toIntOrNull() ?: 12345
             }
         }
 

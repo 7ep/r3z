@@ -12,7 +12,7 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 * On the command line in the top directory of this repo, 
     * run `gradlew test` to run all the tests (includes UI tests, you need Chrome)
     * run `gradlew run` to run the server
-* Visit the application with your browser at http://localhost:8080/
+* Visit the application with your browser at http://localhost:12345/
 
 
 

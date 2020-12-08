@@ -25,7 +25,7 @@ import java.io.File
 import kotlin.concurrent.thread
 
 
-private const val domain = "http://localhost:8080"
+private const val domain = "http://localhost:12345"
 
 /**
  * As a user of r3z
@@ -71,7 +71,7 @@ class BrowserSmokeTests {
 
             // start the server
             thread {
-                sc = Server(8080, dbDirectory)
+                sc = Server(12345, dbDirectory)
                 sc.startServer()
             }
 
