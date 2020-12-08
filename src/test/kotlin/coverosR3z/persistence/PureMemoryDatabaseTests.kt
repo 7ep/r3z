@@ -11,6 +11,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
@@ -632,6 +633,29 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/sessions.json").writeText("BAD DATA HERE")
         
         assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+    }
+
+    /**
+     * In the database, we will only allow there to be one time entry per project / per date.
+     *
+     * You can have this:
+     * project    time    date
+     *    A       2      Jan 1
+     *    B       2      Jan 1
+     *
+     * But not this:
+     * project    time    date
+     *    A       2      Jan 1
+     *    A       2      Jan 1
+     *
+     */
+    @Test
+    fun `test it should only be possible to have one time entry for a date and project`() {
+        val pmd = PureMemoryDatabase()
+        pmd.addTimeEntry(createTimeEntryPreDatabase())
+
+        val ex = assertThrows(IllegalStateException::class.java) {pmd.addTimeEntry(createTimeEntryPreDatabase())}
+        assertEquals("Time entry for a date and project must be unique", ex.message)
     }
 
 

@@ -37,6 +37,9 @@ val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
 const val DEFAULT_SESSION_TOKEN = "abc123"
 
+/**
+ * Helper to easily put together a time entry
+ */
 fun createTimeEntryPreDatabase(
         employee: Employee = DEFAULT_EMPLOYEE,
         time: Time = DEFAULT_TIME,
