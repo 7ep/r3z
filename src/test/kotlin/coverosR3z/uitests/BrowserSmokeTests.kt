@@ -60,9 +60,9 @@ class BrowserSmokeTests {
     @Test
     fun `Smoke test`() {
         val drivers = listOf(
-                {HtmlUnitDriver(BEST_SUPPORTED)},
+//                {HtmlUnitDriver(BEST_SUPPORTED)},
 //                {FirefoxDriver()},
-//                {ChromeDriver(ChromeOptions().setHeadless(false))}
+                {ChromeDriver(ChromeOptions().setHeadless(false))}
         )
 
         for (driver in drivers) {

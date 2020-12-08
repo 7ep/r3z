@@ -465,7 +465,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>>, dbDirectory: String?,
                                        date: Date, project: Project, employee : Employee, time : Time, details : Details) {
             // make sure this is unique for date and project
-            check( timeEntries?.get(employee)?.get(date)?.any{ it.project == project} == true){"Time entry for a date and project must be unique"}
+            val matchesExistingTimeEntry = timeEntries?.get(employee)?.get(date)?.any{ it.project == project} ?: false
+            check(!matchesExistingTimeEntry){"Time entry for a date and project must be unique. Found duplicates within ${project.name}"}
 
             // get the data for a particular employee
             var employeeTimeEntries = timeEntries[employee]
