@@ -22,6 +22,7 @@ data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingU
  *  See https://tools.ietf.org/html/rfc2616
  */
 const val CRLF = "\r\n"
+const val CONTENT_LENGTH = "content-length"
 
 val caching = CacheControl.AGGRESSIVE_MINUTE_CACHE.details
 
@@ -299,7 +300,7 @@ private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISock
 private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper): AnalyzedHttpData {
     val statusCode = parseStatusLineAsClient(statusLineMatches)
     val headers = getHeaders(socketWrapper)
-    val rawData = if (headers.any { it.toLowerCase().startsWith("content-length")}) {
+    val rawData = if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         socketWrapper.read(length)
     } else {
@@ -313,7 +314,7 @@ private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISock
  * read the body if one exists and convert it to a string -> string map
  */
 private fun extractData(server: ISocketWrapper, headers: List<String>) : Pair<Map<String, String>, String?> {
-    return if (headers.any { it.toLowerCase().startsWith("content-length")}) {
+    return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
         Pair(parsePostedData(body), body)
@@ -365,7 +366,7 @@ fun parseStatusLineAsClient(matchResult: MatchResult): StatusCode {
 fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
     require(headers.isNotEmpty()) {"We must receive at least one header at this point or the request is invalid"}
     try {
-        val lengthHeader: String = headers.single { it.toLowerCase().startsWith("content-length") }
+        val lengthHeader: String = headers.single { it.toLowerCase().startsWith(CONTENT_LENGTH) }
         val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
         // arbitrarily setting to 10,000 for now
         val maxContentLength = 10_000
