@@ -127,7 +127,7 @@ class PureMemoryDatabaseTests {
     fun testShouldRemoveSession() {
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
-        pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)
+        pmd.removeSession(DEFAULT_USER)
         assertEquals(NO_USER, pmd.getUserBySessionToken(DEFAULT_SESSION_TOKEN))
     }
 
@@ -136,8 +136,8 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldComplainIfTryingToRemoveNonexistentSession() {
-        val ex = assertThrows(java.lang.IllegalStateException::class.java) {pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN)}
-        assertEquals("There must exist a session in the database for (${DEFAULT_SESSION_TOKEN}) in order to delete it", ex.message)
+        val ex = assertThrows(java.lang.IllegalStateException::class.java) {pmd.removeSession(DEFAULT_USER)}
+        assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
 
     /**
@@ -290,16 +290,6 @@ class PureMemoryDatabaseTests {
         // wait for all those threads
         listOfThreads.forEach{it.join()}
         assertEquals(numberNewSessionsAdded, pmd.getAllSessions().size)
-
-        val listOfThreads2 = mutableListOf<Thread>()
-        for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
-            listOfThreads2.add(thread {
-                pmd.removeSessionByToken(DEFAULT_SESSION_TOKEN+i)
-            })
-        }
-        // wait for all those threads
-        listOfThreads2.forEach{it.join()}
-        assertEquals(0, pmd.getAllSessions().size)
     }
 
     /**

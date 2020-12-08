@@ -156,9 +156,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return sessions[sessionToken]?.user ?: NO_USER
     }
 
-    fun removeSessionByToken(sessionToken: String) {
-        checkNotNull(sessions[sessionToken]) {"There must exist a session in the database for ($sessionToken) in order to delete it"}
-        sessions.remove(sessionToken)
+    @Synchronized
+    fun removeSession(user: User) {
+        check(sessions.any{it.value.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"}
+        sessions.filter{it.value.user == user}.keys.forEach { sessions.remove(it) }
+        serializeSessionsToDisk(this, dbDirectory)
     }
 
     override fun equals(other: Any?): Boolean {

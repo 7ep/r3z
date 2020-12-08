@@ -69,8 +69,8 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return sessionId
     }
 
-    override fun logout(sessionToken: String) {
-        ap.deleteSession(sessionToken)
+    override fun logout(user: User) {
+        ap.deleteSession(user)
     }
 
 }

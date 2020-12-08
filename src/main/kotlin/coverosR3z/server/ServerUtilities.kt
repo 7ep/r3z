@@ -40,7 +40,15 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
     val au = sd.au
     val tru = sd.tru
     val rd = sd.rd
+
+    /**
+     * The user currently logged in
+     */
     val user = rd.user
+
+    /**
+     * The data sent in the POST body
+     */
     val data = rd.data
 
     if (verb == Verb.INVALID) {
@@ -59,7 +67,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }
         Pair(Verb.GET, REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
         Pair(Verb.GET, CREATE_PROJECT.path) -> doGETRequireAuth(authStatus) { ProjectAPI.generateCreateProjectPage(user.name) }
-        Pair(Verb.GET, LOGOUT.path) -> doGETRequireAuth(authStatus) { generateLogoutPage(au, rd.sessionToken) }
+        Pair(Verb.GET, LOGOUT.path) -> doGETRequireAuth(authStatus) { generateLogoutPage(au, user) }
         Pair(Verb.GET, LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
 
         // posts

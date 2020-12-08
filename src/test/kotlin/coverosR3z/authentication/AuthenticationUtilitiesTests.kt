@@ -3,10 +3,13 @@ package coverosR3z.authentication
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.getTime
+import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 
 class AuthenticationUtilitiesTests {
     private lateinit var authUtils : AuthenticationUtilities
@@ -271,5 +274,56 @@ class AuthenticationUtilitiesTests {
         val newSessionId = authUtils.createNewSession(DEFAULT_USER)
         assertEquals(32, newSessionId.length)
     }
+
+    /**
+     * If a user logs out, we should find all their sessions
+     * in the sessions table and wipe them out
+     *
+     * Also test this is getting persisted to disk.  To do that,
+     * we will check that we got what we expected, then reload
+     * the database and confirm we get the same results
+     */
+    @Test
+    fun testShouldClearAllSessionsWhenLogout() {
+        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
+        val pmd = PureMemoryDatabase.start(dbDirectory = DEFAULT_DB_DIRECTORY)
+        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+
+        // we have to register users so reloading the data from disk works
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val user1 = pmd.getUserByName(DEFAULT_USER.name)
+        au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD)
+        val user2 = pmd.getUserByName(DEFAULT_USER_2.name)
+
+        au.createNewSession(user1, DEFAULT_DATETIME, {"abc"})
+        au.createNewSession(user1, DEFAULT_DATETIME, {"def"})
+        au.createNewSession(user2, DEFAULT_DATETIME, {"ghi"})
+
+        // wipe out all the sessions for this user
+        au.logout(user1)
+
+        // check that user1 lacks sessions dn user2 still has theirs
+        assertTrue(pmd.getAllSessions().none{it.value.user == user1})
+        assertEquals(1, pmd.getAllSessions().filter {it.value.user == user2}.size)
+
+        // test out loading it from the disk
+        val pmd2 = PureMemoryDatabase.start(dbDirectory = DEFAULT_DB_DIRECTORY)
+        assertTrue(pmd2.getAllSessions().none{it.value.user == user1})
+        assertEquals(1, pmd2.getAllSessions().filter {it.value.user == user2}.size)
+    }
+
+    /**
+     * If somehow the user were to able to attempt to logout
+     * while already logged out, an exception should be thrown
+     */
+    @Test
+    fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
+        val pmd = PureMemoryDatabase()
+        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+
+        val ex = assertThrows(IllegalStateException::class.java) { au.logout(DEFAULT_USER) }
+        assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
+    }
+
 
 }

@@ -22,12 +22,14 @@ val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
  */
 const val DEFAULT_DATE_STRING = "2020-06-12"
 val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
+val DEFAULT_DATETIME_10_SECONDS_LATER = DateTime(2020, Month.JAN, 1, 0, 0, 10)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = Salt("12345")
 val DEFAULT_PASSWORD = Password("password1234")
 val DEFAULT_HASH = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
 const val DEFAULT_HASH_STRING = "4dc91e9a80320c901f51ccf7166d646c"
 val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1))
+val DEFAULT_USER_2 = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(2))
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
 val DEFAULT_EMPLOYEE = Employee(EmployeeId(1), DEFAULT_EMPLOYEE_NAME)
 val DEFAULT_TIME = Time(60)

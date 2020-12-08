@@ -33,7 +33,7 @@ interface IAuthenticationUtilities {
     /**
      * Wipes out the session entry for this user
      */
-    fun logout(sessionToken: String)
+    fun logout(user: User)
 
 
 }

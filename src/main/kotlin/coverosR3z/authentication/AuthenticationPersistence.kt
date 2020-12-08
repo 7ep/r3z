@@ -25,8 +25,8 @@ class AuthenticationPersistence(val pmd : PureMemoryDatabase) : IAuthPersistence
         pmd.addNewSession(sessionId, user, time)
     }
 
-    override fun deleteSession(sessionToken: String) {
-        pmd.removeSessionByToken(sessionToken)
+    override fun deleteSession(user: User) {
+        pmd.removeSession(user)
     }
 
 }

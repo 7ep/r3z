@@ -34,7 +34,7 @@ class FakeAuthPersistence(
         addNewSessionBehavior()
     }
 
-    override fun deleteSession(sessionToken: String) {
+    override fun deleteSession(user: User) {
         deleteSessionBehavior()
     }
 

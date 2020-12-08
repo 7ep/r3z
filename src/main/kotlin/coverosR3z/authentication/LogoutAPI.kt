@@ -1,7 +1,9 @@
 package coverosR3z.authentication
 
-fun generateLogoutPage(au: IAuthenticationUtilities, sessionToken : String): String {
-    au.logout(sessionToken)
+import coverosR3z.domainobjects.User
+
+fun generateLogoutPage(au: IAuthenticationUtilities, user : User): String {
+    au.logout(user)
     return logoutHTML
 }
 
