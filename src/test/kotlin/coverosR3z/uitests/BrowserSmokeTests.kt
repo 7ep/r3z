@@ -27,6 +27,14 @@ import kotlin.concurrent.thread
 
 private const val domain = "http://localhost:12345"
 
+private enum class Drivers(val driver: () -> WebDriver){
+    HTMLUNIT({ HtmlUnitDriver(BEST_SUPPORTED) }),
+    FIREFOX({ FirefoxDriver() }),
+    CHROME({ ChromeDriver(ChromeOptions().setHeadless(false)) })
+}
+
+private val WEB_DRIVER = Drivers.HTMLUNIT
+
 /**
  * As a user of r3z
  * I want to access it through a browser
@@ -59,11 +67,7 @@ class BrowserSmokeTests {
      */
     @Test
     fun `Smoke test`() {
-        val drivers = listOf(
-//                {HtmlUnitDriver(BEST_SUPPORTED)},
-//                {FirefoxDriver()},
-                {ChromeDriver(ChromeOptions().setHeadless(false))}
-        )
+        val drivers = listOf(WEB_DRIVER.driver)
 
         for (driver in drivers) {
             // wipe out the database
