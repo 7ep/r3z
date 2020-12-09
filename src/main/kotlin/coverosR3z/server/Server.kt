@@ -86,7 +86,7 @@ class Server(val port: Int, private val dbDirectory: String) {
                 logDebug("client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}", cu)
                 handleRequestAndRespond(ServerData(au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
-                handleInternalServerError(ex.stackTraceToString() ?: "NO ERROR MESSAGE DEFINED")
+                handleInternalServerError(ex.stackTraceToString())
             }
 
             returnData(server, responseData)
