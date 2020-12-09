@@ -534,9 +534,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/").listFiles()?.forEach { it.delete() }
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
-        assertTrue(ex.message in listOf("no time entry files found in employees directory at build\\db\\timeentries\\2",
-            "no time entry files found in employees directory at build/db/timeentries/2"))
-//        assertEquals("no time entry files found in employees directory at build\\db\\timeentries\\2", ex.message)
+        assertTrue(ex.message!!.matches("no time entry files found in employees directory at build[\\/]db[\\/]timeentries[\\/]2".toRegex()))
     }
     
     /**
