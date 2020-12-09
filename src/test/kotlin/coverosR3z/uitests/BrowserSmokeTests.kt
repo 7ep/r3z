@@ -199,6 +199,59 @@ class BrowserSmokeTests {
         driver.quit()
     }
 
+    @Test
+    fun startUpShutDownServer() {
+        val drivers = listOf(WEB_DRIVER.driver)
+
+        for (driver in drivers) {
+            // wipe out the database
+            File(dbDirectory).deleteRecursively()
+
+            // start the server
+            thread {
+                sc = Server(12345, dbDirectory)
+                sc.startServer()
+            }
+
+            `UI_TEST An employee should be able to enter time for a specified date`(driver())
+
+            Server.halfOpenServerSocket.close()
+        }
+    }
+
+    fun `UI_TEST An employee should be able to enter time for a specified date`(driver: WebDriver) {
+        val dateString = if (driver is ChromeDriver) {
+            "06122020"
+        } else {
+            DEFAULT_DATE_STRING
+        }
+        val rp = RegisterPage(driver)
+        val lp = LoginPage(driver)
+        val etp = EnterTimePage(driver)
+        val epp = EnterProjectPage(driver)
+        val user = "AliceWantsToEnterTimeYesterday"
+        val password = "IamVeryBusyAndIt'sPrettyAnnoyingThatIfIForgetToRecordMyTimeYesterdayICanNeverRecordItYKnow"
+        val details = "t̷͚̣̙̰̹͖͙͙̼̤̺̳̗̗͈̠̔̀̄͛̃̊́͛ͅh̷̺̪̦̳̦̟̟̻̟͈̙̼̹͛̑̇͊̎̈̍͒̓̕͝ï̶̛͕͉̙̝̳̔̄͛͗̿̓̏̾̍̓͐͌̕͠͝s̸̛͖͖̣̪͎̥̪̲͉͖͍͔̠͇͗̇͆̈́̃̍̾͜͝ ̶͙̑̈́̈́͐̾̓̈́ͅȋ̵̛͕̼̹̪̰̜͇͖̤͗̔̔͑́̑͑͂̃̚͘s̶̨̙̰̲͕͎̣̉̾̃̾̈́͐̎̒̾͆̿̊̚ ̸̼̞͛͗̒͆͆͘ą̵͂̇̋͠n̴̛̥̭̱̼̱̹͓̩̣̪̩̜̟̗̜͈̫̅ ̸̛̦̣͌͋̿͌͆̉̒̿̕e̶̋̃̂̅͛̿̿̊̊̾̀̂̾̒̕͜n̵̦̫̣̳̩̺̖̼̠͖̟̯̟͛̆̍̅̇̓̃͘͘͝͠t̴̢̮̭̭̦̞̘͈̭̺̤͌̃̀͘͘͝r̶̡̨̭̦̰͙͕͉̫̫̜̻͉͖̓̊̏̀̇̈̂͂̑̒̌̃̇͊͗͝y̵͚̱̓͂̓̄̉͆͐͛̽͝ͅ"
+
+        // register and login
+        rp.register(user, password, "Administrator")
+        lp.login(user, password)
+
+        // Create project
+        val project = "Sample Project"
+        epp.enter(project)
+
+        // Enter time
+        etp.enterTime(project, "60", details, dateString)
+
+        // Verify the entry
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        assertEquals("your time entries", driver.title)
+        assertEquals("2020-06-12", driver.findElement(By.cssSelector("body > table > tbody > tr > td:nth-child(4)")).text)
+
+        driver.quit()
+    }
+
     private class EnterTimePage(private val driver: WebDriver) {
 
         fun enterTime(project: String, time: String, details: String, date: String) {

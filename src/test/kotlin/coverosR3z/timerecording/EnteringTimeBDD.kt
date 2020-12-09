@@ -66,6 +66,8 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
+
+
     @Test
     fun `API_TEST An employee should be able to enter time for previous day`() {
         // given the employee worked 8 hours yesterday
@@ -86,26 +88,24 @@ class EnteringTimeBDD {
 
         assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
 
-        val ARBITRARY_TIME = 8*60
-//        val ARBITRARY_EMPLOYEE = Employee(EmployeeId(2), EmployeeName("Really don't care"))
-        val entry = createTimeEntryPreDatabase(time = Time(ARBITRARY_TIME),
+        val eightHours = 8*60
+        val entry = createTimeEntryPreDatabase(time = Time(eightHours),
             project = newProject,
             employee = alice)
+
+        val descr = "no problem here"
         // when the employee enters their time
         val data: Map<String, String> = mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
                          EnterTimeAPI.Elements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
                          EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
-                         EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "no problem here")
+                         EnterTimeAPI.Elements.DETAIL_INPUT.elemName to descr)
         val result = EnterTimeAPI.handlePOST(tru, user.employeeId, data = data)
 
         // then time is saved
         val message = "we should have gotten the success page.Got: $result"
         assertTrue(message, toStr(result.fileContents).contains("SUCCESS"))
-        assertTrue(tru.getEntriesForEmployeeOnDate(alice.id, A_RANDOM_DAY_IN_JUNE_2020).any { it.details.value == "no problem here" })
-//        println(tru.getAllEntriesForEmployee(alice.id))
-        //TODO verify that the time entry is actually recorded on the desired date. It is definitely just getting
-        // ignored right now
-
+        assertTrue(tru.getEntriesForEmployeeOnDate(alice.id, A_RANDOM_DAY_IN_JUNE_2020).any {
+            it.details.value == descr })
     }
 
     @Test
