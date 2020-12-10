@@ -108,4 +108,9 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.getAllEmployees()
     }
 
+    override fun changeEntry(date: Date, project: Project, newEntry: TimeEntryPreDatabase) {
+        persistence.persistNewTimeEntry(newEntry)
+        // might want to delete that old one...
+    }
+
 }

@@ -4,6 +4,7 @@ import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
+import java.awt.Component
 
 /**
  * Used as a mock object for testing
@@ -19,6 +20,7 @@ class FakeTimeRecordingUtilities(
         var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
         var listAllEmployeesBehavior : () -> List<Employee> = {emptyList()} ,
         var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
+        var changeEntryBehavior : () -> Unit = {}
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -59,6 +61,10 @@ class FakeTimeRecordingUtilities(
 
     override fun listAllEmployees(): List<Employee> {
         return listAllEmployeesBehavior()
+    }
+
+    override fun changeEntry(date: Date, project: Project, newEntry: TimeEntryPreDatabase) {
+        return changeEntryBehavior()
     }
 
 }
