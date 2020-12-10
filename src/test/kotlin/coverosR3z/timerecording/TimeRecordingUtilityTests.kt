@@ -10,7 +10,7 @@ import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
 
-class TimeRecordingTests {
+class TimeRecordingUtilityTests {
 
     /**
      * Happy path - record time successfully
