@@ -11,10 +11,9 @@ import coverosR3z.timerecording.EmployeeAPI
 import coverosR3z.timerecording.EnterTimeAPI
 import coverosR3z.timerecording.ProjectAPI
 import io.github.bonigarcia.wdm.WebDriverManager
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.BeforeClass
-import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
@@ -45,6 +44,7 @@ class BrowserSmokeTests {
     companion object {
         private lateinit var sc : Server
         const val dbDirectory = "build/db/"
+        private lateinit var driver: WebDriver
 
         @BeforeClass
         @JvmStatic
@@ -52,6 +52,24 @@ class BrowserSmokeTests {
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
+
+//        val drivers = listOf(WEB_DRIVER.driver)
+            driver = WEB_DRIVER.driver()
+
+            // wipe out the database
+            File(dbDirectory).deleteRecursively()
+
+            // start the server
+            thread {
+                sc = Server(12345, dbDirectory)
+                sc.startServer()
+            }
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun shutDown() {
+            Server.halfOpenServerSocket.close()
         }
 
     }
@@ -200,26 +218,7 @@ class BrowserSmokeTests {
     }
 
     @Test
-    fun startUpShutDownServer() {
-        val drivers = listOf(WEB_DRIVER.driver)
-
-        for (driver in drivers) {
-            // wipe out the database
-            File(dbDirectory).deleteRecursively()
-
-            // start the server
-            thread {
-                sc = Server(12345, dbDirectory)
-                sc.startServer()
-            }
-
-            `UI_TEST An employee should be able to enter time for a specified date`(driver())
-
-            Server.halfOpenServerSocket.close()
-        }
-    }
-
-    fun `UI_TEST An employee should be able to enter time for a specified date`(driver: WebDriver) {
+    fun `UI_TEST An employee should be able to enter time for a specified date`() {
         val dateString = if (driver is ChromeDriver) {
             "06122020"
         } else {
