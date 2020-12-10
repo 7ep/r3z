@@ -6,7 +6,6 @@ import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.misc.toStr
 import coverosR3z.persistence.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Test
@@ -66,11 +65,56 @@ class EnteringTimeBDD {
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
     }
 
+//    fun editEntry(newTime: Time, newDetails: Details = Details("")) {
+//        return TimeEntryPreDatabase()
+//    }
+
     @Test
-    fun `An employee should be able to edit time from a previous time entry` () {
-        //given Andrea has a previous time entry
-        //when she edits her time
-        //then the previous time entry is changed
+    fun `An employee should be able to edit the number of hours worked from a previous time entry` () {
+        //given Andrea has a previous time entry with 24 hours
+        val pmd = PureMemoryDatabase()
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
+
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val alice = systemTru.createEmployee(EmployeeName("Alice"))
+        val userName = UserName("alice_1")
+
+        au.register(userName, DEFAULT_PASSWORD, alice.id)
+        val (_, user) = au.login(userName, DEFAULT_PASSWORD)
+
+        val project = systemTru.createProject(DEFAULT_PROJECT_NAME)
+
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(user))
+
+        assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
+
+        val twentyFourHours = 24*60
+        val entry = createTimeEntryPreDatabase(time = Time(twentyFourHours),
+            project = project,
+            employee = alice)
+
+        val descr = "no problem here"
+        // when the employee enters their time
+        val data: Map<String, String> = mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.elemName to entry.project.id.value.toString(),
+            EnterTimeAPI.Elements.TIME_INPUT.elemName to entry.time.numberOfMinutes.toString(),
+            EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.stringValue,
+            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to descr)
+        val result = EnterTimeAPI.handlePOST(tru, user.employeeId, data = data)
+
+        val newTime = Time(7)
+        val newDetails = Details("The conditions have changed")
+        val oldEntry = tru.getEntriesForEmployeeOnDate(alice.id, A_RANDOM_DAY_IN_JUNE_2020)
+
+        //when she changes the entry to only 8 hours
+        val newEntry = TimeEntryPreDatabase(alice, project, newTime, A_RANDOM_DAY_IN_JUNE_2020, Details(descr))
+        tru.changeEntry(A_RANDOM_DAY_IN_JUNE_2020, project, newEntry)
+
+        //then it is reflected in the database
+        assertTrue(tru.getEntriesForEmployeeOnDate(alice.id, A_RANDOM_DAY_IN_JUNE_2020).any {
+            it.details == newDetails
+            it.time == newTime
+        })
     }
 
     /*

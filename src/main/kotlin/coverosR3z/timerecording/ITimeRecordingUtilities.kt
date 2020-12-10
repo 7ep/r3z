@@ -25,4 +25,5 @@ interface ITimeRecordingUtilities {
     fun findProjectById(id: ProjectId): Project
     fun findEmployeeById(id: EmployeeId): Employee
     fun listAllEmployees(): List<Employee>
+    abstract fun changeEntry(date: Date, project: Project, newEntry: TimeEntryPreDatabase)
 }
