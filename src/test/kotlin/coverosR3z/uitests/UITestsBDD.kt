@@ -101,6 +101,31 @@ class UITests {
         verifyTheEntry()
     }
 
+    @Test
+    fun `An employee should be able to edit the number of hours worked from a previous time entry` () {
+        //given Andrea has a previous time entry with 24 hours
+
+        // when the employee enters their time
+        enterTimeForEmployee()
+
+        //when she changes the entry to only 8 hours
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        // muck with it
+
+        val timeField = driver.findElement(By.cssSelector("#time-entry-1-1 .time input"))
+        timeField.sendKeys("120")
+        // change time to 120
+
+        //then it is reflected in the database
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+
+        val expected = 60120
+        assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
+        // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
+        // until we persist it in some way
+        
+    }
+
     private fun enterTimeForEmployee() {
         val dateString = if (driver is ChromeDriver) {
             "06122020"
