@@ -20,11 +20,10 @@ class TimeRecordingUtilityTests {
         val fakeTimeEntryPersistence = FakeTimeEntryPersistence(minutesRecorded = Time(60))
         val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
         val entry = createTimeEntryPreDatabase()
-        val expectedResult = RecordTimeResult(status = StatusEnum.SUCCESS)
 
         val actualResult = utils.recordTime(entry)
 
-        assertEquals("expect to see a success indicator", expectedResult, actualResult)
+        assertEquals("expect to see a success indicator", StatusEnum.SUCCESS, actualResult.status)
     }
 
     /**
@@ -252,5 +251,20 @@ class TimeRecordingUtilityTests {
         val foundProject = utils.findProjectById(ProjectId(1))
         assertEquals(NO_PROJECT, foundProject)
     }
+
+    /**
+     * Given we have a time entry in the database, let's
+     * edit its values
+     */
+    @Test
+    fun testCanEditTimeEntry() {
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, newTimeEntry) = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
+
+        tru.changeEntry(newTimeEntry!!.id, newTimeEntry.copy(time = Time(2)))
+    }
+
 
 }

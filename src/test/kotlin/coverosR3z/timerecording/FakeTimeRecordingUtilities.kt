@@ -63,8 +63,9 @@ class FakeTimeRecordingUtilities(
         return listAllEmployeesBehavior()
     }
 
-    override fun changeEntry(date: Date, project: Project, newEntry: TimeEntryPreDatabase) {
-        return changeEntryBehavior()
+    override fun changeEntry(id: Int, newEntry: TimeEntry) {
+        changeEntryBehavior()
     }
+
 
 }

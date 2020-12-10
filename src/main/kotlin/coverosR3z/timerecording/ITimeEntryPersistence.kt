@@ -3,7 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.domainobjects.*
 
 interface ITimeEntryPersistence {
-    fun persistNewTimeEntry(entry: TimeEntryPreDatabase)
+    fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry
     fun persistNewProject(projectName: ProjectName) : Project
     fun persistNewEmployee(employeename: EmployeeName): Employee
 
@@ -22,4 +22,5 @@ interface ITimeEntryPersistence {
     fun getAllProjects(): List<Project>
     fun getAllEmployees(): List<Employee>
     fun getEmployeeById(id: EmployeeId): Employee
+    fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry)
 }
