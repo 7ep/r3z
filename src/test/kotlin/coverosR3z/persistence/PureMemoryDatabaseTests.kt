@@ -11,7 +11,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
@@ -531,10 +530,12 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary time entry file inside this employees' directory
-        File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/").listFiles()?.forEach { it.delete() }
+        val file = File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/")
+                file.listFiles()?.forEach { it.delete() }
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
-        assertTrue(ex.message!!.matches("no time entry files found in employees directory at build[\\/]db[\\/]timeentries[\\/]2".toRegex()))
+
+        assertEquals("no time entry files found in employees directory at ${file.path}", ex.message)
     }
     
     /**
