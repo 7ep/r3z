@@ -28,7 +28,7 @@ import coverosR3z.persistence.PureMemoryDatabase.TimeEntrySerializationSurrogate
 class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSetOf(),
                          private val users: MutableSet<User> = mutableSetOf(),
                          private val projects: MutableSet<Project> = mutableSetOf(),
-                         private val timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf(),
+                         private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf(),
 
                         /**
                          * a map between randomly-created letter-number strings, and a given
@@ -50,7 +50,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     @Synchronized
-    fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = this.timeEntries) {
+    fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries) {
         addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details)
     }
 
@@ -95,7 +95,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         val employeeTimeEntries = timeEntries[employee] ?: return Time(0)
 
         // if the employee hasn't entered any time on this date, return 0 minutes
-        val entriesOnDate = employeeTimeEntries[date] ?: return Time(0)
+        val entriesOnDate = employeeTimeEntries.filter{it.date == date}
+        if (entriesOnDate.isEmpty()) {
+            return Time(0)
+        }
 
         val sum = entriesOnDate.sumBy{ it.time.numberOfMinutes }
         return Time(sum)
@@ -105,11 +108,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * Return the list of entries for this employee, or just return an empty list otherwise
      */
     fun getAllTimeEntriesForEmployee(employee: Employee): Set<TimeEntry> {
-        return timeEntries[employee]?.flatMap { it.value }?.toSet() ?: emptySet()
+        return timeEntries[employee]?.toSet() ?: emptySet()
     }
 
     fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return timeEntries[employee]?.get(date) ?: emptySet()
+        return timeEntries[employee]?.filter{it.date == date}?.toSet() ?: emptySet()
     }
 
     fun getUserByName(name: UserName) : User {
@@ -333,10 +336,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
         }
 
-        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> {
+        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableSet<TimeEntry>> {
             val timeEntriesDirectory = "timeentries/"
             return try {
-                val fullTimeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>> = mutableMapOf()
+                val fullTimeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf()
 
                 for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
                     val employee : Employee = try {
@@ -355,8 +358,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                         simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), monthlyTimeEntries.name, setOf(employee), projects))
                     }
 
-                    val orderedTimeEntries: MutableMap<Date, MutableSet<TimeEntry>> = simpleTimeEntries.groupBy{it.date}.mapValues {it.value.toMutableSet()}.toMutableMap()
-                    fullTimeEntries[employee] = orderedTimeEntries
+                    fullTimeEntries[employee] = simpleTimeEntries
                 }
 
                 fullTimeEntries
@@ -462,7 +464,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * Static version of this code so we can use it during deserialization as well as
          * for regular usage
          */
-        private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableMap<Date, MutableSet<TimeEntry>>>, dbDirectory: String?,
+        private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableSet<TimeEntry>>, dbDirectory: String?,
                                        date: Date, project: Project, employee : Employee, time : Time, details : Details) {
             // get the data for a particular employee
             var employeeTimeEntries = timeEntries[employee]
@@ -470,28 +472,18 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             // if the data is null (the employee has never added time entries), create an empty map for them
             // and set that as the variable we'll use for the rest of this method
             if (employeeTimeEntries == null) {
-                employeeTimeEntries = mutableMapOf()
+                employeeTimeEntries = mutableSetOf()
                 timeEntries[employee] = employeeTimeEntries
             }
 
-            // get the data for a particular employee and date
-            var employeeTimeDateEntries = employeeTimeEntries[date]
-
-            // if the data is null on a particular date, create an empty map for that date
-            // and set that as the variable we'll use for the rest of this method
-            if (employeeTimeDateEntries == null) {
-                employeeTimeDateEntries = mutableSetOf()
-                employeeTimeEntries[date] = employeeTimeDateEntries
-            }
-
             // add the new data
-            val newIndex = employeeTimeDateEntries.size + 1
+            val newIndex = employeeTimeEntries.size + 1
             logTrace("new time-entry index is $newIndex")
 
-            employeeTimeDateEntries.add(TimeEntry(newIndex, employee, project, time, date, details))
+            employeeTimeEntries.add(TimeEntry(newIndex, employee, project, time, date, details))
 
             // get all the time entries for the month, to serialize
-            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.flatMap { it -> it.value.filter { it.date.month() == date.month()} }.toSet()
+            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.filter { it.date.month() == date.month()}.toSet()
             val filename = "${date.year()}_${date.month()}"
             logTrace("filename to store time-entries is $filename")
 
