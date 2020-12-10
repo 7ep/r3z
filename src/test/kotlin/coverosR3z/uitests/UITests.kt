@@ -39,7 +39,7 @@ private val WEB_DRIVER = Drivers.HTMLUNIT
  * I want to access it through a browser
  * So that it is convenient
  */
-class BrowserSmokeTests {
+class UITests {
 
     companion object {
         private lateinit var sc : Server
