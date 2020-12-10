@@ -21,20 +21,20 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
             log.audit("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
-            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH)
+            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
         log.audit("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
         confirmLessThan24Hours(entry)
         return try {
-            persistence.persistNewTimeEntry(entry)
+            val newTimeEntry = persistence.persistNewTimeEntry(entry)
             log.debug("recorded time sucessfully")
-            RecordTimeResult(StatusEnum.SUCCESS)
+            RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
         } catch (ex : ProjectIntegrityViolationException) {
             log.debug("time was not recorded successfully: project id did not match a valid project")
-            RecordTimeResult(StatusEnum.INVALID_PROJECT)
+            RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
         } catch (ex : EmployeeIntegrityViolationException) {
             log.debug("time was not recorded successfully: employee id did not match a valid employee")
-            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
+            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
         }
     }
 
@@ -108,9 +108,8 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.getAllEmployees()
     }
 
-    override fun changeEntry(date: Date, project: Project, newEntry: TimeEntryPreDatabase) {
-        persistence.persistNewTimeEntry(newEntry)
-        // might want to delete that old one...
+    override fun changeEntry(id : Int, newEntry: TimeEntry) {
+        persistence.overwriteTimeEntry(checkNotNull(cu.user.employeeId), id, newEntry)
     }
 
 }

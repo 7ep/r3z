@@ -2,6 +2,8 @@ package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_EMPLOYEE
+import coverosR3z.DEFAULT_TIME_ENTRY
+import coverosR3z.createTimeEntryPreDatabase
 import coverosR3z.domainobjects.*
 
 /**
@@ -9,16 +11,17 @@ import coverosR3z.domainobjects.*
  */
 class FakeTimeEntryPersistence(
         var minutesRecorded : Time = Time(0),
-        var persistNewTimeEntryBehavior : () -> Unit = {},
+        var persistNewTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
         var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
         var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
         var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
         var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
+        var overwriteTimeEntryBehavior : () -> Unit = {},
 ) : ITimeEntryPersistence {
 
 
-    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
-        persistNewTimeEntryBehavior()
+    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
+        return persistNewTimeEntryBehavior()
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -60,6 +63,10 @@ class FakeTimeEntryPersistence(
 
     override fun getEmployeeById(id: EmployeeId): Employee {
         return getEmployeeByIdBehavior(id)
+    }
+
+    override fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry) {
+        overwriteTimeEntryBehavior()
     }
 
 }

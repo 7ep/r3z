@@ -50,8 +50,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     @Synchronized
-    fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries) {
-        addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details)
+    fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries) : TimeEntry {
+        return addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details)
     }
 
     @Synchronized
@@ -188,6 +188,13 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         result = 31 * result + timeEntries.hashCode()
         result = 31 * result + sessions.hashCode()
         return result
+    }
+
+    fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {
+        val employee = employees.single { it.id == employeeId }
+        val setOfTimeEntries = checkNotNull(timeEntries[employee])
+        check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
+        setOfTimeEntries.add(newEntry)
     }
 
     companion object {
@@ -465,7 +472,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * for regular usage
          */
         private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableSet<TimeEntry>>, dbDirectory: String?,
-                                       date: Date, project: Project, employee : Employee, time : Time, details : Details) {
+                                       date: Date, project: Project, employee : Employee, time : Time, details : Details) : TimeEntry {
             // get the data for a particular employee
             var employeeTimeEntries = timeEntries[employee]
 
@@ -480,7 +487,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             val newIndex = employeeTimeEntries.size + 1
             logTrace("new time-entry index is $newIndex")
 
-            employeeTimeEntries.add(TimeEntry(newIndex, employee, project, time, date, details))
+            val newTimeEntry = TimeEntry(newIndex, employee, project, time, date, details)
+            employeeTimeEntries.add(newTimeEntry)
 
             // get all the time entries for the month, to serialize
             val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.filter { it.date.month() == date.month()}.toSet()
@@ -489,6 +497,9 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
 
             // write it to disk
             writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, employee, filename, dbDirectory)
+
+            // return the time entry
+            return newTimeEntry
         }
 
     }

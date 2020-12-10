@@ -6,10 +6,10 @@ import coverosR3z.persistence.PureMemoryDatabase
 
 class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
-    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) {
+    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         logDebug("persisting a new timeEntry")
         isEntryValid(entry)
-        pmd.addTimeEntry(entry)
+        return pmd.addTimeEntry(entry)
     }
 
     /**
@@ -61,6 +61,11 @@ class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence
 
     override fun getEmployeeById(id: EmployeeId): Employee {
         return pmd.getEmployeeById(id)
+    }
+
+    override fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry)  {
+        pmd.overwriteTimeEntry(empId, id, newEntry)
+
     }
 
 }

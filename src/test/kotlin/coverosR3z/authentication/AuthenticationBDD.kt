@@ -28,7 +28,7 @@ class AuthenticationBDD {
         val result = tru.recordTime(preparedEntry)
 
         // Then the system disallows it
-        assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH), result)
+        assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null), result)
     }
 
     @Test
