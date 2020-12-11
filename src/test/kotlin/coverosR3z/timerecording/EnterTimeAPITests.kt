@@ -201,21 +201,6 @@ class EnterTimeAPITests {
         assertEquals("Must be able to parse aaa as integer", ex.message)
     }
 
-    //TODO Add negative tests for date (outside of date range, malformed, etc.)
-
-
-    /**
-     * Checking some of the content
-     */
-    @Test
-    fun testDoGETTimeEntriesPage_content() {
-        tru.getAllEntriesForEmployeeBehavior = {setOf(TimeEntry(1, DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020, Details("whatevs")))}
-
-        val result = EnterTimeAPI.generateTimeEntriesPage(tru, DEFAULT_USER)
-
-        assertTrue("page should have this content.  Page:\n$result", result.contains("<tr><td>Default_Project</td><td>60</td><td>whatevs</td><td>2020-06-25</td></tr>"))
-    }
-
     /**
      * What should happen if we send too many inputs to the API?
      * It should complain.  We want precision.
