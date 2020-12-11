@@ -69,8 +69,9 @@ class RegisterAPI {
                     <td>
                         <label for="${Elements.EMPLOYEE_INPUT.elemName}">Employee</label><br>
                         <select id="${Elements.EMPLOYEE_INPUT.id}" name="${Elements.EMPLOYEE_INPUT.elemName}">
+                            <option selected disabled hidden>Choose here</option>
                            """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
-                           <option selected disabled hidden>Choose here</option>
+                           
                       </td>
                     </select>
                 </tr>
