@@ -328,6 +328,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
@@ -346,6 +347,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
@@ -365,6 +367,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
@@ -384,6 +387,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
@@ -403,6 +407,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
@@ -423,6 +428,7 @@ class PureMemoryDatabaseTests {
         val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
     }
 
     /**
