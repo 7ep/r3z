@@ -92,7 +92,6 @@ class ServerTests {
      */
     @Test
     fun testShouldGetFileResponse() {
-        logSettings[LogTypes.TRACE] = true
         client.write("GET /sample.html HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -107,7 +106,6 @@ class ServerTests {
      */
     @Test
     fun testShouldGetFileResponse_CSS() {
-        logSettings[LogTypes.TRACE] = true
         client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -122,7 +120,6 @@ class ServerTests {
      */
     @Test
     fun testShouldGetFileResponse_JS() {
-        logSettings[LogTypes.TRACE] = true
         client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -241,7 +238,6 @@ class ServerTests {
      */
     @Test
     fun testShouldIndicateClientClosedConnection() {
-        logSettings[LogTypes.TRACE] = true
         client.socket.shutdownOutput()
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())

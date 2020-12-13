@@ -14,9 +14,9 @@ fun handleUnauthorized() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, StatusCode.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
-fun handleInternalServerError(msg : String) : PreparedResponseData {
-    logTrace("handling internal server error: $msg")
-    return PreparedResponseData(internalServerErrorHTML(msg), StatusCode.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
+fun handleInternalServerError(shortMessage : String?, fullStackTrace : String) : PreparedResponseData {
+    logTrace("handling internal server error: $fullStackTrace")
+    return PreparedResponseData(internalServerErrorHTML(shortMessage ?: "(None)"), StatusCode.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
 }
 
 const val badRequestHTML = """

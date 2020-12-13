@@ -25,7 +25,6 @@ class LoggerTests {
      */
     @Test
     fun testShouldLambdaRunFaster_lambdaOrParens_PERFORMANCE() {
-        logSettings[LogTypes.TRACE] = false
         val (timeParens, _) = getTime {repeat(1000) {
             logTrace("abc".repeat(100).replace("c", "b").replace("b", "a"))
         }}
