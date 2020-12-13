@@ -21,7 +21,11 @@ plugins {
     // see https://plugins.gradle.org/plugin/org.owasp.dependencycheck
     id "org.owasp.dependencycheck" version "6.0.3"
 
+    // for generating documentation from the code
     id "org.jetbrains.dokka" version "1.4.20"
+
+    // static analysis tool - see https://github.com/detekt/detekt
+    id "io.gitlab.arturbosch.detekt" version "1.15.0-RC1"
 }
 
 // enables us to use Kotlin on the JVM
@@ -93,6 +97,19 @@ sonarqube {
         property "sonar.kotlin.binaries", "build/classes/kotlin/main"
         property "sonar.junit.reportPaths", "build/test-results/test/"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/jacoco/jacoco.xml"
+    }
+}
+
+tasks.detekt.jvmTarget = "1.8"
+
+detekt {
+    failFast = true // fail build on any finding
+    buildUponDefaultConfig = true // preconfigure defaults
+
+    reports {
+        html.enabled = true // observe findings in your browser with structure and code snippets
+        xml.enabled = true // checkstyle like format mainly for integrations like Jenkins
+        txt.enabled = true // similar to the console output, contains issue signature to manually edit baseline files
     }
 }
 
