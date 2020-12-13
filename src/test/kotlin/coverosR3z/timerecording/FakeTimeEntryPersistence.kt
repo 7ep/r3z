@@ -1,9 +1,8 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_EMPLOYEE
+import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_TIME_ENTRY
-import coverosR3z.createTimeEntryPreDatabase
 import coverosR3z.domainobjects.*
 
 /**

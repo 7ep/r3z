@@ -4,12 +4,13 @@ import coverosR3z.DEFAULT_DB_DIRECTORY
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
-import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logSettings
 import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.toStr
-import org.junit.*
-import org.junit.Assert.*
+import org.junit.AfterClass
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import java.net.Socket
 import kotlin.concurrent.thread
 

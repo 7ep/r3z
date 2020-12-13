@@ -4,7 +4,6 @@ import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.*
-import java.awt.Component
 
 /**
  * Used as a mock object for testing

@@ -22,7 +22,6 @@ val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
  */
 const val DEFAULT_DATE_STRING = "2020-06-12"
 val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
-val DEFAULT_DATETIME_10_SECONDS_LATER = DateTime(2020, Month.JAN, 1, 0, 0, 10)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = Salt("12345")
 val DEFAULT_PASSWORD = Password("password1234")
