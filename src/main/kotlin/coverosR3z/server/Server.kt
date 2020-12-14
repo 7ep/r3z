@@ -17,14 +17,17 @@ import java.util.concurrent.Executors
 
 /**
  * This is the top-level entry into the web server
+ * @param port the port the server will run on
+ * @param dbDirectory the directory to store data.  If no directory is provided, the database
+ *                    will run entirely in memory with no disk persistence taking place.
  */
-class Server(val port: Int, private val dbDirectory: String) {
+class Server(val port: Int, private val dbDirectory: String? = null) {
 
     fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
 
         val cu = CurrentUser(SYSTEM_USER)
-        val pmd = PureMemoryDatabase.start(dbDirectory)
+        val pmd = if (dbDirectory == null) {PureMemoryDatabase.startMemoryOnly()} else {PureMemoryDatabase.startWithDiskPersistence(dbDirectory)}
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
         logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")

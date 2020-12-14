@@ -6,6 +6,7 @@ import coverosR3z.server.Server.Companion.extractFirstArgumentAsPort
 
 /**
  * Entry point for the application.  KISS.
+ * argument is the port
  */
 fun main(args: Array<String>) {
     val port = extractFirstArgumentAsPort(args)

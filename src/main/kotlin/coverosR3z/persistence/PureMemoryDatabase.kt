@@ -206,7 +206,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
          * start.  If you are just going to use the database in memory-only,
          * you may as well just instantiate [PureMemoryDatabase]
          */
-        fun start(dbDirectory: String) : PureMemoryDatabase {
+        fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
 
             /** The version of the database.  Update when we have
              * real users and we're changing live prod data.
@@ -238,6 +238,21 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 pmd
             }
         }
+
+        /**
+         * This starts the database with memory-only, that is
+         * no disk persistence.  This is mainly
+         * used for testing purposes
+         */
+        fun startMemoryOnly() : PureMemoryDatabase {
+            val pmd = PureMemoryDatabase()
+
+            logStart("creating an initial employee")
+            pmd.addNewEmployee(EmployeeName("Administrator"))
+
+            return pmd
+        }
+
 
         private val jsonSerializer : Json = Json{prettyPrint = false; allowStructuredMapKeys = true}
         private const val databaseFileSuffix = ".json"

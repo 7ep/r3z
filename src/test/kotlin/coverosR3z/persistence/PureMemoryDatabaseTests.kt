@@ -169,7 +169,7 @@ class PureMemoryDatabaseTests {
         val numberOfDays = 2
         val maxMillisecondsAllowed = 200
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         File(DEFAULT_DB_DIRECTORY).mkdirs()
         val (totalTime) = getTime {
             recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
@@ -318,14 +318,14 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_HappyPath() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -338,13 +338,13 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingTimeEntries() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -359,12 +359,12 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingEmployees() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null)
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -379,12 +379,12 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingProjects() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         pmd.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -399,12 +399,12 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingUsers() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -419,13 +419,13 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingSessions() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
-        val readPmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -440,7 +440,7 @@ class PureMemoryDatabaseTests {
     fun testPersistence_Read_MissingAllFilesButDirectoryExists() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         File(DEFAULT_DB_DIRECTORY).mkdirs()
-        PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "version.txt").exists())
     }
 
@@ -451,7 +451,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_MissingDbDirectory() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "version.txt").exists())
     }
 
@@ -464,7 +464,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -474,7 +474,7 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6.json").writeText("BAD DATA HERE")
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Could not deserialize time entry file 2020_6.json.  deserializer exception message: Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
     }
 
@@ -484,7 +484,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Employees_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -494,7 +494,7 @@ class PureMemoryDatabaseTests {
         // corrupt the employees data file
         File("$DEFAULT_DB_DIRECTORY/employees.json").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Could not read employees file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
     }
 
@@ -507,7 +507,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Employees_MissingFile() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -517,7 +517,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/employees.json").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find an employee with the id of 2 based on entry in timeentries/", ex.message)
     }
 
@@ -528,7 +528,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_MissingFile() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -539,7 +539,7 @@ class PureMemoryDatabaseTests {
         val file = File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/")
                 file.listFiles()?.forEach { it.delete() }
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
 
         assertEquals("no time entry files found in employees directory at ${file.path}", ex.message)
     }
@@ -550,7 +550,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Users_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -560,7 +560,7 @@ class PureMemoryDatabaseTests {
         // corrupt the users data file
         File("$DEFAULT_DB_DIRECTORY/users.json").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
     
     /**
@@ -569,7 +569,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Users_MissingFile() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -579,7 +579,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/users.json").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
@@ -589,7 +589,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Projects_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -599,7 +599,7 @@ class PureMemoryDatabaseTests {
         // corrupt the projects data file
         File("$DEFAULT_DB_DIRECTORY/projects.json").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Could not read projects file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
     }
     
@@ -609,7 +609,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Projects_MissingFile() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -619,7 +619,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/projects.json").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
@@ -629,7 +629,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_CorruptedData_Sessions_BadData() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
@@ -639,7 +639,7 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/sessions.json").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.start(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
 
     /*

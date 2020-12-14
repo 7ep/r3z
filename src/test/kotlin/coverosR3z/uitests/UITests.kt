@@ -84,7 +84,6 @@ class UITests {
         private const val domain = "http://localhost:12345"
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
-        private const val dbDirectory = "build/db/"
         private lateinit var driver: WebDriver
         private lateinit var rp : RegisterPage
         private lateinit var lp : LoginPage
@@ -101,12 +100,9 @@ class UITests {
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
 
-            // wipe out the database
-            File(dbDirectory).deleteRecursively()
-
             // start the server
             thread {
-                sc = Server(12345, dbDirectory)
+                sc = Server(12345)
                 sc.startServer()
             }
 
