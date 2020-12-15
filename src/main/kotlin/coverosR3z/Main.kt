@@ -2,17 +2,16 @@ package coverosR3z
 
 import coverosR3z.logging.logStart
 import coverosR3z.server.Server
-import coverosR3z.server.Server.Companion.extractFirstArgumentAsPort
+import coverosR3z.server.Server.Companion.extractOptions
 
 /**
  * Entry point for the application.  KISS.
  * argument is the port
  */
 fun main(args: Array<String>) {
-    val port = extractFirstArgumentAsPort(args)
-    logStart("starting server on port $port")
-    val dbDirectory = "db/"
-    logStart("database directory is $dbDirectory")
-    Server(port, dbDirectory).startServer()
+    val serverOptions = extractOptions(args)
+    logStart("starting server on port ${serverOptions.port}")
+    logStart("database directory is ${serverOptions.dbDirectory}")
+    Server(serverOptions.port, serverOptions.dbDirectory).startServer()
 }
 

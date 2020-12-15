@@ -1,23 +1,25 @@
 package coverosR3z
 
 import coverosR3z.server.Server
+import org.junit.After
 import org.junit.Test
 import kotlin.concurrent.thread
 
+/**
+ * Due to the entirely-stateful and threaded nature of these tests,
+ * these tests are here as experiments to see how the system behaves,
+ * during which time the experimenter observes the logs of what is
+ * happening, rather than as typical (asserts).
+ *
+ * Try to avoid adding more tests here.  It is better to test the code
+ * underneath with less-stateful and easier tests.
+ */
 class MainTests {
 
-    @Test
-    fun testMain() {
-        // first thread starts the server
-        thread{main(arrayOf("12345"))}
-
-        // second thread tries to stop the server when the server is stoppable
-        // it loops trying to shut down the server, but initially the variable
-        // won't be initialized.  It takes a second or two.  So this will
-        // throw tons of [UninitializedPropertyAccessException] but we catch
-        // them all and only allow the program to continue when it stops throwing.
-        val closingThread = thread{
-            while(true) {
+    @After
+    fun cleanup() {
+        val tryingToClose = thread {
+            while (true) {
                 try {
                     Server.halfOpenServerSocket.close()
                     break
@@ -26,10 +28,20 @@ class MainTests {
                 }
             }
         }
-
-        // this line forces the test to wait here until
-        // we have finished closing the socket.  Without this,
-        // we just exit the test with the threads unfinished
-        closingThread.join()
+        tryingToClose.join()
     }
+
+    /**
+     * If we run main with a particular port number,
+     * it should indicate that during startup
+     */
+    @Test
+    fun testMain() {
+        val data = arrayOf("-p 54321")
+
+        // first thread starts the server
+        thread{main(data)}
+    }
+
+
 }
