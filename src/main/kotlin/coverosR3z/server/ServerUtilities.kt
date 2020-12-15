@@ -234,31 +234,31 @@ fun redirectTo(path: String): PreparedResponseData {
  * On the other hand if it's not a well formed request, or
  * if we don't have that file, we reply with an error page
  */
-val serverStatusLineRegex = "(GET|POST) /(.*) HTTP/(?:1.1|1.0)".toRegex()
+val serverStatusLineRegex = """(GET|POST) /(.*) HTTP/(?:1.1|1.0)""".toRegex()
 
 /**
  * This is the regex used to analyze a status line sent by the server and
  * read by the client.  Servers will send messages like: "HTTP/1.1 200 OK" or "HTTP/1.1 500 Internal Server Error"
  * See [StatusCode]
  */
-private val clientStatusLineRegex = "HTTP/(?:1.1|1.0) (\\d{3}) .*$".toRegex()
+private val clientStatusLineRegex = """HTTP/(?:1.1|1.0) (\d{3}) .*$""".toRegex()
 
 /**
  * Used for extracting the length of the body, in POSTs and
  * responses from servers
  */
-val contentLengthRegex = "[cC]ontent-[lL]ength: (.*)$".toRegex()
+val contentLengthRegex = """[cC]ontent-[lL]ength: (.*)$""".toRegex()
 
 /**
  * Used to extract cookies from the Cookie header
  */
-private val cookieRegex = "[cC]ookie: (.*)$".toRegex()
+private val cookieRegex = """[cC]ookie: (.*)$""".toRegex()
 
 /**
  * Within a cookie header, we want our sessionId cookie, which
  * this regular expression will find
  */
-private val sessionIdCookieRegex = "sessionId=(.*)".toRegex()
+private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
 
 /**
  * Analyze the data following HTTP protocol and create a

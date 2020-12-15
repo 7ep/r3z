@@ -233,3 +233,10 @@ Developer handbook
        the log level is used.  So for example, if we turn off the TRACE level, that means
        any complex logic we pass in to logTrace{ complex_stuff_here } simply won't get run, helping
        performance.
+
+
+    Regular expressions (regex)
+    ---------------------------
+
+    Typically, you should wrap strings to be used as regular expressions in triple-quotes: """foo"""
+    That way, you won't need to escape as much: "\\d" becomes """\d"""
