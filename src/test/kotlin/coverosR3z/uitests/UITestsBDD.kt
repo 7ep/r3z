@@ -123,7 +123,7 @@ class UITests {
         assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
         // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
         // until we persist it in some way
-        
+
     }
 
     private fun enterTimeForEmployee() {
