@@ -6,6 +6,7 @@ import coverosR3z.authentication.CurrentUser
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
@@ -72,7 +73,17 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
             return if (args.isEmpty() || args[0].isBlank()) {
                 ServerOptions()
             } else {
-                ServerOptions(port = args[0].toIntOrNull() ?: 12345)
+                var port : Int?
+                if (args[0] == "-p") {
+                    port = args[1].toIntOrNull()
+                } else {
+                    throw ServerOptionsException("no -p argument included")
+                }
+                if (port !in 1..65535 || port == null) {
+                    throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: -p $port")
+                } else {
+                    ServerOptions(port)
+                }
             }
         }
 

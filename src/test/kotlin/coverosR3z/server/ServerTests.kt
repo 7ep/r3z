@@ -54,13 +54,25 @@ class ServerTests {
 
     @Test
     fun testShouldParseOptions_Port() {
-        val serverOptions = Server.extractOptions(arrayOf("-p 54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-p","54321"))
         assertEquals(54321, serverOptions.port)
+    }
+
+    @Test
+    fun testShouldParseOptions_PortAnother() {
+        val serverOptions = Server.extractOptions(arrayOf("-p","54322"))
+        assertEquals(54322, serverOptions.port)
     }
 
     @Test
     fun testShouldParseOptions_PortNoSpace() {
         val serverOptions = Server.extractOptions(arrayOf("-p54321"))
+        assertEquals(54321, serverOptions.port)
+    }
+
+    @Test
+    fun testHowManyArgsAreThereEven() {
+        val serverOptions = Server.extractOptions(arrayOf("-p", "54321", "-d", "2321", "-a",  "213123"))
         assertEquals(54321, serverOptions.port)
     }
 
