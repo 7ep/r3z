@@ -26,7 +26,7 @@ class ServerTests {
 
         @JvmStatic @BeforeClass
         fun beforeClass() {
-            serverObject = Server(12345, DEFAULT_DB_DIRECTORY)
+            serverObject = Server(12345)
             au = FakeAuthenticationUtilities()
             thread { serverObject.startServer(au) }
         }
