@@ -70,18 +70,23 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
          * as an integer for use as a port number, or defaults to 12345
          */
         fun extractOptions(args: Array<String>): ServerOptions {
+            val fullInput = args.joinToString(" ")
             var portOptionIndex : Int = args.indexOfFirst { it.startsWith("-p") }
             return if (args.isEmpty() || args[0].isBlank() || portOptionIndex==-1) {
                 ServerOptions()
             } else {
                 var port : Int?
+
                 if (args[portOptionIndex] == "-p") {
                     port = args[portOptionIndex+1].toIntOrNull()
                 } else {
                     port = args[portOptionIndex].substring(2).toIntOrNull()
                 }
-                if (port !in 1..65535 || port == null) {
-                    throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: -p $port")
+
+                if (port == null) {
+                   throw ServerOptionsException("port option had no value set.  Your input was: $fullInput")
+                } else if (port !in 1..65535) {
+                    throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $fullInput")
                 } else {
                     ServerOptions(port)
                 }

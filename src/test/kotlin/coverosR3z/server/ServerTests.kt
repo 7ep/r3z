@@ -59,9 +59,9 @@ class ServerTests {
     }
 
     @Test
-    fun testShouldParseOptions_PortAnother() {
-        val serverOptions = Server.extractOptions(arrayOf("-p","86753"))
-        assertEquals(54322, serverOptions.port)
+    fun testShouldParseOptions_PortAnotherValid() {
+        val serverOptions = Server.extractOptions(arrayOf("-p","11111"))
+        assertEquals(11111, serverOptions.port)
     }
 
 //    @Test
@@ -93,7 +93,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_badPort_negativeInteger() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "-1"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p -1"))
+        assertTrue("message: ${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p -1"))
     }
 
     /**
@@ -102,7 +102,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_badPort_zero() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "0"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 0"))
+        assertTrue("message: ${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 0"))
     }
 
     /**
@@ -111,7 +111,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_badPort_above65535() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "65536"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 65536"))
+        assertTrue("message: ${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 65536"))
     }
 
     /**
@@ -122,7 +122,7 @@ class ServerTests {
         val ex = assertThrows(ServerOptionsException::class.java) {
             Server.extractOptions(arrayOf("-p", "-d", "db"))
         }
-        assertTrue(ex.message!!.contains("port option had no value set.  Your input was: -p -d db"))
+        assertTrue("message: ${ex.message}", ex.message!!.contains("port option had no value set.  Your input was: -p -d db"))
     }
 
     @Test
@@ -151,6 +151,16 @@ class ServerTests {
 
     /**
      * This is valid but not great
+     *
+     * This is likely a typo by the user, they probably meant to set
+     * multiple parameters, but on the other hand the database
+     * option needs a value after, so if our user typed it in
+     * like: r3z -d-p1024, yeah, they'll get a directory of -p1024
+     * which looks nuts, but we'll allow it.
+     *
+     * By the way, if the user *does* put in something that the
+     * operating system won't allow, they will get a complaint,
+     * an exception that stems from the File.write command
      */
     @Test
     fun testShouldParseOptions_weirdDatabaseDirectory() {
