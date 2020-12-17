@@ -119,7 +119,9 @@ class ServerTests {
      */
     @Test
     fun testShouldParseOptions_badPort_empty() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "-d", "db"))}
+        val ex = assertThrows(ServerOptionsException::class.java) {
+            Server.extractOptions(arrayOf("-p", "-d", "db"))
+        }
         assertTrue(ex.message!!.contains("port option had no value set.  Your input was: -p -d db"))
     }
 
@@ -137,7 +139,7 @@ class ServerTests {
 
     @Test
     fun testShouldParseOptions_badDatabaseDirectory_Empty() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d "))}
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d"))}
         assertTrue(ex.message!!.contains("The directory option was provided without a directory value"))
     }
 
