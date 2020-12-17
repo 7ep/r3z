@@ -1,9 +1,10 @@
 package coverosR3z.server
 
-import coverosR3z.DEFAULT_DB_DIRECTORY
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
+import coverosR3z.authentication.RegisterAPI
+import coverosR3z.domainobjects.NO_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.toStr
@@ -26,7 +27,7 @@ class ServerTests {
 
         @JvmStatic @BeforeClass
         fun beforeClass() {
-            serverObject = Server(12345, DEFAULT_DB_DIRECTORY)
+            serverObject = Server(12345)
             au = FakeAuthenticationUtilities()
             thread { serverObject.startServer(au) }
         }
@@ -54,13 +55,37 @@ class ServerTests {
 
     @Test
     fun testShouldParseOptions_Port() {
-        val serverOptions = Server.extractOptions(arrayOf("-p 54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-p","54321"))
         assertEquals(54321, serverOptions.port)
+    }
+
+    @Test
+    fun testShouldParseOptions_PortAnotherValid() {
+        val serverOptions = Server.extractOptions(arrayOf("-p","11111"))
+        assertEquals(11111, serverOptions.port)
+    }
+
+    @Test
+    fun testShouldParseOptions_weirdDatabaseDirectory() {
+        val serverOptions = Server.extractOptions(arrayOf("-d-p1024"))
+        assertEquals("-p1024", serverOptions.dbDirectory)
+    }
+
+    @Test
+    fun testShouldParseOptions_NoDiskPersistenceOption() {
+        val serverOptions = Server.extractOptions(arrayOf("--no-disk-persistence"))
+        assertNull(serverOptions.dbDirectory)
     }
 
     @Test
     fun testShouldParseOptions_PortNoSpace() {
         val serverOptions = Server.extractOptions(arrayOf("-p54321"))
+        assertEquals(54321, serverOptions.port)
+    }
+
+    @Test
+    fun testHowManyArgsAreThereEven() {
+        val serverOptions = Server.extractOptions(arrayOf("-p", "54321", "-d", "2321", "-a",  "213123"))
         assertEquals(54321, serverOptions.port)
     }
 
@@ -72,7 +97,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_badPort_nonInteger() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-pabc123"))}
-        assertTrue(ex.message!!.contains("port number was non parsable.  Your input was: -pabc123"))
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Must be able to parse abc123 as integer"))
     }
 
     /**
@@ -80,8 +105,8 @@ class ServerTests {
      */
     @Test
     fun testShouldParseOptions_badPort_negativeInteger() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p -1"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p -1"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "-1"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p -1"))
     }
 
     /**
@@ -89,8 +114,8 @@ class ServerTests {
      */
     @Test
     fun testShouldParseOptions_badPort_zero() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p 0"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 0"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "0"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 0"))
     }
 
     /**
@@ -98,8 +123,8 @@ class ServerTests {
      */
     @Test
     fun testShouldParseOptions_badPort_above65535() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p 65536"))}
-        assertTrue(ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 65536"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "65536"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: -p 65536"))
     }
 
     /**
@@ -107,14 +132,22 @@ class ServerTests {
      */
     @Test
     fun testShouldParseOptions_badPort_empty() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p -d db"))}
-        assertTrue(ex.message!!.contains("port option had no value set.  Your input was: -p -d db"))
+        val ex = assertThrows(ServerOptionsException::class.java) {
+            Server.extractOptions(arrayOf("-p", "-d", "db"))
+        }
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Must be able to parse -d as integer"))
     }
 
     @Test
     fun testShouldParseOptions_DatabaseDirectory() {
-        val serverOptions = Server.extractOptions(arrayOf("-d build/db"))
+        val serverOptions = Server.extractOptions(arrayOf("-d", "build/db"))
         assertEquals("build/db", serverOptions.dbDirectory)
+    }
+
+    @Test
+    fun testShouldParseOptions_BadPort_TooMany() {
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "22", "-p", "33"))}
+        assertTrue(ex.message!!.contains("Multiple port values were provided"))
     }
 
     @Test
@@ -125,58 +158,59 @@ class ServerTests {
 
     @Test
     fun testShouldParseOptions_badDatabaseDirectory_Empty() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d "))}
-        assertTrue(ex.message!!.contains("The directory option was provided without a directory value"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("The directory option was provided without a directory value"))
     }
 
     @Test
     fun testShouldParseOptions_badDatabaseDirectory_EmptyAlternate() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d -p1024"))}
-        assertTrue(ex.message!!.contains("The directory option was provided without a directory value"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d",  "-p1024"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("The directory option was provided without a directory value"))
     }
 
     /**
      * This is valid but not great
+     *
+     * This is likely a typo by the user, they probably meant to set
+     * multiple parameters, but on the other hand the database
+     * option needs a value after, so if our user typed it in
+     * like: r3z -d-p1024, yeah, they'll get a directory of -p1024
+     * which looks nuts, but we'll allow it.
+     *
+     * By the way, if the user *does* put in something that the
+     * operating system won't allow, they will get a complaint,
+     * an exception that stems from the File.write command
      */
-    @Test
-    fun testShouldParseOptions_weirdDatabaseDirectory() {
-        val serverOptions = Server.extractOptions(arrayOf("-d-p1024"))
-        assertEquals("-p1024", serverOptions.dbDirectory)
-    }
-    
-    @Test
-    fun testShouldParseOptions_NoDiskPersistenceOption() {
-        val serverOptions = Server.extractOptions(arrayOf("--no-disk-persistence"))
-        assertNull(serverOptions.dbDirectory)
-    }
+
 
     @Test
     fun testShouldParseOptions_multipleOptionsInvalid() {
-        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("--no-disk-persistence -dbuild/db"))}
-        assertTrue(ex.message!!.contains("You cannot combine options to set the database directory with disallowing disk persistence"))
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("--no-disk-persistence", "-dbuild/db"))}
+        val expected = "If you're setting the noDiskPersistence option and also a database directory, you're very foolish"
+        assertTrue("Message needs to match expected; yours was:\n${ex.message}", ex.message!!.contains(expected))
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
-        val serverOptions = Server.extractOptions(arrayOf("-p54321 -dbuild/db"))
+        val serverOptions = Server.extractOptions(arrayOf("-p54321", "-dbuild/db"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
-        val serverOptions = Server.extractOptions(arrayOf("-dbuild/db -p54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
-        val serverOptions = Server.extractOptions(arrayOf("-dbuild/db -p 54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
-        val serverOptions = Server.extractOptions(arrayOf("-d build/db -p 54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
@@ -187,28 +221,10 @@ class ServerTests {
     @Test
     fun testShouldHelpUser() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-h"))}
-        assertEquals(fullHelpMessage, ex.message!!)
+        assertEquals(Server.fullHelpMessage, ex.message!!)
     }
 
-    private val fullHelpMessage = """
-Here is some help for running this application.
-        
-You can provide options when running this, to change its configuration.
 
-Sample: 
-    The following runs the application with the
-    port set to 54321 and the database directory
-    set to "db":
-    
-    java -jar r3z-1.2.jar -p 54321 -d db
-    
-The options available are:
-
--p PORT_NUMBER         set the port number for the server
--d DIRECTORY           the directory to store data
---no-disk-persistence  do not write data to the disk.  Note
-                       that this is primarily (exclusively?) for tesiing
-    """.trimIndent()
 
     /**
      * If we try something and are unauthenticated,
@@ -336,15 +352,13 @@ The options available are:
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        au.getUserForSessionBehavior = { NO_USER }
+        client.write("POST /${NamedPaths.REGISTER.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "project_entry=1&time_entry=2&detail_entry=nothing+to+say&date_entry=2012-06-20"
+        val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.elemName}=1&${RegisterAPI.Elements.USERNAME_INPUT.elemName}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
-
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
-
+        val result: AnalyzedHttpData = parseHttpMessage(client, au)
         assertEquals(StatusCode.OK, result.statusCode)
     }
 
