@@ -37,7 +37,19 @@ class MainTests {
      */
     @Test
     fun testMain() {
-        val data = arrayOf("-p 54321")
+        val data = arrayOf("-p","54321")
+
+        // first thread starts the server
+        thread{main(data)}
+    }
+
+    /**
+     * If we run main with a particular port number,
+     * it should indicate that during startup
+     */
+    @Test
+    fun testMain_GetHelp() {
+        val data = arrayOf("-h")
 
         // first thread starts the server
         thread{main(data)}
