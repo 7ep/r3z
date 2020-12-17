@@ -69,26 +69,35 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
          * Given the command-line arguments, returns the first value
          * as an integer for use as a port number, or defaults to 12345
          */
-        fun extractOptions(args: Array<String>): ServerOptions {
+        fun extractOptions(args: Array<String>) : ServerOptions {
             val fullInput = args.joinToString(" ")
-            var portOptionIndex : Int = args.indexOfFirst { it.startsWith("-p") }
-            return if (args.isEmpty() || args[0].isBlank() || portOptionIndex==-1) {
+//            var portOptionIndex : Int = args.indexOfFirst { it.startsWith("-p") }
+            return if (args.isEmpty() || args[0].isBlank()) {
+//            return if (args.isEmpty() || args[0].isBlank() || portOptionIndex==-1) {
                 ServerOptions()
             } else {
-                var port : Int?
+                var port : Int? = null
+                var db : String? = null
+                for (i in 0..args.size-1) {
 
-                if (args[portOptionIndex] == "-p") {
-                    port = args[portOptionIndex+1].toIntOrNull()
-                } else {
-                    port = args[portOptionIndex].substring(2).toIntOrNull()
+                    if (args[i].startsWith("-p")) {
+                        if (args[i].length > 2) port = args[i].substring(2).toIntOrNull()
+                        else port = args[i + 1].toIntOrNull()
+                    } else if (args[i].startsWith("-d")) {
+                        if (args[i].length > 2) db = args[i].substring(2)
+                        else db = args[i + 1]
+                    }
                 }
-
-                if (port == null) {
-                   throw ServerOptionsException("port option had no value set.  Your input was: $fullInput")
-                } else if (port !in 1..65535) {
+                if (port == null && db == null) {
+                    throw ServerOptionsException("No valid arguments provided.  Your input was: $fullInput")
+                } else if (port != null && port !in 1..65535) {
                     throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $fullInput")
-                } else {
+                } else if (port != null && db != null){
+                    ServerOptions(port, db)
+                } else if (port != null && db == null) {
                     ServerOptions(port)
+                } else {
+                    ServerOptions(dbDirectory=db)
                 }
 
             }

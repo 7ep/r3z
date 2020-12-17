@@ -132,6 +132,12 @@ class ServerTests {
     }
 
     @Test
+    fun testShouldParseOptions_BadPort_TooMany() {
+        val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "22", "-p", "33"))}
+        assertTrue(ex.message!!.contains("Multiple port values were provided"))
+    }
+
+    @Test
     fun testShouldParseOptions_DatabaseDirectoryNoSpace() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db"))
         assertEquals("build/db", serverOptions.dbDirectory)
