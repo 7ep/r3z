@@ -4,6 +4,8 @@ import coverosR3z.DEFAULT_DB_DIRECTORY
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
+import coverosR3z.authentication.RegisterAPI
+import coverosR3z.domainobjects.NO_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.toStr
@@ -12,13 +14,13 @@ import org.junit.Assert.*
 import java.net.Socket
 import kotlin.concurrent.thread
 
-class ServerTests {
+class Tests {
 
     private lateinit var client : SocketWrapper
 
     companion object {
 
-        private lateinit var serverObject : Server
+        prServerivate lateinit var serverObject : Server
         private lateinit var au : FakeAuthenticationUtilities
 
         @JvmStatic @BeforeClass
@@ -131,7 +133,7 @@ class ServerTests {
         val ex = assertThrows(ServerOptionsException::class.java) {
             Server.extractOptions(arrayOf("-p", "-d", "db"))
         }
-        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port option had no value set.  Your input was: -p -d db"))
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Must be able to parse -d as integer"))
     }
 
     @Test
@@ -161,7 +163,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_badDatabaseDirectory_EmptyAlternate() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-d",  "-p1024"))}
-        assertTrue(ex.message!!.contains("The directory option was provided without a directory value"))
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("The directory option was provided without a directory value"))
     }
 
     /**
@@ -182,7 +184,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_multipleOptionsInvalid() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("--no-disk-persistence", "-dbuild/db"))}
-        val expected = "You cannot combine options to set the database directory with disallowing disk persistence"
+        val expected = "If you're setting the noDiskPersistence option and also a database directory, you're very foolish"
         assertTrue("Message needs to match expected; yours was:\n${ex.message}", ex.message!!.contains(expected))
     }
 
@@ -371,15 +373,13 @@ The options available are:
      */
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        au.getUserForSessionBehavior = { NO_USER }
+        client.write("POST /${NamedPaths.REGISTER.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "project_entry=1&time_entry=2&detail_entry=nothing+to+say&date_entry=2012-06-20"
+        val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.elemName}=1&${RegisterAPI.Elements.USERNAME_INPUT.elemName}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
-
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
-
+        val result: AnalyzedHttpData = parseHttpMessage(client, au)
         assertEquals(StatusCode.OK, result.statusCode)
     }
 
