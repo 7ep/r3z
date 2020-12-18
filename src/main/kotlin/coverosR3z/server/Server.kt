@@ -102,7 +102,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                 var usedNextI = false
                 //var otherArgs: MutableList<String> = mutableListOf()
 
-                args.filter { it.startsWith("-") }.forEachIndexed { i, it ->
+                args.forEachIndexed { i, it ->
 
                     if (it == "--no-disk-persistence") {
                         if (ndp.first) throw ServerOptionsException("The disk persistence option was specified multiple times. This is not allowed, go to jail.")

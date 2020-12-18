@@ -14,13 +14,13 @@ import org.junit.Assert.*
 import java.net.Socket
 import kotlin.concurrent.thread
 
-class Tests {
+class ServerTests {
 
     private lateinit var client : SocketWrapper
 
     companion object {
 
-        prServerivate lateinit var serverObject : Server
+        private lateinit var serverObject : Server
         private lateinit var au : FakeAuthenticationUtilities
 
         @JvmStatic @BeforeClass
@@ -188,31 +188,27 @@ class Tests {
         assertTrue("Message needs to match expected; yours was:\n${ex.message}", ex.message!!.contains(expected))
     }
 
-    @Ignore
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
         val serverOptions = Server.extractOptions(arrayOf("-p54321", "-dbuild/db"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
-    @Ignore
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
-    @Ignore
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
-    @Ignore
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
-        val serverOptions = Server.extractOptions(arrayOf("-d build/db", "-p", "54321"))
+        val serverOptions = Server.extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
         assertEquals(ServerOptions(54321, "build/db"),serverOptions)
     }
 
