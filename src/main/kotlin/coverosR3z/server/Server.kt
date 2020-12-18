@@ -78,25 +78,42 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
             } else {
                 var port : Int? = null
                 var db : String? = null
-                for (i in 0..args.size-1) {
+                var otherArgs: MutableList<String> = mutableListOf()
+                for (i in args.indices) {
 
-                    if (args[i].startsWith("-p")) {
+                    if (args[i].startsWith("--")) {
+                        if (args[i].length > 2) otherArgs.add(args[i].substring(2))
+
+                    } else if (args[i].startsWith("-p")) {
                         if (args[i].length > 2) port = args[i].substring(2).toIntOrNull()
-                        else port = args[i + 1].toIntOrNull()
+                        else if (i+1 < args.size-1) {
+                            port = args[i + 1].toIntOrNull()
+                        }
                     } else if (args[i].startsWith("-d")) {
                         if (args[i].length > 2) db = args[i].substring(2)
-                        else db = args[i + 1]
+                        else if (i+1 < args.size-1){
+                            db = args[i + 1]
+                        }
                     }
                 }
-                if (port == null && db == null) {
-                    throw ServerOptionsException("No valid arguments provided.  Your input was: $fullInput")
+                if (db == null && otherArgs.isEmpty() && port == null) {
+                    throw ServerOptionsException("The directory option was provided without a directory value")
                 } else if (port != null && port !in 1..65535) {
                     throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $fullInput")
                 } else if (port != null && db != null){
                     ServerOptions(port, db)
                 } else if (port != null && db == null) {
-                    ServerOptions(port)
-                } else {
+                    if (otherArgs.contains("no-disk-persistence")){
+                        ServerOptions(port, dbDirectory=null)
+                    } else {
+                        ServerOptions(port)
+                    }
+                } else if (otherArgs.contains("no-disk-persistence") && db == null) {
+                    ServerOptions(dbDirectory=null)
+                } else if (otherArgs.contains("no-disk-persistence") && db != null) {
+                    throw ServerOptionsException("You cannot combine options to set the database directory with disallowing disk persistence")
+                }
+                else {
                     ServerOptions(dbDirectory=db)
                 }
 
