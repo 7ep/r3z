@@ -90,17 +90,13 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
 
         private fun processArgs(args: Array<String>): ServerOptions {
             val fullInput = args.joinToString(" ")
-            //            var portOptionIndex : Int = args.indexOfFirst { it.startsWith("-p") }
             return if (args.isEmpty() || args[0].isBlank()) {
-        //            return if (args.isEmpty() || args[0].isBlank() || portOptionIndex==-1) {
                 ServerOptions()
             } else {
                 //first boolean in each Pair indicates whether the flag is specified
                 var port = Pair<Boolean, Int?>(false, null)
                 var db = Pair<Boolean, String?>(false, null)
                 var ndp = Pair<Boolean, Boolean?>(false, null)
-                var usedNextI = false
-                //var otherArgs: MutableList<String> = mutableListOf()
 
                 args.forEachIndexed { i, it ->
 
@@ -109,7 +105,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                         ndp = Pair(true, true)
                     } else if (it.startsWith("-p")) {
                         if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail.")
-                        var portStr: String =
+                        val portStr: String =
                             when {
                                 it.length > 2 -> it.substring(2)
                                 i + 1 < args.size -> args[i + 1]
@@ -119,42 +115,42 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                         port = Pair(true, portStr.toInt())
                     } else if (it.startsWith("-d")) {
                         if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail.")
-                        var dbStr: String =
+                        val dbStr: String =
                             when {
                                 it.length > 2 -> it.substring(2)
                                 i + 1 < args.size && validateDir(args[i + 1]) -> args[i + 1]
                                 else -> throw ServerOptionsException("The directory option was provided without a directory value")
                             }
                         db = Pair(true, dbStr)
+                    } else if (it.startsWith("-h")) {
+                        throw ServerOptionsException(fullHelpMessage)
                     }
                 }
 
                 ServerOptions.make(port.second, db.second, ndp.second)
-
-
-        //                if (db == null && otherArgs.isEmpty() && port == null) {
-        //                    throw ServerOptionsException("The directory option was provided without a directory value")
-        //                } else if (port != null && port !in 1..65535) {
-        //                    throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $fullInput")
-        //                } else if (port != null && db != null){
-        //                    ServerOptions(port, db)
-        //                } else if (port != null && db == null) {
-        //                    if (otherArgs.contains("no-disk-persistence")){
-        //                        ServerOptions(port, dbDirectory=null)
-        //                    } else {
-        //                        ServerOptions(port)
-        //                    }
-        //                } else if (otherArgs.contains("no-disk-persistence") && db == null) {
-        //                    ServerOptions(dbDirectory=null)
-        //                } else if (otherArgs.contains("no-disk-persistence") && db != null) {
-        //                    throw ServerOptionsException("You cannot combine options to set the database directory with disallowing disk persistence")
-        //                }
-        //                else {
-        //                    ServerOptions(dbDirectory=db)
-        //                }
-
             }
         }
+
+        val fullHelpMessage = """
+Here is some help for running this application.
+        
+You can provide options when running this, to change its configuration.
+
+Sample: 
+    The following runs the application with the
+    port set to 54321 and the database directory
+    set to "db":
+    
+    java -jar r3z-1.2.jar -p 54321 -d db
+    
+The options available are:
+
+-h                     prints this help message
+-p PORT_NUMBER         set the port number for the server
+-d DIRECTORY           the directory to store data
+--no-disk-persistence  do not write data to the disk.  Note
+                       that this is primarily (exclusively?) for tesiing
+    """.trimIndent()
 
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : AnalyzedHttpData {
             lateinit var analyzedHttpData : AnalyzedHttpData

@@ -1,6 +1,5 @@
 package coverosR3z.server
 
-import coverosR3z.DEFAULT_DB_DIRECTORY
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
@@ -9,8 +8,11 @@ import coverosR3z.domainobjects.NO_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.toStr
-import org.junit.*
+import org.junit.AfterClass
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import java.net.Socket
 import kotlin.concurrent.thread
 
@@ -216,32 +218,13 @@ class ServerTests {
      * If the user asks for help with -h or -?, provide
      * an explanation of the app options
      */
-    @Ignore
     @Test
     fun testShouldHelpUser() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-h"))}
-        assertEquals(fullHelpMessage, ex.message!!)
+        assertEquals(Server.fullHelpMessage, ex.message!!)
     }
 
-    private val fullHelpMessage = """
-Here is some help for running this application.
-        
-You can provide options when running this, to change its configuration.
 
-Sample: 
-    The following runs the application with the
-    port set to 54321 and the database directory
-    set to "db":
-    
-    java -jar r3z-1.2.jar -p 54321 -d db
-    
-The options available are:
-
--p PORT_NUMBER         set the port number for the server
--d DIRECTORY           the directory to store data
---no-disk-persistence  do not write data to the disk.  Note
-                       that this is primarily (exclusively?) for tesiing
-    """.trimIndent()
 
     /**
      * If we try something and are unauthenticated,
