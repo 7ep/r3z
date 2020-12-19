@@ -14,7 +14,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileNotFoundException
-import coverosR3z.persistence.PureMemoryDatabase.TimeEntrySerializationSurrogate.Companion as Tess
+import coverosR3z.persistence.PureMemoryDatabase.TimeEntrySurrogate.Companion as Tess
 
 /**
  * Why use those heavy-handed database applications when you
@@ -542,14 +542,14 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * @param dtl the [Details], as a string
      */
     @Serializable
-    private data class TimeEntrySerializationSurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
+    private data class TimeEntrySurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
         companion object {
 
-            fun toSurrogate(te : TimeEntry) : TimeEntrySerializationSurrogate {
-                return TimeEntrySerializationSurrogate(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay, te.details.value)
+            fun toSurrogate(te : TimeEntry) : TimeEntrySurrogate {
+                return TimeEntrySurrogate(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay, te.details.value)
             }
 
-            fun fromSurrogate(te: TimeEntrySerializationSurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
+            fun fromSurrogate(te: TimeEntrySurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
                 val employee = employees.single { it.id == EmployeeId(te.e) }
                 val project = try {
                     projects.single { it.id == ProjectId(te.p) }
@@ -570,7 +570,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     /**
-     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
     private data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
@@ -593,7 +593,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     /**
-     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
     private data class EmployeeSurrogate(val id: Int, val name: String) {
@@ -611,7 +611,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     /**
-     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
     private data class ProjectSurrogate(val id: Int, val name: String) {
@@ -629,7 +629,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     /**
-     * A surrogate. See longer description for another surrogate at [TimeEntrySerializationSurrogate]
+     * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
     private data class SessionSurrogate(val id: Int, val epochSecond: Long) {

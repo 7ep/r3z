@@ -1,61 +1,122 @@
 package coverosR3z.uitests
 
+import coverosR3z.DEFAULT_DATE_STRING
+import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.logging.LogTypes
 import coverosR3z.server.NamedPaths
 import coverosR3z.server.Server
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.AfterClass
+import org.junit.*
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.BeforeClass
-import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runners.MethodSorters
+import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
 import kotlin.concurrent.thread
-
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class UITests {
 
+    /*
+    Employee user story:
+         As an employee, Andrea
+         I want to record my time
+         So that I am easily able to document my time in an organized way
+    */
+    
     @Test
-    fun `001 - should get a 404 error on page not found`() {
-        driver.get("$domain/does-not-exist")
+    fun `001 - recordTime - An employee should be able to enter time for a specified date`() {
+        // given the employee worked 8 hours yesterday
+        loginAsUserAndCreateProject("alice", "projecta")
+        // when the employee enters their time
+        enterTimeForEmployee("projecta")
+
+        // then time is saved
+        verifyTheEntry()
+        logout()
+    }
+
+    @Test
+    fun `002 - recordTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
+        //given Andrea has a previous time entry with 24 hours
+        loginAsUserAndCreateProject("bob", "projectb")
+        // when the employee enters their time
+        enterTimeForEmployee("projectb")
+
+        //when she changes the entry to only 8 hours
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        // muck with it
+
+        val timeField = driver.findElement(By.cssSelector("#time-entry-1-1 .time input"))
+        timeField.sendKeys("120")
+        // change time to 120
+
+        //then it is reflected in the database
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+
+        val expected = 60120
+        //assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
+        // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
+        // until we persist it in some way
+        logout()
+    }
+
+    /*
+    Administrator user story:
+         As an administrator, Adrian
+         I want to create new employees
+         So that I can allow new employees to track time
+    */
+
+    @Test
+    fun `003 - createEmployee - I should be able to create an employee`() {
+        rp.register("employeemaker", "password12345", "Administrator")
+        lp.login("employeemaker", "password12345")
+        eep.enter("a new employee")
+        assertEquals("SUCCESS", driver.title)
+        driver.get("$domain/${NamedPaths.EMPLOYEES.path}")
+        logout()
+    }
+
+
+    @Test
+    fun `004 - general - should get a 404 error on page not found`() {
+        driver.get("${domain}/does-not-exist")
         assertEquals("404 error", driver.title)
     }
 
     @Test
-    fun `002 - should get a 401 error if I fail to login`() {
+    fun `005 - general - should get a 401 error if I fail to login`() {
         lp.login("userabc", "password12345")
         assertEquals("401 error", driver.title)
     }
 
     @Test
-    fun `003 - should get a 500 error if I post insufficient data to a page`() {
+    fun `006 - general - should get a 500 error if I post insufficient data to a page`() {
         rp.register("", "password12345", "Administrator")
         assertEquals("500 error", driver.title)
     }
 
     @Test
-    fun `004 - should get a failure message if I register an already-registered user`() {
+    fun `007 - general - should get a failure message if I register an already-registered user`() {
         rp.register("usera", "password12345", "Administrator")
         rp.register("usera", "password12345", "Administrator")
         assertEquals("FAILURE", driver.title)
     }
 
     @Test
-    fun `005 - should be able to see the homepage and the authenticated homepage`() {
-        driver.get("$domain/${NamedPaths.HOMEPAGE.path}")
+    fun `008 - general - should be able to see the homepage and the authenticated homepage`() {
+        driver.get("${domain}/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Homepage", driver.title)
         rp.register("employeemaker", "password12345", "Administrator")
         lp.login("employeemaker", "password12345")
-        driver.get("$domain/${NamedPaths.HOMEPAGE.path}")
+        driver.get("${domain}/${NamedPaths.HOMEPAGE.path}")
         assertEquals("Authenticated Homepage", driver.title)
         logout()
     }
 
     @Test
-    fun `006 - I should be able to change the logging settings`() {
+    fun `009 - general - I should be able to change the logging settings`() {
         // Given I am an admin
         rp.register("corey", "password12345", "Administrator")
         lp.login("corey", "password12345")
@@ -65,7 +126,7 @@ class UITests {
         llp.save()
         llp.go()
         // Then that logging is set to not log
-        assertFalse(llp.isLoggingOn(LogTypes.WARN))
+        Assert.assertFalse(llp.isLoggingOn(LogTypes.WARN))
         logout()
     }
 
@@ -77,6 +138,7 @@ class UITests {
                  |_|
      alt-text: Helper Methods
      */
+
 
     companion object {
         private const val domain = "http://localhost:12345"
@@ -127,5 +189,35 @@ class UITests {
     private fun logout() {
         lop.go()
     }
+
+    private fun enterTimeForEmployee(project: String) {
+        val dateString = if (driver is ChromeDriver) {
+            "06122020"
+        } else {
+            DEFAULT_DATE_STRING
+        }
+
+        // Enter time
+        etp.enterTime(project, "60", "", dateString)
+    }
+
+    private fun loginAsUserAndCreateProject(user: String, project: String) {
+        val password = DEFAULT_PASSWORD.value
+
+        // register and login
+        rp.register(user, password, "Administrator")
+        lp.login(user, password)
+
+        // Create project
+        epp.enter(project)
+    }
+
+    private fun verifyTheEntry() {
+        // Verify the entry
+        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        assertEquals("your time entries", driver.title)
+        assertEquals("2020-06-12", driver.findElement(By.cssSelector("body > table > tbody > tr > td:nth-child(4)")).text)
+    }
+
 
 }

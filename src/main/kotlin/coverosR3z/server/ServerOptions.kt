@@ -10,7 +10,7 @@ data class ServerOptions(
          * if this is set to null, we won't store anything to disk,
          * which is really just useful for testing
          */
-        val dbDirectory : String? = "db"){
+        val dbDirectory : String? = "db/"){
         companion object{
                 const val defaultPort = 12345
                 fun make(port : Int?, dbDirectory : String?, ndp : Boolean?) : ServerOptions{

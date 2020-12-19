@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+private const val secondsToCache = 60 * 10
+
 enum class CacheControl(value: String) {
 
     /**
@@ -10,7 +12,7 @@ enum class CacheControl(value: String) {
      * we won't hear from the client again once they request any data
      * marked with this, for a period of time
      */
-    AGGRESSIVE_MINUTE_CACHE("public, max-age=60, immutable");
+    AGGRESSIVE_WEB_CACHE("public, max-age=$secondsToCache, immutable");
 
     /**
      * Returns this enum as a full header

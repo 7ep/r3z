@@ -15,7 +15,7 @@ import org.junit.Test
 /**
  * Feature: Entering time
  *
- * Employee story:
+ * Employee user story:
  *      As an employee, Andrea
  *      I want to record my time
  *      So that I am easily able to document my time in an organized way

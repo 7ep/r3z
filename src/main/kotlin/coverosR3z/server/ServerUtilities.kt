@@ -24,7 +24,7 @@ data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingU
 const val CRLF = "\r\n"
 const val CONTENT_LENGTH = "content-length"
 
-val caching = CacheControl.AGGRESSIVE_MINUTE_CACHE.details
+val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
 enum class AuthStatus {
     AUTHENTICATED,
@@ -80,7 +80,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
 
         else -> {
-            handleUnknownFiles(rd)
+            handleStaticFiles(rd)
         }
     }
 }
@@ -158,13 +158,26 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
 }
 
 /**
+ * A simple cache for the static files.  See [handleStaticFiles]
+ */
+val staticFileCache = mutableMapOf<String, PreparedResponseData>()
+
+/**
  * If the user asks for a path we don't know about, try reading
  * that file from our resources directory
  */
-private fun handleUnknownFiles(rd: AnalyzedHttpData): PreparedResponseData {
-    val fileContents = FileReader.read(rd.path)
+private fun handleStaticFiles(rd: AnalyzedHttpData): PreparedResponseData {
+    // check the cache.  If we have what they want already, just return it.
+    // since the files of this application are stored in its resources
+    // file and won't be expected to change while the program is running,
+    // may as well cache what we can.
+    val cachedStaticValue = staticFileCache[rd.path]
+    if (cachedStaticValue != null) {
+        return cachedStaticValue
+    }
 
-    return if (fileContents == null) {
+    val fileContents = FileReader.read(rd.path)
+    val result = if (fileContents == null) {
         logDebug("unable to read a file named ${rd.path}")
         handleNotFound()
     } else {
@@ -177,6 +190,9 @@ private fun handleUnknownFiles(rd: AnalyzedHttpData): PreparedResponseData {
             else -> handleNotFound()
         }
     }
+
+    staticFileCache[rd.path] = result
+    return result
 }
 
 fun isAuthenticated(u : User) : AuthStatus {
