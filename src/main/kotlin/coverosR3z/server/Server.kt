@@ -139,9 +139,10 @@ You can provide options when running this, to change its configuration.
 Sample: 
     The following runs the application with the
     port set to 54321 and the database directory
-    set to "db":
+    set to "db/" (make sure to end the directory
+    with a forward slash):
     
-    java -jar r3z-1.2.jar -p 54321 -d db
+    java -jar r3z-1.2.jar -p 54321 -d db/
     
 The options available are:
 
