@@ -150,7 +150,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectory() {
         val serverOptions = Server.extractOptions(arrayOf("-d", "build/db"))
-        assertEquals("build/db", serverOptions.dbDirectory)
+        assertEquals(ServerOptions(dbDirectory = "build/db"), serverOptions)
     }
 
     @Test
@@ -162,7 +162,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectoryNoSpace() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db"))
-        assertEquals("build/db", serverOptions.dbDirectory)
+        assertEquals(ServerOptions(dbDirectory = "build/db"), serverOptions)
     }
 
     @Test
@@ -202,25 +202,25 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
         val serverOptions = Server.extractOptions(arrayOf("-p54321", "-dbuild/db"))
-        assertEquals(ServerOptions(54321, "build/db"),serverOptions)
+        assertEquals(ServerOptions(54321, "build/db"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p54321"))
-        assertEquals(ServerOptions(54321, "build/db"),serverOptions)
+        assertEquals(ServerOptions(54321, "build/db"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
         val serverOptions = Server.extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
-        assertEquals(ServerOptions(54321, "build/db"),serverOptions)
+        assertEquals(ServerOptions(54321, "build/db"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
         val serverOptions = Server.extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
-        assertEquals(ServerOptions(54321, "build/db"),serverOptions)
+        assertEquals(ServerOptions(54321, "build/db"), serverOptions)
     }
 
     /**
@@ -232,8 +232,6 @@ class ServerTests {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-h"))}
         assertEquals(Server.fullHelpMessage, ex.message!!)
     }
-
-
 
     /**
      * If we try something and are unauthenticated,
