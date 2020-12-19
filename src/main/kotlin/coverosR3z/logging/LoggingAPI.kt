@@ -1,5 +1,6 @@
 package coverosR3z.logging
 
+import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
 
@@ -41,7 +42,7 @@ class LoggingAPI {
                 "false" -> logSettings[lt] = false
                 else -> throw IllegalArgumentException(badInputLoggingDataMsg)
             }
-            logDebug("Configured logging for ${lt.name}: ${logSettings[lt]}")
+            logImperative("Configured logging for ${lt.name}: ${logSettings[lt]}")
         }
 
         fun handlePOST(data: Map<String, String>) : PreparedResponseData{

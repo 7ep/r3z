@@ -23,17 +23,19 @@ fun getCurrentMillis() : Long {
  * log entries will print
  */
 fun resetLogSettingsToDefault() {
-    logSettings[LogTypes.AUDIT] = true
-    logSettings[LogTypes.DEBUG] = true
-    logSettings[LogTypes.WARN] = true
-    logSettings[LogTypes.TRACE] = false
+    LogConfig.logSettings[LogTypes.AUDIT] = true
+    LogConfig.logSettings[LogTypes.DEBUG] = true
+    LogConfig.logSettings[LogTypes.WARN] = true
+    LogConfig.logSettings[LogTypes.TRACE] = false
 }
 
-val logSettings = mutableMapOf(
-        LogTypes.AUDIT to true,
-        LogTypes.WARN to true,
-        LogTypes.DEBUG to true,
-        LogTypes.TRACE to false)
+object LogConfig{
+    val logSettings = mutableMapOf(
+            LogTypes.AUDIT to true,
+            LogTypes.WARN to true,
+            LogTypes.DEBUG to true,
+            LogTypes.TRACE to false)
+}
 
 /**
  * The class version of logging
@@ -58,7 +60,7 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  * See [Logger.audit]
  */
 fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
-    if (logSettings[LogTypes.AUDIT] == true) {
+    if (LogConfig.logSettings[LogTypes.AUDIT] == true) {
         println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: $msg")
     }
 }
@@ -67,7 +69,7 @@ fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  * Used to log finicky details of technical solutions
  */
 fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
-    if (logSettings[LogTypes.DEBUG] == true) {
+    if (LogConfig.logSettings[LogTypes.DEBUG] == true) {
         println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: $msg")
     }
 }
@@ -76,7 +78,7 @@ fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  * Logs nearly extraneous levels of detail.
  */
 fun logTrace(msg: String) {
-    if (logSettings[LogTypes.TRACE] == true) {
+    if (LogConfig.logSettings[LogTypes.TRACE] == true) {
         println("${getCurrentMillis()} TRACE: $msg")
     }
 }
@@ -85,7 +87,7 @@ fun logTrace(msg: String) {
  * Logs nearly extraneous levels of detail.
  */
 fun logTrace(msg: () -> String) {
-    if (logSettings[LogTypes.TRACE] == true) {
+    if (LogConfig.logSettings[LogTypes.TRACE] == true) {
         println("${getCurrentMillis()} TRACE: ${msg()}")
     }
 }
@@ -94,7 +96,7 @@ fun logTrace(msg: () -> String) {
  * Logs nearly extraneous levels of detail.
  */
 fun logWarn(msg: String) {
-    if (logSettings[LogTypes.WARN] == true) {
+    if (LogConfig.logSettings[LogTypes.WARN] == true) {
         println("${getCurrentMillis()} WARN: $msg")
     }
 }
@@ -104,4 +106,11 @@ fun logWarn(msg: String) {
  */
 fun logStart(msg: String) {
     println("${getCurrentMillis()} START: $msg")
+}
+
+/**
+ * Logging that must be shown, which you cannot turn off
+ */
+fun logImperative(msg: String) {
+    println("${getCurrentMillis()} IMPERATIVE: $msg")
 }
