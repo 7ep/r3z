@@ -3,13 +3,14 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.exceptions.DuplicateInputsException
+import coverosR3z.logging.LogConfig.logSettings
+import coverosR3z.logging.LogTypes
 import coverosR3z.misc.getTime
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.lang.Exception
-import java.lang.IllegalArgumentException
+import kotlin.concurrent.thread
 
 class ServerUtilitiesTests {
 
@@ -382,6 +383,36 @@ class ServerUtilitiesTests {
         au.getUserForSessionBehavior = { DEFAULT_USER}
         val user = extractUserFromAuthToken(authCookie, au)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
+    }
+
+    /**
+     * When a user requests static files (like CSS, images, etc)
+     * we use a cache.  If we don't account for multi-threading
+     * properly, it is possible to end up storing the wrong content
+     * during adding to the cache.  This tests corrupting the cache.
+     *
+     * If the target isn't synchronized and corruption can happen,
+     * it might take a few runs of this test to see the corruption
+     * take place.  It manifests as getting fewer entries to the
+     * cache than we should (e.g. 48 instead of 50 expected) and the
+     * amount of corruption differs with each test run.
+     */
+    @Test
+    fun testCorruptingCacheDataForStaticFiles() {
+        logSettings[LogTypes.DEBUG] = false
+        HttpResponseCache.clearCache()
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewStaticEntriesAdded = 50
+        for(i in 1..numberNewStaticEntriesAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                handleStaticFiles(i.toString())
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewStaticEntriesAdded, HttpResponseCache.staticFileCache.size)
+        HttpResponseCache.clearCache()
+        logSettings[LogTypes.DEBUG] = true
     }
 
 }

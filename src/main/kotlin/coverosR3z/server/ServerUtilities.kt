@@ -7,6 +7,7 @@ import coverosR3z.exceptions.DuplicateInputsException
 import coverosR3z.logging.*
 import coverosR3z.logging.logDebug
 import coverosR3z.misc.*
+import coverosR3z.server.HttpResponseCache.staticFileCache
 import coverosR3z.server.NamedPaths.*
 import coverosR3z.timerecording.*
 import java.net.URLDecoder
@@ -80,7 +81,7 @@ fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
 
         else -> {
-            handleStaticFiles(rd)
+            handleStaticFiles(rd.path)
         }
     }
 }
@@ -160,38 +161,70 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
 /**
  * A simple cache for the static files.  See [handleStaticFiles]
  */
-val staticFileCache = mutableMapOf<String, PreparedResponseData>()
+object HttpResponseCache {
+    val staticFileCache = mutableMapOf<String, PreparedResponseData>()
+
+    /**
+     * Clears the cache.  This is just used for testing.
+     */
+    fun clearCache() {
+        staticFileCache.clear()
+    }
+}
 
 /**
  * If the user asks for a path we don't know about, try reading
  * that file from our resources directory
  */
-private fun handleStaticFiles(rd: AnalyzedHttpData): PreparedResponseData {
+fun handleStaticFiles(path: String): PreparedResponseData {
     // check the cache.  If we have what they want already, just return it.
     // since the files of this application are stored in its resources
     // file and won't be expected to change while the program is running,
     // may as well cache what we can.
-    val cachedStaticValue = staticFileCache[rd.path]
+    val cachedStaticValue = staticFileCache[path]
     if (cachedStaticValue != null) {
         return cachedStaticValue
     }
 
-    val fileContents = FileReader.read(rd.path)
+    return readStaticFile(path)
+}
+
+@Synchronized
+private fun readStaticFile(path: String): PreparedResponseData {
+    // it is true that this is duplicated code, however
+    // the difference is that we are now inside a synchronized
+    // block, meaning from here until the end of this scope,
+    // there can only be one thread at a time running the
+    // code.  The reason it is necessary to duplicate this here
+    // is because if two threads hit the previous code that
+    // looks like this, they could both end up deciding there
+    // is nothing in the cache.  One of them would then get
+    // into this code block, the other would be waiting.
+    //
+    // when the next thread tries coming in, it will immediately
+    // his this code, and if the preceeding thread cached what
+    // the subsequent thread needed, it can use that.
+    val cachedStaticValue = staticFileCache[path]
+    if (cachedStaticValue != null) {
+        return cachedStaticValue
+    }
+
+    val fileContents = FileReader.read(path)
     val result = if (fileContents == null) {
-        logDebug("unable to read a file named ${rd.path}")
+        logDebug("unable to read a file named $path")
         handleNotFound()
     } else {
         when {
-            rd.path.takeLast(4) == ".css" -> okCSS(fileContents)
-            rd.path.takeLast(3) == ".js" -> okJS(fileContents)
-            rd.path.takeLast(4) == ".jpg" -> okJPG(fileContents)
-            rd.path.takeLast(5) == ".webp" -> okWEBP(fileContents)
-            rd.path.takeLast(5) == ".html" -> okHTML(fileContents)
+            path.takeLast(4) == ".css" -> okCSS(fileContents)
+            path.takeLast(3) == ".js" -> okJS(fileContents)
+            path.takeLast(4) == ".jpg" -> okJPG(fileContents)
+            path.takeLast(5) == ".webp" -> okWEBP(fileContents)
+            path.takeLast(5) == ".html" -> okHTML(fileContents)
             else -> handleNotFound()
         }
     }
 
-    staticFileCache[rd.path] = result
+    staticFileCache[path] = result
     return result
 }
 

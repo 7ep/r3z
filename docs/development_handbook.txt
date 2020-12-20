@@ -17,6 +17,17 @@ Developer handbook
     The version of the database is set at SocketCommunication.start()
 
 
+    Threads
+    -------
+
+    Any kind of data that could be shared between threads, like caches or databases,
+    needs to be made "thread-safe", which means that threads don't potentially corrupt
+    the data.  If no precautions are taken, it is possible for two threads to make
+    changes to data in unexpected ways.  If this is completely a new concept to you,
+    take the time to review some of the ideas on the web, and also look at tests
+    in this application like testCorruptingEmployeeDataWithMultiThreading.
+
+
     Types
     -----
 
