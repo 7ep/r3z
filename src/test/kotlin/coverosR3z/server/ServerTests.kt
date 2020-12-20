@@ -1,12 +1,17 @@
 package coverosR3z.server
 
+import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
 import coverosR3z.authentication.RegisterAPI
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.exceptions.ServerOptionsException
+import coverosR3z.logging.LogConfig.logSettings
+import coverosR3z.logging.LogTypes
 import coverosR3z.misc.FileReader.Companion.read
+import coverosR3z.misc.getTime
 import coverosR3z.misc.toStr
 import org.junit.AfterClass
 import org.junit.Assert.*
@@ -14,6 +19,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import java.net.Socket
+import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 class ServerTests {
@@ -430,4 +436,69 @@ class ServerTests {
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
+    /**
+     * This is to try out a new client factory, so we send requests
+     * with valid content and valid protocol more easily.
+     *
+     * Question: why does it take 6 seconds to run this 100 thousand times?
+     */
+    @Test
+    fun testWithValidClient() {
+        // so we don't see spam
+        logSettings[LogTypes.DEBUG] = false
+        au.getUserForSessionBehavior = { DEFAULT_USER }
+        val headers = listOf("Cookie: sessionId=abc123", "Connection: keep-alive")
+        val body = mapOf(
+                LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
+                LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val myClient = Client.make(Verb.POST, NamedPaths.LOGIN.path, headers, body, au)
+
+        val (time, _) = getTime {
+            for (i in 1..100) {
+                myClient.send()
+                val result = myClient.read()
+
+                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+            }
+        }
+        println("Time was $time")
+        // turn logging back on for other tests
+        logSettings[LogTypes.DEBUG] = true
+    }
+
+}
+
+class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities) {
+
+    fun send() {
+        socketWrapper.write(data)
+    }
+
+    fun read() : AnalyzedHttpData {
+        return parseHttpMessage(socketWrapper, au)
+    }
+
+    companion object {
+
+        fun make(
+                verb : Verb,
+                path : String,
+                headers : List<String>? = null,
+                body : Map<String,String>? = null,
+                au: IAuthenticationUtilities
+        ) : Client {
+            val clientSocket = Socket("localhost", 12345)
+            val bodyString = body?.map{ it.key + "=" + URLEncoder.encode(it.value, Charsets.UTF_8)}?.joinToString("&") ?: ""
+            val headersString = headers?.joinToString(CRLF) ?: ""
+
+            val data = when (verb) {
+                Verb.GET -> "${verb.name} /$path HTTP/1.1$CRLF" + headers + CRLF + CRLF
+                Verb.POST -> "${verb.name} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headersString + CRLF + CRLF + bodyString
+                else -> throw IllegalArgumentException("unexpected Verb")
+            }
+
+            return Client(SocketWrapper(clientSocket, "client"), data, au)
+        }
+
+    }
 }
