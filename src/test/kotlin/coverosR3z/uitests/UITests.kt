@@ -142,7 +142,7 @@ class UITests {
 
     companion object {
         private const val domain = "http://localhost:12345"
-        private val webDriver = Drivers.CHROME
+        private val webDriver = Drivers.HTMLUNIT
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
         private lateinit var rp : RegisterPage
