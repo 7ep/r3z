@@ -39,6 +39,7 @@ class UITestsBDD {
         logout()
     }
 
+    //TODO: Implement this test for real
     @Test
     fun `002 - An employee should be able to edit the number of hours worked from a previous time entry` () {
         //given Andrea has a previous time entry with 24 hours
