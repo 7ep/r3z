@@ -124,6 +124,12 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                         db = Pair(true, dbStr)
                     } else if (it.startsWith("-h")) {
                         throw ServerOptionsException(fullHelpMessage)
+                    } else if (it.startsWith("-")) {
+                        if (it.length >= 2) {
+                            if (it[1] !in setOf("h", "d", "p")) {
+                                throw ServerOptionsException("Unrecognized option(s)")
+                            }
+                        }
                     }
                 }
 
