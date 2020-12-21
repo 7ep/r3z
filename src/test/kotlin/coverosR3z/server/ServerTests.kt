@@ -95,7 +95,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_UnrecognizedOptions() {
         val ex = assertThrows(ServerOptionsException::class.java) {Server.extractOptions(arrayOf("-p", "54321", "-d", "2321", "-a",  "213123"))}
-        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Unrecognized options"))
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Unrecognized option(s)"))
     }
 
     /**
