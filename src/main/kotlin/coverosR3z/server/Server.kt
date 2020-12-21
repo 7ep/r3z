@@ -13,6 +13,7 @@ import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
+import java.lang.IndexOutOfBoundsException
 import java.net.ServerSocket
 import java.net.SocketException
 import java.util.concurrent.Executors
@@ -131,6 +132,96 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                             }
                         }
                     }
+                }
+
+                ServerOptions.make(port.second, db.second, ndp.second)
+            }
+        }
+
+        fun extractOptionsAlternate(args: Array<String>) : ServerOptions {
+
+            try {
+                return processArgsAlternate(args)
+            }
+            catch (ex: Throwable) {
+                throw ServerOptionsException(ex.message + "\n" +fullHelpMessage)
+            }
+        }
+
+        private fun processArgsAlternate(args: Array<String>): ServerOptions {
+            val fullInput = args.joinToString(" ")
+            return if (args.isEmpty() || args[0].isBlank()) {
+                ServerOptions()
+            } else {
+                //first boolean in each Pair indicates whether the flag is specified
+                var port = Pair<Boolean, Int?>(false, null)
+                var db = Pair<Boolean, String?>(false, null)
+                var ndp = Pair<Boolean, Boolean?>(false, null)
+
+                var currentIndex = 0
+                while (currentIndex < args.size) {
+                    if (args[currentIndex].startsWith("-d")) {
+                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
+                        val flagTail = args[currentIndex].substring(2)
+                        if (flagTail.isNotEmpty()) {
+                            if (flagTail.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
+                            db = Pair(true, flagTail)
+                            currentIndex += 1
+                        } else {
+                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")}
+                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
+                            db = Pair(true, valueAlt)
+                            currentIndex += 2
+                        }
+                    } else  if (args[currentIndex].startsWith("--dbdirectory")) {
+                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
+                        val flagTail = args[currentIndex].substring(13)
+                        if (flagTail.isNotEmpty()) {
+                            if (flagTail.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
+                            db = Pair(true, flagTail)
+                            currentIndex += 1
+                        } else {
+                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")}
+                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
+                            db = Pair(true, valueAlt)
+                            currentIndex += 2
+                        }
+                    }
+                    else if (args[currentIndex].startsWith("-p")) {
+                        if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail. your input: $fullInput")
+                        val flagTail = args[currentIndex].substring(2)
+                        if (flagTail.isNotEmpty()) {
+                            if (flagTail.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
+                            port = Pair(true, checkParseToInt(flagTail))
+                            currentIndex += 1
+                        } else {
+                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The port option was provided without a port value: $fullInput")}
+                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
+                            port = Pair(true, checkParseToInt(valueAlt))
+                            currentIndex += 2
+                        }
+                    }
+                    else if (args[currentIndex].startsWith("--port")) {
+                        if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail. your input: $fullInput")
+                        val flagTail = args[currentIndex].substring(6)
+                        if (flagTail.isNotEmpty()) {
+                            if (flagTail.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
+                            port = Pair(true, checkParseToInt(flagTail))
+                            currentIndex += 1
+                        } else {
+                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The port option was provided without a port value: $fullInput")}
+                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
+                            port = Pair(true, checkParseToInt(valueAlt))
+                            currentIndex += 2
+                        }
+                    }
+                    else if (args[currentIndex] == "--no-disk-persistence") {
+                        if (ndp.first) throw ServerOptionsException("The disk persistence option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
+                        ndp = Pair(first = true, second = true)
+                        currentIndex += 1
+                    }
+                    else if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw ServerOptionsException("")
+                    else throw ServerOptionsException("argument not recognized: ${args[currentIndex]}")
                 }
 
                 ServerOptions.make(port.second, db.second, ndp.second)
