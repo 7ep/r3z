@@ -109,17 +109,17 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                             when {
                                 it.length > 2 -> it.substring(2)
                                 i + 1 < args.size -> args[i + 1]
-                                else -> throw ServerOptionsException("The port option was specified, but no port number was given. This is dumb, you are dumb.")
+                                else -> throw ServerOptionsException("The port option was specified, but no port number was given. This is dumb, you are dumb.\n$fullHelpMessage")
                             }
                         validatePort(portStr, fullInput)
                         port = Pair(true, portStr.toInt())
                     } else if (it.startsWith("-d")) {
-                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail.")
+                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail.\n$fullHelpMessage")
                         val dbStr: String =
                             when {
                                 it.length > 2 -> it.substring(2)
                                 i + 1 < args.size && validateDir(args[i + 1]) -> args[i + 1]
-                                else -> throw ServerOptionsException("The directory option was provided without a directory value")
+                                else -> throw ServerOptionsException("The directory option was provided without a directory value.\n$fullHelpMessage")
                             }
                         db = Pair(true, dbStr)
                     } else if (it.startsWith("-h")) {
@@ -127,7 +127,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                     } else if (it.startsWith("-")) {
                         if (it.length >= 2) {
                             if (it[1] !in setOf('h', 'd', 'p')) {
-                                throw ServerOptionsException("Unrecognized option(s)")
+                                throw ServerOptionsException("Unrecognized option(s): $it")
                             }
                         }
                     }
