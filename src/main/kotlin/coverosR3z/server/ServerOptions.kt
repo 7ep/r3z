@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+import coverosR3z.exceptions.ServerOptionsException
+
 data class ServerOptions(
         /**
          * The port the server will use
@@ -23,6 +25,7 @@ data class ServerOptions(
                                         else -> "db/"
                                 }
 
+                        if (makePort < 1 || makePort > 65535) {throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")}
                         return ServerOptions(makePort, makeDBDir)
                 }
         }
