@@ -23,7 +23,6 @@ data class ServerOptions(
                                         else -> "db/"
                                 }
 
-//                        val makeDBDir = if(ndp==true) null else dbDirectoryDefault
                         return ServerOptions(makePort, makeDBDir)
                 }
         }

@@ -156,7 +156,7 @@ The options available are:
 -p PORT_NUMBER         set the port number for the server
 -d DIRECTORY           the directory to store data
 --no-disk-persistence  do not write data to the disk.  Note
-                       that this is primarily (exclusively?) for tesiing
+                       that this is primarily (exclusively?) for testing
     """.trimIndent()
 
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : AnalyzedHttpData {
