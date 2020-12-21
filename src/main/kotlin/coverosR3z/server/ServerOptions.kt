@@ -16,7 +16,13 @@ data class ServerOptions(
                 fun make(port : Int?, dbDirectory : String?, ndp : Boolean?) : ServerOptions{
                         val makePort = port ?: defaultPort
                         check(!(dbDirectory!=null && ndp==true)){"If you're setting the noDiskPersistence option and also a database directory, you're very foolish."}
-                        val makeDBDir = if(ndp==true) null else dbDirectory
+                        val makeDBDir : String? =
+                                when {
+                                        ndp == true -> null
+                                        dbDirectory != null -> dbDirectory
+                                        else -> "db/"
+                                }
+
                         return ServerOptions(makePort, makeDBDir)
                 }
         }
