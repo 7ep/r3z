@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.exceptions.ServerOptionsException
+import coverosR3z.misc.checkParseToInt
 
 data class ServerOptions(
         /**
@@ -15,13 +16,13 @@ data class ServerOptions(
         val dbDirectory : String? = "db/"){
         companion object{
                 const val defaultPort = 12345
-                fun make(port : Int?, dbDirectory : String?, ndp : Boolean?) : ServerOptions{
-                        val makePort = port ?: defaultPort
-                        check(!(dbDirectory!=null && ndp==true)){"If you're setting the noDiskPersistence option and also a database directory, you're very foolish."}
+                fun make(port : String, dbDirectory : String, ndp : String) : ServerOptions{
+                        val makePort = if (port.isNotBlank()) checkParseToInt(port) else defaultPort
+                        check(!(dbDirectory.isNotBlank() && ndp=="true")){"If you're setting the noDiskPersistence option and also a database directory, you're very foolish."}
                         val makeDBDir : String? =
                                 when {
-                                        ndp == true -> null
-                                        dbDirectory != null -> dbDirectory
+                                        ndp == "true" -> null
+                                        dbDirectory.isNotBlank() -> if (! dbDirectory.endsWith("/")) "$dbDirectory/" else dbDirectory
                                         else -> "db/"
                                 }
 

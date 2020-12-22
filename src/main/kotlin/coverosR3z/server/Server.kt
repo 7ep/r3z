@@ -8,7 +8,6 @@ import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.*
-import coverosR3z.misc.checkParseToInt
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
@@ -67,14 +66,6 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
 
         lateinit var halfOpenServerSocket : ServerSocket
 
-        fun validatePort(arg : String, fullInput : String) {
-            val portNum = checkParseToInt(arg, {"Port number must be an integer value."})
-            if(portNum !in 1..65535) throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $fullInput")
-        }
-        fun validateDir(arg : String) : Boolean{
-            return !(arg.startsWith("-p") || arg=="--no-disk-persistence")
-        }
-
         /**
          * Given the command-line arguments, returns the first value
          * as an integer for use as a port number, or defaults to 12345
@@ -85,146 +76,78 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
                 return processArgs(args)
             }
             catch (ex: Throwable) {
-                throw ServerOptionsException(ex.message ?: "None")
-            }
-        }
-
-        private fun processArgs(args: Array<String>): ServerOptions {
-            val fullInput = args.joinToString(" ")
-            return if (args.isEmpty() || args[0].isBlank()) {
-                ServerOptions()
-            } else {
-                //first boolean in each Pair indicates whether the flag is specified
-                var port = Pair<Boolean, Int?>(false, null)
-                var db = Pair<Boolean, String?>(false, null)
-                var ndp = Pair<Boolean, Boolean?>(false, null)
-
-                args.forEachIndexed { i, it ->
-
-                    if (it == "--no-disk-persistence") {
-                        if (ndp.first) throw ServerOptionsException("The disk persistence option was specified multiple times. This is not allowed, go to jail.")
-                        ndp = Pair(true, true)
-                    } else if (it.startsWith("-p")) {
-                        if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail.")
-                        val portStr: String =
-                            when {
-                                it.length > 2 -> it.substring(2)
-                                i + 1 < args.size -> args[i + 1]
-                                else -> throw ServerOptionsException("The port option was specified, but no port number was given. This is dumb, you are dumb.\n$fullHelpMessage")
-                            }
-                        validatePort(portStr, fullInput)
-                        port = Pair(true, portStr.toInt())
-                    } else if (it.startsWith("-d")) {
-                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail.\n$fullHelpMessage")
-                        val dbStr: String =
-                            when {
-                                it.length > 2 -> it.substring(2)
-                                i + 1 < args.size && validateDir(args[i + 1]) -> args[i + 1]
-                                else -> throw ServerOptionsException("The directory option was provided without a directory value.\n$fullHelpMessage")
-                            }
-                        db = Pair(true, dbStr)
-                    } else if (it.startsWith("-h")) {
-                        throw ServerOptionsException(fullHelpMessage)
-                    } else if (it.startsWith("-")) {
-                        if (it.length >= 2) {
-                            if (it[1] !in setOf('h', 'd', 'p')) {
-                                throw ServerOptionsException("Unrecognized option(s): $it")
-                            }
-                        }
-                    }
-                }
-
-                ServerOptions.make(port.second, db.second, ndp.second)
-            }
-        }
-
-        fun extractOptionsAlternate(args: Array<String>) : ServerOptions {
-
-            try {
-                return processArgsAlternate(args)
-            }
-            catch (ex: Throwable) {
                 throw ServerOptionsException(ex.message + "\n" +fullHelpMessage)
             }
         }
 
-        private fun processArgsAlternate(args: Array<String>): ServerOptions {
+        private fun processArgs(args: Array<String>): ServerOptions {
+            /**
+             * Holds the data for a particular option provided on the command line.  See [ServerOptions.make]
+             * for accepting these values and performing validation.
+             *
+             * The only validation we do here is disallowing duplicate values, like "-p 10 -p 20,"
+             * and also that the value for an option doesn't start with a dash, like "-d -thisiswrong",
+             * or that a key requiring a value does indeed have one, unlike: "-d "
+             */
+            data class Option(var setByUser : Boolean, var value : String, val isFlag : Boolean = false)
+
+            /**
+             * An option group is a group of ways to access an option, say maybe you
+             * have a short version ("-p") and a long version("--port").
+             * Just have multiple [OptionGroup] that refer to the same [Option]
+             */
+            data class OptionGroup(val textValue : String, val o : Option)
+
+            val directoryOption = Option(false, "")
+            val portOption = Option(false, "")
+            val diskPersistenceOption = Option(false, "", isFlag = true)
+
+            val possibleOptions = listOf(
+                OptionGroup("-d", directoryOption),
+                OptionGroup("--dbdirectory", directoryOption),
+                OptionGroup("-p", portOption),
+                OptionGroup("--port", portOption),
+                OptionGroup("--no-disk-persistence", diskPersistenceOption))
+
             val fullInput = args.joinToString(" ")
             return if (args.isEmpty() || args[0].isBlank()) {
                 ServerOptions()
             } else {
-                //first boolean in each Pair indicates whether the flag is specified
-                var port = Pair<Boolean, Int?>(false, null)
-                var db = Pair<Boolean, String?>(false, null)
-                var ndp = Pair<Boolean, Boolean?>(false, null)
-
                 var currentIndex = 0
-                while (currentIndex < args.size) {
-                    if (args[currentIndex].startsWith("-d")) {
-                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
-                        val flagTail = args[currentIndex].substring(2)
-                        if (flagTail.isNotEmpty()) {
-                            if (flagTail.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
-                            db = Pair(true, flagTail)
-                            currentIndex += 1
-                        } else {
-                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")}
-                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
-                            db = Pair(true, valueAlt)
-                            currentIndex += 2
-                        }
-                    } else  if (args[currentIndex].startsWith("--dbdirectory")) {
-                        if (db.first) throw ServerOptionsException("The database option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
-                        val flagTail = args[currentIndex].substring(13)
-                        if (flagTail.isNotEmpty()) {
-                            if (flagTail.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
-                            db = Pair(true, flagTail)
-                            currentIndex += 1
-                        } else {
-                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")}
-                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The directory option was provided without a directory value: $fullInput")
-                            db = Pair(true, valueAlt)
-                            currentIndex += 2
+
+                loop@ while (currentIndex < args.size) {
+                    if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw ServerOptionsException("")
+
+                    for (option in possibleOptions) {
+                        if (args[currentIndex].startsWith(option.textValue)) {
+                            if (option.o.setByUser) throw ServerOptionsException("Duplicate options were provided. This is not allowed, go to jail. your input: $fullInput")
+                            val (value, increment) = if (option.o.isFlag) Pair("true", 1) else getValueForKey(option.textValue, args, currentIndex, fullInput)
+                            currentIndex += increment
+                            option.o.setByUser = true
+                            option.o.value = value
+                            continue@loop
                         }
                     }
-                    else if (args[currentIndex].startsWith("-p")) {
-                        if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail. your input: $fullInput")
-                        val flagTail = args[currentIndex].substring(2)
-                        if (flagTail.isNotEmpty()) {
-                            if (flagTail.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
-                            port = Pair(true, checkParseToInt(flagTail))
-                            currentIndex += 1
-                        } else {
-                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The port option was provided without a port value: $fullInput")}
-                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
-                            port = Pair(true, checkParseToInt(valueAlt))
-                            currentIndex += 2
-                        }
-                    }
-                    else if (args[currentIndex].startsWith("--port")) {
-                        if (port.first) throw ServerOptionsException("Multiple port values were provided. This is not allowed, go to jail. your input: $fullInput")
-                        val flagTail = args[currentIndex].substring(6)
-                        if (flagTail.isNotEmpty()) {
-                            if (flagTail.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
-                            port = Pair(true, checkParseToInt(flagTail))
-                            currentIndex += 1
-                        } else {
-                            val valueAlt = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The port option was provided without a port value: $fullInput")}
-                            if (valueAlt.startsWith("-")) throw ServerOptionsException("The port option was provided without a port value: $fullInput")
-                            port = Pair(true, checkParseToInt(valueAlt))
-                            currentIndex += 2
-                        }
-                    }
-                    else if (args[currentIndex] == "--no-disk-persistence") {
-                        if (ndp.first) throw ServerOptionsException("The disk persistence option was specified multiple times. This is not allowed, go to jail. your input: $fullInput")
-                        ndp = Pair(first = true, second = true)
-                        currentIndex += 1
-                    }
-                    else if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw ServerOptionsException("")
-                    else throw ServerOptionsException("argument not recognized: ${args[currentIndex]}")
+                    throw ServerOptionsException("argument not recognized: ${args[currentIndex]}")
                 }
 
-                ServerOptions.make(port.second, db.second, ndp.second)
+                ServerOptions.make(portOption.value, directoryOption.value, diskPersistenceOption.value)
+            }
+        }
+
+        /**
+         * Gets the value for a flag.  Returns a pair with the value as the first entry and the increment for the current index as the second entry
+         */
+        private fun getValueForKey(keyString : String, args: Array<String>, currentIndex: Int, fullInput: String) : Pair<String, Int> {
+            val concatValue = args[currentIndex].substring(keyString.length)
+            return if (concatValue.isNotEmpty()) {
+                check(concatValue.isNotBlank())
+                if (concatValue.startsWith("-")) throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")
+                Pair(concatValue, 1)
+            } else {
+                val value = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")}
+                if (value.startsWith("-")) throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")
+                Pair(value, 2)
             }
         }
 
@@ -249,6 +172,7 @@ The options available are:
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing
     """.trimIndent()
+
 
         fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : AnalyzedHttpData {
             lateinit var analyzedHttpData : AnalyzedHttpData
