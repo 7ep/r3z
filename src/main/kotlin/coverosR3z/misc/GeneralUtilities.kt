@@ -34,6 +34,23 @@ fun checkParseToInt(value: String?,
 }
 
 /**
+ * Returns the value parsed as an int.  If this fails, returns
+ * an [IllegalStateException] with the message
+ */
+fun checkParseToLong(value: String?,
+                    nullMsg: () -> String = {"Must not be a null value"},
+                    blankMsg: () -> String = {"Must not be blank"},
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as long"}): Long {
+    val notNullValue = requireNotNull(value){ nullMsg() }
+    require(notNullValue.isNotBlank()) { blankMsg() }
+    return try {
+        notNullValue.toLong()
+    } catch (ex: java.lang.NumberFormatException) {
+        throw IllegalArgumentException(parseMsg())
+    }
+}
+
+/**
  * Given a set of keys needed by an API (see files ending in "API") and the
  * actual data received, throw an error if it doesn't precisely match
  * @param receivedKeys the data sent to the API
