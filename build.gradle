@@ -5,8 +5,6 @@ plugins {
     // provides unit test coverage
     id 'jacoco'
 
-    id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
-
     // https://blog.gradle.org/java-toolchains
     // java toolchains - a gradle 6.7 feature - allows us to
     // specify an exact version of the JDK to use when compiling,
@@ -55,7 +53,6 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 
     // junit, for running unit tests
     // https://mvnrepository.com/artifact/junit/junit/4.13.1
