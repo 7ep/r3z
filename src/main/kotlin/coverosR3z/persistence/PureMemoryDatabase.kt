@@ -316,8 +316,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
-            val minimizedTimeEntries = employeeDateTimeEntries.map { Tess.toSurrogate(it) }.toSet()
-            return jsonSerializer.encodeToString(SetSerializer(Tess.serializer()), minimizedTimeEntries)
+            return employeeDateTimeEntries.joinToString ("\n") { TimeEntrySurrogate.toSurrogate(it).serialize() }
         }
 
         private fun serializeUsers(pmd: PureMemoryDatabase): String {
@@ -376,7 +375,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                         throw DatabaseCorruptedException("no time entry files found in employees directory at ${employeeDirectory.path}")
                     }
                     for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
-                        simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), monthlyTimeEntries.name, setOf(employee), projects))
+                        try {
+                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), setOf(employee), projects))
+                        } catch (ex : DatabaseCorruptedException) {
+                            throw DatabaseCorruptedException("Could not deserialize time entry file ${monthlyTimeEntries.name}.  ${ex.message}", ex.ex)
+                        }
                     }
 
                     fullTimeEntries[employee] = simpleTimeEntries
@@ -445,13 +448,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toMutableSet()
         }
 
-        fun deserializeTimeEntries(timeEntries: String, filename: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
-            val tessEntries = try {
-                jsonSerializer.decodeFromString(SetSerializer(Tess.serializer()), timeEntries)
-            } catch (ex : SerializationException) {
-                throw DatabaseCorruptedException("Could not deserialize time entry file $filename.  deserializer exception message: ${ex.message?.replace("\n"," - ")}")
-            }
-            return tessEntries.map { Tess.fromSurrogate(it, employees, projects) }.toSet()
+        fun deserializeTimeEntries(timeEntries: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
+            return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
         }
 
         private fun readFile(dbDirectory: String, name : String): String {
@@ -518,14 +516,40 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * @param dtl the [Details], as a string
      */
     @Serializable
-    private data class TimeEntrySurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
+    data class TimeEntrySurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
+
+        fun serialize(): String {
+            return """{"i": $i, "e": $e, "p": $p, "t": $t, "d": $d, "dtl": "${encode(dtl)}" }"""
+        }
+
         companion object {
+
+            private val serializedStringRegex = """\{"i": (.*), "e": (.*), "p": (.*), "t": (.*), "d": (.*), "dtl": "(.*)" }""".toRegex()
+
+            fun deserialize(str: String): TimeEntrySurrogate {
+                try {
+                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val id = checkParseToInt(groups[1])
+                    val empId = checkParseToInt(groups[2])
+                    val projId = checkParseToInt(groups[3])
+                    val time = checkParseToInt(groups[4])
+                    val date = checkParseToInt(groups[5])
+                    val details = decode(groups[6])
+                    return TimeEntrySurrogate(id, empId, projId, time, date, details)
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                }
+            }
+
+            fun deserializeToTimeEntry(str: String, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
+                return fromSurrogate(deserialize(str), employees, projects)
+            }
 
             fun toSurrogate(te : TimeEntry) : TimeEntrySurrogate {
                 return TimeEntrySurrogate(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay, te.details.value)
             }
 
-            fun fromSurrogate(te: TimeEntrySurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
+            private fun fromSurrogate(te: TimeEntrySurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
                 val employee = employees.single { it.id == EmployeeId(te.e) }
                 val project = try {
                     projects.single { it.id == ProjectId(te.p) }

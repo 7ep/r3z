@@ -198,7 +198,7 @@ class PureMemoryDatabaseTests {
         val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, projects, employees)
 
         val (timeToSerialize, serializedTimeEntries) = getTime{PureMemoryDatabase.serializeTimeEntries(timeEntries)}
-        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, "", employees, projects)}
+        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, employees, projects)}
 
         logAudit("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
         logAudit("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
@@ -475,7 +475,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6.json").writeText("BAD DATA HERE")
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Could not deserialize time entry file 2020_6.json.  deserializer exception message: Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
+        assertEquals("Could not deserialize time entry file 2020_6.json.  Required value was null.", ex.message)
     }
 
     /**
@@ -620,7 +620,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/projects.json").delete()
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Unable to find a project with the id of 1.  Project set size: 0", ex.message)
+        assertEquals("Could not deserialize time entry file 2020_6.json.  Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
     /**
@@ -772,6 +772,21 @@ class PureMemoryDatabaseTests {
         val deserialized = PureMemoryDatabase.SessionSurrogate.deserialize(result)
 
         assertEquals(session, deserialized)
+    }
+
+
+
+    @Test
+    fun testSerialization_TimeEntry() {
+        val timeEntry = PureMemoryDatabase.TimeEntrySurrogate(123, 456, 789, 101, 234, "\n\rabc123½")
+
+        val result = timeEntry.serialize()
+
+        assertEquals("""{"i": 123, "e": 456, "p": 789, "t": 101, "d": 234, "dtl": "%0A%0Dabc123%C2%BD" }""", result)
+
+        val deserialized = PureMemoryDatabase.TimeEntrySurrogate.deserialize(result)
+
+        assertEquals(timeEntry, deserialized)
     }
 
     /*
