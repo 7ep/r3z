@@ -1,16 +1,22 @@
 package coverosR3z.server
 
-import coverosR3z.authentication.*
+import coverosR3z.authentication.IAuthenticationUtilities
+import coverosR3z.authentication.LoginAPI
+import coverosR3z.authentication.RegisterAPI
+import coverosR3z.authentication.generateLogoutPage
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.domainobjects.User
 import coverosR3z.exceptions.DuplicateInputsException
-import coverosR3z.logging.*
+import coverosR3z.logging.LoggingAPI
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logTrace
 import coverosR3z.misc.*
 import coverosR3z.server.HttpResponseCache.staticFileCache
 import coverosR3z.server.NamedPaths.*
-import coverosR3z.timerecording.*
-import java.net.URLDecoder
+import coverosR3z.timerecording.EmployeeAPI
+import coverosR3z.timerecording.EnterTimeAPI
+import coverosR3z.timerecording.ITimeRecordingUtilities
+import coverosR3z.timerecording.ProjectAPI
 
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: AnalyzedHttpData)
 

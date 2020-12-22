@@ -21,7 +21,7 @@ enum class Drivers(val driver: () -> WebDriver){
     CHROME({ ChromeDriver(ChromeOptions().setHeadless(false)) })
 }
 
-class EnterTimePage(private val driver: WebDriver, val domain : String) {
+class EnterTimePage(private val driver: WebDriver, private val domain : String) {
 
     fun enterTime(project: String, time: String, details: String, date: String) {
         driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
@@ -33,7 +33,7 @@ class EnterTimePage(private val driver: WebDriver, val domain : String) {
     }
 }
 
-class LoginPage(private val driver: WebDriver, val domain : String) {
+class LoginPage(private val driver: WebDriver, private val domain : String) {
 
     fun login(username: String, password: String) {
         driver.get("$domain/${NamedPaths.LOGIN.path}")
@@ -43,7 +43,7 @@ class LoginPage(private val driver: WebDriver, val domain : String) {
     }
 }
 
-class RegisterPage(private val driver: WebDriver, val domain : String) {
+class RegisterPage(private val driver: WebDriver, private val domain : String) {
 
     fun register(username: String, password: String, employee: String) {
         driver.get("$domain/${NamedPaths.REGISTER.path}")
@@ -54,7 +54,7 @@ class RegisterPage(private val driver: WebDriver, val domain : String) {
     }
 }
 
-class EnterEmployeePage(private val driver: WebDriver, val domain : String) {
+class EnterEmployeePage(private val driver: WebDriver, private val domain : String) {
 
     fun enter(employee: String) {
         driver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
@@ -63,7 +63,7 @@ class EnterEmployeePage(private val driver: WebDriver, val domain : String) {
     }
 }
 
-class EnterProjectPage(private val driver: WebDriver, val domain : String) {
+class EnterProjectPage(private val driver: WebDriver, private val domain : String) {
 
     fun enter(project: String) {
         driver.get("$domain/${NamedPaths.CREATE_PROJECT.path}")

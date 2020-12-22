@@ -94,7 +94,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
             /**
              * An option group is a group of ways to access an option, say maybe you
              * have a short version ("-p") and a long version("--port").
-             * Just have multiple [OptionGroup] that refer to the same [Option]
+             * Just have multiple OptionGroup that refer to the same Option
              */
             data class OptionGroup(val textValue : String, val o : Option)
 

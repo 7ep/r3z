@@ -295,9 +295,9 @@ class AuthenticationUtilitiesTests {
         au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD)
         val user2 = pmd.getUserByName(DEFAULT_USER_2.name)
 
-        au.createNewSession(user1, DEFAULT_DATETIME, {"abc"})
-        au.createNewSession(user1, DEFAULT_DATETIME, {"def"})
-        au.createNewSession(user2, DEFAULT_DATETIME, {"ghi"})
+        au.createNewSession(user1, DEFAULT_DATETIME) { "abc" }
+        au.createNewSession(user1, DEFAULT_DATETIME) { "def" }
+        au.createNewSession(user2, DEFAULT_DATETIME) { "ghi" }
 
         // wipe out all the sessions for this user
         au.logout(user1)

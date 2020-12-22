@@ -712,7 +712,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 return SessionSurrogate(sessionStr, s.user.id.value, s.dt.epochSecond)
             }
 
-            fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Pair<String, Session> {
+            private fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Pair<String, Session> {
                 val user = try {
                     users.single { it.id.value == ss.id }
                 } catch (ex : NoSuchElementException) {
