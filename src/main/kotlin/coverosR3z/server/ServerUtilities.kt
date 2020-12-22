@@ -465,7 +465,7 @@ fun parsePostedData(input: String): Map<String, String> {
     for(s : String in splitByAmpersand) {
         val pair = s.split("=")
         check(pair.size == 2) {"Splitting on = should return 2 values.  Input was $s"}
-        val result = postedPairs.put(pair[0], URLDecoder.decode(pair[1], Charsets.UTF_8))
+        val result = postedPairs.put(pair[0], decode(pair[1]))
         if (result != null) {
             throw DuplicateInputsException("${pair[0]} was duplicated in the post body - had values of $result and ${pair[1]}")
         }

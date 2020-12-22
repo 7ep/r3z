@@ -2,6 +2,8 @@ package coverosR3z.misc
 
 import coverosR3z.exceptions.InexactInputsException
 import java.lang.IllegalArgumentException
+import java.net.URLDecoder
+import java.net.URLEncoder
 import kotlin.random.Random
 
 /**
@@ -88,4 +90,18 @@ fun safeHtml(input : String) : String {
 fun safeAttr(input : String) : String {
     return input.replace("\"", "&quot;")
         .replace("'", "&apos;")
+}
+
+/**
+ * Encodes UTF-8 text using URL-encoding
+ */
+fun encode(str : String) : String {
+    return URLEncoder.encode(str, Charsets.UTF_8)
+}
+
+/**
+ * Decodes URL-encoded UTF-8 text
+ */
+fun decode(str : String) :String {
+    return URLDecoder.decode(str, Charsets.UTF_8)
 }

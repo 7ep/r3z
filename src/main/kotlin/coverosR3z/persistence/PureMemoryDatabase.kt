@@ -6,6 +6,9 @@ import coverosR3z.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.logging.logStart
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
+import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.decode
+import coverosR3z.misc.encode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
@@ -317,8 +320,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeUsers(pmd: PureMemoryDatabase): String {
-            val minimizedUsers = pmd.users.map {UserSurrogate.toSurrogate(it)}.toSet()
-            return jsonSerializer.encodeToString(SetSerializer(UserSurrogate.serializer()), minimizedUsers )
+            return pmd.users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
         }
 
         private fun serializeSessions(pmd: PureMemoryDatabase): String {
@@ -461,12 +463,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeUsers(usersFile: String): MutableSet<User> {
-            val read: Set<UserSurrogate> = try {
-                jsonSerializer.decodeFromString(SetSerializer(UserSurrogate.serializer()), usersFile)
-            } catch (ex : SerializationException) {
-                throw DatabaseCorruptedException("Could not read users file. ${ex.message?.replace("\n"," - ")}")
-            }
-            return read.map {UserSurrogate.fromSurrogate(it)}.toMutableSet()
+            return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toMutableSet()
         }
 
         fun deserializeTimeEntries(timeEntries: String, filename: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
@@ -573,8 +570,29 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
-    private data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
+    data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
+        fun serialize(): String {
+            return """{id: $id, name: "${encode(name)}", hash: "${encode(hash)}", salt: "${encode(salt)}", empId: ${empId ?: "null"} }"""
+        }
+
         companion object {
+
+            private val serializedStringRegex = """\{id: (.*), name: "(.*)", hash: "(.*)", salt: "(.*)", empId: (.*) }""".toRegex()
+
+            fun deserialize(str : String) : UserSurrogate {
+                try {
+                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val id = checkParseToInt(groups[1])
+                    val empId: Int? = if (groups[5] == "null") null else checkParseToInt(groups[5])
+                    return UserSurrogate(id, decode(groups[2]), decode(groups[3]), decode(groups[4]), empId)
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                }
+            }
+
+            fun deserializeToUser(str : String) : User {
+                return fromSurrogate(deserialize(str))
+            }
 
             fun toSurrogate(u : User) : UserSurrogate {
                 return UserSurrogate(u.id.value, u.name.value, u.hash.value, u.salt.value, u.employeeId?.value)

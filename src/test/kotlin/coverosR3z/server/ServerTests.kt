@@ -11,6 +11,7 @@ import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.FileReader.Companion.read
+import coverosR3z.misc.encode
 import coverosR3z.misc.getTime
 import coverosR3z.misc.toStr
 import org.junit.AfterClass
@@ -489,7 +490,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
                 au: IAuthenticationUtilities
         ) : Client {
             val clientSocket = Socket("localhost", 12345)
-            val bodyString = body?.map{ it.key + "=" + URLEncoder.encode(it.value, Charsets.UTF_8)}?.joinToString("&") ?: ""
+            val bodyString = body?.map{ it.key + "=" + encode(it.value)}?.joinToString("&") ?: ""
             val headersString = headers?.joinToString(CRLF) ?: ""
 
             val data = when (verb) {
