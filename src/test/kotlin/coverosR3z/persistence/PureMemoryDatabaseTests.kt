@@ -495,7 +495,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/employees.json").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Could not read employees file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
+        assertEquals("Required value was null.", ex.message)
     }
 
     /**
@@ -648,7 +648,7 @@ class PureMemoryDatabaseTests {
 
         val result = user.serialize()
 
-        assertEquals("""{id: 1, name: "myname", hash: "myhash", salt: "mysalt", empId: 1 }""", result)
+        assertEquals("""{"id": 1, "name": "myname", "hash": "myhash", "salt": "mysalt", "empId": 1 }""", result)
 
         val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
 
@@ -661,7 +661,7 @@ class PureMemoryDatabaseTests {
 
         val result = user.serialize()
 
-        assertEquals("""{id: 1, name: "myname", hash: "myhash", salt: "mysalt", empId: null }""", result)
+        assertEquals("""{"id": 1, "name": "myname", "hash": "myhash", "salt": "mysalt", "empId": null }""", result)
 
         val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
 
@@ -675,7 +675,7 @@ class PureMemoryDatabaseTests {
 
         val result = user.serialize()
 
-        assertEquals("""{id: 1, name: "myname", hash: "myhash", salt: "mysalt%0Athisisalsotext", empId: 1 }""".trimMargin(), result)
+        assertEquals("""{"id": 1, "name": "myname", "hash": "myhash", "salt": "mysalt%0Athisisalsotext", "empId": 1 }""".trimMargin(), result)
 
         val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
 
@@ -688,11 +688,38 @@ class PureMemoryDatabaseTests {
 
         val result = user.serialize()
 
-        assertEquals("""{id: 1, name: "myname", hash: "myhash", salt: "L%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B", empId: 1 }""", result)
+        assertEquals("""{"id": 1, "name": "myname", "hash": "myhash", "salt": "L%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B", "empId": 1 }""", result)
 
         val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
 
         assertEquals(user, deserialized)
+    }
+
+
+    @Test
+    fun testSerialization_Employee() {
+        val employee = PureMemoryDatabase.EmployeeSurrogate(1, "myname")
+
+        val result = employee.serialize()
+
+        assertEquals("""{"id": 1, "name": "myname" }""", result)
+
+        val deserialized = PureMemoryDatabase.EmployeeSurrogate.deserialize(result)
+
+        assertEquals(employee, deserialized)
+    }
+
+    @Test
+    fun testSerialization_Employee_UnicodeAndMultiline() {
+        val employee = PureMemoryDatabase.EmployeeSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
+
+        val result = employee.serialize()
+
+        assertEquals("""{"id": 1, "name": "%0A%0D%09Hello%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86" }""", result)
+
+        val deserialized = PureMemoryDatabase.EmployeeSurrogate.deserialize(result)
+
+        assertEquals(employee, deserialized)
     }
 
     /*

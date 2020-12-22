@@ -330,8 +330,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeEmployees(pmd: PureMemoryDatabase): String {
-            val minimizedEmployees = pmd.employees.map {EmployeeSurrogate.toSurrogate(it)}.toSet()
-            return jsonSerializer.encodeToString(SetSerializer(EmployeeSurrogate.serializer()), minimizedEmployees)
+            return pmd.employees.joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
         }
 
         private fun serializeProjects(pmd: PureMemoryDatabase): String {
@@ -442,13 +441,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeEmployees(employeesFile: String): MutableSet<Employee> {
-
-            val read: Set<EmployeeSurrogate> = try {
-                jsonSerializer.decodeFromString(SetSerializer(EmployeeSurrogate.serializer()), employeesFile)
-            } catch(ex : SerializationException) {
-                throw DatabaseCorruptedException("Could not read employees file. ${ex.message?.replace("\n"," - ")}")
-            }
-            return read.map {EmployeeSurrogate.fromSurrogate(it)}.toMutableSet()
+            return employeesFile.split("\n").map{EmployeeSurrogate.deserializeToEmployee(it)}.toMutableSet()
         }
 
         private fun deserializeSessions(sessionsFile: String, users: Set<User>): MutableMap<String, Session> {
@@ -571,13 +564,14 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      */
     @Serializable
     data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
+
         fun serialize(): String {
-            return """{id: $id, name: "${encode(name)}", hash: "${encode(hash)}", salt: "${encode(salt)}", empId: ${empId ?: "null"} }"""
+            return """{"id": $id, "name": "${encode(name)}", "hash": "${encode(hash)}", "salt": "${encode(salt)}", "empId": ${empId ?: "null"} }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{id: (.*), name: "(.*)", hash: "(.*)", salt: "(.*)", empId: (.*) }""".toRegex()
+            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)", "hash": "(.*)", "salt": "(.*)", "empId": (.*) }""".toRegex()
 
             fun deserialize(str : String) : UserSurrogate {
                 try {
@@ -614,8 +608,29 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
-    private data class EmployeeSurrogate(val id: Int, val name: String) {
+    data class EmployeeSurrogate(val id: Int, val name: String) {
+
+        fun serialize(): String {
+            return """{"id": $id, "name": "${encode(name)}" }"""
+        }
+
         companion object {
+
+            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)" }""".toRegex()
+
+            fun deserialize(str: String): EmployeeSurrogate {
+                try {
+                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val id = checkParseToInt(groups[1])
+                    return EmployeeSurrogate(id, decode(groups[2]))
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                }
+            }
+
+            fun deserializeToEmployee(str: String) : Employee {
+                return fromSurrogate(deserialize(str))
+            }
 
             fun toSurrogate(e : Employee) : EmployeeSurrogate {
                 return EmployeeSurrogate(e.id.value, e.name.value)
