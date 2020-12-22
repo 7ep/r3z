@@ -7,6 +7,7 @@ import coverosR3z.logging.logStart
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.checkParseToLong
 import coverosR3z.misc.decode
 import coverosR3z.misc.encode
 import kotlinx.serialization.Serializable
@@ -324,9 +325,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeSessions(pmd: PureMemoryDatabase): String {
-            val newMap = mutableMapOf<String, SessionSurrogate>()
-            pmd.sessions.mapValuesTo(newMap, {SessionSurrogate.toSurrogate (it.value)})
-            return jsonSerializer.encodeToString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), newMap)
+            return pmd.sessions.entries.joinToString("\n") { SessionSurrogate.toSurrogate(it.key, it.value).serialize() }
         }
 
         private fun serializeEmployees(pmd: PureMemoryDatabase): String {
@@ -334,8 +333,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeProjects(pmd: PureMemoryDatabase): String {
-            val minimizedProjects = pmd.projects.map {ProjectSurrogate.toSurrogate(it)}.toSet()
-            return jsonSerializer.encodeToString(SetSerializer(ProjectSurrogate.serializer()), minimizedProjects)
+            return pmd.projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
         }
 
         /**
@@ -432,12 +430,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeProjects(projectsFile: String): MutableSet<Project> {
-            val read: Set<ProjectSurrogate> = try {
-               jsonSerializer.decodeFromString(SetSerializer(ProjectSurrogate.serializer()), projectsFile)
-            } catch(ex : SerializationException) {
-                throw DatabaseCorruptedException("Could not read projects file. ${ex.message?.replace("\n"," - ")}")
-            }
-            return read.map {ProjectSurrogate.fromSurrogate(it)}.toMutableSet()
+            return projectsFile.split("\n").map{ProjectSurrogate.deserializeToProject(it)}.toMutableSet()
         }
 
         private fun deserializeEmployees(employeesFile: String): MutableSet<Employee> {
@@ -445,14 +438,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun deserializeSessions(sessionsFile: String, users: Set<User>): MutableMap<String, Session> {
-            val read: Map<String, SessionSurrogate> = try {
-                jsonSerializer.decodeFromString(MapSerializer(String.serializer(), SessionSurrogate.serializer()), sessionsFile)
-            } catch (ex : SerializationException) {
-                throw DatabaseCorruptedException("Could not read sessions file. ${ex.message?.replace("\n"," - ")}")
-            }
-            val newMap = mutableMapOf<String, Session>()
-            read.mapValuesTo(newMap, {SessionSurrogate.fromSurrogate(it.value, users)})
-            return newMap
+            return sessionsFile.split("\n").map{SessionSurrogate.deserializeToSession(it, users)}.toMap().toMutableMap()
         }
 
         private fun deserializeUsers(usersFile: String): MutableSet<User> {
@@ -592,7 +578,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 return UserSurrogate(u.id.value, u.name.value, u.hash.value, u.salt.value, u.employeeId?.value)
             }
 
-            fun fromSurrogate(us: UserSurrogate) : User {
+            private fun fromSurrogate(us: UserSurrogate) : User {
                 val empId : EmployeeId? = if (us.empId == null) {
                     null
                 } else {
@@ -636,7 +622,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 return EmployeeSurrogate(e.id.value, e.name.value)
             }
 
-            fun fromSurrogate(es: EmployeeSurrogate) : Employee {
+            private fun fromSurrogate(es: EmployeeSurrogate) : Employee {
                 return Employee(EmployeeId(es.id), EmployeeName(es.name))
             }
 
@@ -647,17 +633,37 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
-    private data class ProjectSurrogate(val id: Int, val name: String) {
+    data class ProjectSurrogate(val id: Int, val name: String) {
+
+        fun serialize(): String {
+            return """{"id": $id, "name": "${encode(name)}" }"""
+        }
+
         companion object {
+
+            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)" }""".toRegex()
+
+            fun deserialize(str: String): ProjectSurrogate {
+                try {
+                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val id = checkParseToInt(groups[1])
+                    return ProjectSurrogate(id, decode(groups[2]))
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                }
+            }
+
+            fun deserializeToProject(str: String) : Project {
+                return fromSurrogate(deserialize(str))
+            }
 
             fun toSurrogate(p : Project) : ProjectSurrogate {
                 return ProjectSurrogate(p.id.value, p.name.value)
             }
 
-            fun fromSurrogate(ps: ProjectSurrogate) : Project {
+            private fun fromSurrogate(ps: ProjectSurrogate) : Project {
                 return Project(ProjectId(ps.id), ProjectName(ps.name))
             }
-
         }
     }
 
@@ -665,22 +671,44 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
      * A surrogate. See longer description for another surrogate at [TimeEntrySurrogate]
      */
     @Serializable
-    private data class SessionSurrogate(val id: Int, val epochSecond: Long) {
+    data class SessionSurrogate(val sessionStr : String, val id: Int, val epochSecond: Long) {
+
+        fun serialize(): String {
+            return """{"s": "${encode(sessionStr)}", "id": $id, "e": $epochSecond }"""
+        }
+
         companion object {
 
-            fun toSurrogate(s : Session) : SessionSurrogate {
-                return SessionSurrogate(s.user.id.value, s.dt.epochSecond)
+            private val serializedStringRegex = """\{"s": "(.*)", "id": (.*), "e": (.*) }""".toRegex()
+
+            fun deserialize(str: String): SessionSurrogate {
+                try {
+                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val sessionString = decode(groups[1])
+                    val id = checkParseToInt(groups[2])
+                    val epochSecond = checkParseToLong(groups[3])
+                    return SessionSurrogate(sessionString, id, epochSecond)
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                }
             }
 
-            fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Session {
+            fun deserializeToSession(str: String, users: Set<User>) : Pair<String, Session> {
+                return fromSurrogate(deserialize(str), users)
+            }
+
+            fun toSurrogate(sessionStr: String, s : Session) : SessionSurrogate {
+                return SessionSurrogate(sessionStr, s.user.id.value, s.dt.epochSecond)
+            }
+
+            fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Pair<String, Session> {
                 val user = try {
                     users.single { it.id.value == ss.id }
                 } catch (ex : NoSuchElementException) {
                     throw DatabaseCorruptedException("Unable to find a user with the id of ${ss.id}.  User set size: ${users.size}")
                 }
-                return Session(user, DateTime(ss.epochSecond))
+                return Pair(ss.sessionStr, Session(user, DateTime(ss.epochSecond)))
             }
-
         }
     }
 

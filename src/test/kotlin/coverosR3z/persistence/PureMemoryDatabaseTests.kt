@@ -600,7 +600,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY/projects.json").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Could not read projects file. Unexpected JSON token at offset 0: Expected '[, kind: LIST' - JSON input: BAD DATA HERE", ex.message)
+        assertEquals("Required value was null.", ex.message)
     }
     
     /**
@@ -720,6 +720,58 @@ class PureMemoryDatabaseTests {
         val deserialized = PureMemoryDatabase.EmployeeSurrogate.deserialize(result)
 
         assertEquals(employee, deserialized)
+    }
+
+    @Test
+    fun testSerialization_Project() {
+        val project = PureMemoryDatabase.ProjectSurrogate(1, "myname")
+
+        val result = project.serialize()
+
+        assertEquals("""{"id": 1, "name": "myname" }""", result)
+
+        val deserialized = PureMemoryDatabase.ProjectSurrogate.deserialize(result)
+
+        assertEquals(project, deserialized)
+    }
+
+    @Test
+    fun testSerialization_Project_UnicodeAndMultiline() {
+        val project = PureMemoryDatabase.ProjectSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
+
+        val result = project.serialize()
+
+        assertEquals("""{"id": 1, "name": "%0A%0D%09Hello%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86" }""", result)
+
+        val deserialized = PureMemoryDatabase.ProjectSurrogate.deserialize(result)
+
+        assertEquals(project, deserialized)
+    }
+
+    @Test
+    fun testSerialization_Session() {
+        val session = PureMemoryDatabase.SessionSurrogate("abc123", 1, 1608662050608)
+
+        val result = session.serialize()
+
+        assertEquals("""{"s": "abc123", "id": 1, "e": 1608662050608 }""", result)
+
+        val deserialized = PureMemoryDatabase.SessionSurrogate.deserialize(result)
+
+        assertEquals(session, deserialized)
+    }
+
+    @Test
+    fun testSerialization_SessionUnicodeAndMultiline() {
+        val session = PureMemoryDatabase.SessionSurrogate("\n\rabc123½¾¿LÀÁ", 1, 1608662050608)
+
+        val result = session.serialize()
+
+        assertEquals("""{"s": "%0A%0Dabc123%C2%BD%C2%BE%C2%BFL%C3%80%C3%81", "id": 1, "e": 1608662050608 }""", result)
+
+        val deserialized = PureMemoryDatabase.SessionSurrogate.deserialize(result)
+
+        assertEquals(session, deserialized)
     }
 
     /*
