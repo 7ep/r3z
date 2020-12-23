@@ -196,6 +196,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
 
     companion object {
 
+        private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+
         /**
          * This factory method handles the nitty-gritty about starting
          * the database with respect to the files on disk.  If you plan
@@ -510,25 +512,23 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     data class TimeEntrySurrogate(val i: Int, val e: Int, val p: Int, val t : Int, val d : Int, val dtl: String) {
 
         fun serialize(): String {
-            return """{"i": $i, "e": $e, "p": $p, "t": $t, "d": $d, "dtl": "${encode(dtl)}" }"""
+            return """{ i: $i , e: $e , p: $p , t: $t , d: $d , dtl: ${encode(dtl)} }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{"i": (.*), "e": (.*), "p": (.*), "t": (.*), "d": (.*), "dtl": "(.*)" }""".toRegex()
-
             fun deserialize(str: String): TimeEntrySurrogate {
                 try {
-                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap{it.groupValues}.toList()
                     val id = checkParseToInt(groups[1])
-                    val empId = checkParseToInt(groups[2])
-                    val projId = checkParseToInt(groups[3])
-                    val time = checkParseToInt(groups[4])
-                    val date = checkParseToInt(groups[5])
-                    val details = decode(groups[6])
+                    val empId = checkParseToInt(groups[3])
+                    val projId = checkParseToInt(groups[5])
+                    val time = checkParseToInt(groups[7])
+                    val date = checkParseToInt(groups[9])
+                    val details = decode(groups[11])
                     return TimeEntrySurrogate(id, empId, projId, time, date, details)
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as time entry data: $str", ex)
                 }
             }
 
@@ -566,21 +566,19 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     data class UserSurrogate(val id: Int, val name: String, val hash: String, val salt: String, val empId: Int?) {
 
         fun serialize(): String {
-            return """{"id": $id, "name": "${encode(name)}", "hash": "${encode(hash)}", "salt": "${encode(salt)}", "empId": ${empId ?: "null"} }"""
+            return """{ id: $id , name: ${encode(name)} , hash: ${encode(hash)} , salt: ${encode(salt)} , empId: ${empId ?: "null"} }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)", "hash": "(.*)", "salt": "(.*)", "empId": (.*) }""".toRegex()
-
             fun deserialize(str : String) : UserSurrogate {
                 try {
-                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap{it.groupValues}.toList()
                     val id = checkParseToInt(groups[1])
-                    val empId: Int? = if (groups[5] == "null") null else checkParseToInt(groups[5])
-                    return UserSurrogate(id, decode(groups[2]), decode(groups[3]), decode(groups[4]), empId)
+                    val empId: Int? = if (groups[9] == "null") null else checkParseToInt(groups[9])
+                    return UserSurrogate(id, decode(groups[3]), decode(groups[5]), decode(groups[7]), empId)
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as user data: $str", ex)
                 }
             }
 
@@ -610,20 +608,18 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     data class EmployeeSurrogate(val id: Int, val name: String) {
 
         fun serialize(): String {
-            return """{"id": $id, "name": "${encode(name)}" }"""
+            return """{ id: $id , name: ${encode(name)} }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)" }""".toRegex()
-
             fun deserialize(str: String): EmployeeSurrogate {
                 try {
-                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap{it.groupValues}.toList()
                     val id = checkParseToInt(groups[1])
-                    return EmployeeSurrogate(id, decode(groups[2]))
+                    return EmployeeSurrogate(id, decode(groups[3]))
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as employee data: $str", ex)
                 }
             }
 
@@ -648,20 +644,18 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     data class ProjectSurrogate(val id: Int, val name: String) {
 
         fun serialize(): String {
-            return """{"id": $id, "name": "${encode(name)}" }"""
+            return """{ id: $id , name: ${encode(name)} }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{"id": (.*), "name": "(.*)" }""".toRegex()
-
             fun deserialize(str: String): ProjectSurrogate {
                 try {
-                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap{it.groupValues}.toList()
                     val id = checkParseToInt(groups[1])
-                    return ProjectSurrogate(id, decode(groups[2]))
+                    return ProjectSurrogate(id, decode(groups[3]))
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as project data: $str", ex)
                 }
             }
 
@@ -685,22 +679,20 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     data class SessionSurrogate(val sessionStr : String, val id: Int, val epochSecond: Long) {
 
         fun serialize(): String {
-            return """{"s": "${encode(sessionStr)}", "id": $id, "e": $epochSecond }"""
+            return """{ s: ${encode(sessionStr)} , id: $id , e: $epochSecond }"""
         }
 
         companion object {
 
-            private val serializedStringRegex = """\{"s": "(.*)", "id": (.*), "e": (.*) }""".toRegex()
-
             fun deserialize(str: String): SessionSurrogate {
                 try {
-                    val groups = checkNotNull(serializedStringRegex.matchEntire(str)).groupValues
+                    val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap{it.groupValues}.toList()
                     val sessionString = decode(groups[1])
-                    val id = checkParseToInt(groups[2])
-                    val epochSecond = checkParseToLong(groups[3])
+                    val id = checkParseToInt(groups[3])
+                    val epochSecond = checkParseToLong(groups[5])
                     return SessionSurrogate(sessionString, id, epochSecond)
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException(ex.message ?: "no message", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as session data: $str", ex)
                 }
             }
 
