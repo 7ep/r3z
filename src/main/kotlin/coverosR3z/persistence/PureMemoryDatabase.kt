@@ -253,7 +253,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
 
-        private const val databaseFileSuffix = ".json"
+        const val databaseFileSuffix = ".db"
 
         private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
             if (dbDirectory == null) {

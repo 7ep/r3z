@@ -5,6 +5,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.logging.logAudit
 import coverosR3z.misc.getTime
+import coverosR3z.persistence.PureMemoryDatabase.Companion.databaseFileSuffix
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.BeforeClass
@@ -472,10 +473,10 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
         
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6.json").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6$databaseFileSuffix").writeText("BAD DATA HERE")
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Could not deserialize time entry file 2020_6.json.  Unable to deserialize this text as time entry data: BAD DATA HERE", ex.message)
+        assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to deserialize this text as time entry data: BAD DATA HERE", ex.message)
     }
 
     /**
@@ -492,7 +493,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // corrupt the employees data file
-        File("$DEFAULT_DB_DIRECTORY/employees.json").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to deserialize this text as employee data: BAD DATA HERE", ex.message)
@@ -515,7 +516,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/employees.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").delete()
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find an employee with the id of 2 based on entry in timeentries/", ex.message)
@@ -558,7 +559,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // corrupt the users data file
-        File("$DEFAULT_DB_DIRECTORY/users.json").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").writeText("BAD DATA HERE")
         
         assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
@@ -577,7 +578,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/users.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").delete()
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
@@ -597,7 +598,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // corrupt the projects data file
-        File("$DEFAULT_DB_DIRECTORY/projects.json").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to deserialize this text as project data: BAD DATA HERE", ex.message)
@@ -617,10 +618,10 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/projects.json").delete()
+        File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").delete()
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
-        assertEquals("Could not deserialize time entry file 2020_6.json.  Unable to find a project with the id of 1.  Project set size: 0", ex.message)
+        assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
     /**
@@ -637,7 +638,7 @@ class PureMemoryDatabaseTests {
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
 
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/sessions.json").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY/sessions$databaseFileSuffix").writeText("BAD DATA HERE")
         
         assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
