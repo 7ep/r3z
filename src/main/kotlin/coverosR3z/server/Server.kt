@@ -9,13 +9,12 @@ import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import java.lang.IndexOutOfBoundsException
 import java.net.ServerSocket
 import java.net.SocketException
 import java.util.concurrent.Executors
+
 
 /**
  * This is the top-level entry into the web server
@@ -27,49 +26,71 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
 
     fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
-
-        // this adds a hook to the Java runtime, so that if the app is running
-        // and a user stops it - by pressing ctrl+c or a unix "kill" command - the
-        // following code will run
-        Runtime.getRuntime().addShutdownHook(
-            Thread{
-                halfOpenServerSocket.close()
-                logImperative("Received shutdown command")
-                logImperative("Shutting down main server thread")
-                logImperative("Goodbye world!")
-            })
-        val cu = CurrentUser(SYSTEM_USER)
-        val pmd = if (dbDirectory == null) {PureMemoryDatabase.startMemoryOnly()} else {PureMemoryDatabase.startWithDiskPersistence(dbDirectory)}
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-        val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
+        addShutdownHook()
+        val business = initializeBusinessCode(authUtils)
         logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
-        val cachedThreadPool = Executors.newCachedThreadPool()
         try {
+            val cachedThreadPool = Executors.newCachedThreadPool()
+
             while (true) {
                 logTrace("waiting for socket connection")
-
                 val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-                val thread = Thread {
-                    logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
-                    do {
-                        val requestData = handleRequest(server, au, tru)
-                        val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
-                        if (shouldKeepAlive) {
-                            logTrace("This is a keep-alive connection")
-                        }
-                    } while (shouldKeepAlive)
-
-                    logTrace("closing server socket")
-                    server.close()
-                }
-                cachedThreadPool.submit(thread)
+                cachedThreadPool.submit(Thread {processConnectedClient(server, business)})
             }
         } catch (ex : SocketException) {
             if (ex.message == "Interrupted function call: accept failed") {
                 logWarn("Server was shutdown while waiting on accept")
             }
         }
+    }
+
+    private fun processConnectedClient(
+        server: SocketWrapper,
+        businessCode: BusinessCode
+    ) {
+        logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
+        do {
+            val requestData = handleRequest(server, businessCode)
+            val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+            if (shouldKeepAlive) {
+                logTrace("This is a keep-alive connection")
+            }
+        } while (shouldKeepAlive)
+
+        logTrace("closing server socket")
+        server.close()
+    }
+
+    /**
+     * Set up the classes necessary for business-related actions, like
+     * recording time, and so on
+     */
+    private fun initializeBusinessCode(authUtils: IAuthenticationUtilities?): BusinessCode {
+        val cu = CurrentUser(SYSTEM_USER)
+        val pmd = if (dbDirectory == null) {
+            PureMemoryDatabase.startMemoryOnly()
+        } else {
+            PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
+        }
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+        val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
+        return BusinessCode(tru, au)
+    }
+
+    /**
+     * this adds a hook to the Java runtime, so that if the app is running
+     * and a user stops it - by pressing ctrl+c or a unix "kill" command - the
+     * following code will run
+     */
+    private fun addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                halfOpenServerSocket.close()
+                logImperative("Received shutdown command")
+                logImperative("Shutting down main server thread")
+                logImperative("Goodbye world!")
+            })
     }
 
     companion object {
@@ -184,18 +205,18 @@ The options available are:
     """.trimIndent()
 
 
-        fun handleRequest(server: ISocketWrapper, au: IAuthenticationUtilities, tru: ITimeRecordingUtilities) : AnalyzedHttpData {
+        fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode) : AnalyzedHttpData {
             lateinit var analyzedHttpData : AnalyzedHttpData
             val responseData: PreparedResponseData = try {
-                analyzedHttpData = parseHttpMessage(server, au)
+                analyzedHttpData = parseHttpMessage(server, businessCode.au)
                 if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
                     return analyzedHttpData
                 }
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(analyzedHttpData.user)
-                val truWithUser = tru.changeUser(cu)
+                val truWithUser = businessCode.tru.changeUser(cu)
                 logDebug("client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}", cu)
-                handleRequestAndRespond(ServerData(au, truWithUser, analyzedHttpData))
+                handleRequestAndRespond(ServerData(businessCode.au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message, ex.stackTraceToString())
             }
