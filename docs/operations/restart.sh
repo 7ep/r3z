@@ -7,7 +7,7 @@ MYDIR="$(dirname "$(readlink -f "$0")")"
 cd $MYDIR
 
 # stop and run the timekeeping application
-kill $(cat pid); java -jar r3z-1.2.jar -p 12345 -d db &>>r3z.log &
+kill $(cat pid); java -jar r3z.jar -p 12345 -d db &>>r3z.log &
 
 # get the process id, pop it in a file (we'll use this to stop the process later)
 echo $! > pid

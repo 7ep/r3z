@@ -172,7 +172,7 @@ Sample:
     set to "db/" (make sure to end the directory
     with a forward slash):
     
-    java -jar r3z-1.2.jar -p 54321 -d db/
+    java -jar r3z.jar -p 54321 -d db/
     
 The options available are:
 

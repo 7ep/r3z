@@ -35,7 +35,7 @@ group 'com.coveros.r3z'
 // The way it goes is, major, minor.
 // if the major number changes, there's new functionality
 // if the minor changes, it's only bugs fixed, non-functional improvements, or refactorings
-version '1.2'
+version ''
 
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
@@ -158,7 +158,7 @@ jar {
         attributes(
                 'Main-Class': 'coverosR3z.MainKt',
                 "Implementation-Title": "Gradle",
-                "Implementation-Version": archiveVersion,
+                "Implementation-Version": "$r3z_version",
                 )
 
     }
@@ -233,7 +233,7 @@ check.dependsOn(jacocoTestReport)
  */
 task('writeGitCommitToFile') {
     File file = new File("src/main/resources/commit.html")
-    String contents = "Version: " + version + "\nCommit sha: " + getCurrentGitHash()
+    String contents = "Version: " + "$r3z_version" + "\nCommit sha: " + getCurrentGitHash()
     file.write(contents)
 }
 
