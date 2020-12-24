@@ -3,7 +3,7 @@ package coverosR3z.persistence
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.exceptions.NoTimeEntriesOnDiskException
-import coverosR3z.logging.logStart
+import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.checkParseToInt
@@ -219,19 +219,19 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                 // return the restored database
                 restoredPMD
             } else {
-                logStart("No existing database found, building new database")
+                logImperative("No existing database found, building new database")
                 // if nothing is there, we build a new database
                 // and add a clean set of directories
-                logStart("Creating new PureMemoryDatabase")
+                logImperative("Creating new PureMemoryDatabase")
                 val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
 
-                logStart("creating the database directory at \"$dbDirectory\"")
+                logImperative("creating the database directory at \"$dbDirectory\"")
                 File(dbDirectory).mkdirs()
 
-                logStart("Writing the version of the database ($dbVersion) to version.txt")
+                logImperative("Writing the version of the database ($dbVersion) to version.txt")
                 File(dbDirectory + "version.txt").writeText(dbVersion.toString())
 
-                logStart("creating an initial employee")
+                logImperative("creating an initial employee")
                 pmd.addNewEmployee(EmployeeName("Administrator"))
 
                 pmd
@@ -246,7 +246,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         fun startMemoryOnly() : PureMemoryDatabase {
             val pmd = PureMemoryDatabase()
 
-            logStart("creating an initial employee")
+            logImperative("creating an initial employee")
             pmd.addNewEmployee(EmployeeName("Administrator"))
 
             return pmd
@@ -337,7 +337,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             val topDirectory = File(dbDirectory)
             val innerFiles = topDirectory.listFiles()
             if ((! topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
-                logStart("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
+                logImperative("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
                 return null
             }
 

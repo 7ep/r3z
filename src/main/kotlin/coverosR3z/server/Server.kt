@@ -28,11 +28,21 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
     fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
 
+        // this adds a hook to the Java runtime, so that if the app is running
+        // and a user stops it - by pressing ctrl+c or a unix "kill" command - the
+        // following code will run
+        Runtime.getRuntime().addShutdownHook(
+            Thread{
+                halfOpenServerSocket.close()
+                logImperative("Received shutdown command")
+                logImperative("Shutting down main server thread")
+                logImperative("Goodbye world!")
+            })
         val cu = CurrentUser(SYSTEM_USER)
         val pmd = if (dbDirectory == null) {PureMemoryDatabase.startMemoryOnly()} else {PureMemoryDatabase.startWithDiskPersistence(dbDirectory)}
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
         val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
-        logStart("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+        logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         val cachedThreadPool = Executors.newCachedThreadPool()
         try {

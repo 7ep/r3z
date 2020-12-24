@@ -102,13 +102,6 @@ fun logWarn(msg: String) {
 }
 
 /**
- * Logging for actions that always take place at server startup
- */
-fun logStart(msg: String) {
-    println("${getCurrentMillis()} START: $msg")
-}
-
-/**
  * Logging that must be shown, which you cannot turn off
  */
 fun logImperative(msg: String) {
