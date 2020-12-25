@@ -26,7 +26,6 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
 
     fun startServer(authUtils: IAuthenticationUtilities? = null) {
         halfOpenServerSocket = ServerSocket(port)
-        addShutdownHook()
         val business = initializeBusinessCode(authUtils)
         logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
@@ -78,22 +77,23 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         return BusinessCode(tru, au)
     }
 
-    /**
-     * this adds a hook to the Java runtime, so that if the app is running
-     * and a user stops it - by pressing ctrl+c or a unix "kill" command - the
-     * following code will run
-     */
-    private fun addShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                halfOpenServerSocket.close()
-                logImperative("Received shutdown command")
-                logImperative("Shutting down main server thread")
-                logImperative("Goodbye world!")
-            })
-    }
-
     companion object {
+
+        /**
+         * this adds a hook to the Java runtime, so that if the app is running
+         * and a user stops it - by pressing ctrl+c or a unix "kill" command - the
+         * server socket will be shutdown and some messages about closing the server
+         * will log
+         */
+        fun addShutdownHook() {
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    halfOpenServerSocket.close()
+                    logImperative("Received shutdown command")
+                    logImperative("Shutting down main server thread")
+                    logImperative("Goodbye world!")
+                })
+        }
 
         lateinit var halfOpenServerSocket : ServerSocket
 

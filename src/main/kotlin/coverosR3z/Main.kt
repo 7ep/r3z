@@ -15,6 +15,7 @@ fun main(args: Array<String>) {
         logImperative("starting server on port ${serverOptions.port}")
         logImperative("database directory is ${serverOptions.dbDirectory}")
         Server(serverOptions.port, serverOptions.dbDirectory).startServer()
+        Server.addShutdownHook()
     } catch (ex : ServerOptionsException) {
         println(ex.message)
     }
