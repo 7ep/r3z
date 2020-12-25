@@ -9,7 +9,6 @@ private const val maxProjectErrorMsg = "No project id allowed over $maximumProje
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
 private const val minIdMsg = "Valid identifier values are 1 or above"
 const val projectNameNotNullMsg = "The project name must not be null"
-const val projectIdNotBlankMsg = "The project id must not be blank"
 
 /**
  * This is used to represent no project - just to avoid using null for a project

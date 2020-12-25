@@ -1,5 +1,6 @@
 package coverosR3z.uitests
 
+import coverosR3z.BDDHelpers
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.logging.LogTypes
@@ -26,33 +27,35 @@ class UITests {
     
     @Test
     fun `001 - recordTime - An employee should be able to enter time for a specified date`() {
-        // given the employee worked 8 hours yesterday
         loginAsUserAndCreateProject("alice", "projecta")
-        // when the employee enters their time
-        enterTimeForEmployee("projecta")
+        recordTime.markDone("Given the employee worked 8 hours yesterday,")
 
-        // then time is saved
+        enterTimeForEmployee("projecta")
+        recordTime.markDone("when the employee enters their time,")
+
         verifyTheEntry()
+        recordTime.markDone("then time is saved.")
+
         logout()
     }
 
     //TODO: Implement this test for real
     @Test
     fun `002 - recordTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
-        //given Andrea has a previous time entry with 24 hours
-        loginAsUserAndCreateProject("bob", "projectb")
+        loginAsUserAndCreateProject("Andrea", "projectb")
+        recordTime.markDone("Given Andrea has a previous time entry with 24 hours,")
+
         // when the employee enters their time
         enterTimeForEmployee("projectb")
 
-        //when she changes the entry to only 8 hours
         driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        recordTime.markDone("when she changes the entry to only 8 hours,")
         // muck with it
 
         val timeField = driver.findElement(By.cssSelector("#time-entry-1-1 .time input"))
         timeField.sendKeys("120")
         // change time to 120
 
-        //then it is reflected in the database
         driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
 
         val expected = 60120
@@ -62,20 +65,19 @@ class UITests {
         logout()
     }
 
-    /*
-    Administrator user story:
-         As an administrator, Adrian
-         I want to create new employees
-         So that I can allow new employees to track time
-    */
-
     @Test
     fun `003 - createEmployee - I should be able to create an employee`() {
+        createEmployee.markDone("Given the company has hired a new employee, Andrea,")
+
         rp.register("employeemaker", "password12345", "Administrator")
         lp.login("employeemaker", "password12345")
         eep.enter("a new employee")
+        createEmployee.markDone("when I add her as an employee,")
+
         assertEquals("SUCCESS", driver.title)
         driver.get("$domain/${NamedPaths.EMPLOYEES.path}")
+        createEmployee.markDone("then the system indicates success.")
+
         logout()
     }
 
@@ -153,6 +155,8 @@ class UITests {
         private lateinit var eep : EnterEmployeePage
         private lateinit var epp : EnterProjectPage
         private lateinit var lop : LogoutPage
+        private lateinit var createEmployee : BDDHelpers
+        private lateinit var recordTime : BDDHelpers
 
         @BeforeClass
         @JvmStatic
@@ -176,11 +180,17 @@ class UITests {
             epp = EnterProjectPage(driver, domain)
             llp = LoggingPage(driver, domain)
             lop = LogoutPage(driver, domain)
+
+            // setup for BDD
+            createEmployee = BDDHelpers("createEmployeeBDD.html")
+            recordTime = BDDHelpers("enteringTimeBDD.html")
         }
 
         @AfterClass
         @JvmStatic
         fun shutDown() {
+            createEmployee.writeToFile()
+            recordTime.writeToFile()
             Server.halfOpenServerSocket.close()
             driver.quit()
         }

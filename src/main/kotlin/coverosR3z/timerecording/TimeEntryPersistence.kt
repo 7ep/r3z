@@ -4,7 +4,7 @@ import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.persistence.PureMemoryDatabase
 
-class TimeEntryPersistence(val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
+class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         logDebug("persisting a new timeEntry")

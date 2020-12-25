@@ -9,14 +9,17 @@ fun toStr(value : ByteArray) : String {
 }
 
 class FileReader {
+
     companion object {
+
         /**
-         * Read in template file as a string
+         * Read a file
          */
         fun read(filename: String) : ByteArray? {
             val file = this::class.java.classLoader.getResource(filename)
                     ?: return null
             return file.readBytes()
         }
+
     }
 }

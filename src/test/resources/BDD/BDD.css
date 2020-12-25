@@ -1,0 +1,27 @@
+done {
+    color: green;
+    font-weight: bolder;
+    display: block
+}
+
+not-done {
+    color: red;
+    display: block
+}
+
+userstory {
+    display: block;
+    margin: 0;
+    padding: 15px;
+    background: #eee;
+    border-radius: 5px;
+}
+
+scenario {
+    display: block;
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
