@@ -464,8 +464,6 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  */
 fun parsePostedData(input: String): Map<String, String> {
     require(input.isNotEmpty()) {"The input to parse was empty"}
-    // Need to split up '&' separated fields into keys and values and pack into a kotlin map
-    // Closures for efficiency ahoy, sorry
     val postedPairs = mutableMapOf<String, String>()
     val splitByAmpersand = input.split("&")
     for(s : String in splitByAmpersand) {

@@ -11,10 +11,10 @@ Developer handbook
     -------
 
     Each release gets a new version, using major and minor, like 1.0
-    See version in the build.gradle file for more info.
+    See r3z_version in the gradle.properties file for more info.
 
     As we change the schema of the database, update the database version.
-    The version of the database is set at SocketCommunication.start()
+    The version of the database is set PureMemoryDatabase.startWithDiskPersistence
 
 
     Threads
@@ -23,16 +23,16 @@ Developer handbook
     Any kind of data that could be shared between threads, like caches or databases,
     needs to be made "thread-safe", which means that threads don't potentially corrupt
     the data.  If no precautions are taken, it is possible for two threads to make
-    changes to data in unexpected ways.  If this is completely a new concept to you,
-    take the time to review some of the ideas on the web, and also look at tests
+    changes to the same data in unexpected ways.  If this is completely a new concept to you,
+    take the time to review some of the ideas about parallel processing, and also look at tests
     in this application like testCorruptingEmployeeDataWithMultiThreading.
 
 
     Types
     -----
 
-    Throughout the system, there is an attempt to keep raw values - strings, ints
-    floats, and so on - wrapped into custom types - e.g. [Password].
+    Throughout the system, there is an attempt to keep raw values (strings, ints
+    floats, and so on) wrapped into custom types - for example, Password.
 
     This is for some practical reasons:
 
@@ -49,6 +49,10 @@ Developer handbook
     ---------------------------------
 
     BDD files will have a suffix of "BDD".  See "EnteringTimeBDD" for a sample.
+
+    Note that there are centralized BDD files in the test/resources/BDD directory.
+    To see the pattern that is used, examine any of the files in that directory
+    with a suffix of BDD.html and the corresponding code.
 
 
     Test Helpers
@@ -74,13 +78,15 @@ Developer handbook
     imperative we wrap potential exception throwers in our own handling code
     where we can more-precisely describe the problem.
 
-    For an example, see [parsePostedData]
+    For an example, see the code that uses our custom exceptions found in the
+    exceptions directory
 
 
     Invariants
     ----------
 
     We hold these truths to be self-evident in our code...
+
     The following are used in our code to positively assert
     truthful statements inside algorithms.  Don't use "assert",
     since that is possible to turn off, and we want these to always
@@ -104,11 +110,7 @@ Developer handbook
     Otherwise returns the not null value.
     This is for asserting that arguments to a function aren't null.
 
-    fun assert(value: Boolean)
-    For JVM
-    Throws an AssertionError if the value is false and runtime assertions
-    have been enabled on the JVM using the -ea JVM option.
-    (Maybe *not* best to use this, we want these invariants to always work)
+    Also see our customized checks, such as checkParseToInt
 
 
     General architecture
@@ -235,15 +237,19 @@ Developer handbook
            has to be a balance trying to accommodate literally every imaginable thing
            that could ever happen (which is impossible to program).
 
+    IMPERATIVE - these are log entries that *must* show, no matter what.  Rare but valuable,
+                 for example it is used during startup and shutdown of the application, and
+                 also when we change the log settings dynamically during runtime
+
 
     notes:
-    1. When the server starts, it prints the current DateTime, and all subsequent log entries
-       are how far away we are from that point in time, in milliseconds.
-    2. In the log API, there are some that expect an input to be a lambda, like logTrace(msg: () -> String)
+    1. In the log API, there are some that expect an input to be a lambda, like logTrace(msg: () -> String)
        That is a technique so anything we pass in to the function won't be actually run unless
        the log level is used.  So for example, if we turn off the TRACE level, that means
        any complex logic we pass in to logTrace{ complex_stuff_here } simply won't get run, helping
        performance.
+    2. In the Logger.kt file, there is a public variable, logSettings, which can be adjusted at anytime
+       from anywhere in the code to dynamically adjust which log types run.
 
 
     Regular expressions (regex)
