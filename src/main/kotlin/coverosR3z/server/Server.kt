@@ -30,7 +30,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         try {
-            val cachedThreadPool = Executors.newCachedThreadPool()
+            val cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
             while (true) {
                 logTrace("waiting for socket connection")
