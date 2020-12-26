@@ -11,11 +11,11 @@ import coverosR3z.server.Server.Companion.extractOptions
  */
 fun main(args: Array<String>) {
     try {
+        Server.addShutdownHook()
         val serverOptions = extractOptions(args)
         logImperative("starting server on port ${serverOptions.port}")
         logImperative("database directory is ${serverOptions.dbDirectory}")
         Server(serverOptions.port, serverOptions.dbDirectory).startServer()
-        Server.addShutdownHook()
     } catch (ex : ServerOptionsException) {
         println(ex.message)
     }
