@@ -16,44 +16,19 @@ import kotlin.concurrent.thread
  */
 class MainTests {
 
-    @After
-    fun cleanup() {
-        val tryingToClose = thread {
-            while (true) {
-                try {
-                    Server.halfOpenServerSocket.close()
-                    break
-                } catch (ex: UninitializedPropertyAccessException) {
-                    Thread.sleep(10)
-                }
-            }
-        }
-        tryingToClose.join()
-    }
-
     /**
      * If we run main with a particular port number,
      * it should indicate that during startup
      */
     @Test
     fun testMain() {
-        val data = arrayOf("-p","54321")
+        // starts the server
+        thread{main(arrayOf("-p","54321"))}
 
-        // first thread starts the server
-        thread{main(data)}
+        // Give the system sufficient time to startup and set
+        // its shutdown hooks, so when we shut it down it will
+        // try to do so cleanly
+        Thread.sleep(500)
     }
-
-    /**
-     * If we run main with a particular port number,
-     * it should indicate that during startup
-     */
-    @Test
-    fun testMain_GetHelp() {
-        val data = arrayOf("-h")
-
-        // first thread starts the server
-        thread{main(data)}
-    }
-
 
 }

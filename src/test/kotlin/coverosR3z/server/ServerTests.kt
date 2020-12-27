@@ -444,7 +444,7 @@ class ServerTests {
      * Question: why does it take 6 seconds to run this 100 thousand times?
      */
     @Test
-    fun testWithValidClient() {
+    fun testWithValidClient_LoginPage_PERFORMANCE() {
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         au.getUserForSessionBehavior = { DEFAULT_USER }
@@ -467,6 +467,38 @@ class ServerTests {
         logSettings[LogTypes.DEBUG] = true
     }
 
+    /**
+     * I used this to see just how fast the server ran.  Able to get
+     * 25,000 requests per second on 12/26/2020
+     */
+    @Test
+    fun testHomepage_PERFORMANCE() {
+        // so we don't see spam
+        logSettings[LogTypes.DEBUG] = false
+        val (time, _) = getTime {
+            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(100) }
+            threadList.forEach { it.join() }
+        }
+        println("Time was $time")
+        // turn logging back on for other tests
+        logSettings[LogTypes.DEBUG] = true
+    }
+
+    /**
+     * Simply GETs from the homepage many times
+     */
+    private fun makeClientThreadRepeatedRequestsHomepage(numRequests : Int): Thread {
+        return thread {
+            val client =
+                Client.make(Verb.GET, NamedPaths.HOMEPAGE.path, listOf("Connection: keep-alive"), authUtilities = au)
+            for (i in 1..numRequests) {
+                client.send()
+                val result = client.read()
+                assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
+
 }
 
 class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities) {
@@ -482,11 +514,11 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
     companion object {
 
         fun make(
-                verb : Verb,
-                path : String,
-                headers : List<String>? = null,
-                body : Map<String,String>? = null,
-                au: IAuthenticationUtilities
+            verb : Verb,
+            path : String,
+            headers : List<String>? = null,
+            body : Map<String,String>? = null,
+            authUtilities: IAuthenticationUtilities = FakeAuthenticationUtilities()
         ) : Client {
             val clientSocket = Socket("localhost", 12345)
             val bodyString = body?.map{ it.key + "=" + encode(it.value)}?.joinToString("&") ?: ""
@@ -498,7 +530,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
                 else -> throw IllegalArgumentException("unexpected Verb")
             }
 
-            return Client(SocketWrapper(clientSocket, "client"), data, au)
+            return Client(SocketWrapper(clientSocket, "client"), data, authUtilities)
         }
 
     }

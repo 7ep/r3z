@@ -13,7 +13,9 @@ import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import java.net.ServerSocket
 import java.net.SocketException
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -30,7 +32,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         try {
-            val cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+            cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
             while (true) {
                 logTrace("waiting for socket connection")
@@ -88,6 +90,8 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         fun addShutdownHook() {
             Runtime.getRuntime().addShutdownHook(
                 Thread {
+                    cachedThreadPool.shutdown()
+                    cachedThreadPool.awaitTermination(10, TimeUnit.SECONDS)
                     halfOpenServerSocket.close()
                     logImperative("Received shutdown command")
                     logImperative("Shutting down main server thread")
@@ -96,6 +100,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         }
 
         lateinit var halfOpenServerSocket : ServerSocket
+        lateinit var cachedThreadPool: ExecutorService
 
         /**
          * Given the command-line arguments, returns the first value
