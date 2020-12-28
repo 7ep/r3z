@@ -17,7 +17,7 @@ fun main(args: Array<String>) {
     Server.addShutdownHook()
     logImperative("starting server on port ${serverOptions.port}")
     logImperative("database directory is ${serverOptions.dbDirectory}")
-    Server(serverOptions.port, serverOptions.dbDirectory).startServer()
+    Server(serverOptions.port).startServer(Server.initializeBusinessCode(dbDirectory = serverOptions.dbDirectory))
 
 }
 

@@ -463,7 +463,7 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  * for example, valuea=3&valueb=this+is+something
  */
 fun parsePostedData(input: String): Map<String, String> {
-    require(input.isNotEmpty()) {"The input to parse was empty"}
+    require(input.isNotEmpty()) {"The POST body was empty"}
     val postedPairs = mutableMapOf<String, String>()
     val splitByAmpersand = input.split("&")
     for(s : String in splitByAmpersand) {

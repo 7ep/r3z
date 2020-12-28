@@ -21,8 +21,8 @@ fun generateRandomString(size : Int): String {
  * an [IllegalStateException] with the message
  */
 fun checkParseToInt(value: String?,
-                    nullMsg: () -> String = {"Must not be a null value"},
-                    blankMsg: () -> String = {"Must not be blank"},
+                    nullMsg: () -> String = {"Integer must not be a null value"},
+                    blankMsg: () -> String = {"Integer must not be blank"},
                     parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as integer"}): Int {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }

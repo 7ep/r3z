@@ -168,7 +168,7 @@ class UITests {
             // start the server
             thread {
                 sc = Server(12345)
-                sc.startServer()
+                sc.startServer(Server.initializeBusinessCode())
             }
 
             driver = webDriver.driver()

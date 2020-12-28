@@ -10,13 +10,13 @@ class GeneralUtilitiesTests {
     @Test
     fun testParseInteger_NegativeCase_null() {
         val ex = assertThrows(IllegalArgumentException::class.java){checkParseToInt(null)}
-        assertEquals("Must not be a null value", ex.message)
+        assertEquals("Integer must not be a null value", ex.message)
     }
 
     @Test
     fun testParseInteger_NegativeCase_emptyString() {
         val ex = assertThrows(IllegalArgumentException::class.java){checkParseToInt("")}
-        assertEquals("Must not be blank", ex.message)
+        assertEquals("Integer must not be blank", ex.message)
     }
 
     @Test

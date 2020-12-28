@@ -1,11 +1,13 @@
 package coverosR3z.server
 
+import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.authentication.LoginAPI
 import coverosR3z.authentication.RegisterAPI
+import coverosR3z.domainobjects.Date
 import coverosR3z.domainobjects.NO_USER
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.LogConfig.logSettings
@@ -14,6 +16,8 @@ import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.encode
 import coverosR3z.misc.getTime
 import coverosR3z.misc.toStr
+import coverosR3z.timerecording.EnterTimeAPI
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Before
@@ -27,19 +31,20 @@ class ServerTests {
     private lateinit var client : SocketWrapper
 
     companion object {
-
         private lateinit var serverObject : Server
-        private lateinit var au : FakeAuthenticationUtilities
+        private val au = FakeAuthenticationUtilities()
+        private val tru = FakeTimeRecordingUtilities()
 
-        @JvmStatic @BeforeClass
-        fun beforeClass() {
+        @JvmStatic
+        @BeforeClass
+        fun initServer() {
             serverObject = Server(12345)
-            au = FakeAuthenticationUtilities()
-            thread { serverObject.startServer(au) }
+            thread { serverObject.startServer(BusinessCode(tru, au)) }
         }
 
-        @JvmStatic @AfterClass
-        fun afterClass() {
+        @JvmStatic
+        @AfterClass
+        fun stopServer() {
             Server.halfOpenServerSocket.close()
         }
     }
@@ -381,7 +386,7 @@ class ServerTests {
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
+        val result: AnalyzedHttpData = parseHttpMessage(client, au)
 
         assertEquals(StatusCode.INTERNAL_SERVER_ERROR, result.statusCode)
     }
@@ -392,7 +397,6 @@ class ServerTests {
      */
     @Test
     fun testShouldGetInternalServerError_improperlyFormedBody() {
-        au.getUserForSessionBehavior = { DEFAULT_USER }
         client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "test foo bar"
@@ -447,8 +451,7 @@ class ServerTests {
     fun testWithValidClient_LoginPage_PERFORMANCE() {
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        val headers = listOf("Cookie: sessionId=abc123", "Connection: keep-alive")
+        val headers = listOf("Connection: keep-alive")
         val body = mapOf(
                 LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
                 LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
@@ -459,7 +462,7 @@ class ServerTests {
                 myClient.send()
                 val result = myClient.read()
 
-                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+                assertEquals(StatusCode.OK, result.statusCode)
             }
         }
         println("Time was $time")
@@ -476,7 +479,24 @@ class ServerTests {
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(100) }
+            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(10) }
+            threadList.forEach { it.join() }
+        }
+        println("Time was $time")
+        // turn logging back on for other tests
+        logSettings[LogTypes.DEBUG] = true
+    }
+
+    /**
+     * I used this to see just how fast the server ran.  Able to get
+     * 25,000 requests per second on 12/26/2020
+     */
+    @Test
+    fun testEnterTime_PERFORMANCE() {
+        // so we don't see spam
+        logSettings[LogTypes.DEBUG] = false
+        val (time, _) = getTime {
+            val threadList = (1..8).map {  makeClientThreadRepeatedTimeEntries(10) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
@@ -499,9 +519,36 @@ class ServerTests {
         }
     }
 
+    /**
+     * Enters time for a user on many days
+     */
+    private fun makeClientThreadRepeatedTimeEntries(numRequests : Int): Thread {
+        return thread {
+
+            val client =
+                Client.make(
+                    Verb.POST,
+                    NamedPaths.ENTER_TIME.path,
+                    listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
+                    authUtilities = au)
+            for (i in 1..numRequests) {
+                val data = mapOf(
+                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 100).stringValue,
+                    EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "some details go here",
+                    EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
+                    EnterTimeAPI.Elements.TIME_INPUT.elemName to "1",
+                )
+                val clientWithData = client.addPostData(data)
+                clientWithData.send()
+                val result = clientWithData.read()
+                assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
+
 }
 
-class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities) {
+class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities, val path: String = "", val headers: String = "") {
 
     fun send() {
         socketWrapper.write(data)
@@ -509,6 +556,12 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
 
     fun read() : AnalyzedHttpData {
         return parseHttpMessage(socketWrapper, au)
+    }
+
+    fun addPostData(body: Map<String, String>) : Client {
+        val bodyString = body.map{ it.key + "=" + encode(it.value)}.joinToString("&")
+        val data =  "${Verb.POST} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headers + CRLF + CRLF + bodyString
+        return Client(this.socketWrapper, data = data, au)
     }
 
     companion object {
@@ -530,7 +583,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
                 else -> throw IllegalArgumentException("unexpected Verb")
             }
 
-            return Client(SocketWrapper(clientSocket, "client"), data, authUtilities)
+            return Client(SocketWrapper(clientSocket, "client"), data, authUtilities, path, headersString)
         }
 
     }

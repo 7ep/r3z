@@ -96,6 +96,13 @@ class DateTests {
     }
 
     @Test
+    fun testDateStringValue() {
+        val dateInFrontendFormat = "2012-07-20"
+        val actual = Date.make(dateInFrontendFormat)
+        assertEquals(dateInFrontendFormat, actual.stringValue)
+    }
+
+    @Test
     fun testDate_Ancient() {
         assertThrows(IllegalArgumentException::class.java) {Date(1979, Month.DEC, 31)}
     }

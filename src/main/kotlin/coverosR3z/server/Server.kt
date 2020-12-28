@@ -3,7 +3,6 @@ package coverosR3z.server
 import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.AuthenticationUtilities
 import coverosR3z.authentication.CurrentUser
-import coverosR3z.authentication.IAuthenticationUtilities
 import coverosR3z.domainobjects.DateTime
 import coverosR3z.domainobjects.SYSTEM_USER
 import coverosR3z.exceptions.ServerOptionsException
@@ -21,14 +20,15 @@ import java.util.concurrent.TimeUnit
 /**
  * This is the top-level entry into the web server
  * @param port the port the server will run on
- * @param dbDirectory the directory to store data.  If no directory is provided, the database
- *                    will run entirely in memory with no disk persistence taking place.
  */
-class Server(val port: Int, private val dbDirectory: String? = null) {
+class Server(val port: Int) {
 
-    fun startServer(authUtils: IAuthenticationUtilities? = null) {
+    /**
+     * This requires a [BusinessCode] object, see [initializeBusinessCode]
+     * for the typical way to create this.
+     */
+    fun startServer(businessObjects : BusinessCode) {
         halfOpenServerSocket = ServerSocket(port)
-        val business = initializeBusinessCode(authUtils)
         logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         try {
@@ -37,7 +37,7 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
             while (true) {
                 logTrace("waiting for socket connection")
                 val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-                cachedThreadPool.submit(Thread {processConnectedClient(server, business)})
+                cachedThreadPool.submit(Thread {processConnectedClient(server, businessObjects)})
             }
         } catch (ex : SocketException) {
             if (ex.message == "Interrupted function call: accept failed") {
@@ -63,23 +63,32 @@ class Server(val port: Int, private val dbDirectory: String? = null) {
         server.close()
     }
 
-    /**
-     * Set up the classes necessary for business-related actions, like
-     * recording time, and so on
-     */
-    private fun initializeBusinessCode(authUtils: IAuthenticationUtilities?): BusinessCode {
-        val cu = CurrentUser(SYSTEM_USER)
-        val pmd = if (dbDirectory == null) {
-            PureMemoryDatabase.startMemoryOnly()
-        } else {
-            PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
-        }
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
-        val au = authUtils ?: AuthenticationUtilities(AuthenticationPersistence(pmd))
-        return BusinessCode(tru, au)
-    }
-
     companion object {
+
+
+        /**
+         * Set up the classes necessary for business-related actions, like
+         * recording time, and so on
+         * @param pmd typically you would provide null here, but you can enter a value if you want to inject a mock.  If you
+         *            provide a mock, this function will ignore the dbDirectory parameter.
+         * @param dbDirectory the database directory.  If you provide a string the system will use that as the directory
+         *                    for the disk persistence.  If you provide null then the system will operate in memory-only,
+         *                    see PureMemoryDatabase.startMemoryOnly
+         */
+        fun initializeBusinessCode(
+            pmd : PureMemoryDatabase? = null,
+            dbDirectory: String? = null
+        ): BusinessCode {
+            val cu = CurrentUser(SYSTEM_USER)
+            val myPmd = pmd ?: if (dbDirectory == null) {
+                PureMemoryDatabase.startMemoryOnly()
+            } else {
+                PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
+            }
+            val tru = TimeRecordingUtilities(TimeEntryPersistence(myPmd), cu)
+            val au = AuthenticationUtilities(AuthenticationPersistence(myPmd))
+            return BusinessCode(tru, au)
+        }
 
         /**
          * this adds a hook to the Java runtime, so that if the app is running

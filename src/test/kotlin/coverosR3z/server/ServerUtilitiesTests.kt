@@ -67,7 +67,7 @@ class ServerUtilitiesTests {
     fun testShouldHandleBadInputBadly_EmptyString() {
         val ex = assertThrows(IllegalArgumentException::class.java) { parsePostedData("")}
 
-        assertEquals("The input to parse was empty", ex.message)
+        assertEquals("The POST body was empty", ex.message)
     }
 
     /**
