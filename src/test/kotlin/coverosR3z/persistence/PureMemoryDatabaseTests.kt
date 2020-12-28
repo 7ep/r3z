@@ -12,7 +12,9 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
@@ -138,7 +140,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testShouldComplainIfTryingToRemoveNonexistentSession() {
-        val ex = assertThrows(java.lang.IllegalStateException::class.java) {pmd.removeSession(DEFAULT_USER)}
+        val ex = assertThrows(IllegalStateException::class.java) {pmd.removeSession(DEFAULT_USER)}
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
 
@@ -791,6 +793,10 @@ class PureMemoryDatabaseTests {
         assertEquals(timeEntry, deserialized)
     }
 
+    enum class Testing {
+        NOTHING
+    }
+
     /**
      * This is an experiment to try out concurrent hash maps as an alternative
      * to the sets and lists we have been using.  The benefits are that you
@@ -810,19 +816,22 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testTryingOutConcurrentHashMap_PERFORMANCE() {
+        val index = AtomicInteger(1)
         println("Running concurrentHashMap experiment at testTryingOutConcurrentHashMap_PERFORMANCE")
         for (i in 1..10) {
-            val myMap = ConcurrentHashMap<String, Int>()
-            (1..10_000).forEach { myMap[it.toString()] = it }
+            val myMap = ConcurrentHashMap<Employee, Testing>()
+            (1..10_000).forEach { myMap[Employee(EmployeeId(index.getAndIncrement()), EmployeeName(it.toString()))] = Testing.NOTHING }
+            myMap[Employee(EmployeeId(index.getAndIncrement()), EmployeeName("alice"))] = Testing.NOTHING
             val (time, _) = getTime {
                 val t1 = thread {
-                    (10_001..20_000).forEach { myMap[it.toString()] = it }
+                    (10_001..20_000).forEach { myMap[Employee(EmployeeId(index.getAndIncrement()), EmployeeName(it.toString()))] = Testing.NOTHING }
                 }
                 val t2 = thread {
-                    print(myMap.filter { it.value % 2 == 0 }.count())
+                    print(myMap.filter { it.key.hashCode() % 2 == 0 }.count())
                 }
                 t1.join()
                 t2.join()
+                print(". Totalsize: ${myMap.size}")
             }
             println(" time: $time")
         }
