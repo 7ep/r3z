@@ -12,6 +12,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
@@ -788,6 +789,43 @@ class PureMemoryDatabaseTests {
         val deserialized = PureMemoryDatabase.TimeEntrySurrogate.deserialize(result)
 
         assertEquals(timeEntry, deserialized)
+    }
+
+    /**
+     * This is an experiment to try out concurrent hash maps as an alternative
+     * to the sets and lists we have been using.  The benefits are that you
+     * don't need to synchronize, which is pretty sweet when you consider
+     * that in this application, the only thing we're synchronizing is the
+     * data structures in the [PureMemoryDatabase].
+     *
+     * If we can somehow switch in these data structures and remove the sync'd
+     * methods, I believe the performance gains will be through the roof... until
+     * we have to consider the IO (writing to disk).
+     *
+     * Notice that when you run this you get a lot of different
+     * numbers.  That's because this data structure is "weakly consistent",
+     * that is, it's correct for the moment you read from it.  Since
+     * in this experiment we are carrying out a lot of actions that
+     * interfere, you would expect to see varying answers.
+     */
+    @Test
+    fun testTryingOutConcurrentHashMap_PERFORMANCE() {
+        println("Running concurrentHashMap experiment at testTryingOutConcurrentHashMap_PERFORMANCE")
+        for (i in 1..10) {
+            val myMap = ConcurrentHashMap<String, Int>()
+            (1..10_000).forEach { myMap[it.toString()] = it }
+            val (time, _) = getTime {
+                val t1 = thread {
+                    (10_001..20_000).forEach { myMap[it.toString()] = it }
+                }
+                val t2 = thread {
+                    print(myMap.filter { it.value % 2 == 0 }.count())
+                }
+                t1.join()
+                t2.join()
+            }
+            println(" time: $time")
+        }
     }
 
     /*
