@@ -92,13 +92,8 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         val employeeTimeEntries = timeEntries[employee] ?: return Time(0)
 
         // if the employee hasn't entered any time on this date, return 0 minutes
-        val entriesOnDate = employeeTimeEntries.filter{it.date == date}
-        if (entriesOnDate.isEmpty()) {
-            return Time(0)
-        }
-
-        val sum = entriesOnDate.sumBy{ it.time.numberOfMinutes }
-        return Time(sum)
+        val totalMinutes = employeeTimeEntries.filter { it.date == date }.sumBy { te -> te.time.numberOfMinutes }
+        return Time(totalMinutes)
     }
 
     /**

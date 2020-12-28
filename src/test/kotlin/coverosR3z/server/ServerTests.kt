@@ -26,6 +26,12 @@ import org.junit.Test
 import java.net.Socket
 import kotlin.concurrent.thread
 
+/**
+ * Bear in mind this set of tests is to focus on the server functionality,
+ * and *not* the underlying business code / database code.  That's why it
+ * is fine to use fakes for the business code.  If you want to see
+ * the server running with everything real, see [ServerPerformanceTests]
+ */
 class ServerTests {
 
     private lateinit var client : SocketWrapper
