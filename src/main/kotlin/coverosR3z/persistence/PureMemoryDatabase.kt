@@ -6,10 +6,7 @@ import coverosR3z.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
-import coverosR3z.misc.checkParseToInt
-import coverosR3z.misc.checkParseToLong
-import coverosR3z.misc.decode
-import coverosR3z.misc.encode
+import coverosR3z.misc.*
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
@@ -49,7 +46,7 @@ class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, Null
      * The next identifier for an employee that is created.
      */
     private val nextEmployeeIndex = AtomicInteger(employees.size+1)
-
+    private val actionQueue = ActionQueue("DatabaseWriter")
 
     fun copy(): PureMemoryDatabase {
         val employeesMap = ConcurrentHashMap<Employee, NullEnum>()
@@ -68,8 +65,43 @@ class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, Null
     }
 
     @Synchronized
-    fun addTimeEntry(timeEntry : TimeEntryPreDatabase, timeEntries : MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries) : TimeEntry {
-        return addTimeEntryStatic(timeEntries, dbDirectory, timeEntry.date, timeEntry.project, timeEntry.employee, timeEntry.time, timeEntry.details)
+    fun addTimeEntry(
+        timeEntry: TimeEntryPreDatabase,
+        timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries
+    ): TimeEntry {
+        /**
+         * Static version of this code so we can use it during deserialization as well as
+         * for regular usage
+         */
+        // get the data for a particular employee
+        var employeeTimeEntries = timeEntries[timeEntry.employee]
+        // if the data is null (the employee has never added time entries), create an empty map for them
+        // and set that as the variable we'll use for the rest of this method
+        if (employeeTimeEntries == null) {
+            employeeTimeEntries = mutableSetOf()
+            timeEntries[timeEntry.employee] = employeeTimeEntries
+        }
+        // add the new data
+        val newIndex = employeeTimeEntries.size + 1
+        logTrace("new time-entry index is $newIndex")
+        val newTimeEntry = TimeEntry(
+            newIndex,
+            timeEntry.employee,
+            timeEntry.project,
+            timeEntry.time,
+            timeEntry.date,
+            timeEntry.details
+        )
+        employeeTimeEntries.add(newTimeEntry)
+        // get all the time entries for the month, to serialize
+        val allTimeEntriesForMonth: Set<TimeEntry> =
+            employeeTimeEntries.filter { it.date.month() == timeEntry.date.month() }.toSet()
+        val filename = "${timeEntry.date.year()}_${timeEntry.date.month()}"
+        logTrace("filename to store time-entries is $filename")
+        // write it to disk
+        writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, timeEntry.employee, filename, dbDirectory)
+        return newTimeEntry
+        // return the time entry
     }
 
     @Synchronized
@@ -207,6 +239,19 @@ class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, Null
         setOfTimeEntries.add(newEntry)
     }
 
+    /**
+     * This function will stop the database cleanly.
+     *
+     * In order to do this, we need to wait for our threads
+     * to finish their work.  In particular, we
+     * have offloaded our file writes to [actionQueue], which
+     * has an internal thread for serializing all actions
+     * on our database
+     */
+    fun stop() {
+        actionQueue.stop()
+    }
+
     companion object {
 
         private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
@@ -268,79 +313,6 @@ class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, Null
 
         const val databaseFileSuffix = ".db"
 
-        private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
-            if (dbDirectory == null) {
-                logTrace("database directory was null, skipping serialization for Users")
-                return
-            }
-            val users = serializeUsers(pmd)
-            writeDbFile(users, "users", dbDirectory)
-        }
-
-        private fun serializeSessionsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
-            if (dbDirectory == null) {
-                logTrace("database directory was null, skipping serialization for Sessions")
-                return
-            }
-            val sessions = serializeSessions(pmd)
-            writeDbFile(sessions, "sessions", dbDirectory)
-        }
-
-        private fun serializeEmployeesToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
-            if (dbDirectory == null) {
-                logTrace("database directory was null, skipping serialization for Employees")
-                return
-            }
-            val employees = serializeEmployees(pmd)
-            writeDbFile(employees, "employees", dbDirectory)
-        }
-
-        private fun serializeProjectsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
-            if (dbDirectory == null) {
-                logTrace("database directory was null, skipping serialization for Projects")
-                return
-            }
-            val projects = serializeProjects(pmd)
-            writeDbFile(projects, "projects", dbDirectory)
-        }
-
-        private fun writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries: Set<TimeEntry>, employee: Employee, filename: String, dbDirectory : String?) {
-            if (dbDirectory == null) {
-                logTrace("database directory was null, skipping serialization for time entries")
-                return
-            }
-            val timeentriesSerialized = serializeTimeEntries(employeeDateTimeEntries)
-            val subDirectory = dbDirectory + "timeentries/" + "${employee.id.value}/"
-            File(subDirectory).mkdirs()
-            writeDbFile(timeentriesSerialized, filename, subDirectory)
-        }
-
-        private fun writeDbFile(value: String, name : String, dbDirectory: String) {
-            val pathname = dbDirectory + name + databaseFileSuffix
-            val dbFileUsers = File(pathname)
-            logTrace("about to write to $pathname")
-            dbFileUsers.writeText(value)
-        }
-
-        fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
-            return employeeDateTimeEntries.joinToString ("\n") { TimeEntrySurrogate.toSurrogate(it).serialize() }
-        }
-
-        private fun serializeUsers(pmd: PureMemoryDatabase): String {
-            return pmd.users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
-        }
-
-        private fun serializeSessions(pmd: PureMemoryDatabase): String {
-            return pmd.sessions.entries.joinToString("\n") { SessionSurrogate.toSurrogate(it.key, it.value).serialize() }
-        }
-
-        private fun serializeEmployees(pmd: PureMemoryDatabase): String {
-            return pmd.employees.keySet(NullEnum.NULL).joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
-        }
-
-        private fun serializeProjects(pmd: PureMemoryDatabase): String {
-            return pmd.projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
-        }
 
         /**
          * Deserializes the database from file, or returns null if no
@@ -465,42 +437,83 @@ class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, Null
             return File(dbDirectory + name + databaseFileSuffix).readText()
         }
 
-        /**
-         * Static version of this code so we can use it during deserialization as well as
-         * for regular usage
-         */
-        private fun addTimeEntryStatic(timeEntries: MutableMap<Employee, MutableSet<TimeEntry>>, dbDirectory: String?,
-                                       date: Date, project: Project, employee : Employee, time : Time, details : Details) : TimeEntry {
-            // get the data for a particular employee
-            var employeeTimeEntries = timeEntries[employee]
-
-            // if the data is null (the employee has never added time entries), create an empty map for them
-            // and set that as the variable we'll use for the rest of this method
-            if (employeeTimeEntries == null) {
-                employeeTimeEntries = mutableSetOf()
-                timeEntries[employee] = employeeTimeEntries
-            }
-
-            // add the new data
-            val newIndex = employeeTimeEntries.size + 1
-            logTrace("new time-entry index is $newIndex")
-
-            val newTimeEntry = TimeEntry(newIndex, employee, project, time, date, details)
-            employeeTimeEntries.add(newTimeEntry)
-
-            // get all the time entries for the month, to serialize
-            val allTimeEntriesForMonth: Set<TimeEntry> = employeeTimeEntries.filter { it.date.month() == date.month()}.toSet()
-            val filename = "${date.year()}_${date.month()}"
-            logTrace("filename to store time-entries is $filename")
-
-            // write it to disk
-            writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, employee, filename, dbDirectory)
-
-            // return the time entry
-            return newTimeEntry
-        }
-
     }
+
+
+    private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+        if (dbDirectory == null) {
+            logTrace("database directory was null, skipping serialization for Users")
+            return
+        }
+        val users = serializeUsers(pmd)
+        writeDbFile(users, "users", dbDirectory)
+    }
+
+    private fun serializeSessionsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+        if (dbDirectory == null) {
+            logTrace("database directory was null, skipping serialization for Sessions")
+            return
+        }
+        val sessions = serializeSessions(pmd)
+        writeDbFile(sessions, "sessions", dbDirectory)
+    }
+
+    private fun serializeEmployeesToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+        if (dbDirectory == null) {
+            logTrace("database directory was null, skipping serialization for Employees")
+            return
+        }
+        val employees = serializeEmployees(pmd)
+        writeDbFile(employees, "employees", dbDirectory)
+    }
+
+    private fun serializeProjectsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+        if (dbDirectory == null) {
+            logTrace("database directory was null, skipping serialization for Projects")
+            return
+        }
+        val projects = serializeProjects(pmd)
+        writeDbFile(projects, "projects", dbDirectory)
+    }
+
+    private fun writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries: Set<TimeEntry>, employee: Employee, filename: String, dbDirectory : String?) {
+        if (dbDirectory == null) {
+            logTrace("database directory was null, skipping serialization for time entries")
+            return
+        }
+        val timeentriesSerialized = serializeTimeEntries(employeeDateTimeEntries)
+        val subDirectory = dbDirectory + "timeentries/" + "${employee.id.value}/"
+        actionQueue.enqueue{ File(subDirectory).mkdirs() }
+        writeDbFile(timeentriesSerialized, filename, subDirectory)
+    }
+
+    private fun writeDbFile(value: String, name : String, dbDirectory: String) {
+        val pathname = dbDirectory + name + databaseFileSuffix
+        val dbFileUsers = File(pathname)
+        logTrace("about to write to $pathname")
+        actionQueue.enqueue{ dbFileUsers.writeText(value) }
+    }
+
+    fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
+        return employeeDateTimeEntries.joinToString ("\n") { TimeEntrySurrogate.toSurrogate(it).serialize() }
+    }
+
+    private fun serializeUsers(pmd: PureMemoryDatabase): String {
+        return pmd.users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
+    }
+
+    private fun serializeSessions(pmd: PureMemoryDatabase): String {
+        return pmd.sessions.entries.joinToString("\n") { SessionSurrogate.toSurrogate(it.key, it.value).serialize() }
+    }
+
+    private fun serializeEmployees(pmd: PureMemoryDatabase): String {
+        return pmd.employees.keySet(NullEnum.NULL).joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
+    }
+
+    private fun serializeProjects(pmd: PureMemoryDatabase): String {
+        return pmd.projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
+    }
+
 
 
     /**

@@ -168,7 +168,8 @@ class UITests {
             // start the server
             thread {
                 sc = Server(12345)
-                sc.startServer(Server.initializeBusinessCode())
+                val pmd = Server.makeDatabase()
+                sc.startServer(Server.initializeBusinessCode(pmd))
             }
 
             driver = webDriver.driver()

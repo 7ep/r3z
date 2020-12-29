@@ -69,25 +69,33 @@ class Server(val port: Int) {
         /**
          * Set up the classes necessary for business-related actions, like
          * recording time, and so on
+         */
+        fun initializeBusinessCode(
+            pmd : PureMemoryDatabase
+        ): BusinessCode {
+            val cu = CurrentUser(SYSTEM_USER)
+            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+            val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+            return BusinessCode(tru, au)
+        }
+
+        /**
+         * Initializes the database
          * @param pmd typically you would provide null here, but you can enter a value if you want to inject a mock.  If you
          *            provide a mock, this function will ignore the dbDirectory parameter.
          * @param dbDirectory the database directory.  If you provide a string the system will use that as the directory
          *                    for the disk persistence.  If you provide null then the system will operate in memory-only,
          *                    see PureMemoryDatabase.startMemoryOnly
          */
-        fun initializeBusinessCode(
-            pmd : PureMemoryDatabase? = null,
+        fun makeDatabase(
+            pmd: PureMemoryDatabase? = null,
             dbDirectory: String? = null
-        ): BusinessCode {
-            val cu = CurrentUser(SYSTEM_USER)
-            val myPmd = pmd ?: if (dbDirectory == null) {
+        ): PureMemoryDatabase {
+            return pmd ?: if (dbDirectory == null) {
                 PureMemoryDatabase.startMemoryOnly()
             } else {
                 PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
             }
-            val tru = TimeRecordingUtilities(TimeEntryPersistence(myPmd), cu)
-            val au = AuthenticationUtilities(AuthenticationPersistence(myPmd))
-            return BusinessCode(tru, au)
         }
 
         /**
@@ -96,14 +104,21 @@ class Server(val port: Int) {
          * server socket will be shutdown and some messages about closing the server
          * will log
          */
-        fun addShutdownHook() {
+        fun addShutdownHook(pmd: PureMemoryDatabase) {
             Runtime.getRuntime().addShutdownHook(
                 Thread {
+                    logImperative("Received shutdown command")
+                    logImperative("Shutting down main server thread")
                     cachedThreadPool.shutdown()
                     cachedThreadPool.awaitTermination(10, TimeUnit.SECONDS)
                     halfOpenServerSocket.close()
-                    logImperative("Received shutdown command")
-                    logImperative("Shutting down main server thread")
+
+                    logImperative("Shutting down logging")
+                    loggerPrinter.stop()
+
+                    logImperative("Shutting down the database")
+                    pmd.stop()
+
                     logImperative("Goodbye world!")
                 })
         }

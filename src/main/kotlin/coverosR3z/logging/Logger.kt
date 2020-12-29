@@ -2,6 +2,7 @@ package coverosR3z.logging
 
 import coverosR3z.authentication.CurrentUser
 import coverosR3z.domainobjects.SYSTEM_USER
+import coverosR3z.misc.ActionQueue
 
 enum class LogTypes {
     /**
@@ -17,6 +18,8 @@ enum class LogTypes {
 fun getCurrentMillis() : Long {
     return System.currentTimeMillis()
 }
+
+val loggerPrinter = ActionQueue("loggerPrinter")
 
 /**
  * Set the system to standard configuration for which
@@ -54,6 +57,7 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     fun debug(msg: String) {
         logDebug(msg, cu)
     }
+
 }
 
 /**
@@ -61,7 +65,7 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  */
 fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (LogConfig.logSettings[LogTypes.AUDIT] == true) {
-        println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: $msg")
+        loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: $msg") }
     }
 }
 
@@ -70,7 +74,7 @@ fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  */
 fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (LogConfig.logSettings[LogTypes.DEBUG] == true) {
-        println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: $msg")
+        loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: $msg") }
     }
 }
 
@@ -79,7 +83,7 @@ fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
  */
 fun logTrace(msg: String) {
     if (LogConfig.logSettings[LogTypes.TRACE] == true) {
-        println("${getCurrentMillis()} TRACE: $msg")
+        loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: $msg") }
     }
 }
 
@@ -88,16 +92,17 @@ fun logTrace(msg: String) {
  */
 fun logTrace(msg: () -> String) {
     if (LogConfig.logSettings[LogTypes.TRACE] == true) {
-        println("${getCurrentMillis()} TRACE: ${msg()}")
+        loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: ${msg()}") }
     }
 }
 
 /**
- * Logs nearly extraneous levels of detail.
+ * Logs items that could be concerning to the operations team.  Like
+ * a missing database file.
  */
 fun logWarn(msg: String) {
     if (LogConfig.logSettings[LogTypes.WARN] == true) {
-        println("${getCurrentMillis()} WARN: $msg")
+        loggerPrinter.enqueue { println("${getCurrentMillis()} WARN: $msg") }
     }
 }
 

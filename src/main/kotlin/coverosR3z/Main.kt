@@ -14,10 +14,13 @@ fun main(args: Array<String>) {
 
     val serverOptions = extractCommandLineOptions(args)
 
-    Server.addShutdownHook()
     logImperative("starting server on port ${serverOptions.port}")
     logImperative("database directory is ${serverOptions.dbDirectory}")
-    Server(serverOptions.port).startServer(Server.initializeBusinessCode(dbDirectory = serverOptions.dbDirectory))
+
+    val pmd = Server.makeDatabase(dbDirectory = serverOptions.dbDirectory)
+    val businessObjects = Server.initializeBusinessCode(pmd)
+    Server.addShutdownHook(pmd)
+    Server(serverOptions.port).startServer(businessObjects)
 
 }
 
