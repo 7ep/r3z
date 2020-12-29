@@ -28,6 +28,20 @@ class ConcurrentSet<T> : Iterable<T>{
     }
 
     /**
+     * Adds all of the elements of the specified collection to this collection.
+     *
+     * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
+     */
+    fun addAll(elements: Collection<T>): Boolean {
+        var didAdd = false
+        for (element in elements) {
+            map[element] = NullEnum.NULL
+            didAdd = true
+        }
+        return didAdd
+    }
+
+    /**
      * Removes an item from this collection
      */
     fun remove(item: T) {

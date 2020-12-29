@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = ConcurrentSet(),
                          private val users: ConcurrentSet<User> = ConcurrentSet(),
                          private val projects: ConcurrentSet<Project> = ConcurrentSet(),
-                         private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = ConcurrentHashMap(),
+                         private val timeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = ConcurrentHashMap(),
                          private val sessions: ConcurrentSet<Session> = ConcurrentSet(),
                          private val dbDirectory : String? = null
 ) {
@@ -52,7 +52,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
     fun addTimeEntry(
         timeEntry: TimeEntryPreDatabase,
-        timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries
+        timeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = this.timeEntries
     ): TimeEntry {
         /**
          * Static version of this code so we can use it during deserialization as well as
@@ -60,10 +60,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          */
         // get the data for a particular employee
         var employeeTimeEntries = timeEntries[timeEntry.employee]
+
         // if the data is null (the employee has never added time entries), create an empty map for them
         // and set that as the variable we'll use for the rest of this method
         if (employeeTimeEntries == null) {
-            employeeTimeEntries = mutableSetOf()
+            employeeTimeEntries = ConcurrentSet()
             timeEntries[timeEntry.employee] = employeeTimeEntries
         }
         // add the new data
@@ -319,18 +320,18 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             val users = readAndDeserializeUsers(dbDirectory)
             val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
             val employees = readAndDeserializeEmployees(dbDirectory)
-            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.toMutableSet(), projects)
+            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
 
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
         }
 
         private fun readAndDeserializeTimeEntries(
             dbDirectory: String,
-            employees: MutableSet<Employee>,
-            projects: ConcurrentSet<Project>) : MutableMap<Employee, MutableSet<TimeEntry>> {
+            employees: ConcurrentSet<Employee>,
+            projects: ConcurrentSet<Project>) : ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> {
             val timeEntriesDirectory = "timeentries/"
             return try {
-                val fullTimeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = ConcurrentHashMap()
+                val fullTimeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = ConcurrentHashMap()
 
                 for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
                     val employee : Employee = try {
@@ -338,7 +339,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                     } catch (ex : NoSuchElementException) {
                         throw DatabaseCorruptedException("Unable to find an employee with the id of ${employeeDirectory.name} based on entry in $timeEntriesDirectory")
                     }
-                    val simpleTimeEntries = mutableSetOf<TimeEntry>()
+                    val simpleTimeEntries = ConcurrentSet<TimeEntry>()
 
                     // loop through all the files of time entries for this employee, collecting them
                     val timeEntryFiles = employeeDirectory.listFiles()

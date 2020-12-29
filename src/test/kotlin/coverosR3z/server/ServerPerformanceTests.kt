@@ -47,7 +47,6 @@ class ServerPerformanceTests {
      * I used this to see just how fast the server ran.  Able to get
      * 25,000 requests per second on 12/26/2020
      */
-    @Ignore
     @Test
     fun testEnterTime_PERFORMANCE() {
         // so we don't see spam
