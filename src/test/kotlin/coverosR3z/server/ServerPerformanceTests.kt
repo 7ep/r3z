@@ -2,11 +2,10 @@ package coverosR3z.server
 
 import coverosR3z.*
 import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.domainobjects.Date
-import coverosR3z.domainobjects.Hash
-import coverosR3z.domainobjects.Project
+import coverosR3z.domainobjects.*
 import coverosR3z.logging.LogConfig
 import coverosR3z.logging.LogTypes
+import coverosR3z.logging.logAudit
 import coverosR3z.misc.getTime
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.EnterTimeAPI
@@ -44,24 +43,27 @@ class ServerPerformanceTests {
     }
 
     /**
-     * I used this to see just how fast the server ran.  Able to get
-     * 25,000 requests per second on 12/26/2020
+     * Fastest I've seen is 4088 time entries per second,
+     * for five threads and 1000 entries, it took 1.223 seconds
      */
     @Test
     fun testEnterTime_PERFORMANCE() {
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
+        LogConfig.logSettings[LogTypes.AUDIT] = false
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedTimeEntries(10, newProject) }
+            val threadList = (1..2).map { makeClientThreadRepeatedTimeEntries(100, newProject) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
+
         // turn logging back on for other tests
         LogConfig.logSettings[LogTypes.DEBUG] = true
+        LogConfig.logSettings[LogTypes.AUDIT] = true
     }
 
 
@@ -76,6 +78,7 @@ class ServerPerformanceTests {
 
     /**
      * Enters time for a user on many days
+     * @param numRequests The number of requests this client will send to the server.
      */
     private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project): Thread {
         return thread {
@@ -89,7 +92,7 @@ class ServerPerformanceTests {
                 )
             for (i in 1..numRequests) {
                 val data = mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 100).stringValue,
+                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 20).stringValue,
                     EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "some details go here",
                     EnterTimeAPI.Elements.PROJECT_INPUT.elemName to project.id.value.toString(),
                     EnterTimeAPI.Elements.TIME_INPUT.elemName to "1",
