@@ -9,6 +9,7 @@ import coverosR3z.logging.logWarn
 import coverosR3z.misc.*
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -23,12 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = ConcurrentSet(),
                          private val users: ConcurrentSet<User> = ConcurrentSet(),
                          private val projects: ConcurrentSet<Project> = ConcurrentSet(),
-                         private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf(),
-
-                         /**
-                         * a map between randomly-created letter-number strings, and a given
-                         * user.  If a user exists in this data, it means they are currently authenticated.
-                         */
+                         private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = ConcurrentHashMap(),
                          private val sessions: ConcurrentSet<Session> = ConcurrentSet(),
                          private val dbDirectory : String? = null
 ) {
@@ -39,6 +35,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     private val nextEmployeeIndex = AtomicInteger(employees.size+1)
     private val nextUserIndex = AtomicInteger(users.size+1)
     private val nextProjectIndex = AtomicInteger(projects.size+1)
+    private val nextTimeEntryIndex = AtomicInteger(timeEntries.size+1)
 
     private val actionQueue = ActionQueue("DatabaseWriter")
 
@@ -48,12 +45,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             employees = this.employees.map{Employee(it.id, it.name)}.toConcurrentSet(),
             users = this.users.map{User(it.id, it.name, it.hash, it.salt, it.employeeId)}.toConcurrentSet(),
             projects = this.projects.map{Project(it.id, it.name)}.toConcurrentSet(),
-            timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(mutableMapOf()),
+            timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(ConcurrentHashMap()),
             sessions = this.sessions.map {Session(it.sessionId, it.user, it.dt)}.toConcurrentSet(),
         )
     }
 
-    @Synchronized
     fun addTimeEntry(
         timeEntry: TimeEntryPreDatabase,
         timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = this.timeEntries
@@ -71,7 +67,8 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             timeEntries[timeEntry.employee] = employeeTimeEntries
         }
         // add the new data
-        val newIndex = employeeTimeEntries.size + 1
+        val newIndex = nextTimeEntryIndex.getAndIncrement()
+
         logTrace("new time-entry index is $newIndex")
         val newTimeEntry = TimeEntry(
             newIndex,
@@ -333,7 +330,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             projects: ConcurrentSet<Project>) : MutableMap<Employee, MutableSet<TimeEntry>> {
             val timeEntriesDirectory = "timeentries/"
             return try {
-                val fullTimeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf()
+                val fullTimeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = ConcurrentHashMap()
 
                 for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
                     val employee : Employee = try {
@@ -362,7 +359,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 fullTimeEntries
             } catch (ex : NoTimeEntriesOnDiskException) {
                 logWarn("No time entries were found on disk, initializing new empty data")
-                mutableMapOf()
+                ConcurrentHashMap()
             }
         }
 
