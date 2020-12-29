@@ -46,6 +46,12 @@ class ConcurrentSet<T> : Iterable<T>{
         return result
     }
 
+    companion object {
+
+        fun <T> concurrentSetOf(vararg elements: T): ConcurrentSet<T> = elements.toList().toConcurrentSet()
+
+    }
+
 }
 
 fun <T> List<T>.toConcurrentSet() : ConcurrentSet<T> {
