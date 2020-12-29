@@ -303,14 +303,14 @@ class AuthenticationUtilitiesTests {
         au.logout(user1)
 
         // check that user1 lacks sessions and user2 still has theirs
-        assertTrue(pmd.getAllSessions().none{it.value.user == user1})
-        assertEquals(1, pmd.getAllSessions().filter {it.value.user == user2}.size)
+        assertTrue(pmd.getAllSessions().none{it.user == user1})
+        assertEquals(1, pmd.getAllSessions().filter {it.user == user2}.size)
         pmd.stop()
 
         // test out loading it from the disk
         val pmd2 = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = DEFAULT_DB_DIRECTORY)
-        assertTrue(pmd2.getAllSessions().none{it.value.user == user1})
-        assertEquals(1, pmd2.getAllSessions().filter {it.value.user == user2}.size)
+        assertTrue(pmd2.getAllSessions().none{it.user == user1})
+        assertEquals(1, pmd2.getAllSessions().filter {it.user == user2}.size)
     }
 
     /**

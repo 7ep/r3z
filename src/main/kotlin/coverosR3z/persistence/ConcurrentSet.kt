@@ -20,8 +20,18 @@ class ConcurrentSet<T> : Iterable<T>{
         NULL
     }
 
-    fun add(t : T) {
-        map[t] = NullEnum.NULL
+    /**
+     * Adds an item to this collection
+     */
+    fun add(item : T) {
+        map[item] = NullEnum.NULL
+    }
+
+    /**
+     * Removes an item from this collection
+     */
+    fun remove(item: T) {
+        map.remove(checkNotNull(item))
     }
 
     override fun iterator(): Iterator<T> {

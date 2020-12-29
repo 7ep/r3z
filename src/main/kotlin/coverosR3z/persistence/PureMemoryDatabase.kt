@@ -29,7 +29,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                          * a map between randomly-created letter-number strings, and a given
                          * user.  If a user exists in this data, it means they are currently authenticated.
                          */
-                         private val sessions: MutableMap<String, Session> = mutableMapOf(),
+                         private val sessions: ConcurrentSet<Session> = ConcurrentSet(),
                          private val dbDirectory : String? = null
 ) {
 
@@ -49,7 +49,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             users = this.users.map{User(it.id, it.name, it.hash, it.salt, it.employeeId)}.toConcurrentSet(),
             projects = this.projects.map{Project(it.id, it.name)}.toConcurrentSet(),
             timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(mutableMapOf()),
-            sessions = this.sessions.map {Pair(it.key, it.value)}.toMap(mutableMapOf())
+            sessions = this.sessions.map {Session(it.sessionId, it.user, it.dt)}.toConcurrentSet(),
         )
     }
 
@@ -156,38 +156,47 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE
     }
 
+    /**
+     * Get a snapshot, a copy, at this point in time
+     */
     fun getAllEmployees() : List<Employee> {
         return employees.toList()
     }
 
+    /**
+     * Get a snapshot, a copy, at this point in time
+     */
     fun getAllUsers(): List<User> {
         return users.toList()
     }
 
+    /**
+     * Get a snapshot, a copy, at this point in time
+     */
     fun getAllProjects(): List<Project> {
         return projects.toList()
     }
 
-    fun getAllSessions(): Map<String, Session> {
-        return sessions.toMap()
+    /**
+     * Get a snapshot, a copy, at this point in time
+     */
+    fun getAllSessions(): List<Session> {
+        return sessions.toList()
     }
 
-
-    @Synchronized
     fun addNewSession(sessionToken: String, user: User, time: DateTime) {
-        require (sessions[sessionToken] == null) {"There must not already exist a session for (${user.name}) if we are to create one"}
-        sessions[sessionToken] = Session(user, time)
+        require (sessions.none {it.sessionId == sessionToken}) {"There must not already exist a session for (${user.name}) if we are to create one"}
+        sessions.add(Session(sessionToken, user, time))
         serializeSessionsToDisk(this, dbDirectory)
     }
 
     fun getUserBySessionToken(sessionToken: String): User {
-        return sessions[sessionToken]?.user ?: NO_USER
+        return sessions.singleOrNull { it.sessionId == sessionToken }?.user ?: NO_USER
     }
 
-    @Synchronized
     fun removeSession(user: User) {
-        check(sessions.any{it.value.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"}
-        sessions.filter{it.value.user == user}.keys.forEach { sessions.remove(it) }
+        check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"}
+        sessions.filter{it.user == user}.forEach { sessions.remove(it) }
         serializeSessionsToDisk(this, dbDirectory)
     }
 
@@ -367,13 +376,13 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             }
         }
 
-        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): MutableMap<String, Session> {
+        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): ConcurrentSet<Session> {
             return try {
                 val sessionsFile = readFile(dbDirectory, "sessions")
                 deserializeSessions(sessionsFile, users)
             } catch (ex: FileNotFoundException) {
                 logWarn("sessions file missing, creating empty")
-                mutableMapOf()
+                ConcurrentSet()
             }
         }
 
@@ -405,8 +414,8 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             return employeesFile.split("\n").map{EmployeeSurrogate.deserializeToEmployee(it)}.toConcurrentSet()
         }
 
-        private fun deserializeSessions(sessionsFile: String, users: Set<User>): MutableMap<String, Session> {
-            return sessionsFile.split("\n").map{SessionSurrogate.deserializeToSession(it, users)}.toMap().toMutableMap()
+        private fun deserializeSessions(sessionsFile: String, users: Set<User>): ConcurrentSet<Session> {
+            return sessionsFile.split("\n").map{SessionSurrogate.deserializeToSession(it, users)}.toConcurrentSet()
         }
 
         private fun deserializeUsers(usersFile: String): ConcurrentSet<User> {
@@ -487,7 +496,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     }
 
     private fun serializeSessions(pmd: PureMemoryDatabase): String {
-        return pmd.sessions.entries.joinToString("\n") { SessionSurrogate.toSurrogate(it.key, it.value).serialize() }
+        return pmd.sessions.joinToString("\n") { SessionSurrogate.toSurrogate(it).serialize() }
     }
 
     private fun serializeEmployees(pmd: PureMemoryDatabase): String {
@@ -707,21 +716,21 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 }
             }
 
-            fun deserializeToSession(str: String, users: Set<User>) : Pair<String, Session> {
+            fun deserializeToSession(str: String, users: Set<User>) : Session {
                 return fromSurrogate(deserialize(str), users)
             }
 
-            fun toSurrogate(sessionStr: String, s : Session) : SessionSurrogate {
-                return SessionSurrogate(sessionStr, s.user.id.value, s.dt.epochSecond)
+            fun toSurrogate(s : Session) : SessionSurrogate {
+                return SessionSurrogate(s.sessionId, s.user.id.value, s.dt.epochSecond)
             }
 
-            private fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Pair<String, Session> {
+            private fun fromSurrogate(ss: SessionSurrogate, users: Set<User>) : Session {
                 val user = try {
                     users.single { it.id.value == ss.id }
                 } catch (ex : NoSuchElementException) {
                     throw DatabaseCorruptedException("Unable to find a user with the id of ${ss.id}.  User set size: ${users.size}")
                 }
-                return Pair(ss.sessionStr, Session(user, DateTime(ss.epochSecond)))
+                return Session(ss.sessionStr, user, DateTime(ss.epochSecond))
             }
         }
     }
