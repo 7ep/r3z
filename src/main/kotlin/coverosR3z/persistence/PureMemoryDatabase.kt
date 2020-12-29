@@ -111,7 +111,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return newEmployee
     }
 
-    @Synchronized
     fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
         logTrace("PMD: adding new user, \"${userName.value}\"")
         val newUser = User(UserId(nextUserIndex.getAndIncrement()), userName, hash, salt, employeeId)
