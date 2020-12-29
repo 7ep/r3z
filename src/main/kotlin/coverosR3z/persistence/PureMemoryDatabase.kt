@@ -12,6 +12,16 @@ import coverosR3z.misc.decode
 import coverosR3z.misc.encode
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
+
+enum class NullEnum {
+    /**
+     * This is just a token for the value in the ConcurrentHashMap, since
+     * we are only using the keys, never the values.
+     */
+    NULL
+}
 
 /**
  * Why use those heavy-handed database applications when you
@@ -22,12 +32,12 @@ import java.io.FileNotFoundException
  * @param dbDirectory if this is null, the database won't use the disk at all.  If you set it to a directory, like
  *                      File("db/") the database will use that directory for all persistence.
  */
-class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSetOf(),
+class PureMemoryDatabase(private val employees: ConcurrentHashMap<Employee, NullEnum> = ConcurrentHashMap(),
                          private val users: MutableSet<User> = mutableSetOf(),
                          private val projects: MutableSet<Project> = mutableSetOf(),
                          private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf(),
 
-                        /**
+                         /**
                          * a map between randomly-created letter-number strings, and a given
                          * user.  If a user exists in this data, it means they are currently authenticated.
                          */
@@ -35,10 +45,21 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
                          private val dbDirectory : String? = null
 ) {
 
+    /**
+     * The next identifier for an employee that is created.
+     */
+    private val nextEmployeeIndex = AtomicInteger(employees.size+1)
+
 
     fun copy(): PureMemoryDatabase {
+        val employeesMap = ConcurrentHashMap<Employee, NullEnum>()
+        this.employees
+            .map{Employee(it.key.id, it.key.name)}
+            .forEach{employeesMap[it] = NullEnum.NULL}
+
         return PureMemoryDatabase(
-            employees = this.employees.map{Employee(it.id, it.name)}.toMutableSet(),
+
+            employees = employeesMap,
             users = this.users.map{User(it.id, it.name, it.hash, it.salt, it.employeeId)}.toMutableSet(),
             projects = this.projects.map{Project(it.id, it.name)}.toMutableSet(),
             timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(mutableMapOf()),
@@ -62,13 +83,10 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         return newProject
     }
 
-    @Synchronized
     fun addNewEmployee(employeename: EmployeeName) : Employee {
-        logTrace("PMD: adding new employee, \"${employeename.value}\"")
-        val newIndex = employees.size + 1
-        logTrace("PMD: new employee index: $newIndex")
-        val newEmployee = Employee(EmployeeId(newIndex), EmployeeName(employeename.value))
-        employees.add(newEmployee)
+        logTrace{"PMD: adding new employee, \"${employeename.value}\""}
+        val newEmployee = Employee(EmployeeId(nextEmployeeIndex.getAndIncrement()), EmployeeName(employeename.value))
+        employees[newEmployee] = NullEnum.NULL
         serializeEmployeesToDisk(this, dbDirectory)
         return newEmployee
     }
@@ -120,11 +138,11 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     fun getEmployeeById(id: EmployeeId): Employee {
-        return employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE
+        return employees.keySet(NullEnum.NULL).singleOrNull {it.id == id} ?: NO_EMPLOYEE
     }
 
     fun getAllEmployees() : List<Employee> {
-        return employees.toList()
+        return employees.keySet(NullEnum.NULL).toList()
     }
 
     fun getAllUsers(): List<User> {
@@ -183,7 +201,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
     }
 
     fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {
-        val employee = employees.single { it.id == employeeId }
+        val employee = employees.keySet(NullEnum.NULL).single { it.id == employeeId }
         val setOfTimeEntries = checkNotNull(timeEntries[employee])
         check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
         setOfTimeEntries.add(newEntry)
@@ -317,7 +335,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
         }
 
         private fun serializeEmployees(pmd: PureMemoryDatabase): String {
-            return pmd.employees.joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
+            return pmd.employees.keySet(NullEnum.NULL).joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
         }
 
         private fun serializeProjects(pmd: PureMemoryDatabase): String {
@@ -340,7 +358,7 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             val users = readAndDeserializeUsers(dbDirectory)
             val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
             val employees = readAndDeserializeEmployees(dbDirectory)
-            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
+            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.keySet(NullEnum.NULL).toMutableSet(), projects)
 
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
         }
@@ -401,13 +419,15 @@ class PureMemoryDatabase(private val employees: MutableSet<Employee> = mutableSe
             }
         }
 
-        private fun readAndDeserializeEmployees(dbDirectory: String): MutableSet<Employee> {
+        private fun readAndDeserializeEmployees(dbDirectory: String): ConcurrentHashMap<Employee, NullEnum> {
             return try {
+                val newMap = ConcurrentHashMap<Employee, NullEnum>()
                 val employeesFile = readFile(dbDirectory, "employees")
-                deserializeEmployees(employeesFile)
+                deserializeEmployees(employeesFile).forEach{newMap[it] = NullEnum.NULL}
+                return newMap
             } catch (ex: FileNotFoundException) {
                 logWarn("employees file missing, creating empty")
-                mutableSetOf()
+                ConcurrentHashMap()
             }
         }
 
