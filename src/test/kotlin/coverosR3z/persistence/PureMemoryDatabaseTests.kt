@@ -6,6 +6,7 @@ import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.logging.logAudit
 import coverosR3z.logging.loggerPrinter
 import coverosR3z.misc.getTime
+import coverosR3z.persistence.ConcurrentSet.Companion.concurrentSetOf
 import coverosR3z.persistence.PureMemoryDatabase.Companion.databaseFileSuffix
 import org.junit.*
 import org.junit.Assert.*
@@ -213,12 +214,15 @@ class PureMemoryDatabaseTests {
     @Test
     fun testSerializingTimeEntries_PERFORMANCE() {
         val numTimeEntries = 1000
-        val projects = mutableSetOf(DEFAULT_PROJECT)
-        val employees = mutableSetOf(DEFAULT_EMPLOYEE)
-        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, projects, employees)
+        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, DEFAULT_PROJECT, DEFAULT_EMPLOYEE)
 
         val (timeToSerialize, serializedTimeEntries) = getTime{pmd.serializeTimeEntries(timeEntries)}
-        val (timeToDeserialize, _) = getTime{PureMemoryDatabase.deserializeTimeEntries(serializedTimeEntries, employees, projects)}
+        val (timeToDeserialize, _) = getTime{
+            PureMemoryDatabase.deserializeTimeEntries(
+                serializedTimeEntries,
+                DEFAULT_EMPLOYEE,
+                concurrentSetOf(DEFAULT_PROJECT))
+        }
 
         logAudit("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
         logAudit("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
@@ -871,14 +875,14 @@ class PureMemoryDatabaseTests {
      alt-text: Helper Methods
      */
 
-    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int, projects: MutableSet<Project>, employees: MutableSet<Employee>): MutableSet<TimeEntry> {
+    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int, project : Project, employee : Employee): MutableSet<TimeEntry> {
         val timeEntries: MutableSet<TimeEntry> = mutableSetOf()
         for (i in 1..numTimeEntries) {
             timeEntries.add(
                 TimeEntry(
                     i,
-                    employees.first(),
-                    projects.first(),
+                    employee,
+                    project,
                     Time(100),
                     A_RANDOM_DAY_IN_JUNE_2020,
                     Details("I was lazing on a sunday afternoon")

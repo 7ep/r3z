@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = ConcurrentSet(),
                          private val users: ConcurrentSet<User> = ConcurrentSet(),
-                         private val projects: MutableSet<Project> = mutableSetOf(),
+                         private val projects: ConcurrentSet<Project> = ConcurrentSet(),
                          private val timeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf(),
 
                          /**
@@ -38,6 +38,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private val nextEmployeeIndex = AtomicInteger(employees.size+1)
     private val nextUserIndex = AtomicInteger(users.size+1)
+    private val nextProjectIndex = AtomicInteger(projects.size+1)
 
     private val actionQueue = ActionQueue("DatabaseWriter")
 
@@ -46,7 +47,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
             employees = this.employees.map{Employee(it.id, it.name)}.toConcurrentSet(),
             users = this.users.map{User(it.id, it.name, it.hash, it.salt, it.employeeId)}.toConcurrentSet(),
-            projects = this.projects.map{Project(it.id, it.name)}.toMutableSet(),
+            projects = this.projects.map{Project(it.id, it.name)}.toConcurrentSet(),
             timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(mutableMapOf()),
             sessions = this.sessions.map {Pair(it.key, it.value)}.toMap(mutableMapOf())
         )
@@ -92,12 +93,9 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         // return the time entry
     }
 
-    @Synchronized
     fun addNewProject(projectName: ProjectName) : Project {
         logTrace("PMD: adding new project, \"${projectName.value}\"")
-        val newIndex = projects.size + 1
-        logTrace("PMD: new project index: $newIndex")
-        val newProject = Project(ProjectId(newIndex), ProjectName(projectName.value))
+        val newProject = Project(ProjectId(nextProjectIndex.getAndIncrement()), ProjectName(projectName.value))
         projects.add(newProject)
         serializeProjectsToDisk(this, dbDirectory)
         return newProject
@@ -320,7 +318,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
         }
 
-        private fun readAndDeserializeTimeEntries(dbDirectory: String, employees: MutableSet<Employee>, projects: MutableSet<Project>): MutableMap<Employee, MutableSet<TimeEntry>> {
+        private fun readAndDeserializeTimeEntries(
+            dbDirectory: String,
+            employees: MutableSet<Employee>,
+            projects: ConcurrentSet<Project>) : MutableMap<Employee, MutableSet<TimeEntry>> {
             val timeEntriesDirectory = "timeentries/"
             return try {
                 val fullTimeEntries: MutableMap<Employee, MutableSet<TimeEntry>> = mutableMapOf()
@@ -340,7 +341,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                     }
                     for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
                         try {
-                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), setOf(employee), projects))
+                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), employee, projects))
                         } catch (ex : DatabaseCorruptedException) {
                             throw DatabaseCorruptedException("Could not deserialize time entry file ${monthlyTimeEntries.name}.  ${ex.message}", ex.ex)
                         }
@@ -386,18 +387,18 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             }
         }
 
-        private fun readAndDeserializeProjects(dbDirectory: String): MutableSet<Project> {
+        private fun readAndDeserializeProjects(dbDirectory: String): ConcurrentSet<Project> {
             return try {
                 val projectsFile = readFile(dbDirectory, "projects")
                 deserializeProjects(projectsFile)
             } catch (ex: FileNotFoundException) {
                 logWarn("projects file missing, creating empty")
-                mutableSetOf()
+                ConcurrentSet()
             }
         }
 
-        private fun deserializeProjects(projectsFile: String): MutableSet<Project> {
-            return projectsFile.split("\n").map{ProjectSurrogate.deserializeToProject(it)}.toMutableSet()
+        private fun deserializeProjects(projectsFile: String): ConcurrentSet<Project> {
+            return projectsFile.split("\n").map{ProjectSurrogate.deserializeToProject(it)}.toConcurrentSet()
         }
 
         private fun deserializeEmployees(employeesFile: String): ConcurrentSet<Employee> {
@@ -412,7 +413,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toConcurrentSet()
         }
 
-        fun deserializeTimeEntries(timeEntries: String, employees: Set<Employee>, projects: Set<Project>): Set<TimeEntry> {
+        fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
             return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
         }
 
@@ -543,16 +544,15 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 }
             }
 
-            fun deserializeToTimeEntry(str: String, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-                return fromSurrogate(deserialize(str), employees, projects)
+            fun deserializeToTimeEntry(str: String, employee: Employee, projects: ConcurrentSet<Project>) : TimeEntry {
+                return fromSurrogate(deserialize(str), employee, projects)
             }
 
             fun toSurrogate(te : TimeEntry) : TimeEntrySurrogate {
                 return TimeEntrySurrogate(te.id, te.employee.id.value, te.project.id.value, te.time.numberOfMinutes, te.date.epochDay, te.details.value)
             }
 
-            private fun fromSurrogate(te: TimeEntrySurrogate, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-                val employee = employees.single { it.id == EmployeeId(te.e) }
+            private fun fromSurrogate(te: TimeEntrySurrogate, employee: Employee, projects: ConcurrentSet<Project>) : TimeEntry {
                 val project = try {
                     projects.single { it.id == ProjectId(te.p) }
                 } catch (ex : NoSuchElementException) {
