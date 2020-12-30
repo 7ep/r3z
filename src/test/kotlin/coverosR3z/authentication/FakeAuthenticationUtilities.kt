@@ -1,12 +1,13 @@
 package coverosR3z.authentication
 
+import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.*
 
 /**
  * Used as a mock object for testing
  */
 class FakeAuthenticationUtilities (
-    var registerBehavior : () -> RegistrationResult = {RegistrationResult.SUCCESS},
+    var registerBehavior : () -> RegistrationResult = { RegistrationResult(RegistrationResultStatus.SUCCESS, DEFAULT_USER) },
     var loginBehavior : () -> Pair<LoginResult, User> = {Pair(LoginResult.SUCCESS, SYSTEM_USER)},
     var getUserForSessionBehavior: () -> User = { NO_USER },
     var createNewSessionBehavior: () -> String = {""},

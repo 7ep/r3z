@@ -29,7 +29,7 @@ class RegisterAPI {
         val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
         val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.elemName])
         val result = au.register(username, password, employeeId)
-        return if (result == RegistrationResult.SUCCESS) {
+        return if (result.status == RegistrationResultStatus.SUCCESS) {
             okHTML(successHTML)
         } else {
             okHTML(failureHTML)

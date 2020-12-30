@@ -61,7 +61,8 @@ class AuthenticationBDD {
         val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         b.markDone("when I try to register again,")
 
-        assertEquals("The user shouldn't be allowed to register again", RegistrationResult.USERNAME_ALREADY_REGISTERED, result)
+        assertEquals("The user shouldn't be allowed to register again",
+            RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, result.status)
         b.markDone("then the system records that the registration failed.")
     }
 
@@ -85,7 +86,7 @@ class AuthenticationBDD {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
         val au = AuthenticationUtilities(authPersistence)
         val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
-        assertEquals(RegistrationResult.SUCCESS, regStatus)
+        assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
         b.markDone("Given I have registered,")
 
         val (status, _) = au.login(DEFAULT_USER.name, Password("I'm not even trying to be a good password"))

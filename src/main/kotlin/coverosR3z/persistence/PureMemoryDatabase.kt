@@ -145,9 +145,9 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     }
 
     /**
-     * carry out some action on the [User] set of data.
+     * carry out some action on the [Session] set of data.
      * @param shouldSerialize if true, carry out serialization and persistence to disk
-     * @param action a lambda to receive the set of users and do whatever you want with it
+     * @param action a lambda to receive the set of sessions and do whatever you want with it
      */
     fun <R> actOnSessions(shouldSerialize : Boolean = false, action: (ConcurrentSet<Session>) -> R) : R
     {
@@ -157,10 +157,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             serializeSessionsToDisk(this, dbDirectory)
 
         return result
-    }
-
-    fun getUserByName(name: UserName) : User {
-        return users.singleOrNull { u -> u.name == name } ?: NO_USER
     }
 
     fun getProjectById(id: ProjectId) : Project {

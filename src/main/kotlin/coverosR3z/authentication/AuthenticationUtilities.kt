@@ -14,12 +14,12 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
-            ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
+            val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
             logDebug("User registration successful for \"${username.value}\"")
-            RegistrationResult.SUCCESS
+            RegistrationResult(RegistrationResultStatus.SUCCESS, newUser)
         } else {
             logDebug("User ${username.value} could not be registered: already registered")
-            RegistrationResult.USERNAME_ALREADY_REGISTERED
+            RegistrationResult(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, NO_USER)
         }
     }
 

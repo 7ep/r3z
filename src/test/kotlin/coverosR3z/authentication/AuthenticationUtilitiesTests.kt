@@ -118,7 +118,7 @@ class AuthenticationUtilitiesTests {
 
         val result = authUtils.register(DEFAULT_USER.name, DEFAULT_PASSWORD, null)
 
-        assertEquals(RegistrationResult.USERNAME_ALREADY_REGISTERED, result)
+        assertEquals(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, result.status)
     }
 
     @Test
@@ -291,10 +291,8 @@ class AuthenticationUtilitiesTests {
         val au = AuthenticationUtilities(authPersistence)
 
         // we have to register users so reloading the data from disk works
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
-        val user1 = pmd.getUserByName(DEFAULT_USER.name)
-        au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD)
-        val user2 = pmd.getUserByName(DEFAULT_USER_2.name)
+        val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val (_, user2) = au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD)
 
         au.createNewSession(user1, DEFAULT_DATETIME) { "abc" }
         au.createNewSession(user1, DEFAULT_DATETIME) { "def" }
