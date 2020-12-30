@@ -198,6 +198,13 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         serializeSessionsToDisk(this, dbDirectory)
     }
 
+    fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {
+        val employee = employees.single { it.id == employeeId }
+        val setOfTimeEntries = checkNotNull(timeEntries[employee])
+        check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
+        setOfTimeEntries.add(newEntry)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -222,13 +229,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return result
     }
 
-    fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {
-        val employee = employees.single { it.id == employeeId }
-        val setOfTimeEntries = checkNotNull(timeEntries[employee])
-        check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
-        setOfTimeEntries.add(newEntry)
-    }
-
     /**
      * This function will stop the database cleanly.
      *
@@ -245,6 +245,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     companion object {
 
         private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+        const val databaseFileSuffix = ".db"
 
         /**
          * This factory method handles the nitty-gritty about starting
@@ -299,10 +300,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
             return pmd
         }
-
-
-        const val databaseFileSuffix = ".db"
-
 
         /**
          * Deserializes the database from file, or returns null if no
