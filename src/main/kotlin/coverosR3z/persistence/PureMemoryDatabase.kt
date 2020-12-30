@@ -138,6 +138,36 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return timeEntries[employee]?.filter{it.date == date}?.toSet() ?: emptySet()
     }
 
+    /**
+     * carry out some action on the [User] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of users and do whatever you want with it
+     */
+    fun <R> actOnUsers(shouldSerialize : Boolean = false, action: (ConcurrentSet<User>) -> R) : R
+    {
+        val result = action.invoke(users)
+
+        if (shouldSerialize)
+            serializeUsersToDisk(this, dbDirectory)
+
+        return result
+    }
+
+    /**
+     * carry out some action on the [User] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of users and do whatever you want with it
+     */
+    fun <R> actOnSessions(shouldSerialize : Boolean = false, action: (ConcurrentSet<Session>) -> R) : R
+    {
+        val result = action.invoke(sessions)
+
+        if (shouldSerialize)
+            serializeSessionsToDisk(this, dbDirectory)
+
+        return result
+    }
+
     fun getUserByName(name: UserName) : User {
         return users.singleOrNull { u -> u.name == name } ?: NO_USER
     }
@@ -173,29 +203,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     fun getAllProjects(): List<Project> {
         return projects.toList()
-    }
-
-    /**
-     * Get a snapshot, a copy, at this point in time
-     */
-    fun getAllSessions(): List<Session> {
-        return sessions.toList()
-    }
-
-    fun addNewSession(sessionToken: String, user: User, time: DateTime) {
-        require (sessions.none {it.sessionId == sessionToken}) {"There must not already exist a session for (${user.name}) if we are to create one"}
-        sessions.add(Session(sessionToken, user, time))
-        serializeSessionsToDisk(this, dbDirectory)
-    }
-
-    fun getUserBySessionToken(sessionToken: String): User {
-        return sessions.singleOrNull { it.sessionId == sessionToken }?.user ?: NO_USER
-    }
-
-    fun removeSession(user: User) {
-        check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"}
-        sessions.filter{it.user == user}.forEach { sessions.remove(it) }
-        serializeSessionsToDisk(this, dbDirectory)
     }
 
     fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {

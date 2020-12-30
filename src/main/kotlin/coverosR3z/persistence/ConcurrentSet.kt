@@ -1,6 +1,7 @@
 package coverosR3z.persistence
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This uses a [ConcurrentHashMap] as its base.  We store
@@ -12,6 +13,8 @@ class ConcurrentSet<T> : Iterable<T>{
     private val map : ConcurrentHashMap<T, NullEnum> = ConcurrentHashMap()
 
     fun size() = map.size
+
+    val nextIndex = AtomicInteger(size()+1)
 
     private enum class NullEnum {
         /**

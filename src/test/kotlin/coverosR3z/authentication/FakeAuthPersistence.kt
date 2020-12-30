@@ -12,6 +12,7 @@ class FakeAuthPersistence(
     var getUserForSessionBehavior: () -> User = { NO_USER },
     var addNewSessionBehavior : () -> Unit = {},
     var deleteSessionBehavior : () -> Unit = {},
+    var getAllSessionBehavior : () -> Set<Session> = { setOf() },
 ) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) {
@@ -36,6 +37,10 @@ class FakeAuthPersistence(
 
     override fun deleteSession(user: User) {
         deleteSessionBehavior()
+    }
+
+    override fun getAllSessions(): Set<Session> {
+        return getAllSessionBehavior()
     }
 
 }

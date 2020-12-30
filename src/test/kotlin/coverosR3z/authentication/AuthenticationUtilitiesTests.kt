@@ -287,7 +287,8 @@ class AuthenticationUtilitiesTests {
     fun testShouldClearAllSessionsWhenLogout() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         val pmd = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = DEFAULT_DB_DIRECTORY)
-        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        val authPersistence = AuthenticationPersistence(pmd)
+        val au = AuthenticationUtilities(authPersistence)
 
         // we have to register users so reloading the data from disk works
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
@@ -303,14 +304,15 @@ class AuthenticationUtilitiesTests {
         au.logout(user1)
 
         // check that user1 lacks sessions and user2 still has theirs
-        assertTrue(pmd.getAllSessions().none{it.user == user1})
-        assertEquals(1, pmd.getAllSessions().filter {it.user == user2}.size)
+        assertTrue(authPersistence.getAllSessions().none{it.user == user1})
+        assertEquals(1, authPersistence.getAllSessions().filter {it.user == user2}.size)
         pmd.stop()
 
         // test out loading it from the disk
         val pmd2 = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = DEFAULT_DB_DIRECTORY)
-        assertTrue(pmd2.getAllSessions().none{it.user == user1})
-        assertEquals(1, pmd2.getAllSessions().filter {it.user == user2}.size)
+        val authPersistence2 = AuthenticationPersistence(pmd2)
+        assertTrue(authPersistence2.getAllSessions().none{it.user == user1})
+        assertEquals(1, authPersistence2.getAllSessions().filter {it.user == user2}.size)
     }
 
     /**

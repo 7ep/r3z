@@ -1,7 +1,9 @@
 package coverosR3z.server
 
 import coverosR3z.*
+import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.IAuthPersistence
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.LogConfig
 import coverosR3z.logging.LogTypes
@@ -24,12 +26,14 @@ class ServerPerformanceTests {
 
     private lateinit var serverObject : Server
     private lateinit var pmd : PureMemoryDatabase
+    private lateinit var ap : IAuthPersistence
     private val fakeAuth = FakeAuthenticationUtilities()
     private lateinit var serverThread : Thread
 
     @Before
     fun init() {
         pmd = PureMemoryDatabase.startMemoryOnly()
+        ap = AuthenticationPersistence(pmd)
         serverObject = Server(12345)
         serverThread = thread {
             serverObject.startServer(Server.initializeBusinessCode(pmd))
@@ -59,7 +63,7 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.AUDIT] = false
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
             val threadList = (1..2).map { makeClientThreadRepeatedTimeEntries(100, newProject) }
@@ -86,7 +90,7 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.AUDIT] = false
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject) }
         makeTimeEntriesThreads.forEach { it.join() }
@@ -116,7 +120,7 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
         val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
             val viewTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedRequestsViewHomepage(50) }
