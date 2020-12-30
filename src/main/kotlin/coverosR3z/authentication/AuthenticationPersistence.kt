@@ -6,8 +6,8 @@ import coverosR3z.persistence.PureMemoryDatabase
 
 class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) {
-        pmd.actOnUsers (shouldSerialize = true) { users ->
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
+        return pmd.actOnUsers (shouldSerialize = true) { users ->
             logTrace("PMD: adding new user, \"${name.value}\"")
             val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)
             users.add(newUser)
@@ -39,6 +39,10 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
 
     override fun getAllSessions(): Set<Session> {
         return pmd.actOnSessions { sessions -> sessions.toSet() }
+    }
+
+    override fun getAllUsers(): Set<User> {
+        return pmd.actOnUsers { users -> users.toSet() }
     }
 
 }

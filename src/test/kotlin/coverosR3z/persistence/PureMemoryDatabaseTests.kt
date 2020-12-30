@@ -221,22 +221,6 @@ class PureMemoryDatabaseTests {
         assertEquals(numberNewEmployeesAdded, pmd.getAllEmployees().size)
     }
 
-    /**
-     * See [testCorruptingEmployeeDataWithMultiThreading]
-     */
-    @Test
-    fun testCorruptingUserDataWithMultiThreading() {
-        val listOfThreads = mutableListOf<Thread>()
-        val numberNewUsersAdded = 20
-        repeat(numberNewUsersAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
-                pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-            })
-        }
-        // wait for all those threads
-        listOfThreads.forEach{it.join()}
-        assertEquals(numberNewUsersAdded, pmd.getAllUsers().size)
-    }
 
     /**
      * See [testCorruptingEmployeeDataWithMultiThreading]
@@ -304,8 +288,9 @@ class PureMemoryDatabaseTests {
     fun testPersistence_Read_MissingSessions() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
         pmd.stop()
@@ -352,7 +337,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -374,7 +359,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.stop()
@@ -396,7 +381,7 @@ class PureMemoryDatabaseTests {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null)
         pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.stop()
@@ -419,7 +404,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.stop()
 
@@ -441,7 +426,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -463,7 +448,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -487,7 +472,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -510,7 +495,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -534,7 +519,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -555,7 +540,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -577,7 +562,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -599,7 +584,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
@@ -621,7 +606,7 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
         val ap = AuthenticationPersistence(pmd)
         val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
         pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))

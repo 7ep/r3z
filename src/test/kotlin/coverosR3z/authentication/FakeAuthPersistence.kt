@@ -1,22 +1,24 @@
 package coverosR3z.authentication
 
+import coverosR3z.DEFAULT_USER
 import coverosR3z.domainobjects.*
 
 /**
  * Used as a mock object for testing
  */
 class FakeAuthPersistence(
-    var createUserBehavior : () -> Unit = {},
+    var createUserBehavior : () -> User = { DEFAULT_USER },
     var isUserRegisteredBehavior : () -> Boolean = {false},
     var getUserBehavior: () -> User = { NO_USER },
     var getUserForSessionBehavior: () -> User = { NO_USER },
     var addNewSessionBehavior : () -> Unit = {},
     var deleteSessionBehavior : () -> Unit = {},
     var getAllSessionBehavior : () -> Set<Session> = { setOf() },
+    var getAllUsersBehavior : () -> Set<User> = { setOf() },
 ) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) {
-        createUserBehavior()
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
+        return createUserBehavior()
     }
 
     override fun isUserRegistered(name: UserName) : Boolean {
@@ -41,6 +43,10 @@ class FakeAuthPersistence(
 
     override fun getAllSessions(): Set<Session> {
         return getAllSessionBehavior()
+    }
+
+    override fun getAllUsers(): Set<User> {
+        return getAllUsersBehavior()
     }
 
 }

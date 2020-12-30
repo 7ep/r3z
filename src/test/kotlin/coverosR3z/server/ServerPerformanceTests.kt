@@ -62,7 +62,7 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
@@ -89,7 +89,7 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
         val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject) }
@@ -119,7 +119,7 @@ class ServerPerformanceTests {
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
-        val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {

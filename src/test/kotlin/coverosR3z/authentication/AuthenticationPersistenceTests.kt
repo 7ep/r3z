@@ -97,4 +97,22 @@ class AuthenticationPersistenceTests {
         assertEquals(numberNewSessionsAdded, ap.getAllSessions().size)
     }
 
+
+    /**
+     * See [coverosR3z.persistence.PureMemoryDatabaseTests.testCorruptingEmployeeDataWithMultiThreading]
+     */
+    @Test
+    fun testCorruptingUserDataWithMultiThreading() {
+        val listOfThreads = mutableListOf<Thread>()
+        val numberNewUsersAdded = 20
+        repeat(numberNewUsersAdded) { // each thread calls the add a single time
+            listOfThreads.add(thread {
+                ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+            })
+        }
+        // wait for all those threads
+        listOfThreads.forEach{it.join()}
+        assertEquals(numberNewUsersAdded, ap.getAllUsers().size)
+    }
+
 }

@@ -33,7 +33,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      * The next identifier for an employee that is created.
      */
     private val nextEmployeeIndex = AtomicInteger(employees.size()+1)
-    private val nextUserIndex = AtomicInteger(users.size()+1)
     private val nextProjectIndex = AtomicInteger(projects.size()+1)
     private val nextTimeEntryIndex = AtomicInteger(timeEntries.size+1)
 
@@ -105,14 +104,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         employees.add(newEmployee)
         serializeEmployeesToDisk(this, dbDirectory)
         return newEmployee
-    }
-
-    fun addNewUser(userName: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
-        logTrace("PMD: adding new user, \"${userName.value}\"")
-        val newUser = User(UserId(nextUserIndex.getAndIncrement()), userName, hash, salt, employeeId)
-        users.add(newUser)
-        serializeUsersToDisk(this, dbDirectory)
-        return newUser
     }
 
     /**
@@ -189,13 +180,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     fun getAllEmployees() : List<Employee> {
         return employees.toList()
-    }
-
-    /**
-     * Get a snapshot, a copy, at this point in time
-     */
-    fun getAllUsers(): List<User> {
-        return users.toList()
     }
 
     /**
