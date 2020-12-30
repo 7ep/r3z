@@ -6,4 +6,4 @@ package coverosR3z.exceptions
  * the queue to be empty before fully shutting down, and
  * someone tries to enqueue something.
  */
-class QueueStoppingException : Throwable()
+class AttemptToAddToStoppingQueueException : Throwable()

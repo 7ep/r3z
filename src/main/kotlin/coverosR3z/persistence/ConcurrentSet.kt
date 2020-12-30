@@ -10,7 +10,8 @@ import java.util.concurrent.ConcurrentHashMap
 class ConcurrentSet<T> : Iterable<T>{
 
     private val map : ConcurrentHashMap<T, NullEnum> = ConcurrentHashMap()
-    val size = map.size
+
+    fun size() = map.size
 
     private enum class NullEnum {
         /**
@@ -52,6 +53,12 @@ class ConcurrentSet<T> : Iterable<T>{
         return map.keySet(NullEnum.NULL).iterator()
     }
 
+    companion object {
+
+        fun <T> concurrentSetOf(vararg elements: T): ConcurrentSet<T> = elements.toList().toConcurrentSet()
+
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -59,21 +66,12 @@ class ConcurrentSet<T> : Iterable<T>{
         other as ConcurrentSet<*>
 
         if (map != other.map) return false
-        if (size != other.size) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = map.hashCode()
-        result = 31 * result + size
-        return result
-    }
-
-    companion object {
-
-        fun <T> concurrentSetOf(vararg elements: T): ConcurrentSet<T> = elements.toList().toConcurrentSet()
-
+        return map.hashCode()
     }
 
 }

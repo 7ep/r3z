@@ -192,7 +192,7 @@ class UITests {
         fun shutDown() {
             createEmployee.writeToFile()
             recordTime.writeToFile()
-            Server.halfOpenServerSocket.close()
+            sc.halfOpenServerSocket.close()
             driver.quit()
         }
 

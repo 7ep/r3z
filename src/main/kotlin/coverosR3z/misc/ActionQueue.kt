@@ -1,6 +1,6 @@
 package coverosR3z.misc
 
-import coverosR3z.exceptions.QueueStoppingException
+import coverosR3z.exceptions.AttemptToAddToStoppingQueueException
 import coverosR3z.logging.logImperative
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
@@ -37,7 +37,7 @@ class ActionQueue(val name : String) {
 
     fun enqueue(action : () -> Unit) {
         if (stop) {
-            throw QueueStoppingException()
+            throw AttemptToAddToStoppingQueueException()
         }
         queue.add(action)
     }

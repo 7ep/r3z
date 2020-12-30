@@ -19,9 +19,9 @@ fun main(args: Array<String>) {
 
     val pmd = Server.makeDatabase(dbDirectory = serverOptions.dbDirectory)
     val businessObjects = Server.initializeBusinessCode(pmd)
-    Server.addShutdownHook(pmd)
-    Server(serverOptions.port).startServer(businessObjects)
-
+    Server(serverOptions.port)
+        .addShutdownHook(pmd)
+        .startServer(businessObjects)
 }
 
 /**

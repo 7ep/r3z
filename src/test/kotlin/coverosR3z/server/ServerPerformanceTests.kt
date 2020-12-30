@@ -5,12 +5,10 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.LogConfig
 import coverosR3z.logging.LogTypes
-import coverosR3z.logging.logAudit
 import coverosR3z.misc.getTime
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.EnterTimeAPI
 import org.junit.*
-import java.net.Socket
 import kotlin.concurrent.thread
 
 /**
@@ -24,25 +22,33 @@ import kotlin.concurrent.thread
  */
 class ServerPerformanceTests {
 
-    private lateinit var client : SocketWrapper
     private lateinit var serverObject : Server
     private lateinit var pmd : PureMemoryDatabase
+    private val fakeAuth = FakeAuthenticationUtilities()
+    private lateinit var serverThread : Thread
 
     @Before
     fun init() {
-        serverObject = Server(12345)
         pmd = PureMemoryDatabase.startMemoryOnly()
-        thread { serverObject.startServer(Server.initializeBusinessCode(pmd)) }
-        val clientSocket = Socket("localhost", 12345)
-        client = SocketWrapper(clientSocket, "client")
+        serverObject = Server(12345)
+        serverThread = thread {
+            serverObject.startServer(Server.initializeBusinessCode(pmd))
+        }
+        if (! serverObject.systemReady) {
+            Thread.sleep(50)
+        }
     }
 
     @After
     fun stopServer() {
-        Server.halfOpenServerSocket.close()
+        // shutdown the server socket so the sockets
+        // don't go into TIME_WAIT
+        serverObject.halfOpenServerSocket.close()
     }
 
     /**
+     * How fast to enter data, the user's time entries
+     *
      * Fastest I've seen is 4088 time entries per second,
      * for five threads and 1000 entries, it took 1.223 seconds
      */
@@ -66,6 +72,95 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.AUDIT] = true
     }
 
+    /**
+     * How fast to see data, the user's time entries.
+     *
+     * Fastest I've seen is 12,801 responses per second
+     * with 200 threads and 1000 requests each,
+     * that's 200,000 requests in 15.623 seconds,
+     */
+    @Test
+    fun testViewTime_PERFORMANCE() {
+        // so we don't see spam
+        LogConfig.logSettings[LogTypes.DEBUG] = false
+        LogConfig.logSettings[LogTypes.AUDIT] = false
+        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
+        val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+
+        val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject) }
+        makeTimeEntriesThreads.forEach { it.join() }
+
+        val (time, _) = getTime {
+            val viewTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedRequestsViewTimeEntries(50) }
+            viewTimeEntriesThreads.forEach { it.join() }
+        }
+
+        println("Time was $time")
+
+        // turn logging back on for other tests
+        LogConfig.logSettings[LogTypes.DEBUG] = true
+        LogConfig.logSettings[LogTypes.AUDIT] = true
+    }
+
+    /**
+     * How fast to see non-dynamic (but not static) content, authenticated
+     *
+     * By non-dynamic, I mean: authHomePageHTML
+     *
+     * fastest was 38,132 responses.  20 threads, 10,000 requests each, in 5.245 seconds
+     */
+    @Test
+    fun testViewStaticContentAuthenticated_PERFORMANCE() {
+        // so we don't see spam
+        LogConfig.logSettings[LogTypes.DEBUG] = false
+        LogConfig.logSettings[LogTypes.AUDIT] = false
+        val newUser = pmd.addNewUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        pmd.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+
+        val (time, _) = getTime {
+            val viewTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedRequestsViewHomepage(50) }
+            viewTimeEntriesThreads.forEach { it.join() }
+        }
+
+        println("Time was $time")
+
+        // turn logging back on for other tests
+        LogConfig.logSettings[LogTypes.DEBUG] = true
+        LogConfig.logSettings[LogTypes.AUDIT] = true
+    }
+
+    /**
+     * How fast to see static content, non-authenticated
+     *
+     * Very odd.  This one is slower than [testViewStaticContentAuthenticated_PERFORMANCE]
+     * Fastest I saw was 60,168 responses per second, 20 threads doing 10,000 requests each in 3.324 seconds.
+     *
+     * Is there a bug?
+     */
+    @Test
+    fun testViewStaticContentUnauthenticated_PERFORMANCE() {
+        // so we don't see spam
+        LogConfig.logSettings[LogTypes.DEBUG] = false
+        LogConfig.logSettings[LogTypes.AUDIT] = false
+
+        // warm up the cache first
+        val thread1 = makeClientThreadRepeatedRequestsGetStaticFile(2)
+        thread1.join()
+
+
+        val (time, _) = getTime {
+            val viewTimeEntriesThreads = (1..5).map { makeClientThreadRepeatedRequestsGetStaticFile(10) }
+            viewTimeEntriesThreads.forEach { it.join() }
+        }
+
+        println("Time was $time")
+
+        // turn logging back on for other tests
+        LogConfig.logSettings[LogTypes.DEBUG] = true
+        LogConfig.logSettings[LogTypes.AUDIT] = true
+    }
+
 
     /*
      _ _       _                  __ __        _    _           _
@@ -75,6 +170,53 @@ class ServerPerformanceTests {
                  |_|
      alt-text: Helper Methods
      */
+
+
+    /**
+     * Simply GETs a user's time entries page
+     */
+    private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int): Thread {
+        return thread {
+            val client =
+                Client.make(Verb.GET, NamedPaths.TIMEENTRIES.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+            for (i in 1..numRequests) {
+                client.send()
+                val result = client.read()
+                Assert.assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
+
+    /**
+     * Simply GETs the homepage
+     */
+    private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int): Thread {
+        return thread {
+            val client =
+                Client.make(Verb.GET, NamedPaths.TIMEENTRIES.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+            for (i in 1..numRequests) {
+                client.send()
+                val result = client.read()
+                Assert.assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
+
+
+    /**
+     * Simply GETs the general.css file
+     */
+    private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int): Thread {
+        return thread {
+            val client =
+                Client.make(Verb.GET, "sample.js", listOf("Connection: keep-alive"), authUtilities = fakeAuth)
+            for (i in 1..numRequests) {
+                client.send()
+                val result = client.read()
+                Assert.assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
 
     /**
      * Enters time for a user on many days
@@ -88,7 +230,7 @@ class ServerPerformanceTests {
                     Verb.POST,
                     NamedPaths.ENTER_TIME.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
-                    authUtilities = FakeAuthenticationUtilities()
+                    authUtilities = fakeAuth
                 )
             for (i in 1..numRequests) {
                 val data = mapOf(

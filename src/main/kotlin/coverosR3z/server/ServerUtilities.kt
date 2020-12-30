@@ -30,6 +30,7 @@ data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingU
  */
 const val CRLF = "\r\n"
 const val CONTENT_LENGTH = "content-length"
+const val maxContentLength = 400_000
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
@@ -225,7 +226,8 @@ private fun readStaticFile(path: String): PreparedResponseData {
             path.takeLast(3) == ".js" -> okJS(fileContents)
             path.takeLast(4) == ".jpg" -> okJPG(fileContents)
             path.takeLast(5) == ".webp" -> okWEBP(fileContents)
-            path.takeLast(5) == ".html" -> okHTML(fileContents)
+            path.takeLast(5) == ".html" ||
+            path.takeLast(4) == ".htm"   -> okHTML(fileContents)
             else -> handleNotFound()
         }
     }
@@ -423,8 +425,6 @@ fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
     try {
         val lengthHeader: String = headers.single { it.toLowerCase().startsWith(CONTENT_LENGTH) }
         val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
-        // arbitrarily setting to 10,000 for now
-        val maxContentLength = 10_000
         checkNotNull(length) {"The length must not be null for this input.  It was: $lengthHeader"}
         check(length <= maxContentLength) {"The Content-length is not allowed to exceed $maxContentLength characters"}
         check(length >= 0) {"Content-length cannot be negative"}

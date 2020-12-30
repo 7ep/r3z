@@ -32,9 +32,9 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     /**
      * The next identifier for an employee that is created.
      */
-    private val nextEmployeeIndex = AtomicInteger(employees.size+1)
-    private val nextUserIndex = AtomicInteger(users.size+1)
-    private val nextProjectIndex = AtomicInteger(projects.size+1)
+    private val nextEmployeeIndex = AtomicInteger(employees.size()+1)
+    private val nextUserIndex = AtomicInteger(users.size()+1)
+    private val nextProjectIndex = AtomicInteger(projects.size()+1)
     private val nextTimeEntryIndex = AtomicInteger(timeEntries.size+1)
 
     private val actionQueue = ActionQueue("DatabaseWriter")
@@ -563,7 +563,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 val project = try {
                     projects.single { it.id == ProjectId(te.p) }
                 } catch (ex : NoSuchElementException) {
-                    throw DatabaseCorruptedException("Unable to find a project with the id of ${te.p}.  Project set size: ${projects.size}")
+                    throw DatabaseCorruptedException("Unable to find a project with the id of ${te.p}.  Project set size: ${projects.size()}")
                 }
                 return TimeEntry(
                         te.i,

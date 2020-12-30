@@ -353,10 +353,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
-        val headers = listOf("Content-Length: 10001", "Content-Type: Blah")
+        val headers = listOf("Content-Length: ${maxContentLength+1}", "Content-Type: Blah")
 
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("Exception occurred for these headers: Content-Length: 10001;Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed 10000 characters", exception.message)
+        assertEquals("Exception occurred for these headers: Content-Length: ${maxContentLength+1};Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed $maxContentLength characters", exception.message)
     }
 
     /**

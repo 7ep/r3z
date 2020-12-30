@@ -23,17 +23,22 @@ import java.util.concurrent.TimeUnit
  */
 class Server(val port: Int) {
 
+
+    lateinit var halfOpenServerSocket : ServerSocket
+    lateinit var cachedThreadPool: ExecutorService
+    var systemReady = false
+
     /**
      * This requires a [BusinessCode] object, see [initializeBusinessCode]
      * for the typical way to create this.
      */
     fun startServer(businessObjects : BusinessCode) {
         halfOpenServerSocket = ServerSocket(port)
-        logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
 
         try {
             cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-
+            systemReady = true
+            logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
             while (true) {
                 logTrace("waiting for socket connection")
                 val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
@@ -41,7 +46,8 @@ class Server(val port: Int) {
             }
         } catch (ex : SocketException) {
             if (ex.message == "Interrupted function call: accept failed") {
-                logWarn("Server was shutdown while waiting on accept")
+                logImperative("Server was shutdown while waiting on accept")
+                systemReady = false
             }
         }
     }
@@ -62,6 +68,37 @@ class Server(val port: Int) {
         logTrace("closing server socket")
         server.close()
     }
+
+    /**
+     * this adds a hook to the Java runtime, so that if the app is running
+     * and a user stops it - by pressing ctrl+c or a unix "kill" command - the
+     * server socket will be shutdown and some messages about closing the server
+     * will log
+     */
+    fun addShutdownHook(pmd: PureMemoryDatabase) : Server {
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                serverShutdown(pmd)
+            })
+        return this
+    }
+
+    fun serverShutdown(pmd: PureMemoryDatabase) {
+        logImperative("Received shutdown command")
+        logImperative("Shutting down main server thread")
+        cachedThreadPool.shutdown()
+        cachedThreadPool.awaitTermination(10, TimeUnit.SECONDS)
+        halfOpenServerSocket.close()
+
+        logImperative("Shutting down logging")
+        loggerPrinter.stop()
+
+        logImperative("Shutting down the database")
+        pmd.stop()
+
+        logImperative("Goodbye world!")
+    }
+
 
     companion object {
 
@@ -97,34 +134,6 @@ class Server(val port: Int) {
                 PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
             }
         }
-
-        /**
-         * this adds a hook to the Java runtime, so that if the app is running
-         * and a user stops it - by pressing ctrl+c or a unix "kill" command - the
-         * server socket will be shutdown and some messages about closing the server
-         * will log
-         */
-        fun addShutdownHook(pmd: PureMemoryDatabase) {
-            Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    logImperative("Received shutdown command")
-                    logImperative("Shutting down main server thread")
-                    cachedThreadPool.shutdown()
-                    cachedThreadPool.awaitTermination(10, TimeUnit.SECONDS)
-                    halfOpenServerSocket.close()
-
-                    logImperative("Shutting down logging")
-                    loggerPrinter.stop()
-
-                    logImperative("Shutting down the database")
-                    pmd.stop()
-
-                    logImperative("Goodbye world!")
-                })
-        }
-
-        lateinit var halfOpenServerSocket : ServerSocket
-        lateinit var cachedThreadPool: ExecutorService
 
         /**
          * Given the command-line arguments, returns the first value

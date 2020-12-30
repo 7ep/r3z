@@ -51,7 +51,7 @@ class ServerTests {
         @JvmStatic
         @AfterClass
         fun stopServer() {
-            Server.halfOpenServerSocket.close()
+            serverObject.halfOpenServerSocket.close()
         }
     }
 
@@ -584,7 +584,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
             val headersString = headers?.joinToString(CRLF) ?: ""
 
             val data = when (verb) {
-                Verb.GET -> "${verb.name} /$path HTTP/1.1$CRLF" + headers + CRLF + CRLF
+                Verb.GET -> "${verb.name} /$path HTTP/1.1$CRLF" + headersString + CRLF + CRLF
                 Verb.POST -> "${verb.name} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headersString + CRLF + CRLF + bodyString
                 else -> throw IllegalArgumentException("unexpected Verb")
             }
