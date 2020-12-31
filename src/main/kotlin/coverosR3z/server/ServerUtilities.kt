@@ -9,6 +9,7 @@ import coverosR3z.domainobjects.User
 import coverosR3z.exceptions.DuplicateInputsException
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.*
 import coverosR3z.server.HttpResponseCache.staticFileCache
@@ -17,6 +18,8 @@ import coverosR3z.timerecording.EmployeeAPI
 import coverosR3z.timerecording.EnterTimeAPI
 import coverosR3z.timerecording.ITimeRecordingUtilities
 import coverosR3z.timerecording.ProjectAPI
+import java.nio.file.*
+
 
 data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: AnalyzedHttpData)
 
@@ -189,51 +192,54 @@ fun handleStaticFiles(path: String): PreparedResponseData {
     // file and won't be expected to change while the program is running,
     // may as well cache what we can.
     val cachedStaticValue = staticFileCache[path]
-    if (cachedStaticValue != null) {
-        return cachedStaticValue
-    }
-
-    return readStaticFile(path)
-}
-
-@Synchronized
-private fun readStaticFile(path: String): PreparedResponseData {
-    // it is true that this is duplicated code, however
-    // the difference is that we are now inside a synchronized
-    // block, meaning from here until the end of this scope,
-    // there can only be one thread at a time running the
-    // code.  The reason it is necessary to duplicate this here
-    // is because if two threads hit the previous code that
-    // looks like this, they could both end up deciding there
-    // is nothing in the cache.  One of them would then get
-    // into this code block, the other would be waiting.
-    //
-    // when the next thread tries coming in, it will immediately
-    // his this code, and if the preceeding thread cached what
-    // the subsequent thread needed, it can use that.
-    val cachedStaticValue = staticFileCache[path]
-    if (cachedStaticValue != null) {
-        return cachedStaticValue
-    }
-
-    val fileContents = FileReader.read(path)
-    val result = if (fileContents == null) {
+    return if (cachedStaticValue != null) {
+        cachedStaticValue
+    } else {
         logDebug { "unable to read a file named $path" }
         handleNotFound()
-    } else {
-        when {
-            path.takeLast(4) == ".css" -> okCSS(fileContents)
-            path.takeLast(3) == ".js" -> okJS(fileContents)
-            path.takeLast(4) == ".jpg" -> okJPG(fileContents)
-            path.takeLast(5) == ".webp" -> okWEBP(fileContents)
-            path.takeLast(5) == ".html" ||
-            path.takeLast(4) == ".htm"   -> okHTML(fileContents)
-            else -> handleNotFound()
+    }
+}
+
+/**
+ * This is used at server startup to load the cache with all
+ * our static files.
+ *
+ * The code for looping through the files in the jar was
+ * harder than I thought, since we're asking to loop through
+ * a zip file, not an ordinary file system.
+ *
+ * Maybe some opportunity for refactoring here.
+ */
+fun loadStaticFilesToCache() {
+    logImperative("Loading all static files into cache")
+    val urls = checkNotNull(FileReader.getResources("static/"))
+    for (url in urls) {
+        val uri = url.toURI()
+
+        val myPath = if (uri.scheme == "jar") {
+            val fileSystem: FileSystem = FileSystems.newFileSystem(uri, emptyMap<String, Any>())
+            fileSystem.getPath("static/")
+        } else {
+            Paths.get(uri)
+        }
+
+        for (path: Path in Files.walk(myPath, 1)) {
+            val fileContents = FileReader.read("static/" + path.fileName.toString()) ?: continue
+            val filename = path.fileName.toString()
+            val result =
+                when {
+                    filename.takeLast(4) == ".css" -> okCSS(fileContents)
+                    filename.takeLast(3) == ".js" -> okJS(fileContents)
+                    filename.takeLast(4) == ".jpg" -> okJPG(fileContents)
+                    filename.takeLast(5) == ".webp" -> okWEBP(fileContents)
+                    filename.takeLast(5) == ".html" || filename.takeLast(4) == ".htm" -> okHTML(fileContents)
+                    else -> handleNotFound()
+                }
+
+            staticFileCache[filename] = result
+            logTrace { "Added $filename to the cache" }
         }
     }
-
-    staticFileCache[path] = result
-    return result
 }
 
 fun isAuthenticated(u : User) : AuthStatus {

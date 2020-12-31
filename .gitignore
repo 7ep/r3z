@@ -23,4 +23,4 @@ db/
 
 # This is an auto-generated file to show the version sha
 # and version of the system, at runtime
-src/main/resources/commit.html
+src/main/resources/static/commit.html

@@ -1,5 +1,8 @@
 package coverosR3z.misc
 
+import java.net.URL
+import java.util.*
+
 fun toBytes(value : String) : ByteArray {
     return value.toByteArray(Charsets.UTF_8)
 }
@@ -19,6 +22,10 @@ class FileReader {
             val file = this::class.java.classLoader.getResource(filename)
                     ?: return null
             return file.readBytes()
+        }
+
+        fun getResources(name: String): Enumeration<URL>? {
+            return this::class.java.classLoader.getResources(name)
         }
 
     }

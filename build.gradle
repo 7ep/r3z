@@ -232,7 +232,7 @@ check.dependsOn(jacocoTestReport)
  * Put the current Git commit sha in a file accessible while running.
  */
 task('writeGitCommitToFile') {
-    File file = new File("src/main/resources/commit.html")
+    File file = new File("src/main/resources/static/commit.html")
     String contents = "Version: " + "$r3z_version" + "\nCommit sha: " + getCurrentGitHash()
     file.write(contents)
 }

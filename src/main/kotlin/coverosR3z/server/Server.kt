@@ -10,6 +10,7 @@ import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
+import java.io.File
 import java.net.ServerSocket
 import java.net.SocketException
 import java.util.concurrent.ExecutorService
@@ -34,7 +35,7 @@ class Server(val port: Int) {
      */
     fun startServer(businessObjects : BusinessCode) {
         halfOpenServerSocket = ServerSocket(port)
-
+        loadStaticFilesToCache()
         try {
             cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
             systemReady = true

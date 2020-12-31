@@ -282,7 +282,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("sample.html")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.html")!!), result.rawData)
     }
 
     /**
@@ -296,7 +296,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("sample.css")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.css")!!), result.rawData)
     }
 
     /**
@@ -310,7 +310,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("sample.js")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.js")!!), result.rawData)
     }
 
     /**
