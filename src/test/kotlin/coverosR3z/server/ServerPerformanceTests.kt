@@ -141,10 +141,8 @@ class ServerPerformanceTests {
     /**
      * How fast to see static content, non-authenticated
      *
-     * Very odd.  This one is slower than [testViewStaticContentAuthenticated_PERFORMANCE]
-     * Fastest I saw was 60,168 responses per second, 20 threads doing 10,000 requests each in 3.324 seconds.
+     * Fastest I saw was 69,589 responses per second, 20 threads doing 10,000 requests each in 2.874 seconds.
      *
-     * Is there a bug?
      */
     @Test
     fun testViewStaticContentUnauthenticated_PERFORMANCE() {
@@ -152,13 +150,11 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
 
-        // warm up the cache first
-        val thread1 = makeClientThreadRepeatedRequestsGetStaticFile(2)
-        thread1.join()
-
+        val numberThreads = 2
+        val numberRequests = 10
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..5).map { makeClientThreadRepeatedRequestsGetStaticFile(10) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsGetStaticFile(numberRequests) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
