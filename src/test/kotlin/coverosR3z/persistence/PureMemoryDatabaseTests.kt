@@ -59,7 +59,7 @@ class PureMemoryDatabaseTests {
             accumulateMinutesPerEachEmployee(tep, allEmployees)
         }
 
-        logAudit("It took a total of $totalTime milliseconds for this code")
+        logAudit { "It took a total of $totalTime milliseconds for this code" }
         assertTrue(totalTime < 100)
     }
 
@@ -107,14 +107,14 @@ class PureMemoryDatabaseTests {
                     DEFAULT_DB_DIRECTORY
                 )
             }
-            logAudit("it took $timeToReadText milliseconds to deserialize from disk")
+            logAudit { "it took $timeToReadText milliseconds to deserialize from disk" }
 
             val (timeToAssert) = getTime { assertEquals(pmd, deserializedPmd) }
-            logAudit("it took $timeToAssert milliseconds to assert the databases were equal")
+            logAudit { "it took $timeToAssert milliseconds to assert the databases were equal" }
         }
 
         val totalTime = totalTimeReading + totalTimeWriting
-        logAudit("Total time taken for serialization / deserialzation was $totalTime milliseconds")
+        logAudit { "Total time taken for serialization / deserialzation was $totalTime milliseconds" }
 
         assertTrue("totaltimeWriting was supposed to take $maxMillisecondsAllowed.  took $totalTimeWriting", totalTimeWriting < maxMillisecondsAllowed)
         assertTrue("totaltimeReading was supposed to take $maxMillisecondsAllowed.  took $totalTimeReading", totalTimeReading < maxMillisecondsAllowed)
@@ -130,7 +130,7 @@ class PureMemoryDatabaseTests {
      *
      * It used to be easy to see this fail, you just had to remove
      * the locking mechanism from the method at
-     * [PureMemoryDatabase.addNewEmployee], and you
+     * PureMemoryDatabase.addNewEmployee, and you
      * would need to run it a time or two to see it fail.
      *
      * Now, however, we aren't using locking - we're using
@@ -689,23 +689,6 @@ class PureMemoryDatabaseTests {
         }
     }
 
-    private fun prepareSomeRandomTimeEntries(numTimeEntries: Int, project : Project, employee : Employee): MutableSet<TimeEntry> {
-        val timeEntries: MutableSet<TimeEntry> = mutableSetOf()
-        for (i in 1..numTimeEntries) {
-            timeEntries.add(
-                TimeEntry(
-                    i,
-                    employee,
-                    project,
-                    Time(100),
-                    A_RANDOM_DAY_IN_JUNE_2020,
-                    Details("I was lazing on a sunday afternoon")
-                )
-            )
-        }
-        return timeEntries
-    }
-
     private fun recordManyTimeEntries(tep: ITimeEntryPersistence, numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
         val lotsOfEmployees: List<String> = generateEmployeeNames()
         persistEmployeesToDatabase(tep, numberOfEmployees, lotsOfEmployees)
@@ -721,16 +704,16 @@ class PureMemoryDatabaseTests {
             val minutesPerEmployeeTotal =
                     allEmployees.map { e -> tep.readTimeEntries(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
-            logAudit("the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}")
-            logAudit("the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}")
+            logAudit { "the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}" }
+            logAudit { "the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}" }
         }
 
-        logAudit("It took $timeToAccumulate milliseconds to accumulate the minutes per employee")
+        logAudit { "It took $timeToAccumulate milliseconds to accumulate the minutes per employee" }
     }
 
     private fun readTimeEntriesForOneEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
         val (timeToGetAllTimeEntries) = getTime { tep.readTimeEntries(allEmployees[0]) }
-        logAudit("It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee")
+        logAudit { "It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee" }
     }
 
     private fun enterTimeEntries(tep: ITimeEntryPersistence, numberOfDays: Int, allEmployees: List<Employee>, allProjects: List<Project>, numberOfEmployees: Int) {
@@ -746,13 +729,13 @@ class PureMemoryDatabaseTests {
             }
         }
         resetLogSettingsToDefault()
-        logAudit("It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees")
-        logAudit("(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)")
+        logAudit { "It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees" }
+        logAudit { "(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)" }
     }
 
     private fun readProjectsFromDatabase(tep: ITimeEntryPersistence): List<Project> {
         val (timeToReadAllProjects, allProjects) = getTime { tep.getAllProjects()}
-        logAudit("It took $timeToReadAllProjects milliseconds to read all the projects")
+        logAudit { "It took $timeToReadAllProjects milliseconds to read all the projects" }
         return allProjects
     }
 
@@ -761,14 +744,14 @@ class PureMemoryDatabaseTests {
         val (timeToCreateProjects) =
                 getTime { (1..numberOfProjects).forEach { i -> tep.persistNewProject(ProjectName("project$i")) } }
         resetLogSettingsToDefault()
-        logAudit("It took $timeToCreateProjects milliseconds to create $numberOfProjects projects")
+        logAudit { "It took $timeToCreateProjects milliseconds to create $numberOfProjects projects" }
     }
 
     private fun readEmployeesFromDatabase(tep: ITimeEntryPersistence): List<Employee> {
         val (timeToReadAllEmployees, allEmployees) = getTime {
             tep.getAllEmployees()
         }
-        logAudit("It took $timeToReadAllEmployees milliseconds to read all the employees")
+        logAudit { "It took $timeToReadAllEmployees milliseconds to read all the employees" }
         return allEmployees
     }
 
@@ -780,7 +763,7 @@ class PureMemoryDatabaseTests {
             }
         }
         resetLogSettingsToDefault()
-        logAudit("It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees")
+        logAudit { "It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees" }
     }
 
     private fun generateEmployeeNames(): List<String> {
@@ -791,7 +774,7 @@ class PureMemoryDatabaseTests {
             // if you want to make a lot more names, uncomment below
             // lotsOfEmployees = (1..10).flatMap { n -> employeenames.map { u -> "$u$n" } }.toList()
         }
-        logAudit("It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames")
+        logAudit { "It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames" }
         return lotsOfEmployees
     }
 

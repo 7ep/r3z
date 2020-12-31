@@ -25,7 +25,7 @@ class Server(val port: Int) {
 
 
     lateinit var halfOpenServerSocket : ServerSocket
-    lateinit var cachedThreadPool: ExecutorService
+    private lateinit var cachedThreadPool: ExecutorService
     var systemReady = false
 
     /**
@@ -40,7 +40,7 @@ class Server(val port: Int) {
             systemReady = true
             logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
             while (true) {
-                logTrace("waiting for socket connection")
+                logTrace { "waiting for socket connection" }
                 val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
                 cachedThreadPool.submit(Thread {processConnectedClient(server, businessObjects)})
             }
@@ -56,16 +56,16 @@ class Server(val port: Int) {
         server: SocketWrapper,
         businessCode: BusinessCode
     ) {
-        logTrace("client from ${server.socket.inetAddress?.hostAddress} has connected")
+        logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
         do {
             val requestData = handleRequest(server, businessCode)
             val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
             if (shouldKeepAlive) {
-                logTrace("This is a keep-alive connection")
+                logTrace { "This is a keep-alive connection" }
             }
         } while (shouldKeepAlive)
 
-        logTrace("closing server socket")
+        logTrace { "closing server socket" }
         server.close()
     }
 
@@ -83,7 +83,7 @@ class Server(val port: Int) {
         return this
     }
 
-    fun serverShutdown(pmd: PureMemoryDatabase) {
+    private fun serverShutdown(pmd: PureMemoryDatabase) {
         logImperative("Received shutdown command")
         logImperative("Shutting down main server thread")
         cachedThreadPool.shutdown()
@@ -253,7 +253,7 @@ The options available are:
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val cu = CurrentUser(analyzedHttpData.user)
                 val truWithUser = businessCode.tru.changeUser(cu)
-                logDebug("client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}", cu)
+                logDebug(cu) { "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
                 handleRequestAndRespond(ServerData(businessCode.au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message, ex.stackTraceToString())

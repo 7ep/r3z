@@ -28,7 +28,7 @@ class LoginAPI {
                 val newSessionToken: String = au.createNewSession(loginUser)
                 PreparedResponseData(successHTML, StatusCode.OK, listOf(ContentType.TEXT_HTML.value, "Set-Cookie: sessionId=$newSessionToken"))
             } else {
-                logDebug("User ($username) failed to login")
+                logDebug { "User ($username) failed to login" }
                 handleUnauthorized()
             }
         }

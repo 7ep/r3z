@@ -56,12 +56,6 @@ class ConcurrentSet<T> : Iterable<T>{
         return map.keySet(NullEnum.NULL).iterator()
     }
 
-    companion object {
-
-        fun <T> concurrentSetOf(vararg elements: T): ConcurrentSet<T> = elements.toList().toConcurrentSet()
-
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

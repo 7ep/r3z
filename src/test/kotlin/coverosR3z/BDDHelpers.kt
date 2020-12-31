@@ -49,7 +49,7 @@ class BDDHelpers(private var filename : String) {
                 newLocation,
                 onError = {file: File, ioException: IOException ->
                     if (ioException is FileAlreadyExistsException) {
-                        logTrace("skipping file $file, already exists at destination")
+                        logTrace { "skipping file $file, already exists at destination" }
                         OnErrorAction.SKIP
                     } else {
                         throw ioException

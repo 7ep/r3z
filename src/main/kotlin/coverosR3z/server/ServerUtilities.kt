@@ -218,7 +218,7 @@ private fun readStaticFile(path: String): PreparedResponseData {
 
     val fileContents = FileReader.read(path)
     val result = if (fileContents == null) {
-        logDebug("unable to read a file named $path")
+        logDebug { "unable to read a file named $path" }
         handleNotFound()
     } else {
         when {
@@ -324,7 +324,7 @@ private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
 fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
     // read the first line for the fundamental request
     val statusLine = socketWrapper.readLine()
-    logTrace("statusLine: $statusLine")
+    logTrace { "statusLine: $statusLine" }
     if (statusLine.isNullOrBlank()) {
         return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION, rawData = null)
     }
@@ -400,9 +400,9 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
  */
 fun parseStatusLineAsServer(matchResult: MatchResult): Pair<Verb, String> {
     val verb: Verb = Verb.valueOf(checkNotNull(matchResult.groups[1]){"The HTTP verb must not be missing"}.value)
-    logTrace("verb from client was: $verb")
+    logTrace { "verb from client was: $verb" }
     val file = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
-    logTrace("path from client was: $file")
+    logTrace { "path from client was: $file" }
     return Pair(verb, file)
 }
 
@@ -412,7 +412,7 @@ fun parseStatusLineAsServer(matchResult: MatchResult): Pair<Verb, String> {
  */
 fun parseStatusLineAsClient(matchResult: MatchResult): StatusCode {
     val statusCode: StatusCode = StatusCode.fromCode(checkNotNull(matchResult.groups[1]){"The status code must not be missing"}.value)
-    logTrace("status code from client was: $statusCode")
+    logTrace { "status code from client was: $statusCode" }
     return statusCode
 }
 
@@ -499,14 +499,14 @@ fun getHeaders(socket: ISocketWrapper): List<String> {
  * sends data as the body of a response from server
  */
 fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
-    logTrace("Assembling data just before shipping to client")
+    logTrace { "Assembling data just before shipping to client" }
     val status = "HTTP/1.1 ${data.statusCode.value}"
-    logTrace("status: $status")
+    logTrace { "status: $status" }
     val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
 
     val otherHeaders = data.headers.joinToString(CRLF)
-    logTrace("contentLengthHeader: $contentLengthHeader")
-    data.headers.forEach{logTrace("sending header: $it")}
+    logTrace { "contentLengthHeader: $contentLengthHeader" }
+    data.headers.forEach{ logTrace { "sending header: $it" } }
     server.write("$status$CRLF" +
             "$contentLengthHeader$CRLF" +
             otherHeaders +

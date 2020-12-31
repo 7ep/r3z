@@ -15,10 +15,10 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
             val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
-            logDebug("User registration successful for \"${username.value}\"")
+            logDebug { "User registration successful for \"${username.value}\"" }
             RegistrationResult(RegistrationResultStatus.SUCCESS, newUser)
         } else {
-            logDebug("User ${username.value} could not be registered: already registered")
+            logDebug { "User ${username.value} could not be registered: already registered" }
             RegistrationResult(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, NO_USER)
         }
     }
@@ -35,17 +35,17 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         val user = ap.getUser(username)
 
         if (user == NO_USER) {
-            logDebug("Login failed: user ${user.name.value} is not registered.")
+            logDebug { "Login failed: user ${user.name.value} is not registered." }
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
         val hashedSaltedPassword = Hash.createHash(password,user.salt)
         if (user.hash != hashedSaltedPassword) {
-            logDebug("Login failed for user \"${user.name.value}\": Incorrect password.")
+            logDebug { "Login failed for user \"${user.name.value}\": Incorrect password." }
             return Pair(LoginResult.FAILURE, NO_USER)
         }
 
-        logDebug("Login successful for user ${user.name.value}.")
+        logDebug { "Login successful for user ${user.name.value}." }
         return Pair(LoginResult.SUCCESS, user)
     }
 
@@ -64,7 +64,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
      */
     override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
         val sessionId = rand()
-        logDebug("New session ID ($sessionId) generated for user (${user.name.value})")
+        logDebug { "New session ID ($sessionId) generated for user (${user.name.value})" }
         ap.addNewSession(sessionId, user, time)
         return sessionId
     }

@@ -13,7 +13,7 @@ import kotlin.concurrent.thread
 
 class AuthenticationPersistenceTests {
 
-    lateinit var ap : IAuthPersistence
+    private lateinit var ap : IAuthPersistence
 
     @Before
     fun init() {

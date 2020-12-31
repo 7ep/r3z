@@ -43,7 +43,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         return pmd.actOnProjects (shouldSerialize = true) { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
             projects.add(newProject)
-            logDebug("Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database")
+            logDebug { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
             newProject
         }
     }
@@ -52,7 +52,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         return pmd.actOnEmployees (shouldSerialize = true) { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
-            logDebug("Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database")
+            logDebug { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
             newEmployee
         }
     }

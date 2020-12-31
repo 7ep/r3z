@@ -3,9 +3,6 @@ package coverosR3z.authentication
 import coverosR3z.*
 import coverosR3z.domainobjects.*
 import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.server.AnalyzedHttpData
-import coverosR3z.server.NamedPaths
-import coverosR3z.server.Verb
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
 import org.junit.AfterClass

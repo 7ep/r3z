@@ -15,7 +15,7 @@ fun handleUnauthorized() : PreparedResponseData {
 }
 
 fun handleInternalServerError(shortMessage : String?, fullStackTrace : String) : PreparedResponseData {
-    logTrace("handling internal server error: $fullStackTrace")
+    logTrace { "handling internal server error: $fullStackTrace" }
     return PreparedResponseData(internalServerErrorHTML(shortMessage ?: "(None)"), StatusCode.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
 }
 

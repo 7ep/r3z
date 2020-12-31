@@ -10,8 +10,6 @@ import coverosR3z.misc.*
 import coverosR3z.timerecording.TimeEntryPersistence
 import java.io.File
 import java.io.FileNotFoundException
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Why use those heavy-handed database applications when you
@@ -160,7 +158,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private fun serializeUsersToDisk() {
         if (dbDirectory == null) {
-            logTrace("database directory was null, skipping serialization for Users")
+            logTrace { "database directory was null, skipping serialization for Users" }
             return
         }
         val users = users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
@@ -172,7 +170,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private fun serializeSessionsToDisk() {
         if (dbDirectory == null) {
-            logTrace("database directory was null, skipping serialization for Sessions")
+            logTrace { "database directory was null, skipping serialization for Sessions" }
             return
         }
         val sessions = sessions.joinToString("\n") { SessionSurrogate.toSurrogate(it).serialize() }
@@ -184,7 +182,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private fun serializeEmployeesToDisk() {
         if (dbDirectory == null) {
-            logTrace("database directory was null, skipping serialization for Employees")
+            logTrace { "database directory was null, skipping serialization for Employees" }
             return
         }
         val employees = employees.joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
@@ -196,7 +194,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private fun serializeProjectsToDisk() {
         if (dbDirectory == null) {
-            logTrace("database directory was null, skipping serialization for Projects")
+            logTrace { "database directory was null, skipping serialization for Projects" }
             return
         }
         val projects = projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
@@ -209,7 +207,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      */
     private fun serializeTimeEntriesToDisk(timeEntry: TimeEntry) {
         if (dbDirectory == null) {
-            logTrace("database directory was null, skipping serialization for time entries")
+            logTrace { "database directory was null, skipping serialization for time entries" }
             return
         }
 
@@ -224,7 +222,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     private fun writeDbFile(value: String, name : String, directory: String) {
         val pathname = directory + name + databaseFileSuffix
         val dbFileUsers = File(pathname)
-        logTrace("about to write to $pathname")
+        logTrace { "about to write to $pathname" }
         actionQueue.enqueue{ dbFileUsers.writeText(value) }
     }
 
@@ -460,14 +458,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         const val databaseFileSuffix = ".db"
 
         /**
-         * This extends [ConcurrentHashMap] with the ability to provide
-         * atomic access to the index counter, for building id's
-         * for each new entry
-         */
-        val <K,V> ConcurrentHashMap<K,V>.nextIndex: AtomicInteger
-            get() = AtomicInteger(this.size+1)
-
-        /**
          * This factory method handles the nitty-gritty about starting
          * the database with respect to the files on disk.  If you plan
          * to use the database with the disk, here's a great place to
@@ -578,7 +568,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
                 fullTimeEntries
             } catch (ex : NoTimeEntriesOnDiskException) {
-                logWarn("No time entries were found on disk, initializing new empty data")
+                logWarn { "No time entries were found on disk, initializing new empty data" }
                 ConcurrentSet()
             }
         }
@@ -588,7 +578,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 val usersFile = readFile(dbDirectory, "users")
                 deserializeUsers(usersFile)
             } catch (ex: FileNotFoundException) {
-                logWarn("users file missing, creating empty")
+                logWarn { "users file missing, creating empty" }
                 ConcurrentSet()
             }
         }
@@ -598,7 +588,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 val sessionsFile = readFile(dbDirectory, "sessions")
                 deserializeSessions(sessionsFile, users)
             } catch (ex: FileNotFoundException) {
-                logWarn("sessions file missing, creating empty")
+                logWarn { "sessions file missing, creating empty" }
                 ConcurrentSet()
             }
         }
@@ -608,7 +598,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 val employeesFile = readFile(dbDirectory, "employees")
                 deserializeEmployees(employeesFile)
             } catch (ex: FileNotFoundException) {
-                logWarn("employees file missing, creating empty")
+                logWarn { "employees file missing, creating empty" }
                 ConcurrentSet()
             }
         }
@@ -618,7 +608,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 val projectsFile = readFile(dbDirectory, "projects")
                 deserializeProjects(projectsFile)
             } catch (ex: FileNotFoundException) {
-                logWarn("projects file missing, creating empty")
+                logWarn { "projects file missing, creating empty" }
                 ConcurrentSet()
             }
         }
@@ -639,7 +629,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toConcurrentSet()
         }
 
-        fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
+        private fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
             return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
         }
 

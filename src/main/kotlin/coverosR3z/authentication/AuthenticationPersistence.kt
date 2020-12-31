@@ -8,7 +8,7 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
         return pmd.actOnUsers (shouldSerialize = true) { users ->
-            logTrace("PMD: adding new user, \"${name.value}\"")
+            logTrace { "PMD: adding new user, \"${name.value}\"" }
             val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)
             users.add(newUser)
             newUser
