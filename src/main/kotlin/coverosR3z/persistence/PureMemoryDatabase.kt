@@ -7,6 +7,7 @@ import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.*
+import coverosR3z.timerecording.TimeEntryPersistence
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
@@ -24,109 +25,21 @@ import java.util.concurrent.atomic.AtomicInteger
 class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = ConcurrentSet(),
                          private val users: ConcurrentSet<User> = ConcurrentSet(),
                          private val projects: ConcurrentSet<Project> = ConcurrentSet(),
-                         private val timeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = ConcurrentHashMap(),
+                         private val timeEntries: ConcurrentSet<TimeEntry> = ConcurrentSet(),
                          private val sessions: ConcurrentSet<Session> = ConcurrentSet(),
                          private val dbDirectory : String? = null
 ) {
 
-    /**
-     * The next identifier for an employee that is created.
-     */
-    private val nextEmployeeIndex = AtomicInteger(employees.size()+1)
-    private val nextProjectIndex = AtomicInteger(projects.size()+1)
-    private val nextTimeEntryIndex = AtomicInteger(timeEntries.size+1)
-
-    private val actionQueue = ActionQueue("DatabaseWriter")
+    private val actionQueue = ActionQueue("DatabaseWriter for $this")
 
     fun copy(): PureMemoryDatabase {
         return PureMemoryDatabase(
-
-            employees = this.employees.map{Employee(it.id, it.name)}.toConcurrentSet(),
-            users = this.users.map{User(it.id, it.name, it.hash, it.salt, it.employeeId)}.toConcurrentSet(),
-            projects = this.projects.map{Project(it.id, it.name)}.toConcurrentSet(),
-            timeEntries = this.timeEntries.map {Pair(it.key, it.value)}.toMap(ConcurrentHashMap()),
-            sessions = this.sessions.map {Session(it.sessionId, it.user, it.dt)}.toConcurrentSet(),
+            employees = this.employees.toList().toConcurrentSet(),
+            users = this.users.toList().toConcurrentSet(),
+            projects = this.projects.toList().toConcurrentSet(),
+            timeEntries = this.timeEntries.toList().toConcurrentSet(),
+            sessions = this.sessions.toList().toConcurrentSet(),
         )
-    }
-
-    fun addTimeEntry(
-        timeEntry: TimeEntryPreDatabase,
-        timeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = this.timeEntries
-    ): TimeEntry {
-        /**
-         * Static version of this code so we can use it during deserialization as well as
-         * for regular usage
-         */
-        // get the data for a particular employee
-        var employeeTimeEntries = timeEntries[timeEntry.employee]
-
-        // if the data is null (the employee has never added time entries), create an empty map for them
-        // and set that as the variable we'll use for the rest of this method
-        if (employeeTimeEntries == null) {
-            employeeTimeEntries = ConcurrentSet()
-            timeEntries[timeEntry.employee] = employeeTimeEntries
-        }
-        // add the new data
-        val newIndex = nextTimeEntryIndex.getAndIncrement()
-
-        logTrace("new time-entry index is $newIndex")
-        val newTimeEntry = TimeEntry(
-            newIndex,
-            timeEntry.employee,
-            timeEntry.project,
-            timeEntry.time,
-            timeEntry.date,
-            timeEntry.details
-        )
-        employeeTimeEntries.add(newTimeEntry)
-        // get all the time entries for the month, to serialize
-        val allTimeEntriesForMonth: Set<TimeEntry> =
-            employeeTimeEntries.filter { it.date.month() == timeEntry.date.month() }.toSet()
-        val filename = "${timeEntry.date.year()}_${timeEntry.date.month()}"
-        logTrace("filename to store time-entries is $filename")
-        // write it to disk
-        writeTimeEntriesForEmployeeOnDate(allTimeEntriesForMonth, timeEntry.employee, filename, dbDirectory)
-        return newTimeEntry
-        // return the time entry
-    }
-
-    fun addNewProject(projectName: ProjectName) : Project {
-        logTrace("PMD: adding new project, \"${projectName.value}\"")
-        val newProject = Project(ProjectId(nextProjectIndex.getAndIncrement()), ProjectName(projectName.value))
-        projects.add(newProject)
-        serializeProjectsToDisk(this, dbDirectory)
-        return newProject
-    }
-
-    fun addNewEmployee(employeename: EmployeeName) : Employee {
-        logTrace{"PMD: adding new employee, \"${employeename.value}\""}
-        val newEmployee = Employee(EmployeeId(nextEmployeeIndex.getAndIncrement()), EmployeeName(employeename.value))
-        employees.add(newEmployee)
-        serializeEmployeesToDisk(this, dbDirectory)
-        return newEmployee
-    }
-
-    /**
-     * gets the number of minutes a particular [Employee] has worked
-     * on a certain date.
-     */
-    fun getMinutesRecordedOnDate(employee: Employee, date: Date): Time {
-        val employeeTimeEntries = timeEntries[employee] ?: return Time(0)
-
-        // if the employee hasn't entered any time on this date, return 0 minutes
-        val totalMinutes = employeeTimeEntries.filter { it.date == date }.sumBy { te -> te.time.numberOfMinutes }
-        return Time(totalMinutes)
-    }
-
-    /**
-     * Return the list of entries for this employee, or just return an empty list otherwise
-     */
-    fun getAllTimeEntriesForEmployee(employee: Employee): Set<TimeEntry> {
-        return timeEntries[employee]?.toSet() ?: emptySet()
-    }
-
-    fun getAllTimeEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return timeEntries[employee]?.filter{it.date == date}?.toSet() ?: emptySet()
     }
 
     /**
@@ -139,7 +52,22 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(users)
 
         if (shouldSerialize)
-            serializeUsersToDisk(this, dbDirectory)
+            serializeUsersToDisk()
+
+        return result
+    }
+
+    /**
+     * carry out some action on the [User] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of users and do whatever you want with it
+     */
+    fun <R> actOnEmployees(shouldSerialize : Boolean = false, action: (ConcurrentSet<Employee>) -> R) : R
+    {
+        val result = action.invoke(employees)
+
+        if (shouldSerialize)
+            serializeEmployeesToDisk()
 
         return result
     }
@@ -154,42 +82,39 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(sessions)
 
         if (shouldSerialize)
-            serializeSessionsToDisk(this, dbDirectory)
+            serializeSessionsToDisk()
 
         return result
     }
 
-    fun getProjectById(id: ProjectId) : Project {
-        return projects.singleOrNull { p -> p.id == id } ?: NO_PROJECT
-    }
+    /**
+     * carry out some action on the [TimeEntry] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of time entries and do whatever you want with it
+     */
+    fun <R> actOnTimeEntries(shouldSerialize : Boolean = false,
+                             action: (timeEntries: ConcurrentSet<TimeEntry>) -> R) : R
+    {
+        val result = action.invoke(timeEntries)
 
-    fun getProjectByName(name: ProjectName): Project {
-        return projects.singleOrNull { p -> p.name == name } ?: NO_PROJECT
-    }
+        if (shouldSerialize && result is TimeEntry)
+            serializeTimeEntriesToDisk(result)
 
-    fun getEmployeeById(id: EmployeeId): Employee {
-        return employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE
+        return result
     }
 
     /**
-     * Get a snapshot, a copy, at this point in time
+     * carry out some action on the [Project] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of projects and do whatever you want with it
      */
-    fun getAllEmployees() : List<Employee> {
-        return employees.toList()
-    }
+    fun <R> actOnProjects(shouldSerialize : Boolean = false, action: (ConcurrentSet<Project>) -> R) : R {
+        val result = action.invoke(projects)
 
-    /**
-     * Get a snapshot, a copy, at this point in time
-     */
-    fun getAllProjects(): List<Project> {
-        return projects.toList()
-    }
+        if (shouldSerialize)
+            serializeProjectsToDisk()
 
-    fun overwriteTimeEntry(employeeId: EmployeeId, id: Int, newEntry: TimeEntry) {
-        val employee = employees.single { it.id == employeeId }
-        val setOfTimeEntries = checkNotNull(timeEntries[employee])
-        check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
-        setOfTimeEntries.add(newEntry)
+        return result
     }
 
     override fun equals(other: Any?): Boolean {
@@ -229,267 +154,79 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         actionQueue.stop()
     }
 
-    companion object {
 
-        private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
-        const val databaseFileSuffix = ".db"
-
-        /**
-         * This factory method handles the nitty-gritty about starting
-         * the database with respect to the files on disk.  If you plan
-         * to use the database with the disk, here's a great place to
-         * start.  If you are just going to use the database in memory-only,
-         * you may as well just instantiate [PureMemoryDatabase]
-         */
-        fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
-
-            /** The version of the database.  Update when we have
-             * real users and we're changing live prod data.
-             */
-            val dbVersion = 1
-
-            // first we assume the database has been previously persisted
-            val restoredPMD = deserializeFromDisk(dbDirectory)
-
-            return if (restoredPMD != null) {
-                // return the restored database
-                restoredPMD
-            } else {
-                logImperative("No existing database found, building new database")
-                // if nothing is there, we build a new database
-                // and add a clean set of directories
-                logImperative("Creating new PureMemoryDatabase")
-                val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
-
-                logImperative("creating the database directory at \"$dbDirectory\"")
-                File(dbDirectory).mkdirs()
-
-                logImperative("Writing the version of the database ($dbVersion) to version.txt")
-                File(dbDirectory + "version.txt").writeText(dbVersion.toString())
-
-                logImperative("creating an initial employee")
-                pmd.addNewEmployee(EmployeeName("Administrator"))
-
-                pmd
-            }
-        }
-
-        /**
-         * This starts the database with memory-only, that is
-         * no disk persistence.  This is mainly
-         * used for testing purposes
-         */
-        fun startMemoryOnly() : PureMemoryDatabase {
-            val pmd = PureMemoryDatabase()
-
-            logImperative("creating an initial employee")
-            pmd.addNewEmployee(EmployeeName("Administrator"))
-
-            return pmd
-        }
-
-        /**
-         * Deserializes the database from file, or returns null if no
-         * database directory exists
-         */
-        fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
-            val topDirectory = File(dbDirectory)
-            val innerFiles = topDirectory.listFiles()
-            if ((! topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
-                logImperative("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
-                return null
-            }
-
-            val projects = readAndDeserializeProjects(dbDirectory)
-            val users = readAndDeserializeUsers(dbDirectory)
-            val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
-            val employees = readAndDeserializeEmployees(dbDirectory)
-            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
-
-            return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
-        }
-
-        private fun readAndDeserializeTimeEntries(
-            dbDirectory: String,
-            employees: ConcurrentSet<Employee>,
-            projects: ConcurrentSet<Project>) : ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> {
-            val timeEntriesDirectory = "timeentries/"
-            return try {
-                val fullTimeEntries: ConcurrentHashMap<Employee, ConcurrentSet<TimeEntry>> = ConcurrentHashMap()
-
-                for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
-                    val employee : Employee = try {
-                        employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
-                    } catch (ex : NoSuchElementException) {
-                        throw DatabaseCorruptedException("Unable to find an employee with the id of ${employeeDirectory.name} based on entry in $timeEntriesDirectory")
-                    }
-                    val simpleTimeEntries = ConcurrentSet<TimeEntry>()
-
-                    // loop through all the files of time entries for this employee, collecting them
-                    val timeEntryFiles = employeeDirectory.listFiles()
-                    if (timeEntryFiles.isNullOrEmpty()) {
-                        throw DatabaseCorruptedException("no time entry files found in employees directory at ${employeeDirectory.path}")
-                    }
-                    for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
-                        try {
-                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), employee, projects))
-                        } catch (ex : DatabaseCorruptedException) {
-                            throw DatabaseCorruptedException("Could not deserialize time entry file ${monthlyTimeEntries.name}.  ${ex.message}", ex.ex)
-                        }
-                    }
-
-                    fullTimeEntries[employee] = simpleTimeEntries
-                }
-
-                fullTimeEntries
-            } catch (ex : NoTimeEntriesOnDiskException) {
-                logWarn("No time entries were found on disk, initializing new empty data")
-                ConcurrentHashMap()
-            }
-        }
-
-        private fun readAndDeserializeUsers(dbDirectory: String): ConcurrentSet<User> {
-            return try {
-                val usersFile = readFile(dbDirectory, "users")
-                deserializeUsers(usersFile)
-            } catch (ex: FileNotFoundException) {
-                logWarn("users file missing, creating empty")
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): ConcurrentSet<Session> {
-            return try {
-                val sessionsFile = readFile(dbDirectory, "sessions")
-                deserializeSessions(sessionsFile, users)
-            } catch (ex: FileNotFoundException) {
-                logWarn("sessions file missing, creating empty")
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeEmployees(dbDirectory: String): ConcurrentSet<Employee> {
-            return try {
-                val employeesFile = readFile(dbDirectory, "employees")
-                deserializeEmployees(employeesFile)
-            } catch (ex: FileNotFoundException) {
-                logWarn("employees file missing, creating empty")
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeProjects(dbDirectory: String): ConcurrentSet<Project> {
-            return try {
-                val projectsFile = readFile(dbDirectory, "projects")
-                deserializeProjects(projectsFile)
-            } catch (ex: FileNotFoundException) {
-                logWarn("projects file missing, creating empty")
-                ConcurrentSet()
-            }
-        }
-
-        private fun deserializeProjects(projectsFile: String): ConcurrentSet<Project> {
-            return projectsFile.split("\n").map{ProjectSurrogate.deserializeToProject(it)}.toConcurrentSet()
-        }
-
-        private fun deserializeEmployees(employeesFile: String): ConcurrentSet<Employee> {
-            return employeesFile.split("\n").map{EmployeeSurrogate.deserializeToEmployee(it)}.toConcurrentSet()
-        }
-
-        private fun deserializeSessions(sessionsFile: String, users: Set<User>): ConcurrentSet<Session> {
-            return sessionsFile.split("\n").map{SessionSurrogate.deserializeToSession(it, users)}.toConcurrentSet()
-        }
-
-        private fun deserializeUsers(usersFile: String): ConcurrentSet<User> {
-            return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toConcurrentSet()
-        }
-
-        fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
-            return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
-        }
-
-        private fun readFile(dbDirectory: String, name : String): String {
-            return File(dbDirectory + name + databaseFileSuffix).readText()
-        }
-
-    }
-
-
-    private fun serializeUsersToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+    /**
+     * Write the entire set of data to a single file, overwriting if necessary
+     */
+    private fun serializeUsersToDisk() {
         if (dbDirectory == null) {
             logTrace("database directory was null, skipping serialization for Users")
             return
         }
-        val users = serializeUsers(pmd)
+        val users = users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
         writeDbFile(users, "users", dbDirectory)
     }
 
-    private fun serializeSessionsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+    /**
+     * Write the entire set of data to a single file, overwriting if necessary
+     */
+    private fun serializeSessionsToDisk() {
         if (dbDirectory == null) {
             logTrace("database directory was null, skipping serialization for Sessions")
             return
         }
-        val sessions = serializeSessions(pmd)
+        val sessions = sessions.joinToString("\n") { SessionSurrogate.toSurrogate(it).serialize() }
         writeDbFile(sessions, "sessions", dbDirectory)
     }
 
-    private fun serializeEmployeesToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+    /**
+     * Write the entire set of data to a single file, overwriting if necessary
+     */
+    private fun serializeEmployeesToDisk() {
         if (dbDirectory == null) {
             logTrace("database directory was null, skipping serialization for Employees")
             return
         }
-        val employees = serializeEmployees(pmd)
+        val employees = employees.joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
         writeDbFile(employees, "employees", dbDirectory)
     }
 
-    private fun serializeProjectsToDisk(pmd: PureMemoryDatabase, dbDirectory : String?) {
+    /**
+     * Write the entire set of data to a single file, overwriting if necessary
+     */
+    private fun serializeProjectsToDisk() {
         if (dbDirectory == null) {
             logTrace("database directory was null, skipping serialization for Projects")
             return
         }
-        val projects = serializeProjects(pmd)
+        val projects = projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
         writeDbFile(projects, "projects", dbDirectory)
     }
 
-    private fun writeTimeEntriesForEmployeeOnDate(employeeDateTimeEntries: Set<TimeEntry>, employee: Employee, filename: String, dbDirectory : String?) {
+    /**
+     * Because the time entry data set is large, we don't want to rewrite the entire thing each time a
+     * user changes anything.  Instead, we want to examine what has changed and only write that.
+     */
+    private fun serializeTimeEntriesToDisk(timeEntry: TimeEntry) {
         if (dbDirectory == null) {
             logTrace("database directory was null, skipping serialization for time entries")
             return
         }
-        val timeentriesSerialized = serializeTimeEntries(employeeDateTimeEntries)
-        val subDirectory = dbDirectory + "timeentries/" + "${employee.id.value}/"
+
+        val employeeDateTimeEntries = timeEntries.filter { it.employee == timeEntry.employee && it.date.month() == timeEntry.date.month() }
+        val timeentriesSerialized = employeeDateTimeEntries.joinToString ("\n") { TimeEntrySurrogate.toSurrogate(it).serialize() }
+        val subDirectory = dbDirectory + "timeentries/" + "${timeEntry.employee.id.value}/"
+        val filename = "${timeEntry.date.year()}_${timeEntry.date.month()}"
         actionQueue.enqueue{ File(subDirectory).mkdirs() }
         writeDbFile(timeentriesSerialized, filename, subDirectory)
     }
 
-    private fun writeDbFile(value: String, name : String, dbDirectory: String) {
-        val pathname = dbDirectory + name + databaseFileSuffix
+    private fun writeDbFile(value: String, name : String, directory: String) {
+        val pathname = directory + name + databaseFileSuffix
         val dbFileUsers = File(pathname)
         logTrace("about to write to $pathname")
         actionQueue.enqueue{ dbFileUsers.writeText(value) }
     }
-
-    fun serializeTimeEntries(employeeDateTimeEntries: Set<TimeEntry>): String {
-        return employeeDateTimeEntries.joinToString ("\n") { TimeEntrySurrogate.toSurrogate(it).serialize() }
-    }
-
-    private fun serializeUsers(pmd: PureMemoryDatabase): String {
-        return pmd.users.joinToString("\n") { UserSurrogate.toSurrogate(it).serialize() }
-    }
-
-    private fun serializeSessions(pmd: PureMemoryDatabase): String {
-        return pmd.sessions.joinToString("\n") { SessionSurrogate.toSurrogate(it).serialize() }
-    }
-
-    private fun serializeEmployees(pmd: PureMemoryDatabase): String {
-        return pmd.employees.joinToString("\n") { EmployeeSurrogate.toSurrogate(it).serialize() }
-    }
-
-    private fun serializeProjects(pmd: PureMemoryDatabase): String {
-        return pmd.projects.joinToString("\n") { ProjectSurrogate.toSurrogate(it).serialize() }
-    }
-
-
 
     /**
      * Don't be alarmed, this is just a sneaky way to create far smaller text
@@ -717,4 +454,198 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         }
     }
 
+    companion object {
+
+        private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+        const val databaseFileSuffix = ".db"
+
+        /**
+         * This extends [ConcurrentHashMap] with the ability to provide
+         * atomic access to the index counter, for building id's
+         * for each new entry
+         */
+        val <K,V> ConcurrentHashMap<K,V>.nextIndex: AtomicInteger
+            get() = AtomicInteger(this.size+1)
+
+        /**
+         * This factory method handles the nitty-gritty about starting
+         * the database with respect to the files on disk.  If you plan
+         * to use the database with the disk, here's a great place to
+         * start.  If you are just going to use the database in memory-only,
+         * you may as well just instantiate [PureMemoryDatabase]
+         */
+        fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
+
+            /** The version of the database.  Update when we have
+             * real users and we're changing live prod data.
+             */
+            val dbVersion = 1
+
+            // first we assume the database has been previously persisted
+            val restoredPMD = deserializeFromDisk(dbDirectory)
+
+            return if (restoredPMD != null) {
+                // return the restored database
+                restoredPMD
+            } else {
+                logImperative("No existing database found, building new database")
+                // if nothing is there, we build a new database
+                // and add a clean set of directories
+                logImperative("Creating new PureMemoryDatabase")
+                val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
+
+                logImperative("creating the database directory at \"$dbDirectory\"")
+                File(dbDirectory).mkdirs()
+
+                logImperative("Writing the version of the database ($dbVersion) to version.txt")
+                File(dbDirectory + "version.txt").writeText(dbVersion.toString())
+
+                logImperative("creating an initial employee")
+                val tep = TimeEntryPersistence(pmd)
+                tep.persistNewEmployee(EmployeeName("Administrator"))
+
+                pmd
+            }
+        }
+
+        /**
+         * This starts the database with memory-only, that is
+         * no disk persistence.  This is mainly
+         * used for testing purposes
+         */
+        fun startMemoryOnly() : PureMemoryDatabase {
+            val pmd = PureMemoryDatabase()
+
+            logImperative("creating an initial employee")
+            val tep = TimeEntryPersistence(pmd)
+            tep.persistNewEmployee(EmployeeName("Administrator"))
+
+            return pmd
+        }
+
+        /**
+         * Deserializes the database from file, or returns null if no
+         * database directory exists
+         */
+        fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
+            val topDirectory = File(dbDirectory)
+            val innerFiles = topDirectory.listFiles()
+            if ((! topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
+                logImperative("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
+                return null
+            }
+
+            val projects = readAndDeserializeProjects(dbDirectory)
+            val users = readAndDeserializeUsers(dbDirectory)
+            val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
+            val employees = readAndDeserializeEmployees(dbDirectory)
+            val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees, projects)
+
+            return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
+        }
+
+        private fun readAndDeserializeTimeEntries(
+            dbDirectory: String,
+            employees: ConcurrentSet<Employee>,
+            projects: ConcurrentSet<Project>) : ConcurrentSet<TimeEntry> {
+            val timeEntriesDirectory = "timeentries/"
+            return try {
+                val fullTimeEntries: ConcurrentSet<TimeEntry> = ConcurrentSet()
+
+                for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
+                    val employee : Employee = try {
+                        employees.single { it.id == EmployeeId.make(employeeDirectory.name) }
+                    } catch (ex : NoSuchElementException) {
+                        throw DatabaseCorruptedException("Unable to find an employee with the id of ${employeeDirectory.name} based on entry in $timeEntriesDirectory")
+                    }
+                    val simpleTimeEntries = mutableSetOf<TimeEntry>()
+
+                    // loop through all the files of time entries for this employee, collecting them
+                    val timeEntryFiles = employeeDirectory.listFiles()
+                    if (timeEntryFiles.isNullOrEmpty()) {
+                        throw DatabaseCorruptedException("no time entry files found in employees directory at ${employeeDirectory.path}")
+                    }
+                    for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
+                        try {
+                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), employee, projects))
+                        } catch (ex : DatabaseCorruptedException) {
+                            throw DatabaseCorruptedException("Could not deserialize time entry file ${monthlyTimeEntries.name}.  ${ex.message}", ex.ex)
+                        }
+                    }
+
+                    fullTimeEntries.addAll(simpleTimeEntries)
+                }
+
+                fullTimeEntries
+            } catch (ex : NoTimeEntriesOnDiskException) {
+                logWarn("No time entries were found on disk, initializing new empty data")
+                ConcurrentSet()
+            }
+        }
+
+        private fun readAndDeserializeUsers(dbDirectory: String): ConcurrentSet<User> {
+            return try {
+                val usersFile = readFile(dbDirectory, "users")
+                deserializeUsers(usersFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("users file missing, creating empty")
+                ConcurrentSet()
+            }
+        }
+
+        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): ConcurrentSet<Session> {
+            return try {
+                val sessionsFile = readFile(dbDirectory, "sessions")
+                deserializeSessions(sessionsFile, users)
+            } catch (ex: FileNotFoundException) {
+                logWarn("sessions file missing, creating empty")
+                ConcurrentSet()
+            }
+        }
+
+        private fun readAndDeserializeEmployees(dbDirectory: String): ConcurrentSet<Employee> {
+            return try {
+                val employeesFile = readFile(dbDirectory, "employees")
+                deserializeEmployees(employeesFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("employees file missing, creating empty")
+                ConcurrentSet()
+            }
+        }
+
+        private fun readAndDeserializeProjects(dbDirectory: String): ConcurrentSet<Project> {
+            return try {
+                val projectsFile = readFile(dbDirectory, "projects")
+                deserializeProjects(projectsFile)
+            } catch (ex: FileNotFoundException) {
+                logWarn("projects file missing, creating empty")
+                ConcurrentSet()
+            }
+        }
+
+        private fun deserializeProjects(projectsFile: String): ConcurrentSet<Project> {
+            return projectsFile.split("\n").map{ProjectSurrogate.deserializeToProject(it)}.toConcurrentSet()
+        }
+
+        private fun deserializeEmployees(employeesFile: String): ConcurrentSet<Employee> {
+            return employeesFile.split("\n").map{EmployeeSurrogate.deserializeToEmployee(it)}.toConcurrentSet()
+        }
+
+        private fun deserializeSessions(sessionsFile: String, users: Set<User>): ConcurrentSet<Session> {
+            return sessionsFile.split("\n").map{SessionSurrogate.deserializeToSession(it, users)}.toConcurrentSet()
+        }
+
+        private fun deserializeUsers(usersFile: String): ConcurrentSet<User> {
+            return usersFile.split("\n").map{UserSurrogate.deserializeToUser(it)}.toConcurrentSet()
+        }
+
+        fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
+            return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
+        }
+
+        private fun readFile(dbDirectory: String, name : String): String {
+            return File(dbDirectory + name + databaseFileSuffix).readText()
+        }
+
+    }
 }

@@ -2,14 +2,32 @@ package coverosR3z.timerecording
 
 import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
+import coverosR3z.logging.logTrace
+import coverosR3z.persistence.ConcurrentSet
 import coverosR3z.persistence.PureMemoryDatabase
 
 class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
-        logDebug("persisting a new timeEntry")
         isEntryValid(entry)
-        return pmd.addTimeEntry(entry)
+        return pmd.actOnTimeEntries (shouldSerialize = true) { entries ->
+
+            // add the new data
+            val newIndex = entries.nextIndex.getAndIncrement()
+
+            logTrace { "new time-entry index is $newIndex" }
+            val newTimeEntry = TimeEntry(
+                newIndex,
+                entry.employee,
+                entry.project,
+                entry.time,
+                entry.date,
+                entry.details
+            )
+            entries.add(newTimeEntry)
+            logDebug{"recorded a new timeEntry: $newTimeEntry"}
+            newTimeEntry
+        }
     }
 
     /**
@@ -17,54 +35,73 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
      * this timeentry don't exist in the list of projects / employees
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(pmd.getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
-        check(pmd.getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
+        check(getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
+        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
-        logDebug("Recording a new project, ${projectName.value}, to the database")
-        return pmd.addNewProject(projectName)
+        return pmd.actOnProjects (shouldSerialize = true) { projects ->
+            val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
+            projects.add(newProject)
+            logDebug("Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database")
+            newProject
+        }
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
-        logDebug("Recording a new employee, \"${employeename.value}\", to the database")
-        return pmd.addNewEmployee(employeename)
+        return pmd.actOnEmployees (shouldSerialize = true) { employees ->
+            val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
+            employees.add(newEmployee)
+            logDebug("Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database")
+            newEmployee
+        }
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Time {
-        return pmd.getMinutesRecordedOnDate(employee, date)
+        return pmd.actOnTimeEntries(action =
+        fun(timeEntries: ConcurrentSet<TimeEntry>): Time {
+
+            // if the employee hasn't entered any time on this date, return 0 minutes
+            val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }.sumBy { te -> te.time.numberOfMinutes }
+            return Time(totalMinutes)
+        })
     }
 
     override fun readTimeEntries(employee: Employee): Set<TimeEntry> {
-        return pmd.getAllTimeEntriesForEmployee(employee)
+        return pmd.actOnTimeEntries { timeEntries -> timeEntries.filter { it.employee == employee } }.toSet()
     }
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return pmd.getAllTimeEntriesForEmployeeOnDate(employee, date)
+        return pmd.actOnTimeEntries { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
     }
 
     override fun getProjectByName(name: ProjectName): Project {
-        return pmd.getProjectByName(name)
+        return pmd.actOnProjects { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun getProjectById(id: ProjectId): Project {
-        return pmd.getProjectById(id)
+        return pmd.actOnProjects { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
     override fun getAllProjects(): List<Project> {
-        return pmd.getAllProjects()
+        return pmd.actOnProjects { it.toList() }
     }
 
     override fun getAllEmployees(): List<Employee> {
-        return pmd.getAllEmployees()
+        return pmd.actOnEmployees { it.toList() }
     }
 
     override fun getEmployeeById(id: EmployeeId): Employee {
-        return pmd.getEmployeeById(id)
+        return pmd.actOnEmployees { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
     override fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry)  {
-        pmd.overwriteTimeEntry(empId, id, newEntry)
+        val employee = getEmployeeById(empId)
+        pmd.actOnTimeEntries {
+            val setOfTimeEntries = readTimeEntries(employee)
+            check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
+            //TODO - finish this
+        }
 
     }
 

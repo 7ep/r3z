@@ -140,4 +140,48 @@ class TimeEntryPersistenceTests {
         assertEquals("we should get 8 hours worked for this day", Time(60 * 8), query)
     }
 
+    @Test
+    fun `should be able to add a new project`() {
+        tep.persistNewProject(DEFAULT_PROJECT_NAME)
+
+        val project = tep.getProjectById(DEFAULT_PROJECT.id)
+
+        assertEquals(ProjectId(1), project.id)
+    }
+
+    @Test
+    fun `should be able to add a new employee`() {
+        tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+
+        val employee = tep.getEmployeeById(DEFAULT_EMPLOYEE.id)
+
+        assertEquals(1, employee.id.value)
+    }
+
+    @Test
+    fun `should be able to add a new time entry`() {
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        tep.persistNewTimeEntry(TimeEntryPreDatabase(newEmployee, newProject, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
+
+        val timeEntries = tep.readTimeEntriesOnDate(newEmployee, A_RANDOM_DAY_IN_JUNE_2020).first()
+
+        assertEquals(1, timeEntries.id)
+        assertEquals(DEFAULT_EMPLOYEE, timeEntries.employee)
+        assertEquals(DEFAULT_PROJECT, timeEntries.project)
+        assertEquals(DEFAULT_TIME, timeEntries.time)
+        assertEquals(A_RANDOM_DAY_IN_JUNE_2020, timeEntries.date)
+    }
+
+
+    /**
+     * If I ask the database for all the time entries for a particular employee on
+     * a date and there aren't any, I should get back an empty list, not a null.
+     */
+    @Test
+    fun testShouldReturnEmptyListIfNoEntries() {
+        val result = tep.readTimeEntriesOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
+        assertEquals(emptySet<TimeEntry>() , result)
+    }
+
 }

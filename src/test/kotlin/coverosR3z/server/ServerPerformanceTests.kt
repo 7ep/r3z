@@ -10,6 +10,8 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.misc.getTime
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.EnterTimeAPI
+import coverosR3z.timerecording.ITimeEntryPersistence
+import coverosR3z.timerecording.TimeEntryPersistence
 import org.junit.*
 import kotlin.concurrent.thread
 
@@ -27,6 +29,7 @@ class ServerPerformanceTests {
     private lateinit var serverObject : Server
     private lateinit var pmd : PureMemoryDatabase
     private lateinit var ap : IAuthPersistence
+    private lateinit var tep : ITimeEntryPersistence
     private val fakeAuth = FakeAuthenticationUtilities()
     private lateinit var serverThread : Thread
 
@@ -34,6 +37,7 @@ class ServerPerformanceTests {
     fun init() {
         pmd = PureMemoryDatabase.startMemoryOnly()
         ap = AuthenticationPersistence(pmd)
+        tep = TimeEntryPersistence(pmd)
         serverObject = Server(12345)
         serverThread = thread {
             serverObject.startServer(Server.initializeBusinessCode(pmd))
@@ -61,7 +65,7 @@ class ServerPerformanceTests {
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
@@ -88,7 +92,7 @@ class ServerPerformanceTests {
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 

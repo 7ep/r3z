@@ -5,16 +5,16 @@ import coverosR3z.authentication.AuthenticationPersistence
 import coverosR3z.domainobjects.*
 import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.logging.logAudit
-import coverosR3z.logging.loggerPrinter
+import coverosR3z.logging.resetLogSettingsToDefault
+import coverosR3z.logging.turnOffAllLogging
 import coverosR3z.misc.getTime
-import coverosR3z.persistence.ConcurrentSet.Companion.concurrentSetOf
 import coverosR3z.persistence.PureMemoryDatabase.Companion.databaseFileSuffix
+import coverosR3z.timerecording.ITimeEntryPersistence
+import coverosR3z.timerecording.TimeEntryPersistence
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
 import java.io.File
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -45,71 +45,22 @@ class PureMemoryDatabaseTests {
     }
 
     @Test
-    fun `should be able to add a new project`() {
-        pmd.addNewProject(DEFAULT_PROJECT_NAME)
-
-        val project = pmd.getProjectById(DEFAULT_PROJECT.id)
-
-        assertEquals(ProjectId(1), project.id)
-    }
-
-    @Test
-    fun `should be able to add a new employee`() {
-        pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-
-        val employee = pmd.getEmployeeById(DEFAULT_EMPLOYEE.id)
-
-        assertEquals(1, employee.id.value)
-    }
-
-    @Test
-    fun `should be able to add a new time entry`() {
-        pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
-
-        val timeEntries = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020).first()
-
-        assertEquals(1, timeEntries.id)
-        assertEquals(DEFAULT_EMPLOYEE, timeEntries.employee)
-        assertEquals(DEFAULT_PROJECT, timeEntries.project)
-        assertEquals(DEFAULT_TIME, timeEntries.time)
-        assertEquals(A_RANDOM_DAY_IN_JUNE_2020, timeEntries.date)
-    }
-
-    @Test
-    fun `PERFORMANCE a firm should get responses from the database quite quickly`() {
+    fun `PERFORMANCE should get responses from the database quickly`() {
         val numberOfEmployees = 30
         val numberOfProjects = 30
         val numberOfDays = 31
 
-        val allEmployees = recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
+        val tep = TimeEntryPersistence(pmd)
+        val allEmployees = recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
+
 
         val (totalTime) = getTime {
-            readTimeEntriesForOneEmployee(allEmployees)
-            accumulateMinutesPerEachEmployee(allEmployees)
+            readTimeEntriesForOneEmployee(tep, allEmployees)
+            accumulateMinutesPerEachEmployee(tep, allEmployees)
         }
 
         logAudit("It took a total of $totalTime milliseconds for this code")
         assertTrue(totalTime < 100)
-    }
-
-    @Test
-    fun `should be able to get the minutes on a certain date`() {
-        pmd.addNewEmployee(DEFAULT_EMPLOYEE.name)
-        pmd.addTimeEntry(TimeEntryPreDatabase(DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020))
-
-        val minutes = pmd.getMinutesRecordedOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
-
-        assertEquals(DEFAULT_TIME, minutes)
-    }
-
-    /**
-     * If I ask the database for all the time entries for a particular employee on
-     * a date and there aren't any, I should get back an empty list, not a null.
-     */
-    @Test
-    fun testShouldReturnEmptyListIfNoEntries() {
-        val result = pmd.getAllTimeEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
-        assertEquals(emptySet<TimeEntry>() , result)
     }
 
     /**
@@ -118,7 +69,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testShouldBePossibleToCopy_different() {
         val originalPmd = pmd.copy()
-        pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        pmd.actOnEmployees { it.add(DEFAULT_EMPLOYEE) }
         assertNotEquals("after adding a new employee, the databases should differ", originalPmd, pmd)
     }
 
@@ -142,10 +93,11 @@ class PureMemoryDatabaseTests {
         val maxMillisecondsAllowed = 200
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val tep = TimeEntryPersistence(pmd)
         File(DEFAULT_DB_DIRECTORY).mkdirs()
 
         val (totalTimeWriting, _) = getTime {
-            recordManyTimeEntries(numberOfEmployees, numberOfProjects, numberOfDays)
+            recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
             pmd.stop()
         }
 
@@ -169,56 +121,46 @@ class PureMemoryDatabaseTests {
     }
 
     /**
-     * How long does it actually take to serialize and deserialize?
-     * Not very long at all.
-     */
-    @Test
-    fun testSerializingTimeEntries_PERFORMANCE() {
-        val numTimeEntries = 1000
-        val timeEntries: MutableSet<TimeEntry> = prepareSomeRandomTimeEntries(numTimeEntries, DEFAULT_PROJECT, DEFAULT_EMPLOYEE)
-
-        val (timeToSerialize, serializedTimeEntries) = getTime{pmd.serializeTimeEntries(timeEntries)}
-        val (timeToDeserialize, _) = getTime{
-            PureMemoryDatabase.deserializeTimeEntries(
-                serializedTimeEntries,
-                DEFAULT_EMPLOYEE,
-                concurrentSetOf(DEFAULT_PROJECT))
-        }
-
-        logAudit("Time to serialize $numTimeEntries time entries was $timeToSerialize milliseconds")
-        logAudit("Time to deserialize $numTimeEntries time entries was $timeToDeserialize milliseconds")
-
-        assertTrue(timeToSerialize < 150)
-        assertTrue(timeToDeserialize < 150)
-    }
-
-    /**
-     * This is to test that it is possible to corrupt the data when
+     * This is to test that it could be possible to corrupt the data when
      * multiple threads are changing it
      *
      * The idea behind this test is that if we aren't handling
      * the threading cleanly, we won't get one hundred employees
      * added, it will be some smaller number.
      *
-     * When I added the lock, this caused us to have a result
-     * of the proper number of new employees
+     * It used to be easy to see this fail, you just had to remove
+     * the locking mechanism from the method at
+     * [PureMemoryDatabase.addNewEmployee], and you
+     * would need to run it a time or two to see it fail.
      *
-     * To see this fail, just remove the locking mechanism from the
-     * method at [PureMemoryDatabase.addNewEmployee], but you
-     * might need to run it a time or two to see it fail.
+     * Now, however, we aren't using locking - we're using
+     * [ConcurrentSet] which is based on [ConcurrentHashMap], and
+     * also [AtomicInteger], which means we don't need to lock
+     * at all.
+     *
+     * So the only way to get this un-thread-safe again
+     * would be to switch back to using an un-thread-safe
+     * data collection, which isn't quite as easy.
+     *
+     * In any case, this test should still help us, since
+     * if this test passes, it should still mean we are handling
+     * our threads properly.
      */
     @Test
     fun testCorruptingEmployeeDataWithMultiThreading() {
+        val tep = TimeEntryPersistence(pmd)
         val listOfThreads = mutableListOf<Thread>()
         val numberNewEmployeesAdded = 20
+        turnOffAllLogging()
         repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
             listOfThreads.add(thread {
-                pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
+                tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
             })
         }
         // wait for all those threads
         listOfThreads.forEach{it.join()}
-        assertEquals(numberNewEmployeesAdded, pmd.getAllEmployees().size)
+        resetLogSettingsToDefault()
+        assertEquals(numberNewEmployeesAdded, tep.getAllEmployees().size)
     }
 
 
@@ -227,78 +169,41 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testCorruptingProjectDataWithMultiThreading() {
+        val tep = TimeEntryPersistence(pmd)
         val listOfThreads = mutableListOf<Thread>()
         val numberNewProjectsAdded = 20
+        turnOffAllLogging()
         repeat(numberNewProjectsAdded) { // each thread calls the add a single time
             listOfThreads.add(thread {
-                pmd.addNewProject(DEFAULT_PROJECT_NAME)
+                tep.persistNewProject(DEFAULT_PROJECT_NAME)
             })
         }
         // wait for all those threads
         listOfThreads.forEach{it.join()}
-        assertEquals(numberNewProjectsAdded, pmd.getAllProjects().size)
+        resetLogSettingsToDefault()
+        assertEquals(numberNewProjectsAdded, tep.getAllProjects().size)
     }
 
     /**
-     * Time entry recording is fairly involved, we have to lock
-     * a lot.  See [testCorruptingEmployeeDataWithMultiThreading]
+     * See [testCorruptingEmployeeDataWithMultiThreading]
      */
     @Test
     fun testCorruptingTimeEntryDataWithMultiThreading() {
+        val tep = TimeEntryPersistence(pmd)
         val listOfThreads = mutableListOf<Thread>()
         val numberTimeEntriesAdded = 20
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        turnOffAllLogging()
         repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
             listOfThreads.add(thread {
-                pmd.addTimeEntry(createTimeEntryPreDatabase())
+                tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
             })
         }
         // wait for all those threads
         listOfThreads.forEach{it.join()}
-        assertEquals(numberTimeEntriesAdded, pmd.getAllTimeEntriesForEmployee(DEFAULT_EMPLOYEE).size)
-    }
-
-    /**
-     * These tests capture what happens when a file doesn't exist in the directory
-     * because no entries have been, not because it's become corrupted.
-     *
-     * Here there are no users, so there cannot be any sessions either
-     */
-    @Test
-    fun testPersistence_Read_MissingUsers() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-
-        assertEquals(pmd, readPmd)
-        assertEquals(pmd.hashCode(), readPmd.hashCode())
-    }
-
-    /**
-     * These tests capture what happens when a file doesn't exist in the directory
-     * because no entries have been, not because it's become corrupted.
-     *
-     * Here there are no sessions, which might mean no one was logged in
-     */
-    @Test
-    fun testPersistence_Read_MissingSessions() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-
-        assertEquals(pmd, readPmd)
-        assertEquals(pmd.hashCode(), readPmd.hashCode())
+        resetLogSettingsToDefault()
+        assertEquals(numberTimeEntriesAdded, tep.readTimeEntries(DEFAULT_EMPLOYEE).size)
     }
 
     /**
@@ -325,25 +230,13 @@ class PureMemoryDatabaseTests {
         assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "version.txt").exists())
     }
 
-
-
     /**
      * Assuming we have valid data stored on disk, do we read
      * it back properly?
      */
     @Test
     fun testPersistence_Read_HappyPath() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val readPmd = arrangeFullDatabaseWithDisk()
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -351,20 +244,39 @@ class PureMemoryDatabaseTests {
 
     /**
      * These tests capture what happens when a file doesn't exist in the directory
-     * because no entries have been, not because it's become corrupted.
+     * because no entries have been added, not because it's become corrupted.
+     *
+     * Here there are no users, so there cannot be any sessions either
+     */
+    @Test
+    fun testPersistence_Read_MissingUsers() {
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingUser = true)
+
+        assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
+    }
+
+    /**
+     * These tests capture what happens when a file doesn't exist in the directory
+     * because no entries have been added, not because it's become corrupted.
+     *
+     * Here there are no sessions, which might mean no one was logged in
+     */
+    @Test
+    fun testPersistence_Read_MissingSessions() {
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingSession = true)
+
+        assertEquals(pmd, readPmd)
+        assertEquals(pmd.hashCode(), readPmd.hashCode())
+    }
+
+    /**
+     * These tests capture what happens when a file doesn't exist in the directory
+     * because no entries have been added, not because it's become corrupted.
      */
     @Test
     fun testPersistence_Read_MissingTimeEntries() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -372,21 +284,13 @@ class PureMemoryDatabaseTests {
 
     /**
      * These tests capture what happens when a file doesn't exist in the directory
-     * because no entries have been, not because it's become corrupted.
+     * because no entries have been added, not because it's become corrupted.
      *
      * here there are no employees, so there cannot be any time entries
      */
     @Test
     fun testPersistence_Read_MissingEmployees() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null)
-        pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingEmployees = true, skipCreatingTimeEntries = true)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -400,15 +304,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_MissingProjects() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.stop()
-
-        val readPmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true)
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -422,15 +318,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -444,14 +332,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Employees_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // corrupt the employees data file
         File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -468,15 +349,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Employees_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").delete()
@@ -491,19 +364,11 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // delete a necessary time entry file inside this employees' directory
-        val file = File("$DEFAULT_DB_DIRECTORY/timeentries/${newEmployee.id.value}/")
-                file.listFiles()?.forEach { it.delete() }
+        val file = File("$DEFAULT_DB_DIRECTORY/timeentries/2/")
+        file.listFiles()?.forEach { it.delete() }
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
 
@@ -515,15 +380,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Users_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // corrupt the users data file
         File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -536,15 +393,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Users_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").delete()
@@ -558,15 +407,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Projects_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // corrupt the projects data file
         File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -580,15 +421,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Projects_MissingFile() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").delete()
@@ -602,15 +435,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testPersistence_Read_CorruptedData_Sessions_BadData() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        val ap = AuthenticationPersistence(pmd)
-        val newEmployee = pmd.addNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
-        val newProject = pmd.addNewProject(DEFAULT_PROJECT_NAME)
-        ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
-        pmd.addTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
-        pmd.stop()
+        arrangeFullDatabaseWithDisk(skipRestarting = true)
 
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/sessions$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -818,6 +643,52 @@ class PureMemoryDatabaseTests {
      alt-text: Helper Methods
      */
 
+
+    /**
+     * Helps us avoid a lot of repetition in the set of tests related to
+     * corrupting data entries on disk and also reloading the database after
+     * not having done certain things, like for example: not ever having logged in.
+     */
+    private fun arrangeFullDatabaseWithDisk(
+        skipCreatingUser: Boolean = false,
+        skipCreatingSession : Boolean = false,
+        skipCreatingTimeEntries : Boolean = false,
+        skipCreatingEmployees : Boolean = false,
+        skipCreatingProjects : Boolean = false,
+        skipRestarting : Boolean = false): PureMemoryDatabase? {
+
+        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
+        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val ap = AuthenticationPersistence(pmd)
+        val tep = TimeEntryPersistence(pmd)
+        val newEmployee = if (! skipCreatingEmployees) {
+            tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        } else {
+            NO_EMPLOYEE
+        }
+        val newProject = if (! skipCreatingProjects) {
+            tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        } else {
+            NO_PROJECT
+        }
+        if (! skipCreatingUser) {
+            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+            if (! skipCreatingSession) {
+                ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
+            }
+        }
+        if (! skipCreatingTimeEntries) {
+            tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+        }
+        pmd.stop()
+
+        return if (! skipRestarting) {
+            PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        } else {
+            null
+        }
+    }
+
     private fun prepareSomeRandomTimeEntries(numTimeEntries: Int, project : Project, employee : Employee): MutableSet<TimeEntry> {
         val timeEntries: MutableSet<TimeEntry> = mutableSetOf()
         for (i in 1..numTimeEntries) {
@@ -835,20 +706,20 @@ class PureMemoryDatabaseTests {
         return timeEntries
     }
 
-    private fun recordManyTimeEntries(numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
+    private fun recordManyTimeEntries(tep: ITimeEntryPersistence, numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
         val lotsOfEmployees: List<String> = generateEmployeeNames()
-        persistEmployeesToDatabase(numberOfEmployees, lotsOfEmployees)
-        val allEmployees: List<Employee> = readEmployeesFromDatabase()
-        persistProjectsToDatabase(numberOfProjects)
-        val allProjects: List<Project> = readProjectsFromDatabase()
-        enterTimeEntries(numberOfDays, allEmployees, allProjects, numberOfEmployees)
+        persistEmployeesToDatabase(tep, numberOfEmployees, lotsOfEmployees)
+        val allEmployees: List<Employee> = readEmployeesFromDatabase(tep)
+        persistProjectsToDatabase(tep, numberOfProjects)
+        val allProjects: List<Project> = readProjectsFromDatabase(tep)
+        enterTimeEntries(tep, numberOfDays, allEmployees, allProjects, numberOfEmployees)
         return allEmployees
     }
 
-    private fun accumulateMinutesPerEachEmployee(allEmployees: List<Employee>) {
+    private fun accumulateMinutesPerEachEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
         val (timeToAccumulate) = getTime {
             val minutesPerEmployeeTotal =
-                    allEmployees.map { e -> pmd.getAllTimeEntriesForEmployee(e).sumBy { te -> te.time.numberOfMinutes } }
+                    allEmployees.map { e -> tep.readTimeEntries(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
             logAudit("the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}")
             logAudit("the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}")
@@ -857,52 +728,58 @@ class PureMemoryDatabaseTests {
         logAudit("It took $timeToAccumulate milliseconds to accumulate the minutes per employee")
     }
 
-    private fun readTimeEntriesForOneEmployee(allEmployees: List<Employee>) {
-        val (timeToGetAllTimeEntries) = getTime { pmd.getAllTimeEntriesForEmployee(allEmployees[0]) }
+    private fun readTimeEntriesForOneEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
+        val (timeToGetAllTimeEntries) = getTime { tep.readTimeEntries(allEmployees[0]) }
         logAudit("It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee")
     }
 
-    private fun enterTimeEntries(numberOfDays: Int, allEmployees: List<Employee>, allProjects: List<Project>, numberOfEmployees: Int) {
+    private fun enterTimeEntries(tep: ITimeEntryPersistence, numberOfDays: Int, allEmployees: List<Employee>, allProjects: List<Project>, numberOfEmployees: Int) {
+        turnOffAllLogging()
         val (timeToEnterAllTimeEntries) = getTime {
             for (day in 1..numberOfDays) {
                 for (employee in allEmployees) {
-                    pmd.addTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
-                    pmd.addTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
-                    pmd.addTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
-                    pmd.addTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
+                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438 + day), Details("AAAAAAAAAAAA")))
                 }
             }
         }
+        resetLogSettingsToDefault()
         logAudit("It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees")
         logAudit("(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)")
     }
 
-    private fun readProjectsFromDatabase(): List<Project> {
-        val (timeToReadAllProjects, allProjects) = getTime { pmd.getAllProjects()}
+    private fun readProjectsFromDatabase(tep: ITimeEntryPersistence): List<Project> {
+        val (timeToReadAllProjects, allProjects) = getTime { tep.getAllProjects()}
         logAudit("It took $timeToReadAllProjects milliseconds to read all the projects")
         return allProjects
     }
 
-    private fun persistProjectsToDatabase(numberOfProjects: Int) {
+    private fun persistProjectsToDatabase(tep: ITimeEntryPersistence, numberOfProjects: Int) {
+        turnOffAllLogging()
         val (timeToCreateProjects) =
-                getTime { (1..numberOfProjects).forEach { i -> pmd.addNewProject(ProjectName("project$i")) } }
+                getTime { (1..numberOfProjects).forEach { i -> tep.persistNewProject(ProjectName("project$i")) } }
+        resetLogSettingsToDefault()
         logAudit("It took $timeToCreateProjects milliseconds to create $numberOfProjects projects")
     }
 
-    private fun readEmployeesFromDatabase(): List<Employee> {
+    private fun readEmployeesFromDatabase(tep: ITimeEntryPersistence): List<Employee> {
         val (timeToReadAllEmployees, allEmployees) = getTime {
-            pmd.getAllEmployees()
+            tep.getAllEmployees()
         }
         logAudit("It took $timeToReadAllEmployees milliseconds to read all the employees")
         return allEmployees
     }
 
-    private fun persistEmployeesToDatabase(numberOfEmployees: Int, lotsOfEmployees: List<String>) {
+    private fun persistEmployeesToDatabase(tep: ITimeEntryPersistence, numberOfEmployees: Int, lotsOfEmployees: List<String>) {
+        turnOffAllLogging()
         val (timeToEnterEmployees) = getTime {
             for (i in 1..numberOfEmployees) {
-                pmd.addNewEmployee(EmployeeName(lotsOfEmployees[i]))
+                tep.persistNewEmployee(EmployeeName(lotsOfEmployees[i]))
             }
         }
+        resetLogSettingsToDefault()
         logAudit("It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees")
     }
 

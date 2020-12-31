@@ -32,6 +32,13 @@ fun resetLogSettingsToDefault() {
     LogConfig.logSettings[LogTypes.TRACE] = false
 }
 
+fun turnOffAllLogging() {
+    LogConfig.logSettings[LogTypes.AUDIT] = false
+    LogConfig.logSettings[LogTypes.DEBUG] = false
+    LogConfig.logSettings[LogTypes.WARN] = false
+    LogConfig.logSettings[LogTypes.TRACE] = false
+}
+
 object LogConfig{
     val logSettings = mutableMapOf(
             LogTypes.AUDIT to true,
@@ -51,27 +58,29 @@ class Logger (private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
      * try not to be repetitive.
      */
     fun audit(msg : String) {
-        logAudit(msg, cu)
+        logAudit(cu) { msg }
     }
 
     fun debug(msg: String) {
-        logDebug(msg, cu)
+        logDebug(cu) {msg}
     }
 
 }
 
-/**
- * See [Logger.audit]
- */
+@Deprecated("Use the alternate form instead, has better performance", ReplaceWith("logAudit(cu) {msg}"))
 fun logAudit(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (LogConfig.logSettings[LogTypes.AUDIT] == true) {
         loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: $msg") }
     }
 }
 
-/**
- * Used to log finicky details of technical solutions
- */
+fun logAudit(cu : CurrentUser = CurrentUser(SYSTEM_USER), msg : () -> String) {
+    if (LogConfig.logSettings[LogTypes.AUDIT] == true) {
+        loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: ${msg()}") }
+    }
+}
+
+@Deprecated("Use the alternate form instead, has better performance", ReplaceWith("logDebug(cu) {msg}"))
 fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
     if (LogConfig.logSettings[LogTypes.DEBUG] == true) {
         loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: $msg") }
@@ -79,8 +88,15 @@ fun logDebug(msg : String, cu : CurrentUser = CurrentUser(SYSTEM_USER)) {
 }
 
 /**
- * Logs nearly extraneous levels of detail.
+ * Used to log finicky details of technical solutions
  */
+fun logDebug(cu : CurrentUser = CurrentUser(SYSTEM_USER), msg: () -> String) {
+    if (LogConfig.logSettings[LogTypes.DEBUG] == true) {
+        loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: ${msg()}") }
+    }
+}
+
+@Deprecated("Use the alternate form instead, has better performance", ReplaceWith("logTrace {msg}"))
 fun logTrace(msg: String) {
     if (LogConfig.logSettings[LogTypes.TRACE] == true) {
         loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: $msg") }
@@ -96,13 +112,20 @@ fun logTrace(msg: () -> String) {
     }
 }
 
+@Deprecated("Use the alternate form instead, has better performance", ReplaceWith("logWarn {msg}"))
+fun logWarn(msg: String) {
+    if (LogConfig.logSettings[LogTypes.WARN] == true) {
+        loggerPrinter.enqueue { println("${getCurrentMillis()} WARN: $msg") }
+    }
+}
+
 /**
  * Logs items that could be concerning to the operations team.  Like
  * a missing database file.
  */
-fun logWarn(msg: String) {
+fun logWarn(msg: () -> String) {
     if (LogConfig.logSettings[LogTypes.WARN] == true) {
-        loggerPrinter.enqueue { println("${getCurrentMillis()} WARN: $msg") }
+        loggerPrinter.enqueue { println("${getCurrentMillis()} WARN: ${msg()}") }
     }
 }
 
