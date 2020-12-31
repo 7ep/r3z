@@ -57,11 +57,14 @@ class ServerPerformanceTests {
     /**
      * How fast to enter data, the user's time entries
      *
-     * Fastest I've seen is 4088 time entries per second,
-     * for five threads and 1000 entries, it took 1.223 seconds
+     * Fastest I've seen is 7163 time entries per second,
+     * for five threads and 1000 requests (5000 time entries), it took .698 seconds
      */
     @Test
     fun testEnterTime_PERFORMANCE() {
+        val numberThreads = 2
+        val numberRequests = 10
+
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
@@ -70,7 +73,7 @@ class ServerPerformanceTests {
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
-            val threadList = (1..2).map { makeClientThreadRepeatedTimeEntries(100, newProject) }
+            val threadList = (1..numberThreads).map { makeClientThreadRepeatedTimeEntries(numberRequests, newProject) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
@@ -89,6 +92,9 @@ class ServerPerformanceTests {
      */
     @Test
     fun testViewTime_PERFORMANCE() {
+        val numberThreads = 2
+        val numberRequests = 10
+
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
@@ -100,7 +106,7 @@ class ServerPerformanceTests {
         makeTimeEntriesThreads.forEach { it.join() }
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedRequestsViewTimeEntries(50) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
@@ -120,6 +126,9 @@ class ServerPerformanceTests {
      */
     @Test
     fun testViewStaticContentAuthenticated_PERFORMANCE() {
+        val numberThreads = 2
+        val numberRequests = 10
+
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
@@ -127,7 +136,7 @@ class ServerPerformanceTests {
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedRequestsViewHomepage(50) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewHomepage(numberRequests) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
@@ -146,12 +155,12 @@ class ServerPerformanceTests {
      */
     @Test
     fun testViewStaticContentUnauthenticated_PERFORMANCE() {
+        val numberThreads = 2
+        val numberRequests = 10
+
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
-
-        val numberThreads = 2
-        val numberRequests = 10
 
         val (time, _) = getTime {
             val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsGetStaticFile(numberRequests) }
