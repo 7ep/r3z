@@ -42,6 +42,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         )
     }
 
+    ////////////////////////////////////
+    //   DATA ACCESS
+    ////////////////////////////////////
+
     /**
      * carry out some action on the [User] set of data.
      * @param shouldSerialize if true, carry out serialization and persistence to disk
@@ -117,6 +121,12 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return result
     }
 
+    ////////////////////////////////////
+    //   BOILERPLATE
+    ////////////////////////////////////
+
+
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -141,6 +151,12 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return result
     }
 
+
+    ////////////////////////////////////
+    //   DATABASE CONTROL
+    ////////////////////////////////////
+
+
     /**
      * This function will stop the database cleanly.
      *
@@ -154,6 +170,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         actionQueue.stop()
     }
 
+
+    ////////////////////////////////////
+    //   SERIALIZATION
+    ////////////////////////////////////
 
     /**
      * Write the entire set of data to a single file, overwriting if necessary
@@ -230,6 +250,9 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
     companion object {
 
+        /**
+         * The suffix for the database files we will write to disk
+         */
         const val databaseFileSuffix = ".db"
 
         /**
@@ -237,7 +260,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          * the database with respect to the files on disk.  If you plan
          * to use the database with the disk, here's a great place to
          * start.  If you are just going to use the database in memory-only,
-         * you may as well just instantiate [PureMemoryDatabase]
+         * check out [startMemoryOnly]
          */
         fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
 
@@ -276,7 +299,8 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         /**
          * This starts the database with memory-only, that is
          * no disk persistence.  This is mainly
-         * used for testing purposes
+         * used for testing purposes.  For production use,
+         * check out [startWithDiskPersistence]
          */
         fun startMemoryOnly() : PureMemoryDatabase {
             val pmd = PureMemoryDatabase()
@@ -289,7 +313,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         }
 
         /**
-         * Deserializes the database from file, or returns null if no
+         * Deserializes the database from files, or returns null if no
          * database directory exists
          */
         fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
@@ -332,7 +356,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                     }
                     for (monthlyTimeEntries: File in timeEntryFiles.filter { it.isFile }) {
                         try {
-                            simpleTimeEntries.addAll(deserializeTimeEntries(monthlyTimeEntries.readText(), employee, projects))
+                            simpleTimeEntries.addAll(
+                                monthlyTimeEntries.readText().split("\n")
+                                    .map { TimeEntrySurrogate.deserializeToTimeEntry(it, employee, projects) }.toSet()
+                            )
                         } catch (ex : DatabaseCorruptedException) {
                             throw DatabaseCorruptedException("Could not deserialize time entry file ${monthlyTimeEntries.name}.  ${ex.message}", ex.ex)
                         }
@@ -351,7 +378,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun readAndDeserializeUsers(dbDirectory: String): ConcurrentSet<User> {
             return try {
                 val usersFile = readFile(dbDirectory, "users")
-                deserializeUsers(usersFile)
+                usersFile.split("\n").map { UserSurrogate.deserializeToUser(it) }.toConcurrentSet()
             } catch (ex: FileNotFoundException) {
                 logWarn { "users file missing, creating empty" }
                 ConcurrentSet()
@@ -361,7 +388,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): ConcurrentSet<Session> {
             return try {
                 val sessionsFile = readFile(dbDirectory, "sessions")
-                deserializeSessions(sessionsFile, users)
+                sessionsFile.split("\n").map { SessionSurrogate.deserializeToSession(it, users) }.toConcurrentSet()
             } catch (ex: FileNotFoundException) {
                 logWarn { "sessions file missing, creating empty" }
                 ConcurrentSet()
@@ -371,7 +398,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun readAndDeserializeEmployees(dbDirectory: String): ConcurrentSet<Employee> {
             return try {
                 val employeesFile = readFile(dbDirectory, "employees")
-                deserializeEmployees(employeesFile)
+                employeesFile.split("\n").map { EmployeeSurrogate.deserializeToEmployee(it) }.toConcurrentSet()
             } catch (ex: FileNotFoundException) {
                 logWarn { "employees file missing, creating empty" }
                 ConcurrentSet()
@@ -381,31 +408,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun readAndDeserializeProjects(dbDirectory: String): ConcurrentSet<Project> {
             return try {
                 val projectsFile = readFile(dbDirectory, "projects")
-                deserializeProjects(projectsFile)
+                projectsFile.split("\n").map { ProjectSurrogate.deserializeToProject(it) }.toConcurrentSet()
             } catch (ex: FileNotFoundException) {
                 logWarn { "projects file missing, creating empty" }
                 ConcurrentSet()
             }
-        }
-
-        private fun deserializeProjects(projectsFile: String): ConcurrentSet<Project> {
-            return projectsFile.split("\n").map{ ProjectSurrogate.deserializeToProject(it)}.toConcurrentSet()
-        }
-
-        private fun deserializeEmployees(employeesFile: String): ConcurrentSet<Employee> {
-            return employeesFile.split("\n").map{ EmployeeSurrogate.deserializeToEmployee(it)}.toConcurrentSet()
-        }
-
-        private fun deserializeSessions(sessionsFile: String, users: Set<User>): ConcurrentSet<Session> {
-            return sessionsFile.split("\n").map{ SessionSurrogate.deserializeToSession(it, users)}.toConcurrentSet()
-        }
-
-        private fun deserializeUsers(usersFile: String): ConcurrentSet<User> {
-            return usersFile.split("\n").map{ UserSurrogate.deserializeToUser(it)}.toConcurrentSet()
-        }
-
-        private fun deserializeTimeEntries(timeEntries: String, employees: Employee, projects: ConcurrentSet<Project>): Set<TimeEntry> {
-            return timeEntries.split("\n").map { TimeEntrySurrogate.deserializeToTimeEntry(it, employees, projects) }.toSet()
         }
 
         private fun readFile(dbDirectory: String, name : String): String {
