@@ -9,6 +9,7 @@ import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOffAllLogging
 import coverosR3z.misc.getTime
 import coverosR3z.persistence.PureMemoryDatabase.Companion.databaseFileSuffix
+import coverosR3z.persistence.surrogates.*
 import coverosR3z.timerecording.ITimeEntryPersistence
 import coverosR3z.timerecording.TimeEntryPersistence
 import org.junit.*
@@ -445,53 +446,53 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_User() {
-        val user = PureMemoryDatabase.UserSurrogate(1, "myname", "myhash", "mysalt", 1)
+        val user = UserSurrogate(1, "myname", "myhash", "mysalt", 1)
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt , empId: 1 }""", result)
 
-        val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
+        val deserialized = UserSurrogate.deserialize(result)
 
         assertEquals(user, deserialized)
     }
 
     @Test
     fun testSerialization_UserWithNullEmployee() {
-        val user = PureMemoryDatabase.UserSurrogate(1, "myname", "myhash", "mysalt", null)
+        val user = UserSurrogate(1, "myname", "myhash", "mysalt", null)
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt , empId: null }""", result)
 
-        val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
+        val deserialized = UserSurrogate.deserialize(result)
 
         assertEquals(user, deserialized)
     }
 
     @Test
     fun testSerialization_UserWithMultilineText() {
-        val user = PureMemoryDatabase.UserSurrogate(1, "myname", "myhash", """mysalt
+        val user = UserSurrogate(1, "myname", "myhash", """mysalt
             |thisisalsotext""".trimMargin(), 1)
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt%0Athisisalsotext , empId: 1 }""".trimMargin(), result)
 
-        val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
+        val deserialized = UserSurrogate.deserialize(result)
 
         assertEquals(user, deserialized)
     }
 
     @Test
     fun testSerialization_UserWithUnicodeText() {
-        val user = PureMemoryDatabase.UserSurrogate(1, "myname", "myhash", "L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË", 1)
+        val user = UserSurrogate(1, "myname", "myhash", "L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË", 1)
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: L%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B , empId: 1 }""", result)
 
-        val deserialized = PureMemoryDatabase.UserSurrogate.deserialize(result)
+        val deserialized = UserSurrogate.deserialize(result)
 
         assertEquals(user, deserialized)
     }
@@ -499,78 +500,78 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_Employee() {
-        val employee = PureMemoryDatabase.EmployeeSurrogate(1, "myname")
+        val employee = EmployeeSurrogate(1, "myname")
 
         val result = employee.serialize()
 
         assertEquals("""{ id: 1 , name: myname }""", result)
 
-        val deserialized = PureMemoryDatabase.EmployeeSurrogate.deserialize(result)
+        val deserialized = EmployeeSurrogate.deserialize(result)
 
         assertEquals(employee, deserialized)
     }
 
     @Test
     fun testSerialization_Employee_UnicodeAndMultiline() {
-        val employee = PureMemoryDatabase.EmployeeSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
+        val employee = EmployeeSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
 
         val result = employee.serialize()
 
         assertEquals("""{ id: 1 , name: %0A%0D%09Hello%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86 }""", result)
 
-        val deserialized = PureMemoryDatabase.EmployeeSurrogate.deserialize(result)
+        val deserialized = EmployeeSurrogate.deserialize(result)
 
         assertEquals(employee, deserialized)
     }
 
     @Test
     fun testSerialization_Project() {
-        val project = PureMemoryDatabase.ProjectSurrogate(1, "myname")
+        val project = ProjectSurrogate(1, "myname")
 
         val result = project.serialize()
 
         assertEquals("""{ id: 1 , name: myname }""", result)
 
-        val deserialized = PureMemoryDatabase.ProjectSurrogate.deserialize(result)
+        val deserialized = ProjectSurrogate.deserialize(result)
 
         assertEquals(project, deserialized)
     }
 
     @Test
     fun testSerialization_Project_UnicodeAndMultiline() {
-        val project = PureMemoryDatabase.ProjectSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
+        val project = ProjectSurrogate(1, "\n\r\tHelloµ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆ")
 
         val result = project.serialize()
 
         assertEquals("""{ id: 1 , name: %0A%0D%09Hello%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86 }""", result)
 
-        val deserialized = PureMemoryDatabase.ProjectSurrogate.deserialize(result)
+        val deserialized = ProjectSurrogate.deserialize(result)
 
         assertEquals(project, deserialized)
     }
 
     @Test
     fun testSerialization_Session() {
-        val session = PureMemoryDatabase.SessionSurrogate("abc123", 1, 1608662050608)
+        val session = SessionSurrogate("abc123", 1, 1608662050608)
 
         val result = session.serialize()
 
         assertEquals("""{ s: abc123 , id: 1 , e: 1608662050608 }""", result)
 
-        val deserialized = PureMemoryDatabase.SessionSurrogate.deserialize(result)
+        val deserialized = SessionSurrogate.deserialize(result)
 
         assertEquals(session, deserialized)
     }
 
     @Test
     fun testSerialization_SessionUnicodeAndMultiline() {
-        val session = PureMemoryDatabase.SessionSurrogate("\n\rabc123½¾¿LÀÁ", 1, 1608662050608)
+        val session = SessionSurrogate("\n\rabc123½¾¿LÀÁ", 1, 1608662050608)
 
         val result = session.serialize()
 
         assertEquals("""{ s: %0A%0Dabc123%C2%BD%C2%BE%C2%BFL%C3%80%C3%81 , id: 1 , e: 1608662050608 }""", result)
 
-        val deserialized = PureMemoryDatabase.SessionSurrogate.deserialize(result)
+        val deserialized = SessionSurrogate.deserialize(result)
 
         assertEquals(session, deserialized)
     }
@@ -579,13 +580,13 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_TimeEntry() {
-        val timeEntry = PureMemoryDatabase.TimeEntrySurrogate(123, 456, 789, 101, 234, "\n\rabc123½")
+        val timeEntry = TimeEntrySurrogate(123, 456, 789, 101, 234, "\n\rabc123½")
 
         val result = timeEntry.serialize()
 
         assertEquals("""{ i: 123 , e: 456 , p: 789 , t: 101 , d: 234 , dtl: %0A%0Dabc123%C2%BD }""", result)
 
-        val deserialized = PureMemoryDatabase.TimeEntrySurrogate.deserialize(result)
+        val deserialized = TimeEntrySurrogate.deserialize(result)
 
         assertEquals(timeEntry, deserialized)
     }
