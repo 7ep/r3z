@@ -88,6 +88,20 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     }
 
     /**
+     * carry out some action on the [Project] set of data.
+     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * @param action a lambda to receive the set of projects and do whatever you want with it
+     */
+    fun <R> actOnProjects(shouldSerialize : Boolean = false, action: (ConcurrentSet<Project>) -> R) : R {
+        val result = action.invoke(projects)
+
+        if (shouldSerialize)
+            serializeToDisk(projects, "projects")
+
+        return result
+    }
+
+    /**
      * carry out some action on the [TimeEntry] set of data.
      * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of time entries and do whatever you want with it
@@ -103,19 +117,6 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         return result
     }
 
-    /**
-     * carry out some action on the [Project] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
-     * @param action a lambda to receive the set of projects and do whatever you want with it
-     */
-    fun <R> actOnProjects(shouldSerialize : Boolean = false, action: (ConcurrentSet<Project>) -> R) : R {
-        val result = action.invoke(projects)
-
-        if (shouldSerialize)
-            serializeToDisk(projects, "projects")
-
-        return result
-    }
 
     ////////////////////////////////////
     //   BOILERPLATE
