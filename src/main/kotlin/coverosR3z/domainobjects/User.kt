@@ -1,7 +1,11 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.domainobjects.Hash.Companion.createHash
+import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.decode
+import coverosR3z.misc.encode
 import coverosR3z.misc.generateRandomString
+import coverosR3z.persistence.PureMemoryDatabase.Companion.deserializer
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -58,7 +62,23 @@ data class UserId(val value: Int) {
 
 data class Salt(val value: String)
 
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?)
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) {
+
+    fun serialize(): String {
+        return """{ id: ${id.value} , name: ${encode(name.value)} , hash: ${encode(hash.value)} , salt: ${encode(salt.value)} , empId: ${employeeId?.value ?: "null"} }"""
+    }
+
+    companion object {
+        fun deserialize(str: String) : User {
+            return deserializer(str, User::class.java) { groups ->
+                val id = checkParseToInt(groups[1])
+                val empId: EmployeeId? = if (groups[9] == "null") null else EmployeeId(checkParseToInt(groups[9]))
+                User(UserId(id), UserName(decode(groups[3])), Hash(decode(groups[5])), Salt(decode(groups[7])), empId)
+            }
+        }
+    }
+
+}
 
 /**
  * Don't use the constructor to make a hash typically.  Use

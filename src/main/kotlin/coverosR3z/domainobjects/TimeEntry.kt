@@ -1,6 +1,10 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.exceptions.DatabaseCorruptedException
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.decode
+import coverosR3z.misc.encode
+import coverosR3z.persistence.PureMemoryDatabase
 
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
@@ -52,6 +56,46 @@ data class TimeEntry (
 
     fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
         return TimeEntryPreDatabase(employee, project, time, date, details)
+    }
+
+    fun serialize(): String {
+        return """{ i: $id , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
+    }
+
+    companion object {
+
+        fun deserialize(str: String, employee: Employee, projects: Set<Project>) : TimeEntry {
+            return PureMemoryDatabase.deserializer(str, TimeEntry::class.java) { groups ->
+
+                try {
+                    val id = checkParseToInt(groups[1])
+                    val projId = checkParseToInt(groups[3])
+                    val minutes = checkParseToInt(groups[5])
+                    val epochDays = checkParseToInt(groups[7])
+                    val detailText = decode(groups[9])
+
+
+                    val project = try {
+                        projects.single { it.id == ProjectId(projId) }
+                    } catch (ex: NoSuchElementException) {
+                        throw DatabaseCorruptedException("Unable to find a project with the id of ${projId}.  Project set size: ${projects.size}")
+                    }
+                    TimeEntry(
+                        id,
+                        employee,
+                        project,
+                        Time(minutes),
+                        Date(epochDays),
+                        Details(detailText)
+                    )
+
+                } catch (ex : DatabaseCorruptedException) {
+                    throw ex
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException("Unable to deserialize this text as time entry data: $str", ex)
+                }
+            }
+        }
     }
 }
 

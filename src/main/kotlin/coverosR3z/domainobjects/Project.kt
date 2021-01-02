@@ -1,6 +1,9 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.decode
+import coverosR3z.misc.encode
+import coverosR3z.persistence.PureMemoryDatabase.Companion.deserializer
 
 const val maximumProjectsCount = 100_000_000
 private const val maxProjectNameSize = 30
@@ -49,5 +52,20 @@ data class ProjectId(val value: Int) {
 /**
  * A full Project object
  */
-data class Project(val id: ProjectId, val name: ProjectName)
+data class Project(val id: ProjectId, val name: ProjectName) {
+
+    fun serialize(): String {
+        return """{ id: ${id.value} , name: ${encode(name.value)} }"""
+    }
+
+    companion object {
+        fun deserialize(str: String) : Project {
+            return deserializer(str, Project::class.java) { groups ->
+                val id = checkParseToInt(groups[1])
+                Project(ProjectId(id), ProjectName(decode(groups[3])))
+            }
+        }
+    }
+
+}
 

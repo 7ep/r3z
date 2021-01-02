@@ -1,6 +1,9 @@
 package coverosR3z.domainobjects
 
 import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.decode
+import coverosR3z.misc.encode
+import coverosR3z.persistence.PureMemoryDatabase
 
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
@@ -54,6 +57,20 @@ data class EmployeeId(val value: Int) {
     }
 }
 
-data class Employee(val id: EmployeeId, val name: EmployeeName)
+data class Employee(val id: EmployeeId, val name: EmployeeName) {
+
+    fun serialize(): String {
+        return """{ id: ${id.value} , name: ${encode(name.value)} }"""
+    }
+
+    companion object {
+        fun deserialize(str: String) : Employee {
+            return PureMemoryDatabase.deserializer(str, Employee::class.java) { groups ->
+                val id = checkParseToInt(groups[1])
+                Employee(EmployeeId(id), EmployeeName(decode(groups[3])))
+            }
+        }
+    }
+}
 
 

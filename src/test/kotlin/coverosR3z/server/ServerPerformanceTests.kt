@@ -57,8 +57,8 @@ class ServerPerformanceTests {
     /**
      * How fast to enter data, the user's time entries
      *
-     * Fastest I've seen is 7163 time entries per second,
-     * for five threads and 1000 requests (5000 time entries), it took .698 seconds
+     * Fastest I've seen is 11,111 time entries per second,
+     * for five threads and 1000 requests (5000 time entries), it took .450 seconds
      */
     @Test
     fun testEnterTime_PERFORMANCE() {
@@ -122,7 +122,7 @@ class ServerPerformanceTests {
      *
      * By non-dynamic, I mean: authHomePageHTML
      *
-     * fastest was 38,132 responses.  20 threads, 10,000 requests each, in 5.245 seconds
+     * fastest was 41,946 responses.  20 threads, 10,000 requests each, in 4.768 seconds
      */
     @Test
     fun testViewStaticContentAuthenticated_PERFORMANCE() {
@@ -150,7 +150,7 @@ class ServerPerformanceTests {
     /**
      * How fast to see static content, non-authenticated
      *
-     * Fastest I saw was 69,589 responses per second, 20 threads doing 10,000 requests each in 2.874 seconds.
+     * Fastest I saw was 73,746 responses per second, 20 threads doing 10,000 requests each in 2.712 seconds.
      *
      */
     @Test
