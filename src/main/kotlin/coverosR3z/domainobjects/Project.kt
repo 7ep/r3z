@@ -52,9 +52,9 @@ data class ProjectId(val value: Int) {
 /**
  * A full Project object
  */
-data class Project(val id: ProjectId, val name: ProjectName) {
+data class Project(val id: ProjectId, val name: ProjectName) : Serializable {
 
-    fun serialize(): String {
+    override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} }"""
     }
 

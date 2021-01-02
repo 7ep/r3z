@@ -50,12 +50,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of users and do whatever you want with it
      */
-    fun <R> actOnUsers(shouldSerialize : Boolean = false, action: (ConcurrentSet<User>) -> R) : R
-    {
+    fun <R> actOnUsers(shouldSerialize : Boolean = false, action: (ConcurrentSet<User>) -> R) : R {
         val result = action.invoke(users)
 
         if (shouldSerialize)
-            serializeUsersToDisk()
+            serializeToDisk(users, "users")
 
         return result
     }
@@ -65,12 +64,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of users and do whatever you want with it
      */
-    fun <R> actOnEmployees(shouldSerialize : Boolean = false, action: (ConcurrentSet<Employee>) -> R) : R
-    {
+    fun <R> actOnEmployees(shouldSerialize : Boolean = false, action: (ConcurrentSet<Employee>) -> R) : R {
         val result = action.invoke(employees)
 
         if (shouldSerialize)
-            serializeEmployeesToDisk()
+            serializeToDisk(employees, "employees")
 
         return result
     }
@@ -80,12 +78,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
      * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of sessions and do whatever you want with it
      */
-    fun <R> actOnSessions(shouldSerialize : Boolean = false, action: (ConcurrentSet<Session>) -> R) : R
-    {
+    fun <R> actOnSessions(shouldSerialize : Boolean = false, action: (ConcurrentSet<Session>) -> R) : R {
         val result = action.invoke(sessions)
 
         if (shouldSerialize)
-            serializeSessionsToDisk()
+            serializeToDisk(sessions, "sessions")
 
         return result
     }
@@ -115,7 +112,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(projects)
 
         if (shouldSerialize)
-            serializeProjectsToDisk()
+            serializeToDisk(projects, "projects")
 
         return result
     }
@@ -174,52 +171,13 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     //   SERIALIZATION
     ////////////////////////////////////
 
-    /**
-     * Write the entire set of data to a single file, overwriting if necessary
-     */
-    private fun serializeUsersToDisk() {
+    private fun <T: Serializable> serializeToDisk(set : ConcurrentSet<T>, filename: String) {
         if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping serialization for Users" }
+            logTrace { "database directory was null, skipping serialization for $filename" }
             return
         }
-        val users = users.joinToString("\n") { it.serialize() }
-        writeDbFile(users, "users", dbDirectory)
-    }
-
-    /**
-     * Write the entire set of data to a single file, overwriting if necessary
-     */
-    private fun serializeSessionsToDisk() {
-        if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping serialization for Sessions" }
-            return
-        }
-        val sessions = sessions.joinToString("\n") { it.serialize() }
-        writeDbFile(sessions, "sessions", dbDirectory)
-    }
-
-    /**
-     * Write the entire set of data to a single file, overwriting if necessary
-     */
-    private fun serializeEmployeesToDisk() {
-        if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping serialization for Employees" }
-            return
-        }
-        val employees = employees.joinToString("\n") { it.serialize() }
-        writeDbFile(employees, "employees", dbDirectory)
-    }
-
-    /**
-     * Write the entire set of data to a single file, overwriting if necessary
-     */
-    private fun serializeProjectsToDisk() {
-        if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping serialization for Projects" }
-            return
-        }
-        val projects = projects.joinToString("\n") { it.serialize() }
-        writeDbFile(projects, "projects", dbDirectory)
+        val joined = set.joinToString("\n") { it.serialize() }
+        writeDbFile(joined, filename, dbDirectory)
     }
 
     /**
@@ -331,18 +289,18 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          * Deserializes the database from files, or returns null if no
          * database directory exists
          */
-        fun deserializeFromDisk(dbDirectory: String) : PureMemoryDatabase? {
+        fun deserializeFromDisk(dbDirectory: String): PureMemoryDatabase? {
             val topDirectory = File(dbDirectory)
             val innerFiles = topDirectory.listFiles()
-            if ((! topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
+            if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
                 logImperative("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
                 return null
             }
 
-            val projects = readAndDeserializeProjects(dbDirectory)
-            val users = readAndDeserializeUsers(dbDirectory)
-            val sessions = readAndDeserializeSessions(dbDirectory, users.toSet())
-            val employees = readAndDeserializeEmployees(dbDirectory)
+            val projects = readAndDeserialize(dbDirectory, "projects") { Project.deserialize(it) }
+            val users = readAndDeserialize(dbDirectory, "users") { User.deserialize(it) }
+            val sessions = readAndDeserialize(dbDirectory, "sessions") { Session.deserialize(it, users.toSet()) }
+            val employees = readAndDeserialize(dbDirectory, "employees") { Employee.deserialize(it) }
             val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.toSet(), projects.toSet())
 
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
@@ -390,49 +348,20 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             }
         }
 
-        private fun readAndDeserializeUsers(dbDirectory: String): ConcurrentSet<User> {
-            return try {
-                val usersFile = readFile(dbDirectory, "users")
-                usersFile.split("\n").map { User.deserialize(it) }.toConcurrentSet()
-            } catch (ex: FileNotFoundException) {
-                logWarn { "users file missing, creating empty" }
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeSessions(dbDirectory: String, users: Set<User>): ConcurrentSet<Session> {
-            return try {
-                val sessionsFile = readFile(dbDirectory, "sessions")
-                sessionsFile.split("\n").map { Session.deserialize(it, users) }.toConcurrentSet()
-            } catch (ex: FileNotFoundException) {
-                logWarn { "sessions file missing, creating empty" }
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeEmployees(dbDirectory: String): ConcurrentSet<Employee> {
-            return try {
-                val employeesFile = readFile(dbDirectory, "employees")
-                employeesFile.split("\n").map { Employee.deserialize(it) }.toConcurrentSet()
-            } catch (ex: FileNotFoundException) {
-                logWarn { "employees file missing, creating empty" }
-                ConcurrentSet()
-            }
-        }
-
-        private fun readAndDeserializeProjects(dbDirectory: String): ConcurrentSet<Project> {
-            return try {
-                val projectsFile = readFile(dbDirectory, "projects")
-                projectsFile.split("\n").map { Project.deserialize(it) }.toConcurrentSet()
-            } catch (ex: FileNotFoundException) {
-                logWarn { "projects file missing, creating empty" }
-                ConcurrentSet()
-            }
-        }
-
         private fun readFile(dbDirectory: String, name : String): String {
             return File(dbDirectory + name + databaseFileSuffix).readText()
         }
+
+        private fun <T> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ConcurrentSet<T> {
+            return try {
+                val file = readFile(dbDirectory, filename)
+                file.split("\n").map { deserializer(it) }.toConcurrentSet()
+            } catch (ex: FileNotFoundException) {
+                logWarn { "$filename file missing, creating empty" }
+                ConcurrentSet()
+            }
+        }
+
 
     }
 }

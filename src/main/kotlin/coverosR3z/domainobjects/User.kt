@@ -62,9 +62,9 @@ data class UserId(val value: Int) {
 
 data class Salt(val value: String)
 
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) {
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) : Serializable {
 
-    fun serialize(): String {
+    override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} , hash: ${encode(hash.value)} , salt: ${encode(salt.value)} , empId: ${employeeId?.value ?: "null"} }"""
     }
 

@@ -57,9 +57,9 @@ data class EmployeeId(val value: Int) {
     }
 }
 
-data class Employee(val id: EmployeeId, val name: EmployeeName) {
+data class Employee(val id: EmployeeId, val name: EmployeeName) : Serializable {
 
-    fun serialize(): String {
+    override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} }"""
     }
 

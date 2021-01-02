@@ -15,9 +15,9 @@ import coverosR3z.persistence.PureMemoryDatabase.Companion.deserializer
  * @param user the user who is logged in
  * @param dt the date and time the user successfully logged in
  */
-data class Session(val sessionId: String, val user: User, val dt: DateTime) {
+data class Session(val sessionId: String, val user: User, val dt: DateTime) : Serializable {
 
-    fun serialize(): String {
+    override fun serialize(): String {
         return """{ s: ${encode(sessionId)} , id: ${user.id.value} , e: ${dt.epochSecond} }"""
     }
 
