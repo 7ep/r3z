@@ -88,6 +88,7 @@ application {
 
 sonarqube {
     properties {
+        property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.projectKey", "$projectname"
         property "sonar.projectName", "$projectname"
         property "sonar.projectDescription", "Time recording web application"
@@ -107,7 +108,7 @@ task checkQualityGate() {
 
 // throws an exception if the quality gate fails.
 static void isQualityGateGood() {
-    URL url = new URL("http://localhost:9000/api/qualitygates/project_status?projectKey=r3z")
+    URL url = new URL("https://sonarcloud.io/api/qualitygates/project_status?projectKey=r3z")
     HttpURLConnection connection = (HttpURLConnection) url.openConnection()
     connection.setRequestMethod("GET")
     connection.connect()
