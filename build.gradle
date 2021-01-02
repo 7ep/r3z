@@ -1,15 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
+
 plugins {
     // lets us use kotlin
     id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
 
     // provides unit test coverage
     id 'jacoco'
-
-    // https://blog.gradle.org/java-toolchains
-    // java toolchains - a gradle 6.7 feature - allows us to
-    // specify an exact version of the JDK to use when compiling,
-    // and will pull it down if not found on the user's machine.
-    id "java-library"
 
     // scans our code for static analysis
     id "org.sonarqube" version "3.0"
@@ -25,8 +21,27 @@ plugins {
 
 // enables us to use Kotlin on the JVM
 apply plugin: 'kotlin'
-
 apply plugin: 'application'
+
+repositories {
+    jcenter()
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+// tag::compiler-kotlin[]
+def compiler = javaToolchains.compilerFor {
+    languageVersion = JavaLanguageVersion.of(11)
+}
+
+tasks.withType(KotlinJvmCompile).configureEach {
+    kotlinOptions.jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
+}
+// end::compiler-kotlin[]
 
 group 'com.coveros.r3z'
 
@@ -38,14 +53,10 @@ group 'com.coveros.r3z'
 version ''
 
 sourceSets {
-    main.kotlin.srcDirs = main.java.srcDirs = ['src/main/kotlin']
-    test.kotlin.srcDirs = test.java.srcDirs = ['src/test/kotlin']
+    main.kotlin.srcDirs = main.kotlin.srcDirs = ['src/main/kotlin']
+    test.kotlin.srcDirs = test.kotlin.srcDirs = ['src/test/kotlin']
     main.resources.srcDirs = ['src/main/resources']
     test.resources.srcDirs = ['src/test/resources']
-}
-
-repositories {
-    jcenter()
 }
 
 dependencies {
@@ -73,12 +84,6 @@ dependencies {
 // the application
 application {
     mainClass.set('coverosR3z.MainKt')
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
 }
 
 sonarqube {
