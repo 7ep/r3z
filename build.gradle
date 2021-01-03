@@ -1,7 +1,3 @@
-// The following text is copy-pasted from Gradle's own repo
-// for how to provide Kotlin with the necessary JDK directory.
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
-
 plugins {
     // lets us use kotlin
     id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
@@ -49,7 +45,7 @@ def compiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(11)
 }
 
-tasks.withType(KotlinJvmCompile).configureEach {
+tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile).configureEach {
     kotlinOptions.jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 }
 // end::compiler-kotlin[]
