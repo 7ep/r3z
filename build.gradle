@@ -1,3 +1,5 @@
+// The following text is copy-pasted from Gradle's own repo
+// for how to provide Kotlin with the necessary JDK directory.
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 
 plugins {
@@ -33,6 +35,15 @@ java {
     }
 }
 
+// The following text is copy-pasted from Gradle's own repo
+// for how to provide Kotlin with the necessary JDK directory.
+// Yeah I know it's weird-looking, but it definitely works.
+//
+// copied from https://github.com/gradle/gradle/blob/master/subprojects/docs/src/snippets/java/toolchain-kotlin/groovy/build.gradle
+//
+// It allows a user to only have any java installed, and
+// gradle will pull down the proper JDK if needed and use that
+// for compiling Kotlin
 // tag::compiler-kotlin[]
 def compiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(11)
