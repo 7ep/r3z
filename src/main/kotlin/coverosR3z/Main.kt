@@ -3,8 +3,8 @@ package coverosR3z
 import coverosR3z.exceptions.ServerOptionsException
 import coverosR3z.logging.logImperative
 import coverosR3z.server.Server
-import coverosR3z.server.Server.Companion.extractOptions
 import coverosR3z.server.ServerOptions
+import coverosR3z.server.ServerOptions.Companion.extractOptions
 import kotlin.system.exitProcess
 
 /**
