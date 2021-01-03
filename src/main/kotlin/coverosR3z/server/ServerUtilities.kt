@@ -43,10 +43,15 @@ enum class AuthStatus {
 }
 
 /**
- * Examine the request and headers, take proper action, returning a
- * proper response with headers
+ * Examine the request and headers, direct the request to a proper
+ * point in the system that will take the proper action, returning a
+ * proper response with headers.
+ *
+ * If we cannot find a dynamic processor, it means the user wants a static
+ * file, which we handle at the end.
+ *
  */
-fun handleRequestAndRespond(sd : ServerData): PreparedResponseData {
+fun directToProcessor(sd : ServerData): PreparedResponseData {
     val verb = sd.rd.verb
     val path = sd.rd.path
     val au = sd.au

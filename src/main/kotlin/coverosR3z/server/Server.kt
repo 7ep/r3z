@@ -10,7 +10,6 @@ import coverosR3z.logging.*
 import coverosR3z.persistence.PureMemoryDatabase
 import coverosR3z.timerecording.TimeEntryPersistence
 import coverosR3z.timerecording.TimeRecordingUtilities
-import java.io.File
 import java.net.ServerSocket
 import java.net.SocketException
 import java.util.concurrent.ExecutorService
@@ -255,7 +254,7 @@ The options available are:
                 val cu = CurrentUser(analyzedHttpData.user)
                 val truWithUser = businessCode.tru.changeUser(cu)
                 logDebug(cu) { "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
-                handleRequestAndRespond(ServerData(businessCode.au, truWithUser, analyzedHttpData))
+                directToProcessor(ServerData(businessCode.au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
                 handleInternalServerError(ex.message, ex.stackTraceToString())
             }
