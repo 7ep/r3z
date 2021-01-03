@@ -59,6 +59,12 @@ class ServerPerformanceTests {
      *
      * Fastest I've seen is 11,111 time entries per second,
      * for five threads and 1000 requests (5000 time entries), it took .450 seconds
+     *
+     * See EnterTimeAPITests.testEnterTimeAPI_PERFORMANCE for a lower-level version of this
+     *
+     * Question to keep in mind: If we can handle 2.9 million requests per second by
+     * making this request one layer deeper - from the EnterTimeAPI - then maybe we
+     * can use non-blocking IO to get significant speed?
      */
     @Test
     fun testEnterTime_PERFORMANCE() {
