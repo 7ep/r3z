@@ -77,15 +77,15 @@ class Server(val port: Int) {
      * server socket will be shutdown and some messages about closing the server
      * will log
      */
-    fun addShutdownHook(pmd: PureMemoryDatabase) : Server {
+    fun addShutdownHook(pmd: PureMemoryDatabase, serverThread: Thread) : Server {
         Runtime.getRuntime().addShutdownHook(
             Thread {
-                serverShutdown(pmd)
+                serverShutdown(pmd, serverThread)
             })
         return this
     }
 
-    private fun serverShutdown(pmd: PureMemoryDatabase) {
+    private fun serverShutdown(pmd: PureMemoryDatabase, serverThread: Thread) {
         logImperative("Received shutdown command")
         logImperative("Shutting down main server thread")
         cachedThreadPool.shutdown()
@@ -97,6 +97,9 @@ class Server(val port: Int) {
 
         logImperative("Shutting down the database")
         pmd.stop()
+
+        logImperative("Waiting for the main server thread")
+        serverThread.join()
 
         logImperative("Goodbye world!")
     }

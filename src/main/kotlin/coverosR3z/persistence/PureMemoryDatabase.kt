@@ -29,7 +29,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                          private val dbDirectory : String? = null
 ) {
 
-    private val actionQueue = ActionQueue("DatabaseWriter for $this")
+    private val actionQueue = ActionQueue("DatabaseWriter")
 
     fun copy(): PureMemoryDatabase {
         return PureMemoryDatabase(
