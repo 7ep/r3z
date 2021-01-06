@@ -13,7 +13,6 @@ import coverosR3z.server.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import kotlin.concurrent.thread
 
 class EnterTimeAPITests {
 
@@ -232,43 +231,41 @@ class EnterTimeAPITests {
     /**
      * Just how quickly does it go, from this level?
      *
-     * with 10 threads, a million requests each, it takes 5.263 -> 1.9 million requests per second
-     * with 100 threads, a million requests each, it takes 34.328 -> 2.9 million requests per second
+     * With 1000 requests, it takes .180 seconds = 5,555 requests per second.
+     *
      * See [ServerPerformanceTests.testEnterTime_PERFORMANCE]
      */
     @Test
     fun testEnterTimeAPI_PERFORMANCE() {
-        val numberThreads = 2
         val numberOfRequests = 100
 
         turnOffAllLogging()
         // set up real database
         val pmd = PureMemoryDatabase()
-        val tep = TimeEntryPersistence(pmd)
-        val tru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_USER))
+        val tep  = TimeEntryPersistence(pmd)
+        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val user = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id).user
+        val tru = TimeRecordingUtilities(tep, CurrentUser(user))
+        val project : Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val projectId = project.id.value.toString()
+
         val (time, _) = getTime {
-            val enterTimeEntryThreads = (1..numberThreads).map {
-                thread {
-                    for (i in 1..numberOfRequests) {
+            for (i in 1..numberOfRequests) {
 
-                        val data = mapOf(
-                            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
-                            EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
-                            EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
-                            EnterTimeAPI.Elements.DATE_INPUT.elemName to DEFAULT_DATE_STRING
-                        )
+                val data = mapOf(
+                    EnterTimeAPI.Elements.PROJECT_INPUT.elemName to projectId,
+                    EnterTimeAPI.Elements.TIME_INPUT.elemName to "1",
+                    EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
+                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + (i / 20)).stringValue
+                )
 
-                        val response = EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId, data).fileContents
-                        assertTrue(
-                            "we should have gotten the success page.  Got: $response",
-                            toStr(response).contains("SUCCESS")
-                        )
-                    }
-                }
-
+                val response = EnterTimeAPI.handlePOST(tru, employee.id, data).fileContents
+                assertTrue(
+                    "we should have gotten the success page.  Got: $response",
+                    toStr(response).contains("SUCCESS")
+                )
             }
-
-            enterTimeEntryThreads.forEach { it.join() }
         }
         resetLogSettingsToDefault()
         println(time)
