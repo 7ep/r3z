@@ -14,6 +14,7 @@ import java.net.SocketException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 
 /**
@@ -31,22 +32,24 @@ class Server(val port: Int) {
      * This requires a [BusinessCode] object, see [initializeBusinessCode]
      * for the typical way to create this.
      */
-    fun startServer(businessObjects : BusinessCode) {
-        halfOpenServerSocket = ServerSocket(port)
-        loadStaticFilesToCache()
-        try {
-            cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-            systemReady = true
-            logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
-            while (true) {
-                logTrace { "waiting for socket connection" }
-                val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
-                cachedThreadPool.submit(Thread {processConnectedClient(server, businessObjects)})
-            }
-        } catch (ex : SocketException) {
-            if (ex.message == "Interrupted function call: accept failed") {
-                logImperative("Server was shutdown while waiting on accept")
-                systemReady = false
+    fun startServer(businessObjects : BusinessCode) : Thread {
+        return thread {
+            halfOpenServerSocket = ServerSocket(port)
+            loadStaticFilesToCache()
+            try {
+                cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+                systemReady = true
+                logImperative("System is ready.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+                while (true) {
+                    logTrace { "waiting for socket connection" }
+                    val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
+                    cachedThreadPool.submit(Thread { processConnectedClient(server, businessObjects) })
+                }
+            } catch (ex: SocketException) {
+                if (ex.message == "Interrupted function call: accept failed") {
+                    logImperative("Server was shutdown while waiting on accept")
+                    systemReady = false
+                }
             }
         }
     }

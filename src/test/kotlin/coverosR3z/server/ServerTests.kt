@@ -47,7 +47,7 @@ class ServerTests {
         @BeforeClass
         fun initServer() {
             serverObject = Server(12345)
-            thread { serverObject.startServer(BusinessCode(tru, au)) }
+            serverObject.startServer(BusinessCode(tru, au))
         }
 
         @JvmStatic

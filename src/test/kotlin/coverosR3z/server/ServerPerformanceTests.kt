@@ -39,9 +39,7 @@ class ServerPerformanceTests {
         ap = AuthenticationPersistence(pmd)
         tep = TimeEntryPersistence(pmd)
         serverObject = Server(12345)
-        serverThread = thread {
-            serverObject.startServer(Server.initializeBusinessCode(pmd))
-        }
+        serverThread = serverObject.startServer(Server.initializeBusinessCode(pmd))
         if (! serverObject.systemReady) {
             Thread.sleep(50)
         }
