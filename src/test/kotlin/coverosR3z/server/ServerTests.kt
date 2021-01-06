@@ -236,6 +236,12 @@ class ServerTests {
         assertEquals(ServerOptions(54321, "build/db/"), serverOptions)
     }
 
+    @Test
+    fun testShouldParseOptions_setAllLoggingOff() {
+        val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321", "--no-logging"))
+        assertEquals(ServerOptions(54321, "build/db/", allLoggingOff = true), serverOptions)
+    }
+
     /**
      * If the user asks for help with -h or -?, provide
      * an explanation of the app options

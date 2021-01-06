@@ -13,25 +13,53 @@ data class ServerOptions(
          * if this is set to null, we won't store anything to disk,
          * which is really just useful for testing
          */
-        val dbDirectory : String? = "db/"){
+        val dbDirectory : String? = "db/",
 
+        /**
+         * If this is set to true, start the server with
+         * all logging turned off, except IMPERATIVE, which
+         * cannot be turned off.
+         */
+        val allLoggingOff : Boolean = false){
+
+
+        /**
+         * Sets the network port for the application
+         * @param port The preferred port, as a string
+         */
+        fun setPort(port: String) : ServerOptions {
+                val makePort = if (port.isNotBlank()) checkParseToInt(port) else defaultPort
+                if (makePort < 1 || makePort > 65535) {throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")}
+                return ServerOptions(port = makePort, dbDirectory = dbDirectory)
+        }
+
+        /**
+         * Sets the directory where we will store the database files.
+         * @param dbDirectory the directory we want
+         * @param ndp a flag, no-disk-persistence, means to not every write the database to disk (used for testing)
+         */
+        fun setDirectory(dbDirectory: String, ndp: String) : ServerOptions {
+                check(!(dbDirectory.isNotBlank() && ndp=="true")){"If you're setting the noDiskPersistence option and also a database directory, you're very foolish."}
+                val makeDBDir : String? =
+                        when {
+                                ndp == "true" -> null
+                                dbDirectory.isNotBlank() -> if (! dbDirectory.endsWith("/")) "$dbDirectory/" else dbDirectory
+                                else -> "db/"
+                        }
+
+                return ServerOptions(port = port, dbDirectory = makeDBDir)
+        }
+
+        fun setLoggingOff(allLoggingOff: String) : ServerOptions {
+                return ServerOptions(
+                        port = port,
+                        dbDirectory = dbDirectory,
+                        allLoggingOff = allLoggingOff == "true")
+        }
 
         companion object{
 
                 const val defaultPort = 12345
-                fun make(port : String, dbDirectory : String, ndp : String) : ServerOptions{
-                        val makePort = if (port.isNotBlank()) checkParseToInt(port) else defaultPort
-                        check(!(dbDirectory.isNotBlank() && ndp=="true")){"If you're setting the noDiskPersistence option and also a database directory, you're very foolish."}
-                        val makeDBDir : String? =
-                                when {
-                                        ndp == "true" -> null
-                                        dbDirectory.isNotBlank() -> if (! dbDirectory.endsWith("/")) "$dbDirectory/" else dbDirectory
-                                        else -> "db/"
-                                }
-
-                        if (makePort < 1 || makePort > 65535) {throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")}
-                        return ServerOptions(makePort, makeDBDir)
-                }
 
                 /**
                  * Given the command-line arguments, returns the first value
@@ -49,8 +77,8 @@ data class ServerOptions(
 
                 private fun processArgs(args: Array<String>): ServerOptions {
                         /**
-                         * Holds the data for a particular option provided on the command line.  See [ServerOptions.make]
-                         * for accepting these values and performing validation.
+                         * Holds the data for a particular option provided on the command line.  See [ServerOptions.setDirectory]
+                         * and [ServerOptions.setPort] and similar others for accepting these values and performing validation.
                          *
                          * The only validation we do here is disallowing duplicate values, like "-p 10 -p 20,"
                          * and also that the value for an option doesn't start with a dash, like "-d -thisiswrong",
@@ -68,13 +96,15 @@ data class ServerOptions(
                         val directoryOption = Option(false, "")
                         val portOption = Option(false, "")
                         val diskPersistenceOption = Option(false, "", isFlag = true)
+                        val loggingOption = Option(false, "", isFlag = true)
 
                         val possibleOptions = listOf(
                                 OptionGroup("-d", directoryOption),
                                 OptionGroup("--dbdirectory", directoryOption),
                                 OptionGroup("-p", portOption),
                                 OptionGroup("--port", portOption),
-                                OptionGroup("--no-disk-persistence", diskPersistenceOption))
+                                OptionGroup("--no-disk-persistence", diskPersistenceOption),
+                                OptionGroup("--no-logging", loggingOption))
 
                         val fullInput = args.joinToString(" ")
                         return if (args.isEmpty() || args[0].isBlank()) {
@@ -98,7 +128,10 @@ data class ServerOptions(
                                         throw ServerOptionsException("argument not recognized: ${args[currentIndex]}")
                                 }
 
-                                make(portOption.value, directoryOption.value, diskPersistenceOption.value)
+                                return ServerOptions()
+                                        .setPort(portOption.value)
+                                        .setDirectory(directoryOption.value, diskPersistenceOption.value)
+                                        .setLoggingOff(loggingOption.value)
                         }
                 }
 
@@ -138,6 +171,8 @@ The options available are:
 -d DIRECTORY           the directory to store data
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing
+--no-logging           start the server with all logging turned
+                       off, except for "IMPERATIVE"
     """.trimIndent()
 
         }

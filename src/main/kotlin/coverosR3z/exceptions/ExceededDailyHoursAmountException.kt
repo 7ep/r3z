@@ -6,4 +6,7 @@ package coverosR3z.exceptions
  * will end up being more than 24 hours for a single day,
  * that's insane.
  */
-class ExceededDailyHoursAmountException : Exception()
+class ExceededDailyHoursAmountException : Exception() {
+    override val message: String
+        get() = "Exceeded number of hours in a day on this time entry"
+}

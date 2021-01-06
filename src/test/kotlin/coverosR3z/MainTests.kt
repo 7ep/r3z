@@ -1,6 +1,7 @@
 package coverosR3z
 
 import org.junit.Test
+import java.io.File
 import kotlin.concurrent.thread
 
 /**
@@ -20,6 +21,8 @@ class MainTests {
      */
     @Test
     fun testMain() {
+        File("db").deleteRecursively()
+
         // starts the server
         thread{main(arrayOf("-p","54321"))}
 

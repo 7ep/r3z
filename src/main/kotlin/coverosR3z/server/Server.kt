@@ -147,7 +147,7 @@ class Server(val port: Int) {
                 logDebug(cu) { "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
                 directToProcessor(ServerData(businessCode.au, truWithUser, analyzedHttpData))
             } catch (ex: Exception) {
-                handleInternalServerError(ex.message, ex.stackTraceToString())
+                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString())
             }
 
             returnData(server, responseData)
