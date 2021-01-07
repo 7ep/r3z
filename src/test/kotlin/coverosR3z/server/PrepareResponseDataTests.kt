@@ -1,5 +1,7 @@
 package coverosR3z.server
 
+import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.types.StatusCode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test

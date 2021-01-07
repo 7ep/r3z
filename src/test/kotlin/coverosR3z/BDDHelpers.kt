@@ -1,8 +1,8 @@
 package coverosR3z
 
 import coverosR3z.logging.logTrace
-import coverosR3z.misc.FileReader
-import coverosR3z.misc.toStr
+import coverosR3z.misc.utility.FileReader
+import coverosR3z.misc.utility.toStr
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException

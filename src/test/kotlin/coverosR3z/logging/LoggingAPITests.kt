@@ -1,6 +1,6 @@
 package coverosR3z.logging
 
-import coverosR3z.exceptions.InexactInputsException
+import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.server.AuthStatus
 import coverosR3z.server.doPOSTAuthenticated

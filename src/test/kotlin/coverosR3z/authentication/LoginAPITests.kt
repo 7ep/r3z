@@ -2,12 +2,13 @@ package coverosR3z.authentication
 
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.domainobjects.LoginResult
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.passwordMustNotBeBlankMsg
-import coverosR3z.domainobjects.usernameCannotBeEmptyMsg
-import coverosR3z.exceptions.InexactInputsException
-import coverosR3z.misc.toStr
+import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.types.LoginResult
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
+import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
+import coverosR3z.misc.exceptions.InexactInputsException
+import coverosR3z.misc.utility.toStr
 import coverosR3z.server.AuthStatus
 import coverosR3z.server.doPOSTRequireUnauthenticated
 import org.junit.Assert

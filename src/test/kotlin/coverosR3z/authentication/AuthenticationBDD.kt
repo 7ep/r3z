@@ -1,10 +1,14 @@
 package coverosR3z.authentication
 
 import coverosR3z.*
+import coverosR3z.authentication.api.RegisterAPI
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.domainobjects.*
-import coverosR3z.persistence.PureMemoryDatabase
-import coverosR3z.timerecording.TimeEntryPersistence
-import coverosR3z.timerecording.TimeRecordingUtilities
+import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.BeforeClass
@@ -100,7 +104,7 @@ class AuthenticationBDD {
         b.markDone("Given I am not registered,")
 
         val data = mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1")
-        val ex = assertThrows(IllegalArgumentException::class.java){RegisterAPI.handlePOST(au, data)}
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePOST(au, data)}
         b.markDone("when I register with too short of a password,")
 
         assertEquals(passwordMustBeLargeEnoughMsg, ex.message)

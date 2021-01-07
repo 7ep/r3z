@@ -1,16 +1,19 @@
 package coverosR3z.persistence
 
 import coverosR3z.*
-import coverosR3z.authentication.AuthenticationPersistence
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.*
 import coverosR3z.domainobjects.*
-import coverosR3z.exceptions.DatabaseCorruptedException
+import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.logging.logAudit
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOffAllLogging
 import coverosR3z.misc.getTime
-import coverosR3z.persistence.PureMemoryDatabase.Companion.databaseFileSuffix
-import coverosR3z.timerecording.ITimeEntryPersistence
-import coverosR3z.timerecording.TimeEntryPersistence
+import coverosR3z.misc.types.Date
+import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.databaseFileSuffix
+import coverosR3z.timerecording.persistence.ITimeEntryPersistence
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
@@ -323,7 +326,7 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/timeentries/2/2020_6$databaseFileSuffix").writeText("BAD DATA HERE")
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to deserialize this text as time entry data: BAD DATA HERE", ex.message)
     }
 
@@ -337,7 +340,7 @@ class PureMemoryDatabaseTests {
         // corrupt the employees data file
         File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to deserialize this text as Employee data: BAD DATA HERE", ex.message)
     }
 
@@ -354,7 +357,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/employees$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find an employee with the id of 2 based on entry in timeentries/", ex.message)
     }
 
@@ -370,7 +373,7 @@ class PureMemoryDatabaseTests {
         val file = File("$DEFAULT_DB_DIRECTORY/timeentries/2/")
         file.listFiles()?.forEach { it.delete() }
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
 
         assertEquals("no time entry files found in employees directory at ${file.path}", ex.message)
     }
@@ -385,7 +388,7 @@ class PureMemoryDatabaseTests {
         // corrupt the users data file
         File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
     
     /**
@@ -398,7 +401,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/users$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
@@ -412,7 +415,7 @@ class PureMemoryDatabaseTests {
         // corrupt the projects data file
         File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Unable to deserialize this text as Project data: BAD DATA HERE", ex.message)
     }
     
@@ -426,7 +429,7 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY/projects$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
         assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
@@ -440,7 +443,7 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY/sessions$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) {PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
     }
 
     @Test
@@ -471,7 +474,8 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_UserWithMultilineText() {
-        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
+        val user = User(
+            UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
             |thisisalsotext""".trimMargin()), EmployeeId(1))
 
         val result = user.serialize()

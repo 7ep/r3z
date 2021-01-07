@@ -2,7 +2,9 @@ package coverosR3z.timerecording
 
 import coverosR3z.*
 import coverosR3z.domainobjects.*
-import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.persistence.ITimeEntryPersistence
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before

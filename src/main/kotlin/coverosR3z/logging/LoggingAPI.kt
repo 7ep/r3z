@@ -3,7 +3,7 @@ package coverosR3z.logging
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.misc.successHTML
 import coverosR3z.server.*
-
+import coverosR3z.server.types.PreparedResponseData
 
 
 class LoggingAPI {
@@ -45,7 +45,7 @@ class LoggingAPI {
             logImperative("Configured logging for ${lt.name}: ${logSettings[lt]}")
         }
 
-        fun handlePOST(data: Map<String, String>) : PreparedResponseData{
+        fun handlePOST(data: Map<String, String>) : PreparedResponseData {
             for (lt in LogTypes.values()) {
                 setLogging(lt, data)
             }

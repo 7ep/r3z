@@ -1,13 +1,13 @@
 package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.BrowserVersion
-import coverosR3z.authentication.LoginAPI
+import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
-import coverosR3z.server.NamedPaths
-import coverosR3z.timerecording.EmployeeAPI
-import coverosR3z.timerecording.EnterTimeAPI
-import coverosR3z.timerecording.ProjectAPI
+import coverosR3z.server.utility.NamedPaths
+import coverosR3z.timerecording.api.EmployeeAPI
+import coverosR3z.timerecording.api.EnterTimeAPI
+import coverosR3z.timerecording.api.ProjectAPI
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver

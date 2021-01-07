@@ -1,5 +1,7 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.types.DateTime
+import coverosR3z.misc.types.Month
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals

@@ -2,15 +2,14 @@ package coverosR3z.server
 
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.exceptions.DuplicateInputsException
-import coverosR3z.logging.LogConfig.logSettings
-import coverosR3z.logging.LogTypes
+import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.getTime
+import coverosR3z.server.utility.NamedPaths
+import coverosR3z.server.types.Verb
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import kotlin.concurrent.thread
 
 class ServerUtilitiesTests {
 

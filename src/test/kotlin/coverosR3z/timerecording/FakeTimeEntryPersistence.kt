@@ -4,6 +4,8 @@ import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_TIME_ENTRY
 import coverosR3z.domainobjects.*
+import coverosR3z.misc.types.Date
+import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 
 /**
  * Used as a mock object for testing

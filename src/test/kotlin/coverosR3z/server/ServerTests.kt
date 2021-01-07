@@ -3,22 +3,30 @@ package coverosR3z.server
 import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
+import coverosR3z.misc.utility.SystemOptions
 import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.authentication.IAuthenticationUtilities
-import coverosR3z.authentication.LoginAPI
-import coverosR3z.authentication.RegisterAPI
-import coverosR3z.domainobjects.Date
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.exceptions.ServerOptionsException
+import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.api.RegisterAPI
+import coverosR3z.misc.types.Date
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.misc.exceptions.ServerOptionsException
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
-import coverosR3z.misc.FileReader.Companion.read
 import coverosR3z.misc.encode
 import coverosR3z.misc.getTime
-import coverosR3z.misc.toStr
-import coverosR3z.server.ServerOptions.Companion.extractOptions
-import coverosR3z.server.ServerOptions.Companion.fullHelpMessage
-import coverosR3z.timerecording.EnterTimeAPI
+import coverosR3z.misc.utility.SystemOptions.Companion.extractOptions
+import coverosR3z.misc.utility.SystemOptions.Companion.fullHelpMessage
+import coverosR3z.misc.utility.FileReader.Companion.read
+import coverosR3z.misc.utility.toStr
+import coverosR3z.server.utility.NamedPaths
+import coverosR3z.server.utility.Server
+import coverosR3z.server.utility.SocketWrapper
+import coverosR3z.server.types.AnalyzedHttpData
+import coverosR3z.server.types.BusinessCode
+import coverosR3z.server.types.StatusCode
+import coverosR3z.server.types.Verb
+import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.*
@@ -69,19 +77,19 @@ class ServerTests {
     @Test
     fun testShouldParsePortFromCLI_nothingProvided() {
         val serverOptions = extractOptions(arrayOf())
-        assertEquals(ServerOptions(), serverOptions)
+        assertEquals(SystemOptions(), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_Port() {
         val serverOptions = extractOptions(arrayOf("-p","54321"))
-        assertEquals(ServerOptions(54321), serverOptions)
+        assertEquals(SystemOptions(54321), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_PortAnotherValid() {
         val serverOptions = extractOptions(arrayOf("-p","11111"))
-        assertEquals(ServerOptions(11111), serverOptions)
+        assertEquals(SystemOptions(11111), serverOptions)
     }
 
     @Test
@@ -93,13 +101,13 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_NoDiskPersistenceOption() {
         val serverOptions = extractOptions(arrayOf("--no-disk-persistence"))
-        assertEquals(ServerOptions(12345, null), serverOptions)
+        assertEquals(SystemOptions(12345, null), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_PortNoSpace() {
         val serverOptions = extractOptions(arrayOf("-p54321"))
-        assertEquals(ServerOptions(54321), serverOptions)
+        assertEquals(SystemOptions(54321), serverOptions)
     }
 
     /**
@@ -163,7 +171,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectory() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db"))
-        assertEquals(ServerOptions(dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
@@ -175,7 +183,7 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectoryNoSpace() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db"))
-        assertEquals(ServerOptions(dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
@@ -215,31 +223,31 @@ class ServerTests {
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
         val serverOptions = extractOptions(arrayOf("-p54321", "-dbuild/db"))
-        assertEquals(ServerOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p54321"))
-        assertEquals(ServerOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
-        assertEquals(ServerOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
-        assertEquals(ServerOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_setAllLoggingOff() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321", "--no-logging"))
-        assertEquals(ServerOptions(54321, "build/db/", allLoggingOff = true), serverOptions)
+        assertEquals(SystemOptions(54321, "build/db/", allLoggingOff = true), serverOptions)
     }
 
     /**

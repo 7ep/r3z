@@ -1,9 +1,11 @@
 package coverosR3z.authentication
 
 import coverosR3z.*
-import coverosR3z.domainobjects.NO_USER
-import coverosR3z.domainobjects.UserName
-import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.persistence.IAuthPersistence
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.UserName
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

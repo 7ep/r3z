@@ -1,10 +1,10 @@
 package coverosR3z
 
-import coverosR3z.exceptions.ServerOptionsException
+import coverosR3z.misc.exceptions.ServerOptionsException
 import coverosR3z.logging.logImperative
-import coverosR3z.server.Server
-import coverosR3z.server.ServerOptions
-import coverosR3z.server.ServerOptions.Companion.extractOptions
+import coverosR3z.misc.utility.SystemOptions
+import coverosR3z.server.utility.Server
+import coverosR3z.misc.utility.SystemOptions.Companion.extractOptions
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -29,9 +29,9 @@ fun main(args: Array<String>) {
 
 /**
  * The user can provide command-line options when running this.
- * See [ServerOptions] and [extractOptions]
+ * See [SystemOptions] and [extractOptions]
  */
-private fun extractCommandLineOptions(args: Array<String>): ServerOptions {
+private fun extractCommandLineOptions(args: Array<String>): SystemOptions {
     return try {
         extractOptions(args)
     } catch (ex: ServerOptionsException) {

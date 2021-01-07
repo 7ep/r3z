@@ -1,9 +1,12 @@
 package coverosR3z.authentication
 
 import coverosR3z.*
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.domainobjects.*
 import coverosR3z.misc.getTime
-import coverosR3z.persistence.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -46,7 +49,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `It should not be possible to create a username longer than 50 characters`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){UserName("a".repeat(51))}
+        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("a".repeat(51)) }
         assertEquals(tooLargeUsernameMsg, ex.message)
     }
 
@@ -78,13 +81,13 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `A 2-character username should be considered too short`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){UserName("aa")}
+        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("aa") }
         assertEquals(tooSmallUsernameMsg, ex.message)
     }
 
     @Test
     fun `An empty username should be indicated as such`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){UserName("")}
+        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("") }
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
 

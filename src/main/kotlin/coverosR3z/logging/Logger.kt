@@ -1,8 +1,8 @@
 package coverosR3z.logging
 
-import coverosR3z.authentication.CurrentUser
-import coverosR3z.domainobjects.SYSTEM_USER
-import coverosR3z.misc.ActionQueue
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.misc.utility.ActionQueue
 
 enum class LogTypes {
     /**

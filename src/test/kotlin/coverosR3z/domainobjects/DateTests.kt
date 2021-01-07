@@ -1,5 +1,7 @@
 package coverosR3z.domainobjects
 
+import coverosR3z.misc.types.Date
+import coverosR3z.misc.types.Month
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.IllegalArgumentException
@@ -43,7 +45,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_singleInteger() {
-        val ex = assertThrows(IllegalStateException::class.java) {Date.make("33333")}
+        val ex = assertThrows(IllegalStateException::class.java) { Date.make("33333")}
         assertEquals("Input to this function must split to exactly three parts", ex.message)
     }
 
@@ -52,7 +54,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_nonInteger() {
-        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("2020-Jan-06")}
+        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("2020-Jan-06")}
         assertEquals("Must be able to parse Jan as integer", ex.message)
     }
 
@@ -61,7 +63,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_tooLargeDate() {
-        val ex = assertThrows(DateTimeException::class.java) {Date.make("2020-01-32")}
+        val ex = assertThrows(DateTimeException::class.java) { Date.make("2020-01-32")}
         assertEquals("Invalid value for DayOfMonth (valid values 1 - 28/31): 32", ex.message)
     }
 
@@ -70,7 +72,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespace() {
-        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("   2020-01-32   ")}
+        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("   2020-01-32   ")}
         assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
     }
 
@@ -79,7 +81,7 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespaceInside() {
-        val ex = assertThrows(IllegalArgumentException::class.java) {Date.make("   2020-    01-32   ")}
+        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("   2020-    01-32   ")}
         assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
     }
 
@@ -104,7 +106,7 @@ class DateTests {
 
     @Test
     fun testDate_Ancient() {
-        assertThrows(IllegalArgumentException::class.java) {Date(1979, Month.DEC, 31)}
+        assertThrows(IllegalArgumentException::class.java) { Date(1979, Month.DEC, 31) }
     }
 
     @Test
@@ -114,7 +116,7 @@ class DateTests {
 
     @Test
     fun testDate_DistantFuture() {
-        assertThrows(IllegalArgumentException::class.java) {Date(2200, Month.JAN, 2)}
+        assertThrows(IllegalArgumentException::class.java) { Date(2200, Month.JAN, 2) }
     }
 
     @Test
