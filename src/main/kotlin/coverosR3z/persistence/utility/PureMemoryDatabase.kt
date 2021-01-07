@@ -7,7 +7,7 @@ import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.utility.ActionQueue
-import coverosR3z.misc.types.Serializable
+import coverosR3z.persistence.types.Serializable
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.persistence.types.ConcurrentSet

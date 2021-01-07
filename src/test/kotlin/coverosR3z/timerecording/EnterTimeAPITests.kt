@@ -13,7 +13,7 @@ import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.toStr
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.*
-import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence

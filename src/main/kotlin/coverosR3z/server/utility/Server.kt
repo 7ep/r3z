@@ -8,10 +8,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.api.handleInternalServerError
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.types.Verb
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import java.net.ServerSocket
@@ -166,7 +163,7 @@ class Server(val port: Int) {
                     // otherwise review the routing
                     // now that we know who the user is (if they authenticated) we can update the current user
                     val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
-                    directToProcessor(ServerData(businessCode.au, truWithUser, analyzedHttpData))
+                    directToProcessor(ServerData(businessCode.au, truWithUser, analyzedHttpData, isAuthenticated(analyzedHttpData.user)))
                 }
             } catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here

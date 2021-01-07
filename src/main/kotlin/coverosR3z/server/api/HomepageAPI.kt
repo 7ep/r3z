@@ -1,14 +1,27 @@
 package coverosR3z.server.api
 
-import coverosR3z.authentication.types.UserName
+import coverosR3z.server.types.Endpoint
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.utility.doGETAuthAndUnauth
+
+class HomepageAPI(private val sd: ServerData){
+
+    companion object : Endpoint {
+
+        override fun respond(sd: ServerData) : PreparedResponseData {
+            val hp = HomepageAPI(sd)
+            return doGETAuthAndUnauth(sd.authStatus, { hp.generateAuthHomepage() }, { hp.generateUnAuthenticatedHomepage() })
+        }
+    }
 
 
-fun generateAuthHomepage(username : UserName) : String = authHomePageHTML(username.value)
-fun generateUnAuthenticatedHomepage() : String = homepageHTML
+    fun generateAuthHomepage(): String = authHomePageHTML(sd.rd.user.name.value)
+    fun generateUnAuthenticatedHomepage(): String = homepageHTML
 
-fun authHomePageHTML(username : String) : String {
-    return """
+    private fun authHomePageHTML(username: String): String {
+        return """
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -30,9 +43,9 @@ fun authHomePageHTML(username : String) : String {
         </body>
     </html>
 """
-}
+    }
 
-const val homepageHTML = """
+    private val homepageHTML = """
 <!DOCTYPE html>    
 <html lang="en">
     <head>
@@ -50,3 +63,5 @@ const val homepageHTML = """
     </body>
 </html>
 """
+
+}

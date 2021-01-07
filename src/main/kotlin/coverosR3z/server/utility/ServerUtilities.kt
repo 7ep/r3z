@@ -1,31 +1,24 @@
 package coverosR3z.server.utility
 
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.api.generateLogoutPage
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.User
-import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.logging.LoggingAPI
-import coverosR3z.logging.logDebug
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.utility.FileReader
 import coverosR3z.misc.utility.checkHasExactInputs
-import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.*
-import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.server.types.*
+import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.timerecording.api.EmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.api.ProjectAPI
 import java.nio.file.*
 
-
-data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: AnalyzedHttpData)
 
 /**
  *   HTTP/1.1 defines the sequence CR LF as the end-of-line marker for all
@@ -40,11 +33,6 @@ const val CONTENT_LENGTH = "content-length"
 const val maxContentLength = 400_000
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
-
-enum class AuthStatus {
-    AUTHENTICATED,
-    UNAUTHENTICATED
-}
 
 /**
  * Examine the request and headers, direct the request to a proper
@@ -76,11 +64,11 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         return handleBadRequest()
     }
 
-    val authStatus : AuthStatus = isAuthenticated(user)
+    val authStatus = sd.authStatus
 
     return when (Pair(verb, path)){
         Pair(Verb.GET, ""),
-        Pair(Verb.GET, HOMEPAGE.path)  -> doGETAuthAndUnauth(authStatus, { generateAuthHomepage(user.name) }, { generateUnAuthenticatedHomepage() })
+        Pair(Verb.GET, HOMEPAGE.path)  -> HomepageAPI.respond(sd)
         Pair(Verb.GET, ENTER_TIME.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateEnterTimePage(tru, user.name) }
         Pair(Verb.GET, TIMEENTRIES.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateTimeEntriesPage(tru, user) }
         Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateCreateEmployeePage(user.name) }

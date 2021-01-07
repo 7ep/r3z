@@ -2,7 +2,7 @@ package coverosR3z.logging
 
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.LogConfig.logSettings
-import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.utility.doPOSTAuthenticated
 import org.junit.After
 import org.junit.Assert.*

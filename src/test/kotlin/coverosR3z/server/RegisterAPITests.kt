@@ -12,7 +12,7 @@ import coverosR3z.timerecording.types.minEmployeeIdMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
-import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.utility.doPOSTRequireUnauthenticated
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities

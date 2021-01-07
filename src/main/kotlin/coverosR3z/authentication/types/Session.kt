@@ -6,7 +6,7 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.checkParseToLong
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
-import coverosR3z.misc.types.Serializable
+import coverosR3z.persistence.types.Serializable
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
 
 /**
