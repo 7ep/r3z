@@ -5,7 +5,7 @@ import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.types.NamedPaths
-import coverosR3z.timerecording.api.EmployeeAPI
+import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import org.openqa.selenium.By
@@ -58,8 +58,8 @@ class EnterEmployeePage(private val driver: WebDriver, private val domain : Stri
 
     fun enter(employee: String) {
         driver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
-        driver.findElement(By.id(EmployeeAPI.Elements.EMPLOYEE_INPUT.id)).sendKeys(employee)
-        driver.findElement(By.id(EmployeeAPI.Elements.CREATE_BUTTON.id)).click()
+        driver.findElement(By.id(CreateEmployeeAPI.Elements.EMPLOYEE_INPUT.id)).sendKeys(employee)
+        driver.findElement(By.id(CreateEmployeeAPI.Elements.CREATE_BUTTON.id)).click()
     }
 }
 

@@ -11,10 +11,7 @@ import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.Verb
-import coverosR3z.timerecording.api.EmployeeAPI
-import coverosR3z.timerecording.api.EnterTimeAPI
-import coverosR3z.timerecording.api.ProjectAPI
-import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.timerecording.api.*
 
 
 /**
@@ -50,21 +47,24 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
     val authStatus = sd.authStatus
 
     return when (Pair(verb, path)){
+        // GET
+
         Pair(Verb.GET, ""),
         Pair(Verb.GET, NamedPaths.HOMEPAGE.path)  -> HomepageAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.TIMEENTRIES.path) -> ViewTimeAPI.handleGet(sd)
-        Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateCreateEmployeePage(user.name) }
-        Pair(Verb.GET, NamedPaths.EMPLOYEES.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateExistingEmployeesPage(user.name, tru) }
+        Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { CreateEmployeeAPI.generateCreateEmployeePage(user.name) }
+        Pair(Verb.GET, NamedPaths.EMPLOYEES.path) -> ViewEmployeesAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }
         Pair(Verb.GET, NamedPaths.REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
         Pair(Verb.GET, NamedPaths.CREATE_PROJECT.path) -> doGETRequireAuth(authStatus) { ProjectAPI.generateCreateProjectPage(user.name) }
         Pair(Verb.GET, NamedPaths.LOGOUT.path) -> doGETRequireAuth(authStatus) { generateLogoutPage(au, user) }
         Pair(Verb.GET, NamedPaths.LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
 
-        // posts
+        // POST
+
         Pair(Verb.POST, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handlePost(sd)
-        Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> doPOSTAuthenticated(authStatus, EmployeeAPI.requiredInputs, data) { EmployeeAPI.handlePOST(tru, data) }
+        Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> doPOSTAuthenticated(authStatus, CreateEmployeeAPI.requiredInputs, data) { CreateEmployeeAPI.handlePOST(tru, data) }
         Pair(Verb.POST, NamedPaths.LOGIN.path) -> doPOSTRequireUnauthenticated(authStatus, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
         Pair(Verb.POST, NamedPaths.REGISTER.path) -> doPOSTRequireUnauthenticated(authStatus, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }
         Pair(Verb.POST, NamedPaths.CREATE_PROJECT.path) -> doPOSTAuthenticated(authStatus, ProjectAPI.requiredInputs, data) { ProjectAPI.handlePOST(tru, data) }
