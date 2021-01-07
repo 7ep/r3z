@@ -53,7 +53,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, NamedPaths.HOMEPAGE.path)  -> HomepageAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.TIMEENTRIES.path) -> ViewTimeAPI.handleGet(sd)
-        Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { CreateEmployeeAPI.generateCreateEmployeePage(user.name) }
+        Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> CreateEmployeeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.EMPLOYEES.path) -> ViewEmployeesAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }
         Pair(Verb.GET, NamedPaths.REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
@@ -64,7 +64,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         // POST
 
         Pair(Verb.POST, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handlePost(sd)
-        Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> doPOSTAuthenticated(authStatus, CreateEmployeeAPI.requiredInputs, data) { CreateEmployeeAPI.handlePOST(tru, data) }
+        Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> CreateEmployeeAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.LOGIN.path) -> doPOSTRequireUnauthenticated(authStatus, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
         Pair(Verb.POST, NamedPaths.REGISTER.path) -> doPOSTRequireUnauthenticated(authStatus, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }
         Pair(Verb.POST, NamedPaths.CREATE_PROJECT.path) -> doPOSTAuthenticated(authStatus, ProjectAPI.requiredInputs, data) { ProjectAPI.handlePOST(tru, data) }
