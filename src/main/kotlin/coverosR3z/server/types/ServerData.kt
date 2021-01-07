@@ -7,4 +7,4 @@ import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 /**
  * Data for use by the API endpoints
  */
-data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val rd: AnalyzedHttpData, val authStatus: AuthStatus)
+data class ServerData(val au: IAuthenticationUtilities, val tru: ITimeRecordingUtilities, val ahd: AnalyzedHttpData, val authStatus: AuthStatus)

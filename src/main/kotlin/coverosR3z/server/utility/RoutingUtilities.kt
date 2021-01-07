@@ -27,11 +27,11 @@ import coverosR3z.timerecording.api.ViewTimeAPI
  *
  */
 fun directToProcessor(sd : ServerData): PreparedResponseData {
-    val verb = sd.rd.verb
-    val path = sd.rd.path
+    val verb = sd.ahd.verb
+    val path = sd.ahd.path
     val au = sd.au
     val tru = sd.tru
-    val rd = sd.rd
+    val rd = sd.ahd
 
     /**
      * The user currently logged in
@@ -52,7 +52,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
     return when (Pair(verb, path)){
         Pair(Verb.GET, ""),
         Pair(Verb.GET, NamedPaths.HOMEPAGE.path)  -> HomepageAPI.handleGet(sd)
-        Pair(Verb.GET, NamedPaths.ENTER_TIME.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateEnterTimePage(tru, user.name) }
+        Pair(Verb.GET, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.TIMEENTRIES.path) -> ViewTimeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateCreateEmployeePage(user.name) }
         Pair(Verb.GET, NamedPaths.EMPLOYEES.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateExistingEmployeesPage(user.name, tru) }
@@ -63,7 +63,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, NamedPaths.LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
 
         // posts
-        Pair(Verb.POST, NamedPaths.ENTER_TIME.path) -> doPOSTAuthenticated(authStatus, EnterTimeAPI.requiredInputs, data) { EnterTimeAPI.handlePOST(tru, user.employeeId, data) }
+        Pair(Verb.POST, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> doPOSTAuthenticated(authStatus, EmployeeAPI.requiredInputs, data) { EmployeeAPI.handlePOST(tru, data) }
         Pair(Verb.POST, NamedPaths.LOGIN.path) -> doPOSTRequireUnauthenticated(authStatus, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
         Pair(Verb.POST, NamedPaths.REGISTER.path) -> doPOSTRequireUnauthenticated(authStatus, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }

@@ -19,8 +19,8 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     private fun existingTimeEntriesHTML() : String {
-        val username = safeHtml(sd.rd.user.name.value)
-        val te = sd.tru.getAllEntriesForEmployee(sd.rd.user.employeeId ?: NO_EMPLOYEE.id)
+        val username = safeHtml(sd.ahd.user.name.value)
+        val te = sd.tru.getAllEntriesForEmployee(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id)
         return """
         <!DOCTYPE html>        
         <html>

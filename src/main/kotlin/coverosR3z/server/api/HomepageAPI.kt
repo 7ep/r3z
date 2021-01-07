@@ -17,7 +17,7 @@ class HomepageAPI(private val sd: ServerData){
     }
 
     private fun authHomePageHTML(): String {
-        val username = safeHtml(sd.rd.user.name.value)
+        val username = safeHtml(sd.ahd.user.name.value)
         return """
         <!DOCTYPE html>
         <html lang="en">
