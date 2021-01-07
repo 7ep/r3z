@@ -17,6 +17,7 @@ import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.timerecording.api.EmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.api.ViewTimeAPI
 import java.nio.file.*
 
 
@@ -68,9 +69,9 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
 
     return when (Pair(verb, path)){
         Pair(Verb.GET, ""),
-        Pair(Verb.GET, HOMEPAGE.path)  -> HomepageAPI.respond(sd)
+        Pair(Verb.GET, HOMEPAGE.path)  -> HomepageAPI.handleGet(sd)
         Pair(Verb.GET, ENTER_TIME.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateEnterTimePage(tru, user.name) }
-        Pair(Verb.GET, TIMEENTRIES.path) -> doGETRequireAuth(authStatus) { EnterTimeAPI.generateTimeEntriesPage(tru, user) }
+        Pair(Verb.GET, TIMEENTRIES.path) -> ViewTimeAPI.handleGet(sd)
         Pair(Verb.GET, CREATE_EMPLOYEE.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateCreateEmployeePage(user.name) }
         Pair(Verb.GET, EMPLOYEES.path) -> doGETRequireAuth(authStatus) { EmployeeAPI.generateExistingEmployeesPage(user.name, tru) }
         Pair(Verb.GET, LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }

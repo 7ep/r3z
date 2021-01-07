@@ -1,6 +1,6 @@
 package coverosR3z.server.api
 
-import coverosR3z.server.types.Endpoint
+import coverosR3z.server.types.GetEndpoint
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
@@ -8,19 +8,16 @@ import coverosR3z.server.utility.doGETAuthAndUnauth
 
 class HomepageAPI(private val sd: ServerData){
 
-    companion object : Endpoint {
+    companion object : GetEndpoint {
 
-        override fun respond(sd: ServerData) : PreparedResponseData {
+        override fun handleGet(sd: ServerData) : PreparedResponseData {
             val hp = HomepageAPI(sd)
-            return doGETAuthAndUnauth(sd.authStatus, { hp.generateAuthHomepage() }, { hp.generateUnAuthenticatedHomepage() })
+            return doGETAuthAndUnauth(sd.authStatus, { hp.authHomePageHTML() }, { hp.homepageHTML })
         }
     }
 
-
-    fun generateAuthHomepage(): String = authHomePageHTML(sd.rd.user.name.value)
-    fun generateUnAuthenticatedHomepage(): String = homepageHTML
-
-    private fun authHomePageHTML(username: String): String {
+    private fun authHomePageHTML(): String {
+        val username = safeHtml(sd.rd.user.name.value)
         return """
         <!DOCTYPE html>
         <html lang="en">
@@ -31,7 +28,7 @@ class HomepageAPI(private val sd: ServerData){
         </head>        
         <body>
             <div class="container">
-                <h2>You are on the authenticated homepage, ${safeHtml(username)}</h2>
+                <h2>You are on the authenticated homepage, $username</h2>
                 <p><a href="createemployee">Create employee</a></p>
                 <p><a href="employees">Show all employees</a></p>
                 <p><a href="createproject">Create project</a></p>

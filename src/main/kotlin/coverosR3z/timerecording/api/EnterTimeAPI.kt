@@ -31,9 +31,6 @@ class EnterTimeAPI {
             Elements.DATE_INPUT.elemName,
         )
 
-        fun generateTimeEntriesPage(tru: ITimeRecordingUtilities, user : User): String =
-            existingTimeEntriesHTML(user.name.value, tru.getAllEntriesForEmployee(user.employeeId ?: NO_EMPLOYEE.id))
-
         fun generateEnterTimePage(tru : ITimeRecordingUtilities, username : UserName): String =
             entertimeHTML(username.value, tru.listAllProjects())
 
@@ -109,51 +106,6 @@ class EnterTimeAPI {
         """
         }
 
-
-        private fun existingTimeEntriesHTML(username : String, te : Set<TimeEntry>) : String {
-            return """
-        <!DOCTYPE html>        
-        <html>
-            <head>
-                <title>your time entries</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                table,
-                td {
-                    border: 1px solid #333;
-                }
-        
-                thead,
-                tfoot {
-                    background-color: #333;
-                    color: #fff;
-                }
-        
-                </style>
-            </head>
-            <body>
-                <p>
-                    Here are your entries, <span id="username">$username</span>
-                </p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Project</th>
-                            <th>Time</th>
-                            <th>Details</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                    """ + te.joinToString("") { "<tr id=time-entry-${it.employee.id.value}-${it.id}><td>${safeHtml(it.project.name.value)}</td><td class='time'><input type=text value=${it.time.numberOfMinutes}></input></td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
-                    </tbody>
-                </table>
-        
-            </body>
-        </html>
-        """
-        }
 
 
     }
