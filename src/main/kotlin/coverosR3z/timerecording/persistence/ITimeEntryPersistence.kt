@@ -1,7 +1,7 @@
 package coverosR3z.timerecording.persistence
 
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.types.Date
+import coverosR3z.timerecording.types.*
 
 interface ITimeEntryPersistence {
     fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry

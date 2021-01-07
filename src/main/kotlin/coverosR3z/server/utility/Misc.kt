@@ -1,4 +1,4 @@
-package coverosR3z.misc
+package coverosR3z.server.utility
 
 const val successHTML = """
     <!DOCTYPE html>

@@ -1,4 +1,4 @@
-package coverosR3z.domainobjects
+package coverosR3z.timerecording.types
 
 enum class StatusEnum {
     SUCCESS,

@@ -3,13 +3,13 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.*
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.types.Month
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert
 

@@ -2,13 +2,13 @@ package coverosR3z.timerecording.utility
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.domainobjects.*
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
-import coverosR3z.persistence.EmployeeIntegrityViolationException
-import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.persistence.exceptions.EmployeeIntegrityViolationException
+import coverosR3z.persistence.exceptions.ProjectIntegrityViolationException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
+import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) :
     ITimeRecordingUtilities {

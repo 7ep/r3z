@@ -1,10 +1,10 @@
 package coverosR3z.authentication.persistence
 
 import coverosR3z.authentication.types.*
-import coverosR3z.domainobjects.*
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.types.DateTime
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.types.EmployeeId
 
 class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPersistence {
 

@@ -1,9 +1,9 @@
-package coverosR3z.domainobjects
+package coverosR3z.timerecording.types
 
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
-import coverosR3z.misc.checkParseToInt
-import coverosR3z.misc.decode
-import coverosR3z.misc.encode
+import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.decode
+import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 
@@ -20,7 +20,7 @@ data class Details(val value : String = "") {
 
     companion object {
         fun make(value : String?) : Details {
-            val valueNotNull = checkNotNull(value) {detailsNotNullMsg}
+            val valueNotNull = checkNotNull(value) { detailsNotNullMsg }
             return Details(valueNotNull)
         }
     }
@@ -53,7 +53,8 @@ data class TimeEntry (
     val project: Project,
     val time: Time,
     val date: Date,
-    val details : Details = Details()) {
+    val details : Details = Details()
+) {
 
     fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
         return TimeEntryPreDatabase(employee, project, time, date, details)
@@ -109,5 +110,6 @@ data class TimeEntryPreDatabase (
     val project: Project,
     val time: Time,
     val date: Date,
-    val details : Details = Details())
+    val details : Details = Details()
+)
 

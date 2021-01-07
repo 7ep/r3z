@@ -1,4 +1,4 @@
-package coverosR3z.persistence
+package coverosR3z.persistence.exceptions
 
 /**
  * This is thrown whenever data is changed in such a way

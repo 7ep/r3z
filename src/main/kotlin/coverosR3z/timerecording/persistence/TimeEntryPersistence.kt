@@ -1,11 +1,11 @@
 package coverosR3z.timerecording.persistence
 
-import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.types.ConcurrentSet
+import coverosR3z.timerecording.types.*
 
 class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
 

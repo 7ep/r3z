@@ -3,17 +3,17 @@ package coverosR3z.persistence
 import coverosR3z.*
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.domainobjects.*
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.logging.logAudit
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOffAllLogging
-import coverosR3z.misc.getTime
+import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.databaseFileSuffix
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
@@ -137,7 +137,7 @@ class PureMemoryDatabaseTests {
      * would need to run it a time or two to see it fail.
      *
      * Now, however, we aren't using locking - we're using
-     * [ConcurrentSet] which is based on [ConcurrentHashMap], and
+     * [coverosR3z.persistence.types.ConcurrentSet] which is based on [ConcurrentHashMap], and
      * also [AtomicInteger], which means we don't need to lock
      * at all.
      *
@@ -219,7 +219,7 @@ class PureMemoryDatabaseTests {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         File(DEFAULT_DB_DIRECTORY).mkdirs()
         PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "version.txt").exists())
+        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "currentVersion.txt").exists())
     }
 
     /**
@@ -230,7 +230,7 @@ class PureMemoryDatabaseTests {
     fun testPersistence_Read_MissingDbDirectory() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
         PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "version.txt").exists())
+        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "currentVersion.txt").exists())
     }
 
     /**
@@ -476,7 +476,8 @@ class PureMemoryDatabaseTests {
     fun testSerialization_UserWithMultilineText() {
         val user = User(
             UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
-            |thisisalsotext""".trimMargin()), EmployeeId(1))
+            |thisisalsotext""".trimMargin()), EmployeeId(1)
+        )
 
         val result = user.serialize()
 

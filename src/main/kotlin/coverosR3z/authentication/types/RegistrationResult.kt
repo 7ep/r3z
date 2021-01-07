@@ -1,6 +1,4 @@
-package coverosR3z.domainobjects
-
-import coverosR3z.authentication.types.User
+package coverosR3z.authentication.types
 
 enum class RegistrationResultStatus {
     SUCCESS,

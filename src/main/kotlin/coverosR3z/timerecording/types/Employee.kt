@@ -1,8 +1,8 @@
-package coverosR3z.domainobjects
+package coverosR3z.timerecording.types
 
-import coverosR3z.misc.checkParseToInt
-import coverosR3z.misc.decode
-import coverosR3z.misc.encode
+import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.decode
+import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Serializable
 import coverosR3z.persistence.utility.PureMemoryDatabase
 
@@ -20,20 +20,20 @@ const val employeeIdCannotBeBlank = "The employee id must not be blank"
  * This is used to represent no employee - just to avoid using null for an employee
  * It's a typed null, essentially
  */
-val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount-1), EmployeeName("THIS REPRESENTS NO EMPLOYEE"))
+val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount -1), EmployeeName("THIS REPRESENTS NO EMPLOYEE"))
 
 /**
  * Holds a employee's name before we have a whole object, like [Employee]
  */
 data class EmployeeName(val value: String) {
     init {
-        require(value.isNotEmpty()) {employeeNameCannotBeEmptyMsg}
-        require(value.length <= maxEmployeeNameSize) {maxEmployeeNameSizeMsg}
+        require(value.isNotEmpty()) { employeeNameCannotBeEmptyMsg }
+        require(value.length <= maxEmployeeNameSize) { maxEmployeeNameSizeMsg }
     }
 
     companion object {
         fun make(value: String?) : EmployeeName {
-            val valueNotNull = checkNotNull(value) {employeeNameNotNullMsg}
+            val valueNotNull = checkNotNull(value) { employeeNameNotNullMsg }
             return EmployeeName(valueNotNull)
         }
     }
@@ -53,7 +53,7 @@ data class EmployeeId(val value: Int) {
          * You can pass the id as a string and we'll try to parse it
          */
         fun make(value: String?) : EmployeeId {
-            return EmployeeId(checkParseToInt(value, {employeeIdNotNullMsg}, {employeeIdCannotBeBlank}))
+            return EmployeeId(checkParseToInt(value, { employeeIdNotNullMsg }, { employeeIdCannotBeBlank }))
         }
     }
 }

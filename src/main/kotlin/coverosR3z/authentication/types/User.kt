@@ -1,12 +1,12 @@
 package coverosR3z.authentication.types
 
 import coverosR3z.authentication.types.Hash.Companion.createHash
-import coverosR3z.domainobjects.EmployeeId
-import coverosR3z.domainobjects.NO_EMPLOYEE
-import coverosR3z.misc.checkParseToInt
-import coverosR3z.misc.decode
-import coverosR3z.misc.encode
-import coverosR3z.misc.generateRandomString
+import coverosR3z.timerecording.types.EmployeeId
+import coverosR3z.timerecording.types.NO_EMPLOYEE
+import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.decode
+import coverosR3z.misc.utility.encode
+import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.misc.types.Serializable
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
 import java.security.spec.KeySpec

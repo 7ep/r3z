@@ -1,4 +1,4 @@
-package coverosR3z.server
+package coverosR3z.server.utility
 
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.authentication.api.LoginAPI
@@ -11,13 +11,12 @@ import coverosR3z.logging.LoggingAPI
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
-import coverosR3z.misc.*
 import coverosR3z.misc.utility.FileReader
+import coverosR3z.misc.utility.checkHasExactInputs
+import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.toBytes
-import coverosR3z.server.HttpResponseCache.staticFileCache
-import coverosR3z.server.api.generateAuthHomepage
-import coverosR3z.server.api.generateUnAuthenticatedHomepage
-import coverosR3z.server.utility.ISocketWrapper
+import coverosR3z.server.utility.HttpResponseCache.staticFileCache
+import coverosR3z.server.api.*
 import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.EmployeeAPI
@@ -168,9 +167,9 @@ fun doPOSTAuthenticated(authStatus : AuthStatus,
  * @param handler the method run to handle the POST
  */
 fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
-                        requiredInputs : Set<String>,
-                        data : Map<String, String>,
-                        handler: () -> PreparedResponseData
+                                 requiredInputs : Set<String>,
+                                 data : Map<String, String>,
+                                 handler: () -> PreparedResponseData
 ) : PreparedResponseData {
     return when (authStatus) {
         AuthStatus.UNAUTHENTICATED -> {
@@ -187,12 +186,6 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
 object HttpResponseCache {
     val staticFileCache = mutableMapOf<String, PreparedResponseData>()
 
-    /**
-     * Clears the cache.  This is just used for testing.
-     */
-    fun clearCache() {
-        staticFileCache.clear()
-    }
 }
 
 /**
@@ -530,7 +523,8 @@ fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
             "$contentLengthHeader$CRLF" +
             otherHeaders +
             CRLF +
-            CRLF)
+            CRLF
+    )
     server.writeBytes(data.fileContents)
 }
 

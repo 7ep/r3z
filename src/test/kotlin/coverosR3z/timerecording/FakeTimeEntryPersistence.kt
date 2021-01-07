@@ -3,21 +3,21 @@ package coverosR3z.timerecording
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.DEFAULT_TIME_ENTRY
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
+import coverosR3z.timerecording.types.*
 
 /**
  * Used as a mock object for testing
  */
 class FakeTimeEntryPersistence(
-        var minutesRecorded : Time = Time(0),
-        var persistNewTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
-        var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
-        var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
-        var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
-        var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
-        var overwriteTimeEntryBehavior : () -> Unit = {},
+    var minutesRecorded : Time = Time(0),
+    var persistNewTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
+    var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
+    var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
+    var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
+    var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
+    var overwriteTimeEntryBehavior : () -> Unit = {},
 ) : ITimeEntryPersistence {
 
 

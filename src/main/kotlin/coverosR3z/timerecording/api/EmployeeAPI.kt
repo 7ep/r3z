@@ -1,12 +1,12 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.domainobjects.Employee
-import coverosR3z.domainobjects.EmployeeName
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.authentication.types.UserName
-import coverosR3z.misc.safeHtml
-import coverosR3z.misc.successHTML
+import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.utility.successHTML
 import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.okHTML
+import coverosR3z.server.utility.okHTML
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
 class EmployeeAPI {

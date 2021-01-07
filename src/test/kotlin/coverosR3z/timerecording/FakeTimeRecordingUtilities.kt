@@ -3,15 +3,15 @@ package coverosR3z.timerecording
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.types.Date
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
 /**
  * Used as a mock object for testing
  */
 class FakeTimeRecordingUtilities(
-    var recordTimeBehavior : () -> RecordTimeResult = {RecordTimeResult()},
+    var recordTimeBehavior : () -> RecordTimeResult = { RecordTimeResult() },
     var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },

@@ -13,19 +13,17 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.misc.exceptions.ServerOptionsException
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
-import coverosR3z.misc.encode
-import coverosR3z.misc.getTime
+import coverosR3z.misc.utility.encode
+import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.utility.SystemOptions.Companion.extractOptions
 import coverosR3z.misc.utility.SystemOptions.Companion.fullHelpMessage
 import coverosR3z.misc.utility.FileReader.Companion.read
 import coverosR3z.misc.utility.toStr
-import coverosR3z.server.utility.NamedPaths
-import coverosR3z.server.utility.Server
-import coverosR3z.server.utility.SocketWrapper
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
+import coverosR3z.server.utility.*
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.AfterClass
@@ -570,7 +568,7 @@ class ServerTests {
 
 }
 
-class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities, val path: String = "", val headers: String = "") {
+class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities, val path: String = "", private val headers: String = "") {
 
     fun send() {
         socketWrapper.write(data)
@@ -581,7 +579,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
     }
 
     fun addPostData(body: Map<String, String>) : Client {
-        val bodyString = body.map{ it.key + "=" + encode(it.value)}.joinToString("&")
+        val bodyString = body.map{ it.key + "=" + encode(it.value) }.joinToString("&")
         val data =  "${Verb.POST} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headers + CRLF + CRLF + bodyString
         return Client(this.socketWrapper, data = data, au)
     }
@@ -596,7 +594,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
             authUtilities: IAuthenticationUtilities = FakeAuthenticationUtilities()
         ) : Client {
             val clientSocket = Socket("localhost", 12345)
-            val bodyString = body?.map{ it.key + "=" + encode(it.value)}?.joinToString("&") ?: ""
+            val bodyString = body?.map{ it.key + "=" + encode(it.value) }?.joinToString("&") ?: ""
             val headersString = headers?.joinToString(CRLF) ?: ""
 
             val data = when (verb) {

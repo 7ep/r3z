@@ -4,11 +4,11 @@ import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.domainobjects.*
-import coverosR3z.persistence.EmployeeIntegrityViolationException
-import coverosR3z.persistence.ProjectIntegrityViolationException
+import coverosR3z.persistence.exceptions.EmployeeIntegrityViolationException
+import coverosR3z.persistence.exceptions.ProjectIntegrityViolationException
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test

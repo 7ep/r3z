@@ -2,7 +2,6 @@ package coverosR3z.persistence.utility
 
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
-import coverosR3z.domainobjects.*
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
@@ -13,6 +12,7 @@ import coverosR3z.persistence.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.persistence.types.ConcurrentSet
 import coverosR3z.persistence.types.toConcurrentSet
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -217,7 +217,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          * The suffix for the database files we will write to disk
          */
         const val databaseFileSuffix = ".db"
-        val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+        private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
 
 
         /**
@@ -248,8 +248,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
              */
             val dbVersion = 1
 
+            val fullDbDirectory = dbDirectory
+
             // first we assume the database has been previously persisted
-            val restoredPMD = deserializeFromDisk(dbDirectory)
+            val restoredPMD = deserializeFromDisk(fullDbDirectory)
 
             return if (restoredPMD != null) {
                 // return the restored database
@@ -259,13 +261,13 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 // if nothing is there, we build a new database
                 // and add a clean set of directories
                 logImperative("Creating new PureMemoryDatabase")
-                val pmd = PureMemoryDatabase(dbDirectory = dbDirectory)
+                val pmd = PureMemoryDatabase(dbDirectory = fullDbDirectory)
 
-                logImperative("creating the database directory at \"$dbDirectory\"")
-                File(dbDirectory).mkdirs()
+                logImperative("creating the database directory at \"$fullDbDirectory\"")
+                File(fullDbDirectory).mkdirs()
 
                 logImperative("Writing the version of the database ($dbVersion) to version.txt")
-                File(dbDirectory + "version.txt").writeText(dbVersion.toString())
+                File(fullDbDirectory + "currentVersion.txt").writeText(dbVersion.toString())
 
                 logImperative("creating an initial employee")
                 val tep = TimeEntryPersistence(pmd)

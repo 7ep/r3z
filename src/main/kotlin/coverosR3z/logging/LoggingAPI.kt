@@ -1,9 +1,9 @@
 package coverosR3z.logging
 
 import coverosR3z.logging.LogConfig.logSettings
-import coverosR3z.misc.successHTML
-import coverosR3z.server.*
+import coverosR3z.server.utility.successHTML
 import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.utility.okHTML
 
 
 class LoggingAPI {

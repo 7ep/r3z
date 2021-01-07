@@ -1,4 +1,4 @@
-package coverosR3z.misc
+package coverosR3z.misc.utility
 
 import coverosR3z.misc.exceptions.InexactInputsException
 import java.lang.IllegalArgumentException

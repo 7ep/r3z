@@ -1,8 +1,8 @@
 package coverosR3z.timerecording
 
 import coverosR3z.*
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.types.Date
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Test

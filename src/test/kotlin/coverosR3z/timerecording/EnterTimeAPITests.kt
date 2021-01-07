@@ -5,17 +5,19 @@ import coverosR3z.authentication.*
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.domainobjects.*
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOffAllLogging
-import coverosR3z.misc.getTime
+import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.toStr
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.*
+import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
@@ -147,7 +149,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_aboveMaxProject() {
         val data = mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to (maximumProjectsCount+1).toString(),
+            EnterTimeAPI.Elements.PROJECT_INPUT.elemName to (maximumProjectsCount +1).toString(),
             EnterTimeAPI.Elements.TIME_INPUT.elemName to "60",
             EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
@@ -181,7 +183,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.elemName to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString())
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePOST(tru, DEFAULT_USER.employeeId,data) }
-        assertEquals("${noNegativeTimeMsg}-60", ex.message)
+        assertEquals("$noNegativeTimeMsg-60", ex.message)
     }
 
     /**

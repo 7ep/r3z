@@ -4,8 +4,7 @@ import coverosR3z.*
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.domainobjects.*
-import coverosR3z.misc.getTime
+import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before

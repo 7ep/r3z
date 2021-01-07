@@ -1,7 +1,6 @@
 package coverosR3z.misc.utility
 
 import coverosR3z.misc.exceptions.ServerOptionsException
-import coverosR3z.misc.checkParseToInt
 
 data class SystemOptions(
         /**

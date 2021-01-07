@@ -1,6 +1,6 @@
 package coverosR3z.misc.types
 
-import coverosR3z.misc.checkParseToInt
+import coverosR3z.misc.utility.checkParseToInt
 import java.time.LocalDate
 
 const val dateNotNullMsg = "date must not be null"

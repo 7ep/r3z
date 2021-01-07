@@ -5,10 +5,9 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.Hash
-import coverosR3z.domainobjects.*
 import coverosR3z.logging.LogConfig
 import coverosR3z.logging.LogTypes
-import coverosR3z.misc.getTime
+import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.utility.NamedPaths
@@ -18,6 +17,7 @@ import coverosR3z.server.types.Verb
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.Project
 import org.junit.*
 import kotlin.concurrent.thread
 

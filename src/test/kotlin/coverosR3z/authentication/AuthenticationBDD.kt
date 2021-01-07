@@ -5,9 +5,12 @@ import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.domainobjects.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.EmployeeName
+import coverosR3z.timerecording.types.RecordTimeResult
+import coverosR3z.timerecording.types.StatusEnum
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.*

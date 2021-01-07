@@ -3,9 +3,9 @@ package coverosR3z.server
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.server.exceptions.DuplicateInputsException
-import coverosR3z.misc.getTime
-import coverosR3z.server.utility.NamedPaths
+import coverosR3z.misc.utility.getTime
 import coverosR3z.server.types.Verb
+import coverosR3z.server.utility.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
@@ -52,7 +52,7 @@ class ServerUtilitiesTests {
             "&project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
         }
 
-        val (time, _) = getTime {parsePostedData(input)}
+        val (time, _) = getTime { parsePostedData(input) }
 
         val maxTime = 100
         assertTrue("time taken was $time, should be less than $maxTime", time < maxTime)
@@ -64,7 +64,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldHandleBadInputBadly_EmptyString() {
-        val ex = assertThrows(IllegalArgumentException::class.java) { parsePostedData("")}
+        val ex = assertThrows(IllegalArgumentException::class.java) { parsePostedData("") }
 
         assertEquals("The POST body was empty", ex.message)
     }
@@ -77,7 +77,7 @@ class ServerUtilitiesTests {
     fun testShouldHandleBadInputBadly_InvalidFormat() {
         // input cannot be split at all
         val input = "foo"
-        val ex = assertThrows(IllegalStateException::class.java) { parsePostedData(input)}
+        val ex = assertThrows(IllegalStateException::class.java) { parsePostedData(input) }
 
         assertEquals("Splitting on = should return 2 values.  Input was foo", ex.message)
     }
@@ -130,7 +130,7 @@ class ServerUtilitiesTests {
     fun testShouldParse_FailWhenDuplicates() {
         val input = "foo=abc&foo=123"
 
-        val ex = assertThrows(DuplicateInputsException::class.java) {parsePostedData(input)}
+        val ex = assertThrows(DuplicateInputsException::class.java) { parsePostedData(input) }
         assertEquals("foo was duplicated in the post body - had values of abc and 123", ex.message)
     }
 
@@ -352,10 +352,10 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
-        val headers = listOf("Content-Length: ${maxContentLength+1}", "Content-Type: Blah")
+        val headers = listOf("Content-Length: ${maxContentLength +1}", "Content-Type: Blah")
 
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
-        assertEquals("Exception occurred for these headers: Content-Length: ${maxContentLength+1};Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed $maxContentLength characters", exception.message)
+        assertEquals("Exception occurred for these headers: Content-Length: ${maxContentLength +1};Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed $maxContentLength characters", exception.message)
     }
 
     /**

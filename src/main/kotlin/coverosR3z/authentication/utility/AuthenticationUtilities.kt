@@ -2,9 +2,9 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.domainobjects.*
 import coverosR3z.logging.logDebug
 import coverosR3z.misc.types.DateTime
+import coverosR3z.timerecording.types.EmployeeId
 
 
 class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {

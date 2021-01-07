@@ -1,8 +1,8 @@
-package coverosR3z.domainobjects
+package coverosR3z.timerecording.types
 
-import coverosR3z.misc.checkParseToInt
-import coverosR3z.misc.decode
-import coverosR3z.misc.encode
+import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.decode
+import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Serializable
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
 
@@ -18,20 +18,20 @@ const val projectNameNotNullMsg = "The project name must not be null"
  * This is used to represent no project - just to avoid using null for a project
  * It's a typed null, essentially
  */
-val NO_PROJECT = Project(ProjectId(maximumProjectsCount-1), ProjectName("THIS REPRESENTS NO PROJECT"))
+val NO_PROJECT = Project(ProjectId(maximumProjectsCount -1), ProjectName("THIS REPRESENTS NO PROJECT"))
 
 /**
  * When we just have a name (like when adding a new project, or searching)
  */
 data class ProjectName(val value: String) {
     init {
-        require(value.isNotEmpty()) {emptyProjectNameMsg}
+        require(value.isNotEmpty()) { emptyProjectNameMsg }
         require(value.length <= maxProjectNameSize) { maxProjectNameSizeMsg }
     }
 
     companion object {
         fun make(value: String?) : ProjectName {
-            val valueNotNull = checkNotNull(value) {projectNameNotNullMsg}
+            val valueNotNull = checkNotNull(value) { projectNameNotNullMsg }
             return ProjectName(valueNotNull)
         }
     }
@@ -39,7 +39,7 @@ data class ProjectName(val value: String) {
 
 data class ProjectId(val value: Int) {
     init {
-        require(value > 0) {minIdMsg}
+        require(value > 0) { minIdMsg }
         require(value < maximumProjectsCount) { maxProjectErrorMsg }
     }
 

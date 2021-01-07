@@ -7,11 +7,13 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
-import coverosR3z.domainobjects.employeeIdCannotBeBlank
-import coverosR3z.domainobjects.minEmployeeIdMsg
+import coverosR3z.timerecording.types.employeeIdCannotBeBlank
+import coverosR3z.timerecording.types.minEmployeeIdMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
+import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.utility.doPOSTRequireUnauthenticated
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.*
@@ -126,7 +128,7 @@ class RegisterAPITests {
         val data = mapOf(
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
         assertEquals("expected keys: [username, password, employee]. received keys: [password, employee]", ex.message)
     }
 

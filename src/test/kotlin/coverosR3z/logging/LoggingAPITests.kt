@@ -2,8 +2,8 @@ package coverosR3z.logging
 
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.LogConfig.logSettings
-import coverosR3z.server.AuthStatus
-import coverosR3z.server.doPOSTAuthenticated
+import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.utility.doPOSTAuthenticated
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -93,7 +93,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [warn, debug, trace]", ex.message)
     }
 
@@ -103,7 +103,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, debug, trace]", ex.message)
     }
 
@@ -113,7 +113,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, warn, trace]", ex.message)
     }
 
@@ -123,7 +123,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, warn, debug]", ex.message)
     }
 
@@ -135,28 +135,28 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_audit() {
         val data = allTrue(audit = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_warn() {
         val data = allTrue(warn = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_debug() {
         val data = allTrue(debug = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_trace() {
         val data = allTrue(trace = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }}
+        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 

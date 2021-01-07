@@ -3,10 +3,10 @@ package coverosR3z.timerecording
 import coverosR3z.DEFAULT_PROJECT_NAME
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
-import coverosR3z.domainobjects.maxProjectNameSizeMsg
+import coverosR3z.timerecording.types.maxProjectNameSizeMsg
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.server.AuthStatus
-import coverosR3z.server.doPOSTAuthenticated
+import coverosR3z.server.utility.AuthStatus
+import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals

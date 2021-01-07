@@ -1,7 +1,7 @@
 package coverosR3z.server.api
 
 import coverosR3z.authentication.types.UserName
-import coverosR3z.misc.safeHtml
+import coverosR3z.misc.utility.safeHtml
 
 
 fun generateAuthHomepage(username : UserName) : String = authHomePageHTML(username.value)
