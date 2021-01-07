@@ -3,15 +3,14 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.api.generateLogoutPage
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.User
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.utility.FileReader
-import coverosR3z.misc.utility.checkHasExactInputs
 import coverosR3z.misc.utility.toBytes
-import coverosR3z.server.api.*
+import coverosR3z.server.api.HomepageAPI
+import coverosR3z.server.api.handleBadRequest
+import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.timerecording.api.EmployeeAPI
@@ -133,14 +132,6 @@ fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
             cache[filename] = result
             logTrace { "Added $filename to the cache" }
         }
-    }
-}
-
-fun isAuthenticated(u : User) : AuthStatus {
-    return if (u != NO_USER) {
-        AuthStatus.AUTHENTICATED
-    } else {
-        AuthStatus.UNAUTHENTICATED
     }
 }
 

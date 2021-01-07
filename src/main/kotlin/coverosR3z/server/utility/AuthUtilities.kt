@@ -1,5 +1,7 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.User
 import coverosR3z.misc.utility.checkHasExactInputs
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
@@ -83,5 +85,14 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
             handler()
         }
         AuthStatus.AUTHENTICATED -> redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+    }
+}
+
+
+fun isAuthenticated(u : User) : AuthStatus {
+    return if (u != NO_USER) {
+        AuthStatus.AUTHENTICATED
+    } else {
+        AuthStatus.UNAUTHENTICATED
     }
 }
