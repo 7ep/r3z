@@ -4,7 +4,7 @@ import coverosR3z.BDDHelpers
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.logging.LogTypes
-import coverosR3z.server.utility.NamedPaths
+import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.utility.Server
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*

@@ -5,6 +5,7 @@ import coverosR3z.authentication.types.User
 import coverosR3z.misc.utility.checkHasExactInputs
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.types.PreparedResponseData
 
 /*

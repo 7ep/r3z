@@ -10,7 +10,7 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.server.utility.NamedPaths
+import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.utility.Server
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb

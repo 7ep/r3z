@@ -1,4 +1,4 @@
-package coverosR3z.server.utility
+package coverosR3z.server.types
 
 /**
  * An enumeration of the possible well-known paths requestable by clients

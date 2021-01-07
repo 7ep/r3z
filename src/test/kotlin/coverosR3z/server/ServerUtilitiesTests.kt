@@ -4,6 +4,7 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
+import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.types.Verb
 import coverosR3z.server.utility.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities

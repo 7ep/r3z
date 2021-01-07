@@ -4,7 +4,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
-import coverosR3z.server.utility.NamedPaths
+import coverosR3z.server.types.NamedPaths
 import coverosR3z.timerecording.api.EmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
