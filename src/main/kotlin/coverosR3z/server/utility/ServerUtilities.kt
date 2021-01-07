@@ -15,7 +15,6 @@ import coverosR3z.misc.utility.FileReader
 import coverosR3z.misc.utility.checkHasExactInputs
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.toBytes
-import coverosR3z.server.utility.HttpResponseCache.staticFileCache
 import coverosR3z.server.api.*
 import coverosR3z.server.utility.NamedPaths.*
 import coverosR3z.server.types.*
@@ -101,7 +100,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
 
         else -> {
-            handleStaticFiles(rd.path)
+            handleNotFound()
         }
     }
 }
@@ -181,32 +180,6 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
 }
 
 /**
- * A simple cache for the static files.  See [handleStaticFiles]
- */
-object HttpResponseCache {
-    val staticFileCache = mutableMapOf<String, PreparedResponseData>()
-
-}
-
-/**
- * If the user asks for a path we don't know about, try reading
- * that file from our resources directory
- */
-fun handleStaticFiles(path: String): PreparedResponseData {
-    // check the cache.  If we have what they want already, just return it.
-    // since the files of this application are stored in its resources
-    // file and won't be expected to change while the program is running,
-    // may as well cache what we can.
-    val cachedStaticValue = staticFileCache[path]
-    return if (cachedStaticValue != null) {
-        cachedStaticValue
-    } else {
-        logDebug { "unable to read a file named $path" }
-        handleNotFound()
-    }
-}
-
-/**
  * This is used at server startup to load the cache with all
  * our static files.
  *
@@ -216,7 +189,7 @@ fun handleStaticFiles(path: String): PreparedResponseData {
  *
  * Maybe some opportunity for refactoring here.
  */
-fun loadStaticFilesToCache() {
+fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
     logImperative("Loading all static files into cache")
     val urls = checkNotNull(FileReader.getResources("static/"))
     for (url in urls) {
@@ -242,7 +215,7 @@ fun loadStaticFilesToCache() {
                     else -> handleNotFound()
                 }
 
-            staticFileCache[filename] = result
+            cache[filename] = result
             logTrace { "Added $filename to the cache" }
         }
     }
