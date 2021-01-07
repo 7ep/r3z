@@ -1,8 +1,8 @@
 package coverosR3z.server.utility
 
 import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.authentication.api.generateLogoutPage
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleBadRequest
@@ -58,7 +58,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, NamedPaths.LOGIN.path) -> doGETRequireUnauthenticated(authStatus) { LoginAPI.generateLoginPage() }
         Pair(Verb.GET, NamedPaths.REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
         Pair(Verb.GET, NamedPaths.CREATE_PROJECT.path) -> doGETRequireAuth(authStatus) { ProjectAPI.generateCreateProjectPage(user.name) }
-        Pair(Verb.GET, NamedPaths.LOGOUT.path) -> doGETRequireAuth(authStatus) { generateLogoutPage(au, user) }
+        Pair(Verb.GET, NamedPaths.LOGOUT.path) -> LogoutAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
 
         // POST

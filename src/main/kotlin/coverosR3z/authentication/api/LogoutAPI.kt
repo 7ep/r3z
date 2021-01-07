@@ -1,14 +1,27 @@
 package coverosR3z.authentication.api
 
-import coverosR3z.authentication.types.User
-import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.server.types.GetEndpoint
+import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.utility.doGETRequireAuth
 
-fun generateLogoutPage(au: IAuthenticationUtilities, user : User): String {
-    au.logout(user)
-    return logoutHTML
-}
+class LogoutAPI(private val sd: ServerData) {
 
-const val logoutHTML = """
+    companion object : GetEndpoint {
+
+        override fun handleGet(sd: ServerData): PreparedResponseData {
+            val l = LogoutAPI(sd)
+            return doGETRequireAuth(sd.authStatus) { l.generateLogoutPage() }
+        }
+
+    }
+
+    fun generateLogoutPage(): String {
+        sd.au.logout(sd.ahd.user)
+        return logoutHTML
+    }
+
+    private val logoutHTML = """
 <!DOCTYPE html>    
 <html>
     <head>
@@ -27,3 +40,4 @@ const val logoutHTML = """
     </body>
 </html>    
 """
+}
