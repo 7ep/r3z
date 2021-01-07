@@ -14,7 +14,7 @@ Developer handbook
     See r3z_version in the gradle.properties file for more info.
 
     As we change the schema of the database, update the database version.
-    The version of the database is set PureMemoryDatabase.startWithDiskPersistence
+    The version of the database is called CURRENT_DATABASE_VERSION in Constants
 
 
     Threads

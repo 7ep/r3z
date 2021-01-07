@@ -3,7 +3,7 @@ package coverosR3z.server
 import coverosR3z.A_RANDOM_DAY_IN_JUNE_2020
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.misc.utility.SystemOptions
+import coverosR3z.config.utility.SystemOptions
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.authentication.api.LoginAPI
@@ -15,8 +15,8 @@ import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.getTime
-import coverosR3z.misc.utility.SystemOptions.Companion.extractOptions
-import coverosR3z.misc.utility.SystemOptions.Companion.fullHelpMessage
+import coverosR3z.config.utility.SystemOptions.Companion.extractOptions
+import coverosR3z.config.utility.SystemOptions.Companion.fullHelpMessage
 import coverosR3z.misc.utility.FileReader.Companion.read
 import coverosR3z.misc.utility.toStr
 import coverosR3z.server.types.AnalyzedHttpData

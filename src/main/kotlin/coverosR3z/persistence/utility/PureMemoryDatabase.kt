@@ -2,6 +2,7 @@ package coverosR3z.persistence.utility
 
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
+import coverosR3z.config.CURRENT_DATABASE_VERSION
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
@@ -243,12 +244,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          */
         fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
 
-            /** The version of the database.  Update when we have
-             * real users and we're changing live prod data.
-             */
-            val dbVersion = 1
-
-            val fullDbDirectory = dbDirectory
+            val fullDbDirectory = "$dbDirectory$CURRENT_DATABASE_VERSION/"
 
             // first we assume the database has been previously persisted
             val restoredPMD = deserializeFromDisk(fullDbDirectory)
@@ -260,18 +256,20 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 logImperative("No existing database found, building new database")
                 // if nothing is there, we build a new database
                 // and add a clean set of directories
-                logImperative("Creating new PureMemoryDatabase")
                 val pmd = PureMemoryDatabase(dbDirectory = fullDbDirectory)
+                logImperative("Created new PureMemoryDatabase")
 
-                logImperative("creating the database directory at \"$fullDbDirectory\"")
                 File(fullDbDirectory).mkdirs()
+                logImperative("Created the database directory at \"$fullDbDirectory\"")
 
-                logImperative("Writing the version of the database ($dbVersion) to version.txt")
-                File(fullDbDirectory + "currentVersion.txt").writeText(dbVersion.toString())
+                val versionFilename = "currentVersion.txt"
+                File(dbDirectory + versionFilename).writeText(CURRENT_DATABASE_VERSION.toString())
+                logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
 
-                logImperative("creating an initial employee")
+
                 val tep = TimeEntryPersistence(pmd)
                 tep.persistNewEmployee(EmployeeName("Administrator"))
+                logImperative("Created an initial employee")
 
                 pmd
             }

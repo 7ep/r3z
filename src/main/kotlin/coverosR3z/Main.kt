@@ -2,9 +2,9 @@ package coverosR3z
 
 import coverosR3z.misc.exceptions.ServerOptionsException
 import coverosR3z.logging.logImperative
-import coverosR3z.misc.utility.SystemOptions
+import coverosR3z.config.utility.SystemOptions
 import coverosR3z.server.utility.Server
-import coverosR3z.misc.utility.SystemOptions.Companion.extractOptions
+import coverosR3z.config.utility.SystemOptions.Companion.extractOptions
 import java.io.File
 import kotlin.system.exitProcess
 
