@@ -7,6 +7,7 @@ import coverosR3z.misc.types.DateTime
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -150,20 +151,25 @@ class Server(val port: Int) {
             lateinit var analyzedHttpData : AnalyzedHttpData
             val responseData: PreparedResponseData = try {
                 analyzedHttpData = parseHttpMessage(server, businessCode.au)
+
                 logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
                 if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
                     return analyzedHttpData
                 }
 
-                // if we can just return a static file now, do that...
-                val staticResponse : PreparedResponseData? = staticFileCache[analyzedHttpData.path]
-                if (staticResponse != null) {
-                    staticResponse
+                if (analyzedHttpData.verb == Verb.INVALID) {
+                    handleBadRequest()
                 } else {
-                    // otherwise review the routing
-                    // now that we know who the user is (if they authenticated) we can update the current user
-                    val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
-                    directToProcessor(ServerData(businessCode.au, truWithUser, analyzedHttpData, isAuthenticated(analyzedHttpData.user)))
+                    // if we can just return a static file now, do that...
+                    val staticResponse : PreparedResponseData? = staticFileCache[analyzedHttpData.path]
+                    if (staticResponse != null) {
+                    staticResponse
+                    } else {
+                        // otherwise review the routing
+                        // now that we know who the user is (if they authenticated) we can update the current user
+                        val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
+                        routeToEndpoint(ServerData(businessCode.au, truWithUser, analyzedHttpData, isAuthenticated(analyzedHttpData.user)))
+                    }
                 }
             } catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here

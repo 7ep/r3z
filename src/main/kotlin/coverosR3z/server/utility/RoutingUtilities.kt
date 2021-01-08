@@ -5,7 +5,6 @@ import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.types.PreparedResponseData
@@ -23,30 +22,8 @@ import coverosR3z.timerecording.api.*
  * file, which we handle at the end.
  *
  */
-fun directToProcessor(sd : ServerData): PreparedResponseData {
-    val verb = sd.ahd.verb
-    val path = sd.ahd.path
-    val au = sd.au
-    val tru = sd.tru
-    val rd = sd.ahd
-
-    /**
-     * The user currently logged in
-     */
-    val user = rd.user
-
-    /**
-     * The data sent in the POST body
-     */
-    val data = rd.data
-
-    if (verb == Verb.INVALID) {
-        return handleBadRequest()
-    }
-
-    val authStatus = sd.authStatus
-
-    return when (Pair(verb, path)){
+fun routeToEndpoint(sd : ServerData): PreparedResponseData {
+    return when (Pair(sd.ahd.verb, sd.ahd.path)){
         // GET
 
         Pair(Verb.GET, ""),
@@ -59,7 +36,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, NamedPaths.REGISTER.path) -> RegisterAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.CREATE_PROJECT.path) -> ProjectAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGOUT.path) -> LogoutAPI.handleGet(sd)
-        Pair(Verb.GET, NamedPaths.LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
+        Pair(Verb.GET, NamedPaths.LOGGING.path) -> LoggingAPI.handleGet(sd)
 
         // POST
 
@@ -68,7 +45,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, NamedPaths.LOGIN.path) -> LoginAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.REGISTER.path) -> RegisterAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.CREATE_PROJECT.path) -> ProjectAPI.handlePost(sd)
-        Pair(Verb.POST, NamedPaths.LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        Pair(Verb.POST, NamedPaths.LOGGING.path) -> LoggingAPI.handlePost(sd)
 
         else -> {
             handleNotFound()

@@ -1,9 +1,14 @@
 package coverosR3z.logging
 
+import coverosR3z.DEFAULT_USER
+import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.LogConfig.logSettings
+import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.doPOSTAuthenticated
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -27,7 +32,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setAuditTrueOnly() {
         val data = allFalse(audit = "true")
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
@@ -37,7 +45,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setWarnTrueOnly() {
         val data = allFalse(warn = "true")
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
@@ -47,7 +58,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setDebugTrueOnly() {
         val data = allFalse(debug = "true")
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(true, logSettings[LogTypes.DEBUG])
@@ -57,7 +71,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setTraceTrueOnly() {
         val data = allFalse(trace = "true")
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
@@ -67,7 +84,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_allOn() {
         val data = allTrue()
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(true, logSettings[LogTypes.AUDIT])
         assertEquals(true, logSettings[LogTypes.WARN])
         assertEquals(true, logSettings[LogTypes.DEBUG])
@@ -77,7 +97,10 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_allOff() {
         val data = allFalse()
-        doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        LoggingAPI.handlePost(sd)
+
         assertEquals(false, logSettings[LogTypes.AUDIT])
         assertEquals(false, logSettings[LogTypes.WARN])
         assertEquals(false, logSettings[LogTypes.DEBUG])
@@ -93,7 +116,10 @@ class LoggingAPITests {
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [warn, debug, trace]", ex.message)
     }
 
@@ -103,7 +129,10 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, debug, trace]", ex.message)
     }
 
@@ -113,7 +142,11 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, warn, trace]", ex.message)
     }
 
@@ -123,7 +156,10 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
                 LoggingAPI.Elements.WARN_INPUT.elemName to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.elemName to "false")
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, warn, debug]", ex.message)
     }
 
@@ -135,28 +171,40 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_audit() {
         val data = allTrue(audit = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_warn() {
         val data = allTrue(warn = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_debug() {
         val data = allTrue(debug = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
     @Test
     fun testShouldComplainAboutBadInput_trace() {
         val data = allTrue(trace = "foo")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTAuthenticated(AuthStatus.AUTHENTICATED, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) } }
+        val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 

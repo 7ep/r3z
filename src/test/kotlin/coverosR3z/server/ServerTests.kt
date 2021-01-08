@@ -329,7 +329,7 @@ class ServerTests {
      */
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
-        client.write("INVALID /test.utl HTTP/1.1$CRLF$CRLF")
+        client.write("FOO /test.utl HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
 
