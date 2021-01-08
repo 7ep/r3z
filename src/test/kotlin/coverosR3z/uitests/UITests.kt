@@ -3,14 +3,18 @@ package coverosR3z.uitests
 import coverosR3z.BDDHelpers
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_PASSWORD
+import coverosR3z.authentication.api.RegisterAPI
+import coverosR3z.authentication.types.*
 import coverosR3z.logging.LogTypes
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.ViewEmployeesAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.runners.MethodSorters
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -96,12 +100,6 @@ class UITests {
     }
 
     @Test
-    fun `006 - general - should get a 500 error if I post insufficient data to a page`() {
-        rp.register("", "password12345", "Administrator")
-        assertEquals("500 error", driver.title)
-    }
-
-    @Test
     fun `007 - general - should get a failure message if I register an already-registered user`() {
         rp.register("usera", "password12345", "Administrator")
         rp.register("usera", "password12345", "Administrator")
@@ -130,8 +128,49 @@ class UITests {
         llp.save()
         llp.go()
         // Then that logging is set to not log
-        Assert.assertFalse(llp.isLoggingOn(LogTypes.WARN))
+        assertFalse(llp.isLoggingOn(LogTypes.WARN))
         logout()
+    }
+
+    @Test
+    fun `010 - general - Validation should stop me entering invalid input on the registration page`() {
+        // validation won't allow it through - missing username
+        rp.register("", "password12345", "Administrator")
+        assertEquals("register", driver.title)
+
+        // validation won't allow it through - missing password
+        rp.register("alice", "", "Administrator")
+        assertEquals("register", driver.title)
+
+        // validation won't allow it through - missing employee
+        driver.get("$domain/${RegisterAPI.path}")
+        driver.findElement(By.id("username")).sendKeys("alice")
+        driver.findElement(By.id("password")).sendKeys("password12345")
+        driver.findElement(By.id("register_button")).click()
+        assertEquals("register", driver.title)
+
+        // validation won't allow it through - username too short
+        rp.register("a".repeat(minUserNameSize-1), "password12345", "Administrator")
+        assertEquals("register", driver.title)
+
+        // Text entry will stop taking characters at the maximum size, so
+        // what gets entered will just be truncated to [maxUserNameSize]
+        val tooLongUsername = "a".repeat(maxUserNameSize+1)
+        rp.register(tooLongUsername, "password12345", "Administrator")
+        assertFalse(pmd.actOnUsers { users -> users.any { it.name.value == tooLongUsername } })
+
+        // validation won't allow it through - password too short
+        rp.register("alice", "a".repeat(minPasswordSize-1), "Administrator")
+        assertEquals("register", driver.title)
+
+        // Text entry will stop taking characters at the maximum size, so
+        // what gets entered will just be truncated to [maxPasswordSize]
+        // therefore, if we use a password too long, the system will
+        // only record the password that was exactly at max size
+        val maxPassword = "a".repeat(maxPasswordSize)
+        rp.register("cool", maxPassword + "z", "Administrator")
+        lp.login("cool", maxPassword)
+        assertEquals("SUCCESS", driver.title)
     }
 
     /*
@@ -146,7 +185,7 @@ class UITests {
 
     companion object {
         private const val domain = "http://localhost:12345"
-        private val webDriver = Drivers.HTMLUNIT
+        private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
         private lateinit var rp : RegisterPage
@@ -158,6 +197,8 @@ class UITests {
         private lateinit var lop : LogoutPage
         private lateinit var createEmployee : BDDHelpers
         private lateinit var recordTime : BDDHelpers
+        private lateinit var businessCode : BusinessCode
+        private lateinit var pmd : PureMemoryDatabase
 
         @BeforeClass
         @JvmStatic
@@ -168,8 +209,9 @@ class UITests {
 
             // start the server
             sc = Server(12345)
-            val pmd = Server.makeDatabase()
-            sc.startServer(Server.initializeBusinessCode(pmd))
+            pmd = Server.makeDatabase()
+            businessCode = Server.initializeBusinessCode(pmd)
+            sc.startServer(businessCode)
 
             driver = webDriver.driver()
 
