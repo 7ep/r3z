@@ -24,3 +24,6 @@ db/
 # This is an auto-generated file to show the version sha
 # and version of the system, at runtime
 src/main/resources/static/commit.html
+
+# This indicates the system is running, no need to commit it
+SYSTEM_RUNNING
