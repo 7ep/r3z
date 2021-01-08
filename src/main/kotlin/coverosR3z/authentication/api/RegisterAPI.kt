@@ -1,8 +1,6 @@
 package coverosR3z.authentication.api
 
-import coverosR3z.authentication.types.Password
-import coverosR3z.authentication.types.RegistrationResultStatus
-import coverosR3z.authentication.types.UserName
+import coverosR3z.authentication.types.*
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PostEndpoint
@@ -66,6 +64,7 @@ class RegisterAPI(private val sd: ServerData) {
           <title>register</title>
           <link rel="stylesheet" href="general.css" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta apifile="RegisterAPI" >
       </head>
       <header><a class="home-button" href="homepage">r3z</a></header>
       <body>
@@ -78,20 +77,20 @@ class RegisterAPI(private val sd: ServerData) {
                 <tr>
                     <td>
                         <label for="${Elements.USERNAME_INPUT.elemName}">Username</label><br>
-                        <input type="text" name="${Elements.USERNAME_INPUT.elemName}" id="${Elements.USERNAME_INPUT.id}">
+                        <input type="text" name="${Elements.USERNAME_INPUT.elemName}" id="${Elements.USERNAME_INPUT.id}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label for="${Elements.PASSWORD_INPUT.elemName}">Password</label><br>
-                        <input type="password" name="${Elements.PASSWORD_INPUT.elemName}" id="${Elements.PASSWORD_INPUT.id}">
+                        <input type="password" name="${Elements.PASSWORD_INPUT.elemName}" id="${Elements.PASSWORD_INPUT.id}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label for="${Elements.EMPLOYEE_INPUT.elemName}">Employee</label><br>
-                        <select id="${Elements.EMPLOYEE_INPUT.id}" name="${Elements.EMPLOYEE_INPUT.elemName}">
-                            <option selected disabled hidden>Choose here</option>
+                        <select id="${Elements.EMPLOYEE_INPUT.id}" name="${Elements.EMPLOYEE_INPUT.elemName}" required="required">
+                            <option selected disabled hidden value="">Choose here</option>
                            """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
                            
                       </td>

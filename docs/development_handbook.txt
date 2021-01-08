@@ -217,6 +217,22 @@ Developer handbook
     As we deal with more parsers, we will need to include more cleaning utilities.
 
 
+    Web page development and testing
+    --------------------------------
+
+    A thought about improving the cycle-time for the web pages: Chrome has an *override* feature - it will
+    allow you to save a file that the browser will use instead of pulling from the server.
+    See https://developers.google.com/web/updates/2018/01/devtools?utm_source=devtools#overrides
+
+    This means we can develop a web page to our heart's content very quickly and easily, and once it's about
+    where we want, we copy the relevant portions into the real system.
+
+    Inside the <head> element of our HTML, try to follow a pattern of setting the file location for
+    the HTML, as we see for example in RegisterAPI at registerHTML, you will see this line:
+        <meta apifile="RegisterAPI" >
+
+
+
     Logging
     -------
 
