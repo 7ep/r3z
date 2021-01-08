@@ -2,7 +2,6 @@ package coverosR3z.authentication
 
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
-import coverosR3z.DEFAULT_USER_NO_EMPLOYEE
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
@@ -13,7 +12,6 @@ import coverosR3z.misc.utility.toStr
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.ServerData
-import coverosR3z.server.utility.doPOSTRequireUnauthenticated
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert

@@ -2,15 +2,15 @@ package coverosR3z.logging
 
 import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
-import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.logging.LogConfig.logSettings
+import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.ServerData
-import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 

@@ -9,7 +9,6 @@ import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
-import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals

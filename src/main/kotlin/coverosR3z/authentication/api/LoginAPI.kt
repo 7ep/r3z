@@ -4,7 +4,6 @@ import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.UserName
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.logDebug
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*

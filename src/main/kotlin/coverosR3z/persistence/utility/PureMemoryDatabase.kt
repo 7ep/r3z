@@ -295,7 +295,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          * Deserializes the database from files, or returns null if no
          * database directory exists
          */
-        fun deserializeFromDisk(dbDirectory: String): PureMemoryDatabase? {
+        private fun deserializeFromDisk(dbDirectory: String): PureMemoryDatabase? {
             val topDirectory = File(dbDirectory)
             val innerFiles = topDirectory.listFiles()
             if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
