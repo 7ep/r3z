@@ -23,105 +23,111 @@ const val maxContentLength = 400_000
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
-/**
- * This is used at server startup to load the cache with all
- * our static files.
- *
- * The code for looping through the files in the jar was
- * harder than I thought, since we're asking to loop through
- * a zip file, not an ordinary file system.
- *
- * Maybe some opportunity for refactoring here.
- */
-fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
-    logImperative("Loading all static files into cache")
-    val urls = checkNotNull(FileReader.getResources("static/"))
-    for (url in urls) {
-        val uri = url.toURI()
+class ServerUtilities {
+    companion object {
 
-        val myPath = if (uri.scheme == "jar") {
-            val fileSystem: FileSystem = FileSystems.newFileSystem(uri, emptyMap<String, Any>())
-            fileSystem.getPath("static/")
-        } else {
-            Paths.get(uri)
-        }
 
-        for (path: Path in Files.walk(myPath, 1)) {
-            val fileContents = FileReader.read("static/" + path.fileName.toString()) ?: continue
-            val filename = path.fileName.toString()
-            val result =
-                when {
-                    filename.takeLast(4) == ".css" -> okCSS(fileContents)
-                    filename.takeLast(3) == ".js" -> okJS(fileContents)
-                    filename.takeLast(4) == ".jpg" -> okJPG(fileContents)
-                    filename.takeLast(5) == ".webp" -> okWEBP(fileContents)
-                    filename.takeLast(5) == ".html" || filename.takeLast(4) == ".htm" -> okHTML(fileContents)
-                    else -> handleNotFound()
+        /**
+         * This is used at server startup to load the cache with all
+         * our static files.
+         *
+         * The code for looping through the files in the jar was
+         * harder than I thought, since we're asking to loop through
+         * a zip file, not an ordinary file system.
+         *
+         * Maybe some opportunity for refactoring here.
+         */
+        fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
+            logImperative("Loading all static files into cache")
+            val urls = checkNotNull(FileReader.getResources("static/"))
+            for (url in urls) {
+                val uri = url.toURI()
+
+                val myPath = if (uri.scheme == "jar") {
+                    val fileSystem: FileSystem = FileSystems.newFileSystem(uri, emptyMap<String, Any>())
+                    fileSystem.getPath("static/")
+                } else {
+                    Paths.get(uri)
                 }
 
-            cache[filename] = result
-            logTrace { "Added $filename to the cache" }
+                for (path: Path in Files.walk(myPath, 1)) {
+                    val fileContents = FileReader.read("static/" + path.fileName.toString()) ?: continue
+                    val filename = path.fileName.toString()
+                    val result =
+                        when {
+                            filename.takeLast(4) == ".css" -> okCSS(fileContents)
+                            filename.takeLast(3) == ".js" -> okJS(fileContents)
+                            filename.takeLast(4) == ".jpg" -> okJPG(fileContents)
+                            filename.takeLast(5) == ".webp" -> okWEBP(fileContents)
+                            filename.takeLast(5) == ".html" || filename.takeLast(4) == ".htm" -> okHTML(fileContents)
+                            else -> handleNotFound()
+                        }
+
+                    cache[filename] = result
+                    logTrace { "Added $filename to the cache" }
+                }
+            }
         }
+
+        /**
+         * If you are responding with a success message and it is HTML
+         */
+        fun okHTML(contents : String) =
+                ok(toBytes(contents), listOf(ContentType.TEXT_HTML.value))
+
+        /**
+         * If you are responding with a success message and it is HTML
+         */
+        fun okHTML(contents : ByteArray) =
+                ok(contents, listOf(ContentType.TEXT_HTML.value))
+
+        /**
+         * If you are responding with a success message and it is CSS
+         */
+        fun okCSS(contents : ByteArray) =
+                ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
+        /**
+         * If you are responding with a success message and it is JavaScript
+         */
+        fun okJS (contents : ByteArray) =
+                ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
+
+        fun okJPG (contents : ByteArray) =
+            ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
+
+        fun okWEBP (contents : ByteArray) =
+                ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
+
+        private fun ok (contents: ByteArray, ct : List<String>) =
+                PreparedResponseData(contents, StatusCode.OK, ct)
+
+        /**
+         * Use this to redirect to any particular page
+         */
+        fun redirectTo(path: String): PreparedResponseData {
+            return PreparedResponseData("", StatusCode.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
+        }
+
+        /**
+         * sends data as the body of a response from server
+         */
+        fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
+            logTrace { "Assembling data just before shipping to client" }
+            val status = "HTTP/1.1 ${data.statusCode.value}"
+            logTrace { "status: $status" }
+            val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
+
+            val otherHeaders = data.headers.joinToString(CRLF)
+            logTrace { "contentLengthHeader: $contentLengthHeader" }
+            data.headers.forEach{ logTrace { "sending header: $it" } }
+            server.write("$status$CRLF" +
+                    "$contentLengthHeader$CRLF" +
+                    otherHeaders +
+                    CRLF +
+                    CRLF
+            )
+            server.writeBytes(data.fileContents)
+        }
+
     }
 }
-
-/**
- * If you are responding with a success message and it is HTML
- */
-fun okHTML(contents : String) =
-        ok(toBytes(contents), listOf(ContentType.TEXT_HTML.value))
-
-/**
- * If you are responding with a success message and it is HTML
- */
-fun okHTML(contents : ByteArray) =
-        ok(contents, listOf(ContentType.TEXT_HTML.value))
-
-/**
- * If you are responding with a success message and it is CSS
- */
-fun okCSS(contents : ByteArray) =
-        ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
-/**
- * If you are responding with a success message and it is JavaScript
- */
-fun okJS (contents : ByteArray) =
-        ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
-
-fun okJPG (contents : ByteArray) =
-    ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
-
-fun okWEBP (contents : ByteArray) =
-        ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
-
-private fun ok (contents: ByteArray, ct : List<String>) =
-        PreparedResponseData(contents, StatusCode.OK, ct)
-
-/**
- * Use this to redirect to any particular page
- */
-fun redirectTo(path: String): PreparedResponseData {
-    return PreparedResponseData("", StatusCode.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
-}
-
-/**
- * sends data as the body of a response from server
- */
-fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
-    logTrace { "Assembling data just before shipping to client" }
-    val status = "HTTP/1.1 ${data.statusCode.value}"
-    logTrace { "status: $status" }
-    val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
-
-    val otherHeaders = data.headers.joinToString(CRLF)
-    logTrace { "contentLengthHeader: $contentLengthHeader" }
-    data.headers.forEach{ logTrace { "sending header: $it" } }
-    server.write("$status$CRLF" +
-            "$contentLengthHeader$CRLF" +
-            otherHeaders +
-            CRLF +
-            CRLF
-    )
-    server.writeBytes(data.fileContents)
-}
-

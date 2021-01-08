@@ -8,7 +8,7 @@ import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
-import coverosR3z.server.utility.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.*
 

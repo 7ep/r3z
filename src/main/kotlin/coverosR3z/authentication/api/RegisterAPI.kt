@@ -9,6 +9,7 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
+import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.timerecording.types.EmployeeId
 
 class RegisterAPI(private val sd: ServerData) {

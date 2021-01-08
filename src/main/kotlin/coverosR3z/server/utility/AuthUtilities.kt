@@ -7,6 +7,8 @@ import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 
 /*
 These are utilities to standardize handling of various scenarious

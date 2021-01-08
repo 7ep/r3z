@@ -4,8 +4,7 @@ interface PostEndpoint : Api {
 
     /**
      * Note you will need to consider authentication properly
-     * here.  for example:
-     * [coverosR3z.server.utility.doGETAuthAndUnauth]
+     * here.  See the authentication mechanisms at [coverosR3z.server.utility.AuthUtilities]
      */
     fun handlePost(sd : ServerData) : PreparedResponseData
 
