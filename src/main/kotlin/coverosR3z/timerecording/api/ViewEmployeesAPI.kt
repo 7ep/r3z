@@ -4,7 +4,7 @@ import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
-import coverosR3z.server.utility.doGETRequireAuth
+import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 
 class ViewEmployeesAPI(private val sd: ServerData) {
 

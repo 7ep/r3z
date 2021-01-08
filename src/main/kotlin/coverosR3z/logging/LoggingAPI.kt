@@ -6,8 +6,8 @@ import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.utility.successHTML
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
-import coverosR3z.server.utility.doGETRequireAuth
-import coverosR3z.server.utility.doPOSTAuthenticated
+import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
+import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.okHTML
 
 

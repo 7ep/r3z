@@ -7,8 +7,8 @@ import coverosR3z.authentication.types.UserName
 import coverosR3z.logging.logDebug
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
-import coverosR3z.server.utility.doGETRequireUnauthenticated
-import coverosR3z.server.utility.doPOSTRequireUnauthenticated
+import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
+import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.successHTML
 
 class LoginAPI(val sd: ServerData) {
