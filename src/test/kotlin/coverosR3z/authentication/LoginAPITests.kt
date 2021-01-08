@@ -2,6 +2,7 @@ package coverosR3z.authentication
 
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.DEFAULT_USER
+import coverosR3z.DEFAULT_USER_NO_EMPLOYEE
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
@@ -9,8 +10,12 @@ import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
+import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.doPOSTRequireUnauthenticated
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -20,10 +25,12 @@ import org.junit.Test
 class LoginAPITests {
 
     lateinit var au : FakeAuthenticationUtilities
+    lateinit var tru : ITimeRecordingUtilities
 
     @Before
     fun init() {
         au = FakeAuthenticationUtilities()
+        tru = FakeTimeRecordingUtilities()
     }
 
     /**
@@ -35,7 +42,8 @@ class LoginAPITests {
                 LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
 
-        val responseData = doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val responseData = LoginAPI.handlePost(sd)
 
         Assert.assertTrue("The system should indicate success.  File was $responseData",
                 toStr(responseData.fileContents).contains("SUCCESS"))
@@ -50,7 +58,8 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
 
-        val responseData = doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val responseData = LoginAPI.handlePost(sd)
 
         Assert.assertTrue("The system should indicate failure.  File was ${toStr(responseData.fileContents)}",
                 toStr(responseData.fileContents).contains("401 error"))
@@ -66,7 +75,8 @@ class LoginAPITests {
         val data = mapOf(
             LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
 
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [password]", ex.message)
     }
@@ -80,7 +90,8 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.elemName to "",
             LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
@@ -93,7 +104,8 @@ class LoginAPITests {
         val data = mapOf(
             LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value)
 
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [username]", ex.message)
     }
@@ -107,7 +119,8 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.elemName to "")
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, LoginAPI.requiredInputs, data) { LoginAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
 

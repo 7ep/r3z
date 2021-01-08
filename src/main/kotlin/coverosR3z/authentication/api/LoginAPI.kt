@@ -7,12 +7,12 @@ import coverosR3z.authentication.types.UserName
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.logDebug
 import coverosR3z.server.api.handleUnauthorized
+import coverosR3z.server.types.*
+import coverosR3z.server.utility.doGETRequireUnauthenticated
+import coverosR3z.server.utility.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.successHTML
-import coverosR3z.server.types.ContentType
-import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.types.StatusCode
 
-class LoginAPI {
+class LoginAPI(val sd: ServerData) {
 
     enum class Elements(val elemName: String, val id: String)  {
         USERNAME_INPUT("username", "username"),
@@ -20,29 +20,40 @@ class LoginAPI {
         LOGIN_BUTTON("", "login_button"),
     }
 
-    companion object {
+    companion object : GetEndpoint, PostEndpoint {
 
         val requiredInputs = setOf(
             Elements.USERNAME_INPUT.elemName,
             Elements.PASSWORD_INPUT.elemName,
         )
 
-        fun handlePOST(au: IAuthenticationUtilities, data: Map<String, String>) : PreparedResponseData {
-            val username = UserName.make(data[Elements.USERNAME_INPUT.elemName])
-            val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
-            val (loginResult, loginUser) = au.login(username, password)
-            return if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
-                val newSessionToken: String = au.createNewSession(loginUser)
-                PreparedResponseData(successHTML, StatusCode.OK, listOf(ContentType.TEXT_HTML.value, "Set-Cookie: sessionId=$newSessionToken"))
-            } else {
-                logDebug { "User ($username) failed to login" }
-                handleUnauthorized()
-            }
+        override fun handleGet(sd: ServerData): PreparedResponseData {
+            val l = LoginAPI(sd)
+            return doGETRequireUnauthenticated(sd.authStatus) { l.loginHTML }
         }
 
-        fun generateLoginPage(): String = loginHTML
+        override fun handlePost(sd: ServerData): PreparedResponseData {
+            val l = LoginAPI(sd)
+            return doPOSTRequireUnauthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { l.handlePOST() }
+        }
+    }
 
-        private val loginHTML = """
+    fun handlePOST() : PreparedResponseData {
+        val data = sd.ahd.data
+        val au = sd.au
+        val username = UserName.make(data[Elements.USERNAME_INPUT.elemName])
+        val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
+        val (loginResult, loginUser) = au.login(username, password)
+        return if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
+            val newSessionToken: String = au.createNewSession(loginUser)
+            PreparedResponseData(successHTML, StatusCode.OK, listOf(ContentType.TEXT_HTML.value, "Set-Cookie: sessionId=$newSessionToken"))
+        } else {
+            logDebug { "User ($username) failed to login" }
+            handleUnauthorized()
+        }
+    }
+
+    private val loginHTML = """
         <!DOCTYPE html>
         <html>
           <head>
@@ -81,5 +92,4 @@ class LoginAPI {
         </html>      
         """
 
-    }
 }
