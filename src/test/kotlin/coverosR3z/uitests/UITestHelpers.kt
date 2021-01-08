@@ -2,9 +2,10 @@ package coverosR3z.uitests
 
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.api.LogoutAPI
+import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
-import coverosR3z.server.types.NamedPaths
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
@@ -24,7 +25,7 @@ enum class Drivers(val driver: () -> WebDriver){
 class EnterTimePage(private val driver: WebDriver, private val domain : String) {
 
     fun enterTime(project: String, time: String, details: String, date: String) {
-        driver.get("$domain/${NamedPaths.ENTER_TIME.path}")
+        driver.get("$domain/${EnterTimeAPI.path}")
         driver.findElement(By.id(EnterTimeAPI.Elements.PROJECT_INPUT.id)).findElement(By.xpath("//option[. = '$project']")).click()
         driver.findElement(By.id(EnterTimeAPI.Elements.TIME_INPUT.id)).sendKeys(time)
         driver.findElement(By.id(EnterTimeAPI.Elements.DETAIL_INPUT.id)).sendKeys(details)
@@ -36,7 +37,7 @@ class EnterTimePage(private val driver: WebDriver, private val domain : String) 
 class LoginPage(private val driver: WebDriver, private val domain : String) {
 
     fun login(username: String, password: String) {
-        driver.get("$domain/${NamedPaths.LOGIN.path}")
+        driver.get("$domain/${LoginAPI.path}")
         driver.findElement(By.id(LoginAPI.Elements.USERNAME_INPUT.id)).sendKeys(username)
         driver.findElement(By.id(LoginAPI.Elements.PASSWORD_INPUT.id)).sendKeys(password)
         driver.findElement(By.id(LoginAPI.Elements.LOGIN_BUTTON.id)).click()
@@ -46,7 +47,7 @@ class LoginPage(private val driver: WebDriver, private val domain : String) {
 class RegisterPage(private val driver: WebDriver, private val domain : String) {
 
     fun register(username: String, password: String, employee: String) {
-        driver.get("$domain/${NamedPaths.REGISTER.path}")
+        driver.get("$domain/${RegisterAPI.path}")
         driver.findElement(By.id("username")).sendKeys(username)
         driver.findElement(By.id("password")).sendKeys(password)
         driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$employee']")).click()
@@ -57,7 +58,7 @@ class RegisterPage(private val driver: WebDriver, private val domain : String) {
 class EnterEmployeePage(private val driver: WebDriver, private val domain : String) {
 
     fun enter(employee: String) {
-        driver.get("$domain/${NamedPaths.CREATE_EMPLOYEE.path}")
+        driver.get("$domain/${CreateEmployeeAPI.path}")
         driver.findElement(By.id(CreateEmployeeAPI.Elements.EMPLOYEE_INPUT.id)).sendKeys(employee)
         driver.findElement(By.id(CreateEmployeeAPI.Elements.CREATE_BUTTON.id)).click()
     }
@@ -66,7 +67,7 @@ class EnterEmployeePage(private val driver: WebDriver, private val domain : Stri
 class EnterProjectPage(private val driver: WebDriver, private val domain : String) {
 
     fun enter(project: String) {
-        driver.get("$domain/${NamedPaths.CREATE_PROJECT.path}")
+        driver.get("$domain/${ProjectAPI.path}")
         driver.findElement(By.id(ProjectAPI.Elements.PROJECT_INPUT.id)).sendKeys(project)
         driver.findElement(By.id(ProjectAPI.Elements.CREATE_BUTTON.id)).click()
     }
@@ -75,7 +76,7 @@ class EnterProjectPage(private val driver: WebDriver, private val domain : Strin
 class LoggingPage(private val driver: WebDriver, private val domain: String) {
 
     fun go() {
-        driver.get("$domain/${NamedPaths.LOGGING.path}")
+        driver.get("$domain/${LoggingAPI.path}")
     }
 
     fun setLoggingTrue(lt : LogTypes) {
@@ -120,7 +121,7 @@ class LoggingPage(private val driver: WebDriver, private val domain: String) {
 class LogoutPage(private val driver: WebDriver, private val domain: String) {
 
     fun go() {
-        driver.get("$domain/${NamedPaths.LOGOUT.path}")
+        driver.get("$domain/${LogoutAPI.path}")
     }
 
 }

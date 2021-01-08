@@ -16,6 +16,9 @@ class ViewTimeAPI(private val sd: ServerData) {
             return doGETRequireAuth(sd.authStatus) { vt.existingTimeEntriesHTML() }
         }
 
+        override val path: String
+            get() = "timeentries"
+
     }
 
     private fun existingTimeEntriesHTML() : String {

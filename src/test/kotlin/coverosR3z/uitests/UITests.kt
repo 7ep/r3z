@@ -4,8 +4,10 @@ import coverosR3z.BDDHelpers
 import coverosR3z.DEFAULT_DATE_STRING
 import coverosR3z.DEFAULT_PASSWORD
 import coverosR3z.logging.LogTypes
-import coverosR3z.server.types.NamedPaths
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.utility.Server
+import coverosR3z.timerecording.api.ViewEmployeesAPI
+import coverosR3z.timerecording.api.ViewTimeAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
@@ -47,7 +49,7 @@ class UITests {
         // when the employee enters their time
         enterTimeForEmployee("projectb")
 
-        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        driver.get("$domain/${ViewTimeAPI.path}")
         recordTime.markDone("when she changes the entry to only 8 hours,")
         // muck with it
 
@@ -55,7 +57,7 @@ class UITests {
         timeField.sendKeys("120")
         // change time to 120
 
-        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        driver.get("$domain/${ViewTimeAPI.path}")
 
         val expected = 60120
         //assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
@@ -74,7 +76,7 @@ class UITests {
         createEmployee.markDone("when I add her as an employee,")
 
         assertEquals("SUCCESS", driver.title)
-        driver.get("$domain/${NamedPaths.EMPLOYEES.path}")
+        driver.get("$domain/${ViewEmployeesAPI.path}")
         createEmployee.markDone("then the system indicates success.")
 
         logout()
@@ -108,11 +110,11 @@ class UITests {
 
     @Test
     fun `008 - general - should be able to see the homepage and the authenticated homepage`() {
-        driver.get("${domain}/${NamedPaths.HOMEPAGE.path}")
+        driver.get("${domain}/${HomepageAPI.path}")
         assertEquals("Homepage", driver.title)
         rp.register("employeemaker", "password12345", "Administrator")
         lp.login("employeemaker", "password12345")
-        driver.get("${domain}/${NamedPaths.HOMEPAGE.path}")
+        driver.get("${domain}/${HomepageAPI.path}")
         assertEquals("Authenticated Homepage", driver.title)
         logout()
     }
@@ -223,7 +225,7 @@ class UITests {
 
     private fun verifyTheEntry() {
         // Verify the entry
-        driver.get("$domain/${NamedPaths.TIMEENTRIES.path}")
+        driver.get("$domain/${ViewTimeAPI.path}")
         assertEquals("your time entries", driver.title)
         assertEquals("2020-06-12", driver.findElement(By.cssSelector("body > table > tbody > tr > td:nth-child(4)")).text)
     }

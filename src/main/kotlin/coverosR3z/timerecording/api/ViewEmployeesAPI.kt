@@ -14,6 +14,9 @@ class ViewEmployeesAPI(private val sd: ServerData) {
             return doGETRequireAuth(sd.authStatus) { ve.existingEmployeesHTML() }
         }
 
+        override val path: String
+            get() = "employees"
+
     }
 
     private fun existingEmployeesHTML() : String {

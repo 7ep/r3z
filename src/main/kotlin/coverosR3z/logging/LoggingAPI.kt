@@ -25,12 +25,14 @@ class LoggingAPI(private val sd: ServerData) {
         private const val missingLoggingDataInputMsg = "input must not be missing"
         const val badInputLoggingDataMsg = "input for log setting must be \"true\" or \"false\""
 
-        val requiredInputs = setOf(
+        override val requiredInputs: Set<String> = setOf(
             Elements.AUDIT_INPUT.elemName,
             Elements.WARN_INPUT.elemName,
             Elements.DEBUG_INPUT.elemName,
             Elements.TRACE_INPUT.elemName,
         )
+        override val path: String
+            get() = "logging"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoggingAPI(sd)

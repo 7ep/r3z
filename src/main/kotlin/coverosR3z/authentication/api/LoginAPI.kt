@@ -22,10 +22,12 @@ class LoginAPI(val sd: ServerData) {
 
     companion object : GetEndpoint, PostEndpoint {
 
-        val requiredInputs = setOf(
+        override val requiredInputs = setOf(
             Elements.USERNAME_INPUT.elemName,
             Elements.PASSWORD_INPUT.elemName,
         )
+        override val path: String
+            get() = "login"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)

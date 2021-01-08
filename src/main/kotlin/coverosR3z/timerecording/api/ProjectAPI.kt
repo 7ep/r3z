@@ -20,9 +20,11 @@ class ProjectAPI(private val sd: ServerData) {
 
     companion object : GetEndpoint, PostEndpoint {
 
-        val requiredInputs = setOf(
+        override val requiredInputs = setOf(
             Elements.PROJECT_INPUT.elemName
         )
+        override val path: String
+            get() = "createproject"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val p = ProjectAPI(sd)

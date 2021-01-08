@@ -24,12 +24,14 @@ class EnterTimeAPI(private val sd: ServerData) {
 
     companion object : GetEndpoint, PostEndpoint {
 
-        val requiredInputs = setOf(
+        override val requiredInputs = setOf(
             Elements.PROJECT_INPUT.elemName,
             Elements.TIME_INPUT.elemName,
             Elements.DETAIL_INPUT.elemName,
             Elements.DATE_INPUT.elemName,
         )
+        override val path: String
+            get() = "entertime"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)

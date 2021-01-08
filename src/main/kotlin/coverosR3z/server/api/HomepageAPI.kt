@@ -2,11 +2,12 @@ package coverosR3z.server.api
 
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.types.Api
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.doGETAuthAndUnauth
 
-class HomepageAPI(private val sd: ServerData){
+class HomepageAPI(private val sd: ServerData)  {
 
     companion object : GetEndpoint {
 
@@ -14,6 +15,9 @@ class HomepageAPI(private val sd: ServerData){
             val hp = HomepageAPI(sd)
             return doGETAuthAndUnauth(sd.authStatus, { hp.authHomePageHTML() }, { hp.homepageHTML })
         }
+
+        override val path: String
+            get() = "homepage"
     }
 
     private fun authHomePageHTML(): String {

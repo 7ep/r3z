@@ -14,6 +14,9 @@ class LogoutAPI(private val sd: ServerData) {
             return doGETRequireAuth(sd.authStatus) { l.generateLogoutPage() }
         }
 
+        override val path: String
+            get() = "logout"
+
     }
 
     fun generateLogoutPage(): String {

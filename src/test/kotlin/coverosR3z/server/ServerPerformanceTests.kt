@@ -10,11 +10,11 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.utility.Server
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
 import coverosR3z.timerecording.api.EnterTimeAPI
+import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
@@ -198,7 +198,7 @@ class ServerPerformanceTests {
     private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, NamedPaths.TIMEENTRIES.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -213,7 +213,7 @@ class ServerPerformanceTests {
     private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, NamedPaths.TIMEENTRIES.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -248,7 +248,7 @@ class ServerPerformanceTests {
             val client =
                 Client.make(
                     Verb.POST,
-                    NamedPaths.ENTER_TIME.path,
+                    EnterTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
                     authUtilities = fakeAuth
                 )

@@ -26,7 +26,10 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         /**
          * The required inputs for this API
          */
-        val requiredInputs = setOf(Elements.EMPLOYEE_INPUT.elemName)
+        override val requiredInputs = setOf(Elements.EMPLOYEE_INPUT.elemName)
+
+        override val path: String
+            get() = "createemployee"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val ce = CreateEmployeeAPI(sd)

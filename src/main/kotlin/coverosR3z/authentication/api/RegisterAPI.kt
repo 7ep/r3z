@@ -22,12 +22,14 @@ class RegisterAPI(private val sd: ServerData) {
 
     companion object : GetEndpoint, PostEndpoint {
 
-        val requiredInputs = setOf(
+        override val requiredInputs = setOf(
             Elements.USERNAME_INPUT.elemName,
             Elements.PASSWORD_INPUT.elemName,
             Elements.EMPLOYEE_INPUT.elemName,
             Elements.USERNAME_INPUT.elemName,
         )
+        override val path: String
+            get() = "register"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val r = RegisterAPI(sd)

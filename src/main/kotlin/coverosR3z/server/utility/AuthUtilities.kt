@@ -3,9 +3,9 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.misc.utility.checkHasExactInputs
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.NamedPaths
 import coverosR3z.server.types.PreparedResponseData
 
 /*
@@ -23,7 +23,7 @@ if they come in unauthenticated.
 fun doGETRequireAuth(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
     return when (authStatus) {
         AuthStatus.AUTHENTICATED -> okHTML(generator())
-        AuthStatus.UNAUTHENTICATED -> redirectTo(NamedPaths.HOMEPAGE.path)
+        AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
     }
 }
 
@@ -47,7 +47,7 @@ fun doGETAuthAndUnauth(authStatus : AuthStatus, generatorAuthenticated : () -> S
 fun doGETRequireUnauthenticated(authStatus : AuthStatus, generator : () -> String): PreparedResponseData {
     return when (authStatus) {
         AuthStatus.UNAUTHENTICATED -> okHTML(generator())
-        AuthStatus.AUTHENTICATED -> redirectTo(NamedPaths.HOMEPAGE.path)
+        AuthStatus.AUTHENTICATED -> redirectTo(HomepageAPI.path)
     }
 }
 
@@ -85,7 +85,7 @@ fun doPOSTRequireUnauthenticated(authStatus : AuthStatus,
             checkHasExactInputs(data.keys, requiredInputs)
             handler()
         }
-        AuthStatus.AUTHENTICATED -> redirectTo(NamedPaths.AUTHHOMEPAGE.path)
+        AuthStatus.AUTHENTICATED -> redirectTo(HomepageAPI.path)
     }
 }
 

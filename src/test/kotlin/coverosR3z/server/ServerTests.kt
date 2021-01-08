@@ -19,6 +19,7 @@ import coverosR3z.config.utility.SystemOptions.Companion.extractOptions
 import coverosR3z.config.utility.SystemOptions.Companion.fullHelpMessage
 import coverosR3z.misc.utility.FileReader.Companion.read
 import coverosR3z.misc.utility.toStr
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.*
 import coverosR3z.timerecording.api.EnterTimeAPI
@@ -369,7 +370,7 @@ class ServerTests {
      */
     @Test
     fun testShouldGetUnauthorizedResponseAfterPost() {
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF$CRLF")
+        client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
 
@@ -382,7 +383,7 @@ class ServerTests {
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
         au.getUserForSessionBehavior = { NO_USER }
-        client.write("POST /${NamedPaths.REGISTER.path} HTTP/1.1$CRLF")
+        client.write("POST /${RegisterAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.elemName}=1&${RegisterAPI.Elements.USERNAME_INPUT.elemName}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
@@ -397,7 +398,7 @@ class ServerTests {
     @Test
     fun testShouldGetInternalServerError() {
         au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "project_entry=1&time_entry=2"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
@@ -414,7 +415,7 @@ class ServerTests {
      */
     @Test
     fun testShouldGetInternalServerError_improperlyFormedBody() {
-        client.write("POST /${NamedPaths.ENTER_TIME.path} HTTP/1.1$CRLF")
+        client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "test foo bar"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
@@ -447,7 +448,7 @@ class ServerTests {
     @Test
     fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
         au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${NamedPaths.LOGIN.path} HTTP/1.1$CRLF")
+        client.write("POST /${LoginAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "${LoginAPI.Elements.USERNAME_INPUT.elemName}=alice&${LoginAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
@@ -472,7 +473,7 @@ class ServerTests {
         val body = mapOf(
                 LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
                 LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
-        val myClient = Client.make(Verb.POST, NamedPaths.LOGIN.path, headers, body, au)
+        val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au)
 
         val (time, _) = getTime {
             for (i in 1..100) {
@@ -527,7 +528,7 @@ class ServerTests {
     private fun makeClientThreadRepeatedRequestsHomepage(numRequests : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, NamedPaths.HOMEPAGE.path, listOf("Connection: keep-alive"), authUtilities = au)
+                Client.make(Verb.GET, HomepageAPI.path, listOf("Connection: keep-alive"), authUtilities = au)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -545,7 +546,7 @@ class ServerTests {
             val client =
                 Client.make(
                     Verb.POST,
-                    NamedPaths.ENTER_TIME.path,
+                    EnterTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
                     authUtilities = au)
             for (i in 1..numRequests) {
