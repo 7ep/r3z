@@ -12,7 +12,9 @@ import coverosR3z.timerecording.types.minEmployeeIdMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
+import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.doPOSTRequireUnauthenticated
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -45,7 +47,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.value.toString())
-        val responseData = doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }.fileContents
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val responseData = RegisterAPI.handlePost(sd).fileContents
+
         assertTrue("The system should indicate success.  File was $responseData",
                 toStr(responseData).contains("SUCCESS"))
     }
@@ -59,7 +64,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to "",
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
 
@@ -69,7 +77,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to "",
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
     }
 
@@ -79,7 +90,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to "")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals(employeeIdCannotBeBlank, ex.message)
     }
 
@@ -90,7 +104,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to employee)
-        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals("Must be able to parse $employee as integer", ex.message)
     }
 
@@ -103,7 +120,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to "0")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals(minEmployeeIdMsg, ex.message)
     }
 
@@ -116,7 +136,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to "-10")
-        val ex = assertThrows(IllegalArgumentException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals(minEmployeeIdMsg, ex.message)
     }
 
@@ -128,7 +151,10 @@ class RegisterAPITests {
         val data = mapOf(
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals("expected keys: [username, password, employee]. received keys: [password, employee]", ex.message)
     }
 
@@ -140,7 +166,10 @@ class RegisterAPITests {
         val data = mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.EMPLOYEE_INPUT.elemName to DEFAULT_EMPLOYEE.id.toString())
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals("expected keys: [username, password, employee]. received keys: [username, employee]", ex.message)
     }
 
@@ -152,7 +181,10 @@ class RegisterAPITests {
         val data = mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
-        val ex = assertThrows(InexactInputsException::class.java){ doPOSTRequireUnauthenticated(AuthStatus.UNAUTHENTICATED, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) } }
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+
+        val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
+
         assertEquals("expected keys: [username, password, employee]. received keys: [username, password]", ex.message)
     }
 

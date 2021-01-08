@@ -6,6 +6,10 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.types.AnalyzedHttpData
+import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.ServerData
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
@@ -107,7 +111,8 @@ class AuthenticationBDD {
         b.markDone("Given I am not registered,")
 
         val data = mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1")
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePOST(au, data)}
+        val sd = ServerData(au, FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
+        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd)}
         b.markDone("when I register with too short of a password,")
 
         assertEquals(passwordMustBeLargeEnoughMsg, ex.message)

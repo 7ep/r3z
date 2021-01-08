@@ -56,7 +56,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.GET, NamedPaths.CREATE_EMPLOYEE.path) -> CreateEmployeeAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.EMPLOYEES.path) -> ViewEmployeesAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGIN.path) -> LoginAPI.handleGet(sd)
-        Pair(Verb.GET, NamedPaths.REGISTER.path) -> doGETRequireUnauthenticated(authStatus) { RegisterAPI.generateRegisterUserPage(tru) }
+        Pair(Verb.GET, NamedPaths.REGISTER.path) -> RegisterAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.CREATE_PROJECT.path) -> doGETRequireAuth(authStatus) { ProjectAPI.generateCreateProjectPage(user.name) }
         Pair(Verb.GET, NamedPaths.LOGOUT.path) -> LogoutAPI.handleGet(sd)
         Pair(Verb.GET, NamedPaths.LOGGING.path) -> doGETRequireAuth(authStatus) { LoggingAPI.generateLoggingConfigPage() }
@@ -66,7 +66,7 @@ fun directToProcessor(sd : ServerData): PreparedResponseData {
         Pair(Verb.POST, NamedPaths.ENTER_TIME.path) -> EnterTimeAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.CREATE_EMPLOYEE.path) -> CreateEmployeeAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.LOGIN.path) -> LoginAPI.handlePost(sd)
-        Pair(Verb.POST, NamedPaths.REGISTER.path) -> doPOSTRequireUnauthenticated(authStatus, RegisterAPI.requiredInputs, data) { RegisterAPI.handlePOST(au, data) }
+        Pair(Verb.POST, NamedPaths.REGISTER.path) -> RegisterAPI.handlePost(sd)
         Pair(Verb.POST, NamedPaths.CREATE_PROJECT.path) -> doPOSTAuthenticated(authStatus, ProjectAPI.requiredInputs, data) { ProjectAPI.handlePOST(tru, data) }
         Pair(Verb.POST, NamedPaths.LOGGING.path) -> doPOSTAuthenticated(authStatus, LoggingAPI.requiredInputs, data) { LoggingAPI.handlePOST(data) }
 

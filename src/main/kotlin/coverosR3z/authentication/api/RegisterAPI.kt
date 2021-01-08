@@ -3,17 +3,16 @@ package coverosR3z.authentication.api
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.RegistrationResultStatus
 import coverosR3z.authentication.types.UserName
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.types.GetEndpoint
+import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.utility.failureHTML
-import coverosR3z.server.utility.okHTML
-import coverosR3z.server.utility.successHTML
-import coverosR3z.timerecording.types.Employee
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.utility.*
 import coverosR3z.timerecording.types.EmployeeId
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
-class RegisterAPI {
+class RegisterAPI(private val sd: ServerData) {
+
     enum class Elements(val elemName: String, val id: String) {
         USERNAME_INPUT("username", "username"),
         PASSWORD_INPUT("password", "password"),
@@ -21,18 +20,29 @@ class RegisterAPI {
         REGISTER_BUTTON("", "register_button"),
     }
 
-    companion object {
+    companion object : GetEndpoint, PostEndpoint {
 
-    val requiredInputs = setOf(
-        Elements.USERNAME_INPUT.elemName,
-        Elements.PASSWORD_INPUT.elemName,
-        Elements.EMPLOYEE_INPUT.elemName,
-        Elements.USERNAME_INPUT.elemName,
-    )
+        val requiredInputs = setOf(
+            Elements.USERNAME_INPUT.elemName,
+            Elements.PASSWORD_INPUT.elemName,
+            Elements.EMPLOYEE_INPUT.elemName,
+            Elements.USERNAME_INPUT.elemName,
+        )
 
-    fun generateRegisterUserPage(tru: ITimeRecordingUtilities): String = registerHTML(tru.listAllEmployees())
+        override fun handleGet(sd: ServerData): PreparedResponseData {
+            val r = RegisterAPI(sd)
+            return doGETRequireUnauthenticated(sd.authStatus) { r.registerHTML() }
+        }
 
-    fun handlePOST(au: IAuthenticationUtilities, data: Map<String, String>) : PreparedResponseData {
+        override fun handlePost(sd: ServerData): PreparedResponseData {
+            val r = RegisterAPI(sd)
+            return doPOSTRequireUnauthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { r.handlePOST() }
+        }
+    }
+
+    fun handlePOST() : PreparedResponseData {
+        val data = sd.ahd.data
+        val au = sd.au
         val username = UserName.make(data[Elements.USERNAME_INPUT.elemName])
         val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
         val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.elemName])
@@ -44,7 +54,9 @@ class RegisterAPI {
         }
     }
 
-    private fun registerHTML(employees: List<Employee>) : String {
+    private fun registerHTML() : String {
+        val employees = sd.tru.listAllEmployees()
+
         return """
     <!DOCTYPE html>        
     <html>
@@ -96,4 +108,4 @@ class RegisterAPI {
     """
     }
 
-}}
+}
