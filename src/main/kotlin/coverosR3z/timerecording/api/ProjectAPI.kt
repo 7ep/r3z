@@ -1,36 +1,51 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.timerecording.types.ProjectName
-import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.utility.safeHtml
-import coverosR3z.server.utility.successHTML
+import coverosR3z.server.types.GetEndpoint
+import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.utility.doGETRequireAuth
+import coverosR3z.server.utility.doPOSTAuthenticated
 import coverosR3z.server.utility.okHTML
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
+import coverosR3z.server.utility.successHTML
+import coverosR3z.timerecording.types.ProjectName
 
-class ProjectAPI {
+class ProjectAPI(private val sd: ServerData) {
 
     enum class Elements(val elemName: String, val id: String) {
         PROJECT_INPUT("project_name", "project_name"),
         CREATE_BUTTON("", "project_create_button"),
     }
 
-    companion object {
+    companion object : GetEndpoint, PostEndpoint {
 
         val requiredInputs = setOf(
             Elements.PROJECT_INPUT.elemName
         )
 
-        fun handlePOST(tru: ITimeRecordingUtilities, data: Map<String, String>) : PreparedResponseData {
-            tru.createProject(ProjectName.make(data[Elements.PROJECT_INPUT.elemName]))
-            return okHTML(successHTML)
+        override fun handleGet(sd: ServerData): PreparedResponseData {
+            val p = ProjectAPI(sd)
+            return doGETRequireAuth(sd.authStatus) { p.createProjectHTML() }
         }
 
-        fun generateCreateProjectPage(username: UserName): String = createProjectHTML(username.value)
+        override fun handlePost(sd: ServerData): PreparedResponseData {
+            val p = ProjectAPI(sd)
+            return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { p.handlePOST() }
+        }
 
 
-        private fun createProjectHTML(username : String) : String {
-            return """
+    }
+
+    fun handlePOST() : PreparedResponseData {
+        sd.tru.createProject(ProjectName.make(sd.ahd.data[Elements.PROJECT_INPUT.elemName]))
+        return okHTML(successHTML)
+    }
+
+    private fun createProjectHTML() : String {
+        val username = safeHtml(sd.ahd.user.name.value)
+
+        return """
 <!DOCTYPE html>        
 <html>
     <head>
@@ -41,7 +56,7 @@ class ProjectAPI {
         <form action="createproject" method="post">
         
             <p>
-                Hello there, <span id="username">${safeHtml(username)}</span>!
+                Hello there, <span id="username">$username</span>!
             </p>
         
             <p>
@@ -57,7 +72,6 @@ class ProjectAPI {
     </body>
 </html>
 """
-        }
     }
 }
 
