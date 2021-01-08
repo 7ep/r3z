@@ -61,8 +61,8 @@ class ServerPerformanceTests {
     /**
      * How fast to enter data, the user's time entries
      *
-     * Fastest I've seen is 11,111 time entries per second,
-     * for five threads and 1000 requests (5000 time entries), it took .450 seconds
+     * Fastest I've seen is 11,876 time entries per second,
+     * for five threads and 1000 requests (5000 time entries), it took .421 seconds
      *
      * See EnterTimeAPITests.testEnterTimeAPI_PERFORMANCE for a lower-level version of this
      *
