@@ -82,6 +82,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         <head>
             <title>enter time</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta apifile="EnterTimeAPI" >
             <link rel="stylesheet" href="entertime.css" />
             <script src="entertime.js"></script>
         </head>

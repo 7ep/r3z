@@ -7,6 +7,7 @@ const val successHTML = """
     </head>
         <title>SUCCESS</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="Misc" >
     <body>
        <p>SUCCESS</p>
         <p><a href="homepage">Homepage</a></p>
@@ -21,6 +22,7 @@ const val failureHTML = """
     </head>
         <title>FAILURE</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="Misc" >
     <body>
        <p>FAILURE</p>
     </body>

@@ -29,6 +29,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
             <head>
                 <title>Company Employees</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta apifile="ViewEmployeesAPI" >
                 <style>
                 table,
                 td {

@@ -31,6 +31,7 @@ const val badRequestHTML = """
     </head>
         <title>400 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="ErrorsAPI" >
     <body>
        <p>400 error - BAD REQUEST</p>
     </body>
@@ -44,6 +45,7 @@ const val notFoundHTML = """
     </head>
         <title>404 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="ErrorsAPI" >
     <body>
        <p>404 error - NOT FOUND</p>
     </body>
@@ -57,6 +59,7 @@ const val unauthorizedHTML = """
     </head>
         <title>401 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="ErrorsAPI" >
     <body>
        <p>401 error - UNAUTHORIZED</p>
     </body>
@@ -71,6 +74,7 @@ fun internalServerErrorHTML(msg : String) : String {
     </head>
         <title>500 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="ErrorsAPI" >
     <body>
        <p>500 error - INTERNAL SERVER ERROR</p>
        <p><a href="homepage">Homepage</a></p>

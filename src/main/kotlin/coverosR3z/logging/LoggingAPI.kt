@@ -101,6 +101,7 @@ class LoggingAPI(private val sd: ServerData) {
         <head>
             <title>Authenticated Homepage</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta apifile="LoggingAPI" >
         </head>        
         <body>
     

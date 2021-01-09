@@ -30,6 +30,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <head>
                 <title>your time entries</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta apifile="ViewTimeAPI" >
                 <style>
                 table,
                 td {

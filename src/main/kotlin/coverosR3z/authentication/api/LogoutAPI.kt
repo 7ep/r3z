@@ -30,6 +30,7 @@ class LogoutAPI(private val sd: ServerData) {
     <head>
         <title>Logout</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="LogoutAPI" >
         <link rel="stylesheet" href="general.css" />
     </head>
     <body>

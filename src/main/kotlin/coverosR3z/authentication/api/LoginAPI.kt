@@ -64,6 +64,7 @@ class LoginAPI(val sd: ServerData) {
               <title>register</title>
               <link rel="stylesheet" href="general.css" />
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta apifile="LoginAPI" >
           </head>
           <header><a class="home-button" href="homepage">r3z</a></header>
           <body>

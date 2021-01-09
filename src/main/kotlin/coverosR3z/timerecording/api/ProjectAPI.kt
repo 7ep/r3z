@@ -53,6 +53,7 @@ class ProjectAPI(private val sd: ServerData) {
     <head>
         <title>create project</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="ProjectAPI" >
     </head>
     <body>
         <form action="createproject" method="post">

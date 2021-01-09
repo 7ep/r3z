@@ -54,6 +54,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         <head>
             <title>create employee</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta apifile="CreateEmployeeAPI" >
         </head>
         <body>
         <form action="createemployee" method="post">
