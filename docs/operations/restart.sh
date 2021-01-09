@@ -41,5 +41,21 @@ java -jar r3z.jar -p 12345 -d db &>>r3z.log &
 # (we'll use this to stop the process later)
 echo $! > pid
 
+# Give the system time to start
+sleep 2
+
+# Check it's running
+i=0
+if [ ! -f SYSTEM_RUNNING ]
+then
+  echo
+  echo
+  echo "***************************************************************"
+  echo "WARNING! The system does not appear to be running after startup"
+  echo "         (Could not find a file called SYSTEM_RUNNING          "
+  echo "***************************************************************"
+  echo
+fi
+
 # jump back to where we started
 cd -
