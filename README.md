@@ -17,11 +17,18 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 #### Summary:
 
 R3z consists of a web application and tests.  Its goals are: 
+
 * To provide an ecosystem suitable for practicing agile engineering
 * To enable research and innovation in valuable development techniques
 * To meet business needs in a capabilities-oriented way, rather than being 
 tool driven or following the more typical big-design-up-front waterfall methods
 * To provide a demonstration of the results of deep agile internally, as well as for clients and partners
+
+#### Getting started:
+
+Check out the [development handbook](docs/development_handbook.md)
+
+#### Theme
 
 *What would happen if you built software in the simplest possible way from scratch?*
 
