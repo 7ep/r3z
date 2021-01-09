@@ -60,7 +60,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(users)
 
         if (shouldSerialize)
-            serializeToDisk(users, "users")
+            serializeToDisk(users, USERS_FILENAME)
 
         return result
     }
@@ -74,7 +74,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(employees)
 
         if (shouldSerialize)
-            serializeToDisk(employees, "employees")
+            serializeToDisk(employees, EMPLOYEES_FILENAME)
 
         return result
     }
@@ -88,7 +88,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(sessions)
 
         if (shouldSerialize)
-            serializeToDisk(sessions, "sessions")
+            serializeToDisk(sessions, SESSIONS_FILENAME)
 
         return result
     }
@@ -102,7 +102,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         val result = action.invoke(projects)
 
         if (shouldSerialize)
-            serializeToDisk(projects, "projects")
+            serializeToDisk(projects, PROJECTS_FILENAME)
 
         return result
     }
@@ -199,7 +199,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
         val employeeDateTimeEntries = timeEntries.filter { it.employee == timeEntry.employee && it.date.month() == timeEntry.date.month() }
         val timeentriesSerialized = employeeDateTimeEntries.joinToString ("\n") { it.serialize() }
-        val subDirectory = dbDirectory + "timeentries/" + "${timeEntry.employee.id.value}/"
+        val subDirectory = dbDirectory + "$TIMEENTRIES_DIRECTORY/" + "${timeEntry.employee.id.value}/"
         val filename = "${timeEntry.date.year()}_${timeEntry.date.month()}"
         actionQueue.enqueue{ File(subDirectory).mkdirs() }
         writeDbFile(timeentriesSerialized, filename, subDirectory)
@@ -219,6 +219,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
          */
         const val databaseFileSuffix = ".db"
         private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+        const val EMPLOYEES_FILENAME = "employees"
+        const val SESSIONS_FILENAME = "sessions"
+        const val PROJECTS_FILENAME = "projects"
+        const val USERS_FILENAME = "users"
+        const val TIMEENTRIES_DIRECTORY = "timeentries"
 
 
         /**
@@ -303,10 +308,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 return null
             }
 
-            val projects = readAndDeserialize(dbDirectory, "projects") { Project.deserialize(it) }
-            val users = readAndDeserialize(dbDirectory, "users") { User.deserialize(it) }
-            val sessions = readAndDeserialize(dbDirectory, "sessions") { Session.deserialize(it, users.toSet()) }
-            val employees = readAndDeserialize(dbDirectory, "employees") { Employee.deserialize(it) }
+            val projects = readAndDeserialize(dbDirectory, PROJECTS_FILENAME) { Project.deserialize(it) }
+            val users = readAndDeserialize(dbDirectory, USERS_FILENAME) { User.deserialize(it) }
+            val sessions = readAndDeserialize(dbDirectory, SESSIONS_FILENAME) { Session.deserialize(it, users.toSet()) }
+            val employees = readAndDeserialize(dbDirectory, EMPLOYEES_FILENAME) { Employee.deserialize(it) }
             val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.toSet(), projects.toSet())
 
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
@@ -316,7 +321,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             dbDirectory: String,
             employees: Set<Employee>,
             projects: Set<Project>) : ConcurrentSet<TimeEntry> {
-            val timeEntriesDirectory = "timeentries/"
+            val timeEntriesDirectory = "$TIMEENTRIES_DIRECTORY/"
             return try {
                 val fullTimeEntries: ConcurrentSet<TimeEntry> = ConcurrentSet()
 
@@ -361,6 +366,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun <T> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ConcurrentSet<T> {
             return try {
                 val file = readFile(dbDirectory, filename)
+                if (file.isBlank()) {
+                    logWarn { "$filename file exists but empty, creating empty data set" }
+                    return ConcurrentSet()
+                }
                 file.split("\n").map { deserializer(it) }.toConcurrentSet()
             } catch (ex: FileNotFoundException) {
                 logWarn { "$filename file missing, creating empty" }
