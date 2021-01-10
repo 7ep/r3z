@@ -84,18 +84,18 @@ class ServerUtilities {
         /**
          * If you are responding with a success message and it is CSS
          */
-        fun okCSS(contents : ByteArray) =
+        private fun okCSS(contents : ByteArray) =
                 ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
         /**
          * If you are responding with a success message and it is JavaScript
          */
-        fun okJS (contents : ByteArray) =
+        private fun okJS (contents : ByteArray) =
                 ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
 
-        fun okJPG (contents : ByteArray) =
+        private fun okJPG (contents : ByteArray) =
             ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
 
-        fun okWEBP (contents : ByteArray) =
+        private fun okWEBP (contents : ByteArray) =
                 ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
 
         private fun ok (contents: ByteArray, ct : List<String>) =

@@ -77,9 +77,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
     testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
 
-    // HtmlUnit - maybe a fast web driver?
-    testImplementation group: 'org.seleniumhq.selenium', name: 'htmlunit-driver', version: '2.45.0'
-
     // https://github.com/bonigarcia/webdrivermanager
     testImplementation("io.github.bonigarcia:webdrivermanager:4.2.2")
 }

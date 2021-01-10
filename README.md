@@ -7,6 +7,7 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 #### Quick Start:
 
 * Install [Java](https://www.java.com/en/download/) if you don't already have it.
+* Make sure you have [Chrome](https://www.google.com/chrome/)  
 * [Clone](https://git-scm.com/docs/git-clone) or [download](https://github.com/7ep/r3z/archive/master.zip) this repo. 
     * If you don't know what "clone" means here, just download it.
     * if you download, unzip the downloaded file to its own directory.
