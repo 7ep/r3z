@@ -22,6 +22,7 @@ Table of contents
 - [Web page dev and test](#web-page-development-and-testing)
 - [Logging](#logging)
 - [Regular expressions](#regular-expressions-regex)
+- [Directories](#directories)
 
 
 Guiding ideas
@@ -213,15 +214,14 @@ with keeping sessions active indefinitely?
 API
 ---
 
-Some of the files have the acronym API in their name.  That means they are the HTTP endpoints for
-the web application and contain code and template text for those.
+The HTTP endpoints have the acronym API as a suffix.
 
-Some important information for working with endpoints:
-1. Make sure to examine handleRequestAndRespond, which is the method that chooses how to interact
-   with many of the API calls, like what kind of authentication is necessary
-2. Examine the files with a suffix of API.kt - For example, EnterTimeAPI.kt
-3. Methods that handle POST are typically called handlePOST
-4. Methods that handle GET are typically called generate + ____ + Page, like generateTimeEntriesPage
+For developing an API, some crucial information:
+1. Routing is set in RoutingUtilities
+2. Every API has a companion object that implements an API interface, such as
+   GetEndpoint or PostEndpoint (for example, see HomepageAPI.kt)
+3. Choose the authentication mechanisms for the page, from coverosR3z.server.utility.AuthUtilities.Companion.
+   Examine any of the other API's to see how these are used, in the handleGet and handlePost methods.
 
 
 Parsers and clean text
@@ -296,3 +296,13 @@ Regular expressions (regex)
 
 Typically, you should wrap strings to be used as regular expressions in triple-quotes: """foo"""
 That way, you won't need to escape as much: "\\d" becomes """\d"""
+
+Directories
+-----------
+
+The source code is organized using these standards for the directories (and thus, packages).
+- _utility_ - these provide the main logic
+- _exceptions_ - custom exceptions
+- _types_ - custom types
+- _api_ - HTTP endpoints
+- _persistence_ - access to the database
