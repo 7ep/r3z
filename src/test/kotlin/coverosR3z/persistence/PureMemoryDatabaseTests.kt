@@ -28,18 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PureMemoryDatabaseTests {
-
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            // wipe out the database
-            File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        }
-
-    }
 
     private lateinit var pmd: PureMemoryDatabase
 
@@ -53,6 +42,10 @@ class PureMemoryDatabaseTests {
         pmd.stop()
     }
 
+    /**
+     * This will typically complete in 40 milliseconds
+     */
+    @PerformanceTest
     @Test
     fun `PERFORMANCE should get responses from the database quickly`() {
         val numberOfEmployees = 30
@@ -69,7 +62,6 @@ class PureMemoryDatabaseTests {
         }
 
         logAudit { "It took a total of $totalTime milliseconds for this code" }
-        assertTrue(totalTime < 100)
     }
 
     /**
@@ -94,6 +86,8 @@ class PureMemoryDatabaseTests {
     /**
      * Test writing the whole database and reading the whole database
      */
+    @IntegrationTest(usesDirectory=true)
+    @PerformanceTest
     @Test
     fun testShouldWriteAndReadToDisk_PERFORMANCE() {
         val numberOfEmployees = 3
@@ -213,6 +207,7 @@ class PureMemoryDatabaseTests {
      * files or subdirectories in it.  everything should 
      * still work as before
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingAllFilesButDirectoryExists() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
@@ -225,6 +220,7 @@ class PureMemoryDatabaseTests {
      * If we are starting and try to read and there's no 
      * database directory.  Just make one.
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingDbDirectory() {
         File(DEFAULT_DB_DIRECTORY).deleteRecursively()
@@ -236,9 +232,10 @@ class PureMemoryDatabaseTests {
      * Assuming we have valid data stored on disk, do we read
      * it back properly?
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_HappyPath() {
-        val readPmd = arrangeFullDatabaseWithDisk()
+        val readPmd = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = "testPersistence_Read_HappyPath")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -250,9 +247,10 @@ class PureMemoryDatabaseTests {
      *
      * Here there are no users, so there cannot be any sessions either
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingUsers() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingUser = true)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingUser = true, databaseDirectorySuffix = "testPersistence_Read_MissingUsers")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -264,9 +262,10 @@ class PureMemoryDatabaseTests {
      *
      * Here there are no sessions, which might mean no one was logged in
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingSessions() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingSession = true)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingSession = true, databaseDirectorySuffix = "testPersistence_Read_MissingSessions")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -276,13 +275,15 @@ class PureMemoryDatabaseTests {
      * This is similar to [testPersistence_Read_MissingSessions] but
      * where the sessions file is empty, instead of missing
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_EmptySessionsFile() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
+        val databaseDirectorySuffix = "testPersistence_Read_EmptySessionsFile"
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the sessions file to empty
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").delete()
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").createNewFile()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").createNewFile()
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -292,9 +293,10 @@ class PureMemoryDatabaseTests {
      * These tests capture what happens when a file doesn't exist in the directory
      * because no entries have been added, not because it's become corrupted.
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingTimeEntries() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingTimeEntries")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -306,9 +308,10 @@ class PureMemoryDatabaseTests {
      *
      * here there are no employees, so there cannot be any time entries
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingEmployees() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingEmployees")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -319,13 +322,15 @@ class PureMemoryDatabaseTests {
      * This is similar to [testPersistence_Read_MissingEmployees] but
      * where the file is empty, instead of missing
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_EmptyEmployees() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
+        val databaseDirectorySuffix = "testPersistence_Read_EmptyEmployees"
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the file to empty
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").delete()
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").createNewFile()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").createNewFile()
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -337,9 +342,10 @@ class PureMemoryDatabaseTests {
      *
      * Here, there are no projects, which also means there cannot be time entries
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingProjects() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true)
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingProjects")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -351,13 +357,15 @@ class PureMemoryDatabaseTests {
      * This is similar to [testPersistence_Read_MissingProjects] but
      * where the file is empty, instead of missing
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_EmptyProjects() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true)
+        val databaseDirectorySuffix = "testPersistence_Read_EmptyProjects"
+        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the file to empty
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").delete()
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").createNewFile()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").createNewFile()
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -369,28 +377,32 @@ class PureMemoryDatabaseTests {
      * response is to halt and yell for help, because at that point all
      * bets are off, we won't have enough information to properly recover.
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_BadData() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_TimeEntries_BadData"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$TIMEENTRIES_DIRECTORY/2/2020_6$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$TIMEENTRIES_DIRECTORY/2/2020_6$databaseFileSuffix").writeText("BAD DATA HERE")
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
         assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to deserialize this text as time entry data: BAD DATA HERE", ex.message)
     }
 
     /**
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Employees_BadData() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Employees_BadData"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the employees data file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
         assertEquals("Unable to deserialize this text as Employee data: BAD DATA HERE", ex.message)
     }
 
@@ -400,14 +412,16 @@ class PureMemoryDatabaseTests {
      * response is to halt and yell for help, because at that point all
      * bets are off, we won't have enough information to properly recover.
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Employees_MissingFile() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Employees_MissingFile"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$EMPLOYEES_FILENAME$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
         assertEquals("Unable to find an employee with the id of 2 based on entry in timeentries/", ex.message)
     }
 
@@ -415,15 +429,17 @@ class PureMemoryDatabaseTests {
      * In the time entries directory we store files by employee id.  If we look inside
      * a directory and find no files, that indicates a data corruption.
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_MissingFile() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_TimeEntries_MissingFile"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // delete a necessary time entry file inside this employees' directory
-        val file = File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$TIMEENTRIES_DIRECTORY/2/")
+        val file = File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$TIMEENTRIES_DIRECTORY/2/")
         file.listFiles()?.forEach { it.delete() }
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
 
         assertEquals("no time entry files found in employees directory at ${file.path}", ex.message)
     }
@@ -431,69 +447,79 @@ class PureMemoryDatabaseTests {
     /**
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Users_BadData() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Users_BadData"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the users data file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$USERS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$USERS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
     }
     
     /**
      * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Users_MissingFile() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Users_MissingFile"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$USERS_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$USERS_FILENAME$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
         assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
     /**
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Projects_BadData() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Projects_BadData"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the projects data file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
         assertEquals("Unable to deserialize this text as Project data: BAD DATA HERE", ex.message)
     }
     
     /**
      * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Projects_MissingFile() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Projects_MissingFile"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // delete a necessary file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").delete()
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$PROJECTS_FILENAME$databaseFileSuffix").delete()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
         assertEquals("Could not deserialize time entry file 2020_6$databaseFileSuffix.  Unable to find a project with the id of 1.  Project set size: 0", ex.message)
     }
     
     /**
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
+    @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_CorruptedData_Sessions_BadData() {
-        arrangeFullDatabaseWithDisk(skipRestarting = true)
+        val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Sessions_BadData"
+        arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/$SESSIONS_FILENAME$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)}
+        assertThrows(DatabaseCorruptedException::class.java) { PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY + databaseDirectorySuffix + "/")}
     }
 
     @Test
@@ -659,6 +685,7 @@ class PureMemoryDatabaseTests {
      * not having done certain things, like for example: not ever having logged in.
      */
     private fun arrangeFullDatabaseWithDisk(
+        databaseDirectorySuffix : String = "",
         skipCreatingUser: Boolean = false,
         skipCreatingSession : Boolean = false,
         skipCreatingTimeEntries : Boolean = false,
@@ -666,8 +693,10 @@ class PureMemoryDatabaseTests {
         skipCreatingProjects : Boolean = false,
         skipRestarting : Boolean = false): PureMemoryDatabase? {
 
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+        val databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
+
+        File(databaseDirectory).deleteRecursively()
+        pmd = PureMemoryDatabase.startWithDiskPersistence(databaseDirectory)
         val ap = AuthenticationPersistence(pmd)
         val tep = TimeEntryPersistence(pmd)
         val newEmployee = if (! skipCreatingEmployees) {
@@ -692,7 +721,7 @@ class PureMemoryDatabaseTests {
         pmd.stop()
 
         return if (! skipRestarting) {
-            PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+            PureMemoryDatabase.startWithDiskPersistence(databaseDirectory)
         } else {
             null
         }

@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.DEFAULT_USER
+import coverosR3z.PerformanceTest
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
@@ -45,6 +46,7 @@ class ServerUtilitiesTests {
     /**
      * Make sure it doesn't choke on huge inputs
      */
+    @PerformanceTest
     @Test
     fun testShouldParseData_PERFORMANCE() {
         var input = "project_entry0=projecta&time_entry0=2&detail_entry0=nothing+to+say"

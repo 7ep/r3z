@@ -44,9 +44,12 @@ class ServerPerformanceTests {
         pmd = PureMemoryDatabase.startMemoryOnly()
         ap = AuthenticationPersistence(pmd)
         tep = TimeEntryPersistence(pmd)
-        serverObject = Server(12345)
+    }
+
+    private fun startServer(port : Int) {
+        serverObject = Server(port)
         serverThread = serverObject.startServer(Server.initializeBusinessCode(pmd))
-        if (! serverObject.systemReady) {
+        if (!serverObject.systemReady) {
             Thread.sleep(50)
         }
     }
@@ -67,10 +70,15 @@ class ServerPerformanceTests {
      * See EnterTimeAPITests.testEnterTimeAPI_PERFORMANCE for a lower-level version of this
      *
      */
+    @IntegrationTest(usesPort = true)
+    @PerformanceTest
     @Test
     fun testEnterTime_PERFORMANCE() {
         val numberThreads = 2
         val numberRequests = 10
+
+        val port = 3000
+        startServer(port)
 
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
@@ -80,7 +88,7 @@ class ServerPerformanceTests {
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
-            val threadList = (1..numberThreads).map { makeClientThreadRepeatedTimeEntries(numberRequests, newProject) }
+            val threadList = (1..numberThreads).map { makeClientThreadRepeatedTimeEntries(numberRequests, newProject, port) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
@@ -97,10 +105,15 @@ class ServerPerformanceTests {
      * with 200 threads and 1000 requests each,
      * that's 200,000 requests in 15.623 seconds,
      */
+    @IntegrationTest(usesPort = true)
+    @PerformanceTest
     @Test
     fun testViewTime_PERFORMANCE() {
         val numberThreads = 2
         val numberRequests = 10
+
+        val port = 3001
+        startServer(port)
 
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
@@ -109,11 +122,11 @@ class ServerPerformanceTests {
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
-        val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject) }
+        val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject, port) }
         makeTimeEntriesThreads.forEach { it.join() }
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests, port) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
@@ -131,10 +144,15 @@ class ServerPerformanceTests {
      *
      * fastest was 41,946 responses.  20 threads, 10,000 requests each, in 4.768 seconds
      */
+    @IntegrationTest(usesPort = true)
+    @PerformanceTest
     @Test
     fun testViewStaticContentAuthenticated_PERFORMANCE() {
         val numberThreads = 2
         val numberRequests = 10
+
+        val port = 3002
+        startServer(port)
 
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
@@ -143,7 +161,7 @@ class ServerPerformanceTests {
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewHomepage(numberRequests) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewHomepage(numberRequests, port) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
@@ -160,17 +178,22 @@ class ServerPerformanceTests {
      * Fastest I saw was 73,746 responses per second, 20 threads doing 10,000 requests each in 2.712 seconds.
      *
      */
+    @IntegrationTest(usesPort = true)
+    @PerformanceTest
     @Test
     fun testViewStaticContentUnauthenticated_PERFORMANCE() {
         val numberThreads = 2
         val numberRequests = 10
+
+        val port = 3003
+        startServer(port)
 
         // so we don't see spam
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsGetStaticFile(numberRequests) }
+            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsGetStaticFile(numberRequests, port) }
             viewTimeEntriesThreads.forEach { it.join() }
         }
 
@@ -195,10 +218,10 @@ class ServerPerformanceTests {
     /**
      * Simply GETs a user's time entries page
      */
-    private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int, port : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -210,10 +233,10 @@ class ServerPerformanceTests {
     /**
      * Simply GETs the homepage
      */
-    private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int, port : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth)
+                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -226,10 +249,10 @@ class ServerPerformanceTests {
     /**
      * Simply GETs the general.css file
      */
-    private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int, port : Int): Thread {
         return thread {
             val client =
-                Client.make(Verb.GET, "sample.js", listOf("Connection: keep-alive"), authUtilities = fakeAuth)
+                Client.make(Verb.GET, "sample.js", listOf("Connection: keep-alive"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -242,7 +265,7 @@ class ServerPerformanceTests {
      * Enters time for a user on many days
      * @param numRequests The number of requests this client will send to the server.
      */
-    private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project): Thread {
+    private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project, port : Int): Thread {
         return thread {
 
             val client =
@@ -250,7 +273,8 @@ class ServerPerformanceTests {
                     Verb.POST,
                     EnterTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
-                    authUtilities = fakeAuth
+                    authUtilities = fakeAuth,
+                    port = port
                 )
             for (i in 1..numRequests) {
                 val data = mapOf(

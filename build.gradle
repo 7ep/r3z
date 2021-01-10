@@ -185,6 +185,8 @@ jar {
 
 test {
 
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
     jacoco {
       includes = ['coverosR3z.*']
     }

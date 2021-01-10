@@ -20,6 +20,7 @@ class MainTests {
      * If we run main with a particular port number,
      * it should indicate that during startup
      */
+    @IntegrationTest(usesPort = true, usesDirectory = true)
     @Test
     fun testMain() {
         File("db").deleteRecursively()

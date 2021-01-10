@@ -1,6 +1,6 @@
 package coverosR3z
 
-import coverosR3z.misc.exceptions.ServerOptionsException
+import coverosR3z.misc.exceptions.SystemOptionsException
 import coverosR3z.logging.logImperative
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.server.utility.Server
@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
 private fun extractCommandLineOptions(args: Array<String>): SystemOptions {
     return try {
         extractOptions(args)
-    } catch (ex: ServerOptionsException) {
+    } catch (ex: SystemOptionsException) {
         println(ex.message)
         exitProcess(0)
     }

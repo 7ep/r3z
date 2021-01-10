@@ -256,6 +256,7 @@ class EnterTimeAPITests {
      *
      * See [ServerPerformanceTests.testEnterTime_PERFORMANCE]
      */
+    @PerformanceTest
     @Test
     fun testEnterTimeAPI_PERFORMANCE() {
         val numberOfRequests = 100

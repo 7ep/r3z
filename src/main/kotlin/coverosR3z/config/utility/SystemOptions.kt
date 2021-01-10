@@ -1,6 +1,6 @@
 package coverosR3z.config.utility
 
-import coverosR3z.misc.exceptions.ServerOptionsException
+import coverosR3z.misc.exceptions.SystemOptionsException
 import coverosR3z.misc.utility.checkParseToInt
 
 data class SystemOptions(
@@ -29,7 +29,7 @@ data class SystemOptions(
          */
         fun setPort(port: String) : SystemOptions {
                 val makePort = if (port.isNotBlank()) checkParseToInt(port) else defaultPort
-                if (makePort < 1 || makePort > 65535) {throw ServerOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")
+                if (makePort < 1 || makePort > 65535) {throw SystemOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")
                 }
                 return SystemOptions(port = makePort, dbDirectory = dbDirectory)
         }
@@ -72,7 +72,7 @@ data class SystemOptions(
                                 return processArgs(args)
                         }
                         catch (ex: Throwable) {
-                                throw ServerOptionsException(ex.message + "\n" + fullHelpMessage)
+                                throw SystemOptionsException(ex.message + "\n" + fullHelpMessage)
                         }
                 }
 
@@ -114,11 +114,11 @@ data class SystemOptions(
                                 var currentIndex = 0
 
                                 loop@ while (currentIndex < args.size) {
-                                        if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw ServerOptionsException("")
+                                        if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw SystemOptionsException("")
 
                                         for (option in possibleOptions) {
                                                 if (args[currentIndex].startsWith(option.textValue)) {
-                                                        if (option.o.setByUser) throw ServerOptionsException("Duplicate options were provided. This is not allowed, go to jail. your input: $fullInput")
+                                                        if (option.o.setByUser) throw SystemOptionsException("Duplicate options were provided. This is not allowed, go to jail. your input: $fullInput")
                                                         val (value, increment) = if (option.o.isFlag) Pair("true", 1) else getValueForKey(option.textValue, args, currentIndex, fullInput)
                                                         currentIndex += increment
                                                         option.o.setByUser = true
@@ -126,7 +126,7 @@ data class SystemOptions(
                                                         continue@loop
                                                 }
                                         }
-                                        throw ServerOptionsException("argument not recognized: ${args[currentIndex]}")
+                                        throw SystemOptionsException("argument not recognized: ${args[currentIndex]}")
                                 }
 
                                 return SystemOptions()
@@ -143,12 +143,12 @@ data class SystemOptions(
                         val concatValue = args[currentIndex].substring(keyString.length)
                         return if (concatValue.isNotEmpty()) {
                                 check(concatValue.isNotBlank())
-                                if (concatValue.startsWith("-")) throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")
+                                if (concatValue.startsWith("-")) throw SystemOptionsException("The $keyString option was provided without a value: $fullInput")
                                 Pair(concatValue, 1)
                         } else {
-                                val value = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")
+                                val value = try {args[currentIndex + 1]} catch (ex : IndexOutOfBoundsException) {throw SystemOptionsException("The $keyString option was provided without a value: $fullInput")
                                 }
-                                if (value.startsWith("-")) throw ServerOptionsException("The $keyString option was provided without a value: $fullInput")
+                                if (value.startsWith("-")) throw SystemOptionsException("The $keyString option was provided without a value: $fullInput")
                                 Pair(value, 2)
                         }
                 }
