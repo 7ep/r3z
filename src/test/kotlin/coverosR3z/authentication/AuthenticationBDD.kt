@@ -29,6 +29,7 @@ import org.junit.Test
  */
 class AuthenticationBDD {
 
+    @BDD
     @Test
     fun `I cannot change someone else's time`() {
         val (tru, sarah) = initializeTwoUsersAndLogin()
@@ -42,6 +43,7 @@ class AuthenticationBDD {
         b.markDone("then the system disallows it.")
     }
 
+    @BDD
     @Test
     fun `I should be able to register a user with a valid password`() {
         val pmd = PureMemoryDatabase()
@@ -59,6 +61,7 @@ class AuthenticationBDD {
         b.markDone("then the system records that the registration succeeded.")
     }
 
+    @BDD
     @Test
     fun `I should not be able to register a user if they are already registered`() {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
@@ -74,6 +77,7 @@ class AuthenticationBDD {
         b.markDone("then the system records that the registration failed.")
     }
 
+    @BDD
     @Test
     fun `I should be able to log in once I'm a registered user`() {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
@@ -89,6 +93,7 @@ class AuthenticationBDD {
         b.markDone("then the system knows who I am.")
     }
 
+    @BDD
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
@@ -104,6 +109,7 @@ class AuthenticationBDD {
         b.markDone("then the system denies me access.")
     }
 
+    @BDD
     @Test
     fun `if I enter an invalid password while registering, it will disallow it`() {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase())

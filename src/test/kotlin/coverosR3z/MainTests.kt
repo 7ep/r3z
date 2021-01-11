@@ -23,12 +23,13 @@ class MainTests {
     @IntegrationTest(usesPort = true, usesDirectory = true)
     @Test
     fun testMain() {
-        File("db").deleteRecursively()
+        val dbPath = "build/db/maintest/"
+        File(dbPath).deleteRecursively()
 
         val (previousOut, out) = captureSystemOut()
 
         // starts the server
-        thread{main(arrayOf("-p","54321"))}
+        thread{main(arrayOf("-p","54321", "-d", dbPath))}
 
         // Give the system sufficient time to startup and set
         // its shutdown hooks, so when we shut it down it will
@@ -38,11 +39,11 @@ class MainTests {
 
         val expectedResults = listOf(
             "IMPERATIVE: starting server on port 54321",
-            "IMPERATIVE: database directory is db/",
-            "IMPERATIVE: directory db/1/ did not exist.  Returning null for the PureMemoryDatabase",
+            "IMPERATIVE: database directory is build/db/maintest/",
+            "IMPERATIVE: directory build/db/maintest/1/ did not exist.  Returning null for the PureMemoryDatabase",
             "IMPERATIVE: No existing database found, building new database",
             "IMPERATIVE: Created new PureMemoryDatabase",
-            "IMPERATIVE: Created the database directory at \"db/1/\"",
+            "IMPERATIVE: Created the database directory at \"build/db/maintest/1/",
             "IMPERATIVE: Wrote the version of the database (1) to currentVersion.txt")
 
         compareInOrder(expectedResults, out.toString())

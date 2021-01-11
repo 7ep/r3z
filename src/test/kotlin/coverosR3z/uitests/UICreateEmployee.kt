@@ -1,5 +1,6 @@
 package coverosR3z.uitests
 
+import coverosR3z.BDD
 import coverosR3z.BDDHelpers
 import coverosR3z.UITest
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -13,6 +14,7 @@ import org.openqa.selenium.WebDriver
 
 class UICreateEmployee {
 
+    @BDD
     @UITest
     @Test
     fun `createEmployee - I should be able to create an employee`() {

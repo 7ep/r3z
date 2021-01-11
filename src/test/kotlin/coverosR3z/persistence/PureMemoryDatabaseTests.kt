@@ -95,8 +95,10 @@ class PureMemoryDatabaseTests {
         val numberOfProjects = 5
         val numberOfDays = 2
         val maxMillisecondsAllowed = 200
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        pmd = PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+
+        val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldWriteAndReadToDisk_PERFORMANCE/"
+        File(dbDirectory).deleteRecursively()
+        pmd = PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
         val tep = TimeEntryPersistence(pmd)
 
         val (totalTimeWriting, _) = getTime {
@@ -105,7 +107,7 @@ class PureMemoryDatabaseTests {
         }
 
         val (totalTimeReading, readPmd) = getTime {
-            PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
+            PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
         }
 
         assertEquals("The database should be exactly the same after the reload", pmd, readPmd)
@@ -211,10 +213,11 @@ class PureMemoryDatabaseTests {
     @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingAllFilesButDirectoryExists() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        File(DEFAULT_DB_DIRECTORY).mkdirs()
-        PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "currentVersion.txt").exists())
+        val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingAllFilesButDirectoryExists/"
+        File(dbDirectory).deleteRecursively()
+        File(dbDirectory).mkdirs()
+        PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
+        assertTrue("a new database will store its version", File(dbDirectory + "currentVersion.txt").exists())
     }
 
     /**
@@ -224,9 +227,10 @@ class PureMemoryDatabaseTests {
     @IntegrationTest(usesDirectory=true)
     @Test
     fun testPersistence_Read_MissingDbDirectory() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        PureMemoryDatabase.startWithDiskPersistence(DEFAULT_DB_DIRECTORY)
-        assertTrue("a new database will store its version", File(DEFAULT_DB_DIRECTORY + "currentVersion.txt").exists())
+        val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingDbDirectory/"
+        File(dbDirectory).deleteRecursively()
+        PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
+        assertTrue("a new database will store its version", File(dbDirectory + "currentVersion.txt").exists())
     }
 
     /**

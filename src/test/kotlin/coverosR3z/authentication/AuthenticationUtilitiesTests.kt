@@ -285,10 +285,12 @@ class AuthenticationUtilitiesTests {
      * we will check that we got what we expected, then reload
      * the database and confirm we get the same results
      */
+    @IntegrationTest(usesDirectory = true)
     @Test
     fun testShouldClearAllSessionsWhenLogout() {
-        File(DEFAULT_DB_DIRECTORY).deleteRecursively()
-        val pmd = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = DEFAULT_DB_DIRECTORY)
+        val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"
+        File(dbDirectory).deleteRecursively()
+        val pmd = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = dbDirectory)
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 
@@ -309,7 +311,7 @@ class AuthenticationUtilitiesTests {
         pmd.stop()
 
         // test out loading it from the disk
-        val pmd2 = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = DEFAULT_DB_DIRECTORY)
+        val pmd2 = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = dbDirectory)
         val authPersistence2 = AuthenticationPersistence(pmd2)
         assertTrue(authPersistence2.getAllSessions().none{it.user == user1})
         assertEquals(1, authPersistence2.getAllSessions().filter {it.user == user2}.size)

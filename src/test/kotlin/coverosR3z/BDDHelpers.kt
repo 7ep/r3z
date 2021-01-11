@@ -19,15 +19,20 @@ class BDDHelpers(private var filename : String) {
         val fileContentsAtDestination = try {File("$destinationDirectory$filename").readBytes()} catch (ex : FileNotFoundException) {null}
 
         // but if it's not there, just use the one in the resources directory
-        fileContents = toStr(fileContentsAtDestination ?: FileReader.read("$sourceDirectory$filename")!!)
+        fileContents = toStr(fileContentsAtDestination ?: FileReader.read("$sourceDirectory$filename") ?: throw BDDFileMissingException())
     }
 
     /**
      * In the BDD file, replace "not-done" with "done" if we have done that
      * step in the scenario
+     * @param s this text in the BDD HTML file will be marked as done
+     * @param predicate optional, but if suppolied, will be used to determine if
+     *                  the BDD statement will be marked as done
      */
-    fun markDone(s: String) {
-        fileContents = fileContents.replace("<not-done>$s</not-done>", "<done>$s</done>")
+    fun markDone(s: String, predicate: () -> Boolean = {true}) {
+        if (predicate()) {
+            fileContents = fileContents.replace("<not-done>$s</not-done>", "<done>$s</done>")
+        }
     }
 
     /**

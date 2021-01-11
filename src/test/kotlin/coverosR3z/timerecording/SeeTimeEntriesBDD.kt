@@ -4,7 +4,9 @@ import coverosR3z.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.BeforeClass
 import org.junit.Test
 
 /**
@@ -14,40 +16,41 @@ import org.junit.Test
  */
 class SeeTimeEntriesBDD {
 
+    @BDD
     @Test
     fun `happy path - should be able to get my time entries on a date`() {
-        // Given I have recorded some time entries
         val (tru, entries) = recordSomeEntriesInDatabase()
+        b.markDone("Given I have recorded some time entries")
 
-        // When I request my time entries on a specific date
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
+        b.markDone("When I request my time entries on a specific date")
 
-        // Then I see all of them
-        allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020)
+        b.markDone("Then I see all of them") {allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020)}
     }
 
+    @BDD
     @Test
     fun `should be able to obtain all my time entries`() {
-        // Given I have recorded some time entries
         val (tru, entries) = recordSomeEntriesInDatabase()
+        b.markDone("Given I have recorded some time entries")
 
-        // When I request my time entries
         val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        b.markDone("When I request my time entries")
 
-        // Then I see all of them
-        allEntriesArePresent(entries, dbEntries)
+        b.markDone("Then I see all of them") {allEntriesArePresent(entries, dbEntries)}
     }
 
+    @BDD
     @Test
     fun `there should be no entries on a given date if they have not been recorded yet`(){
-        // Given no time entries were made on a day
         val (tru, _) = generateSomeEntriesPreDatabase()
+        b.markDone("Given no time entries were made on a day")
 
-        // When I ask for the time entries of that day
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
+        b.markDone("When I ask for the time entries of that day")
 
-        // Then I am returned nothing
         assertEquals(emptySet<TimeEntry>(), dbEntries)
+        b.markDone("Then I am returned nothing")
     }
 
     /*
@@ -60,18 +63,38 @@ class SeeTimeEntriesBDD {
      */
 
 
-    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>, entryDate: Date) {
-        val todayEntries = entries.filter { e -> e.date == entryDate }
-        allEntriesArePresent(todayEntries, dbEntries)
+    companion object {
+
+        private lateinit var b : BDDHelpers
+
+        @BeforeClass
+        @JvmStatic
+        fun init() {
+
+            b = BDDHelpers("viewTimeBDD.html")
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun finishing() {
+            b.writeToFile()
+        }
+
     }
 
-    private fun allEntriesArePresent(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>) {
+    private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>, entryDate: Date) : Boolean {
+        val todayEntries = entries.filter { e -> e.date == entryDate }
+        return allEntriesArePresent(todayEntries, dbEntries)
+    }
+
+    private fun allEntriesArePresent(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>) : Boolean {
         assertEquals(entries.size, dbEntries.size)
 
         for (entry in entries) {
             // we should find exactly one that matches it in the ones we pulled from the database
-            dbEntries.single { d -> d.toTimeEntryPreDatabase() == entry }
+            assertEquals(1, dbEntries.count { d -> d.toTimeEntryPreDatabase() == entry })
         }
+        return true
     }
 
     private fun generateSomeEntriesPreDatabase() : Pair<TimeRecordingUtilities, List<TimeEntryPreDatabase>>{

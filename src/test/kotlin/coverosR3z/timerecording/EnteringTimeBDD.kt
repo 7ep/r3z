@@ -24,6 +24,7 @@ class EnteringTimeBDD {
     /**
      * Just another flavor of happy path
      */
+    @BDD
     @Test
     fun `A employee enters six hours on a project with copious notes`() {
         val (tru, entry) = addingProjectHoursWithNotes()
@@ -36,6 +37,7 @@ class EnteringTimeBDD {
         b.markDone("then the system indicates it has persisted the new information.")
     }
 
+    @BDD
     @Test
     fun `A employee has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
         val (tru, newProject: Project, newEmployee: Employee) = enterTwentyFourHoursPreviously()
