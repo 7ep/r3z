@@ -91,7 +91,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </thead>
                     <tbody>
                         
-                    """ + te.joinToString("") { "<tr id=time-entry-${it.employee.id.value}-${it.id}><td>${safeHtml(it.project.name.value)}</td><td class='time'><input type=text value=${it.time.numberOfMinutes}></input></td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
+                    """ + te.joinToString("") { "<tr id=time-entry-${it.employee.id.value}-${it.id.value}><td>${safeHtml(it.project.name.value)}</td><td class='time'><input type=text value=${it.time.numberOfMinutes}></input></td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
                     </tbody>
                 </table>
         

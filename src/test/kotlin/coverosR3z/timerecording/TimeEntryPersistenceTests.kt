@@ -168,7 +168,7 @@ class TimeEntryPersistenceTests {
 
         val timeEntries = tep.readTimeEntriesOnDate(newEmployee, A_RANDOM_DAY_IN_JUNE_2020).first()
 
-        assertEquals(1, timeEntries.id)
+        assertEquals(DEFAULT_TIME_ENTRY.id, timeEntries.id)
         assertEquals(DEFAULT_EMPLOYEE, timeEntries.employee)
         assertEquals(DEFAULT_PROJECT, timeEntries.project)
         assertEquals(DEFAULT_TIME, timeEntries.time)
