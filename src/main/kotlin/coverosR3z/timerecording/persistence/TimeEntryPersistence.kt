@@ -18,7 +18,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
 
             logTrace { "new time-entry index is $newIndex" }
             val newTimeEntry = TimeEntry(
-                newIndex,
+                TimeEntryId(newIndex),
                 entry.employee,
                 entry.project,
                 entry.time,
@@ -31,9 +31,25 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         }
     }
 
+    override fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry) : TimeEntry {
+        val oldEntry = pmd.actOnTimeEntries{entries ->
+            entries.single{it.id == newEntry.id}
+        }
+
+        pmd.actOnTimeEntries{ entries ->
+            entries.remove(oldEntry)
+            entries.add(newEntry)
+        }
+
+        logDebug{"modified an existing timeEntry: $newEntry"}
+        logTrace { "new time-entry  is $newEntry" }
+        logTrace { "old time-entry index is $oldEntry" }
+        return newEntry
+    }
+
     /**
      * This will throw an exception if the project or employee in
-     * this timeentry don't exist in the list of projects / employees
+     * this time entry don't exist in the list of projects / employees
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
         check(getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
@@ -95,15 +111,4 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
     override fun getEmployeeById(id: EmployeeId): Employee {
         return pmd.actOnEmployees { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
-
-    override fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry)  {
-        val employee = getEmployeeById(empId)
-        pmd.actOnTimeEntries {
-            val setOfTimeEntries = readTimeEntries(employee)
-            check(setOfTimeEntries.count{it.id == id} == 1) {"There must be exactly one tme entry found to edit"}
-            //TODO - finish this
-        }
-
-    }
-
 }

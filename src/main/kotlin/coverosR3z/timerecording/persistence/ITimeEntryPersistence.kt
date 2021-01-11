@@ -8,6 +8,9 @@ interface ITimeEntryPersistence {
     fun persistNewProject(projectName: ProjectName) : Project
     fun persistNewEmployee(employeename: EmployeeName): Employee
 
+    fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry) : TimeEntry
+
+
     /**
      * Provided a employee and date, give the number of minutes they worked on that date
      */
@@ -23,5 +26,4 @@ interface ITimeEntryPersistence {
     fun getAllProjects(): List<Project>
     fun getAllEmployees(): List<Employee>
     fun getEmployeeById(id: EmployeeId): Employee
-    fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry)
 }

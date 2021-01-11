@@ -10,6 +10,12 @@ interface ITimeRecordingUtilities {
     fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult
 
     /**
+     * This assumes you are changing your own time entries,
+     * which implies you have an employee id
+     */
+    fun changeEntry(newEntry: TimeEntry): RecordTimeResult
+
+    /**
      * Business code for creating a new project in the
      * system (persists it to the database)
      */
@@ -26,10 +32,4 @@ interface ITimeRecordingUtilities {
     fun findProjectById(id: ProjectId): Project
     fun findEmployeeById(id: EmployeeId): Employee
     fun listAllEmployees(): List<Employee>
-
-    /**
-     * This assumes you are changing your own time entries,
-     * which implies you have an employee id
-     */
-    fun changeEntry(id: Int, newEntry: TimeEntry)
 }

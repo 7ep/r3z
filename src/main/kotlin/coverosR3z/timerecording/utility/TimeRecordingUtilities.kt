@@ -28,7 +28,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
         log.audit("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
-        confirmLessThan24Hours(entry)
+        confirmLessThan24Hours(entry.time, entry.employee, entry.date)
         return try {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             log.debug("recorded time sucessfully")
@@ -42,13 +42,36 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         }
     }
 
-    private fun confirmLessThan24Hours(entry: TimeEntryPreDatabase) {
+    override fun changeEntry(newEntry: TimeEntry): RecordTimeResult{
+        val user = cu.user
+        // ensure time entry user is the logged in user, or
+        // is the system
+        if (user != SYSTEM_USER && user.employeeId != newEntry.employee.id) {
+            log.audit("time was not recorded successfully: current user ${user.name.value} does not have access " +
+                    "to modify time for ${newEntry.employee.name.value}")
+            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
+        }
+        log.audit("Recording ${newEntry.time.numberOfMinutes} minutes on \"${newEntry.project.name.value}\"")
+        confirmLessThan24Hours(newEntry.time, newEntry.employee, newEntry.date)
+        return try {
+            val newTimeEntry = persistence.overwriteTimeEntry(checkNotNull(cu.user.employeeId), newEntry)
+            RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
+        } catch (ex : ProjectIntegrityViolationException) {
+            log.debug("time was not recorded successfully: project id did not match a valid project")
+            RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+        } catch (ex : EmployeeIntegrityViolationException) {
+            log.debug("time was not recorded successfully: employee id did not match a valid employee")
+            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+        }
+    }
+
+    private fun confirmLessThan24Hours(time: Time, employee: Employee, date: Date) {
         log.debug("confirming total time is less than 24 hours")
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        val minutesRecorded : Time = persistence.queryMinutesRecorded(entry.employee, entry.date)
+        val minutesRecorded : Time = persistence.queryMinutesRecorded(employee, date)
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
-        val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + entry.time.numberOfMinutes
+        val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + time.numberOfMinutes
         if (existingPlusNewMinutes > twentyFourHours) {
             log.debug("More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)")
             throw ExceededDailyHoursAmountException()
@@ -110,10 +133,6 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
 
     override fun listAllEmployees(): List<Employee> {
         return persistence.getAllEmployees()
-    }
-
-    override fun changeEntry(id : Int, newEntry: TimeEntry) {
-        persistence.overwriteTimeEntry(checkNotNull(cu.user.employeeId), id, newEntry)
     }
 
 }

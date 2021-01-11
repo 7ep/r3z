@@ -11,6 +11,8 @@ const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
 const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in minutes: "
 const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
+private const val minIdMsg = "Valid identifier values are 1 or above"
+
 
 data class Details(val value : String = "") {
     init {
@@ -22,6 +24,18 @@ data class Details(val value : String = "") {
         fun make(value : String?) : Details {
             val valueNotNull = checkNotNull(value) { detailsNotNullMsg }
             return Details(valueNotNull)
+        }
+    }
+}
+
+data class TimeEntryId(val value: Int) {
+    init {
+        require(value > 0) { minIdMsg }
+    }
+
+    companion object {
+        fun make(value: String?) : TimeEntryId {
+            return TimeEntryId(checkParseToInt(value))
         }
     }
 }
@@ -48,7 +62,7 @@ data class Time(val numberOfMinutes : Int) {
  * like "this was for Coveros", this object would contain all that.
  */
 data class TimeEntry (
-    val id : Int,
+    val id : TimeEntryId,
     val employee: Employee,
     val project: Project,
     val time: Time,
@@ -61,7 +75,7 @@ data class TimeEntry (
     }
 
     fun serialize(): String {
-        return """{ i: $id , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
+        return """{ i: ${id.value} , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
     }
 
     companion object {
@@ -83,7 +97,7 @@ data class TimeEntry (
                         throw DatabaseCorruptedException("Unable to find a project with the id of ${projId}.  Project set size: ${projects.size}")
                     }
                     TimeEntry(
-                        id,
+                        TimeEntryId(id),
                         employee,
                         project,
                         Time(minutes),
