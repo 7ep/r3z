@@ -44,13 +44,13 @@ class UIRecordTime {
     @Test
     fun `recordTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
         loginAsUserAndCreateProject("Andrea", "projectb")
-        recordTime.markDone("Given Andrea has a previous time entry with 24 hours,")
+        recordTime.markDone("Given Andrea has a previous time entry with 1 hour,")
 
         // when the employee enters their time
         enterTimeForEmployee("projectb")
 
         driver.get("$domain/${ViewTimeAPI.path}")
-        recordTime.markDone("when she changes the entry to only 8 hours,")
+        recordTime.markDone("when she changes the entry to two hours,")
         // muck with it
 
         val timeField = driver.findElement(By.cssSelector("#time-entry-1-1 .time input"))
@@ -58,9 +58,8 @@ class UIRecordTime {
         // change time to 120
 
         driver.get("$domain/${ViewTimeAPI.path}")
-
-        val expected = 60120
-        //assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
+        val expected = 60120 // debugging, should eventually HIGHLIGHT and replace
+//        assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
         // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
         // until we persist it in some way
         logout()

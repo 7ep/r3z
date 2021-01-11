@@ -17,7 +17,7 @@ class FakeTimeEntryPersistence(
     var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
-    var overwriteTimeEntryBehavior : () -> Unit = {},
+    var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY},
 ) : ITimeEntryPersistence {
 
 
@@ -66,8 +66,8 @@ class FakeTimeEntryPersistence(
         return getEmployeeByIdBehavior(id)
     }
 
-    override fun overwriteTimeEntry(empId: EmployeeId, id: Int, newEntry: TimeEntry) {
-        overwriteTimeEntryBehavior()
+    override fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry): TimeEntry {
+        return overwriteTimeEntryBehavior()
     }
 
 }

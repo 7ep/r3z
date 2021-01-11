@@ -4,12 +4,16 @@ import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.logging.resetLogSettingsToDefault
+import coverosR3z.logging.turnOffAllLogging
+import coverosR3z.logging.turnOnAllLogging
 import coverosR3z.persistence.exceptions.EmployeeIntegrityViolationException
 import coverosR3z.persistence.exceptions.ProjectIntegrityViolationException
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
+import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -261,12 +265,19 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testCanEditTimeEntry() {
+        turnOnAllLogging()
         val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val (_, newTimeEntry) = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
 
-        tru.changeEntry(newTimeEntry!!.id, newTimeEntry.copy(time = Time(2)))
+        val actual = tru.changeEntry(newTimeEntry!!.copy(time = Time(2)))
+        val expected = RecordTimeResult(StatusEnum.SUCCESS,
+            TimeEntry(TimeEntryId(1), DEFAULT_EMPLOYEE, DEFAULT_PROJECT, Time(2), A_RANDOM_DAY_IN_JUNE_2020))
+        assertEquals(expected, actual)
+        //TODO this does not test anything, it should!
+        // (but at least it compiles)
+        resetLogSettingsToDefault()
     }
 
 

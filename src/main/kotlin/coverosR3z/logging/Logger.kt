@@ -32,6 +32,13 @@ fun resetLogSettingsToDefault() {
     LogConfig.logSettings[LogTypes.TRACE] = false
 }
 
+fun turnOnAllLogging() {
+    LogConfig.logSettings[LogTypes.AUDIT] = true
+    LogConfig.logSettings[LogTypes.DEBUG] = true
+    LogConfig.logSettings[LogTypes.WARN] = true
+    LogConfig.logSettings[LogTypes.TRACE] = true
+}
+
 fun turnOffAllLogging() {
     LogConfig.logSettings[LogTypes.AUDIT] = false
     LogConfig.logSettings[LogTypes.DEBUG] = false
