@@ -59,7 +59,7 @@ class UIRecordTime {
 
         driver.get("$domain/${ViewTimeAPI.path}")
         val expected = 60120 // debugging, should eventually HIGHLIGHT and replace
-//        assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
+        assertEquals(expected, driver.findElement(By.cssSelector("#time-entry-1-1 .time input")).getAttribute("value"))
         // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
         // until we persist it in some way
         logout()

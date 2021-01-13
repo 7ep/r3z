@@ -19,45 +19,34 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     }
 
     override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
+        return createOrModifyEntry(entry) {
+            val newTimeEntry = persistence.persistNewTimeEntry(entry)
+            log.debug("recorded time successfully")
+            newTimeEntry
+        }
+    }
+
+    override fun changeEntry(entry: TimeEntry): RecordTimeResult{
+        return createOrModifyEntry(entry.toTimeEntryPreDatabase()) {
+            val newTimeEntry = persistence.overwriteTimeEntry(entry)
+            log.debug("modified time successfully")
+            newTimeEntry
+        }
+    }
+
+    private fun createOrModifyEntry(entry: TimeEntryPreDatabase, behavior: () -> TimeEntry): RecordTimeResult{
         val user = cu.user
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
-            log.audit("time was not recorded successfully: current user ${user.name.value} does not have access to modify time for ${entry.employee.name.value}")
+            log.audit("time was not recorded successfully: current user ${user.name.value} does not have access " +
+                    "to modify time for ${entry.employee.name.value}")
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
         log.audit("Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\"")
         confirmLessThan24Hours(entry.time, entry.employee, entry.date)
         return try {
-            val newTimeEntry = persistence.persistNewTimeEntry(entry)
-            log.debug("recorded time sucessfully")
-            RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
-        } catch (ex : IllegalStateException) {
-            log.debug("Error adding time entry: ${ex.message}")
-
-            when (ex.message) {
-                TimeEntryPersistence.timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
-                TimeEntryPersistence.timeEntryInvalidBadProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
-                TimeEntryPersistence.timeEntryInvalidNoEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
-                TimeEntryPersistence.timeEntryInvalidNoProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
-                else -> RecordTimeResult(StatusEnum.NULL, null)
-            }
-        }
-    }
-
-    override fun changeEntry(newEntry: TimeEntry): RecordTimeResult{
-        val user = cu.user
-        // ensure time entry user is the logged in user, or
-        // is the system
-        if (user != SYSTEM_USER && user.employeeId != newEntry.employee.id) {
-            log.audit("time was not recorded successfully: current user ${user.name.value} does not have access " +
-                    "to modify time for ${newEntry.employee.name.value}")
-            return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
-        }
-        log.audit("Recording ${newEntry.time.numberOfMinutes} minutes on \"${newEntry.project.name.value}\"")
-        confirmLessThan24Hours(newEntry.time, newEntry.employee, newEntry.date)
-        return try {
-            val newTimeEntry = persistence.overwriteTimeEntry(newEntry)
+            val newTimeEntry = behavior()
             RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
         } catch (ex : IllegalStateException) {
             log.debug("Error adding time entry: ${ex.message}")

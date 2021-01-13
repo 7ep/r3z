@@ -56,7 +56,7 @@ class ProjectAPI(private val sd: ServerData) {
         <meta apifile="ProjectAPI" >
     </head>
     <body>
-        <form action="createproject" method="post">
+        <form action="$path" method="post">
         
             <p>
                 Hello there, <span id="username">$username</span>!

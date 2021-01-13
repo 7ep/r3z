@@ -74,7 +74,7 @@ class RegisterAPI(private val sd: ServerData) {
         <br>
         <h2>Register a User</h2>
         
-        <form method="post" action="register">
+        <form method="post" action="$path">
           <table> 
               <tbody>
                 <tr>

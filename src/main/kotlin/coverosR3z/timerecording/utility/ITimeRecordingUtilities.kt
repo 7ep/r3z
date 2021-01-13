@@ -13,7 +13,7 @@ interface ITimeRecordingUtilities {
      * This assumes you are changing your own time entries,
      * which implies you have an employee id
      */
-    fun changeEntry(newEntry: TimeEntry): RecordTimeResult
+    fun changeEntry(entry: TimeEntry): RecordTimeResult
 
     /**
      * Business code for creating a new project in the

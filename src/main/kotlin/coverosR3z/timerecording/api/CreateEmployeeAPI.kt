@@ -57,7 +57,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             <meta apifile="CreateEmployeeAPI" >
         </head>
         <body>
-        <form action="createemployee" method="post">
+        <form action="$path" method="post">
         
             <p>
                 Hello there, <span id="username">$username</span>!
