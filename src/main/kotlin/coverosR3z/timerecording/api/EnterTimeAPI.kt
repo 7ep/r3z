@@ -87,7 +87,7 @@ class EnterTimeAPI(private val sd: ServerData) {
             <script src="entertime.js"></script>
         </head>
         <body>
-            <form action="entertime" method="post">
+            <form action="$path" method="post">
     
                 <p>
                     Hello there, <span id="username">$username</span>!

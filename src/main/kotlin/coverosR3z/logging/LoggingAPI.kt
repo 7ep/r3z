@@ -105,7 +105,7 @@ class LoggingAPI(private val sd: ServerData) {
         </head>        
         <body>
     
-            <form method="post" action="logging">
+            <form method="post" action="$path">
                 <fieldset>
                     <legend>Info logging:</legend>
                     <div>

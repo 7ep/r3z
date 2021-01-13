@@ -91,7 +91,28 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </thead>
                     <tbody>
                         
-                    """ + te.joinToString("") { "<tr id=time-entry-${it.employee.id.value}-${it.id.value}><td>${safeHtml(it.project.name.value)}</td><td class='time'><input type=text value=${it.time.numberOfMinutes}></input></td><td>${safeHtml(it.details.value)}</td><td>${it.date.stringValue}</td></tr>\n" } + """    
+                    """ + te.joinToString("") {
+                    """
+                    <tr id=time-entry-${it.employee.id.value}-${it.id.value}>
+                        <form action="$path" method="post">
+                            <input type="hidden" name=${Elements.ID_INPUT.elemName} value=${it.id.value} />
+                            <td><input type="hidden" name=${Elements.PROJECT_INPUT.elemName} value="${it.project.id.value}" />
+                                ${safeHtml(it.project.name.value)}
+                            </td>
+                            <td class='time'>
+                                <input name=${Elements.TIME_INPUT.elemName} type=text value=${it.time.numberOfMinutes} />
+                                <button>🔒</button>
+                            </td>
+                            <td>
+                                <input name=${Elements.DETAIL_INPUT.elemName} value=${safeHtml(it.details.value)} />
+                            </td>
+                            <td>
+                                <input name=${Elements.DATE_INPUT.elemName} value=${it.date.stringValue} />
+                            </td>
+                        </form>
+                    </tr>
+                    """
+                    }  +  """
                     </tbody>
                 </table>
         

@@ -2,7 +2,6 @@ package coverosR3z.timerecording
 
 import coverosR3z.DEFAULT_EMPLOYEE
 import coverosR3z.DEFAULT_PROJECT
-import coverosR3z.DEFAULT_TIME_ENTRY
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
@@ -33,7 +32,7 @@ class FakeTimeRecordingUtilities(
         return recordTimeBehavior()
     }
 
-    override fun changeEntry(newEntry: TimeEntry): RecordTimeResult{
+    override fun changeEntry(entry: TimeEntry): RecordTimeResult{
         return changeEntryBehavior()
     }
 

@@ -71,7 +71,7 @@ class LoginAPI(val sd: ServerData) {
             <br>
             <h2>Login</h2>
             
-            <form  method="post" action="login">
+            <form  method="post" action="$path">
               <table> 
                 <tbody>
                     <tr>
