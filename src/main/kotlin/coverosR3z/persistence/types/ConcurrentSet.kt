@@ -14,7 +14,7 @@ class ConcurrentSet<T> : Iterable<T>{
 
     fun size() = map.size
 
-    val nextIndex = AtomicInteger(size()+1)
+    val nextIndex = AtomicInteger(1)
 
     private enum class NullEnum {
         /**
@@ -63,12 +63,15 @@ class ConcurrentSet<T> : Iterable<T>{
         other as ConcurrentSet<*>
 
         if (map != other.map) return false
+        if (nextIndex.get() != other.nextIndex.get()) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return map.hashCode()
+        var result = map.hashCode()
+        result = 31 * result + nextIndex.get().hashCode()
+        return result
     }
 
 }

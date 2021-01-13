@@ -309,10 +309,17 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             }
 
             val projects = readAndDeserialize(dbDirectory, PROJECTS_FILENAME) { Project.deserialize(it) }
+            projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
+
             val users = readAndDeserialize(dbDirectory, USERS_FILENAME) { User.deserialize(it) }
+            users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
+
             val sessions = readAndDeserialize(dbDirectory, SESSIONS_FILENAME) { Session.deserialize(it, users.toSet()) }
             val employees = readAndDeserialize(dbDirectory, EMPLOYEES_FILENAME) { Employee.deserialize(it) }
+            employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
+
             val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.toSet(), projects.toSet())
+            fullTimeEntries.nextIndex.set(fullTimeEntries.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             return PureMemoryDatabase(employees, users, projects, fullTimeEntries, sessions, dbDirectory)
         }
