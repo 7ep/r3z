@@ -2,12 +2,11 @@ package coverosR3z.timerecording.utility
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
-import coverosR3z.persistence.exceptions.EmployeeIntegrityViolationException
-import coverosR3z.persistence.exceptions.ProjectIntegrityViolationException
+import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) :
@@ -33,12 +32,16 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             log.debug("recorded time sucessfully")
             RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
-        } catch (ex : ProjectIntegrityViolationException) {
-            log.debug("time was not recorded successfully: project id did not match a valid project")
-            RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
-        } catch (ex : EmployeeIntegrityViolationException) {
-            log.debug("time was not recorded successfully: employee id did not match a valid employee")
-            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+        } catch (ex : IllegalStateException) {
+            log.debug("Error adding time entry: ${ex.message}")
+
+            when (ex.message) {
+                TimeEntryPersistence.timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+                TimeEntryPersistence.timeEntryInvalidBadProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+                TimeEntryPersistence.timeEntryInvalidNoEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+                TimeEntryPersistence.timeEntryInvalidNoProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+                else -> RecordTimeResult(StatusEnum.NULL, null)
+            }
         }
     }
 
@@ -54,14 +57,18 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         log.audit("Recording ${newEntry.time.numberOfMinutes} minutes on \"${newEntry.project.name.value}\"")
         confirmLessThan24Hours(newEntry.time, newEntry.employee, newEntry.date)
         return try {
-            val newTimeEntry = persistence.overwriteTimeEntry(checkNotNull(cu.user.employeeId), newEntry)
+            val newTimeEntry = persistence.overwriteTimeEntry(newEntry)
             RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
-        } catch (ex : ProjectIntegrityViolationException) {
-            log.debug("time was not recorded successfully: project id did not match a valid project")
-            RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
-        } catch (ex : EmployeeIntegrityViolationException) {
-            log.debug("time was not recorded successfully: employee id did not match a valid employee")
-            RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+        } catch (ex : IllegalStateException) {
+            log.debug("Error adding time entry: ${ex.message}")
+
+            when (ex.message) {
+                TimeEntryPersistence.timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+                TimeEntryPersistence.timeEntryInvalidBadProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+                TimeEntryPersistence.timeEntryInvalidNoEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+                TimeEntryPersistence.timeEntryInvalidNoProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+                else -> RecordTimeResult(StatusEnum.NULL, null)
+            }
         }
     }
 

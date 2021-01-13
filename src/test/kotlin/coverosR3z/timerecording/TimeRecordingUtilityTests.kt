@@ -1,19 +1,15 @@
 package coverosR3z.timerecording
 
-import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.*
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.resetLogSettingsToDefault
-import coverosR3z.logging.turnOffAllLogging
 import coverosR3z.logging.turnOnAllLogging
-import coverosR3z.persistence.exceptions.EmployeeIntegrityViolationException
-import coverosR3z.persistence.exceptions.ProjectIntegrityViolationException
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -37,13 +33,13 @@ class TimeRecordingUtilityTests {
      * Negative case - what happens if we receive a request to enter
      * time for an invalid project?
      */
+    @IntegrationTest
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                minutesRecorded = Time(60),
-                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
+        val pmd = PureMemoryDatabase()
+        val tep = TimeEntryPersistence(pmd)
+        val utils = TimeRecordingUtilities(tep, CurrentUser(SYSTEM_USER))
         val entry = createTimeEntryPreDatabase(project= Project(ProjectId(1), ProjectName("an invalid project")))
         val expectedResult = RecordTimeResult(StatusEnum.INVALID_PROJECT)
 
@@ -56,14 +52,15 @@ class TimeRecordingUtilityTests {
      * Negative case - what happens if we receive a request to enter
      * time for an invalid employee?
      */
+    @IntegrationTest
     @Test
     fun `Should fail to record time for non-existent employee`() {
         // it's an invalid project because the project doesn't exist
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                minutesRecorded = Time(60),
-                persistNewTimeEntryBehavior = { throw EmployeeIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase()
+        val pmd = PureMemoryDatabase()
+        val tep = TimeEntryPersistence(pmd)
+        val utils = TimeRecordingUtilities(tep, CurrentUser(SYSTEM_USER))
+        val project = utils.createProject(DEFAULT_PROJECT_NAME)
+        val entry = createTimeEntryPreDatabase(project = project)
         val expectedResult = RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
 
         val actualResult = utils.recordTime(entry)
@@ -76,16 +73,20 @@ class TimeRecordingUtilityTests {
      * any more time when we've already recorded the maximum for the day?
      * (It should throw an exception)
      */
+    @IntegrationTest
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
         val twentyFourHours = Time(24 * 60)
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                minutesRecorded = twentyFourHours,
-                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase(time= Time(1), project= Project(ProjectId(1), ProjectName("an invalid project")))
+        val pmd = PureMemoryDatabase()
+        val tep = TimeEntryPersistence(pmd)
+        val utils = TimeRecordingUtilities(tep, CurrentUser(SYSTEM_USER))
+        val project = utils.createProject(DEFAULT_PROJECT_NAME)
+        val employee = utils.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val entry1 = createTimeEntryPreDatabase(time= twentyFourHours, project= project, employee = employee)
+        utils.recordTime(entry1)
+        val entry2 = createTimeEntryPreDatabase(time= Time(1), project= project, employee = employee)
 
-        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry2) }
     }
 
     /**
@@ -96,13 +97,16 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
         val twentyThreeHours = Time(23 * 60)
-        val fakeTimeEntryPersistence = FakeTimeEntryPersistence(
-                minutesRecorded = twentyThreeHours,
-                persistNewTimeEntryBehavior = { throw ProjectIntegrityViolationException() })
-        val utils = TimeRecordingUtilities(fakeTimeEntryPersistence, CurrentUser(SYSTEM_USER))
-        val entry = createTimeEntryPreDatabase(time= Time(60 * 2), project= Project(ProjectId(1), ProjectName("an invalid project")))
+        val pmd = PureMemoryDatabase()
+        val tep = TimeEntryPersistence(pmd)
+        val utils = TimeRecordingUtilities(tep, CurrentUser(SYSTEM_USER))
+        val project = utils.createProject(DEFAULT_PROJECT_NAME)
+        val employee = utils.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val entry1 = createTimeEntryPreDatabase(time= twentyThreeHours, project= project, employee = employee)
+        utils.recordTime(entry1)
+        val entry2 = createTimeEntryPreDatabase(time= Time(60 * 2), project= project, employee = employee)
 
-        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.recordTime(entry2) }
     }
 
 
@@ -265,20 +269,74 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testCanEditTimeEntry() {
+        // arrange
         turnOnAllLogging()
         val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val (_, newTimeEntry) = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
-
-        val actual = tru.changeEntry(newTimeEntry!!.copy(time = Time(2)))
         val expected = RecordTimeResult(StatusEnum.SUCCESS,
             TimeEntry(TimeEntryId(1), DEFAULT_EMPLOYEE, DEFAULT_PROJECT, Time(2), A_RANDOM_DAY_IN_JUNE_2020))
+
+        // act
+        val actual: RecordTimeResult = tru.changeEntry(newTimeEntry!!.copy(time = Time(2)))
+
+        // assert
         assertEquals(expected, actual)
-        //TODO this does not test anything, it should!
-        // (but at least it compiles)
         resetLogSettingsToDefault()
     }
 
+    /**
+     * Nothing much different should take place if we're overwriting
+     * with the exact same values, just want to make that explicit in a test
+     */
+    @Test
+    fun testCanEditTimeEntry_Unchanged() {
+        // arrange
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val result = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
+
+        // act
+        val actual: RecordTimeResult = tru.changeEntry(result.newTimeEntry!!)
+
+        // assert
+        assertEquals(result, actual)
+    }
+
+    /**
+     * Someone who isn't this employee cannot change the time entry
+     */
+    @Test
+    fun testCanEditTimeEntry_DisallowDifferentEmployeeToChange() {
+        // arrange
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val result: RecordTimeResult = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
+        val truOtherUser = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER_2))
+        val expected = RecordTimeResult(status= StatusEnum.USER_EMPLOYEE_MISMATCH, newTimeEntry=null)
+
+        // act
+        val actual: RecordTimeResult = truOtherUser.changeEntry(result.newTimeEntry!!)
+
+        // assert
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testCanEditTimeEntry_InvalidProject() {
+        // arrange
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
+        tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        tru.createProject(DEFAULT_PROJECT_NAME)
+        val (_, newTimeEntry) = tru.recordTime(createTimeEntryPreDatabase(time = Time(1)))
+        val expected = RecordTimeResult(status= StatusEnum.INVALID_PROJECT, newTimeEntry=null)
+
+        val result = tru.changeEntry(newTimeEntry!!.copy(project = Project(ProjectId(5), ProjectName("fake"))))
+
+        assertEquals(expected, result)
+    }
 
 }

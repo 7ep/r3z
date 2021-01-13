@@ -8,7 +8,7 @@ interface ITimeEntryPersistence {
     fun persistNewProject(projectName: ProjectName) : Project
     fun persistNewEmployee(employeename: EmployeeName): Employee
 
-    fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry) : TimeEntry
+    fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry
 
 
     /**
