@@ -31,10 +31,13 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         }
     }
 
-    override fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry) : TimeEntry {
+    override fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry {
+        isEntryValid(newEntry.toTimeEntryPreDatabase())
         val oldEntry = pmd.actOnTimeEntries{entries ->
             entries.single{it.id == newEntry.id}
         }
+
+        check (oldEntry.employee == newEntry.employee) {"Employee field of a time entry may not be changed"}
 
         pmd.actOnTimeEntries{ entries ->
             entries.remove(oldEntry)
@@ -42,18 +45,20 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         }
 
         logDebug{"modified an existing timeEntry: $newEntry"}
-        logTrace { "new time-entry  is $newEntry" }
-        logTrace { "old time-entry index is $oldEntry" }
+        logTrace { "old time-entry index is $oldEntry and new time-entry is $newEntry" }
         return newEntry
     }
 
     /**
      * This will throw an exception if the project or employee in
      * this time entry don't exist in the list of projects / employees
+     * or is missing in the time entry
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(getProjectById(entry.project.id) != NO_PROJECT) {"a time entry with no project is invalid"}
-        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {"a time entry with no employee is invalid"}
+        check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidNoProject}
+        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidNoEmployee}
+        check(pmd.actOnEmployees { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
+        check(pmd.actOnProjects { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -110,5 +115,12 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
 
     override fun getEmployeeById(id: EmployeeId): Employee {
         return pmd.actOnEmployees { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
+    }
+
+    companion object {
+        const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
+        const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"
+        const val timeEntryInvalidBadEmployee = "a time entry with a non-registered employee is invalid"
+        const val timeEntryInvalidBadProject = "a time entry with a non-registered project is invalid"
     }
 }

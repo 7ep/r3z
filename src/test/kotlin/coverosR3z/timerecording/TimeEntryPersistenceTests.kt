@@ -186,4 +186,54 @@ class TimeEntryPersistenceTests {
         assertEquals(emptySet<TimeEntry>() , result)
     }
 
+    @Test
+    fun testShouldEditTimeEntry() {
+        // arrange an existing time entry and a modified time entry
+        val startingTimeEntry = DEFAULT_TIME_ENTRY
+        val revisedTimeEntry = startingTimeEntry.copy(time = Time(2))
+        tep.persistNewProject(startingTimeEntry.project.name)
+        tep.persistNewEmployee(startingTimeEntry.employee.name)
+        tep.persistNewTimeEntry(startingTimeEntry.toTimeEntryPreDatabase())
+
+        // overwrite it
+        tep.overwriteTimeEntry(revisedTimeEntry)
+        val readTimeEntry: TimeEntry = tep.readTimeEntriesOnDate(startingTimeEntry.employee, startingTimeEntry.date).single()
+
+        assertEquals(revisedTimeEntry, readTimeEntry)
+    }
+
+    @Test
+    fun testShouldEditTimeEntry_NoChanges() {
+        // arrange an existing time entry
+        val startingTimeEntry = DEFAULT_TIME_ENTRY
+        tep.persistNewProject(startingTimeEntry.project.name)
+        tep.persistNewEmployee(startingTimeEntry.employee.name)
+        tep.persistNewTimeEntry(startingTimeEntry.toTimeEntryPreDatabase())
+
+        // overwrite it but causes no change
+        tep.overwriteTimeEntry(startingTimeEntry)
+        val readTimeEntry: TimeEntry = tep.readTimeEntriesOnDate(startingTimeEntry.employee, startingTimeEntry.date).single()
+
+        assertEquals(startingTimeEntry, readTimeEntry)
+    }
+
+    /**
+    The employee a user logs time to should not be able to be changed, since their user is bound to a single
+    employee.
+     */
+    @Test
+    fun testCanEditTimeEntry_DisallowChangeToOtherEmployee() {
+        // arrange an existing time entry and a modified time entry
+        val startingTimeEntry = DEFAULT_TIME_ENTRY
+        val newEmployee = Employee(EmployeeId(5), EmployeeName("alice"))
+        val revisedTimeEntry = startingTimeEntry.copy(employee = newEmployee)
+        tep.persistNewProject(startingTimeEntry.project.name)
+        tep.persistNewEmployee(startingTimeEntry.employee.name)
+        tep.persistNewTimeEntry(startingTimeEntry.toTimeEntryPreDatabase())
+
+        // act and assert
+        val ex = assertThrows(java.lang.IllegalStateException::class.java) {tep.overwriteTimeEntry(revisedTimeEntry)}
+        assertEquals("a time entry with no employee is invalid", ex.message)
+    }
+
 }

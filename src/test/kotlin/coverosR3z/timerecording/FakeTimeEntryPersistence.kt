@@ -66,7 +66,7 @@ class FakeTimeEntryPersistence(
         return getEmployeeByIdBehavior(id)
     }
 
-    override fun overwriteTimeEntry(empId: EmployeeId, newEntry: TimeEntry): TimeEntry {
+    override fun overwriteTimeEntry(newEntry: TimeEntry): TimeEntry {
         return overwriteTimeEntryBehavior()
     }
 
