@@ -1,7 +1,6 @@
 package coverosR3z.uitests
 
-import coverosR3z.BDDHelpers
-import coverosR3z.UITest
+import coverosR3z.bdd.BDDHelpers
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.utility.Server

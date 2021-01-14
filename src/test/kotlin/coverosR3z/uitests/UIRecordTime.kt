@@ -1,9 +1,10 @@
 package coverosR3z.uitests
 
-import coverosR3z.BDDHelpers
-import coverosR3z.DEFAULT_DATE_STRING
-import coverosR3z.DEFAULT_PASSWORD
-import coverosR3z.UITest
+import coverosR3z.bdd.BDDHelpers
+import coverosR3z.bdd.BDDScenario
+import coverosR3z.bdd.RecordTimeUserStory
+import coverosR3z.misc.DEFAULT_DATE_STRING
+import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.utility.Server
@@ -27,14 +28,24 @@ class UIRecordTime {
     @UITest
     @Test
     fun `recordTime - An employee should be able to enter time for a specified date`() {
+        val s = RecordTimeUserStory.addScenario(
+            "recordTime - An employee should be able to enter time for a specified date",
+
+            listOf(
+                "Given the employee worked 8 hours yesterday,",
+                "when the employee enters their time,",
+                "then time is saved."
+            )
+        )
+
         loginAsUserAndCreateProject("alice", "projecta")
-        recordTime.markDone("Given the employee worked 8 hours yesterday,")
+        s.markDone("Given the employee worked 8 hours yesterday,")
 
         enterTimeForEmployee("projecta")
-        recordTime.markDone("when the employee enters their time,")
+        s.markDone("when the employee enters their time,")
 
         verifyTheEntry()
-        recordTime.markDone("then time is saved.")
+        s.markDone("then time is saved.")
 
         logout()
     }

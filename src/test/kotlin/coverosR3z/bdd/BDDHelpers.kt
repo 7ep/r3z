@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.bdd
 
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.utility.FileReader

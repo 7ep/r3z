@@ -1,10 +1,10 @@
 package coverosR3z.authentication
 
-import coverosR3z.*
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.UserName
+import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -91,7 +91,7 @@ class AuthenticationPersistenceTests {
         val numberNewSessionsAdded = 20
         for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
             listOfThreads.add(thread {
-                ap.addNewSession(DEFAULT_SESSION_TOKEN+i, DEFAULT_USER, DEFAULT_DATETIME)
+                ap.addNewSession(DEFAULT_SESSION_TOKEN +i, DEFAULT_USER, DEFAULT_DATETIME)
             })
         }
         // wait for all those threads

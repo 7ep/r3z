@@ -1,7 +1,7 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_EMPLOYEE
-import coverosR3z.DEFAULT_PROJECT
+import coverosR3z.misc.DEFAULT_EMPLOYEE
+import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*

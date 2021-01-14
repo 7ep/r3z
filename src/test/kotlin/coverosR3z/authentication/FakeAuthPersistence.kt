@@ -1,6 +1,6 @@
 package coverosR3z.authentication
 
-import coverosR3z.DEFAULT_USER
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.types.DateTime

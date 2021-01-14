@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.bdd
 
 /**
  * The BDD framework requires a source BDD HTML file to exist

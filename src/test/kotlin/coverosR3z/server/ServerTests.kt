@@ -1,6 +1,5 @@
 package coverosR3z.server
 
-import coverosR3z.*
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
@@ -8,6 +7,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
+import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.FileReader.Companion.read
 import coverosR3z.misc.utility.encode

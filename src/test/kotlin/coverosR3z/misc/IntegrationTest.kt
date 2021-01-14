@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.misc
 
 /**
  * Marks a test as integration, which practically speaking

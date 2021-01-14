@@ -1,10 +1,12 @@
 package coverosR3z.authentication
 
-import coverosR3z.*
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.bdd.BDD
+import coverosR3z.bdd.BDDHelpers
+import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus

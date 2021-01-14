@@ -1,8 +1,8 @@
 package coverosR3z.server
 
-import coverosR3z.DEFAULT_EMPLOYEE
-import coverosR3z.DEFAULT_PASSWORD
-import coverosR3z.DEFAULT_USER
+import coverosR3z.misc.DEFAULT_EMPLOYEE
+import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg

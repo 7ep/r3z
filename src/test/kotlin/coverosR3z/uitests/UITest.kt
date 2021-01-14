@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.uitests
 
 /**
  * Marks a test as requiring the whole system to be running

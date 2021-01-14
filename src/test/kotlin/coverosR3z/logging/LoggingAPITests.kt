@@ -1,6 +1,6 @@
 package coverosR3z.logging
 
-import coverosR3z.DEFAULT_USER
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.misc.exceptions.InexactInputsException

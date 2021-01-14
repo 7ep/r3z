@@ -1,6 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.*
+import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence

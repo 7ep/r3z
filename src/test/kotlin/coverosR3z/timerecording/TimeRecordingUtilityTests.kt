@@ -1,10 +1,10 @@
 package coverosR3z.timerecording
 
-import coverosR3z.*
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOnAllLogging
+import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
