@@ -7,6 +7,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.UserName
 import coverosR3z.bdd.BDD
 import coverosR3z.bdd.BDDHelpers
+import coverosR3z.bdd.RecordTimeUserStory
 import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.DEFAULT_PROJECT_NAME
@@ -32,27 +33,47 @@ class EnteringTimeBDD {
     @BDD
     @Test
     fun `A employee enters six hours on a project with copious notes`() {
+        val s = RecordTimeUserStory.addScenario(
+            "A employee enters six hours on a project with copious notes",
+
+            listOf(
+                "Given I have worked 6 hours on project A on Monday with a lot of notes,",
+                "when I enter in that time,",
+                "then the system indicates it has persisted the new information."
+            )
+        )
+
         val (tru, entry) = addingProjectHoursWithNotes()
-        b.markDone("Given I have worked 6 hours on project A on Monday with a lot of notes,")
+        s.markDone("Given I have worked 6 hours on project A on Monday with a lot of notes,")
 
         val recordStatus = tru.recordTime(entry)
-        b.markDone("when I enter in that time,")
+        s.markDone("when I enter in that time,")
 
         assertEquals("the system indicates it has persisted the new information", StatusEnum.SUCCESS, recordStatus.status)
-        b.markDone("then the system indicates it has persisted the new information.")
+        s.markDone("then the system indicates it has persisted the new information.")
     }
 
     @BDD
     @Test
     fun `A employee has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
+        val s = RecordTimeUserStory.addScenario(
+            "A employee has already entered 24 hours for the day, they cannot enter more time on a new entry",
+
+            listOf(
+                "given the employee has already entered 24 hours of time entries before,",
+                "when they enter in a new time entry for one hour,",
+                "then the system disallows it."
+            )
+        )
+
         val (tru, newProject: Project, newEmployee: Employee) = enterTwentyFourHoursPreviously()
-        b.markDone("given the employee has already entered 24 hours of time entries before,")
+        s.markDone("given the employee has already entered 24 hours of time entries before,")
 
         val entry = createTimeEntryPreDatabase(time = Time(30), project = newProject, employee = newEmployee)
-        b.markDone("when they enter in a new time entry for one hour,")
+        s.markDone("when they enter in a new time entry for one hour,")
 
         assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
-        b.markDone("then the system disallows it.")
+        s.markDone("then the system disallows it.")
     }
 
 
@@ -64,25 +85,6 @@ class EnteringTimeBDD {
                  |_|
      alt-text: Helper Methods
      */
-
-    companion object {
-
-        private lateinit var b : BDDHelpers
-
-        @BeforeClass
-        @JvmStatic
-        fun init() {
-            b = BDDHelpers("enteringTimeBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun finishing() {
-            b.writeToFile()
-        }
-
-    }
-
 
     private fun addingProjectHoursWithNotes(): Pair<TimeRecordingUtilities, TimeEntryPreDatabase> {
         val pmd = PureMemoryDatabase()

@@ -2,57 +2,87 @@ package coverosR3z.timerecording
 
 import coverosR3z.bdd.BDD
 import coverosR3z.bdd.BDDHelpers
+import coverosR3z.bdd.RecordTimeUserStory
+import coverosR3z.bdd.ViewTimeUserStory
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
 
-/**
- * As an employee
-   I want to see the time entries I have previously entered
-   So that I can confirm my time on work has been accounted correctly
- */
 class SeeTimeEntriesBDD {
 
     @BDD
     @Test
     fun `happy path - should be able to get my time entries on a date`() {
+        val s = ViewTimeUserStory.addScenario(
+            "happy path - should be able to get my time entries on a date",
+
+            listOf(
+                "Given I have recorded some time entries",
+                "When I request my time entries on a specific date",
+                "Then I see all of them"
+            )
+        )
+
         val (tru, entries) = recordSomeEntriesInDatabase()
-        b.markDone("Given I have recorded some time entries")
+        s.markDone("Given I have recorded some time entries")
 
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
-        b.markDone("When I request my time entries on a specific date")
+        s.markDone("When I request my time entries on a specific date")
 
-        b.markDone("Then I see all of them") {allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020)}
+        assertTrue(allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020))
+        s.markDone("Then I see all of them")
     }
 
     @BDD
     @Test
     fun `should be able to obtain all my time entries`() {
+        val s = ViewTimeUserStory.addScenario(
+            "should be able to obtain all my time entries",
+
+            listOf(
+                "Given I have recorded some time entries",
+                "When I request my time entries",
+                "Then I see all of them"
+            )
+        )
+
         val (tru, entries) = recordSomeEntriesInDatabase()
-        b.markDone("Given I have recorded some time entries")
+        s.markDone("Given I have recorded some time entries")
 
         val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
-        b.markDone("When I request my time entries")
+        s.markDone("When I request my time entries")
 
-        b.markDone("Then I see all of them") {allEntriesArePresent(entries, dbEntries)}
+        assertTrue(allEntriesArePresent(entries, dbEntries))
+        s.markDone("Then I see all of them")
     }
 
     @BDD
     @Test
     fun `there should be no entries on a given date if they have not been recorded yet`(){
+        val s = ViewTimeUserStory.addScenario(
+            "there should be no entries on a given date if they have not been recorded yet",
+
+            listOf(
+                "Given no time entries were made on a day",
+                "When I ask for the time entries of that day",
+                "Then I am returned nothing"
+            )
+        )
+
         val (tru, _) = generateSomeEntriesPreDatabase()
-        b.markDone("Given no time entries were made on a day")
+        s.markDone("Given no time entries were made on a day")
 
         val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
-        b.markDone("When I ask for the time entries of that day")
+        s.markDone("When I ask for the time entries of that day")
 
         assertEquals(emptySet<TimeEntry>(), dbEntries)
-        b.markDone("Then I am returned nothing")
+        s.markDone("Then I am returned nothing")
     }
 
     /*
@@ -63,26 +93,6 @@ class SeeTimeEntriesBDD {
                  |_|
      alt-text: Helper Methods
      */
-
-
-    companion object {
-
-        private lateinit var b : BDDHelpers
-
-        @BeforeClass
-        @JvmStatic
-        fun init() {
-
-            b = BDDHelpers("viewTimeBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun finishing() {
-            b.writeToFile()
-        }
-
-    }
 
     private fun allEntriesArePresentOnDate(entries: List<TimeEntryPreDatabase>, dbEntries: Set<TimeEntry>, entryDate: Date) : Boolean {
         val todayEntries = entries.filter { e -> e.date == entryDate }
