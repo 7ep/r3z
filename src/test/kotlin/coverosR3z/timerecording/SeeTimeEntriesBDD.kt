@@ -1,6 +1,8 @@
 package coverosR3z.timerecording
 
-import coverosR3z.*
+import coverosR3z.bdd.BDD
+import coverosR3z.bdd.BDDHelpers
+import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

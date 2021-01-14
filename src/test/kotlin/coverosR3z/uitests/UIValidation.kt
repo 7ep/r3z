@@ -1,7 +1,6 @@
 package coverosR3z.uitests
 
-import coverosR3z.BDDHelpers
-import coverosR3z.UITest
+import coverosR3z.bdd.BDDHelpers
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.maxPasswordSize
 import coverosR3z.authentication.types.maxUserNameSize

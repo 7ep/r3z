@@ -1,7 +1,7 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_PROJECT_NAME
-import coverosR3z.DEFAULT_USER
+import coverosR3z.misc.DEFAULT_PROJECT_NAME
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException

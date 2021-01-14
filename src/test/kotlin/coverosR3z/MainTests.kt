@@ -1,5 +1,6 @@
 package coverosR3z
 
+import coverosR3z.misc.IntegrationTest
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.*

@@ -1,7 +1,7 @@
 package coverosR3z.server
 
-import coverosR3z.DEFAULT_USER
-import coverosR3z.PerformanceTest
+import coverosR3z.misc.DEFAULT_USER
+import coverosR3z.misc.PerformanceTest
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
@@ -382,7 +382,7 @@ class ServerUtilitiesTests {
     fun testShouldExtractUserFromAuthToken() {
         val authCookie = "abc123"
         val expectedUser = DEFAULT_USER
-        au.getUserForSessionBehavior = { DEFAULT_USER}
+        au.getUserForSessionBehavior = { DEFAULT_USER }
         val user = extractUserFromAuthToken(authCookie, au)
         assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
     }

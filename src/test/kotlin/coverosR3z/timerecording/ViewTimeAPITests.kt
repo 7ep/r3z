@@ -1,6 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_DATE_STRING
+import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr

@@ -1,8 +1,8 @@
 package coverosR3z.timerecording
 
-import coverosR3z.DEFAULT_EMPLOYEE
-import coverosR3z.DEFAULT_PROJECT
-import coverosR3z.DEFAULT_TIME_ENTRY
+import coverosR3z.misc.DEFAULT_EMPLOYEE
+import coverosR3z.misc.DEFAULT_PROJECT
+import coverosR3z.misc.DEFAULT_TIME_ENTRY
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -17,7 +17,7 @@ class FakeTimeEntryPersistence(
     var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
-    var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY},
+    var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
 ) : ITimeEntryPersistence {
 
 

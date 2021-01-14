@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.misc
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.types.CurrentUser
@@ -46,11 +46,11 @@ const val DEFAULT_SESSION_TOKEN = "abc123"
  * Helper to easily put together a time entry
  */
 fun createTimeEntryPreDatabase(
-        employee: Employee = DEFAULT_EMPLOYEE,
-        time: Time = DEFAULT_TIME,
-        project: Project = DEFAULT_PROJECT,
-        details: Details = Details(),
-        date: Date = A_RANDOM_DAY_IN_JUNE_2020
+    employee: Employee = DEFAULT_EMPLOYEE,
+    time: Time = DEFAULT_TIME,
+    project: Project = DEFAULT_PROJECT,
+    details: Details = Details(),
+    date: Date = A_RANDOM_DAY_IN_JUNE_2020
 ) = TimeEntryPreDatabase ( employee, project, time, date, details)
 
 /**
