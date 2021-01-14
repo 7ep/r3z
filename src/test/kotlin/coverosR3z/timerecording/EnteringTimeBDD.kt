@@ -1,25 +1,22 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.UserName
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.bdd.BDD
-import coverosR3z.bdd.BDDHelpers
 import coverosR3z.bdd.RecordTimeUserStory
 import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.DEFAULT_PROJECT_NAME
 import coverosR3z.misc.createTimeEntryPreDatabase
-import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.AfterClass
 import org.junit.Assert.*
-import org.junit.BeforeClass
 import org.junit.Test
 
 /**

@@ -1,6 +1,5 @@
 package coverosR3z.uitests
 
-import coverosR3z.bdd.BDDHelpers
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.utility.Server
@@ -56,8 +55,6 @@ class UIErrors {
         private lateinit var eep : EnterEmployeePage
         private lateinit var epp : EnterProjectPage
         private lateinit var lop : LogoutPage
-        private lateinit var createEmployee : BDDHelpers
-        private lateinit var recordTime : BDDHelpers
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
 
@@ -67,18 +64,6 @@ class UIErrors {
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
-
-            // setup for BDD
-            createEmployee = BDDHelpers("createEmployeeBDD.html")
-            recordTime = BDDHelpers("enteringTimeBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun shutDown() {
-            createEmployee.writeToFile()
-            recordTime.writeToFile()
-
         }
 
     }
