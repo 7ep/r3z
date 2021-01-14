@@ -2,10 +2,7 @@ package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.utility.safeHtml
-import coverosR3z.server.types.GetEndpoint
-import coverosR3z.server.types.PostEndpoint
-import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.server.utility.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
@@ -14,20 +11,28 @@ import coverosR3z.timerecording.types.EmployeeId
 
 class RegisterAPI(private val sd: ServerData) {
 
-    enum class Elements(val elemName: String, val id: String) {
+    enum class Elements(private val elemName: String, private val id: String) : Element {
         USERNAME_INPUT("username", "username"),
         PASSWORD_INPUT("password", "password"),
         EMPLOYEE_INPUT("employee", "employee"),
-        REGISTER_BUTTON("", "register_button"),
+        REGISTER_BUTTON("", "register_button"),;
+
+        override fun getId(): String {
+            return this.id
+        }
+
+        override fun getElemName(): String {
+            return this.elemName
+        }
     }
 
     companion object : GetEndpoint, PostEndpoint {
 
         override val requiredInputs = setOf(
-            Elements.USERNAME_INPUT.elemName,
-            Elements.PASSWORD_INPUT.elemName,
-            Elements.EMPLOYEE_INPUT.elemName,
-            Elements.USERNAME_INPUT.elemName,
+            Elements.USERNAME_INPUT,
+            Elements.PASSWORD_INPUT,
+            Elements.EMPLOYEE_INPUT,
+            Elements.USERNAME_INPUT,
         )
         override val path: String
             get() = "register"
@@ -44,11 +49,11 @@ class RegisterAPI(private val sd: ServerData) {
     }
 
     fun handlePOST() : PreparedResponseData {
-        val data = sd.ahd.data
+        val data = sd.ahd.data.mapping
         val au = sd.au
-        val username = UserName.make(data[Elements.USERNAME_INPUT.elemName])
-        val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
-        val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.elemName])
+        val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
+        val password = Password.make(data[Elements.PASSWORD_INPUT.getElemName()])
+        val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.getElemName()])
         val result = au.register(username, password, employeeId)
         return if (result.status == RegistrationResultStatus.SUCCESS) {
             okHTML(successHTML)
@@ -79,20 +84,20 @@ class RegisterAPI(private val sd: ServerData) {
               <tbody>
                 <tr>
                     <td>
-                        <label for="${Elements.USERNAME_INPUT.elemName}">Username</label><br>
-                        <input type="text" name="${Elements.USERNAME_INPUT.elemName}" id="${Elements.USERNAME_INPUT.id}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
+                        <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label><br>
+                        <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="${Elements.PASSWORD_INPUT.elemName}">Password</label><br>
-                        <input type="password" name="${Elements.PASSWORD_INPUT.elemName}" id="${Elements.PASSWORD_INPUT.id}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
+                        <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label><br>
+                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="${Elements.EMPLOYEE_INPUT.elemName}">Employee</label><br>
-                        <select id="${Elements.EMPLOYEE_INPUT.id}" name="${Elements.EMPLOYEE_INPUT.elemName}" required="required">
+                        <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Employee</label><br>
+                        <select id="${Elements.EMPLOYEE_INPUT.getId()}" name="${Elements.EMPLOYEE_INPUT.getElemName()}" required="required">
                             <option selected disabled hidden value="">Choose here</option>
                            """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
                            
@@ -101,7 +106,7 @@ class RegisterAPI(private val sd: ServerData) {
                 </tr>
                 <tr>
                     <td>
-                        <button id="${Elements.REGISTER_BUTTON.id}" class="submit">Register</button>
+                        <button id="${Elements.REGISTER_BUTTON.getId()}" class="submit">Register</button>
                     </td>
                 </tr>
             </tbody>

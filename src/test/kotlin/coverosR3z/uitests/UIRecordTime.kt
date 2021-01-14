@@ -55,14 +55,14 @@ class UIRecordTime {
 
         val timeRow = driver.findElement(By.id("time-entry-1-1"))
 
-        val timeField = timeRow.findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.elemName}]"))
+        val timeField = timeRow.findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
         timeField.clear()
         timeField.sendKeys("120")
         timeRow.findElement(By.tagName("button")).click()
         // change time to 120
 
         driver.get("$domain/${ViewTimeAPI.path}")
-        assertEquals("120", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.elemName}]")).getAttribute("value"))
+        assertEquals("120", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).getAttribute("value"))
         // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
         // until we persist it in some way
         logout()
@@ -175,7 +175,7 @@ class UIRecordTime {
         // Verify the entry
         driver.get("$domain/${ViewTimeAPI.path}")
         assertEquals("your time entries", driver.title)
-        assertEquals("2020-06-12", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.DATE_INPUT.elemName}]")).getAttribute("value"))
+        assertEquals("2020-06-12", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).getAttribute("value"))
     }
 
 

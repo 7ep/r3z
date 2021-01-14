@@ -10,6 +10,7 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.utility.Server
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
@@ -277,16 +278,16 @@ class ServerPerformanceTests {
                     port = port
                 )
             for (i in 1..numRequests) {
-                val data = mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 20).stringValue,
-                    EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "some details go here",
-                    EnterTimeAPI.Elements.PROJECT_INPUT.elemName to project.id.value.toString(),
-                    EnterTimeAPI.Elements.TIME_INPUT.elemName to "1",
-                )
+                val data = PostBodyData(mapOf(
+                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 20).stringValue,
+                    EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
+                    EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.id.value.toString(),
+                    EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                ))
                 val clientWithData = client.addPostData(data)
                 clientWithData.send()
                 val result = clientWithData.read()
-                Assert.assertEquals("result was ${result.rawData}", StatusCode.OK, result.statusCode)
+                Assert.assertEquals("result was ${result.data.rawData}", StatusCode.OK, result.statusCode)
             }
         }
     }

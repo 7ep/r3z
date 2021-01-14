@@ -2,10 +2,7 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.safeHtml
-import coverosR3z.server.types.GetEndpoint
-import coverosR3z.server.types.PostEndpoint
-import coverosR3z.server.types.PreparedResponseData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
@@ -14,21 +11,29 @@ import coverosR3z.timerecording.types.*
 
 class EnterTimeAPI(private val sd: ServerData) {
 
-    enum class Elements (val elemName: String, val id: String) {
+    enum class Elements (private val elemName: String, private val id: String) : Element {
         PROJECT_INPUT("project_entry", "project_entry"),
         TIME_INPUT("time_entry", "time_entry"),
         DETAIL_INPUT("detail_entry", "detail_entry"),
         ENTER_TIME_BUTTON("", "enter_time_button"),
-        DATE_INPUT("date_entry", "date_entry"),
+        DATE_INPUT("date_entry", "date_entry"),;
+
+        override fun getId(): String {
+            return this.id
+        }
+
+        override fun getElemName(): String {
+            return this.elemName
+        }
     }
 
     companion object : GetEndpoint, PostEndpoint {
 
         override val requiredInputs = setOf(
-            Elements.PROJECT_INPUT.elemName,
-            Elements.TIME_INPUT.elemName,
-            Elements.DETAIL_INPUT.elemName,
-            Elements.DATE_INPUT.elemName,
+            Elements.PROJECT_INPUT,
+            Elements.TIME_INPUT,
+            Elements.DETAIL_INPUT,
+            Elements.DATE_INPUT,
         )
         override val path: String
             get() = "entertime"
@@ -51,10 +56,10 @@ class EnterTimeAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.tru
-        val projectId = ProjectId.make(data[Elements.PROJECT_INPUT.elemName])
-        val time = Time.make(data[Elements.TIME_INPUT.elemName])
-        val details = Details.make(data[Elements.DETAIL_INPUT.elemName])
-        val date = Date.make(data[Elements.DATE_INPUT.elemName])
+        val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
+        val time = Time.make(data.mapping[Elements.TIME_INPUT.getElemName()])
+        val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
+        val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 
         val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
@@ -101,22 +106,22 @@ class EnterTimeAPI(private val sd: ServerData) {
                 </p>
     
                 <p>
-                    <label for="${Elements.TIME_INPUT.elemName}">Time:</label>
-                    <input name="${Elements.TIME_INPUT.elemName}" id="${Elements.TIME_INPUT.id}" type="text" />
+                    <label for="${Elements.TIME_INPUT.getElemName()}">Time:</label>
+                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="text" />
                 </p>
     
                 <p>
-                    <label for="${Elements.DETAIL_INPUT.elemName}">Details:</label>
-                    <input name="${Elements.DETAIL_INPUT.elemName}" id="${Elements.DETAIL_INPUT.id}" type="text" />
+                    <label for="${Elements.DETAIL_INPUT.getElemName()}">Details:</label>
+                    <input name="${Elements.DETAIL_INPUT.getElemName()}" id="${Elements.DETAIL_INPUT.getId()}" type="text" />
                 </p>
                 
                 <p>
-                    <label for="${Elements.DATE_INPUT.elemName}">Date:</label>
-                    <input name="${Elements.DATE_INPUT.elemName}" id="${Elements.DATE_INPUT.id}" type="date" />
+                    <label for="${Elements.DATE_INPUT.getElemName()}">Date:</label>
+                    <input name="${Elements.DATE_INPUT.getElemName()}" id="${Elements.DATE_INPUT.getId()}" type="date" />
                 </p>
                 
                 <p>
-                    <button id="${Elements.ENTER_TIME_BUTTON.id}">Enter time</button>
+                    <button id="${Elements.ENTER_TIME_BUTTON.getId()}">Enter time</button>
                 </p>
     
             </form>

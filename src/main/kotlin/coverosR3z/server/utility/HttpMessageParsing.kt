@@ -7,6 +7,7 @@ import coverosR3z.logging.logTrace
 import coverosR3z.misc.utility.decode
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.server.types.AnalyzedHttpData
+import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
 
@@ -54,7 +55,7 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
     val statusLine = socketWrapper.readLine()
     logTrace { "statusLine: $statusLine" }
     if (statusLine.isNullOrBlank()) {
-        return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION, rawData = null)
+        return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION)
     }
 
     return when {
@@ -76,9 +77,9 @@ private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISock
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
     val user = extractUserFromAuthToken(token, au)
-    val (data, rawData) = extractData(socketWrapper, headers)
+    val postBodyData = extractData(socketWrapper, headers)
 
-    return AnalyzedHttpData(verb, path, data, user, token, headers, rawData)
+    return AnalyzedHttpData(verb, path, postBodyData, user, token, headers)
 }
 
 /**
@@ -94,19 +95,19 @@ private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISock
         null
     }
 
-    return AnalyzedHttpData(statusCode = statusCode, headers = headers, rawData = rawData)
+    return AnalyzedHttpData(statusCode = statusCode, headers = headers, data = PostBodyData(rawData = rawData))
 }
 
 /**
  * read the body if one exists and convert it to a string -> string map
  */
-private fun extractData(server: ISocketWrapper, headers: List<String>) : Pair<Map<String, String>, String?> {
+private fun extractData(server: ISocketWrapper, headers: List<String>) : PostBodyData {
     return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
-        Pair(parsePostedData(body), body)
+        PostBodyData(parsePostedData(body), body)
     } else {
-        Pair(emptyMap(), null)
+        PostBodyData()
     }
 }
 

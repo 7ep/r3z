@@ -15,7 +15,7 @@ interface PostEndpoint : Api {
      * For example, if you require the data to include username and password,
      * you include that here.
      */
-    val requiredInputs: Set<String>
+    val requiredInputs: Set<Element>
 
 
 }

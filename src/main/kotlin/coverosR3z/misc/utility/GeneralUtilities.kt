@@ -1,6 +1,7 @@
 package coverosR3z.misc.utility
 
 import coverosR3z.misc.exceptions.InexactInputsException
+import coverosR3z.server.types.Element
 import java.lang.IllegalArgumentException
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -56,9 +57,10 @@ fun checkParseToLong(value: String?,
  * @param receivedKeys the data sent to the API
  * @param requiredKeys the exact keys required
  */
-fun checkHasExactInputs(receivedKeys: Set<String>, requiredKeys: Set<String>) {
-    if (receivedKeys != requiredKeys) {
-        throw InexactInputsException("expected keys: ${requiredKeys}. received keys: $receivedKeys")
+fun checkHasExactInputs(receivedKeys: Set<String>, requiredKeys: Set<Element>) {
+    val requiredKeyStrings = requiredKeys.map { it.getElemName() }.toSet()
+    if (receivedKeys != requiredKeyStrings) {
+        throw InexactInputsException("expected keys: ${requiredKeyStrings}. received keys: $receivedKeys")
     }
 }
 
