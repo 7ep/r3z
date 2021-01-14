@@ -13,17 +13,25 @@ import coverosR3z.server.utility.successHTML
 
 class LoginAPI(val sd: ServerData) {
 
-    enum class Elements(val elemName: String, val id: String)  {
+    enum class Elements(private val elemName: String, private val id: String) : Element  {
         USERNAME_INPUT("username", "username"),
         PASSWORD_INPUT("password", "password"),
-        LOGIN_BUTTON("", "login_button"),
+        LOGIN_BUTTON("", "login_button"),;
+
+        override fun getId(): String {
+            return this.id
+        }
+
+        override fun getElemName(): String {
+            return this.elemName
+        }
     }
 
     companion object : GetEndpoint, PostEndpoint {
 
         override val requiredInputs = setOf(
-            Elements.USERNAME_INPUT.elemName,
-            Elements.PASSWORD_INPUT.elemName,
+            Elements.USERNAME_INPUT,
+            Elements.PASSWORD_INPUT,
         )
         override val path: String
             get() = "login"
@@ -40,10 +48,10 @@ class LoginAPI(val sd: ServerData) {
     }
 
     fun handlePOST() : PreparedResponseData {
-        val data = sd.ahd.data
+        val data = sd.ahd.data.mapping
         val au = sd.au
-        val username = UserName.make(data[Elements.USERNAME_INPUT.elemName])
-        val password = Password.make(data[Elements.PASSWORD_INPUT.elemName])
+        val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
+        val password = Password.make(data[Elements.PASSWORD_INPUT.getElemName()])
         val (loginResult, loginUser) = au.login(username, password)
         return if (loginResult == LoginResult.SUCCESS && loginUser != NO_USER) {
             val newSessionToken: String = au.createNewSession(loginUser)
@@ -76,18 +84,18 @@ class LoginAPI(val sd: ServerData) {
                 <tbody>
                     <tr>
                         <td>
-                            <label for="${Elements.USERNAME_INPUT.elemName}">Username</label>
-                            <input type="text" name="${Elements.USERNAME_INPUT.elemName}" id="${Elements.USERNAME_INPUT.id}">
+                            <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
+                            <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}">
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <label for="${Elements.PASSWORD_INPUT.elemName}">Password</label>
-                            <input type="password" name="${Elements.PASSWORD_INPUT.elemName}" id="${Elements.PASSWORD_INPUT.id}">
+                            <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
+                            <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}">
                         </td>
                     </tr>    
                         <td>
-                            <button id="${Elements.LOGIN_BUTTON.id}" class="submit">Login</button>
+                            <button id="${Elements.LOGIN_BUTTON.getId()}" class="submit">Login</button>
                         </td>
                     </tr>
                 </tbody>

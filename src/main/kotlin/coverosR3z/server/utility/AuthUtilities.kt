@@ -6,6 +6,8 @@ import coverosR3z.misc.utility.checkHasExactInputs
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.Element
+import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
@@ -66,13 +68,13 @@ class AuthUtilities {
          */
         fun doPOSTAuthenticated(
             authStatus: AuthStatus,
-            requiredInputs: Set<String>,
-            data: Map<String, String>,
+            requiredInputs: Set<Element>,
+            data: PostBodyData,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
             return when (authStatus) {
                 AuthStatus.AUTHENTICATED -> {
-                    checkHasExactInputs(data.keys, requiredInputs)
+                    checkHasExactInputs(data.mapping.keys, requiredInputs)
                     handler()
                 }
                 AuthStatus.UNAUTHENTICATED -> handleUnauthorized()
@@ -86,13 +88,13 @@ class AuthUtilities {
          */
         fun doPOSTRequireUnauthenticated(
             authStatus: AuthStatus,
-            requiredInputs: Set<String>,
-            data: Map<String, String>,
+            requiredInputs: Set<Element>,
+            data: PostBodyData,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
             return when (authStatus) {
                 AuthStatus.UNAUTHENTICATED -> {
-                    checkHasExactInputs(data.keys, requiredInputs)
+                    checkHasExactInputs(data.mapping.keys, requiredInputs)
                     handler()
                 }
                 AuthStatus.AUTHENTICATED -> redirectTo(HomepageAPI.path)

@@ -14,10 +14,7 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.utility.toStr
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.types.StatusCode
-import coverosR3z.server.types.Verb
+import coverosR3z.server.types.*
 import coverosR3z.server.utility.CRLF
 import coverosR3z.server.utility.Server
 import coverosR3z.server.utility.SocketWrapper
@@ -105,7 +102,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("static/sample.html")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.html")!!), result.data.rawData)
     }
 
     /**
@@ -123,7 +120,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("static/sample.css")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.css")!!), result.data.rawData)
     }
 
     /**
@@ -141,7 +138,7 @@ class ServerTests {
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
 
         assertEquals(StatusCode.OK, result.statusCode)
-        assertEquals(toStr(read("static/sample.js")!!), result.rawData)
+        assertEquals(toStr(read("static/sample.js")!!), result.data.rawData)
     }
 
     /**
@@ -224,7 +221,7 @@ class ServerTests {
         au.getUserForSessionBehavior = { NO_USER }
         client.write("POST /${RegisterAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.elemName}=1&${RegisterAPI.Elements.USERNAME_INPUT.elemName}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
+        val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName()}=1&${RegisterAPI.Elements.USERNAME_INPUT.getElemName()}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.getElemName()}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
         val result: AnalyzedHttpData = parseHttpMessage(client, au)
@@ -305,7 +302,7 @@ class ServerTests {
         au.getUserForSessionBehavior = { DEFAULT_USER }
         client.write("POST /${LoginAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "${LoginAPI.Elements.USERNAME_INPUT.elemName}=alice&${LoginAPI.Elements.PASSWORD_INPUT.elemName}=password12345"
+        val body = "${LoginAPI.Elements.USERNAME_INPUT.getElemName()}=alice&${LoginAPI.Elements.PASSWORD_INPUT.getElemName()}=password12345"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
 
@@ -331,8 +328,8 @@ class ServerTests {
         logSettings[LogTypes.DEBUG] = false
         val headers = listOf("Connection: keep-alive")
         val body = mapOf(
-                LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
-                LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+                LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+                LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value)
         val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au, port)
 
         val (time, _) = getTime {
@@ -421,12 +418,12 @@ class ServerTests {
                     authUtilities = au,
                     port = port)
             for (i in 1..numRequests) {
-                val data = mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.elemName to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 100).stringValue,
-                    EnterTimeAPI.Elements.DETAIL_INPUT.elemName to "some details go here",
-                    EnterTimeAPI.Elements.PROJECT_INPUT.elemName to "1",
-                    EnterTimeAPI.Elements.TIME_INPUT.elemName to "1",
-                )
+                val data = PostBodyData(mapOf(
+                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 100).stringValue,
+                    EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
+                    EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                    EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                ))
                 val clientWithData = client.addPostData(data)
                 clientWithData.send()
                 val result = clientWithData.read()
@@ -447,8 +444,8 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
         return parseHttpMessage(socketWrapper, au)
     }
 
-    fun addPostData(body: Map<String, String>) : Client {
-        val bodyString = body.map{ it.key + "=" + encode(it.value) }.joinToString("&")
+    fun addPostData(body: PostBodyData) : Client {
+        val bodyString = body.mapping.map{ it.key + "=" + encode(it.value) }.joinToString("&")
         val data =  "${Verb.POST} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headers + CRLF + CRLF + bodyString
         return Client(this.socketWrapper, data = data, au)
     }

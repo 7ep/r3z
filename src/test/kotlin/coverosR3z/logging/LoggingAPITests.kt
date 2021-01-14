@@ -6,6 +6,7 @@ import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.After
@@ -112,10 +113,10 @@ class LoggingAPITests {
      */
     @Test
     fun testShouldComplain_missingAudit() {
-        val data = mapOf(
-                LoggingAPI.Elements.WARN_INPUT.elemName to "false",
-                LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
-                LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
+        val data = PostBodyData(mapOf(
+                LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "true",
+                LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
         val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
@@ -125,10 +126,10 @@ class LoggingAPITests {
 
     @Test
     fun testShouldComplain_missingWarn() {
-        val data = mapOf(
-                LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
-                LoggingAPI.Elements.DEBUG_INPUT.elemName to "true",
-                LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
+        val data = PostBodyData(mapOf(
+                LoggingAPI.Elements.AUDIT_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "true",
+                LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
         val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
@@ -138,10 +139,10 @@ class LoggingAPITests {
 
     @Test
     fun testShouldComplain_missingDebug() {
-        val data = mapOf(
-                LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
-                LoggingAPI.Elements.WARN_INPUT.elemName to "false",
-                LoggingAPI.Elements.TRACE_INPUT.elemName to "false")
+        val data = PostBodyData(mapOf(
+                LoggingAPI.Elements.AUDIT_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
 
         val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
@@ -152,10 +153,10 @@ class LoggingAPITests {
 
     @Test
     fun testShouldComplain_missingTrace() {
-        val data = mapOf(
-                LoggingAPI.Elements.AUDIT_INPUT.elemName to "false",
-                LoggingAPI.Elements.WARN_INPUT.elemName to "false",
-                LoggingAPI.Elements.DEBUG_INPUT.elemName to "false")
+        val data = PostBodyData(mapOf(
+                LoggingAPI.Elements.AUDIT_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
+                LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "false"))
         val sd = ServerData(FakeAuthenticationUtilities(), FakeTimeRecordingUtilities(), AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
@@ -220,23 +221,23 @@ class LoggingAPITests {
     private fun allFalse(audit: String = "false",
                          warn: String = "false",
                          debug: String = "false",
-                         trace: String = "false"): Map<String, String> {
-        return mapOf(
-                LoggingAPI.Elements.AUDIT_INPUT.elemName to audit,
-                LoggingAPI.Elements.WARN_INPUT.elemName to warn,
-                LoggingAPI.Elements.DEBUG_INPUT.elemName to debug,
-                LoggingAPI.Elements.TRACE_INPUT.elemName to trace)
+                         trace: String = "false"): PostBodyData {
+        return PostBodyData(mapOf(
+                LoggingAPI.Elements.AUDIT_INPUT.getElemName() to audit,
+                LoggingAPI.Elements.WARN_INPUT.getElemName() to warn,
+                LoggingAPI.Elements.DEBUG_INPUT.getElemName() to debug,
+                LoggingAPI.Elements.TRACE_INPUT.getElemName() to trace))
     }
 
     private fun allTrue(audit: String = "true",
                         warn: String = "true",
                         debug: String = "true",
-                        trace: String = "true"): Map<String, String> {
-        return mapOf(
-            LoggingAPI.Elements.AUDIT_INPUT.elemName to audit,
-            LoggingAPI.Elements.WARN_INPUT.elemName to warn,
-            LoggingAPI.Elements.DEBUG_INPUT.elemName to debug,
-            LoggingAPI.Elements.TRACE_INPUT.elemName to trace)
+                        trace: String = "true"): PostBodyData {
+        return PostBodyData(mapOf(
+            LoggingAPI.Elements.AUDIT_INPUT.getElemName() to audit,
+            LoggingAPI.Elements.WARN_INPUT.getElemName() to warn,
+            LoggingAPI.Elements.DEBUG_INPUT.getElemName() to debug,
+            LoggingAPI.Elements.TRACE_INPUT.getElemName() to trace))
     }
 
 }

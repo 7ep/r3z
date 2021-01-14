@@ -11,6 +11,7 @@ import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -36,9 +37,9 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_happyPath() {
-        val data = mapOf(
-                LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
-            LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val data = PostBodyData(mapOf(
+                LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+            LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val responseData = LoginAPI.handlePost(sd)
@@ -52,9 +53,9 @@ class LoginAPITests {
     @Test
     fun testHandlePostLogin_failedLogin() {
         au.loginBehavior = {Pair(LoginResult.FAILURE, NO_USER)}
-        val data = mapOf(
-            LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
-            LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val data = PostBodyData(mapOf(
+            LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+            LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val responseData = LoginAPI.handlePost(sd)
@@ -70,8 +71,8 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_missingUser() {
-        val data = mapOf(
-            LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val data = PostBodyData(mapOf(
+            LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
@@ -84,9 +85,9 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_blankUser() {
-        val data = mapOf(
-            LoginAPI.Elements.USERNAME_INPUT.elemName to "",
-            LoginAPI.Elements.PASSWORD_INPUT.elemName to DEFAULT_PASSWORD.value)
+        val data = PostBodyData(mapOf(
+            LoginAPI.Elements.USERNAME_INPUT.getElemName() to "",
+            LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
@@ -99,8 +100,8 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_missingPassword() {
-        val data = mapOf(
-            LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value)
+        val data = PostBodyData(mapOf(
+            LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
@@ -113,9 +114,9 @@ class LoginAPITests {
      */
     @Test
     fun testHandlePostLogin_blankPassword() {
-        val data = mapOf(
-            LoginAPI.Elements.USERNAME_INPUT.elemName to DEFAULT_USER.name.value,
-            LoginAPI.Elements.PASSWORD_INPUT.elemName to "")
+        val data = PostBodyData(mapOf(
+            LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+            LoginAPI.Elements.PASSWORD_INPUT.getElemName() to ""))
 
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }

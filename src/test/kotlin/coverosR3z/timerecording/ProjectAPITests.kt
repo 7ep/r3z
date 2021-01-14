@@ -5,10 +5,7 @@ import coverosR3z.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.ServerData
-import coverosR3z.server.types.StatusCode
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.types.maxProjectNameSizeMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -34,7 +31,7 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject() {
-        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to DEFAULT_PROJECT_NAME.value)
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         assertEquals(StatusCode.OK, ProjectAPI.handlePost(sd).statusCode)
@@ -45,7 +42,7 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_HugeName() {
-        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to "a".repeat(31))
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(31)))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ ProjectAPI.handlePost(sd)}
@@ -58,7 +55,7 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_BigName() {
-        val data = mapOf(ProjectAPI.Elements.PROJECT_INPUT.elemName to "a".repeat(30))
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(30)))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
         assertEquals(StatusCode.OK, ProjectAPI.handlePost(sd).statusCode)
@@ -69,7 +66,7 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_noBody() {
-        val data = emptyMap<String,String>()
+        val data = PostBodyData()
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
         val ex = assertThrows(InexactInputsException::class.java){  ProjectAPI.handlePost(sd) }
         assertEquals("expected keys: [project_name]. received keys: []", ex.message)
