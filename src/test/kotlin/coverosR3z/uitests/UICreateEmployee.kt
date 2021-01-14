@@ -2,6 +2,7 @@ package coverosR3z.uitests
 
 import coverosR3z.bdd.BDD
 import coverosR3z.bdd.BDDHelpers
+import coverosR3z.bdd.CreateEmployeeUserStory
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.utility.Server
@@ -17,16 +18,26 @@ class UICreateEmployee {
     @UITest
     @Test
     fun `createEmployee - I should be able to create an employee`() {
-        createEmployee.markDone("Given the company has hired a new employee, Andrea,")
+        val s = CreateEmployeeUserStory.addScenario(
+            "createEmployee - I should be able to create an employee",
+
+            listOf(
+                "Given the company has hired a new employee, Andrea,",
+                "when I add her as an employee,",
+                "then the system indicates success."
+            )
+        )
+
+        s.markDone("Given the company has hired a new employee, Andrea,")
 
         rp.register("employeemaker", "password12345", "Administrator")
         lp.login("employeemaker", "password12345")
         eep.enter("a new employee")
-        createEmployee.markDone("when I add her as an employee,")
+        s.markDone("when I add her as an employee,")
 
         assertEquals("SUCCESS", driver.title)
         driver.get("$domain/${ViewEmployeesAPI.path}")
-        createEmployee.markDone("then the system indicates success.")
+        s.markDone("then the system indicates success.")
 
         logout()
     }
@@ -55,8 +66,6 @@ class UICreateEmployee {
         private lateinit var eep : EnterEmployeePage
         private lateinit var epp : EnterProjectPage
         private lateinit var lop : LogoutPage
-        private lateinit var createEmployee : BDDHelpers
-        private lateinit var recordTime : BDDHelpers
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
 
@@ -66,18 +75,6 @@ class UICreateEmployee {
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
-
-            // setup for BDD
-            createEmployee = BDDHelpers("createEmployeeBDD.html")
-            recordTime = BDDHelpers("enteringTimeBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun shutDown() {
-            createEmployee.writeToFile()
-            recordTime.writeToFile()
-
         }
 
     }

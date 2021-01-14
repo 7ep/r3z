@@ -1,6 +1,8 @@
 package coverosR3z.bdd
 
 object RecordTimeUserStory : UserStory(
+    key = "RecordTime",
+    story =
     """
         As an employee, Andrea,
         I want to record my time
