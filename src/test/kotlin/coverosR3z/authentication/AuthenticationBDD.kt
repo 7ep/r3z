@@ -6,7 +6,6 @@ import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.bdd.AuthenticationUserStory
 import coverosR3z.bdd.BDD
-import coverosR3z.bdd.BDDHelpers
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.AnalyzedHttpData
@@ -194,20 +193,6 @@ class AuthenticationBDD {
      */
 
     companion object {
-
-        private lateinit var b : BDDHelpers
-
-        @BeforeClass
-        @JvmStatic
-        fun init() {
-            b = BDDHelpers("authenticationBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun finishing() {
-            b.writeToFile()
-        }
 
         private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
             val (tru, _) = initializeAUserAndLogin()
