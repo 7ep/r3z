@@ -1,5 +1,6 @@
 package coverosR3z.uitests
 
+import coverosR3z.bdd.BDD
 import coverosR3z.bdd.BDDHelpers
 import coverosR3z.bdd.BDDScenario
 import coverosR3z.bdd.RecordTimeUserStory
@@ -18,13 +19,7 @@ import org.openqa.selenium.chrome.ChromeDriver
 
 class UIRecordTime {
 
-    /*
-    Employee user story:
-         As an employee, Andrea
-         I want to record my time
-         So that I am easily able to document my time in an organized way
-    */
-
+    @BDD
     @UITest
     @Test
     fun `recordTime - An employee should be able to enter time for a specified date`() {
@@ -50,18 +45,27 @@ class UIRecordTime {
         logout()
     }
 
-    //TODO: Implement this test for real
+    @BDD
     @UITest
     @Test
     fun `recordTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
+        val s = RecordTimeUserStory.addScenario(
+            "recordTime - An employee should be able to edit the number of hours worked from a previous time entry",
+
+            listOf(
+                "Given Andrea has a previous time entry with 1 hour,",
+                "when she changes the entry to two hours,",
+                "then the system indicates the two hours was persisted"
+            )
+        )
         loginAsUserAndCreateProject("Andrea", "projectb")
-        recordTime.markDone("Given Andrea has a previous time entry with 1 hour,")
+        s.markDone("Given Andrea has a previous time entry with 1 hour,")
 
         // when the employee enters their time
         enterTimeForEmployee("projectb")
 
         driver.get("$domain/${ViewTimeAPI.path}")
-        recordTime.markDone("when she changes the entry to two hours,")
+        s.markDone("when she changes the entry to two hours,")
         // muck with it
 
         val timeRow = driver.findElement(By.id("time-entry-1-1"))
@@ -74,6 +78,7 @@ class UIRecordTime {
 
         driver.get("$domain/${ViewTimeAPI.path}")
         assertEquals("120", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).getAttribute("value"))
+        s.markDone("then the system indicates the two hours was persisted")
         // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
         // until we persist it in some way
         logout()
@@ -103,8 +108,6 @@ class UIRecordTime {
         private lateinit var eep : EnterEmployeePage
         private lateinit var epp : EnterProjectPage
         private lateinit var lop : LogoutPage
-        private lateinit var createEmployee : BDDHelpers
-        private lateinit var recordTime : BDDHelpers
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
 
@@ -114,18 +117,6 @@ class UIRecordTime {
             // install the most-recent chromedriver
             WebDriverManager.chromedriver().setup()
             WebDriverManager.firefoxdriver().setup()
-
-            // setup for BDD
-            createEmployee = BDDHelpers("createEmployeeBDD.html")
-            recordTime = BDDHelpers("enteringTimeBDD.html")
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun shutDown() {
-            createEmployee.writeToFile()
-            recordTime.writeToFile()
-
         }
 
     }
