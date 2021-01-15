@@ -56,7 +56,7 @@ class UICreateEmployee {
 
 
     companion object {
-        private const val port = 2004
+        private const val port = 4000
         private const val domain = "http://localhost:$port"
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server

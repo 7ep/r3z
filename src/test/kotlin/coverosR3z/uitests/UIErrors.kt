@@ -43,7 +43,7 @@ class UIErrors {
 
 
     companion object {
-        private const val port = 2003
+        private const val port = 4002
         private const val domain = "http://localhost:$port"
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server

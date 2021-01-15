@@ -52,7 +52,7 @@ class UIGeneral {
 
 
     companion object {
-        private const val port = 2002
+        private const val port = 4005
         private const val domain = "http://localhost:$port"
 
         private val webDriver = Drivers.CHROME

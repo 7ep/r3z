@@ -20,6 +20,7 @@ import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
 import org.junit.*
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 /**
@@ -78,7 +79,7 @@ class ServerPerformanceTests {
         val numberThreads = 2
         val numberRequests = 10
 
-        val port = 3000
+        val port = port.getAndIncrement()
         startServer(port)
 
         // so we don't see spam
@@ -113,7 +114,7 @@ class ServerPerformanceTests {
         val numberThreads = 2
         val numberRequests = 10
 
-        val port = 3001
+        val port = port.getAndIncrement()
         startServer(port)
 
         // so we don't see spam
@@ -152,7 +153,7 @@ class ServerPerformanceTests {
         val numberThreads = 2
         val numberRequests = 10
 
-        val port = 3002
+        val port = port.getAndIncrement()
         startServer(port)
 
         // so we don't see spam
@@ -186,7 +187,7 @@ class ServerPerformanceTests {
         val numberThreads = 2
         val numberRequests = 10
 
-        val port = 3003
+        val port = port.getAndIncrement()
         startServer(port)
 
         // so we don't see spam
@@ -290,6 +291,10 @@ class ServerPerformanceTests {
                 Assert.assertEquals("result was ${result.data.rawData}", StatusCode.OK, result.statusCode)
             }
         }
+    }
+    
+    companion object {
+        val port = AtomicInteger(3000)
     }
 
 }

@@ -24,6 +24,7 @@ import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.*
 import org.junit.Assert.assertEquals
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 /**
@@ -59,7 +60,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldReturnUnauthenticatedAs401Page() {
-        val port = 6000
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("POST /entertime HTTP/1.1$CRLF")
@@ -78,7 +79,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGet200Response() {
-        val port = 6002
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
@@ -94,7 +95,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse() {
-        val port = 6003
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /sample.html HTTP/1.1$CRLF$CRLF")
@@ -112,7 +113,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse_CSS() {
-        val port = 6004
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
@@ -130,7 +131,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse_JS() {
-        val port = 6005
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
@@ -147,7 +148,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
-        val port = 6006
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("FOO /test.utl HTTP/1.1$CRLF$CRLF")
@@ -164,7 +165,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
-        val port = 6007
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /doesnotexist.html HTTP/1.1$CRLF$CRLF")
@@ -182,7 +183,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfoundUnknownSuffix() {
-        val port = 6008
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("GET /sample_template.utl HTTP/1.1$CRLF$CRLF")
@@ -199,7 +200,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetUnauthorizedResponseAfterPost() {
-        val port = 6009
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF$CRLF")
@@ -215,7 +216,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        val port = 6010
+        val port = port.getAndIncrement()
         initServer(port)
 
         au.getUserForSessionBehavior = { NO_USER }
@@ -234,7 +235,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetInternalServerError() {
-        val port = 6011
+        val port = port.getAndIncrement()
         initServer(port)
 
         au.getUserForSessionBehavior = { DEFAULT_USER }
@@ -256,7 +257,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetInternalServerError_improperlyFormedBody() {
-        val port = 6012
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
@@ -277,7 +278,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldIndicateClientClosedConnection() {
-        val port = 6013
+        val port = port.getAndIncrement()
         initServer(port)
 
         client.socket.shutdownOutput()
@@ -296,7 +297,7 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
-        val port = 6014
+        val port = port.getAndIncrement()
         initServer(port)
 
         au.getUserForSessionBehavior = { DEFAULT_USER }
@@ -321,7 +322,7 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testWithValidClient_LoginPage_PERFORMANCE() {
-        val port = 6015
+        val port = port.getAndIncrement()
         initServer(port)
 
         // so we don't see spam
@@ -353,7 +354,7 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testHomepage_PERFORMANCE() {
-        val port = 6016
+        val port = port.getAndIncrement()
         initServer(port)
 
         // so we don't see spam
@@ -375,7 +376,7 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testEnterTime_PERFORMANCE() {
-        val port = 6017
+        val port = port.getAndIncrement()
         initServer(port)
 
         // so we don't see spam
@@ -431,6 +432,10 @@ class ServerTests {
             }
         }
     }
+    
+    companion object {
+        val port = AtomicInteger(2000)
+    }
 
 }
 
@@ -451,7 +456,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
     }
 
     companion object {
-
+        
         fun make(
             verb : Verb,
             path : String,

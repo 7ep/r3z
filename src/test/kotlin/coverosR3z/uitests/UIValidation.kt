@@ -70,7 +70,7 @@ class UIValidation {
 
 
     companion object {
-        private const val port = 2000
+        private const val port = 4004
         private const val domain = "http://localhost:$port"
 
         private val webDriver = Drivers.CHROME

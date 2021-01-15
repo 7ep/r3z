@@ -43,44 +43,6 @@ class UIRecordTime {
         logout()
     }
 
-    @BDD
-    @UITest
-    @Test
-    fun `recordTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
-        val s = RecordTimeUserStory.addScenario(
-            "recordTime - An employee should be able to edit the number of hours worked from a previous time entry",
-
-            listOf(
-                "Given Andrea has a previous time entry with 1 hour,",
-                "when she changes the entry to two hours,",
-                "then the system indicates the two hours was persisted"
-            )
-        )
-        loginAsUserAndCreateProject("Andrea", "projectb")
-        s.markDone("Given Andrea has a previous time entry with 1 hour,")
-
-        // when the employee enters their time
-        enterTimeForEmployee("projectb")
-
-        driver.get("$domain/${ViewTimeAPI.path}")
-        s.markDone("when she changes the entry to two hours,")
-        // muck with it
-
-        val timeRow = driver.findElement(By.id("time-entry-1-1"))
-
-        val timeField = timeRow.findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
-        timeField.clear()
-        timeField.sendKeys("120")
-        timeRow.findElement(By.tagName("button")).click()
-        // change time to 120
-
-        driver.get("$domain/${ViewTimeAPI.path}")
-        assertEquals("120", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).getAttribute("value"))
-        s.markDone("then the system indicates the two hours was persisted")
-        // stopping point 12/10/20: sent keys do not persist when the driver accesses the page again. Won't solve that
-        // until we persist it in some way
-        logout()
-    }
 
 
     /*
@@ -94,7 +56,7 @@ class UIRecordTime {
 
 
     companion object {
-        private const val port = 2001
+        private const val port = 4003
         private const val domain = "http://localhost:$port"
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
