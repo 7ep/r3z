@@ -44,6 +44,9 @@ class ServerTests {
     private fun initServer(port : Int) {
         serverObject = Server(port)
         serverObject.startServer(BusinessCode(tru, au))
+        while (!serverObject.systemReady) {
+            Thread.sleep(50)
+        }
         val clientSocket = Socket("localhost", port)
         client = SocketWrapper(clientSocket, "client")
     }
@@ -432,7 +435,7 @@ class ServerTests {
             }
         }
     }
-    
+
     companion object {
         val port = AtomicInteger(2000)
     }
