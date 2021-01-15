@@ -11,7 +11,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         isEntryValid(entry)
-        return pmd.actOnTimeEntries (shouldSerialize = true) { entries ->
+        return pmd.actOnTimeEntries { entries ->
 
             // add the new data
             val newIndex = entries.nextIndex.getAndIncrement()
@@ -33,7 +33,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
 
     override fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry {
         isEntryValid(newEntry.toTimeEntryPreDatabase())
-        val oldEntry = pmd.actOnTimeEntries{entries ->
+        val oldEntry = pmd.readTimeEntries{entries ->
             entries.single{it.id == newEntry.id}
         }
 
@@ -58,11 +58,11 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidNoProject}
         check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidNoEmployee}
         check(pmd.actOnEmployees { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
-        check(pmd.actOnProjects { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
+        check(pmd.readProjects { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
-        return pmd.actOnProjects (shouldSerialize = true) { projects ->
+        return pmd.actOnProjects { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
             projects.add(newProject)
             logDebug { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
@@ -71,7 +71,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
-        return pmd.actOnEmployees (shouldSerialize = true) { employees ->
+        return pmd.actOnEmployees { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
             logDebug { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
@@ -80,33 +80,33 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Time {
-        return pmd.actOnTimeEntries(action =
-        fun(timeEntries: ConcurrentSet<TimeEntry>): Time {
+        return pmd.readTimeEntries (
+            fun(timeEntries): Time {
 
-            // if the employee hasn't entered any time on this date, return 0 minutes
-            val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }.sumBy { te -> te.time.numberOfMinutes }
-            return Time(totalMinutes)
-        })
+                // if the employee hasn't entered any time on this date, return 0 minutes
+                val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }.sumBy { te -> te.time.numberOfMinutes }
+                return Time(totalMinutes)
+            })
     }
 
     override fun readTimeEntries(employee: Employee): Set<TimeEntry> {
-        return pmd.actOnTimeEntries { timeEntries -> timeEntries.filter { it.employee == employee } }.toSet()
+        return pmd.readTimeEntries{ timeEntries -> timeEntries.filter { it.employee == employee } }.toSet()
     }
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return pmd.actOnTimeEntries { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
+        return pmd.readTimeEntries { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
     }
 
     override fun getProjectByName(name: ProjectName): Project {
-        return pmd.actOnProjects { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
+        return pmd.readProjects { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun getProjectById(id: ProjectId): Project {
-        return pmd.actOnProjects { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
+        return pmd.readProjects { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
     override fun getAllProjects(): List<Project> {
-        return pmd.actOnProjects { it.toList() }
+        return pmd.readProjects { it.toList() }
     }
 
     override fun getAllEmployees(): List<Employee> {

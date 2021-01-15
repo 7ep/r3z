@@ -16,6 +16,8 @@ import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.*
+import kotlin.NoSuchElementException
 
 
 /**
@@ -52,76 +54,110 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     ////////////////////////////////////
 
     /**
-     * carry out some action on the [User] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * carry out some write action on the [User] set of data.
      * @param action a lambda to receive the set of users and do whatever you want with it
      */
-    fun <R> actOnUsers(shouldSerialize : Boolean = false, action: (ConcurrentSet<User>) -> R) : R {
+    fun <R> actOnUsers(action: (ConcurrentSet<User>) -> R) : R {
         val result = action.invoke(users)
 
-        if (shouldSerialize)
-            serializeToDisk(users, USERS_FILENAME)
+        serializeToDisk(users, USERS_FILENAME)
 
         return result
     }
 
     /**
-     * carry out some action on the [User] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * carry out some readonly action on the [User] set of data.
      * @param action a lambda to receive the set of users and do whatever you want with it
      */
-    fun <R> actOnEmployees(shouldSerialize : Boolean = false, action: (ConcurrentSet<Employee>) -> R) : R {
+    fun <R> readUsers(action: (Set<User>) -> R) : R {
+        return action.invoke(Collections.unmodifiableSet(users))
+    }
+
+    /**
+     * carry out some write action on the [User] set of data.
+     * @param action a lambda to receive the set of users and do whatever you want with it
+     */
+    fun <R> actOnEmployees(action: (ConcurrentSet<Employee>) -> R) : R {
         val result = action.invoke(employees)
 
-        if (shouldSerialize)
-            serializeToDisk(employees, EMPLOYEES_FILENAME)
+        serializeToDisk(employees, EMPLOYEES_FILENAME)
 
         return result
+    }
+
+    /**
+     * carry out some readonly action on the [User] set of data.
+     * @param action a lambda to receive the set of users and do whatever you want with it
+     */
+    fun <R> readEmployees(action: (Set<Employee>) -> R) : R {
+        return action.invoke(Collections.unmodifiableSet(employees))
     }
 
     /**
      * carry out some action on the [Session] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of sessions and do whatever you want with it
      */
-    fun <R> actOnSessions(shouldSerialize : Boolean = false, action: (ConcurrentSet<Session>) -> R) : R {
+    fun <R> actOnSessions(action: (ConcurrentSet<Session>) -> R) : R {
         val result = action.invoke(sessions)
 
-        if (shouldSerialize)
-            serializeToDisk(sessions, SESSIONS_FILENAME)
+        serializeToDisk(sessions, SESSIONS_FILENAME)
 
         return result
+    }
+    /**
+     * Read from the [Session] set of data.
+     * @param action a lambda to receive the set of sessions and do whatever you want with it
+     */
+    fun <R> readSessions(action: (Set<Session>) -> R) : R {
+        return action.invoke(Collections.unmodifiableSet(sessions))
     }
 
     /**
      * carry out some action on the [Project] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
      * @param action a lambda to receive the set of projects and do whatever you want with it
      */
-    fun <R> actOnProjects(shouldSerialize : Boolean = false, action: (ConcurrentSet<Project>) -> R) : R {
+    fun <R> actOnProjects(action: (ConcurrentSet<Project>) -> R) : R {
         val result = action.invoke(projects)
 
-        if (shouldSerialize)
-            serializeToDisk(projects, PROJECTS_FILENAME)
+        serializeToDisk(projects, PROJECTS_FILENAME)
 
         return result
     }
 
     /**
-     * carry out some action on the [TimeEntry] set of data.
-     * @param shouldSerialize if true, carry out serialization and persistence to disk
+     * Read the [Project] set of data.
+     * @param action a lambda to receive the set of projects and do whatever you want with it
+     */
+    fun <R> readProjects(action: (Set<Project>) -> R) : R {
+        return action.invoke(Collections.unmodifiableSet(projects))
+    }
+
+    /**
+     * carry out an edit or change of some kind on the [TimeEntry] set of data.
      * @param action a lambda to receive the set of time entries and do whatever you want with it
      */
-    fun <R> actOnTimeEntries(shouldSerialize : Boolean = false,
-                             action: (timeEntries: ConcurrentSet<TimeEntry>) -> R) : R
+    fun actOnTimeEntries(action: (timeEntries: ConcurrentSet<TimeEntry>) -> TimeEntry) : TimeEntry
     {
         val result = action.invoke(timeEntries)
 
-        if (shouldSerialize && result is TimeEntry)
-            serializeTimeEntriesToDisk(result)
+        serializeTimeEntriesToDisk(result)
 
         return result
     }
+
+    /**
+     * carry out some read action on the [TimeEntry] set of data.
+     * This method does not ever serialize to disk, or expect any
+     * changes to the underlying data, it just reads.
+     *
+     * @param action a lambda to receive the set of time entries and do whatever you want with it
+     */
+    fun <R> readTimeEntries(action: (timeEntries: Set<TimeEntry>) -> R) : R
+    {
+        return action(Collections.unmodifiableSet(timeEntries))
+    }
+
+
 
 
     ////////////////////////////////////

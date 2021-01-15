@@ -8,11 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * the data in the keys only.  We provide some syntactic sugar
  * so this seems similar to using a Set.
  */
-class ConcurrentSet<T> : Iterable<T>{
+class ConcurrentSet<T> : Iterable<T>, Set<T>{
 
     private val map : ConcurrentHashMap<T, NullEnum> = ConcurrentHashMap()
-
-    fun size() = map.size
 
     val nextIndex = AtomicInteger(1)
 
@@ -27,8 +25,9 @@ class ConcurrentSet<T> : Iterable<T>{
     /**
      * Adds an item to this collection
      */
-    fun add(item : T) {
+    fun add(item : T) : T{
         map[item] = NullEnum.NULL
+        return item
     }
 
     /**
@@ -72,6 +71,21 @@ class ConcurrentSet<T> : Iterable<T>{
         var result = map.hashCode()
         result = 31 * result + nextIndex.get().hashCode()
         return result
+    }
+
+    override val size: Int
+        get() = map.size
+
+    override fun contains(element: T): Boolean {
+        return map.keys.contains(element)
+    }
+
+    override fun containsAll(elements: Collection<T>): Boolean {
+        return map.keys.containsAll(elements)
+    }
+
+    override fun isEmpty(): Boolean {
+        return map.isEmpty()
     }
 
 }

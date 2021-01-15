@@ -1,16 +1,13 @@
 package coverosR3z.timerecording
 
 import coverosR3z.bdd.BDD
-import coverosR3z.bdd.RecordTimeUserStory
 import coverosR3z.bdd.ViewTimeUserStory
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.BeforeClass
 import org.junit.Test
 
 class SeeTimeEntriesBDD {
