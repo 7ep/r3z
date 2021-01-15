@@ -100,19 +100,19 @@ class ViewTimeAPI(private val sd: ServerData) {
                     """
                     <tr id=time-entry-${it.employee.id.value}-${it.id.value}>
                         <form action="$path" method="post">
-                            <input type="hidden" name=${Elements.ID_INPUT.getElemName()} value=${it.id.value} />
+                            <input type="hidden" name=${Elements.ID_INPUT.getElemName()} value="${it.id.value}" />
                             <td><input type="hidden" name=${Elements.PROJECT_INPUT.getElemName()} value="${it.project.id.value}" />
                                 ${safeHtml(it.project.name.value)}
                             </td>
                             <td class='time'>
-                                <input name=${Elements.TIME_INPUT.getElemName()} type=text value=${it.time.numberOfMinutes} />
+                                <input name=${Elements.TIME_INPUT.getElemName()} type=text value="${it.time.numberOfMinutes}" />
                                 <button>🔒</button>
                             </td>
                             <td>
-                                <input name=${Elements.DETAIL_INPUT.getElemName()} value=${safeHtml(it.details.value)} />
+                                <input name=${Elements.DETAIL_INPUT.getElemName()} value="${safeHtml(it.details.value)}" />
                             </td>
                             <td>
-                                <input name=${Elements.DATE_INPUT.getElemName()} value=${it.date.stringValue} />
+                                <input name=${Elements.DATE_INPUT.getElemName()} value="${it.date.stringValue}" />
                             </td>
                         </form>
                     </tr>
