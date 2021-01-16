@@ -10,6 +10,7 @@ import coverosR3z.authentication.types.User
 data class AnalyzedHttpData(
     val verb: Verb = Verb.NONE,
     val path: String = "(NOTHING REQUESTED)",
+    val queryString: Map<String,String> = mapOf(),
     val data: PostBodyData = PostBodyData(),
     val user: User = NO_USER,
     val sessionToken: String = "NO TOKEN",

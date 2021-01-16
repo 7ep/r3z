@@ -6,4 +6,5 @@ package coverosR3z.server.types
 interface Element {
     fun getElemName() : String
     fun getId() : String
+    fun getElemClass(): String
 }

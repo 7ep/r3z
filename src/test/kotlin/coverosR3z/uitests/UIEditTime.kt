@@ -43,14 +43,6 @@ class UIEditTime {
         logout()
     }
 
-//    @BDD
-//    @UITest
-//    @Test
-//    fun `editTime - ` () {
-//
-//    }
-
-
 
     /*
      _ _       _                  __ __        _    _           _
@@ -126,20 +118,22 @@ class UIEditTime {
     }
 
     private fun changeTime() {
-        val timeRow = driver.findElement(By.id("time-entry-1-1"))
+        // put the row into edit mode
+        driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
 
         val timeField =
-            timeRow.findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+            driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
         timeField.clear()
         timeField.sendKeys("120")
-        timeRow.findElement(By.tagName("button")).click()
-        // change time to 120
 
+        // save the new time
+        driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
+
+        // go to the page
         driver.get("$domain/${ViewTimeAPI.path}")
-        assertEquals("120",
-            driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
-                .getAttribute("value")
-        )
+
+        // confirm the change
+        assertEquals("120", driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }
 
     private fun enterTimeForEmployee(project: String) {

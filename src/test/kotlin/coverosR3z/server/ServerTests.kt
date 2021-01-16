@@ -7,6 +7,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.logging.LogTypes
+import coverosR3z.logging.logImperative
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.FileReader.Companion.read
@@ -26,6 +27,7 @@ import org.junit.Assert.assertEquals
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
+import kotlin.properties.Delegates
 
 /**
  * Bear in mind this set of tests is to focus on the server functionality,
@@ -36,23 +38,28 @@ import kotlin.concurrent.thread
 class ServerTests {
 
     private lateinit var client : SocketWrapper
-
+    private var testPort by Delegates.notNull<Int>()
     private lateinit var serverObject : Server
     private val au = FakeAuthenticationUtilities()
     private val tru = FakeTimeRecordingUtilities()
 
-    private fun initServer(port : Int) {
-        serverObject = Server(port)
+    @Before
+    fun initServer() {
+        testPort = port.getAndIncrement()
+        val sleeptime = 50L
+        serverObject = Server(testPort)
         serverObject.startServer(BusinessCode(tru, au))
         while (!serverObject.systemReady) {
-            Thread.sleep(50)
+            logImperative("System is not ready, sleeping for $sleeptime milliseconds")
+            Thread.sleep(sleeptime)
         }
-        val clientSocket = Socket("localhost", port)
+        val clientSocket = Socket("localhost", testPort)
         client = SocketWrapper(clientSocket, "client")
     }
 
     @After
     fun stopServer() {
+        logImperative("stopping server")
         serverObject.halfOpenServerSocket.close()
     }
 
@@ -63,9 +70,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldReturnUnauthenticatedAs401Page() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("POST /entertime HTTP/1.1$CRLF")
         val body = "test=test"
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
@@ -82,9 +86,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGet200Response() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
 
         val statusline = client.readLine()
@@ -98,9 +99,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /sample.html HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -116,9 +114,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse_CSS() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -134,9 +129,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetFileResponse_JS() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
 
         val result = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -151,9 +143,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("FOO /test.utl HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -168,9 +157,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /doesnotexist.html HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -186,9 +172,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfoundUnknownSuffix() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("GET /sample_template.utl HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -203,9 +186,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetUnauthorizedResponseAfterPost() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF$CRLF")
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -219,9 +199,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         au.getUserForSessionBehavior = { NO_USER }
         client.write("POST /${RegisterAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
@@ -238,9 +215,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetInternalServerError() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         au.getUserForSessionBehavior = { DEFAULT_USER }
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
@@ -260,9 +234,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetInternalServerError_improperlyFormedBody() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
         val body = "test foo bar"
@@ -281,9 +252,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldIndicateClientClosedConnection() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         client.socket.shutdownOutput()
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities())
@@ -300,9 +268,6 @@ class ServerTests {
     @IntegrationTest(usesPort = true)
     @Test
     fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         au.getUserForSessionBehavior = { DEFAULT_USER }
         client.write("POST /${LoginAPI.path} HTTP/1.1$CRLF")
         client.write("Cookie: sessionId=abc123$CRLF")
@@ -325,16 +290,13 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testWithValidClient_LoginPage_PERFORMANCE() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val headers = listOf("Connection: keep-alive")
         val body = mapOf(
                 LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
                 LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value)
-        val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au, port)
+        val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au, testPort)
 
         val (time, _) = getTime {
             for (i in 1..100) {
@@ -357,13 +319,10 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testHomepage_PERFORMANCE() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(10, port) }
+            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(10, testPort) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
@@ -379,13 +338,10 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testEnterTime_PERFORMANCE() {
-        val port = port.getAndIncrement()
-        initServer(port)
-
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedTimeEntries(10, port) }
+            val threadList = (1..8).map {  makeClientThreadRepeatedTimeEntries(10, testPort) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")

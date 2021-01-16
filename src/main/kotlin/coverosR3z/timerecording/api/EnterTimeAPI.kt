@@ -25,6 +25,10 @@ class EnterTimeAPI(private val sd: ServerData) {
         override fun getElemName(): String {
             return this.elemName
         }
+
+        override fun getElemClass(): String {
+            throw NotImplementedError()
+        }
     }
 
     companion object : GetEndpoint, PostEndpoint {

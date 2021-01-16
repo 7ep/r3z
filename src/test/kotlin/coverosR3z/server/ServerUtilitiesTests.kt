@@ -38,7 +38,7 @@ class ServerUtilitiesTests {
         val input = "project_entry=projecta&time_entry=2&detail_entry=nothing+to+say"
         val expected = mapOf("project_entry" to "projecta", "time_entry" to "2", "detail_entry" to "nothing to say")
 
-        val result = parsePostedData(input)
+        val result = parseUrlEncodedForm(input)
 
         assertEquals(expected, result)
     }
@@ -55,7 +55,7 @@ class ServerUtilitiesTests {
             "&project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
         }
 
-        val (time, _) = getTime { parsePostedData(input) }
+        val (time, _) = getTime { parseUrlEncodedForm(input) }
 
         val maxTime = 100
         assertTrue("time taken was $time, should be less than $maxTime", time < maxTime)
@@ -67,7 +67,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldHandleBadInputBadly_EmptyString() {
-        val ex = assertThrows(IllegalArgumentException::class.java) { parsePostedData("") }
+        val ex = assertThrows(IllegalArgumentException::class.java) { parseUrlEncodedForm("") }
 
         assertEquals("The POST body was empty", ex.message)
     }
@@ -80,7 +80,7 @@ class ServerUtilitiesTests {
     fun testShouldHandleBadInputBadly_InvalidFormat() {
         // input cannot be split at all
         val input = "foo"
-        val ex = assertThrows(IllegalStateException::class.java) { parsePostedData(input) }
+        val ex = assertThrows(IllegalStateException::class.java) { parseUrlEncodedForm(input) }
 
         assertEquals("Splitting on = should return 2 values.  Input was foo", ex.message)
     }
@@ -93,7 +93,7 @@ class ServerUtilitiesTests {
         val input = "username=Henry+the+Eighth+I+am+I+am%2C+Henry+the+Eighth+I+am%21&password=l%21Mfr%7EWc9gIz%27pbXs7%5B%5Dl%7C%27lBM4%2FNg3t8nYevRUNQcL_%2BSW%25A522sThETaQlbB%5E%7BqiNJWzpblP%6024N_V8A6%23A-2T%234%7Dc%29DP%25%3Bm1WC_RXlI%7DMyZHo7*Q1%28kC%2BlC%2F9%28%27%2BjMA9%2Ffr%24IZ%2C%5C5%3DBivXp36tb&employee=1"
         val expected = mapOf("username" to "Henry the Eighth I am I am, Henry the Eighth I am!", "password" to "l!Mfr~Wc9gIz'pbXs7[]l|'lBM4/Ng3t8nYevRUNQcL_+SW%A522sThETaQlbB^{qiNJWzpblP`24N_V8A6#A-2T#4}c)DP%;m1WC_RXlI}MyZHo7*Q1(kC+lC/9('+jMA9/fr\$IZ,\\5=BivXp36tb", "employee" to "1")
 
-        val result = parsePostedData(input)
+        val result = parseUrlEncodedForm(input)
 
         assertEquals(expected, result)
     }
@@ -106,7 +106,7 @@ class ServerUtilitiesTests {
         val input = "username=%09%21%22%23%24%25%26%27%28%29*%2B%2C-.%2FA0123456789A%3A%3B%3C%3D%3E%3F%40UABCDEFGHIJKLMNOPQRSTUVWXYZA%5B%5C%5D%5E_%60LabcdefghijklmnopqrstuvwxyzA%7B%7C%7D%7ECL%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B%C3%8C%C3%8D%C3%8E%C3%8F%C3%90%C3%91%C3%92%C3%93%C3%94%C3%95%C3%96M%C3%97L%C3%98%C3%99%C3%9A%C3%9B%C3%9C%C3%9D%C3%9E%C3%9F%C3%A0%C3%A1%C3%A2%C3%A3%C3%A4%C3%A5%C3%A6%C3%A7%C3%A8%C3%A9%C3%AA%C3%AB%C3%AC%C3%AD%C3%AE%C3%AF%C3%B0%C3%B1%C3%B2%C3%B3%C3%B4%C3%B5%C3%B6M%C3%B7L%C3%B8%C3%B9%C3%BA%C3%BB%C3%BC%C3%BD%C3%BE%C3%BFE%C5%81%C5%82%C5%83%C5%84%C5%85%C5%86%C5%87%C5%88E%C5%8A%C5%8B%C5%8C%C5%8D%C5%8E%C5%8F%C5%90%C5%91%C5%92%C5%93%C5%94%C5%95%C5%96%C5%97%C5%98%C5%99%C5%9A%C5%9B%C5%9C%C5%9D%C5%9E%C5%9F%C5%A0%C5%A1%C5%A2%C5%A3%C5%A4%C5%A5%C5%A6%C5%A7%C5%A8%C5%A9%C5%AA%C5%AB%C5%AC%C5%AD%C5%AE%C5%AF%C5%B0%C5%B1%C5%B4%C5%B5%C5%B6%C5%B7%C5%B8%C5%B9%C5%BA%C5%BB%C5%BC%C5%BD%C5%BE%C5%BF"
         val expected = mapOf("username" to "\t!\"#\$%&'()*+,-./A0123456789A:;<=>?@UABCDEFGHIJKLMNOPQRSTUVWXYZA[\\]^_`LabcdefghijklmnopqrstuvwxyzA{|}~CL¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖM×LØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöM÷LøùúûüýþÿEŁłŃńŅņŇňEŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŴŵŶŷŸŹźŻżŽžſ")
 
-        val result = parsePostedData(input)
+        val result = parseUrlEncodedForm(input)
 
         assertEquals(expected, result)
     }
@@ -120,7 +120,7 @@ class ServerUtilitiesTests {
         val input = "username=%20%C2%A1"
         val expected = mapOf("username" to " ¡")
 
-        val result = parsePostedData(input)
+        val result = parseUrlEncodedForm(input)
 
         assertEquals(expected, result)
     }
@@ -133,7 +133,7 @@ class ServerUtilitiesTests {
     fun testShouldParse_FailWhenDuplicates() {
         val input = "foo=abc&foo=123"
 
-        val ex = assertThrows(DuplicateInputsException::class.java) { parsePostedData(input) }
+        val ex = assertThrows(DuplicateInputsException::class.java) { parseUrlEncodedForm(input) }
         assertEquals("foo was duplicated in the post body - had values of abc and 123", ex.message)
     }
 
@@ -143,7 +143,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
         val input = serverStatusLineRegex.matchEntire("POST /${EnterTimeAPI.path} HTTP/1.1")
-        val expected = Pair(Verb.POST, EnterTimeAPI.path)
+        val expected = Triple(Verb.POST, EnterTimeAPI.path, mapOf<String,String>())
 
         val result = parseStatusLineAsServer(input!!)
 
@@ -156,7 +156,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_GET() {
         val input = serverStatusLineRegex.matchEntire("GET /test HTTP/1.1")
-        val expected = Pair(Verb.GET, "test")
+        val expected = Triple(Verb.GET, "test", mapOf<String,String>())
 
         val result = parseStatusLineAsServer(input!!)
 
@@ -169,7 +169,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
         val input = serverStatusLineRegex.matchEntire("GET /test.utl HTTP/1.1")
-        val expected = Pair(Verb.GET, "test.utl")
+        val expected = Triple(Verb.GET, "test.utl", mapOf<String,String>())
 
         val result = parseStatusLineAsServer(input!!)
 
@@ -182,7 +182,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_CSS() {
         val input = serverStatusLineRegex.matchEntire("GET /test.css HTTP/1.1")
-        val expected = Pair(Verb.GET, "test.css")
+        val expected = Triple(Verb.GET, "test.css", mapOf<String,String>())
 
         val result = parseStatusLineAsServer(input!!)
 
@@ -195,11 +195,59 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_JS() {
         val input = serverStatusLineRegex.matchEntire("GET /test.js HTTP/1.1")
-        val expected = Pair(Verb.GET, "test.js")
+        val expected = Triple(Verb.GET, "test.js", mapOf<String,String>())
 
         val result = parseStatusLineAsServer(input!!)
 
         assertEquals(expected, result)
+    }
+
+    /**
+     * Should extract out a simple query string, in this
+     * case it is abc=123
+     */
+    @Test
+    fun testShouldParseQueryString() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?abc=123 HTTP/1.1")
+        val expected = Triple(Verb.GET, "test", mapOf("abc" to "123"))
+
+        val result = parseStatusLineAsServer(input!!)
+
+        assertEquals(expected, result)
+    }
+
+    /**
+     * Should extract out a more complex query string, in this
+     * case it is abc=123&def=456
+     */
+    @Test
+    fun testShouldParseQueryString_Multiple() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?abc=123&def=456 HTTP/1.1")
+        val expected = Triple(Verb.GET, "test", mapOf("abc" to "123", "def" to "456"))
+
+        val result = parseStatusLineAsServer(input!!)
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testShouldParseQueryString_badlyFormed_multipleQuestionMarks() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?abc=123?def=456 HTTP/1.1")
+
+        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!)}
+    }
+
+    /**
+     * We expect query strings to be key-value pairs.  What should
+     * happen if we only get a key, like /test?abc
+     *
+     * Probably should get an exception thrown
+     */
+    @Test
+    fun testShouldParseQueryString_badlyFormed_NoValueButOnlyKey() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?abc HTTP/1.1")
+
+        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!)}
     }
 
     /**

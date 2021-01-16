@@ -72,14 +72,14 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
  * If we are reviewing an HTTP message as a server
  */
 private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
-    val (verb, path) = parseStatusLineAsServer(statusLineMatches)
+    val (verb, path, queryString) = parseStatusLineAsServer(statusLineMatches)
     val headers = getHeaders(socketWrapper)
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
     val user = extractUserFromAuthToken(token, au)
     val postBodyData = extractData(socketWrapper, headers)
 
-    return AnalyzedHttpData(verb, path, postBodyData, user, token, headers)
+    return AnalyzedHttpData(verb, path, queryString, postBodyData, user, token, headers)
 }
 
 /**
@@ -105,7 +105,7 @@ private fun extractData(server: ISocketWrapper, headers: List<String>) : PostBod
     return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
-        PostBodyData(parsePostedData(body), body)
+        PostBodyData(parseUrlEncodedForm(body), body)
     } else {
         PostBodyData()
     }
@@ -129,12 +129,16 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
 /**
  * The first line tells us a lot. See [serverStatusLineRegex]
  */
-fun parseStatusLineAsServer(matchResult: MatchResult): Pair<Verb, String> {
+fun parseStatusLineAsServer(matchResult: MatchResult): Triple<Verb, String, Map<String,String>> {
     val verb: Verb = Verb.valueOf(checkNotNull(matchResult.groups[1]){"The HTTP verb must not be missing"}.value)
     logTrace { "verb from client was: $verb" }
-    val file = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
-    logTrace { "path from client was: $file" }
-    return Pair(verb, file)
+    val pathAndQuery = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
+    logTrace { "full path from client was: $pathAndQuery" }
+    val split = pathAndQuery.split("?")
+    check(split.size in 1..2)
+    val path = split[0]
+    val queryString = if (split.size == 2)  parseUrlEncodedForm(split[1]) else mapOf()
+    return Triple(verb, path, queryString)
 }
 
 /**
@@ -193,7 +197,7 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  *
  * for example, valuea=3&valueb=this+is+something
  */
-fun parsePostedData(input: String): Map<String, String> {
+fun parseUrlEncodedForm(input: String): Map<String, String> {
     require(input.isNotEmpty()) {"The POST body was empty"}
     val postedPairs = mutableMapOf<String, String>()
     val splitByAmpersand = input.split("&")

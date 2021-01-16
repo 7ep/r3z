@@ -137,7 +137,8 @@ class UIRecordTime {
         // Verify the entry
         driver.get("$domain/${ViewTimeAPI.path}")
         assertEquals("your time entries", driver.title)
-        assertEquals("2020-06-12", driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).getAttribute("value"))
+        assertEquals("2020-06-12", driver.findElement(By.cssSelector("#time-entry-1-1 .date")).text)
+        assertEquals("60", driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }
 
 

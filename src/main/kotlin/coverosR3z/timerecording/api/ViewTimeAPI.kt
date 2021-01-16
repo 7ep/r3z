@@ -1,6 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
@@ -11,11 +12,12 @@ import coverosR3z.timerecording.types.*
 
 class ViewTimeAPI(private val sd: ServerData) {
 
-    enum class Elements (private val elemName: String, private val id: String) : Element {
+    enum class Elements (private val elemName: String = "", private val id: String = "", private val elemClass: String = "") : Element {
         PROJECT_INPUT("project_entry", "project_entry"),
         TIME_INPUT("time_entry", "time_entry"),
         DETAIL_INPUT("detail_entry", "detail_entry"),
-        ENTER_TIME_BUTTON("", "enter_time_button"),
+        EDIT_BUTTON(elemClass = "editbutton"),
+        SAVE_BUTTON(elemClass = "savebutton"),
         DATE_INPUT("date_entry", "date_entry"),
         ID_INPUT("entry_id", "entry_id"),;
 
@@ -25,6 +27,10 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         override fun getElemName(): String {
             return this.elemName
+        }
+
+        override fun getElemClass(): String {
+            return this.elemClass
         }
     }
 
@@ -60,6 +66,11 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun existingTimeEntriesHTML() : String {
         val username = safeHtml(sd.ahd.user.name.value)
         val te = sd.tru.getAllEntriesForEmployee(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id)
+        val queryString = sd.ahd.queryString["editid"]
+
+        // either get the id as an integer or get null,
+        // the code will handle either properly
+        val idBeingEdited = queryString?.toInt()
         return """
         <!DOCTYPE html>        
         <html>
@@ -97,26 +108,53 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <tbody>
                         
                     """ + te.joinToString("") {
-                    """
-                    <tr id=time-entry-${it.employee.id.value}-${it.id.value}>
+                    if (it.id.value == idBeingEdited) {
+                        """
+                    <tr id="time-entry-${it.employee.id.value}-${it.id.value}">
                         <form action="$path" method="post">
-                            <input type="hidden" name=${Elements.ID_INPUT.getElemName()} value="${it.id.value}" />
-                            <td><input type="hidden" name=${Elements.PROJECT_INPUT.getElemName()} value="${it.project.id.value}" />
+                            <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
+                            <td class="project">
+                                <input type="hidden" name="${Elements.PROJECT_INPUT.getElemName()}" value="${it.project.id.value}" />
                                 ${safeHtml(it.project.name.value)}
                             </td>
-                            <td class='time'>
-                                <input name=${Elements.TIME_INPUT.getElemName()} type=text value="${it.time.numberOfMinutes}" />
-                                <button>🔒</button>
+                            <td class="time">
+                                <input name="${Elements.TIME_INPUT.getElemName()}" type=text value="${it.time.numberOfMinutes}" />
+                            </td>
+                            <td class="details">
+                                <input name="${Elements.DETAIL_INPUT.getElemName()}" value="${safeHtml(it.details.value)}" />
+                            </td>
+                            <td class="date">
+                                <input name="${Elements.DATE_INPUT.getElemName()}" value="${it.date.stringValue}" />
                             </td>
                             <td>
-                                <input name=${Elements.DETAIL_INPUT.getElemName()} value="${safeHtml(it.details.value)}" />
-                            </td>
-                            <td>
-                                <input name=${Elements.DATE_INPUT.getElemName()} value="${it.date.stringValue}" />
+                                <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
                             </td>
                         </form>
                     </tr>
+                      """
+                    } else {
+                      """
+                     <tr id="time-entry-${it.employee.id.value}-${it.id.value}">
+                        <div>
+                            <td class="project">
+                                ${safeHtml(it.project.name.value)}
+                            </td>
+                            <td class="time">
+                                ${it.time.numberOfMinutes}
+                            </td>
+                            <td class="details">
+                                ${safeHtml(it.details.value)}
+                            </td>
+                            <td class="date">
+                                ${it.date.stringValue}
+                            </td>
+                            <td>
+                                <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
+                            </td>
+                        </div>
+                    </tr>
                     """
+        }
                     }  +  """
                     </tbody>
                 </table>
