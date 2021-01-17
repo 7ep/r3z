@@ -1,6 +1,7 @@
 package coverosR3z.server.api
 
 import coverosR3z.logging.logTrace
+import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.ContentType
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.StatusCode
@@ -67,6 +68,7 @@ const val unauthorizedHTML = """
 """
 
 fun internalServerErrorHTML(msg : String) : String {
+    val safeMsg = safeHtml(msg)
     return """
 <!DOCTYPE html>    
 <html>
@@ -78,7 +80,7 @@ fun internalServerErrorHTML(msg : String) : String {
     <body>
        <p>500 error - INTERNAL SERVER ERROR</p>
        <p><a href="homepage">Homepage</a></p>
-       <p>Error message: $msg</p>
+       <p>Error message: $safeMsg</p>
     </body>
 </html>        
 """

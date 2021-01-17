@@ -1,6 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
@@ -65,11 +66,11 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun existingTimeEntriesHTML() : String {
         val username = safeHtml(sd.ahd.user.name.value)
         val te = sd.tru.getAllEntriesForEmployee(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id)
-        val queryString = sd.ahd.queryString["editid"]
+        val editidValue = sd.ahd.queryString["editid"]
 
         // either get the id as an integer or get null,
         // the code will handle either properly
-        val idBeingEdited = queryString?.toInt()
+        val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
         return """
         <!DOCTYPE html>        
         <html>
