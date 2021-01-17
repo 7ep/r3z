@@ -4,6 +4,7 @@ Developer handbook
 Table of contents
 -----------------
 
+- [New Developer Setup](#new-developer-setup)
 - [Guiding ideas](#guiding-ideas)
 - [Version](#version)
 - [Threads](#threads)
@@ -14,7 +15,8 @@ Table of contents
 - [Wrapping exceptions](#wrapping-exceptions)
 - [Invariants](#invariants)
 - [General architecture](#general-architecture)
-- [Pure Memory Database](#pure-memory-database)
+- [Persistence files](#persistence-files)
+- [Database](#database)  
 - [Authentication](#authentication)
 - [Timeouts and sessions](#timeouts-and-sessions)
 - [API](#api)
@@ -25,8 +27,33 @@ Table of contents
 - [Directories](#directories)
 
 
+New Developer Setup
+-------------------
+
+Here's the general series of steps for a new developer:
+
+1. Install Java onto your machine if you don't already have it.  Any version of Java will suffice, but 
+   the best would be the version 11 SDK, and make sure to add the path to your JDK to your environment
+   as JAVA_HOME, and also add the path to the Java binaries to your PATH variable.
+2. Download and install Intellij Community Edition (which is free of charge) if you don't already have 
+   it. This is definitely the best IDE for our purposes, since it is developed by the same company
+   that develops the Kotlin language, and also, it's awesome.  And it's the IDE all the other developers use.
+3. Obtain this source code from Github, at https://github.com/7ep/r3z.git
+4. Run the tests on your computer, using the command line: gradlew test 
+   (you might need to add dot-slash before that, if you are using Mac or Linux)
+5. Run the application to get a feel for the user experience: gradlew run
+6. Open the software with Intellij.  Try building and running tests with it.  Note that the
+   default test runner in Intellij will run the tests serially (rather than in parallel) which
+   takes a while.  To run them faster, find the gradle tool window and the test task within it,
+   and run the tests there.
+7. Read through some of this developer documentation to get a feel for some of its unique characteristics
+8. Examine some of the tests in the system to get a feel for how the system works and how
+   test automation is done
+
+
 Guiding ideas
 -------------
+
 1. Take care of the pennies and the pounds will take care of themselves
 2. A stitch in time saves nine
 
@@ -72,11 +99,18 @@ This is for some practical reasons:
 Behavior-Driven Development (BDD)
 ---------------------------------
 
-BDD files will have a suffix of "BDD".  See "EnteringTimeBDD" for a sample.
+BDD files will often have a suffix of "BDD".  See "EnteringTimeBDD" for a sample.
 
-Note that there are centralized BDD files in the test/resources/BDD directory.
-To see the pattern that is used, examine any of the files in that directory
-with a suffix of BDD.html and the corresponding code.
+Note that there is a type in the system called "UserStory" and one called "BDDScenario",
+both of which are in the test source code.  All the user stories are located in
+src/test/kotlin/coverosR3z/bdd, and if you "find usages" on any of them (e.g. EditTimeUserStory),
+it will lead to the related scenario, such as:
+
+    editTime - An employee should be able to edit the number of hours worked from a previous time entry
+
+Examine that method for an example of how this works.
+
+Once all the tests are complete, you will see the BDD results written to build/bdd
 
 
 Test Helpers
@@ -88,7 +122,10 @@ When writing tests, you might find some of the functions in TestHelpers.kt handy
 Performance
 -----------
 
-Performance tests include the text "PERFORMANCE" in the name
+Performance tests include the text "PERFORMANCE" in the name.  We are currently
+running an experiment of writing the results of these tests to files in
+docs/performance_archive/granular_tests , to see whether trends over time help
+us think more clearly about system performance.
 
 
 Wrapping exceptions
@@ -102,8 +139,8 @@ To avoid the difficulty this causes during maintenance and debugging, it is
 imperative we wrap potential exception throwers in our own handling code
 where we can more-precisely describe the problem.
 
-For an example, see the code that uses our custom exceptions found in the
-exceptions directory
+For an example, in several of the top-level packages (the domains), there is 
+often an "exceptions" package that contains related custom exceptions for that domain
 
 
 Invariants
@@ -147,7 +184,7 @@ eventually talks to PureMemoryDatabase, where the data is actually stored.
 
 These constitute the business application.  We then provide an interface
 to this code from the outside world, like for example, by providing http
-access.
+access, whose code is in files with a suffix of "API"
 
 Keeping things clean and simple is crucial.
 
@@ -157,27 +194,28 @@ To stay organized, follow these guidelines:
     files or straight to the PureMemoryDatabase
 
 
-Pure Memory Database
---------------------
+Persistence files
+-----------------
 
-When dealing with the layer of the Pure Memory Database, some general design
+When dealing with this layer, some general design
 considerations must be maintained.
+
 1. The code in this layer is *solely* dedicated to CRUD details.  The only other
    logic to include is checking invariants - that is, making sure that certain
    fundamental truths are held true, for data that is readily available at this
    level.  There is no *exact* right way to do this, but in general we don't want
-   general business logic occurring here.  For example, this is ok:
+   general business logic occurring here.
+   
 
-       fun addNewSession(sessionToken: String, user: User, time: DateTime) {
-           require (sessions[sessionToken] == null) {"a session already exists for user (${user.name})"}
-           sessions[sessionToken] = Pair(user, time)
-       }
+Database
+--------
 
-       fun removeSessionByToken(sessionToken: String) {
-           checkNotNull(sessions[sessionToken]) {"Tried to delete session ($sessionToken) but it didn't exist in session database"}
-           sessions.remove(sessionToken)
-       }
+The database is where we store all the shared state for the users.  It is quite
+simple - just several sets of data, typically of type [ConcurrentSet], which is a
+thread-safe data structure.
 
+The Database mainly consists of the data, some code to provide access to that data,
+and code to enable persistence to disk.
 
 Authentication
 --------------
