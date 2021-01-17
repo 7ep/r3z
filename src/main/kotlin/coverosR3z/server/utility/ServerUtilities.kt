@@ -18,8 +18,6 @@ import java.nio.file.*
  *  See https://tools.ietf.org/html/rfc2616
  */
 const val CRLF = "\r\n"
-const val CONTENT_LENGTH = "content-length"
-const val maxContentLength = 400_000
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 

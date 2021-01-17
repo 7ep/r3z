@@ -46,6 +46,22 @@ private val cookieRegex = """[cC]ookie: (.*)$""".toRegex()
  */
 private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
 
+
+/**
+ * The content length is the size of the body of the HTTP request.
+ * We want to put some cap on it, for now, since our current expected use
+ * case doesn't account for just endlessly huge content.  Maybe when
+ * we include video streaming that will change.
+ */
+const val CONTENT_LENGTH = "content-length"
+const val maxContentLength = 400_000
+
+/**
+ * Putting a cap on the size of query strings,
+ * just to keep things within some kind of bounds.
+ */
+const val maxQueryStringLength = 1024
+
 /**
  * Analyze the data following HTTP protocol and create a
  * [AnalyzedHttpData] to store the vital information
@@ -137,7 +153,10 @@ fun parseStatusLineAsServer(matchResult: MatchResult): Triple<Verb, String, Map<
     val split = pathAndQuery.split("?")
     check(split.size in 1..2)
     val path = split[0]
-    val queryString = if (split.size == 2)  parseUrlEncodedForm(split[1]) else mapOf()
+    val queryString = if (split.size == 2)  {
+        check(split[1].length < maxQueryStringLength) { "query string exceeded maximum allowed length" }
+        parseUrlEncodedForm(split[1])
+    } else mapOf()
     return Triple(verb, path, queryString)
 }
 
@@ -198,12 +217,13 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  * for example, valuea=3&valueb=this+is+something
  */
 fun parseUrlEncodedForm(input: String): Map<String, String> {
-    require(input.isNotEmpty()) {"The POST body was empty"}
+    require(input.isNotEmpty()) {"The URL-encoded content was empty"}
     val postedPairs = mutableMapOf<String, String>()
     val splitByAmpersand = input.split("&")
     for(s : String in splitByAmpersand) {
         val pair = s.split("=")
         check(pair.size == 2) {"Splitting on = should return 2 values.  Input was $s"}
+        check(pair[0].isNotBlank()) {"The key must not be blank"}
         val result = postedPairs.put(pair[0], decode(pair[1]))
         if (result != null) {
             throw DuplicateInputsException("${pair[0]} was duplicated in the post body - had values of $result and ${pair[1]}")

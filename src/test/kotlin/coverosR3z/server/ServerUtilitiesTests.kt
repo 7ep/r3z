@@ -73,7 +73,7 @@ class ServerUtilitiesTests {
     fun testShouldHandleBadInputBadly_EmptyString() {
         val ex = assertThrows(IllegalArgumentException::class.java) { parseUrlEncodedForm("") }
 
-        assertEquals("The POST body was empty", ex.message)
+        assertEquals("The URL-encoded content was empty", ex.message)
     }
 
     /**
@@ -252,6 +252,40 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc HTTP/1.1")
 
         assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!)}
+    }
+
+    /**
+     * We expect query strings to be key-value pairs.  What should
+     * happen if we only get a value, like /test?=abc
+     *
+     * Probably should get an exception thrown
+     */
+    @Test
+    fun testShouldParseQueryString_badlyFormed_OnlyValue() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?=abc HTTP/1.1")
+
+        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!) }
+    }
+
+    /**
+     * The query string must not be too large.  See [maxQueryStringLength]
+     */
+    @Test
+    fun testShouldParseQueryString_badlyFormed_TooLarge() {
+        val input = serverStatusLineRegex.matchEntire("GET /test?=${"a".repeat(maxQueryStringLength+1)} HTTP/1.1")
+
+        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!) }
+    }
+
+    /**
+     * It's to be considered badly formed if we receive a path followed by just a question mark.
+     */
+    @Test
+    fun testShouldParseQueryString_badlyFormed_TooSmall() {
+        val input = serverStatusLineRegex.matchEntire("GET /test? HTTP/1.1")
+
+        val ex = assertThrows(IllegalArgumentException::class.java) { parseStatusLineAsServer(input!!) }
+        assertEquals("The URL-encoded content was empty", ex.message)
     }
 
     /**
