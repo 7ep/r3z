@@ -63,6 +63,8 @@ class PureMemoryDatabaseTests {
         }
 
         logAudit { "It took a total of $totalTime milliseconds for this code" }
+        File("${granularPerfArchiveDirectory}PERFORMANCE_should_get_responses_from_the_database_quickly")
+            .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttime: $totalTime\n")
     }
 
     /**
@@ -91,10 +93,9 @@ class PureMemoryDatabaseTests {
     @PerformanceTest
     @Test
     fun testShouldWriteAndReadToDisk_PERFORMANCE() {
-        val numberOfEmployees = 3
-        val numberOfProjects = 5
-        val numberOfDays = 2
-        val maxMillisecondsAllowed = 200
+        val numberOfEmployees = 20
+        val numberOfProjects = 10
+        val numberOfDays = 31
 
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldWriteAndReadToDisk_PERFORMANCE/"
         File(dbDirectory).deleteRecursively()
@@ -113,10 +114,9 @@ class PureMemoryDatabaseTests {
         assertEquals("The database should be exactly the same after the reload", pmd, readPmd)
 
         val totalTime = totalTimeReading + totalTimeWriting
+        File("${granularPerfArchiveDirectory}testShouldWriteAndReadToDisk_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberOfProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttotalTime: $totalTime\n")
         logAudit { "Total time taken for serialization / deserialzation was $totalTime milliseconds" }
-
-        assertTrue("totaltimeWriting was supposed to take $maxMillisecondsAllowed.  took $totalTimeWriting", totalTimeWriting < maxMillisecondsAllowed)
-        assertTrue("totaltimeReading was supposed to take $maxMillisecondsAllowed.  took $totalTimeReading", totalTimeReading < maxMillisecondsAllowed)
     }
 
     /**

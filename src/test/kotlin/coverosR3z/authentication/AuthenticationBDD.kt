@@ -19,9 +19,7 @@ import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.RecordTimeResult
 import coverosR3z.timerecording.types.StatusEnum
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.AfterClass
 import org.junit.Assert.*
-import org.junit.BeforeClass
 import org.junit.Test
 
 class AuthenticationBDD {

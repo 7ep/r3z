@@ -1,8 +1,7 @@
 package coverosR3z.misc
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.types.Month
@@ -41,6 +40,7 @@ val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
 val DEFAULT_TIME_ENTRY = TimeEntry(TimeEntryId(1), DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020)
 const val DEFAULT_SESSION_TOKEN = "abc123"
+const val granularPerfArchiveDirectory = "docs/performance_archive/granular_tests/"
 
 /**
  * Helper to easily put together a time entry

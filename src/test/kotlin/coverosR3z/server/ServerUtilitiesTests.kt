@@ -3,6 +3,8 @@ package coverosR3z.server
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.PerformanceTest
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.misc.granularPerfArchiveDirectory
+import coverosR3z.misc.types.Date
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
 import coverosR3z.server.types.Verb
@@ -12,6 +14,7 @@ import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 class ServerUtilitiesTests {
 
@@ -49,16 +52,17 @@ class ServerUtilitiesTests {
     @PerformanceTest
     @Test
     fun testShouldParseData_PERFORMANCE() {
+        val numberOfParsings = 1000
+
         var input = "project_entry0=projecta&time_entry0=2&detail_entry0=nothing+to+say"
-        for (i in 1..1000) {
+        for (i in 1..numberOfParsings) {
             input +=
             "&project_entry$i=projecta&time_entry$i=2&detail_entry$i=nothing+to+say"
         }
 
         val (time, _) = getTime { parseUrlEncodedForm(input) }
-
-        val maxTime = 100
-        assertTrue("time taken was $time, should be less than $maxTime", time < maxTime)
+        File("${granularPerfArchiveDirectory}testShouldParseData_PERFORMANCE")
+            .appendText("${ Date.now().stringValue}\tnumberOfParsings: $numberOfParsings\ttime: $time\n")
     }
 
     /**

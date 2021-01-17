@@ -20,6 +20,7 @@ import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
 import org.junit.*
+import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
@@ -75,9 +76,9 @@ class ServerPerformanceTests {
     @IntegrationTest(usesPort = true)
     @PerformanceTest
     @Test
-    fun testEnterTime_PERFORMANCE() {
-        val numberThreads = 2
-        val numberRequests = 10
+    fun testEnterTimeReal_PERFORMANCE() {
+        val numberThreads = 5
+        val numberRequests = 200
 
         val port = port.getAndIncrement()
         startServer(port)
@@ -94,6 +95,8 @@ class ServerPerformanceTests {
             threadList.forEach { it.join() }
         }
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testEnterTimeReal_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
 
         // turn logging back on for other tests
         LogConfig.logSettings[LogTypes.DEBUG] = true
@@ -111,8 +114,8 @@ class ServerPerformanceTests {
     @PerformanceTest
     @Test
     fun testViewTime_PERFORMANCE() {
-        val numberThreads = 2
-        val numberRequests = 10
+        val numberThreads = 20
+        val numberRequests = 100
 
         val port = port.getAndIncrement()
         startServer(port)
@@ -133,6 +136,8 @@ class ServerPerformanceTests {
         }
 
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testViewTime_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
 
         // turn logging back on for other tests
         LogConfig.logSettings[LogTypes.DEBUG] = true
@@ -150,8 +155,8 @@ class ServerPerformanceTests {
     @PerformanceTest
     @Test
     fun testViewStaticContentAuthenticated_PERFORMANCE() {
-        val numberThreads = 2
-        val numberRequests = 10
+        val numberThreads = 20
+        val numberRequests = 500
 
         val port = port.getAndIncrement()
         startServer(port)
@@ -168,6 +173,8 @@ class ServerPerformanceTests {
         }
 
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testViewStaticContentAuthenticated_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
 
         // turn logging back on for other tests
         LogConfig.logSettings[LogTypes.DEBUG] = true
@@ -184,8 +191,8 @@ class ServerPerformanceTests {
     @PerformanceTest
     @Test
     fun testViewStaticContentUnauthenticated_PERFORMANCE() {
-        val numberThreads = 2
-        val numberRequests = 10
+        val numberThreads = 10
+        val numberRequests = 500
 
         val port = port.getAndIncrement()
         startServer(port)
@@ -200,6 +207,8 @@ class ServerPerformanceTests {
         }
 
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testViewStaticContentUnauthenticated_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
 
         // turn logging back on for other tests
         LogConfig.logSettings[LogTypes.DEBUG] = true

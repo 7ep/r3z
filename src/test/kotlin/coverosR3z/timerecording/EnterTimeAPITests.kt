@@ -24,6 +24,7 @@ import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 class EnterTimeAPITests {
 
@@ -267,7 +268,7 @@ class EnterTimeAPITests {
     @PerformanceTest
     @Test
     fun testEnterTimeAPI_PERFORMANCE() {
-        val numberOfRequests = 100
+        val numberOfRequests = 200
 
         turnOffAllLogging()
         // set up real database
@@ -300,6 +301,8 @@ class EnterTimeAPITests {
         }
         resetLogSettingsToDefault()
         println(time)
+        File("${granularPerfArchiveDirectory}testEnterTimeAPI_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\trequests: $numberOfRequests\ttime: $time milliseconds\n")
     }
 
     /*

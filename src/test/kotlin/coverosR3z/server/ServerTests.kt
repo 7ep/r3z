@@ -24,6 +24,7 @@ import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.*
 import org.junit.Assert.assertEquals
+import java.io.File
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -290,6 +291,8 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testWithValidClient_LoginPage_PERFORMANCE() {
+        val numberOfRequests = 100
+
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val headers = listOf("Connection: keep-alive")
@@ -299,7 +302,7 @@ class ServerTests {
         val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au, testPort)
 
         val (time, _) = getTime {
-            for (i in 1..100) {
+            for (i in 1..numberOfRequests) {
                 myClient.send()
                 val result = myClient.read()
 
@@ -307,6 +310,9 @@ class ServerTests {
             }
         }
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testWithValidClient_LoginPage_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
+
         // turn logging back on for other tests
         logSettings[LogTypes.DEBUG] = true
     }
@@ -319,13 +325,19 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testHomepage_PERFORMANCE() {
+        val numberOfThreads = 10
+        val numberOfRequests = 300
+
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedRequestsHomepage(10, testPort) }
+            val threadList = (1..numberOfThreads).map {  makeClientThreadRepeatedRequestsHomepage(numberOfRequests, testPort) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testHomepage_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tnumberOfThreads: $numberOfThreads\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
+
         // turn logging back on for other tests
         logSettings[LogTypes.DEBUG] = true
     }
@@ -338,13 +350,19 @@ class ServerTests {
     @PerformanceTest
     @Test
     fun testEnterTime_PERFORMANCE() {
+        val threadCount = 10
+        val requestCount = 100
+
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..8).map {  makeClientThreadRepeatedTimeEntries(10, testPort) }
+            val threadList = (1..threadCount).map {  makeClientThreadRepeatedTimeEntries(requestCount, testPort) }
             threadList.forEach { it.join() }
         }
         println("Time was $time")
+        File("${granularPerfArchiveDirectory}testEnterTime_PERFORMANCE")
+            .appendText("${Date.now().stringValue}\tthreadCount: $threadCount\trequestCount: $requestCount\ttime:$time\n")
+
         // turn logging back on for other tests
         logSettings[LogTypes.DEBUG] = true
     }

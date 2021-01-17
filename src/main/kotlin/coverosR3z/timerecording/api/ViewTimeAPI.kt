@@ -1,7 +1,6 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
-import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
