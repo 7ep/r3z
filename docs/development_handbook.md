@@ -35,20 +35,20 @@ Here's the general series of steps for a new developer:
 1. Install Java onto your machine if you don't already have it.  Any version of Java will suffice, but 
    the best would be the version 11 SDK, and make sure to add the path to your JDK to your environment
    as JAVA_HOME, and also add the path to the Java binaries to your PATH variable.
-2. Download and install Intellij Community Edition (which is free of charge) if you don't already have 
+2. Download and install IntelliJ Community Edition (which is free of charge) if you don't already have 
    it. This is definitely the best IDE for our purposes, since it is developed by the same company
-   that develops the Kotlin language, and also, it's awesome.  And it's the IDE all the other developers use.
+   that develops the Kotlin language, and also, it's awesome.  And it's the IDE all the other developers use. Find it here: https://www.jetbrains.com/idea/download/
 3. Obtain this source code from Github, at https://github.com/7ep/r3z.git
 4. Run the tests on your computer, using the command line: gradlew test 
-   (you might need to add dot-slash before that, if you are using Mac or Linux)
+   (you might need to add dot-slash before that, if you are using macOS or Linux)
 5. Run the application to get a feel for the user experience: gradlew run
-6. Open the software with Intellij.  Try building and running tests with it.  Note that the
-   default test runner in Intellij will run the tests serially (rather than in parallel) which
+6. Open the software with IntelliJ.  Try building and running tests with it.  Note that the
+   default test runner in IntelliJ will run the tests serially (rather than in parallel) which
    takes a while.  To run them faster, find the gradle tool window and the test task within it,
    and run the tests there.
-7. Read through some of this developer documentation to get a feel for some of its unique characteristics
+7. Read through some of this developer documentation to get a feel for some of its unique characteristics.
 8. Examine some of the tests in the system to get a feel for how the system works and how
-   test automation is done
+   test automation is done.
 
 
 Guiding ideas
