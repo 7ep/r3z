@@ -263,7 +263,7 @@ class EnterTimeAPITests {
      *
      * With 1000 requests, it takes .180 seconds = 5,555 requests per second.
      *
-     * See [ServerPerformanceTests.testEnterTime_PERFORMANCE]
+     * See [ServerPerformanceTests.testEnterTimeReal_PERFORMANCE]
      */
     @PerformanceTest
     @Test

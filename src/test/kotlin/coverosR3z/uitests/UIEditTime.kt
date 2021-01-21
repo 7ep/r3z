@@ -56,7 +56,7 @@ class UIEditTime {
 
     companion object {
         private const val port = 4001
-        private val domain = "http://localhost:$port"
+        private const val domain = "http://localhost:$port"
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
