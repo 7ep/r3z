@@ -61,7 +61,9 @@ class LoginAPI(val sd: ServerData) {
             val newSessionToken: String = au.createNewSession(loginUser)
             // we use SameSite as a way to avoid cross-site scripting attacks.
             // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-            val cookie = "Set-Cookie: sessionId=$newSessionToken; SameSite=Strict"
+            // HttpOnly - JavaScript cannot access this coo
+            // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
+            val cookie = "Set-Cookie: sessionId=$newSessionToken; SameSite=Strict; HttpOnly"
             PreparedResponseData(successHTML, StatusCode.OK, listOf(ContentType.TEXT_HTML.value, cookie))
         } else {
             logDebug { "User ($username) failed to login" }

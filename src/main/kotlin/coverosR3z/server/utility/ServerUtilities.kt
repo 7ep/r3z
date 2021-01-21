@@ -108,23 +108,33 @@ class ServerUtilities {
 
         /**
          * sends data as the body of a response from server
+         * Also adds necessary across-the-board headers
          */
         fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
             logTrace { "Assembling data just before shipping to client" }
             val status = "HTTP/1.1 ${data.statusCode.value}"
             logTrace { "status: $status" }
-            val contentLengthHeader = "Content-Length: ${data.fileContents.size}"
+            val basicServerHeaders = generateBasicServerResponseHeaders(data)
+            val allHeaders = basicServerHeaders + data.headers
 
-            val otherHeaders = data.headers.joinToString(CRLF)
-            logTrace { "contentLengthHeader: $contentLengthHeader" }
-            data.headers.forEach{ logTrace { "sending header: $it" } }
-            server.write("$status$CRLF" +
-                    "$contentLengthHeader$CRLF" +
-                    otherHeaders +
+            val headerResponse = "$status$CRLF" +
+                    allHeaders.joinToString(CRLF) +
                     CRLF +
                     CRLF
-            )
+
+            server.write(headerResponse)
             server.writeBytes(data.fileContents)
+        }
+
+        private fun generateBasicServerResponseHeaders(data: PreparedResponseData): List<String> {
+            return listOf(
+                "$CONTENT_LENGTH: ${data.fileContents.size}",
+
+                // security-oriented headers
+                "X-Frame-Options: DENY",
+                "X-Content-Type-Options: nosniff",
+                "server: cerver",
+            )
         }
 
     }

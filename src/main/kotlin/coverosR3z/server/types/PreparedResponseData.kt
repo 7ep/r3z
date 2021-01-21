@@ -5,7 +5,15 @@ import coverosR3z.misc.utility.toBytes
 /**
  * Data for shipping to the client
  */
-data class PreparedResponseData(val fileContents: ByteArray, val statusCode: StatusCode, val headers : List<String> = emptyList()){
+data class PreparedResponseData(val fileContents: ByteArray,
+                                val statusCode: StatusCode,
+
+                                /**
+                                 * these are the headers that a particular API set.
+                                 * There are also server-wide headers set at ServerUtilities.returnData
+                                 */
+                                val headers : List<String> = emptyList()){
+
     constructor(fileContents: String, statusCode: StatusCode, headers : List<String> = emptyList())
             : this(toBytes(fileContents), statusCode, headers)
 

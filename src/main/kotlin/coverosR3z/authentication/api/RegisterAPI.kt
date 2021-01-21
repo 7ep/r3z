@@ -7,6 +7,7 @@ import coverosR3z.server.utility.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.EmployeeId
 
 class RegisterAPI(private val sd: ServerData) {
@@ -60,7 +61,7 @@ class RegisterAPI(private val sd: ServerData) {
         val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.getElemName()])
         val result = au.register(username, password, employeeId)
         return if (result.status == RegistrationResultStatus.SUCCESS) {
-            okHTML(successHTML)
+            redirectTo(LoginAPI.path)
         } else {
             okHTML(failureHTML)
         }

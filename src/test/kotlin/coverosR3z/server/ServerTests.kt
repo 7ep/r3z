@@ -207,7 +207,7 @@ class ServerTests {
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
         val result: AnalyzedHttpData = parseHttpMessage(client, au)
-        assertEquals(StatusCode.OK, result.statusCode)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
     }
 
     /**

@@ -1,24 +1,21 @@
 package coverosR3z.server
 
-import coverosR3z.misc.DEFAULT_EMPLOYEE
-import coverosR3z.misc.DEFAULT_PASSWORD
-import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.misc.DEFAULT_EMPLOYEE
+import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.utility.toStr
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.employeeIdCannotBeBlank
 import coverosR3z.timerecording.types.minEmployeeIdMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -49,10 +46,11 @@ class RegisterAPITests {
             RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString()))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
 
-        val responseData = RegisterAPI.handlePost(sd).fileContents
+        val response = RegisterAPI.handlePost(sd)
 
-        assertTrue("The system should indicate success.  File was $responseData",
-                toStr(responseData).contains("SUCCESS"))
+        assertEquals("The system should redirect to the login page.",
+            StatusCode.SEE_OTHER,
+            response.statusCode)
     }
 
     /**

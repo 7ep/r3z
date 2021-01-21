@@ -53,7 +53,7 @@ private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
  * case doesn't account for just endlessly huge content.  Maybe when
  * we include video streaming that will change.
  */
-const val CONTENT_LENGTH = "content-length"
+const val CONTENT_LENGTH = "Content-Length"
 const val maxContentLength = 400_000
 
 /**
@@ -104,7 +104,7 @@ private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISock
 private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper): AnalyzedHttpData {
     val statusCode = parseStatusLineAsClient(statusLineMatches)
     val headers = getHeaders(socketWrapper)
-    val rawData = if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
+    val rawData = if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase())}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         socketWrapper.read(length)
     } else {
@@ -118,7 +118,7 @@ private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISock
  * read the body if one exists and convert it to a string -> string map
  */
 private fun extractData(server: ISocketWrapper, headers: List<String>) : PostBodyData {
-    return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH)}) {
+    return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase())}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
         PostBodyData(parseUrlEncodedForm(body), body)
@@ -177,7 +177,7 @@ fun parseStatusLineAsClient(matchResult: MatchResult): StatusCode {
 fun extractLengthOfPostBodyFromHeaders(headers: List<String>): Int {
     require(headers.isNotEmpty()) {"We must receive at least one header at this point or the request is invalid"}
     try {
-        val lengthHeader: String = headers.single { it.toLowerCase().startsWith(CONTENT_LENGTH) }
+        val lengthHeader: String = headers.single { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase()) }
         val length: Int? = contentLengthRegex.matchEntire(lengthHeader)?.groups?.get(1)?.value?.toInt()
         checkNotNull(length) {"The length must not be null for this input.  It was: $lengthHeader"}
         check(length <= maxContentLength) {"The Content-length is not allowed to exceed $maxContentLength characters"}
