@@ -1,4 +1,4 @@
-package coverosR3z.bdd
+package coverosR3z.bddframework
 
 /**
  * Represents a user story, a conception of a feature which includes the following:

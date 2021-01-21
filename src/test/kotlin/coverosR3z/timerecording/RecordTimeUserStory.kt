@@ -1,4 +1,6 @@
-package coverosR3z.bdd
+package coverosR3z.timerecording
+
+import coverosR3z.bddframework.UserStory
 
 object RecordTimeUserStory : UserStory(
     key = "RecordTime",

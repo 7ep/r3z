@@ -1,7 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.bdd.BDD
-import coverosR3z.bdd.ViewTimeUserStory
+import coverosR3z.bddframework.BDD
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*

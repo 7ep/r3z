@@ -1,4 +1,6 @@
-package coverosR3z.bdd
+package coverosR3z.authentication
+
+import coverosR3z.bddframework.UserStory
 
 object AuthenticationUserStory : UserStory(
     key = "Authentication",

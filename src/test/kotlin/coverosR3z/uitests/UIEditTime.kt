@@ -1,7 +1,7 @@
 package coverosR3z.uitests
 
-import coverosR3z.bdd.BDD
-import coverosR3z.bdd.EditTimeUserStory
+import coverosR3z.bddframework.BDD
+import coverosR3z.timerecording.EditTimeUserStory
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.persistence.utility.PureMemoryDatabase

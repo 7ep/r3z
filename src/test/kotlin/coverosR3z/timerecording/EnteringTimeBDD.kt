@@ -5,8 +5,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.UserName
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.bdd.BDD
-import coverosR3z.bdd.RecordTimeUserStory
+import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.DEFAULT_PROJECT_NAME

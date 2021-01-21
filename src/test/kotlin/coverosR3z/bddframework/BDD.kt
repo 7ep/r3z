@@ -1,4 +1,4 @@
-package coverosR3z.bdd
+package coverosR3z.bddframework
 
 /**
  * Marks a method as supporting Behavior-Driven
