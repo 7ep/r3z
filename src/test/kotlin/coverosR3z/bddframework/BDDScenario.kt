@@ -31,15 +31,23 @@ class BDDScenario(private val shortDesc: String, steps: List<String>, private va
         for(i in renderedSteps.indices) {
             renderedSteps[i] = renderedSteps[i].replace("<not-done>$step</not-done>", "<done>$step</done>")
         }
+        writeBDDFile()
+    }
+
+    fun writeBDDFile() {
         File("build/bdd/${userStory.key}/").mkdirs()
 
         val storyFile = File("build/bdd/${userStory.key}/story.html")
-        if (! storyFile.exists()) {
+        if (!storyFile.exists()) {
             storyFile.writeText("<userstory>\n${userStory.story.trimIndent()}\n</userstory>")
         }
 
         val scenarioName = onlyAlphaNumerics.replace(shortDesc, "_")
-        File("build/bdd/${userStory.key}/scenario_$scenarioName.html").writeText("<scenario>$shortDesc</scenario>\n" + renderedSteps.joinToString("\n"))
+        File("build/bdd/${userStory.key}/scenario_$scenarioName.html").writeText(
+            "<scenario>$shortDesc</scenario>\n" + renderedSteps.joinToString(
+                "\n"
+            )
+        )
     }
 
 }

@@ -23,6 +23,8 @@ abstract class UserStory(val key : String, val story: String) {
 
     fun addScenario(description: String, steps: List<String>): BDDScenario {
         val newScenario = BDDScenario(description, steps, this)
+        // write the initial (nothing yet done) scenario, if nothing is marked done
+        newScenario.writeBDDFile()
         scenarios.add(newScenario)
         return newScenario
     }
