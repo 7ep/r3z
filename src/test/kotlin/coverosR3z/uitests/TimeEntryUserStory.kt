@@ -21,7 +21,6 @@ Scenario: should be possible to disallow time entry on future days for certain p
 Scenario: I should see my existing time entries when I open the time entry page
 Scenario: When I enter a time entry, I want to enter a comment explaining the entry
 Scenario: When I enter a time entry, I want to enter a time spent
-Scenario: When I enter a time entry, I want to enter a date
 Scenario: When I enter a time entry, I want to enter a project
 
 Explore: what is the metaphor we want for the UI/UX? Calendar? Tabbing? (non-mouse nav)?
