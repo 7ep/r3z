@@ -1,5 +1,6 @@
 package coverosR3z.persistence.types
 
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -51,8 +52,16 @@ class ConcurrentSet<T> : Iterable<T>, Set<T>{
         map.remove(checkNotNull(item))
     }
 
+    /**
+     * We will provide an iterator, but only for
+     * read-only actions - no writing allowed
+     *
+     * This constricts the interface, to simplify
+     * things so it is easier to comprehend where
+     * data is allowed to be changed.
+     */
     override fun iterator(): Iterator<T> {
-        return map.keySet(NullEnum.NULL).iterator()
+        return Collections.unmodifiableSet(map.keySet(NullEnum.NULL)).iterator()
     }
 
     override fun equals(other: Any?): Boolean {
