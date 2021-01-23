@@ -109,11 +109,11 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
     }
 
     override fun getAllEmployees(): List<Employee> {
-        return pmd.actOnEmployees { it.toList() }
+        return pmd.readEmployees { it.toList() }
     }
 
     override fun getEmployeeById(id: EmployeeId): Employee {
-        return pmd.actOnEmployees { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
+        return pmd.readEmployees { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
     companion object {
