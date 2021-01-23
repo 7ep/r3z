@@ -64,12 +64,14 @@ class UITimeEntry {
      */
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `all inputs should restrict to valid values` () {
     }
 
     @BDD
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `timeentry - should be able to submit time for a certain period`() {
         val s = TimeEntryUserStory.addScenario(
             "timeentry - should be able to submit time for a certain period",
@@ -84,6 +86,7 @@ class UITimeEntry {
     @BDD
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `timeentry - should be able to unsubmit a period`() {
         val s = TimeEntryUserStory.addScenario(
             "timeentry - should be able to unsubmit a period",
@@ -97,6 +100,7 @@ class UITimeEntry {
 
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `should be able to edit make multiple entries at once`() {
         // Given I spent half my day on training and half on client work
         // There should be fields available to record both these things
@@ -108,6 +112,7 @@ class UITimeEntry {
 
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `a blind person should have equivalent accommodation for entering time`() {
         // I am blind, so I use a screen reader
         // I enter my time using the screen reader
@@ -145,6 +150,7 @@ class UITimeEntry {
 
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `should be able to navigate the time periods`() {
 
     }
@@ -163,12 +169,14 @@ class UITimeEntry {
 
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `I should not need to enter details on a time entry`() {
 
     }
 
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `all data entry should be automatically saved as I work`() {
 
     }
@@ -180,6 +188,7 @@ class UITimeEntry {
      */
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `a new time period should typically populate default projects`() {
 
     }
@@ -192,6 +201,7 @@ class UITimeEntry {
      */
     @UITest
     @Test
+    @Ignore("Not started yet")
     fun `should be an option to quickly enter time per project or per day `() {
 
     }

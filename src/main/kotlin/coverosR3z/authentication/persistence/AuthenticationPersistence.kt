@@ -18,11 +18,11 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
     }
 
     override fun isUserRegistered(name: UserName): Boolean {
-        return pmd.actOnUsers { users -> users.singleOrNull { u -> u.name == name } ?: NO_USER } != NO_USER
+        return pmd.readUsers { users -> users.singleOrNull { u -> u.name == name } ?: NO_USER } != NO_USER
     }
 
     override fun getUser(name: UserName) : User {
-        return pmd.actOnUsers { users ->  users.singleOrNull { u -> u.name == name } ?: NO_USER }
+        return pmd.readUsers { users ->  users.singleOrNull { u -> u.name == name } ?: NO_USER }
     }
 
     override fun getUserForSession(sessionToken: String): User {
@@ -30,12 +30,12 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
     }
 
     override fun addNewSession(sessionId: String, user: User, time: DateTime) {
-        pmd.actOnSessions { sessions -> require(sessions.none { it.sessionId == sessionId }) { "There must not already exist a session for (${user.name}) if we are to create one" } }
+        pmd.readSessions { sessions -> require(sessions.none { it.sessionId == sessionId }) { "There must not already exist a session for (${user.name}) if we are to create one" } }
         pmd.actOnSessions { sessions -> sessions.add(Session(sessionId, user, time)) }
     }
 
     override fun deleteSession(user: User) {
-        pmd.actOnSessions { sessions ->  check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"} }
+        pmd.readSessions { sessions ->  check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"} }
         pmd.actOnSessions { sessions -> sessions.filter { it.user == user }.forEach { sessions.remove(it) } }
     }
 
@@ -44,7 +44,7 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
     }
 
     override fun getAllUsers(): Set<User> {
-        return pmd.actOnUsers { users -> users.toSet() }
+        return pmd.readUsers { users -> users.toSet() }
     }
 
 }
