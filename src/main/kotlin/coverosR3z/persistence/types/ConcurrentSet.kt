@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * the data in the keys only.  We provide some syntactic sugar
  * so this seems similar to using a Set.
  */
-class ConcurrentSet<T> : Iterable<T>, Set<T>{
+open class ConcurrentSet<T> : Iterable<T>, Set<T> {
 
     private val map : ConcurrentHashMap<T, NullEnum> = ConcurrentHashMap()
 
@@ -26,7 +26,7 @@ class ConcurrentSet<T> : Iterable<T>, Set<T>{
     /**
      * Adds an item to this collection
      */
-    fun add(item : T) : T{
+    open fun add(item : T) : T{
         map[item] = NullEnum.NULL
         return item
     }
@@ -36,7 +36,7 @@ class ConcurrentSet<T> : Iterable<T>, Set<T>{
      *
      * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
      */
-    fun addAll(elements: Collection<T>): Boolean {
+    open fun addAll(elements: Collection<T>): Boolean {
         var didAdd = false
         for (element in elements) {
             map[element] = NullEnum.NULL
@@ -48,7 +48,7 @@ class ConcurrentSet<T> : Iterable<T>, Set<T>{
     /**
      * Removes an item from this collection
      */
-    fun remove(item: T) {
+    open fun remove(item: T) {
         map.remove(checkNotNull(item))
     }
 
