@@ -106,8 +106,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         </tr>
                     </thead>
                     <tbody>
-                        
-                    """ + renderTimeRows(te, idBeingEdited, projects) +  """
+                    ${renderTimeRows(te, idBeingEdited, projects)}
                     </tbody>
                 </table>
         
@@ -182,8 +181,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                 <td class="project">
                                     <select name="project_entry" id="project_entry"/>
                                         <option selected disabled hidden>Choose here</option>
-                                         """ + projects.joinToString("") {
-                                        "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } + """
+                                        ${projectsToOptions(projects)}
                                     </select>
                                 </td>
                                 <td class="time">
@@ -201,6 +199,11 @@ class ViewTimeAPI(private val sd: ServerData) {
                             </form>
                         </tr>
                           """
+
+    private fun projectsToOptions(projects: List<Project>) =
+        projects.joinToString("") {
+            "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n"
+        }
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
