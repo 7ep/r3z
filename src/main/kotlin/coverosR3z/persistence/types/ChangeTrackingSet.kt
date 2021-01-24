@@ -29,3 +29,9 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
 
 
 }
+
+fun <T> List<T>.toChangeTrackingSet() : ChangeTrackingSet<T> {
+    val newSet = ChangeTrackingSet<T>()
+    this.forEach{newSet.add(it)}
+    return newSet
+}
