@@ -52,10 +52,10 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     ////////////////////////////////////
 
     /**
-     * carry out some write action on the [User] set of data.
-     * @param action a lambda to receive the set of users and do whatever you want with it
+     * carry out some write action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
-    fun <R> actOnUsers(action: (ConcurrentSet<User>) -> R) : R {
+    fun <R> actOnUsers(action: (ChangeTrackingSet<User>) -> R) : R {
         val result = action.invoke(users)
 
         serializeToDisk(users, USERS_FILENAME)
@@ -64,18 +64,18 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     }
 
     /**
-     * carry out some readonly action on the [User] set of data.
-     * @param action a lambda to receive the set of users and do whatever you want with it
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
     fun <R> readUsers(action: (Set<User>) -> R) : R {
         return action.invoke(Collections.unmodifiableSet(users))
     }
 
     /**
-     * carry out some write action on the [User] set of data.
-     * @param action a lambda to receive the set of users and do whatever you want with it
+     * carry out some write action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
-    fun <R> actOnEmployees(action: (ConcurrentSet<Employee>) -> R) : R {
+    fun <R> actOnEmployees(action: (ChangeTrackingSet<Employee>) -> R) : R {
         val result = action.invoke(employees)
 
         serializeToDisk(employees, EMPLOYEES_FILENAME)
@@ -84,18 +84,18 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     }
 
     /**
-     * carry out some readonly action on the [User] set of data.
-     * @param action a lambda to receive the set of users and do whatever you want with it
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
     fun <R> readEmployees(action: (Set<Employee>) -> R) : R {
         return action.invoke(Collections.unmodifiableSet(employees))
     }
 
     /**
-     * carry out some action on the [Session] set of data.
-     * @param action a lambda to receive the set of sessions and do whatever you want with it
+     * carry out some write action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
-    fun <R> actOnSessions(action: (ConcurrentSet<Session>) -> R) : R {
+    fun <R> actOnSessions(action: (ChangeTrackingSet<Session>) -> R) : R {
         val result = action.invoke(sessions)
 
         serializeToDisk(sessions, SESSIONS_FILENAME)
@@ -103,18 +103,18 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
         return result
     }
     /**
-     * Read from the [Session] set of data.
-     * @param action a lambda to receive the set of sessions and do whatever you want with it
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
     fun <R> readSessions(action: (Set<Session>) -> R) : R {
         return action.invoke(Collections.unmodifiableSet(sessions))
     }
 
     /**
-     * carry out some action on the [Project] set of data.
-     * @param action a lambda to receive the set of projects and do whatever you want with it
+     * carry out some write action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
-    fun <R> actOnProjects(action: (ConcurrentSet<Project>) -> R) : R {
+    fun <R> actOnProjects(action: (ChangeTrackingSet<Project>) -> R) : R {
         val result = action.invoke(projects)
 
         serializeToDisk(projects, PROJECTS_FILENAME)
@@ -123,32 +123,29 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     }
 
     /**
-     * Read the [Project] set of data.
-     * @param action a lambda to receive the set of projects and do whatever you want with it
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
     fun <R> readProjects(action: (Set<Project>) -> R) : R {
         return action.invoke(Collections.unmodifiableSet(projects))
     }
 
     /**
-     * carry out an edit or change of some kind on the [TimeEntry] set of data.
-     * @param action a lambda to receive the set of time entries and do whatever you want with it
+     * carry out some write action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
-    fun actOnTimeEntries(action: (timeEntries: ConcurrentSet<TimeEntry>) -> TimeEntry) : TimeEntry
-    {
+    fun <R> actOnTimeEntries(action: (ChangeTrackingSet<TimeEntry>) -> R) : R {
         val result = action.invoke(timeEntries)
 
-        serializeTimeEntriesToDisk(result)
+        val changedTimeEntries = timeEntries.getChangedData()
+        serializeTimeEntriesToDisk(changedTimeEntries)
 
         return result
     }
 
     /**
-     * carry out some read action on the [TimeEntry] set of data.
-     * This method does not ever serialize to disk, or expect any
-     * changes to the underlying data, it just reads.
-     *
-     * @param action a lambda to receive the set of time entries and do whatever you want with it
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
      */
     fun <R> readTimeEntries(action: (timeEntries: Set<TimeEntry>) -> R) : R
     {
@@ -225,18 +222,22 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
      * Because the time entry data set is large, we don't want to rewrite the entire thing each time a
      * user changes anything.  Instead, we want to examine what has changed and only write that.
      */
-    private fun serializeTimeEntriesToDisk(timeEntry: TimeEntry) {
+    private fun serializeTimeEntriesToDisk(modifiedEntries: Set<TimeEntry>) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping serialization for time entries" }
             return
         }
 
-        val employeeDateTimeEntries = timeEntries.filter { it.employee == timeEntry.employee && it.date.month() == timeEntry.date.month() }
-        val timeentriesSerialized = employeeDateTimeEntries.joinToString ("\n") { it.serialize() }
-        val subDirectory = dbDirectory + "$TIMEENTRIES_DIRECTORY/" + "${timeEntry.employee.id.value}/"
-        val filename = "${timeEntry.date.year()}_${timeEntry.date.month()}"
-        actionQueue.enqueue{ File(subDirectory).mkdirs() }
-        writeDbFile(timeentriesSerialized, filename, subDirectory)
+        for (entry in modifiedEntries) {
+            // get all the time-entries for the employee and the month(s) of the modified time entry
+            val employeeDateTimeEntries =
+                timeEntries.filter { it.employee == entry.employee && it.date.month() == entry.date.month() }
+            val timeentriesSerialized = employeeDateTimeEntries.joinToString("\n") { it.serialize() }
+            val subDirectory = dbDirectory + "$TIMEENTRIES_DIRECTORY/" + "${entry.employee.id.value}/"
+            val filename = "${entry.date.year()}_${entry.date.month()}"
+            actionQueue.enqueue { File(subDirectory).mkdirs() }
+            writeDbFile(timeentriesSerialized, filename, subDirectory)
+        }
     }
 
     private fun writeDbFile(value: String, name : String, directory: String) {

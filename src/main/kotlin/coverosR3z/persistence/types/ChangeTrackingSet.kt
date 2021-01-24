@@ -4,10 +4,19 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
 
     private val modified = mutableSetOf<T>()
 
+    /**
+     * Gets the current changes to the data, clearing
+     * it in the process
+     */
     fun getChangedData(): Set<T> {
-        return modified
+        val mySet = modified.toSet()
+        modified.clear()
+        return mySet
     }
 
+    /**
+     * clears the set of tracked changed data
+     */
     fun clearModifications() {
         modified.clear()
     }
