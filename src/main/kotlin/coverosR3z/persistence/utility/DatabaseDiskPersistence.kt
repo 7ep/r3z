@@ -11,12 +11,12 @@ import java.io.File
  *
  * The pattern is to group it by index
  */
-class DatabaseSerialization(private val dbDirectory : String? = null) {
+class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
 
     private val actionQueue = ActionQueue("DatabaseWriter")
 
     /**
-     * This function will stop the database serialization cleanly.
+     * This function will stop the database persistence cleanly.
      *
      * In order to do this, we need to wait for our threads
      * to finish their work.  In particular, we
@@ -35,7 +35,7 @@ class DatabaseSerialization(private val dbDirectory : String? = null) {
      * @param set the data we are serializing and writing
      * @param name the name of the data
      */
-    fun <T: IndexableSerializable> serializeToDisk(set : Set<T>, name: String) {
+    fun <T: IndexableSerializable> persistToDisk(set : Set<T>, name: String) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping serialization for $name" }
             return
