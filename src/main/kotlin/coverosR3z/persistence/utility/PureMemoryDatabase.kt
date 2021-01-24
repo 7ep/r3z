@@ -7,11 +7,9 @@ import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.utility.ActionQueue
-import coverosR3z.persistence.types.Serializable
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.exceptions.NoTimeEntriesOnDiskException
-import coverosR3z.persistence.types.ConcurrentSet
-import coverosR3z.persistence.types.toConcurrentSet
+import coverosR3z.persistence.types.*
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import java.io.File
@@ -29,11 +27,11 @@ import kotlin.NoSuchElementException
  * @param dbDirectory if this is null, the database won't use the disk at all.  If you set it to a directory, like
  *                      File("db/") the database will use that directory for all persistence.
  */
-class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = ConcurrentSet(),
-                         private val users: ConcurrentSet<User> = ConcurrentSet(),
-                         private val projects: ConcurrentSet<Project> = ConcurrentSet(),
-                         private val timeEntries: ConcurrentSet<TimeEntry> = ConcurrentSet(),
-                         private val sessions: ConcurrentSet<Session> = ConcurrentSet(),
+class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
+                         private val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
+                         private val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
+                         private val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
+                         private val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
                          private val dbDirectory : String? = null
 ) {
 
@@ -41,11 +39,11 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
 
     fun copy(): PureMemoryDatabase {
         return PureMemoryDatabase(
-            employees = this.employees.toList().toConcurrentSet(),
-            users = this.users.toList().toConcurrentSet(),
-            projects = this.projects.toList().toConcurrentSet(),
-            timeEntries = this.timeEntries.toList().toConcurrentSet(),
-            sessions = this.sessions.toList().toConcurrentSet(),
+            employees = this.employees.toList().toChangeTrackingSet(),
+            users = this.users.toList().toChangeTrackingSet(),
+            projects = this.projects.toList().toChangeTrackingSet(),
+            timeEntries = this.timeEntries.toList().toChangeTrackingSet(),
+            sessions = this.sessions.toList().toChangeTrackingSet(),
         )
     }
 
@@ -214,7 +212,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
     //   SERIALIZATION
     ////////////////////////////////////
 
-    private fun <T: Serializable> serializeToDisk(set : ConcurrentSet<T>, filename: String) {
+    private fun <T: Serializable> serializeToDisk(set : Set<T>, filename: String) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping serialization for $filename" }
             return
@@ -344,14 +342,14 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 return null
             }
 
-            val projects = readAndDeserialize(dbDirectory, PROJECTS_FILENAME) { Project.deserialize(it) }
+            val projects = readAndDeserializeNew(dbDirectory, PROJECTS_FILENAME) { Project.deserialize(it) }
             projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val users = readAndDeserialize(dbDirectory, USERS_FILENAME) { User.deserialize(it) }
+            val users = readAndDeserializeNew(dbDirectory, USERS_FILENAME) { User.deserialize(it) }
             users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val sessions = readAndDeserialize(dbDirectory, SESSIONS_FILENAME) { Session.deserialize(it, users.toSet()) }
-            val employees = readAndDeserialize(dbDirectory, EMPLOYEES_FILENAME) { Employee.deserialize(it) }
+            val sessions = readAndDeserializeNew(dbDirectory, SESSIONS_FILENAME) { Session.deserialize(it, users.toSet()) }
+            val employees = readAndDeserializeNew(dbDirectory, EMPLOYEES_FILENAME) { Employee.deserialize(it) }
             employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             val fullTimeEntries = readAndDeserializeTimeEntries(dbDirectory, employees.toSet(), projects.toSet())
@@ -363,10 +361,10 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
         private fun readAndDeserializeTimeEntries(
             dbDirectory: String,
             employees: Set<Employee>,
-            projects: Set<Project>) : ConcurrentSet<TimeEntry> {
+            projects: Set<Project>) : ChangeTrackingSet<TimeEntry> {
             val timeEntriesDirectory = "$TIMEENTRIES_DIRECTORY/"
             return try {
-                val fullTimeEntries: ConcurrentSet<TimeEntry> = ConcurrentSet()
+                val fullTimeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet()
 
                 for (employeeDirectory: File in File(dbDirectory + timeEntriesDirectory).listFiles()?.filter { it.isDirectory } ?: throw NoTimeEntriesOnDiskException()) {
                     val employee : Employee = try {
@@ -398,7 +396,7 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
                 fullTimeEntries
             } catch (ex : NoTimeEntriesOnDiskException) {
                 logWarn { "No time entries were found on disk, initializing new empty data" }
-                ConcurrentSet()
+                ChangeTrackingSet()
             }
         }
 
@@ -417,6 +415,20 @@ class PureMemoryDatabase(private val employees: ConcurrentSet<Employee> = Concur
             } catch (ex: FileNotFoundException) {
                 logWarn { "$filename file missing, creating empty" }
                 ConcurrentSet()
+            }
+        }
+
+        private fun <T> readAndDeserializeNew(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+            return try {
+                val file = readFile(dbDirectory, filename)
+                if (file.isBlank()) {
+                    logWarn { "$filename file exists but empty, creating empty data set" }
+                    return ChangeTrackingSet()
+                }
+                file.split("\n").map { deserializer(it) }.toChangeTrackingSet()
+            } catch (ex: FileNotFoundException) {
+                logWarn { "$filename file missing, creating empty" }
+                ChangeTrackingSet()
             }
         }
 
