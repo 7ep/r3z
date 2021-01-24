@@ -43,7 +43,7 @@ class UIValidation {
         // what gets entered will just be truncated to [maxUserNameSize]
         val tooLongUsername = "a".repeat(maxUserNameSize+1)
         rp.register(tooLongUsername, "password12345", "Administrator")
-        assertFalse(pmd.actOnUsers { users -> users.any { it.name.value == tooLongUsername } })
+        assertFalse(pmd.UserDataAccess().read { users -> users.any { it.name.value == tooLongUsername } })
 
         // validation won't allow it through - password too short
         rp.register("alice", "a".repeat(minPasswordSize-1), "Administrator")

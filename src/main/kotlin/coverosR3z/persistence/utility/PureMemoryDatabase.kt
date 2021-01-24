@@ -15,6 +15,7 @@ import coverosR3z.timerecording.types.*
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
+import javax.xml.crypto.Data
 import kotlin.NoSuchElementException
 
 
@@ -27,12 +28,12 @@ import kotlin.NoSuchElementException
  * @param dbDirectory if this is null, the database won't use the disk at all.  If you set it to a directory, like
  *                      File("db/") the database will use that directory for all persistence.
  */
-class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
-                         private val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
-                         private val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
-                         private val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
-                         private val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
-                         private val dbDirectory : String? = null
+open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
+                         protected val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
+                         protected val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
+                         protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
+                         protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
+                         protected val dbDirectory : String? = null
 ) {
 
     private val actionQueue = ActionQueue("DatabaseWriter")
@@ -51,107 +52,85 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     //   DATA ACCESS
     ////////////////////////////////////
 
-    /**
-     * carry out some write action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> actOnUsers(action: (ChangeTrackingSet<User>) -> R) : R {
-        val result = action.invoke(users)
+    inner class EmployeeDataAccess : DataAccess<Employee> {
 
-        serializeToDisk(users, USERS_FILENAME)
+        override fun <R> actOn(action: (ChangeTrackingSet<Employee>) -> R): R {
+            val result = action.invoke(employees)
 
-        return result
+            serializeToDisk(employees, EMPLOYEES_FILENAME)
+
+            return result
+        }
+
+        override fun <R> read(action: (Set<Employee>) -> R): R {
+            return action.invoke(Collections.unmodifiableSet(employees))
+        }
+
     }
 
-    /**
-     * carry out some readonly action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> readUsers(action: (Set<User>) -> R) : R {
-        return action.invoke(Collections.unmodifiableSet(users))
+    inner class UserDataAccess : DataAccess<User> {
+
+        override fun <R> actOn(action: (ChangeTrackingSet<User>) -> R): R {
+            val result = action.invoke(users)
+
+            serializeToDisk(users, USERS_FILENAME)
+
+            return result
+        }
+
+        override fun <R> read(action: (Set<User>) -> R): R {
+            return action.invoke(Collections.unmodifiableSet(users))
+        }
+
     }
 
-    /**
-     * carry out some write action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> actOnEmployees(action: (ChangeTrackingSet<Employee>) -> R) : R {
-        val result = action.invoke(employees)
+    inner class SessionDataAccess : DataAccess<Session> {
 
-        serializeToDisk(employees, EMPLOYEES_FILENAME)
+        override fun <R> actOn(action: (ChangeTrackingSet<Session>) -> R) : R {
+            val result = action.invoke(sessions)
 
-        return result
+            serializeToDisk(sessions, SESSIONS_FILENAME)
+
+            return result
+        }
+
+        override fun <R> read(action: (Set<Session>) -> R) : R {
+            return action.invoke(Collections.unmodifiableSet(sessions))
+        }
+
     }
 
-    /**
-     * carry out some readonly action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> readEmployees(action: (Set<Employee>) -> R) : R {
-        return action.invoke(Collections.unmodifiableSet(employees))
+    inner class ProjectDataAccess : DataAccess<Project> {
+
+        override fun <R> actOn(action: (ChangeTrackingSet<Project>) -> R): R {
+            val result = action.invoke(projects)
+
+            serializeToDisk(projects, PROJECTS_FILENAME)
+
+            return result
+        }
+
+        override fun <R> read(action: (Set<Project>) -> R): R {
+            return action.invoke(Collections.unmodifiableSet(projects))
+        }
+
     }
 
-    /**
-     * carry out some write action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> actOnSessions(action: (ChangeTrackingSet<Session>) -> R) : R {
-        val result = action.invoke(sessions)
+    inner class TimeEntryDataAccess : DataAccess<TimeEntry> {
+        override fun <R> actOn(action: (ChangeTrackingSet<TimeEntry>) -> R): R {
+            val result = action.invoke(timeEntries)
 
-        serializeToDisk(sessions, SESSIONS_FILENAME)
+            val changedTimeEntries = timeEntries.getChangedData()
+            serializeTimeEntriesToDisk(changedTimeEntries)
 
-        return result
+            return result
+        }
+
+        override fun <R> read(action: (Set<TimeEntry>) -> R): R {
+            return action(Collections.unmodifiableSet(timeEntries))
+        }
+
     }
-    /**
-     * carry out some readonly action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> readSessions(action: (Set<Session>) -> R) : R {
-        return action.invoke(Collections.unmodifiableSet(sessions))
-    }
-
-    /**
-     * carry out some write action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> actOnProjects(action: (ChangeTrackingSet<Project>) -> R) : R {
-        val result = action.invoke(projects)
-
-        serializeToDisk(projects, PROJECTS_FILENAME)
-
-        return result
-    }
-
-    /**
-     * carry out some readonly action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> readProjects(action: (Set<Project>) -> R) : R {
-        return action.invoke(Collections.unmodifiableSet(projects))
-    }
-
-    /**
-     * carry out some write action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> actOnTimeEntries(action: (ChangeTrackingSet<TimeEntry>) -> R) : R {
-        val result = action.invoke(timeEntries)
-
-        val changedTimeEntries = timeEntries.getChangedData()
-        serializeTimeEntriesToDisk(changedTimeEntries)
-
-        return result
-    }
-
-    /**
-     * carry out some readonly action on the data.
-     * @param action a lambda to receive the set of data and do whatever you want with it
-     */
-    fun <R> readTimeEntries(action: (timeEntries: Set<TimeEntry>) -> R) : R
-    {
-        return action(Collections.unmodifiableSet(timeEntries))
-    }
-
 
 
 
@@ -209,7 +188,7 @@ class PureMemoryDatabase(private val employees: ChangeTrackingSet<Employee> = Ch
     //   SERIALIZATION
     ////////////////////////////////////
 
-    private fun <T: Serializable> serializeToDisk(set : Set<T>, filename: String) {
+    protected fun <T: Serializable> serializeToDisk(set : Set<T>, filename: String) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping serialization for $filename" }
             return

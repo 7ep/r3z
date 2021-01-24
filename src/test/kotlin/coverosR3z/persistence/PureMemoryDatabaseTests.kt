@@ -74,7 +74,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testShouldBePossibleToCopy_different() {
         val originalPmd = pmd.copy()
-        pmd.actOnEmployees { it.add(DEFAULT_EMPLOYEE) }
+        pmd.EmployeeDataAccess().actOn { it.add(DEFAULT_EMPLOYEE) }
         assertNotEquals("after adding a new employee, the databases should differ", originalPmd, pmd)
     }
 

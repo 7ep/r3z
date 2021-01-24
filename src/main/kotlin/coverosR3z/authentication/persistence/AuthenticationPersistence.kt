@@ -9,7 +9,7 @@ import coverosR3z.timerecording.types.EmployeeId
 class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
-        return pmd.actOnUsers { users ->
+        return pmd.UserDataAccess().actOn { users ->
             logTrace { "PMD: adding new user, \"${name.value}\"" }
             val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)
             users.add(newUser)
@@ -18,33 +18,33 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
     }
 
     override fun isUserRegistered(name: UserName): Boolean {
-        return pmd.readUsers { users -> users.singleOrNull { u -> u.name == name } ?: NO_USER } != NO_USER
+        return pmd.UserDataAccess().read { users -> users.singleOrNull { u -> u.name == name } ?: NO_USER } != NO_USER
     }
 
     override fun getUser(name: UserName) : User {
-        return pmd.readUsers { users ->  users.singleOrNull { u -> u.name == name } ?: NO_USER }
+        return pmd.UserDataAccess().read { users ->  users.singleOrNull { u -> u.name == name } ?: NO_USER }
     }
 
     override fun getUserForSession(sessionToken: String): User {
-        return pmd.readSessions { sessions -> sessions.singleOrNull { it.sessionId == sessionToken }?.user ?: NO_USER }
+        return pmd.SessionDataAccess().read { sessions -> sessions.singleOrNull { it.sessionId == sessionToken }?.user ?: NO_USER }
     }
 
     override fun addNewSession(sessionId: String, user: User, time: DateTime) {
-        pmd.readSessions { sessions -> require(sessions.none { it.sessionId == sessionId }) { "There must not already exist a session for (${user.name}) if we are to create one" } }
-        pmd.actOnSessions { sessions -> sessions.add(Session(sessionId, user, time)) }
+        pmd.SessionDataAccess().read { sessions -> require(sessions.none { it.sessionId == sessionId }) { "There must not already exist a session for (${user.name}) if we are to create one" } }
+        pmd.SessionDataAccess().actOn { sessions -> sessions.add(Session(sessionId, user, time)) }
     }
 
     override fun deleteSession(user: User) {
-        pmd.readSessions { sessions ->  check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"} }
-        pmd.actOnSessions { sessions -> sessions.filter { it.user == user }.forEach { sessions.remove(it) } }
+        pmd.SessionDataAccess().read { sessions ->  check(sessions.any{it.user == user}) {"There must exist a session in the database for (${user.name.value}) in order to delete it"} }
+        pmd.SessionDataAccess().actOn { sessions -> sessions.filter { it.user == user }.forEach { sessions.remove(it) } }
     }
 
     override fun getAllSessions(): Set<Session> {
-        return pmd.readSessions { sessions -> sessions.toSet() }
+        return pmd.SessionDataAccess().read { sessions -> sessions.toSet() }
     }
 
     override fun getAllUsers(): Set<User> {
-        return pmd.readUsers { users -> users.toSet() }
+        return pmd.UserDataAccess().read { users -> users.toSet() }
     }
 
 }
