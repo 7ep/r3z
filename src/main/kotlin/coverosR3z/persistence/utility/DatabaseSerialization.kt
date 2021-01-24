@@ -15,6 +15,18 @@ class DatabaseSerialization(private val dbDirectory : String? = null) {
 
     private val actionQueue = ActionQueue("DatabaseWriter")
 
+    /**
+     * This function will stop the database serialization cleanly.
+     *
+     * In order to do this, we need to wait for our threads
+     * to finish their work.  In particular, we
+     * have offloaded our file writes to [actionQueue], which
+     * has an internal thread for serializing all actions
+     * on our database
+     */
+    fun stop() {
+        actionQueue.stop()
+    }
 
 
     /**
@@ -31,11 +43,10 @@ class DatabaseSerialization(private val dbDirectory : String? = null) {
 
         for (item in set) {
             val parentDirectory = "$dbDirectory$name"
-            File(parentDirectory).mkdirs()
+            actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
             val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-            File(fullPath)
-                .writeText(item.serialize())
+            actionQueue.enqueue { File(fullPath).writeText(item.serialize()) }
         }
     }
 
@@ -49,7 +60,7 @@ class DatabaseSerialization(private val dbDirectory : String? = null) {
             val parentDirectory = "$dbDirectory$subDirectory"
 
             val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-            File(fullPath).delete()
+            actionQueue.enqueue { File(fullPath).delete() }
         }
     }
 
