@@ -2,6 +2,8 @@ package coverosR3z.persistence
 
 import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.persistence.types.ChangeTrackingSet
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.ProjectId
 import coverosR3z.timerecording.types.ProjectName
@@ -26,9 +28,9 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.add(DEFAULT_PROJECT)
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
 
     @Test
@@ -38,9 +40,9 @@ class ChangeTrackingSetTests {
         projects.clearModifications()
         projects.remove(DEFAULT_PROJECT)
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, DELETE)), data)
     }
 
     /**
@@ -55,9 +57,9 @@ class ChangeTrackingSetTests {
         projects.remove(DEFAULT_PROJECT)
         projects.add(newProject)
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT, newProject), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, DELETE), Pair(newProject, CREATE)), data)
     }
 
     // what happens if we add the same thing twice?
@@ -67,9 +69,9 @@ class ChangeTrackingSetTests {
         projects.add(DEFAULT_PROJECT)
         projects.add(DEFAULT_PROJECT)
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
 
     // what happens if we use the addAll method
@@ -78,9 +80,9 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT))
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
 
     /**
@@ -92,9 +94,9 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT, DEFAULT_PROJECT))
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
 
     /**
@@ -106,9 +108,9 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT, newProject))
 
-        val data : Set<Project> = projects.getChangedData()
+        val data = projects.getChangedData()
 
-        assertEquals(setOf(DEFAULT_PROJECT, newProject), data)
+        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE), Pair(newProject, CREATE)), data)
     }
 
 

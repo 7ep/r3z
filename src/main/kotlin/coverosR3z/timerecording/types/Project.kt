@@ -3,7 +3,7 @@ package coverosR3z.timerecording.types
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
-import coverosR3z.persistence.types.Serializable
+import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
 
 const val maximumProjectsCount = 100_000_000
@@ -53,7 +53,11 @@ data class ProjectId(val value: Int) {
 /**
  * A full Project object
  */
-data class Project(val id: ProjectId, val name: ProjectName) : Serializable {
+data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializable {
+
+    override fun getIndex(): Int {
+        return id.value
+    }
 
     override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} }"""

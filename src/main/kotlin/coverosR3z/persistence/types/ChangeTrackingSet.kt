@@ -1,14 +1,35 @@
 package coverosR3z.persistence.types
 
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
+
 class ChangeTrackingSet<T> : ConcurrentSet<T>() {
 
-    private val modified = mutableSetOf<T>()
+    /**
+     * This is used to tag what gets changed, so we
+     * know what to do during serialization later.
+     * For example, if something was deleted, we
+     * would delete the file.
+     */
+    enum class DataAction {
+        /**
+         * New data is being added
+         */
+        CREATE,
+
+        /**
+         * Data is being deleted from the set
+         */
+        DELETE
+    }
+
+    private val modified = mutableSetOf<Pair<T, DataAction>>()
 
     /**
      * Gets the current changes to the data, clearing
      * it in the process
      */
-    fun getChangedData(): Set<T> {
+    fun getChangedData(): Set<Pair<T, DataAction>> {
         val mySet = modified.toSet()
         modified.clear()
         return mySet
@@ -22,17 +43,17 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
     }
 
     override fun add(item : T) : T {
-        modified.add(item)
+        modified.add(Pair(item, CREATE))
         return super.add(item)
     }
 
     override fun addAll(elements: Collection<T>) : Boolean {
-        modified.addAll(elements)
+        modified.addAll(elements.map { Pair(it, CREATE) }.toSet() as Collection<Pair<T, DataAction>>)
         return super.addAll(elements)
     }
 
     override fun remove(item: T) {
-        modified.add(item)
+        modified.add(Pair(item, DELETE))
         return super.remove(item)
     }
 

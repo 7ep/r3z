@@ -121,7 +121,7 @@ open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employe
             val result = action.invoke(timeEntries)
 
             val changedTimeEntries = timeEntries.getChangedData()
-            serializeTimeEntriesToDisk(changedTimeEntries)
+            serializeTimeEntriesToDisk(changedTimeEntries.map { it.first }.toSet())
 
             return result
         }
