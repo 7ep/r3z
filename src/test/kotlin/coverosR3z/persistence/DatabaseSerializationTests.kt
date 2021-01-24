@@ -31,6 +31,7 @@ class DatabaseSerializationTests {
 
         val subDirectory = "project"
         dbs.serializeToDisk(projects, subDirectory)
+        dbs.stop()
 
         assertDirectoryAndFilesAsExpected(dbDirectory, subDirectory, projects)
     }
@@ -54,6 +55,7 @@ class DatabaseSerializationTests {
 
         val revisedProject = Project(DEFAULT_PROJECT.id, ProjectName("this is new"))
         dbs.serializeToDisk(setOf(revisedProject), subDirectory)
+        dbs.stop()
 
         val text = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").readText()
         val readProject = Project.deserialize(text)
@@ -70,6 +72,7 @@ class DatabaseSerializationTests {
         dbs.serializeToDisk(setOf(DEFAULT_PROJECT), subDirectory)
 
         dbs.deleteOnDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        dbs.stop()
 
         val doesExist = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").exists()
         assertFalse("after deleting, the file should not exist", doesExist)
