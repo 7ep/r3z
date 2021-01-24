@@ -1,8 +1,8 @@
 package coverosR3z.persistence
 
 import coverosR3z.misc.DEFAULT_PROJECT
-import coverosR3z.persistence.utility.DatabaseSerialization
-import coverosR3z.persistence.utility.DatabaseSerialization.Companion.databaseFileSuffix
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.ProjectId
 import coverosR3z.timerecording.types.ProjectName
@@ -10,7 +10,7 @@ import org.junit.Test
 import java.io.File
 import org.junit.Assert.*
 
-class DatabaseSerializationTests {
+class DatabaseDiskPersistenceTests {
 
     /**
      * Testing a new concept in writing to disk.
@@ -19,18 +19,18 @@ class DatabaseSerializationTests {
      * will get its own file.  So Project 1 will get its own file, Project 2, etc.
      */
     @Test
-    fun testSerializationNew_Project() {
-        val dbDirectory = "build/db/testSerializationNew_Project/"
+    fun testPersistenceNew_Project() {
+        val dbDirectory = "build/db/testPersistenceNew_Project/"
         File(dbDirectory).deleteRecursively()
 
         val projects = (1..10)
             .map { Project(ProjectId(it), ProjectName("$it")) }
             .toSet()
 
-        val dbs = DatabaseSerialization(dbDirectory)
+        val dbs = DatabaseDiskPersistence(dbDirectory)
 
         val subDirectory = "project"
-        dbs.serializeToDisk(projects, subDirectory)
+        dbs.persistToDisk(projects, subDirectory)
         dbs.stop()
 
         assertDirectoryAndFilesAsExpected(dbDirectory, subDirectory, projects)
@@ -46,15 +46,15 @@ class DatabaseSerializationTests {
      * and add.  So we remove, then we add, in order to update.
      */
     @Test
-    fun testSerializationNew_Update() {
-        val dbDirectory = "build/db/testSerializationNew_RemoveAndAdd/"
+    fun testPersistenceNew_Update() {
+        val dbDirectory = "build/db/testPersistenceNew_Update/"
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
-        val dbs = DatabaseSerialization(dbDirectory)
-        dbs.serializeToDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        val dbs = DatabaseDiskPersistence(dbDirectory)
+        dbs.persistToDisk(setOf(DEFAULT_PROJECT), subDirectory)
 
         val revisedProject = Project(DEFAULT_PROJECT.id, ProjectName("this is new"))
-        dbs.serializeToDisk(setOf(revisedProject), subDirectory)
+        dbs.persistToDisk(setOf(revisedProject), subDirectory)
         dbs.stop()
 
         val text = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").readText()
@@ -64,12 +64,12 @@ class DatabaseSerializationTests {
     }
 
     @Test
-    fun testSerializationNew_Delete() {
-        val dbDirectory = "build/db/testSerializationNew_RemoveAndAdd/"
+    fun testPersistenceNew_Delete() {
+        val dbDirectory = "build/db/testPersistenceNew_Delete/"
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
-        val dbs = DatabaseSerialization(dbDirectory)
-        dbs.serializeToDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        val dbs = DatabaseDiskPersistence(dbDirectory)
+        dbs.persistToDisk(setOf(DEFAULT_PROJECT), subDirectory)
 
         dbs.deleteOnDisk(setOf(DEFAULT_PROJECT), subDirectory)
         dbs.stop()
