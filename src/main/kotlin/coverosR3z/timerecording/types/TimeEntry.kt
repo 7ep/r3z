@@ -5,6 +5,8 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
 import coverosR3z.persistence.utility.PureMemoryDatabase
 
 const val MAX_DETAILS_LENGTH = 500
@@ -68,34 +70,46 @@ data class TimeEntry (
     val time: Time,
     val date: Date,
     val details : Details = Details()
-) {
+) : IndexableSerializable {
 
     fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
         return TimeEntryPreDatabase(employee, project, time, date, details)
     }
 
-    fun serialize(): String {
-        return """{ i: ${id.value} , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
+    override fun getIndex(): Int {
+        return id.value
+    }
+
+    override fun serialize(): String {
+        return """{ i: ${id.value} , e: ${employee.id.value} , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
     }
 
     companion object {
 
-        fun deserialize(str: String, employee: Employee, projects: Set<Project>) : TimeEntry {
-            return PureMemoryDatabase.deserializer(str, TimeEntry::class.java) { groups ->
+        fun deserialize(str: String, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
+            return deserializer(str, TimeEntry::class.java) { groups ->
 
                 try {
                     val id = checkParseToInt(groups[1])
-                    val projId = checkParseToInt(groups[3])
-                    val minutes = checkParseToInt(groups[5])
-                    val epochDays = checkParseToInt(groups[7])
-                    val detailText = decode(groups[9])
+                    val empId = checkParseToInt(groups[3])
+                    val projId = checkParseToInt(groups[5])
+                    val minutes = checkParseToInt(groups[7])
+                    val epochDays = checkParseToInt(groups[9])
+                    val detailText = decode(groups[11])
 
 
                     val project = try {
                         projects.single { it.id == ProjectId(projId) }
                     } catch (ex: NoSuchElementException) {
-                        throw DatabaseCorruptedException("Unable to find a project with the id of ${projId}.  Project set size: ${projects.size}")
+                        throw DatabaseCorruptedException("Unable to find a project with the id of ${projId} while deserializing a time entry.  Project set size: ${projects.size}")
                     }
+
+                    val employee = try {
+                        employees.single { it.id == EmployeeId(empId) }
+                    } catch (ex: NoSuchElementException) {
+                        throw DatabaseCorruptedException("Unable to find an employee with the id of ${empId} while deserializing a time entry.  Employee set size: ${employees.size}")
+                    }
+
                     TimeEntry(
                         TimeEntryId(id),
                         employee,

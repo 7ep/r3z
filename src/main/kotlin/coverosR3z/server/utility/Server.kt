@@ -6,6 +6,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.types.DateTime
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.*
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
@@ -147,7 +148,7 @@ class Server(val port: Int) {
             return pmd ?: if (dbDirectory == null) {
                 PureMemoryDatabase.startMemoryOnly()
             } else {
-                PureMemoryDatabase.startWithDiskPersistence(dbDirectory)
+                DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory)
             }
         }
 

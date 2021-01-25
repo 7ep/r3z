@@ -50,6 +50,12 @@ Here's the general series of steps for a new developer:
 8. Examine some of the tests in the system to get a feel for how the system works and how
    test automation is done.
 
+Optional:
+* Install "Code With Me" plugin for IntelliJ - Preferences > Plugins > Code WIth me
+    * Use the new "Code With Me" icon in top bar to enable "Full Access" (turn off "start voice call")
+    * Share the link with your friends
+    
+
 
 Guiding ideas
 -------------

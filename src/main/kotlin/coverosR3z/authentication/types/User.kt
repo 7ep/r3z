@@ -7,8 +7,8 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.generateRandomString
-import coverosR3z.persistence.types.Serializable
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
+import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -66,7 +66,11 @@ data class UserId(val value: Int) {
 data class Salt(val value: String)
 
 data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) :
-    Serializable {
+    IndexableSerializable {
+
+    override fun getIndex(): Int {
+        return id.value
+    }
 
     override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} , hash: ${encode(hash.value)} , salt: ${encode(salt.value)} , empId: ${employeeId?.value ?: "null"} }"""
