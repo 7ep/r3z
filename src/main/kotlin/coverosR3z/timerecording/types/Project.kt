@@ -4,7 +4,7 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.deserializer
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
 
 const val maximumProjectsCount = 100_000_000
 private const val maxProjectNameSize = 30

@@ -31,7 +31,7 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPer
 
     override fun addNewSession(sessionId: String, user: User, time: DateTime) {
         pmd.SessionDataAccess().read { sessions -> require(sessions.none { it.sessionId == sessionId }) { "There must not already exist a session for (${user.name}) if we are to create one" } }
-        pmd.SessionDataAccess().actOn { sessions -> sessions.add(Session(sessionId, user, time)) }
+        pmd.SessionDataAccess().actOn { sessions -> sessions.add(Session(sessions.nextIndex.getAndIncrement(), sessionId, user, time)) }
     }
 
     override fun deleteSession(user: User) {

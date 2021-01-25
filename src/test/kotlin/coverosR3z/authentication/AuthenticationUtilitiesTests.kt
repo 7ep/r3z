@@ -5,6 +5,7 @@ import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before
@@ -290,7 +291,7 @@ class AuthenticationUtilitiesTests {
     fun testShouldClearAllSessionsWhenLogout() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"
         File(dbDirectory).deleteRecursively()
-        val pmd = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = dbDirectory)
+        val pmd = DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory = dbDirectory)
         val authPersistence = AuthenticationPersistence(pmd)
         val au = AuthenticationUtilities(authPersistence)
 
@@ -311,7 +312,7 @@ class AuthenticationUtilitiesTests {
         pmd.stop()
 
         // test out loading it from the disk
-        val pmd2 = PureMemoryDatabase.startWithDiskPersistence(dbDirectory = dbDirectory)
+        val pmd2 = DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory = dbDirectory)
         val authPersistence2 = AuthenticationPersistence(pmd2)
         assertTrue(authPersistence2.getAllSessions().none{it.user == user1})
         assertEquals(1, authPersistence2.getAllSessions().filter {it.user == user2}.size)

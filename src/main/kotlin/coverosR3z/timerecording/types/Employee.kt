@@ -3,8 +3,8 @@ package coverosR3z.timerecording.types
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
-import coverosR3z.persistence.types.Serializable
-import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
 
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
@@ -58,7 +58,11 @@ data class EmployeeId(val value: Int) {
     }
 }
 
-data class Employee(val id: EmployeeId, val name: EmployeeName) : Serializable {
+data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSerializable {
+
+    override fun getIndex(): Int {
+        return id.value
+    }
 
     override fun serialize(): String {
         return """{ id: ${id.value} , name: ${encode(name.value)} }"""
@@ -66,7 +70,7 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : Serializable {
 
     companion object {
         fun deserialize(str: String) : Employee {
-            return PureMemoryDatabase.deserializer(str, Employee::class.java) { groups ->
+            return deserializer(str, Employee::class.java) { groups ->
                 val id = checkParseToInt(groups[1])
                 Employee(EmployeeId(id), EmployeeName(decode(groups[3])))
             }
