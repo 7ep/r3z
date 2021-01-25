@@ -58,15 +58,17 @@ data class EmployeeId(val value: Int) {
     }
 }
 
-data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSerializable {
+data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
     }
 
-    override fun serialize(): String {
-        return """{ id: ${id.value} , name: ${encode(name.value)} }"""
-    }
+    override val dataMappings: Map<String, String>
+        get() = mapOf(
+            "id" to "${id.value}",
+            "name" to encode(name.value)
+        )
 
     companion object {
         fun deserialize(str: String) : Employee {

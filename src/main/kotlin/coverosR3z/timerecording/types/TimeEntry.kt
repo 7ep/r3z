@@ -7,7 +7,6 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
-import coverosR3z.persistence.utility.PureMemoryDatabase
 
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
@@ -70,7 +69,7 @@ data class TimeEntry (
     val time: Time,
     val date: Date,
     val details : Details = Details()
-) : IndexableSerializable {
+) : IndexableSerializable() {
 
     fun toTimeEntryPreDatabase() : TimeEntryPreDatabase {
         return TimeEntryPreDatabase(employee, project, time, date, details)
@@ -80,9 +79,15 @@ data class TimeEntry (
         return id.value
     }
 
-    override fun serialize(): String {
-        return """{ i: ${id.value} , e: ${employee.id.value} , p: ${project.id.value} , t: ${time.numberOfMinutes} , d: ${date.epochDay} , dtl: ${encode(details.value)} }"""
-    }
+    override val dataMappings: Map<String, String>
+        get() = mapOf(
+            "i" to "${id.value}",
+            "e" to "${employee.id.value}",
+            "p" to "${project.id.value}",
+            "t" to "${time.numberOfMinutes}",
+            "d" to "${date.epochDay}",
+            "dtl" to encode(details.value)
+        )
 
     companion object {
 
@@ -101,13 +106,13 @@ data class TimeEntry (
                     val project = try {
                         projects.single { it.id == ProjectId(projId) }
                     } catch (ex: NoSuchElementException) {
-                        throw DatabaseCorruptedException("Unable to find a project with the id of ${projId} while deserializing a time entry.  Project set size: ${projects.size}")
+                        throw DatabaseCorruptedException("Unable to find a project with the id of $projId while deserializing a time entry.  Project set size: ${projects.size}")
                     }
 
                     val employee = try {
                         employees.single { it.id == EmployeeId(empId) }
                     } catch (ex: NoSuchElementException) {
-                        throw DatabaseCorruptedException("Unable to find an employee with the id of ${empId} while deserializing a time entry.  Employee set size: ${employees.size}")
+                        throw DatabaseCorruptedException("Unable to find an employee with the id of $empId while deserializing a time entry.  Employee set size: ${employees.size}")
                     }
 
                     TimeEntry(

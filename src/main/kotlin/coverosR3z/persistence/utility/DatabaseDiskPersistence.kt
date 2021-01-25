@@ -8,19 +8,19 @@ import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
-import coverosR3z.persistence.exceptions.NoTimeEntriesOnDiskException
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.types.toChangeTrackingSet
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.EMPLOYEES
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.PROJECTS
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.SESSIONS
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.TIME_ENTRIES
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.USERS
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.EmployeeName
+import coverosR3z.timerecording.types.Project
+import coverosR3z.timerecording.types.TimeEntry
 import java.io.File
-import java.io.FileNotFoundException
 
 /**
  * Encapsulates the logic necessary for writing any data to disk.

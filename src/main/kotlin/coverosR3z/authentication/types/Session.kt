@@ -17,15 +17,19 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserial
  * @param user the user who is logged in
  * @param dt the date and time the user successfully logged in
  */
-data class Session(val simpleId: Int, val sessionId: String, val user: User, val dt: DateTime) : IndexableSerializable {
+data class Session(val simpleId: Int, val sessionId: String, val user: User, val dt: DateTime) : IndexableSerializable() {
 
     override fun getIndex(): Int {
         return simpleId
     }
 
-    override fun serialize(): String {
-        return """{ sid: $simpleId , s: ${encode(sessionId)} , id: ${user.id.value} , e: ${dt.epochSecond} }"""
-    }
+    override val dataMappings: Map<String, String>
+        get() = mapOf(
+            "sid" to "$simpleId",
+            "s" to encode(sessionId),
+            "id" to "${user.id.value}",
+            "e" to "${dt.epochSecond}"
+        )
 
     companion object {
 

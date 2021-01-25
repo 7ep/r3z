@@ -99,8 +99,3 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
 
 }
 
-fun <T> List<T>.toConcurrentSet() : ConcurrentSet<T> {
-    val newSet = ConcurrentSet<T>()
-    this.forEach{newSet.add(it)}
-    return newSet
-}

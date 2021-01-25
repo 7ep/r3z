@@ -66,15 +66,20 @@ data class UserId(val value: Int) {
 data class Salt(val value: String)
 
 data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) :
-    IndexableSerializable {
+    IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
     }
 
-    override fun serialize(): String {
-        return """{ id: ${id.value} , name: ${encode(name.value)} , hash: ${encode(hash.value)} , salt: ${encode(salt.value)} , empId: ${employeeId?.value ?: "null"} }"""
-    }
+    override val dataMappings: Map<String, String>
+        get() = mapOf(
+            "id" to "${id.value}",
+            "name" to encode(name.value),
+            "hash" to encode(hash.value),
+            "salt" to encode(salt.value),
+            "empId" to "${employeeId?.value ?: "null"}"
+        )
 
     companion object {
         fun deserialize(str: String) : User {

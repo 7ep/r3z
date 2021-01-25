@@ -53,15 +53,17 @@ data class ProjectId(val value: Int) {
 /**
  * A full Project object
  */
-data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializable {
+data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
     }
 
-    override fun serialize(): String {
-        return """{ id: ${id.value} , name: ${encode(name.value)} }"""
-    }
+    override val dataMappings: Map<String, String>
+        get() = mapOf(
+            "id" to "${id.value}",
+            "name" to encode(name.value)
+        )
 
     companion object {
         fun deserialize(str: String) : Project {
