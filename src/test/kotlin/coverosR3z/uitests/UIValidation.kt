@@ -21,42 +21,29 @@ class UIValidation {
     @Test
     fun `validation - Validation should stop me entering invalid input on the registration page`() {
         // validation won't allow it through - missing username
-        rp.register("", "password12345", "Administrator")
-        assertEquals("register", driver.title)
+        disallowBecauseMissingUsername()
 
         // validation won't allow it through - missing password
-        rp.register("alice", "", "Administrator")
-        assertEquals("register", driver.title)
+        disallowBecauseMissingPassword()
 
         // validation won't allow it through - missing employee
-        driver.get("$domain/${RegisterAPI.path}")
-        driver.findElement(By.id("username")).sendKeys("alice")
-        driver.findElement(By.id("password")).sendKeys("password12345")
-        driver.findElement(By.id("register_button")).click()
-        assertEquals("register", driver.title)
+        disallowBecauseMissingEmployee()
 
         // validation won't allow it through - username too short
-        rp.register("a".repeat(minUserNameSize-1), "password12345", "Administrator")
-        assertEquals("register", driver.title)
+        tooShortUsername()
 
         // Text entry will stop taking characters at the maximum size, so
         // what gets entered will just be truncated to [maxUserNameSize]
-        val tooLongUsername = "a".repeat(maxUserNameSize+1)
-        rp.register(tooLongUsername, "password12345", "Administrator")
-        assertFalse(pmd.UserDataAccess().read { users -> users.any { it.name.value == tooLongUsername } })
+        tooLongerUsername()
 
         // validation won't allow it through - password too short
-        rp.register("alice", "a".repeat(minPasswordSize-1), "Administrator")
-        assertEquals("register", driver.title)
+        tooShortPassword()
 
         // Text entry will stop taking characters at the maximum size, so
         // what gets entered will just be truncated to [maxPasswordSize]
         // therefore, if we use a password too long, the system will
         // only record the password that was exactly at max size
-        val maxPassword = "a".repeat(maxPasswordSize)
-        rp.register("cool", maxPassword + "z", "Administrator")
-        lp.login("cool", maxPassword)
-        assertEquals("SUCCESS", driver.title)
+        tooLongPassword()
     }
 
     /*
@@ -68,6 +55,47 @@ class UIValidation {
      alt-text: Helper Methods
      */
 
+
+    private fun tooLongPassword() {
+        val maxPassword = "a".repeat(maxPasswordSize)
+        rp.register("cool", maxPassword + "z", "Administrator")
+        lp.login("cool", maxPassword)
+        assertEquals("SUCCESS", driver.title)
+    }
+
+    private fun tooShortPassword() {
+        rp.register("alice", "a".repeat(minPasswordSize - 1), "Administrator")
+        assertEquals("register", driver.title)
+    }
+
+    private fun tooLongerUsername() {
+        val tooLongUsername = "a".repeat(maxUserNameSize + 1)
+        rp.register(tooLongUsername, "password12345", "Administrator")
+        assertFalse(pmd.UserDataAccess().read { users -> users.any { it.name.value == tooLongUsername } })
+    }
+
+    private fun tooShortUsername() {
+        rp.register("a".repeat(minUserNameSize - 1), "password12345", "Administrator")
+        assertEquals("register", driver.title)
+    }
+
+    private fun disallowBecauseMissingEmployee() {
+        driver.get("$domain/${RegisterAPI.path}")
+        driver.findElement(By.id("username")).sendKeys("alice")
+        driver.findElement(By.id("password")).sendKeys("password12345")
+        driver.findElement(By.id("register_button")).click()
+        assertEquals("register", driver.title)
+    }
+
+    private fun disallowBecauseMissingPassword() {
+        rp.register("alice", "", "Administrator")
+        assertEquals("register", driver.title)
+    }
+
+    private fun disallowBecauseMissingUsername() {
+        rp.register("", "password12345", "Administrator")
+        assertEquals("register", driver.title)
+    }
 
     companion object {
         private const val port = 4004

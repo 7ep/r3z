@@ -32,13 +32,10 @@ class UICreateEmployee {
 
         s.markDone("Given the company has hired a new employee, Andrea,")
 
-        rp.register("employeemaker", "password12345", "Administrator")
-        lp.login("employeemaker", "password12345")
-        eep.enter("a new employee")
+        addAndreaEmployee()
         s.markDone("when I add her as an employee,")
 
-        assertEquals("SUCCESS", driver.title)
-        driver.get("$domain/${ViewEmployeesAPI.path}")
+        confirmSuccess()
         s.markDone("then the system indicates success.")
 
         logout()
@@ -53,6 +50,17 @@ class UICreateEmployee {
                  |_|
      alt-text: Helper Methods
      */
+
+    private fun confirmSuccess() {
+        assertEquals("SUCCESS", driver.title)
+        driver.get("$domain/${ViewEmployeesAPI.path}")
+    }
+
+    private fun addAndreaEmployee() {
+        rp.register("employeemaker", "password12345", "Administrator")
+        lp.login("employeemaker", "password12345")
+        eep.enter("a new employee")
+    }
 
 
     companion object {
