@@ -31,6 +31,7 @@ class EnterTimePage(private val driver: WebDriver, private val domain : String) 
         createContainer.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
         createContainer.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
         createContainer.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
         assertEquals("your time entries" ,driver.title)
     }
 }
