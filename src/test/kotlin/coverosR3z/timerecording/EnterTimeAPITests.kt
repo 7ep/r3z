@@ -48,10 +48,9 @@ class EnterTimeAPITests {
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
         val result = EnterTimeAPI.handlePost(sd)
 
-        // this should cause a redirect back to the timeentries page
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.contains("Location: timeentries"))
+        assertSuccessfulTimeEntry(result)
     }
+
 
     /**
      * If we are missing required data
@@ -215,9 +214,7 @@ class EnterTimeAPITests {
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
         val result = EnterTimeAPI.handlePost(sd)
 
-        // this should cause a redirect back to the timeentries page
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.contains("Location: timeentries"))
+        assertSuccessfulTimeEntry(result)
     }
 
     /**
@@ -295,10 +292,9 @@ class EnterTimeAPITests {
                 ))
 
                 val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-                val response = EnterTimeAPI.handlePost(sd)
-                // this should cause a redirect back to the timeentries page
-                assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-                assertTrue(response.headers.contains("Location: timeentries"))
+                val result = EnterTimeAPI.handlePost(sd)
+
+                assertSuccessfulTimeEntry(result)
 
             }
         }
@@ -316,5 +312,14 @@ class EnterTimeAPITests {
                  |_|
      alt-text: Helper Methods
      */
+
+
+    /**
+     * this should confirm what happens when a user successfully enters their time
+     */
+    private fun assertSuccessfulTimeEntry(result: PreparedResponseData) {
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.contains("Location: timeentries"))
+    }
 
 }
