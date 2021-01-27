@@ -14,6 +14,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     enum class Elements (private val elemName: String = "", private val id: String = "", private val elemClass: String = "") : Element {
         PROJECT_INPUT("project_entry", "project_entry"),
+        CREATE_TIME_ENTRY_ROW(id="create_time_entry"),
         TIME_INPUT("time_entry", "time_entry"),
         DETAIL_INPUT("detail_entry", "detail_entry"),
         EDIT_BUTTON(elemClass = "editbutton"),
@@ -176,7 +177,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                           """
 
     private fun renderCreateTimeRow(projects: List<Project>) = """
-                        <tr id="create-time-entry">
+                        <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
                             <form action="${EnterTimeAPI.path}" method="post">
                                 <td class="project">
                                     <select name="project_entry" id="project_entry"/>
