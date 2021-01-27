@@ -3,6 +3,12 @@ package coverosR3z.persistence.types
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
 
+/**
+ * Similar to [ConcurrentSet] except that it tracks any changes
+ * made to the data.  Anything that uses the [add] command will
+ * have an item added to [modified] with a tag of [CREATE], and
+ * anything that uses [remove] will do similarly with a tag of [DELETE]
+ */
 class ChangeTrackingSet<T> : ConcurrentSet<T>() {
 
     /**
