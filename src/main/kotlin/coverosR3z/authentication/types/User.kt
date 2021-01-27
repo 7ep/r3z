@@ -9,6 +9,7 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 import java.security.spec.KeySpec
@@ -102,7 +103,10 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
         }
     }
 
-    companion object {
+    companion object : SerializableCompanion {
+
+        override val directoryName: String
+            get() = "users"
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("id"),

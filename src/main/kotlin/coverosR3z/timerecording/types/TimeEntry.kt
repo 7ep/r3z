@@ -7,6 +7,7 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 
@@ -135,8 +136,10 @@ data class TimeEntry (
         }
     }
 
-    companion object {
+    companion object : SerializableCompanion {
 
+        override val directoryName: String
+            get() = "time_entries"
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("i"),

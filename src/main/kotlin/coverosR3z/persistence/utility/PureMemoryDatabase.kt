@@ -48,11 +48,11 @@ open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employe
     //   DATA ACCESS
     ////////////////////////////////////
 
-    inner class EmployeeDataAccess : AbstractDataAccess<Employee>(employees, diskPersistence, EMPLOYEES)
-    inner class ProjectDataAccess : AbstractDataAccess<Project>(projects, diskPersistence, PROJECTS)
-    inner class UserDataAccess : AbstractDataAccess<User>(users, diskPersistence, USERS)
-    inner class SessionDataAccess : AbstractDataAccess<Session>(sessions, diskPersistence, SESSIONS)
-    inner class TimeEntryDataAccess : AbstractDataAccess<TimeEntry>(timeEntries, diskPersistence, TIME_ENTRIES)
+    inner class EmployeeDataAccess : AbstractDataAccess<Employee>(employees, diskPersistence, Employee.directoryName)
+    inner class ProjectDataAccess : AbstractDataAccess<Project>(projects, diskPersistence, Project.directoryName)
+    inner class UserDataAccess : AbstractDataAccess<User>(users, diskPersistence, User.directoryName)
+    inner class SessionDataAccess : AbstractDataAccess<Session>(sessions, diskPersistence, Session.directoryName)
+    inner class TimeEntryDataAccess : AbstractDataAccess<TimeEntry>(timeEntries, diskPersistence, TimeEntry.directoryName)
 
 
     ////////////////////////////////////
@@ -105,12 +105,6 @@ open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employe
     }
 
     companion object {
-
-        const val EMPLOYEES = "employees"
-        const val SESSIONS = "sessions"
-        const val PROJECTS = "projects"
-        const val USERS = "users"
-        const val TIME_ENTRIES = "time_entries"
 
         /**
          * This starts the database with memory-only, that is

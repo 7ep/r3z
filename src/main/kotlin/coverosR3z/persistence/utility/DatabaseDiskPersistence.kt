@@ -10,11 +10,6 @@ import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.EMPLOYEES
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.PROJECTS
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.SESSIONS
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.TIME_ENTRIES
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.USERS
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
@@ -139,19 +134,19 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 return null
             }
 
-            val projects = readAndDeserialize(dbDirectory, PROJECTS) { Project.Deserializer().deserialize(it) }
+            val projects = readAndDeserialize(dbDirectory, Project.directoryName) { Project.Deserializer().deserialize(it) }
             projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val users = readAndDeserialize(dbDirectory, USERS) { User.Deserializer().deserialize(it) }
+            val users = readAndDeserialize(dbDirectory, User.directoryName) { User.Deserializer().deserialize(it) }
             users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val sessions = readAndDeserialize(dbDirectory, SESSIONS) { Session.Deserializer(users.toSet()).deserialize(it) }
+            val sessions = readAndDeserialize(dbDirectory, Session.directoryName) { Session.Deserializer(users.toSet()).deserialize(it) }
             sessions.nextIndex.set(sessions.maxOfOrNull { it.simpleId }?.inc() ?: 1)
 
-            val employees = readAndDeserialize(dbDirectory, EMPLOYEES) { Employee.Deserializer().deserialize(it) }
+            val employees = readAndDeserialize(dbDirectory, Employee.directoryName) { Employee.Deserializer().deserialize(it) }
             employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val timeEntries = readAndDeserialize(dbDirectory, TIME_ENTRIES) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
+            val timeEntries = readAndDeserialize(dbDirectory, TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
             timeEntries.nextIndex.set(timeEntries.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, dbDirectory)
