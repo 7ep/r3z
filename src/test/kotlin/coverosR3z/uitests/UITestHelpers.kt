@@ -8,6 +8,7 @@ import coverosR3z.logging.LoggingAPI
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.api.ViewTimeAPI
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -23,12 +24,12 @@ enum class Drivers(val driver: () -> WebDriver){
 class EnterTimePage(private val driver: WebDriver, private val domain : String) {
 
     fun enterTime(project: String, time: String, details: String, date: String) {
-        driver.get("$domain/${EnterTimeAPI.path}")
-        driver.findElement(By.id(EnterTimeAPI.Elements.PROJECT_INPUT.getId())).findElement(By.xpath("//option[. = '$project']")).click()
-        driver.findElement(By.id(EnterTimeAPI.Elements.TIME_INPUT.getId())).sendKeys(time)
-        driver.findElement(By.id(EnterTimeAPI.Elements.DETAIL_INPUT.getId())).sendKeys(details)
-        driver.findElement(By.id(EnterTimeAPI.Elements.DATE_INPUT.getId())).sendKeys(date)
-        driver.findElement(By.id(EnterTimeAPI.Elements.ENTER_TIME_BUTTON.getId())).click()
+        driver.get("$domain/${ViewTimeAPI.path}")
+        driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT.getId())).findElement(By.xpath("//option[. = '$project']")).click()
+        driver.findElement(By.id(ViewTimeAPI.Elements.TIME_INPUT.getId())).sendKeys(time)
+        driver.findElement(By.id(ViewTimeAPI.Elements.DETAIL_INPUT.getId())).sendKeys(details)
+        driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT.getId())).sendKeys(date)
+        driver.findElement(By.id(ViewTimeAPI.Elements.SAVE_BUTTON.getId())).click()
         assertEquals("your time entries" ,driver.title)
     }
 }
