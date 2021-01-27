@@ -67,18 +67,18 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
         return id.value
     }
 
-    override val dataMappings: Map<String, String>
+    override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
-            Keys.ID.getKey() to "${id.value}",
-            Keys.NAME.getKey() to encode(name.value)
+            Keys.ID to "${id.value}",
+            Keys.NAME to encode(name.value)
         )
 
     class Deserializer : Deserializable<Employee> {
 
         override fun deserialize(str: String) : Employee {
-            return deserialize(str, Employee::class.java) { entries ->
-                val id = checkParseToInt(entries[Keys.ID.getKey()])
-                Employee(EmployeeId(id), EmployeeName(decode(entries[Keys.NAME.getKey()])))
+            return deserialize(str, Employee::class.java, Companion) { entries ->
+                val id = checkParseToInt(entries[Keys.ID])
+                Employee(EmployeeId(id), EmployeeName(decode(entries[Keys.NAME])))
             }
         }
 
@@ -88,6 +88,10 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
 
         override val directoryName: String
             get() = "employees"
+
+        override fun convertToKey(s: String): SerializationKeys {
+            return Keys.values().single { it.getKey() == s }
+        }
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("id"),

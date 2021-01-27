@@ -11,4 +11,9 @@ interface SerializableCompanion {
      */
     val directoryName: String
 
+    /**
+     * Converts a string to a [SerializationKeys]
+     */
+    fun convertToKey(s: String): SerializationKeys
+
 }

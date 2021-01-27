@@ -10,10 +10,13 @@ import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.types.SerializableCompanion
+import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.Project
+import coverosR3z.timerecording.types.Project.Companion.convertToKey
 import coverosR3z.timerecording.types.TimeEntry
 import java.io.File
 
@@ -180,15 +183,16 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
          */
-        fun <T: Any> deserialize(str : String, clazz: Class<T>, convert: (Map<String, String>) -> T) : T {
+        fun <T: Any, C: SerializableCompanion> deserialize(str : String, clazz: Class<T>, instance : C, convert: (Map<SerializationKeys, String>) -> T) : T {
             try {
                 val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap { it.groupValues }.toList()
                 var currentIndex = 0
                 check(groups.size % 3 == 0) {"Our regular expression returns three values each time.  The whole match, then the key, then the value.  Thus a multiple of 3"}
-                val map = mutableMapOf<String, String>()
+                val map = mutableMapOf<SerializationKeys, String>()
                 while(true) {
                     if (groups.size - currentIndex >= 3) {
-                        map[groups[currentIndex+1]] = groups[currentIndex + 2]
+                        val keyString = instance.convertToKey(groups[currentIndex + 1])
+                        map[keyString] = groups[currentIndex + 2]
                         currentIndex += 3
                     } else {
                         break
@@ -201,5 +205,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 throw DatabaseCorruptedException("Unable to deserialize this text as ${clazz.simpleName} data: $str", ex)
             }
         }
+
+
     }
 }

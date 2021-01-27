@@ -62,18 +62,18 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
         return id.value
     }
 
-    override val dataMappings: Map<String, String>
+    override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
-            Keys.ID.getKey() to "${id.value}",
-            Keys.NAME.getKey() to encode(name.value)
+            Keys.ID to "${id.value}",
+            Keys.NAME to encode(name.value)
         )
 
     class Deserializer : Deserializable<Project> {
 
         override fun deserialize(str: String) : Project {
-            return deserialize(str, Project::class.java) { entries ->
-                val id = checkParseToInt(entries[Keys.ID.getKey()])
-                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Keys.NAME.getKey()]))))
+            return deserialize(str, Project::class.java, Companion) { entries ->
+                val id = checkParseToInt(entries[Keys.ID])
+                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Keys.NAME]))))
             }
         }
     }
@@ -82,6 +82,10 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
 
         override val directoryName: String
             get() = "projects"
+
+        override fun convertToKey(s: String): SerializationKeys {
+            return Keys.values().single { it.getKey() == s }
+        }
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("id"),

@@ -75,29 +75,29 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
         return id.value
     }
 
-    override val dataMappings: Map<String, String>
+    override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
-            Keys.ID.getKey() to "${id.value}",
-            Keys.NAME.getKey() to encode(name.value),
-            Keys.HASH.getKey() to encode(hash.value),
-            Keys.SALT.getKey() to encode(salt.value),
-            Keys.EMPLOYEE_ID.getKey() to "${employeeId?.value ?: "null"}"
+            Keys.ID to "${id.value}",
+            Keys.NAME to encode(name.value),
+            Keys.HASH to encode(hash.value),
+            Keys.SALT to encode(salt.value),
+            Keys.EMPLOYEE_ID to "${employeeId?.value ?: "null"}"
         )
 
     class Deserializer : Deserializable<User> {
 
         override fun deserialize(str: String) : User {
-            return deserialize(str, User::class.java) { entries ->
+            return deserialize(str, User::class.java, Companion) { entries ->
 
-                val id = checkParseToInt(entries[Keys.ID.getKey()])
+                val id = checkParseToInt(entries[Keys.ID])
 
-                val empId: EmployeeId? = if (entries[Keys.EMPLOYEE_ID.getKey()] == "null") null else EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID.getKey()]))
+                val empId: EmployeeId? = if (entries[Keys.EMPLOYEE_ID] == "null") null else EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID]))
 
                 User(
                     UserId(id),
-                    UserName(decode(entries[Keys.NAME.getKey()])),
-                    Hash(decode(entries[Keys.HASH.getKey()])),
-                    Salt(decode(entries[Keys.SALT.getKey()])),
+                    UserName(decode(entries[Keys.NAME])),
+                    Hash(decode(entries[Keys.HASH])),
+                    Salt(decode(entries[Keys.SALT])),
                     empId)
             }
         }
@@ -107,6 +107,10 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
 
         override val directoryName: String
             get() = "users"
+
+        override fun convertToKey(s: String): SerializationKeys {
+            return Keys.values().single { it.getKey() == s }
+        }
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("id"),

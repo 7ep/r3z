@@ -84,9 +84,9 @@ class DatabaseDiskPersistenceTests {
     @Test
     fun testDeserializerNew() {
         val projectSerialized = """{ id: 1 , name: myname }"""
-         deserialize(projectSerialized, Project::class.java) { entries ->
-                val id = checkParseToInt(entries[Project.Companion.Keys.ID.getKey()])
-                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Project.Companion.Keys.NAME.getKey()]))))
+         deserialize(projectSerialized, Project::class.java, Project.Companion) { entries ->
+                val id = checkParseToInt(entries[Project.Companion.Keys.ID])
+                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Project.Companion.Keys.NAME]))))
             }
     }
 

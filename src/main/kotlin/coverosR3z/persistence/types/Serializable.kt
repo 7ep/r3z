@@ -16,13 +16,13 @@ abstract class Serializable {
      * Note that encoding values before serialization is key -
      * see the [coverosR3z.misc.utility.encode] method for details.
      */
-    abstract val dataMappings: Map<String, String>
+    abstract val dataMappings: Map<SerializationKeys, String>
 
     /**
      * converts the data in this object to a form easily written to disk.
      * See [dataMappings] to see how we map a name to a value
      */
     fun serialize(): String {
-        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key}: ${it.value}" }  +" }"
+        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.getKey()}: ${it.value}" }  +" }"
     }
 }

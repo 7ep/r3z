@@ -26,22 +26,22 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
         return simpleId
     }
 
-    override val dataMappings: Map<String, String>
+    override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
-            Keys.SIMPLE_ID.getKey() to "$simpleId",
-            Keys.SESSION_ID.getKey() to encode(sessionId),
-            Keys.USER_ID.getKey() to "${user.id.value}",
-            Keys.EPOCH_SECOND.getKey() to "${dt.epochSecond}"
+            Keys.SIMPLE_ID to "$simpleId",
+            Keys.SESSION_ID to encode(sessionId),
+            Keys.USER_ID to "${user.id.value}",
+            Keys.EPOCH_SECOND to "${dt.epochSecond}"
         )
 
     class Deserializer(val users: Set<User>) : Deserializable<Session> {
 
         override fun deserialize(str: String): Session {
-            return deserialize(str, Session::class.java) { entries ->
-                val simpleId = checkParseToInt(entries[Keys.SIMPLE_ID.getKey()])
-                val sessionString = decode(entries[Keys.SESSION_ID.getKey()])
-                val id = checkParseToInt(entries[Keys.USER_ID.getKey()])
-                val epochSecond = checkParseToLong(entries[Keys.EPOCH_SECOND.getKey()])
+            return deserialize(str, Session::class.java, Companion) { entries ->
+                val simpleId = checkParseToInt(entries[Keys.SIMPLE_ID])
+                val sessionString = decode(entries[Keys.SESSION_ID])
+                val id = checkParseToInt(entries[Keys.USER_ID])
+                val epochSecond = checkParseToLong(entries[Keys.EPOCH_SECOND])
                 val user = try {
                     users.single { it.id.value == id }
                 } catch (ex: NoSuchElementException) {
@@ -56,6 +56,10 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
 
         override val directoryName: String
             get() = "sessions"
+
+        override fun convertToKey(s: String): SerializationKeys {
+            return Keys.values().single { it.getKey() == s }
+        }
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             SIMPLE_ID("sid"),

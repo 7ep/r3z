@@ -82,28 +82,28 @@ data class TimeEntry (
         return id.value
     }
 
-    override val dataMappings: Map<String, String>
+    override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
-            Keys.ID.getKey() to "${id.value}",
-            Keys.EMPLOYEE_ID.getKey() to "${employee.id.value}",
-            Keys.PROJECT_ID.getKey() to "${project.id.value}",
-            Keys.TIME.getKey() to "${time.numberOfMinutes}",
-            Keys.DATE.getKey() to "${date.epochDay}",
-            Keys.DETAIL.getKey() to encode(details.value)
+            Keys.ID to "${id.value}",
+            Keys.EMPLOYEE_ID to "${employee.id.value}",
+            Keys.PROJECT_ID to "${project.id.value}",
+            Keys.TIME to "${time.numberOfMinutes}",
+            Keys.DATE to "${date.epochDay}",
+            Keys.DETAIL to encode(details.value)
         )
 
     class Deserializer(val employees: Set<Employee>, val projects: Set<Project>) : Deserializable<TimeEntry> {
 
         override fun deserialize(str: String) : TimeEntry {
-            return deserialize(str, TimeEntry::class.java) { entries ->
+            return deserialize(str, TimeEntry::class.java, Companion) { entries ->
 
                 try {
-                    val id = checkParseToInt(entries[Keys.ID.getKey()])
-                    val empId = checkParseToInt(entries[Keys.EMPLOYEE_ID.getKey()])
-                    val projId = checkParseToInt(entries[Keys.PROJECT_ID.getKey()])
-                    val minutes = checkParseToInt(entries[Keys.TIME.getKey()])
-                    val epochDays = checkParseToInt(entries[Keys.DATE.getKey()])
-                    val detailText = decode(entries[Keys.DETAIL.getKey()])
+                    val id = checkParseToInt(entries[Keys.ID])
+                    val empId = checkParseToInt(entries[Keys.EMPLOYEE_ID])
+                    val projId = checkParseToInt(entries[Keys.PROJECT_ID])
+                    val minutes = checkParseToInt(entries[Keys.TIME])
+                    val epochDays = checkParseToInt(entries[Keys.DATE])
+                    val detailText = decode(entries[Keys.DETAIL])
 
 
                     val project = try {
@@ -140,6 +140,10 @@ data class TimeEntry (
 
         override val directoryName: String
             get() = "time_entries"
+
+        override fun convertToKey(s: String): SerializationKeys {
+            return Keys.values().single { it.getKey() == s }
+        }
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("i"),
