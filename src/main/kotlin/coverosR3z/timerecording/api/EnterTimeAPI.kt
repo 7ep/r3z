@@ -6,6 +6,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.*
 
@@ -77,7 +78,7 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         tru.recordTime(timeEntry)
 
-        return okHTML(successHTML)
+        return redirectTo(ViewTimeAPI.path)
     }
 
 

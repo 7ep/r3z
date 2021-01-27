@@ -13,10 +13,7 @@ import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.utility.toStr
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.ServerPerformanceTests
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -49,9 +46,11 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val response = EnterTimeAPI.handlePost(sd).fileContents
-        assertTrue("we should have gotten the success page.  Got: $response", toStr(response).contains("SUCCESS"))
+        val result = EnterTimeAPI.handlePost(sd)
+
+        assertSuccessfulTimeEntry(result)
     }
+
 
     /**
      * If we are missing required data
@@ -213,8 +212,9 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val result = EnterTimeAPI.handlePost(sd).fileContents
-        assertTrue("we should have gotten the success page.  Got: $result", toStr(result).contains("SUCCESS"))
+        val result = EnterTimeAPI.handlePost(sd)
+
+        assertSuccessfulTimeEntry(result)
     }
 
     /**
@@ -292,11 +292,10 @@ class EnterTimeAPITests {
                 ))
 
                 val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-                val response = EnterTimeAPI.handlePost(sd).fileContents
-                assertTrue(
-                    "we should have gotten the success page.  Got: $response",
-                    toStr(response).contains("SUCCESS")
-                )
+                val result = EnterTimeAPI.handlePost(sd)
+
+                assertSuccessfulTimeEntry(result)
+
             }
         }
         resetLogSettingsToDefault()
@@ -313,5 +312,14 @@ class EnterTimeAPITests {
                  |_|
      alt-text: Helper Methods
      */
+
+
+    /**
+     * this should confirm what happens when a user successfully enters their time
+     */
+    private fun assertSuccessfulTimeEntry(result: PreparedResponseData) {
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.contains("Location: timeentries"))
+    }
 
 }
