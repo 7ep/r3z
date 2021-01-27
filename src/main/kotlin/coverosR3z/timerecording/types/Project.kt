@@ -3,8 +3,10 @@ package coverosR3z.timerecording.types
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
+import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
+import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
 
 const val maximumProjectsCount = 100_000_000
 private const val maxProjectNameSize = 30
@@ -61,15 +63,33 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
 
     override val dataMappings: Map<String, String>
         get() = mapOf(
-            "id" to "${id.value}",
-            "name" to encode(name.value)
+            Keys.ID.getKey() to "${id.value}",
+            Keys.NAME.getKey() to encode(name.value)
         )
 
+    class Deserializer : Deserializable<Project> {
+
+        override fun deserialize(str: String) : Project {
+            return deserializerNew(str, Project::class.java) { entries ->
+                val id = checkParseToInt(entries[Keys.ID.getKey()])
+                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Keys.NAME.getKey()]))))
+            }
+        }
+    }
+
     companion object {
-        fun deserialize(str: String) : Project {
-            return deserializer(str, Project::class.java) { groups ->
-                val id = checkParseToInt(groups[1])
-                Project(ProjectId(id), ProjectName(decode(groups[3])))
+
+        enum class Keys(private val keyString: String) : SerializationKeys {
+            ID("id"),
+            NAME("name");
+
+            /**
+             * This needs to be a method and not just a value of the class
+             * so that we can have it meet an interface specification, so
+             * that we can use it in generic code
+             */
+            override fun getKey() : String {
+                return keyString
             }
         }
     }

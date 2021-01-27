@@ -7,8 +7,10 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.generateRandomString
+import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
+import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -74,21 +76,51 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
 
     override val dataMappings: Map<String, String>
         get() = mapOf(
-            "id" to "${id.value}",
-            "name" to encode(name.value),
-            "hash" to encode(hash.value),
-            "salt" to encode(salt.value),
-            "empId" to "${employeeId?.value ?: "null"}"
+            Keys.ID.getKey() to "${id.value}",
+            Keys.NAME.getKey() to encode(name.value),
+            Keys.HASH.getKey() to encode(hash.value),
+            Keys.SALT.getKey() to encode(salt.value),
+            Keys.EMPLOYEE_ID.getKey() to "${employeeId?.value ?: "null"}"
         )
 
-    companion object {
-        fun deserialize(str: String) : User {
-            return deserializer(str, User::class.java) { groups ->
-                val id = checkParseToInt(groups[1])
-                val empId: EmployeeId? = if (groups[9] == "null") null else EmployeeId(checkParseToInt(groups[9]))
-                User(UserId(id), UserName(decode(groups[3])), Hash(decode(groups[5])), Salt(decode(groups[7])), empId)
+    class Deserializer : Deserializable<User> {
+
+        override fun deserialize(str: String) : User {
+            return deserializerNew(str, User::class.java) { entries ->
+
+                val id = checkParseToInt(entries[Keys.ID.getKey()])
+
+                val empId: EmployeeId? = if (entries[Keys.EMPLOYEE_ID.getKey()] == "null") null else EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID.getKey()]))
+
+                User(
+                    UserId(id),
+                    UserName(decode(entries[Keys.NAME.getKey()])),
+                    Hash(decode(entries[Keys.HASH.getKey()])),
+                    Salt(decode(entries[Keys.SALT.getKey()])),
+                    empId)
             }
         }
+    }
+
+    companion object {
+
+        enum class Keys(private val keyString: String) : SerializationKeys {
+            ID("id"),
+            NAME("name"),
+            HASH("hash"),
+            SALT("salt"),
+            EMPLOYEE_ID("empId");
+
+            /**
+             * This needs to be a method and not just a value of the class
+             * so that we can have it meet an interface specification, so
+             * that we can use it in generic code
+             */
+            override fun getKey() : String {
+                return keyString
+            }
+        }
+
     }
 
 }

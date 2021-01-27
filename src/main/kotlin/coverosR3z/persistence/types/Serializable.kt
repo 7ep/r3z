@@ -4,6 +4,7 @@ package coverosR3z.persistence.types
  * Serializable classes are able to [serialize] their content
  */
 abstract class Serializable {
+
     /**
      * this represents the connection between a name of a property
      * and the associated value ot it in this class,
@@ -15,7 +16,7 @@ abstract class Serializable {
      * Note that encoding values before serialization is key -
      * see the [coverosR3z.misc.utility.encode] method for details.
      */
-    abstract val dataMappings: Map<String,String>
+    abstract val dataMappings: Map<String, String>
 
     /**
      * converts the data in this object to a form easily written to disk.

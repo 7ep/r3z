@@ -1,8 +1,11 @@
 package coverosR3z.persistence
 
 import coverosR3z.misc.DEFAULT_PROJECT
+import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.ProjectId
 import coverosR3z.timerecording.types.ProjectName
@@ -58,7 +61,7 @@ class DatabaseDiskPersistenceTests {
         dbs.stop()
 
         val text = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").readText()
-        val readProject = Project.deserialize(text)
+        val readProject = Project.Deserializer().deserialize(text)
 
         assertEquals(revisedProject, readProject)
     }
@@ -78,6 +81,15 @@ class DatabaseDiskPersistenceTests {
         assertFalse("after deleting, the file should not exist", doesExist)
     }
 
+    @Test
+    fun testDeserializerNew() {
+        val projectSerialized = """{ id: 1 , name: myname }"""
+         deserializerNew(projectSerialized, Project::class.java) { entries ->
+                val id = checkParseToInt(entries[Project.Companion.Keys.ID.getKey()])
+                Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Project.Companion.Keys.NAME.getKey()]))))
+            }
+    }
+
     /**
      * Helper to make sure all the content is as expected
      */
@@ -87,7 +99,7 @@ class DatabaseDiskPersistenceTests {
             .walkTopDown()
             .filter { it.isFile }
             .forEach {
-                val thisProject = Project.deserialize(it.readText())
+                val thisProject = Project.Deserializer().deserialize(it.readText())
                 assertTrue("The file, ${it.name}, should start with the id of the project, ${thisProject.id}",
                     it.name.startsWith(thisProject.id.value.toString()))
                 mutableProjects.remove(thisProject)

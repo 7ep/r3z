@@ -84,7 +84,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
     companion object {
         const val databaseFileSuffix = ".db"
 
-        private val serializedStringRegex = """ .*?: (.*?) """.toRegex()
+        private val serializedStringRegex = """ (.*?): (.*?) """.toRegex()
 
         /**
          * This factory method handles the nitty-gritty about starting
@@ -139,19 +139,19 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 return null
             }
 
-            val projects = readAndDeserializeNew(dbDirectory, PROJECTS) { Project.deserialize(it) }
+            val projects = readAndDeserializeNew(dbDirectory, PROJECTS) { Project.Deserializer().deserialize(it) }
             projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val users = readAndDeserializeNew(dbDirectory, USERS) { User.deserialize(it) }
+            val users = readAndDeserializeNew(dbDirectory, USERS) { User.Deserializer().deserialize(it) }
             users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val sessions = readAndDeserializeNew(dbDirectory, SESSIONS) { Session.deserialize(it, users.toSet()) }
+            val sessions = readAndDeserializeNew(dbDirectory, SESSIONS) { Session.Deserializer(users.toSet()).deserialize(it) }
             sessions.nextIndex.set(sessions.maxOfOrNull { it.simpleId }?.inc() ?: 1)
 
-            val employees = readAndDeserializeNew(dbDirectory, EMPLOYEES) { Employee.deserialize(it) }
+            val employees = readAndDeserializeNew(dbDirectory, EMPLOYEES) { Employee.Deserializer().deserialize(it) }
             employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val timeEntries = readAndDeserializeNew(dbDirectory, TIME_ENTRIES) { TimeEntry.deserialize(it, employees, projects) }
+            val timeEntries = readAndDeserializeNew(dbDirectory, TIME_ENTRIES) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
             timeEntries.nextIndex.set(timeEntries.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, dbDirectory)
@@ -185,10 +185,21 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
          */
-        fun <T: Any> deserializer(str : String, clazz: Class<T>, convert: (List<String>) -> T) : T {
+        fun <T: Any> deserializerNew(str : String, clazz: Class<T>, convert: (Map<String, String>) -> T) : T {
             try {
                 val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap { it.groupValues }.toList()
-                return convert(groups)
+                var currentIndex = 0
+                check(groups.size % 3 == 0) {"Our regular expression returns three values each time.  The whole match, then the key, then the value.  Thus a multiple of 3"}
+                val map = mutableMapOf<String, String>()
+                while(true) {
+                    if (groups.size - currentIndex >= 3) {
+                        map[groups[currentIndex+1]] = groups[currentIndex + 2]
+                        currentIndex += 3
+                    } else {
+                        break
+                    }
+                }
+                return convert(map)
             } catch (ex : DatabaseCorruptedException) {
                 throw ex
             }catch (ex : Throwable) {

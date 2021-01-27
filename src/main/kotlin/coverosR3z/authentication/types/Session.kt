@@ -1,13 +1,15 @@
 package coverosR3z.authentication.types
 
 import coverosR3z.misc.types.DateTime
-import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.checkParseToLong
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
+import coverosR3z.persistence.exceptions.DatabaseCorruptedException
+import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
+import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
 
 /**
  * This stores the information about when a user successfully logged
@@ -25,28 +27,48 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
 
     override val dataMappings: Map<String, String>
         get() = mapOf(
-            "sid" to "$simpleId",
-            "s" to encode(sessionId),
-            "id" to "${user.id.value}",
-            "e" to "${dt.epochSecond}"
+            Keys.SIMPLE_ID.getKey() to "$simpleId",
+            Keys.SESSION_ID.getKey() to encode(sessionId),
+            Keys.USER_ID.getKey() to "${user.id.value}",
+            Keys.EPOCH_SECOND.getKey() to "${dt.epochSecond}"
         )
 
-    companion object {
+    class Deserializer(val users: Set<User>) : Deserializable<Session> {
 
-        fun deserialize(str: String, users: Set<User>) : Session {
-            return deserializer(str, Session::class.java) { groups ->
-                val simpleId = checkParseToInt(groups[1])
-                val sessionString = decode(groups[3])
-                val id = checkParseToInt(groups[5])
-                val epochSecond = checkParseToLong(groups[7])
+        override fun deserialize(str: String): Session {
+            return deserializerNew(str, Session::class.java) { entries ->
+                val simpleId = checkParseToInt(entries[Keys.SIMPLE_ID.getKey()])
+                val sessionString = decode(entries[Keys.SESSION_ID.getKey()])
+                val id = checkParseToInt(entries[Keys.USER_ID.getKey()])
+                val epochSecond = checkParseToLong(entries[Keys.EPOCH_SECOND.getKey()])
                 val user = try {
                     users.single { it.id.value == id }
-                } catch (ex : NoSuchElementException) {
+                } catch (ex: NoSuchElementException) {
                     throw DatabaseCorruptedException("Unable to find a user with the id of $id.  User set size: ${users.size}")
                 }
                 Session(simpleId, sessionString, user, DateTime(epochSecond))
             }
         }
+    }
+
+    companion object {
+
+        enum class Keys(private val keyString: String) : SerializationKeys {
+            SIMPLE_ID("sid"),
+            SESSION_ID("s"),
+            USER_ID("id"),
+            EPOCH_SECOND("e");
+
+            /**
+             * This needs to be a method and not just a value of the class
+             * so that we can have it meet an interface specification, so
+             * that we can use it in generic code
+             */
+            override fun getKey() : String {
+                return keyString
+            }
+        }
+
     }
 
 }

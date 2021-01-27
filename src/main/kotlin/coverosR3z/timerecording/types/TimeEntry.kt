@@ -5,8 +5,10 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializer
+import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
 
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
@@ -81,26 +83,26 @@ data class TimeEntry (
 
     override val dataMappings: Map<String, String>
         get() = mapOf(
-            "i" to "${id.value}",
-            "e" to "${employee.id.value}",
-            "p" to "${project.id.value}",
-            "t" to "${time.numberOfMinutes}",
-            "d" to "${date.epochDay}",
-            "dtl" to encode(details.value)
+            Keys.ID.getKey() to "${id.value}",
+            Keys.EMPLOYEE_ID.getKey() to "${employee.id.value}",
+            Keys.PROJECT_ID.getKey() to "${project.id.value}",
+            Keys.TIME.getKey() to "${time.numberOfMinutes}",
+            Keys.DATE.getKey() to "${date.epochDay}",
+            Keys.DETAIL.getKey() to encode(details.value)
         )
 
-    companion object {
+    class Deserializer(val employees: Set<Employee>, val projects: Set<Project>) : Deserializable<TimeEntry> {
 
-        fun deserialize(str: String, employees: Set<Employee>, projects: Set<Project>) : TimeEntry {
-            return deserializer(str, TimeEntry::class.java) { groups ->
+        override fun deserialize(str: String) : TimeEntry {
+            return deserializerNew(str, TimeEntry::class.java) { entries ->
 
                 try {
-                    val id = checkParseToInt(groups[1])
-                    val empId = checkParseToInt(groups[3])
-                    val projId = checkParseToInt(groups[5])
-                    val minutes = checkParseToInt(groups[7])
-                    val epochDays = checkParseToInt(groups[9])
-                    val detailText = decode(groups[11])
+                    val id = checkParseToInt(entries[Keys.ID.getKey()])
+                    val empId = checkParseToInt(entries[Keys.EMPLOYEE_ID.getKey()])
+                    val projId = checkParseToInt(entries[Keys.PROJECT_ID.getKey()])
+                    val minutes = checkParseToInt(entries[Keys.TIME.getKey()])
+                    val epochDays = checkParseToInt(entries[Keys.DATE.getKey()])
+                    val detailText = decode(entries[Keys.DETAIL.getKey()])
 
 
                     val project = try {
@@ -131,6 +133,29 @@ data class TimeEntry (
                 }
             }
         }
+    }
+
+    companion object {
+
+
+        enum class Keys(private val keyString: String) : SerializationKeys {
+            ID("i"),
+            EMPLOYEE_ID("e"),
+            PROJECT_ID("p"),
+            TIME("t"),
+            DATE("d"),
+            DETAIL("dtl");
+
+            /**
+             * This needs to be a method and not just a value of the class
+             * so that we can have it meet an interface specification, so
+             * that we can use it in generic code
+             */
+            override fun getKey() : String {
+                return keyString
+            }
+        }
+
     }
 }
 

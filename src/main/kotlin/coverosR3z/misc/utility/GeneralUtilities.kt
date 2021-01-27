@@ -121,6 +121,7 @@ fun encode(str : String) : String {
 /**
  * Decodes URL-encoded UTF-8 text
  */
-fun decode(str : String) :String {
+fun decode(str : String?) : String {
+    requireNotNull(str)
     return URLDecoder.decode(str, Charsets.UTF_8)
 }
