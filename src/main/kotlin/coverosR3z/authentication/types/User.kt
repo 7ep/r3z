@@ -10,7 +10,7 @@ import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -86,7 +86,7 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
     class Deserializer : Deserializable<User> {
 
         override fun deserialize(str: String) : User {
-            return deserializerNew(str, User::class.java) { entries ->
+            return deserialize(str, User::class.java) { entries ->
 
                 val id = checkParseToInt(entries[Keys.ID.getKey()])
 

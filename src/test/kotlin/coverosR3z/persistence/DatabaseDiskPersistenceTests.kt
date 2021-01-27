@@ -5,7 +5,7 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.ProjectId
 import coverosR3z.timerecording.types.ProjectName
@@ -84,7 +84,7 @@ class DatabaseDiskPersistenceTests {
     @Test
     fun testDeserializerNew() {
         val projectSerialized = """{ id: 1 , name: myname }"""
-         deserializerNew(projectSerialized, Project::class.java) { entries ->
+         deserialize(projectSerialized, Project::class.java) { entries ->
                 val id = checkParseToInt(entries[Project.Companion.Keys.ID.getKey()])
                 Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Project.Companion.Keys.NAME.getKey()]))))
             }

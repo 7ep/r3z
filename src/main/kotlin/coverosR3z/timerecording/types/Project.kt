@@ -6,7 +6,7 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 
 const val maximumProjectsCount = 100_000_000
 private const val maxProjectNameSize = 30
@@ -70,7 +70,7 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
     class Deserializer : Deserializable<Project> {
 
         override fun deserialize(str: String) : Project {
-            return deserializerNew(str, Project::class.java) { entries ->
+            return deserialize(str, Project::class.java) { entries ->
                 val id = checkParseToInt(entries[Keys.ID.getKey()])
                 Project(ProjectId(id), ProjectName(decode(checkNotNull(entries[Keys.NAME.getKey()]))))
             }

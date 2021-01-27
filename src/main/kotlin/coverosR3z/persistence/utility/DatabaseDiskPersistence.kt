@@ -139,25 +139,25 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 return null
             }
 
-            val projects = readAndDeserializeNew(dbDirectory, PROJECTS) { Project.Deserializer().deserialize(it) }
+            val projects = readAndDeserialize(dbDirectory, PROJECTS) { Project.Deserializer().deserialize(it) }
             projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val users = readAndDeserializeNew(dbDirectory, USERS) { User.Deserializer().deserialize(it) }
+            val users = readAndDeserialize(dbDirectory, USERS) { User.Deserializer().deserialize(it) }
             users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val sessions = readAndDeserializeNew(dbDirectory, SESSIONS) { Session.Deserializer(users.toSet()).deserialize(it) }
+            val sessions = readAndDeserialize(dbDirectory, SESSIONS) { Session.Deserializer(users.toSet()).deserialize(it) }
             sessions.nextIndex.set(sessions.maxOfOrNull { it.simpleId }?.inc() ?: 1)
 
-            val employees = readAndDeserializeNew(dbDirectory, EMPLOYEES) { Employee.Deserializer().deserialize(it) }
+            val employees = readAndDeserialize(dbDirectory, EMPLOYEES) { Employee.Deserializer().deserialize(it) }
             employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
-            val timeEntries = readAndDeserializeNew(dbDirectory, TIME_ENTRIES) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
+            val timeEntries = readAndDeserialize(dbDirectory, TIME_ENTRIES) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
             timeEntries.nextIndex.set(timeEntries.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, dbDirectory)
         }
 
-        private fun <T> readAndDeserializeNew(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+        private fun <T> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
             val dataDirectory = File("$dbDirectory$filename")
             val changeTrackingSet = ChangeTrackingSet<T>()
 
@@ -185,7 +185,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
          */
-        fun <T: Any> deserializerNew(str : String, clazz: Class<T>, convert: (Map<String, String>) -> T) : T {
+        fun <T: Any> deserialize(str : String, clazz: Class<T>, convert: (Map<String, String>) -> T) : T {
             try {
                 val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap { it.groupValues }.toList()
                 var currentIndex = 0

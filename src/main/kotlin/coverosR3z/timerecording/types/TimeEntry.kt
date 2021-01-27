@@ -8,7 +8,7 @@ import coverosR3z.misc.types.Date
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
@@ -94,7 +94,7 @@ data class TimeEntry (
     class Deserializer(val employees: Set<Employee>, val projects: Set<Project>) : Deserializable<TimeEntry> {
 
         override fun deserialize(str: String) : TimeEntry {
-            return deserializerNew(str, TimeEntry::class.java) { entries ->
+            return deserialize(str, TimeEntry::class.java) { entries ->
 
                 try {
                     val id = checkParseToInt(entries[Keys.ID.getKey()])

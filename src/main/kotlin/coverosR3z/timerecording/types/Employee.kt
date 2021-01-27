@@ -6,7 +6,7 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserializerNew
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 
 private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
@@ -75,7 +75,7 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
     class Deserializer : Deserializable<Employee> {
 
         override fun deserialize(str: String) : Employee {
-            return deserializerNew(str, Employee::class.java) { entries ->
+            return deserialize(str, Employee::class.java) { entries ->
                 val id = checkParseToInt(entries[Keys.ID.getKey()])
                 Employee(EmployeeId(id), EmployeeName(decode(entries[Keys.NAME.getKey()])))
             }
