@@ -13,10 +13,7 @@ import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.utility.toStr
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.ServerPerformanceTests
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -49,8 +46,11 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val response = EnterTimeAPI.handlePost(sd).fileContents
-        assertTrue("we should have gotten the success page.  Got: $response", toStr(response).contains("SUCCESS"))
+        val result = EnterTimeAPI.handlePost(sd)
+
+        // this should cause a redirect back to the timeentries page
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.contains("Location: timeentries"))
     }
 
     /**
@@ -213,8 +213,11 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val result = EnterTimeAPI.handlePost(sd).fileContents
-        assertTrue("we should have gotten the success page.  Got: $result", toStr(result).contains("SUCCESS"))
+        val result = EnterTimeAPI.handlePost(sd)
+
+        // this should cause a redirect back to the timeentries page
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.contains("Location: timeentries"))
     }
 
     /**
@@ -292,11 +295,11 @@ class EnterTimeAPITests {
                 ))
 
                 val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-                val response = EnterTimeAPI.handlePost(sd).fileContents
-                assertTrue(
-                    "we should have gotten the success page.  Got: $response",
-                    toStr(response).contains("SUCCESS")
-                )
+                val response = EnterTimeAPI.handlePost(sd)
+                // this should cause a redirect back to the timeentries page
+                assertEquals(StatusCode.SEE_OTHER, response.statusCode)
+                assertTrue(response.headers.contains("Location: timeentries"))
+
             }
         }
         resetLogSettingsToDefault()
