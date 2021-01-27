@@ -8,6 +8,7 @@ import coverosR3z.logging.LoggingAPI
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
+import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
@@ -28,6 +29,7 @@ class EnterTimePage(private val driver: WebDriver, private val domain : String) 
         driver.findElement(By.id(EnterTimeAPI.Elements.DETAIL_INPUT.getId())).sendKeys(details)
         driver.findElement(By.id(EnterTimeAPI.Elements.DATE_INPUT.getId())).sendKeys(date)
         driver.findElement(By.id(EnterTimeAPI.Elements.ENTER_TIME_BUTTON.getId())).click()
+        assertEquals("your time entries" ,driver.title)
     }
 }
 
