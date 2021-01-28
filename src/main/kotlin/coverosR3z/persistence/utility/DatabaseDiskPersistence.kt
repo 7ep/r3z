@@ -178,6 +178,9 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                     }
                 }
 
+            // since we're deserializing, no need to remember these modifications,
+            // they would just cause us to write them all out immediately after.
+            changeTrackingSet.clearModifications()
             return changeTrackingSet
         }
 
