@@ -332,5 +332,4 @@ class AuthenticationUtilitiesTests {
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
 
-
 }
