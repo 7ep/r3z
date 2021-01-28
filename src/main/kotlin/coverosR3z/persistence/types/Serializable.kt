@@ -1,5 +1,7 @@
 package coverosR3z.persistence.types
 
+import coverosR3z.misc.utility.encode
+
 /**
  * Serializable classes are able to [serialize] their content
  */
@@ -23,6 +25,6 @@ abstract class Serializable {
      * See [dataMappings] to see how we map a name to a value
      */
     fun serialize(): String {
-        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.getKey()}: ${it.value}" }  +" }"
+        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.getKey()}: ${encode(it.value)}" }  +" }"
     }
 }

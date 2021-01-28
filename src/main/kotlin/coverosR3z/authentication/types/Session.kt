@@ -3,8 +3,6 @@ package coverosR3z.authentication.types
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.checkParseToLong
-import coverosR3z.misc.utility.decode
-import coverosR3z.misc.utility.encode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
@@ -29,7 +27,7 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
     override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
             Keys.SIMPLE_ID to "$simpleId",
-            Keys.SESSION_ID to encode(sessionId),
+            Keys.SESSION_ID to sessionId,
             Keys.USER_ID to "${user.id.value}",
             Keys.EPOCH_SECOND to "${dt.epochSecond}"
         )
@@ -39,7 +37,7 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
         override fun deserialize(str: String): Session {
             return deserialize(str, Session::class.java, Companion) { entries ->
                 val simpleId = checkParseToInt(entries[Keys.SIMPLE_ID])
-                val sessionString = decode(entries[Keys.SESSION_ID])
+                val sessionString = checkNotNull(entries[Keys.SESSION_ID])
                 val id = checkParseToInt(entries[Keys.USER_ID])
                 val epochSecond = checkParseToLong(entries[Keys.EPOCH_SECOND])
                 val user = try {

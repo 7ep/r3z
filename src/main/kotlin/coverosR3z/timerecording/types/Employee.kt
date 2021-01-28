@@ -1,8 +1,6 @@
 package coverosR3z.timerecording.types
 
 import coverosR3z.misc.utility.checkParseToInt
-import coverosR3z.misc.utility.decode
-import coverosR3z.misc.utility.encode
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
@@ -70,7 +68,7 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
     override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
             Keys.ID to "${id.value}",
-            Keys.NAME to encode(name.value)
+            Keys.NAME to name.value
         )
 
     class Deserializer : Deserializable<Employee> {
@@ -78,7 +76,7 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
         override fun deserialize(str: String) : Employee {
             return deserialize(str, Employee::class.java, Companion) { entries ->
                 val id = checkParseToInt(entries[Keys.ID])
-                Employee(EmployeeId(id), EmployeeName(decode(entries[Keys.NAME])))
+                Employee(EmployeeId(id), EmployeeName.make((entries[Keys.NAME])))
             }
         }
 

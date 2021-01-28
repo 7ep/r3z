@@ -7,6 +7,7 @@ import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.logging.logWarn
 import coverosR3z.misc.utility.ActionQueue
+import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
@@ -192,7 +193,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 while(true) {
                     if (groups.size - currentIndex >= 3) {
                         val keyString = instance.convertToKey(groups[currentIndex + 1])
-                        map[keyString] = groups[currentIndex + 2]
+                        map[keyString] = decode(groups[currentIndex + 2])
                         currentIndex += 3
                     } else {
                         break

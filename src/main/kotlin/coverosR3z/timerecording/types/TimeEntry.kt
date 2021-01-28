@@ -2,8 +2,6 @@ package coverosR3z.timerecording.types
 
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.misc.utility.checkParseToInt
-import coverosR3z.misc.utility.decode
-import coverosR3z.misc.utility.encode
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
@@ -89,7 +87,7 @@ data class TimeEntry (
             Keys.PROJECT_ID to "${project.id.value}",
             Keys.TIME to "${time.numberOfMinutes}",
             Keys.DATE to "${date.epochDay}",
-            Keys.DETAIL to encode(details.value)
+            Keys.DETAIL to details.value
         )
 
     class Deserializer(val employees: Set<Employee>, val projects: Set<Project>) : Deserializable<TimeEntry> {
@@ -103,7 +101,7 @@ data class TimeEntry (
                     val projId = checkParseToInt(entries[Keys.PROJECT_ID])
                     val minutes = checkParseToInt(entries[Keys.TIME])
                     val epochDays = checkParseToInt(entries[Keys.DATE])
-                    val detailText = decode(entries[Keys.DETAIL])
+                    val detailText = entries[Keys.DETAIL]
 
 
                     val project = try {
@@ -124,7 +122,7 @@ data class TimeEntry (
                         project,
                         Time(minutes),
                         Date(epochDays),
-                        Details(detailText)
+                        Details.make(detailText)
                     )
 
                 } catch (ex : DatabaseCorruptedException) {
