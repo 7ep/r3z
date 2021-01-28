@@ -20,15 +20,7 @@ class UITimeEntry {
     @UITest
     @Test
     fun `timeentry - An employee should be able to enter time for a specified date`() {
-        val s = TimeEntryUserStory.addScenario(
-            "timeentry - An employee should be able to enter time for a specified date",
-
-            listOf(
-                "Given the employee worked 8 hours yesterday,",
-                "when the employee enters their time,",
-                "then time is saved."
-            )
-        )
+        val s = TimeEntryUserStory.getScenario("timeentry - An employee should be able to enter time for a specified date")
 
         loginAsUserAndCreateProject("alice", "projecta")
         s.markDone("Given the employee worked 8 hours yesterday,")
@@ -93,14 +85,10 @@ class UITimeEntry {
     @Test
     @Ignore("Not started yet")
     fun `timeentry - should be able to submit time for a certain period`() {
-        val s = TimeEntryUserStory.addScenario(
-            "timeentry - should be able to submit time for a certain period",
-            listOf(
-                "Given that I am done entering my time for the period",
-                "When I submit my time",
-                "Then the time period is ready to be approved"
-            )
-        )
+        val s = TimeEntryUserStory.getScenario("timeentry - should be able to submit time for a certain period")
+        s.markDone("Given that I am done entering my time for the period")
+        s.markDone("When I submit my time")
+        s.markDone("Then the time period is ready to be approved")
     }
 
     @BDD
@@ -108,14 +96,10 @@ class UITimeEntry {
     @Test
     @Ignore("Not started yet")
     fun `timeentry - should be able to unsubmit a period`() {
-        val s = TimeEntryUserStory.addScenario(
-            "timeentry - should be able to unsubmit a period",
-            listOf(
-                "Given that I had submitted my time but need to make a change",
-                "When I unsubmit my time",
-                "Then the time period is ready for more editing"
-            )
-        )
+        val s = TimeEntryUserStory.getScenario("timeentry - should be able to unsubmit a period")
+        s.markDone("Given that I had submitted my time but need to make a change")
+        s.markDone("When I unsubmit my time")
+        s.markDone("Then the time period is ready for more editing")
     }
 
     @UITest
@@ -144,28 +128,20 @@ class UITimeEntry {
     @Test
     @Ignore("for now, projects allow future entry, this will require changes to the project data structure")
     fun `timeentry - should be possible to disallow time entry on future days for certain projects`() {
-        val s = TimeEntryUserStory.addScenario(
-            "timeentry - should be possible to disallow time entry on future days for certain projects",
-            listOf(
-                "Given I am working on a project for the government that disallows forward entry",
-                "when I try to enter time tomorrow",
-                "then the system disallows it."
-            )
-        )
+        val s = TimeEntryUserStory.getScenario("timeentry - should be possible to disallow time entry on future days for certain projects")
+        s.markDone("Given I am working on a project for the government that disallows forward entry")
+        s.markDone("when I try to enter time tomorrow")
+        s.markDone("then the system disallows it.")
     }
 
     @BDD
     @UITest
     @Test
     fun `timeentry - I should see my existing time entries when I open the time entry page`() {
-        val s = TimeEntryUserStory.addScenario(
-            "timeentry - I should see my existing time entries when I open the time entry page",
-            listOf(
-                "Given I had previous entries this period",
-                "when I open the time entry page",
-                "then I see my prior entries"
-            )
-        )
+        val s = TimeEntryUserStory.getScenario("timeentry - I should see my existing time entries when I open the time entry page")
+        s.markDone("Given I had previous entries this period")
+        s.markDone("when I open the time entry page")
+        s.markDone("then I see my prior entries")
     }
 
     @UITest

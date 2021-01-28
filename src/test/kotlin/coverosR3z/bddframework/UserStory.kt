@@ -19,13 +19,24 @@ package coverosR3z.bddframework
  *                  spaces - to help label this user story.  For example, RecordTime
  */
 abstract class UserStory(val key : String, val story: String) {
-    private val scenarios : MutableList<BDDScenario> = mutableListOf()
+    private val scenarios : MutableMap<String, BDDScenario> = mutableMapOf()
 
-    fun addScenario(description: String, steps: List<String>): BDDScenario {
-        val newScenario = BDDScenario(description, steps, this)
+    /**
+     * Adds a new scenario for this user story
+     * @param description a sentence-length description of the scenario
+     * @param steps one or more steps that must be satisfied for this scenario to pass
+     */
+    fun addScenario(description: String, vararg steps: String): BDDScenario {
+        val newScenario = BDDScenario(description, steps.toList(), this)
         // write the initial (nothing yet done) scenario, if nothing is marked done
         newScenario.writeBDDFile()
-        scenarios.add(newScenario)
+        scenarios[description] = newScenario
         return newScenario
+    }
+
+    fun getScenario(description : String) : BDDScenario {
+        return checkNotNull(scenarios[description])
+        {"The scenario provided, \"$description\", did not match any BDD scenario.\n" +
+                "All the scenarios registered are ${scenarios.keys.joinToString(",")}"}
     }
 }

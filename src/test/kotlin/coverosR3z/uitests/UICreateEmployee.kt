@@ -20,15 +20,7 @@ class UICreateEmployee {
     @UITest
     @Test
     fun `createEmployee - I should be able to create an employee`() {
-        val s = CreateEmployeeUserStory.addScenario(
-            "createEmployee - I should be able to create an employee",
-
-            listOf(
-                "Given the company has hired a new employee, Andrea,",
-                "when I add her as an employee,",
-                "then the system indicates success."
-            )
-        )
+        val s = CreateEmployeeUserStory.getScenario("createEmployee - I should be able to create an employee")
 
         s.markDone("Given the company has hired a new employee, Andrea,")
 

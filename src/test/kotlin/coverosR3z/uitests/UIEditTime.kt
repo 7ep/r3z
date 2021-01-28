@@ -21,15 +21,7 @@ class UIEditTime {
     @UITest
     @Test
     fun `editTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
-        val s = EditTimeUserStory.addScenario(
-            "editTime - An employee should be able to edit the number of hours worked from a previous time entry",
-
-            listOf(
-                "Given Andrea has a previous time entry with 1 hour,",
-                "when she changes the entry to two hours,",
-                "then the system indicates the two hours was persisted"
-            )
-        )
+        val s = EditTimeUserStory.getScenario("editTime - An employee should be able to edit the number of hours worked from a previous time entry")
 
         loginAsUserAndCreateProject("Andrea", "projectb")
         s.markDone("Given Andrea has a previous time entry with 1 hour,")

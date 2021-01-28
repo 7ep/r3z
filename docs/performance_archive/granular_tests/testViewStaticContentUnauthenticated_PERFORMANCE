@@ -51,3 +51,5 @@
 2021-01-27	numberThreads: 10	numberRequests: 500	time: 218
 2021-01-27	numberThreads: 10	numberRequests: 500	time: 265
 2021-01-27	numberThreads: 10	numberRequests: 500	time: 294
+2021-01-28	numberThreads: 10	numberRequests: 500	time: 360
+2021-01-28	numberThreads: 10	numberRequests: 500	time: 250

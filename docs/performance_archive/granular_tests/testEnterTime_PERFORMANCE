@@ -47,3 +47,5 @@
 2021-01-27	threadCount: 10	requestCount: 100	time:10
 2021-01-27	threadCount: 10	requestCount: 100	time:28
 2021-01-27	threadCount: 10	requestCount: 100	time:47
+2021-01-28	threadCount: 10	requestCount: 100	time:50
+2021-01-28	threadCount: 10	requestCount: 100	time:21

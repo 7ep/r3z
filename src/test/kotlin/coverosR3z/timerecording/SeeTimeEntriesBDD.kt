@@ -14,15 +14,7 @@ class SeeTimeEntriesBDD {
     @BDD
     @Test
     fun `happy path - should be able to get my time entries on a date`() {
-        val s = ViewTimeUserStory.addScenario(
-            "happy path - should be able to get my time entries on a date",
-
-            listOf(
-                "Given I have recorded some time entries",
-                "When I request my time entries on a specific date",
-                "Then I see all of them"
-            )
-        )
+        val s = ViewTimeUserStory.getScenario("happy path - should be able to get my time entries on a date")
 
         val (tru, entries) = recordSomeEntriesInDatabase()
         s.markDone("Given I have recorded some time entries")
@@ -37,15 +29,7 @@ class SeeTimeEntriesBDD {
     @BDD
     @Test
     fun `should be able to obtain all my time entries`() {
-        val s = ViewTimeUserStory.addScenario(
-            "should be able to obtain all my time entries",
-
-            listOf(
-                "Given I have recorded some time entries",
-                "When I request my time entries",
-                "Then I see all of them"
-            )
-        )
+        val s = ViewTimeUserStory.getScenario("should be able to obtain all my time entries")
 
         val (tru, entries) = recordSomeEntriesInDatabase()
         s.markDone("Given I have recorded some time entries")
@@ -60,15 +44,7 @@ class SeeTimeEntriesBDD {
     @BDD
     @Test
     fun `there should be no entries on a given date if they have not been recorded yet`(){
-        val s = ViewTimeUserStory.addScenario(
-            "there should be no entries on a given date if they have not been recorded yet",
-
-            listOf(
-                "Given no time entries were made on a day",
-                "When I ask for the time entries of that day",
-                "Then I am returned nothing"
-            )
-        )
+        val s = ViewTimeUserStory.getScenario("there should be no entries on a given date if they have not been recorded yet")
 
         val (tru, _) = generateSomeEntriesPreDatabase()
         s.markDone("Given no time entries were made on a day")

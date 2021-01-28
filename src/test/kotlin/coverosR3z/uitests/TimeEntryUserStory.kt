@@ -10,7 +10,53 @@ object TimeEntryUserStory : UserStory(
    I want to have a highly-efficient means to enter time 
    So that I can work with my time entries without really having to think about the tool
     """
-)
+) {
+    init {
+
+        addScenario(
+            "timeentry - An employee should be able to enter time for a specified date",
+
+                "Given the employee worked 8 hours yesterday,",
+                "when the employee enters their time,",
+                "then time is saved."
+        )
+
+        addScenario(
+            "timeentry - should be able to submit time for a certain period",
+
+                "Given that I am done entering my time for the period",
+                "When I submit my time",
+                "Then the time period is ready to be approved"
+        )
+
+        addScenario(
+            "timeentry - should be able to unsubmit a period",
+
+                "Given that I had submitted my time but need to make a change",
+                "When I unsubmit my time",
+                "Then the time period is ready for more editing"
+        )
+
+        addScenario(
+            "timeentry - should be possible to disallow time entry on future days for certain projects",
+
+                "Given I am working on a project for the government that disallows forward entry",
+                "when I try to enter time tomorrow",
+                "then the system disallows it."
+            )
+
+        addScenario(
+            "timeentry - I should see my existing time entries when I open the time entry page",
+
+                "Given I had previous entries this period",
+                "when I open the time entry page",
+                "then I see my prior entries"
+        )
+
+    }
+}
+
+
 
 /*
 Scenario: should be able to enter time

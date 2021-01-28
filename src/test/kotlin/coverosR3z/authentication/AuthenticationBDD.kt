@@ -26,15 +26,7 @@ class AuthenticationBDD {
     @BDD
     @Test
     fun `I cannot change someone else's time`() {
-        val s = AuthenticationUserStory.addScenario(
-            "I cannot change someone else's time",
-
-            listOf(
-                "Given I am logged in as user alice and employees Sarah and Alice exist in the database,",
-                "when I try to add a time-entry for Sarah,",
-                "then the system disallows it."
-            )
-        )
+        val s = AuthenticationUserStory.getScenario("I cannot change someone else's time")
 
         val (tru, sarah) = initializeTwoUsersAndLogin()
         s.markDone("Given I am logged in as user alice and employees Sarah and Alice exist in the database,")
@@ -50,15 +42,7 @@ class AuthenticationBDD {
     @BDD
     @Test
     fun `I should be able to register a user with a valid password`() {
-        val s = AuthenticationUserStory.addScenario(
-            "I should be able to register a user with a valid password",
-
-            listOf(
-                "Given I am not currently registered,",
-                "when I register a new user,",
-                "then the system records that the registration succeeded."
-            )
-        )
+        val s = AuthenticationUserStory.getScenario("I should be able to register a user with a valid password")
 
         val (pmd, au) = startWithEmptyDatabase()
         s.markDone("Given I am not currently registered,")
@@ -73,15 +57,7 @@ class AuthenticationBDD {
     @BDD
     @Test
     fun `I should not be able to register a user if they are already registered`() {
-        val s = AuthenticationUserStory.addScenario(
-            "I should not be able to register a user if they are already registered",
-
-            listOf(
-                "Given I have previously been registered,",
-                "when I try to register again,",
-                "then the system records that the registration failed."
-            )
-        )
+        val s = AuthenticationUserStory.getScenario("I should not be able to register a user if they are already registered")
 
         val au = setupPreviousRegisteredUser()
         s.markDone("Given I have previously been registered,")
@@ -97,15 +73,7 @@ class AuthenticationBDD {
     @BDD
     @Test
     fun `I should be able to log in once I'm a registered user`() {
-        val s = AuthenticationUserStory.addScenario(
-            "I should be able to log in once I'm a registered user",
-
-            listOf(
-                "Given I have registered,",
-                "when I enter valid credentials,",
-                "then the system knows who I am."
-            )
-        )
+        val s = AuthenticationUserStory.getScenario("I should be able to log in once I'm a registered user")
 
         val (authPersistence, au) = setupPreviousRegistration()
         s.markDone("Given I have registered,")
@@ -120,15 +88,7 @@ class AuthenticationBDD {
     @BDD
     @Test
     fun `if I enter a bad password while logging in, I will be denied access`() {
-        val s = AuthenticationUserStory.addScenario(
-            "if I enter a bad password while logging in, I will be denied access",
-
-            listOf(
-                "Given I have registered,",
-                "when I login with the wrong credentials,",
-                "then the system denies me access."
-            )
-        )
+        val s = AuthenticationUserStory.getScenario("if I enter a bad password while logging in, I will be denied access")
 
         val au = doSuccessfulRegistration()
         s.markDone("Given I have registered,")
@@ -142,16 +102,8 @@ class AuthenticationBDD {
 
     @BDD
     @Test
-    fun `if I enter an invalid password while registering, it will disallow it`() {
-        val s = AuthenticationUserStory.addScenario(
-            "if I enter an invalid password while registering, it will disallow it",
-
-            listOf(
-                "Given I am not registered,",
-                "when I register with too short of a password,",
-                "then the system denies the registration on the basis of a bad password."
-            )
-        )
+    fun `if I enter too short a password while registering, it will disallow it`() {
+        val s = AuthenticationUserStory.getScenario("if I enter too short a password while registering, it will disallow it")
 
         val (_, au) = startWithEmptyDatabase()
         s.markDone("Given I am not registered,")

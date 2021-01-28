@@ -29,15 +29,7 @@ class EnteringTimeBDD {
     @BDD
     @Test
     fun `A employee enters six hours on a project with copious notes`() {
-        val s = RecordTimeUserStory.addScenario(
-            "A employee enters six hours on a project with copious notes",
-
-            listOf(
-                "Given I have worked 6 hours on project A on Monday with a lot of notes,",
-                "when I enter in that time,",
-                "then the system indicates it has persisted the new information."
-            )
-        )
+        val s = RecordTimeUserStory.getScenario("A employee enters six hours on a project with copious notes")
 
         val (tru, entry) = addingProjectHoursWithNotes()
         s.markDone("Given I have worked 6 hours on project A on Monday with a lot of notes,")
@@ -52,15 +44,7 @@ class EnteringTimeBDD {
     @BDD
     @Test
     fun `A employee has already entered 24 hours for the day, they cannot enter more time on a new entry`() {
-        val s = RecordTimeUserStory.addScenario(
-            "A employee has already entered 24 hours for the day, they cannot enter more time on a new entry",
-
-            listOf(
-                "given the employee has already entered 24 hours of time entries before,",
-                "when they enter in a new time entry for one hour,",
-                "then the system disallows it."
-            )
-        )
+        val s = RecordTimeUserStory.getScenario("A employee has already entered 24 hours for the day, they cannot enter more time on a new entry")
 
         val (tru, newProject: Project, newEmployee: Employee) = enterTwentyFourHoursPreviously()
         s.markDone("given the employee has already entered 24 hours of time entries before,")
