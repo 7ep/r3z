@@ -53,6 +53,14 @@ object TimeEntryUserStory : UserStory(
                 "then I see my prior entries"
         )
 
+        addScenario(
+            "timeentry - I should be able to delete time entries for a non-submitted period",
+
+                "Given I decided a time entry was wrong and I haven't submitted this period,",
+                "When I delete the time entry,",
+                "Then the time entry is removed"
+        )
+
     }
 }
 
