@@ -20,15 +20,15 @@ class UIErrors {
     @UITest
     @Test
     fun `errors - should get a 401 error if I fail to login`() {
-        lp.login("userabc", "password12345")
+        pom.lp.login("userabc", "password12345")
         assertEquals("401 error", driver.title)
     }
 
     @UITest
     @Test
     fun `errors - should get a failure message if I register an already-registered user`() {
-        rp.register("usera", "password12345", "Administrator")
-        rp.register("usera", "password12345", "Administrator")
+        pom.rp.register("usera", "password12345", "Administrator")
+        pom.rp.register("usera", "password12345", "Administrator")
         assertEquals("FAILURE", driver.title)
     }
 
@@ -48,15 +48,9 @@ class UIErrors {
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
-        private lateinit var rp : RegisterPage
-        private lateinit var lp : LoginPage
-        private lateinit var llp : LoggingPage
-        private lateinit var etp : EnterTimePage
-        private lateinit var eep : EnterEmployeePage
-        private lateinit var epp : EnterProjectPage
-        private lateinit var lop : LogoutPage
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
+        private lateinit var pom : PageObjectModel
 
         @BeforeClass
         @JvmStatic
@@ -77,15 +71,7 @@ class UIErrors {
         sc.startServer(businessCode)
 
         driver = webDriver.driver()
-
-        rp = RegisterPage(driver, domain)
-        lp = LoginPage(driver, domain)
-        etp = EnterTimePage(driver, domain)
-        eep = EnterEmployeePage(driver, domain)
-        epp = EnterProjectPage(driver, domain)
-        llp = LoggingPage(driver, domain)
-        lop = LogoutPage(driver, domain)
-
+        pom = PageObjectModel.make(driver, domain)
     }
 
     @After

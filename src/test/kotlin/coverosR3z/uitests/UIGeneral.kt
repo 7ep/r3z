@@ -18,8 +18,8 @@ class UIGeneral {
     fun `general - should be able to see the homepage and the authenticated homepage`() {
         driver.get("${domain}/${HomepageAPI.path}")
         assertEquals("Homepage", driver.title)
-        rp.register("employeemaker", "password12345", "Administrator")
-        lp.login("employeemaker", "password12345")
+        pom.rp.register("employeemaker", "password12345", "Administrator")
+        pom.lp.login("employeemaker", "password12345")
         driver.get("${domain}/${HomepageAPI.path}")
         assertEquals("Authenticated Homepage", driver.title)
         logout()
@@ -29,15 +29,15 @@ class UIGeneral {
     @Test
     fun `general - I should be able to change the logging settings`() {
         // Given I am an admin
-        rp.register("corey", "password12345", "Administrator")
-        lp.login("corey", "password12345")
-        llp.go()
+        pom.rp.register("corey", "password12345", "Administrator")
+        pom.lp.login("corey", "password12345")
+        pom.llp.go()
         // When I set Warn-level logging to not log
-        llp.setLoggingFalse(LogTypes.WARN)
-        llp.save()
-        llp.go()
+        pom.llp.setLoggingFalse(LogTypes.WARN)
+        pom.llp.save()
+        pom.llp.go()
         // Then that logging is set to not log
-        assertFalse(llp.isLoggingOn(LogTypes.WARN))
+        assertFalse(pom.llp.isLoggingOn(LogTypes.WARN))
         logout()
     }
 
@@ -58,15 +58,9 @@ class UIGeneral {
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
-        private lateinit var rp : RegisterPage
-        private lateinit var lp : LoginPage
-        private lateinit var llp : LoggingPage
-        private lateinit var etp : EnterTimePage
-        private lateinit var eep : EnterEmployeePage
-        private lateinit var epp : EnterProjectPage
-        private lateinit var lop : LogoutPage
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
+        private lateinit var pom : PageObjectModel
 
 
         @BeforeClass
@@ -88,15 +82,7 @@ class UIGeneral {
         sc.startServer(businessCode)
 
         driver = webDriver.driver()
-
-        rp = RegisterPage(driver, domain)
-        lp = LoginPage(driver, domain)
-        etp = EnterTimePage(driver, domain)
-        eep = EnterEmployeePage(driver, domain)
-        epp = EnterProjectPage(driver, domain)
-        llp = LoggingPage(driver, domain)
-        lop = LogoutPage(driver, domain)
-
+        pom = PageObjectModel.make(driver, domain)
     }
 
     @After
@@ -106,7 +92,7 @@ class UIGeneral {
     }
 
     private fun logout() {
-        lop.go()
+        pom.lop.go()
     }
 
 }

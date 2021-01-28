@@ -58,24 +58,24 @@ class UIValidation {
 
     private fun tooLongPassword() {
         val maxPassword = "a".repeat(maxPasswordSize)
-        rp.register("cool", maxPassword + "z", "Administrator")
-        lp.login("cool", maxPassword)
+        pom.rp.register("cool", maxPassword + "z", "Administrator")
+        pom.lp.login("cool", maxPassword)
         assertEquals("SUCCESS", driver.title)
     }
 
     private fun tooShortPassword() {
-        rp.register("alice", "a".repeat(minPasswordSize - 1), "Administrator")
+        pom.rp.register("alice", "a".repeat(minPasswordSize - 1), "Administrator")
         assertEquals("register", driver.title)
     }
 
     private fun tooLongerUsername() {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
-        rp.register(tooLongUsername, "password12345", "Administrator")
+        pom.rp.register(tooLongUsername, "password12345", "Administrator")
         assertFalse(pmd.UserDataAccess().read { users -> users.any { it.name.value == tooLongUsername } })
     }
 
     private fun tooShortUsername() {
-        rp.register("a".repeat(minUserNameSize - 1), "password12345", "Administrator")
+        pom.rp.register("a".repeat(minUserNameSize - 1), "password12345", "Administrator")
         assertEquals("register", driver.title)
     }
 
@@ -88,12 +88,12 @@ class UIValidation {
     }
 
     private fun disallowBecauseMissingPassword() {
-        rp.register("alice", "", "Administrator")
+        pom.rp.register("alice", "", "Administrator")
         assertEquals("register", driver.title)
     }
 
     private fun disallowBecauseMissingUsername() {
-        rp.register("", "password12345", "Administrator")
+        pom.rp.register("", "password12345", "Administrator")
         assertEquals("register", driver.title)
     }
 
@@ -104,15 +104,9 @@ class UIValidation {
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
-        private lateinit var rp : RegisterPage
-        private lateinit var lp : LoginPage
-        private lateinit var llp : LoggingPage
-        private lateinit var etp : EnterTimePage
-        private lateinit var eep : EnterEmployeePage
-        private lateinit var epp : EnterProjectPage
-        private lateinit var lop : LogoutPage
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
+        private lateinit var pom : PageObjectModel
 
 
         @BeforeClass
@@ -134,15 +128,7 @@ class UIValidation {
         sc.startServer(businessCode)
 
         driver = webDriver.driver()
-
-        rp = RegisterPage(driver, domain)
-        lp = LoginPage(driver, domain)
-        etp = EnterTimePage(driver, domain)
-        eep = EnterEmployeePage(driver, domain)
-        epp = EnterProjectPage(driver, domain)
-        llp = LoggingPage(driver, domain)
-        lop = LogoutPage(driver, domain)
-
+        pom = PageObjectModel.make(driver, domain)
     }
 
     @After

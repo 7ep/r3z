@@ -52,15 +52,9 @@ class UIEditTime {
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
-        private lateinit var rp : RegisterPage
-        private lateinit var lp : LoginPage
-        private lateinit var llp : LoggingPage
-        private lateinit var etp : EnterTimePage
-        private lateinit var eep : EnterEmployeePage
-        private lateinit var epp : EnterProjectPage
-        private lateinit var lop : LogoutPage
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
+        private lateinit var pom : PageObjectModel
 
         @BeforeClass
         @JvmStatic
@@ -81,15 +75,7 @@ class UIEditTime {
         sc.startServer(businessCode)
 
         driver = webDriver.driver()
-
-        rp = RegisterPage(driver, domain)
-        lp = LoginPage(driver, domain)
-        etp = EnterTimePage(driver, domain)
-        eep = EnterEmployeePage(driver, domain)
-        epp = EnterProjectPage(driver, domain)
-        llp = LoggingPage(driver, domain)
-        lop = LogoutPage(driver, domain)
-
+        pom = PageObjectModel.make(driver, domain)
     }
 
     @After
@@ -99,7 +85,7 @@ class UIEditTime {
     }
 
     private fun logout() {
-        lop.go()
+        pom.lop.go()
     }
 
 
@@ -136,18 +122,18 @@ class UIEditTime {
         }
 
         // Enter time
-        etp.enterTime(project, "60", "", dateString)
+        pom.etp.enterTime(project, "60", "", dateString)
     }
 
     private fun loginAsUserAndCreateProject(user: String, project: String) {
         val password = DEFAULT_PASSWORD.value
 
         // register and login
-        rp.register(user, password, "Administrator")
-        lp.login(user, password)
+        pom.rp.register(user, password, "Administrator")
+        pom.lp.login(user, password)
 
         // Create project
-        epp.enter(project)
+        pom.epp.enter(project)
     }
 
 }

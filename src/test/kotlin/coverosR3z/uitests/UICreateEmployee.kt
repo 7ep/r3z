@@ -49,9 +49,9 @@ class UICreateEmployee {
     }
 
     private fun addAndreaEmployee() {
-        rp.register("employeemaker", "password12345", "Administrator")
-        lp.login("employeemaker", "password12345")
-        eep.enter("a new employee")
+        pom.rp.register("employeemaker", "password12345", "Administrator")
+        pom.lp.login("employeemaker", "password12345")
+        pom.eep.enter("a new employee")
     }
 
 
@@ -61,15 +61,9 @@ class UICreateEmployee {
         private val webDriver = Drivers.CHROME
         private lateinit var sc : Server
         private lateinit var driver: WebDriver
-        private lateinit var rp : RegisterPage
-        private lateinit var lp : LoginPage
-        private lateinit var llp : LoggingPage
-        private lateinit var etp : EnterTimePage
-        private lateinit var eep : EnterEmployeePage
-        private lateinit var epp : EnterProjectPage
-        private lateinit var lop : LogoutPage
         private lateinit var businessCode : BusinessCode
         private lateinit var pmd : PureMemoryDatabase
+        private lateinit var pom : PageObjectModel
 
         @BeforeClass
         @JvmStatic
@@ -90,14 +84,7 @@ class UICreateEmployee {
         sc.startServer(businessCode)
 
         driver = webDriver.driver()
-
-        rp = RegisterPage(driver, domain)
-        lp = LoginPage(driver, domain)
-        etp = EnterTimePage(driver, domain)
-        eep = EnterEmployeePage(driver, domain)
-        epp = EnterProjectPage(driver, domain)
-        llp = LoggingPage(driver, domain)
-        lop = LogoutPage(driver, domain)
+        pom = PageObjectModel.make(driver, domain)
 
     }
 
@@ -108,7 +95,7 @@ class UICreateEmployee {
     }
 
     private fun logout() {
-        lop.go()
+        pom.lop.go()
     }
 
 }
