@@ -67,6 +67,27 @@ class UITimeEntry {
     fun `all inputs should restrict to valid values` () {
     }
 
+    @UITest
+    @Test
+    @Ignore("Not started yet")
+    fun `date entry should default to today's date`() {
+
+    }
+
+    @UITest
+    @Test
+    @Ignore("Not started yet")
+    fun `should group time entries by period`() {
+
+    }
+
+    @UITest
+    @Test
+    @Ignore("Not started yet")
+    fun `should allow sorting time entries by any field`() {
+
+    }
+
     @BDD
     @UITest
     @Test

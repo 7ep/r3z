@@ -3,6 +3,7 @@ package coverosR3z.authentication
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
@@ -275,7 +276,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun testShouldCreateNewSession() {
         val newSessionId = authUtils.createNewSession(DEFAULT_USER)
-        assertEquals(32, newSessionId.length)
+        assertEquals(LENGTH_OF_BYTES_OF_SESSION_STRING * 2, newSessionId.length)
     }
 
     /**

@@ -1,6 +1,7 @@
 package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.types.*
+import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.misc.types.DateTime
 import coverosR3z.timerecording.types.EmployeeId
@@ -30,7 +31,7 @@ interface IAuthenticationUtilities {
      * Adds a new session to the sessions data structure, with
      * the user and a generated session value
      */
-    fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = { generateRandomString(16) }) : String
+    fun createNewSession(user: User, time : DateTime = DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)), rand : () -> String = { generateRandomString(LENGTH_OF_BYTES_OF_SESSION_STRING) }) : String
 
     /**
      * Wipes out the session entry for this user
