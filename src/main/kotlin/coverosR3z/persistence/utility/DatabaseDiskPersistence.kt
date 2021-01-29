@@ -9,15 +9,11 @@ import coverosR3z.logging.logWarn
 import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
-import coverosR3z.persistence.types.ChangeTrackingSet
-import coverosR3z.persistence.types.IndexableSerializable
-import coverosR3z.persistence.types.SerializableCompanion
-import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.persistence.types.*
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.Project
-import coverosR3z.timerecording.types.Project.Companion.convertToKey
 import coverosR3z.timerecording.types.TimeEntry
 import java.io.File
 
@@ -158,13 +154,13 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
 
         private fun <T> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
             val dataDirectory = File("$dbDirectory$filename")
-            val changeTrackingSet = ChangeTrackingSet<T>()
 
             if (! dataDirectory.exists()) {
                 logWarn { "$filename directory missing, creating empty set of data" }
-                return changeTrackingSet
+                return ChangeTrackingSet()
             }
 
+            val data = ChangeTrackingSet<T>()
             dataDirectory
                 .walkTopDown()
                 .filter {it.isFile }
@@ -174,14 +170,11 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                     if (fileContents.isBlank()) {
                         logWarn { "${it.name} file exists but empty, skipping" }
                     } else {
-                        changeTrackingSet.add(deserializer(fileContents))
+                        data.addWithoutTracking(deserializer(fileContents))
                     }
                 }
 
-            // since we're deserializing, no need to remember these modifications,
-            // they would just cause us to write them all out immediately after.
-            changeTrackingSet.clearModifications()
-            return changeTrackingSet
+            return data
         }
 
         /**

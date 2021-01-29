@@ -22,7 +22,7 @@ class DatabaseDiskPersistenceTests {
      * will get its own file.  So Project 1 will get its own file, Project 2, etc.
      */
     @Test
-    fun testPersistenceNew_Project() {
+    fun testPersistence_Project() {
         val dbDirectory = "build/db/testPersistenceNew_Project/"
         File(dbDirectory).deleteRecursively()
 
@@ -49,7 +49,7 @@ class DatabaseDiskPersistenceTests {
      * and add.  So we remove, then we add, in order to update.
      */
     @Test
-    fun testPersistenceNew_Update() {
+    fun testPersistence_Update() {
         val dbDirectory = "build/db/testPersistenceNew_Update/"
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
@@ -67,7 +67,7 @@ class DatabaseDiskPersistenceTests {
     }
 
     @Test
-    fun testPersistenceNew_Delete() {
+    fun testPersistence_Delete() {
         val dbDirectory = "build/db/testPersistenceNew_Delete/"
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
@@ -82,7 +82,7 @@ class DatabaseDiskPersistenceTests {
     }
 
     @Test
-    fun testDeserializerNew() {
+    fun testDeserializer() {
         val projectSerialized = """{ id: 1 , name: myname }"""
          deserialize(projectSerialized, Project::class.java, Project.Companion) { entries ->
                 val id = checkParseToInt(entries[Project.Companion.Keys.ID])

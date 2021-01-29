@@ -53,6 +53,16 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         return super.add(item)
     }
 
+    /**
+     * Unlike [add], this will not put anything into the
+     * list of modified data.  This is necessary in
+     * some situations, like when deserializing data from disk
+     * during system startup.
+     */
+    fun addWithoutTracking(item : T) : T {
+        return super.add(item)
+    }
+
     override fun addAll(elements: Collection<T>) : Boolean {
         modified.addAll(elements.map { Pair(it, CREATE) }.toSet() as Collection<Pair<T, DataAction>>)
         return super.addAll(elements)
