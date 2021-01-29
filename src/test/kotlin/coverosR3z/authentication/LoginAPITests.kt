@@ -9,10 +9,7 @@ import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert
@@ -44,8 +41,8 @@ class LoginAPITests {
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED)
         val responseData = LoginAPI.handlePost(sd)
 
-        Assert.assertTrue("The system should indicate success.  File was $responseData",
-                toStr(responseData.fileContents).contains("SUCCESS"))
+        assertEquals("The system should take you to the authenticated homepage",
+                StatusCode.SEE_OTHER, responseData.statusCode)
         Assert.assertTrue("A cookie should be set if valid login",
                 responseData.headers.any { it.contains("Set-Cookie") })
     }

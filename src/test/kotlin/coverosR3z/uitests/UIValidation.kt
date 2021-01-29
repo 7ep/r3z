@@ -56,7 +56,7 @@ class UIValidation {
         val maxPassword = "a".repeat(maxPasswordSize)
         pom.rp.register("cool", maxPassword + "z", "Administrator")
         pom.lp.login("cool", maxPassword)
-        assertEquals("SUCCESS", pom.driver.title)
+        assertEquals("Authenticated Homepage", pom.driver.title)
     }
 
     private fun tooShortPassword() {

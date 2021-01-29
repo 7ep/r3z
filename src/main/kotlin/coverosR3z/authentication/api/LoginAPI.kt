@@ -5,6 +5,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.UserName
 import coverosR3z.logging.logDebug
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
@@ -64,7 +65,7 @@ class LoginAPI(val sd: ServerData) {
             // HttpOnly - JavaScript cannot access this coo
             // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
             val cookie = "Set-Cookie: sessionId=$newSessionToken; SameSite=Strict; HttpOnly"
-            PreparedResponseData(successHTML, StatusCode.OK, listOf(ContentType.TEXT_HTML.value, cookie))
+            PreparedResponseData("", StatusCode.SEE_OTHER, listOf(cookie, "Location: ${HomepageAPI.path}"))
         } else {
             logDebug { "User ($username) failed to login" }
             handleUnauthorized()
@@ -77,6 +78,7 @@ class LoginAPI(val sd: ServerData) {
           <head>
               <title>register</title>
               <link rel="stylesheet" href="general.css" />
+              <link rel="stylesheet" href="login.css" />
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <meta apifile="LoginAPI" >
           </head>
