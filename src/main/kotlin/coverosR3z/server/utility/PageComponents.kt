@@ -1,0 +1,26 @@
+package coverosR3z.server.utility
+
+class PageComponents {
+    companion object {
+        val standardHeader = """<header><a class="home-button" href="homepage">r3z</a></header>"""
+
+        fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """
+<!DOCTYPE html>    
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="general.css" />
+        $extraHeaderContent
+        <title>$title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta apifile="$apiFile" >
+    </head>
+    <body>
+        ${PageComponents.standardHeader}
+        $body
+    </body>
+</html>
+"""
+
+    }
+
+}

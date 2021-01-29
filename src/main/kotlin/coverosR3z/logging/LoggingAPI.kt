@@ -5,6 +5,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.successHTML
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
+import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 
 
@@ -104,16 +105,7 @@ class LoggingAPI(private val sd: ServerData) {
 
 
     private fun loggingConfigHtml() : String {
-        return """
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <title>Authenticated Homepage</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <meta apifile="LoggingAPI" >
-        </head>        
-        <body>
-    
+        val body = """
             <form method="post" action="$path">
                 <fieldset>
                     <legend>Info logging:</legend>
@@ -161,11 +153,7 @@ class LoggingAPI(private val sd: ServerData) {
                 
                 <button id="${Elements.SAVE_BUTTON.getId()}">Save</button>
             </form>
-    
-    
-        </body>
-    </html>
-    
     """
+        return PageComponents.makeTemplate("Logging configuration", "LoggingAPI", body)
     }
 }

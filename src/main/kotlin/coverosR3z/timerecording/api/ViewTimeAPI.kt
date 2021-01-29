@@ -6,6 +6,7 @@ import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
+import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
@@ -74,31 +75,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         // either get the id as an integer or get null,
         // the code will handle either properly
         val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
-        return """
-        <!DOCTYPE html>        
-        <html lang="en">
-            <head>
-                <title>your time entries</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <meta apifile="ViewTimeAPI" >
-                <style>
-                table,
-                td {
-                    border: 1px solid #333;
-                }
-        
-                thead,
-                tfoot {
-                    background-color: #333;
-                    color: #fff;
-                }
-        
-                </style>
-            </head>
-            <body>
+        val body = """
                 <p>
                     Here are your entries, <span id="username">$username</span>
                 </p>
+                <div class="container">
                 <table>
                     <thead>
                         <tr>
@@ -112,10 +93,9 @@ class ViewTimeAPI(private val sd: ServerData) {
                     ${renderTimeRows(te, idBeingEdited, projects)}
                     </tbody>
                 </table>
-        
-            </body>
-        </html>
+                </div>
         """
+        return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
     }
 
     private fun renderTimeRows(
