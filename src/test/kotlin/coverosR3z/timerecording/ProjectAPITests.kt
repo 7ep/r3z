@@ -34,7 +34,7 @@ class ProjectAPITests {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
-        assertEquals(StatusCode.OK, ProjectAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
 
     /**
@@ -58,7 +58,7 @@ class ProjectAPITests {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(30)))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED)
 
-        assertEquals(StatusCode.OK, ProjectAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
 
     /**

@@ -1,10 +1,12 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.ProjectName
 
@@ -50,7 +52,7 @@ class ProjectAPI(private val sd: ServerData) {
 
     fun handlePOST() : PreparedResponseData {
         sd.tru.createProject(ProjectName.make(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()]))
-        return okHTML(successHTML)
+        return redirectTo(HomepageAPI.path)
     }
 
     private fun createProjectHTML() : String {
