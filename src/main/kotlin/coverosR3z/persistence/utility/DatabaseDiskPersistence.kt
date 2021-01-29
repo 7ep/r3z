@@ -135,24 +135,15 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
             }
 
             val projects = readAndDeserialize(dbDirectory, Project.directoryName) { Project.Deserializer().deserialize(it) }
-            projects.nextIndex.set(projects.maxOfOrNull { it.id.value }?.inc() ?: 1)
-
             val users = readAndDeserialize(dbDirectory, User.directoryName) { User.Deserializer().deserialize(it) }
-            users.nextIndex.set(users.maxOfOrNull { it.id.value }?.inc() ?: 1)
-
-            val sessions = readAndDeserialize(dbDirectory, Session.directoryName) { Session.Deserializer(users.toSet()).deserialize(it) }
-            sessions.nextIndex.set(sessions.maxOfOrNull { it.simpleId }?.inc() ?: 1)
-
+            val sessions = readAndDeserialize(dbDirectory, Session.directoryName) { Session.Deserializer(users).deserialize(it) }
             val employees = readAndDeserialize(dbDirectory, Employee.directoryName) { Employee.Deserializer().deserialize(it) }
-            employees.nextIndex.set(employees.maxOfOrNull { it.id.value }?.inc() ?: 1)
-
             val timeEntries = readAndDeserialize(dbDirectory, TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
-            timeEntries.nextIndex.set(timeEntries.maxOfOrNull { it.id.value }?.inc() ?: 1)
 
             return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, dbDirectory)
         }
 
-        private fun <T> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+        private fun <T : Indexed> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
             val dataDirectory = File("$dbDirectory$filename")
 
             if (! dataDirectory.exists()) {
@@ -174,6 +165,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                     }
                 }
 
+            data.nextIndex.set(data.maxOfOrNull { it.getIndex() }?.inc() ?: 1)
             return data
         }
 
