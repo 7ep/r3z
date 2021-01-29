@@ -306,7 +306,7 @@ class ServerTests {
                 myClient.send()
                 val result = myClient.read()
 
-                assertEquals(StatusCode.OK, result.statusCode)
+                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
             }
         }
         println("Time was $time")

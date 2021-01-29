@@ -38,7 +38,7 @@ class ViewTimeAPITests {
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
         val response = ViewTimeAPI.handlePost(sd).statusCode
         assertEquals(
-            "we should have gotten redirected to the viewTime page.  Got: $response",
+            "We should have gotten redirected to the viewTime page",
             StatusCode.SEE_OTHER, response
         )
     }

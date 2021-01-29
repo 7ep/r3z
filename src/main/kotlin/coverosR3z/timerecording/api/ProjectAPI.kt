@@ -5,6 +5,7 @@ import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
+import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.successHTML
@@ -58,15 +59,7 @@ class ProjectAPI(private val sd: ServerData) {
     private fun createProjectHTML() : String {
         val username = safeHtml(sd.ahd.user.name.value)
 
-        return """
-<!DOCTYPE html>        
-<html lang="en">
-    <head>
-        <title>create project</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta apifile="ProjectAPI" >
-    </head>
-    <body>
+        val body = """
         <form action="$path" method="post">
         
             <p>
@@ -83,9 +76,8 @@ class ProjectAPI(private val sd: ServerData) {
             </p>
         
         </form>
-    </body>
-</html>
 """
+        return PageComponents.makeTemplate("create project", "ProjectAPI", body)
     }
 }
 

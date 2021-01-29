@@ -5,6 +5,7 @@ import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
+import coverosR3z.server.utility.PageComponents
 
 class ViewEmployeesAPI(private val sd: ServerData) {
 
@@ -23,28 +24,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
         val username = safeHtml(sd.ahd.user.name.value)
         val employees = sd.tru.listAllEmployees()
 
-        return """
-        <!DOCTYPE html>        
-        <html lang="en">
-            <head>
-                <title>Company Employees</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <meta apifile="ViewEmployeesAPI" >
-                <style>
-                table,
-                td {
-                    border: 1px solid #333;
-                }
-        
-                thead,
-                tfoot {
-                    background-color: #333;
-                    color: #fff;
-                }
-        
-                </style>
-            </head>
-            <body>
+        val body = """
                 <p>
                     Here are the employees at your company, <span id="username">${safeHtml(username)}</span>
                 </p>
@@ -59,9 +39,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
                     """ +employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${safeHtml(it.name.value)}</td></tr>\n" } + """
                     </tbody>
                 </table>
-        
-            </body>
-        </html>
         """
+            return PageComponents.makeTemplate("view employees", "ViewEmployeesAPI", body)
     }
 }

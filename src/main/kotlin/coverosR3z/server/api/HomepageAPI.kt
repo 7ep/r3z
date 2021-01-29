@@ -5,6 +5,7 @@ import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETAuthAndUnauth
+import coverosR3z.server.utility.PageComponents
 
 class HomepageAPI(private val sd: ServerData)  {
 
@@ -21,16 +22,7 @@ class HomepageAPI(private val sd: ServerData)  {
 
     private fun authHomePageHTML(): String {
         val username = safeHtml(sd.ahd.user.name.value)
-        return """
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <link rel="stylesheet" href="general.css" />
-            <title>Authenticated Homepage</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <meta apifile="HomepageAPI" >
-        </head>        
-        <body>
+        val body = """
             <div class="container">
                 <h2>You are on the authenticated homepage, $username</h2>
                 <p><a href="createemployee">Create employee</a></p>
@@ -41,9 +33,8 @@ class HomepageAPI(private val sd: ServerData)  {
                 <p><a href="logging">Log configuration</a></p>
                 <p><a href="logout">Logout</a></p>
             </div>
-        </body>
-    </html>
 """
+        return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body)
     }
 
     private val homepageHTML = """
@@ -55,8 +46,8 @@ class HomepageAPI(private val sd: ServerData)  {
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta apifile="HomepageAPI" >
     </head>
-    <header><a class="home-button" href="homepage">r3z</a></header>
     <body>
+        ${PageComponents.standardHeader}
         <div class="container">
             <h2>You are on the homepage</h2>
             <p><a href="login">Login</a></p>

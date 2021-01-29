@@ -1,0 +1,54 @@
+.container {
+  border: 2px solid #e2e2e2;
+  margin: auto;
+  border-radius: .5em;
+  background-color: white;
+  opacity: 82%;
+  width: 780px;
+  padding: 10px;
+}
+
+tbody tr:nth-child(odd) {
+  background: #d9ced0;
+}
+
+tbody tr:nth-child(even) {
+  background: #fff;
+}
+
+
+table {
+  color: black;
+/*   border-collapse: collapse; */
+  border-spacing: 1px solid black;
+
+}
+
+td.date {
+  width: 10%;
+}
+td.details {
+  width: 90%
+}
+td.project {
+  width: 15%;
+}
+td.time {
+  width: 10%;
+}
+input {
+  background-color: #dfffdf;
+  border: 0;
+}
+input[name=detail_entry]{
+  width: 98%;
+}
+input[name=time_entry]{
+  width: 98%;
+}
+input[name=date_entry] {
+  width: 98%
+}
+select#project_entry {
+  width: 98%;
+}
