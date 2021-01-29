@@ -90,9 +90,6 @@ class UIEditTime {
         // save the new time
         pom.driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
 
-        // go to the page
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
-
         // confirm the change
         assertEquals("120", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }

@@ -6,7 +6,9 @@ import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
+import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.*
 
@@ -221,7 +223,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
         tru.changeEntry(timeEntry)
 
-        return okHTML(successHTML)
+        return redirectTo(path)
     }
 
 }

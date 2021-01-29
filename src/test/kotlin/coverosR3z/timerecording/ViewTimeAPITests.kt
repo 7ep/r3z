@@ -4,12 +4,10 @@ import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.utility.toStr
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
+import coverosR3z.timerecording.types.StatusEnum
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -38,10 +36,10 @@ class ViewTimeAPITests {
             Elements.ID_INPUT.getElemName() to "1"
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val response = ViewTimeAPI.handlePost(sd).fileContents
-        Assert.assertTrue(
-            "we should have gotten the success page.  Got: $response",
-            toStr(response).contains("SUCCESS")
+        val response = ViewTimeAPI.handlePost(sd).statusCode
+        assertEquals(
+            "we should have gotten redirected to the viewTime page.  Got: $response",
+            StatusCode.SEE_OTHER, response
         )
     }
 
