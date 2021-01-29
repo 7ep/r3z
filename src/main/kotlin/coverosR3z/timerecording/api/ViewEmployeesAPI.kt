@@ -25,7 +25,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
 
         return """
         <!DOCTYPE html>        
-        <html>
+        <html lang="en">
             <head>
                 <title>Company Employees</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">

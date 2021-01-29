@@ -59,7 +59,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 
         return """
     <!DOCTYPE html>        
-    <html>
+    <html lang="en">
         <head>
             <title>create employee</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">

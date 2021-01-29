@@ -73,7 +73,7 @@ class LoginAPI(val sd: ServerData) {
 
     private val loginHTML = """
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
           <head>
               <title>register</title>
               <link rel="stylesheet" href="general.css" />

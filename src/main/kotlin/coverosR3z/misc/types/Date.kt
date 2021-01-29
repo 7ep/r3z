@@ -83,7 +83,6 @@ class Date(val epochDay : Int) : Comparable<Date> {
          * and returns a date.
          */
         fun make(value: String?): Date {
-            //ToDo: refactor to incorporate nullity and blankness checks into the checkParseToInt function (duplicated in all usages)
             val valueNotNull = checkNotNull(value){ dateNotNullMsg }
             require(valueNotNull.isNotBlank()) { dateNotBlankMsg }
             val split = value.split("-")

@@ -72,7 +72,7 @@ class RegisterAPI(private val sd: ServerData) {
 
         return """
     <!DOCTYPE html>        
-    <html>
+    <html lang="en">
       <head>
           <title>register</title>
           <link rel="stylesheet" href="general.css" />

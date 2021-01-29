@@ -96,7 +96,6 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
             val restoredPMD = deserializeFromDisk(fullDbDirectory)
 
             return if (restoredPMD != null) {
-                // return the restored database
                 restoredPMD
             } else {
                 logImperative("No existing database found, building new database")

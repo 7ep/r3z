@@ -88,7 +88,7 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         return """
         <!DOCTYPE html>        
-        <html>
+        <html lang="en">
         <head>
             <title>enter time</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">

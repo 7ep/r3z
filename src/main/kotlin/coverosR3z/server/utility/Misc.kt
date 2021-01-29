@@ -2,7 +2,7 @@ package coverosR3z.server.utility
 
 const val successHTML = """
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
     </head>
         <title>SUCCESS</title>
@@ -17,7 +17,7 @@ const val successHTML = """
 
 const val failureHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
     </head>
         <title>FAILURE</title>

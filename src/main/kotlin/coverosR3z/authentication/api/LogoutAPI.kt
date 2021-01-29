@@ -26,7 +26,7 @@ class LogoutAPI(private val sd: ServerData) {
 
     private val logoutHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
         <title>Logout</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">

@@ -1,5 +1,6 @@
 package coverosR3z.server.utility
 
+import coverosR3z.config.STATIC_FILES_DIRECTORY
 import coverosR3z.logging.logImperative
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.utility.FileReader
@@ -37,19 +38,20 @@ class ServerUtilities {
          */
         fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
             logImperative("Loading all static files into cache")
-            val urls = checkNotNull(FileReader.getResources("static/"))
+
+            val urls = checkNotNull(FileReader.getResources(STATIC_FILES_DIRECTORY))
             for (url in urls) {
                 val uri = url.toURI()
 
                 val myPath = if (uri.scheme == "jar") {
                     val fileSystem: FileSystem = FileSystems.newFileSystem(uri, emptyMap<String, Any>())
-                    fileSystem.getPath("static/")
+                    fileSystem.getPath(STATIC_FILES_DIRECTORY)
                 } else {
                     Paths.get(uri)
                 }
 
                 for (path: Path in Files.walk(myPath, 1)) {
-                    val fileContents = FileReader.read("static/" + path.fileName.toString()) ?: continue
+                    val fileContents = FileReader.read(STATIC_FILES_DIRECTORY + path.fileName.toString()) ?: continue
                     val filename = path.fileName.toString()
                     val result =
                         when {

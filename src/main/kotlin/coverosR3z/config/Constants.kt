@@ -15,3 +15,8 @@ const val CURRENT_DATABASE_VERSION = 1
  */
 const val LENGTH_OF_BYTES_OF_SESSION_STRING = 40
 
+/**
+ * in the resources, where we store our static files
+ */
+const val STATIC_FILES_DIRECTORY = "static/"
+

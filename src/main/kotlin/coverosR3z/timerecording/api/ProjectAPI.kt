@@ -58,7 +58,7 @@ class ProjectAPI(private val sd: ServerData) {
 
         return """
 <!DOCTYPE html>        
-<html>
+<html lang="en">
     <head>
         <title>create project</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">

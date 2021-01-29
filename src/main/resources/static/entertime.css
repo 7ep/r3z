@@ -19,7 +19,7 @@ hr {
 }
 
 body {
-    font-family: "serif";
+    font-family: serif;
     font-size: larger;
     background-color: #f7f7f8;
 }
@@ -148,7 +148,7 @@ div.banner h2.titleheader a:visited {
 
    body {
      margin: 0;
-     font-family: "serif";
+     font-family: serif;
      font-size: normal;
      background-color: initial;
    }

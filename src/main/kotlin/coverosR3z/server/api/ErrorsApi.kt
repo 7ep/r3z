@@ -27,7 +27,7 @@ fun handleInternalServerError(shortMessage : String, fullStackTrace : String) : 
 
 const val badRequestHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
     </head>
         <title>400 error</title>
@@ -41,7 +41,7 @@ const val badRequestHTML = """
 
 const val notFoundHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
     </head>
         <title>404 error</title>
@@ -55,7 +55,7 @@ const val notFoundHTML = """
 
 const val unauthorizedHTML = """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
     </head>
         <title>401 error</title>
@@ -71,7 +71,7 @@ fun internalServerErrorHTML(msg : String) : String {
     val safeMsg = safeHtml(msg)
     return """
 <!DOCTYPE html>    
-<html>
+<html lang="en">
     <head>
     </head>
         <title>500 error</title>

@@ -14,7 +14,6 @@ body {
   font-family: "helvetica", sans-serif;
   padding-top: 40px;
   margin: 0;
-  padding: 0;
   background-image: url("dawnsunrise.webp");
   background-size: 100vw 100vh;
 }
@@ -84,7 +83,7 @@ select {
 
 button {
   cursor: pointer;
-  font-size: 120%;;
+  font-size: 120%;
   margin: 8px 0 1px 0;
   color: white;
   background-color: #C65364;
