@@ -11,8 +11,7 @@ header {
 body {
   color: #885555;
   background-color: rgb(75, 109, 154);
-  font-family: "helvetica", sans-serif;
-  padding-top: 40px;
+  font-family: sans-serif;
   margin: 0;
   background-image: url("dawnsunrise.webp");
   background-size: 100vw 100vh;

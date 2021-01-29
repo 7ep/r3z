@@ -3,15 +3,11 @@ package coverosR3z.uitests
 import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
-import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.ViewTimeAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UITimeEntry {
@@ -217,12 +213,6 @@ class UITimeEntry {
 
     companion object {
         private const val port = 4003
-        private const val domain = "http://localhost:$port"
-        private val webDriver = Drivers.CHROME
-        private lateinit var sc : Server
-        private lateinit var driver: WebDriver
-        private lateinit var businessCode : BusinessCode
-        private lateinit var pmd : PureMemoryDatabase
         private lateinit var pom : PageObjectModel
 
         @BeforeClass
@@ -237,20 +227,13 @@ class UITimeEntry {
 
     @Before
     fun init() {
-        // start the server
-        sc = Server(port)
-        pmd = Server.makeDatabase()
-        businessCode = Server.initializeBusinessCode(pmd)
-        sc.startServer(businessCode)
-
-        driver = webDriver.driver()
-        pom = PageObjectModel.make(driver, domain)
+        pom = startupTestForUI(port)
     }
 
     @After
     fun cleanup() {
-        sc.halfOpenServerSocket.close()
-        driver.quit()
+        pom.server.halfOpenServerSocket.close()
+        pom.driver.quit()
     }
 
     private fun logout() {
@@ -258,7 +241,7 @@ class UITimeEntry {
     }
 
     private fun enterTimeForEmployee(project: String) {
-        val dateString = if (driver is ChromeDriver) {
+        val dateString = if (pom.driver is ChromeDriver) {
             "06122020"
         } else {
             DEFAULT_DATE_STRING
@@ -281,10 +264,10 @@ class UITimeEntry {
 
     private fun verifyTheEntry() {
         // Verify the entry
-        driver.get("$domain/${ViewTimeAPI.path}")
-        assertEquals("your time entries", driver.title)
-        assertEquals("2020-06-12", driver.findElement(By.cssSelector("#time-entry-1-1 .date")).text)
-        assertEquals("60", driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        assertEquals("your time entries", pom.driver.title)
+        assertEquals("2020-06-12", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .date")).text)
+        assertEquals("60", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }
 
 

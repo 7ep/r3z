@@ -2,9 +2,6 @@ package coverosR3z.uitests
 
 import coverosR3z.bddframework.BDD
 import coverosR3z.timerecording.CreateEmployeeUserStory
-import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.ViewEmployeesAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -12,7 +9,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import org.openqa.selenium.WebDriver
 
 class UICreateEmployee {
 
@@ -44,8 +40,8 @@ class UICreateEmployee {
      */
 
     private fun confirmSuccess() {
-        assertEquals("SUCCESS", driver.title)
-        driver.get("$domain/${ViewEmployeesAPI.path}")
+        assertEquals("SUCCESS", pom.driver.title)
+        pom.driver.get("${pom.domain}/${ViewEmployeesAPI.path}")
     }
 
     private fun addAndreaEmployee() {
@@ -57,12 +53,6 @@ class UICreateEmployee {
 
     companion object {
         private const val port = 4000
-        private const val domain = "http://localhost:$port"
-        private val webDriver = Drivers.CHROME
-        private lateinit var sc : Server
-        private lateinit var driver: WebDriver
-        private lateinit var businessCode : BusinessCode
-        private lateinit var pmd : PureMemoryDatabase
         private lateinit var pom : PageObjectModel
 
         @BeforeClass
@@ -77,21 +67,13 @@ class UICreateEmployee {
 
     @Before
     fun init() {
-        // start the server
-        sc = Server(port)
-        pmd = Server.makeDatabase()
-        businessCode = Server.initializeBusinessCode(pmd)
-        sc.startServer(businessCode)
-
-        driver = webDriver.driver()
-        pom = PageObjectModel.make(driver, domain)
-
+        pom = startupTestForUI(port)
     }
 
     @After
     fun cleanup() {
-        sc.halfOpenServerSocket.close()
-        driver.quit()
+        pom.server.halfOpenServerSocket.close()
+        pom.driver.quit()
     }
 
     private fun logout() {

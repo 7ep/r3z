@@ -5,10 +5,11 @@ import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
+import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.CreateEmployeeAPI
-import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -19,6 +20,25 @@ import org.openqa.selenium.firefox.FirefoxDriver
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX({ FirefoxDriver() }),
     CHROME({ ChromeDriver(ChromeOptions().setHeadless(false)) })
+}
+
+/**
+ * sets up everything needed to run the UI tests:
+ * - starts the server on the port provided
+ * - creates a new database for the server
+ * - initializes the utilities needed
+ * - creates a [PageObjectModel] so the UI tests have access to all this stuff,
+ *   and so we can have a testing-oriented API
+ *   @param port the port our server will run on, and thus the port our client should target
+ */
+fun startupTestForUI(port : Int) : PageObjectModel {
+    // start the server
+    val server = Server(port)
+    val pmd = Server.makeDatabase()
+    val businessCode = Server.initializeBusinessCode(pmd)
+    server.startServer(businessCode)
+
+    return PageObjectModel.make(webDriver.driver(), port, businessCode, server, pmd)
 }
 
 class EnterTimePage(private val driver: WebDriver, private val domain : String) {

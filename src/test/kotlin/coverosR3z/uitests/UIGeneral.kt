@@ -1,27 +1,23 @@
 package coverosR3z.uitests
 
 import coverosR3z.logging.LogTypes
-import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.utility.Server
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.openqa.selenium.WebDriver
 
 class UIGeneral {
 
     @UITest
     @Test
     fun `general - should be able to see the homepage and the authenticated homepage`() {
-        driver.get("${domain}/${HomepageAPI.path}")
-        assertEquals("Homepage", driver.title)
+        pom.driver.get("${pom.domain}/${HomepageAPI.path}")
+        assertEquals("Homepage", pom.driver.title)
         pom.rp.register("employeemaker", "password12345", "Administrator")
         pom.lp.login("employeemaker", "password12345")
-        driver.get("${domain}/${HomepageAPI.path}")
-        assertEquals("Authenticated Homepage", driver.title)
+        pom.driver.get("${pom.domain}/${HomepageAPI.path}")
+        assertEquals("Authenticated Homepage", pom.driver.title)
         logout()
     }
 
@@ -53,15 +49,7 @@ class UIGeneral {
 
     companion object {
         private const val port = 4005
-        private const val domain = "http://localhost:$port"
-
-        private val webDriver = Drivers.CHROME
-        private lateinit var sc : Server
-        private lateinit var driver: WebDriver
-        private lateinit var businessCode : BusinessCode
-        private lateinit var pmd : PureMemoryDatabase
         private lateinit var pom : PageObjectModel
-
 
         @BeforeClass
         @JvmStatic
@@ -75,20 +63,13 @@ class UIGeneral {
 
     @Before
     fun init() {
-        // start the server
-        sc = Server(port)
-        pmd = Server.makeDatabase()
-        businessCode = Server.initializeBusinessCode(pmd)
-        sc.startServer(businessCode)
-
-        driver = webDriver.driver()
-        pom = PageObjectModel.make(driver, domain)
+        pom = startupTestForUI(port)
     }
 
     @After
     fun cleanup() {
-        sc.halfOpenServerSocket.close()
-        driver.quit()
+        pom.server.halfOpenServerSocket.close()
+        pom.driver.quit()
     }
 
     private fun logout() {
