@@ -95,7 +95,7 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
     class Deserializer : Deserializable<User> {
 
         override fun deserialize(str: String) : User {
-            return deserialize(str, User::class.java, Companion) { entries ->
+            return deserialize(str, Companion) { entries ->
 
                 val id = checkParseToInt(entries[Keys.ID])
 

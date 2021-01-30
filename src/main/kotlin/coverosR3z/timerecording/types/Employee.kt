@@ -74,7 +74,7 @@ data class Employee(val id: EmployeeId, val name: EmployeeName) : IndexableSeria
     class Deserializer : Deserializable<Employee> {
 
         override fun deserialize(str: String) : Employee {
-            return deserialize(str, Employee::class.java, Companion) { entries ->
+            return deserialize(str, Companion) { entries ->
                 val id = checkParseToInt(entries[Keys.ID])
                 Employee(EmployeeId(id), EmployeeName.make((entries[Keys.NAME])))
             }

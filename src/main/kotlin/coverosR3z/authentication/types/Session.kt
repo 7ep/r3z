@@ -35,7 +35,7 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
     class Deserializer(val users: Set<User>) : Deserializable<Session> {
 
         override fun deserialize(str: String): Session {
-            return deserialize(str, Session::class.java, Companion) { entries ->
+            return deserialize(str, Companion) { entries ->
                 val simpleId = checkParseToInt(entries[Keys.SIMPLE_ID])
                 val sessionString = checkNotNull(entries[Keys.SESSION_ID])
                 val id = checkParseToInt(entries[Keys.USER_ID])

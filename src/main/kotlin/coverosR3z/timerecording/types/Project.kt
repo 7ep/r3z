@@ -69,7 +69,7 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
     class Deserializer : Deserializable<Project> {
 
         override fun deserialize(str: String) : Project {
-            return deserialize(str, Project::class.java, Companion) { entries ->
+            return deserialize(str, Companion) { entries ->
                 val id = checkParseToInt(entries[Keys.ID])
                 Project(ProjectId(id), ProjectName.make(entries[Keys.NAME]))
             }

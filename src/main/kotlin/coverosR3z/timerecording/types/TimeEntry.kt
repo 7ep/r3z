@@ -111,7 +111,7 @@ data class TimeEntry (
     class Deserializer(val employees: Set<Employee>, val projects: Set<Project>) : Deserializable<TimeEntry> {
 
         override fun deserialize(str: String) : TimeEntry {
-            return deserialize(str, TimeEntry::class.java, Companion) { entries ->
+            return deserialize(str, Companion) { entries ->
 
                 try {
                     val id = checkParseToInt(entries[Keys.ID])

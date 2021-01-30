@@ -171,7 +171,11 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
          */
-        fun <T: Any, C: SerializableCompanion> deserialize(str : String, clazz: Class<T>, instance : C, convert: (Map<SerializationKeys, String>) -> T) : T {
+        fun <T: Any, C: SerializableCompanion> deserialize(
+            str: String,
+            instance: C,
+            convert: (Map<SerializationKeys, String>) -> T
+        ) : T {
             try {
                 val groups = checkNotNull(serializedStringRegex.findAll(str)).flatMap { it.groupValues }.toList()
                 var currentIndex = 0
@@ -190,7 +194,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
             } catch (ex : DatabaseCorruptedException) {
                 throw ex
             }catch (ex : Throwable) {
-                throw DatabaseCorruptedException("Unable to deserialize this text as ${clazz.simpleName} data: $str", ex)
+                throw DatabaseCorruptedException("Unable to deserialize this text from the ${instance.directoryName} directory: $str", ex)
             }
         }
 

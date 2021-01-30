@@ -404,7 +404,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}/27$databaseFileSuffix").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
-        assertEquals("Unable to deserialize this text as Employee data: BAD DATA HERE", ex.message)
+        assertEquals("Unable to deserialize this text from the employees directory: BAD DATA HERE", ex.message)
     }
 
     /**
@@ -440,7 +440,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${User.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
-        assertEquals("Unable to deserialize this text as User data: BAD DATA HERE", ex.message)
+        assertEquals("Unable to deserialize this text from the users directory: BAD DATA HERE", ex.message)
     }
     
     /**
@@ -473,7 +473,7 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id}$databaseFileSuffix").writeText("BAD DATA HERE")
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
-        assertEquals("Unable to deserialize this text as Project data: BAD DATA HERE", ex.message)
+        assertEquals("Unable to deserialize this text from the projects directory: BAD DATA HERE", ex.message)
     }
     
     /**
