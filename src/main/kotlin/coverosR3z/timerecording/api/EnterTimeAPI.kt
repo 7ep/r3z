@@ -103,12 +103,12 @@ class EnterTimeAPI(private val sd: ServerData) {
     
                 <p>
                     <label for="${Elements.TIME_INPUT.getElemName()}">Time:</label>
-                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="number" step="0.25" type="text" />
+                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="number" step="0.25" min="0" max="24" required="required" />
                 </p>
     
                 <p>
                     <label for="${Elements.DETAIL_INPUT.getElemName()}">Details:</label>
-                    <input name="${Elements.DETAIL_INPUT.getElemName()}" id="${Elements.DETAIL_INPUT.getId()}" type="text" />
+                    <input name="${Elements.DETAIL_INPUT.getElemName()}" id="${Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
                 </p>
                 
                 <p>

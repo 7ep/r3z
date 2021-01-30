@@ -149,10 +149,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     ${safeHtml(it.project.name.value)}
                                 </td>
                                 <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" value="${it.time.getHoursAsString()}" />
+                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
                                 </td>
                                 <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="${safeHtml(it.details.value)}" />
+                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="${safeHtml(it.details.value)}" maxlength="$MAX_DETAILS_LENGTH"/>
                                 </td>
                                 <td class="date">
                                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${it.date.stringValue}" />
@@ -174,10 +174,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     </select>
                                 </td>
                                 <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" />
+                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
                                 </td>
                                 <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="" />
+                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="" maxlength="$MAX_DETAILS_LENGTH"/>
                                 </td>
                                 <td class="date">
                                     <input name="${Elements.DATE_INPUT.getElemName()}" value="${Date.now().stringValue}" type="date" />

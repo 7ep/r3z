@@ -1,9 +1,6 @@
 package coverosR3z.authentication.api
 
-import coverosR3z.authentication.types.LoginResult
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.Password
-import coverosR3z.authentication.types.UserName
+import coverosR3z.authentication.types.*
 import coverosR3z.logging.logDebug
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
@@ -83,13 +80,13 @@ class LoginAPI(val sd: ServerData) {
                     <tr>
                         <td>
                             <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
-                            <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}">
+                            <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
-                            <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}">
+                            <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                         </td>
                     </tr>    
                         <td>
