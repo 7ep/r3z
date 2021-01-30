@@ -297,7 +297,7 @@ class ServerPerformanceTests {
                 val clientWithData = client.addPostData(data)
                 clientWithData.send()
                 val result = clientWithData.read()
-                Assert.assertEquals("result was ${result.data.rawData}", StatusCode.OK, result.statusCode)
+                Assert.assertEquals("result was ${result.data.rawData}", StatusCode.SEE_OTHER, result.statusCode)
             }
         }
     }

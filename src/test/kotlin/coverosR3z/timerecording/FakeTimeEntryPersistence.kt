@@ -1,5 +1,6 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.misc.DEFAULT_TIME_ENTRY
@@ -18,7 +19,12 @@ class FakeTimeEntryPersistence(
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
+    var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() }
 ) : ITimeEntryPersistence {
+
+    override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
+        return setCurrentUserBehavior()
+    }
 
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * the data in the keys only.  We provide some syntactic sugar
  * so this seems similar to using a Set.
  */
-open class ConcurrentSet<T> : Iterable<T>, Set<T> {
+open class ConcurrentSet<T> : Iterable<T>, Set<T>, MutableCollection<T> {
 
     private val map : ConcurrentHashMap<T, NullEnum> = ConcurrentHashMap()
 
@@ -23,12 +23,9 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
         NULL
     }
 
-    /**
-     * Adds an item to this collection
-     */
-    open fun add(item : T) : T{
-        map[item] = NullEnum.NULL
-        return item
+    override fun add(element : T) : Boolean {
+        map[element] = NullEnum.NULL
+        return true
     }
 
     /**
@@ -36,7 +33,7 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
      *
      * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
      */
-    open fun addAll(elements: Collection<T>): Boolean {
+    override fun addAll(elements: Collection<T>): Boolean {
         var didAdd = false
         for (element in elements) {
             map[element] = NullEnum.NULL
@@ -45,11 +42,12 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
         return didAdd
     }
 
-    /**
-     * Removes an item from this collection
-     */
-    open fun remove(item: T) {
-        map.remove(checkNotNull(item))
+    override fun remove(element: T) : Boolean {
+        val itemToRemove = checkNotNull(element)
+        if (map[itemToRemove] == null) return false
+
+        map.remove(itemToRemove)
+        return true
     }
 
     /**
@@ -60,7 +58,7 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
      * things so it is easier to comprehend where
      * data is allowed to be changed.
      */
-    override fun iterator(): Iterator<T> {
+    override fun iterator(): MutableIterator<T> {
         return Collections.unmodifiableSet(map.keySet(NullEnum.NULL)).iterator()
     }
 
@@ -95,6 +93,27 @@ open class ConcurrentSet<T> : Iterable<T>, Set<T> {
 
     override fun isEmpty(): Boolean {
         return map.isEmpty()
+    }
+
+    override fun clear() {
+        this.map.clear()
+    }
+
+    override fun removeAll(elements: Collection<T>): Boolean {
+        // whether the set was modified
+        var wasModified = false
+        for (e in elements) {
+            checkNotNull(e)
+            if (map[e] != null) {
+                map.remove(e)
+                wasModified = true
+            }
+        }
+        return wasModified
+    }
+
+    override fun retainAll(elements: Collection<T>): Boolean {
+        throw NotImplementedError("we have no current use for this, so leaving unimplemented")
     }
 
 }

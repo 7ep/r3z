@@ -128,7 +128,8 @@ class Server(val port: Int) {
             pmd : PureMemoryDatabase
         ): BusinessCode {
             val cu = CurrentUser(SYSTEM_USER)
-            val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+            val tep = TimeEntryPersistence(pmd, cu)
+            val tru = TimeRecordingUtilities(tep, cu)
             val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
             return BusinessCode(tru, au)
         }

@@ -29,7 +29,7 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         DELETE
     }
 
-    private val modified = mutableSetOf<Pair<T, DataAction>>()
+    private val modified = ConcurrentSet<Pair<T, DataAction>>()
 
     /**
      * Gets the current changes to the data, clearing
@@ -48,9 +48,9 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         modified.clear()
     }
 
-    override fun add(item : T) : T {
-        modified.add(Pair(item, CREATE))
-        return super.add(item)
+    override fun add(element : T) : Boolean {
+        modified.add(Pair(element, CREATE))
+        return super.add(element)
     }
 
     /**
@@ -59,7 +59,7 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
      * some situations, like when deserializing data from disk
      * during system startup.
      */
-    fun addWithoutTracking(item : T) : T {
+    fun addWithoutTracking(item : T) : Boolean {
         return super.add(item)
     }
 
@@ -68,9 +68,9 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         return super.addAll(elements)
     }
 
-    override fun remove(item: T) {
-        modified.add(Pair(item, DELETE))
-        return super.remove(item)
+    override fun remove(element: T) : Boolean {
+        modified.add(Pair(element, DELETE))
+        return super.remove(element)
     }
 
 

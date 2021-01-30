@@ -1,12 +1,20 @@
 package coverosR3z.timerecording.persistence
 
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
 
-class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPersistence {
+class TimeEntryPersistence(
+    private val pmd : PureMemoryDatabase,
+    private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) : ITimeEntryPersistence {
+
+    override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
+        return TimeEntryPersistence(pmd, cu)
+    }
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         isEntryValid(entry)
@@ -15,7 +23,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
             // add the new data
             val newIndex = entries.nextIndex.getAndIncrement()
 
-            logTrace { "new time-entry index is $newIndex" }
+            logTrace(cu) {"new time-entry index is $newIndex" }
             val newTimeEntry = TimeEntry(
                 TimeEntryId(newIndex),
                 entry.employee,
@@ -25,7 +33,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
                 entry.details
             )
             entries.add(newTimeEntry)
-            logDebug{"recorded a new timeEntry: $newTimeEntry"}
+            logDebug(cu) {"recorded a new timeEntry: $newTimeEntry"}
             newTimeEntry
         }
     }
@@ -43,8 +51,8 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
             entries.add(newEntry)
         }
 
-        logDebug{"modified an existing timeEntry: $newEntry"}
-        logTrace { "old time-entry index is $oldEntry and new time-entry is $newEntry" }
+        logDebug(cu) {"modified an existing timeEntry: $newEntry"}
+        logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $newEntry" }
         return newEntry
     }
 
@@ -64,7 +72,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         return pmd.ProjectDataAccess().actOn { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
             projects.add(newProject)
-            logDebug { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
+            logDebug(cu) { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
             newProject
         }
     }
@@ -73,7 +81,7 @@ class TimeEntryPersistence(private val pmd : PureMemoryDatabase) : ITimeEntryPer
         return pmd.EmployeeDataAccess().actOn { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
-            logDebug { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
+            logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
             newEmployee
         }
     }
