@@ -248,7 +248,7 @@ class UITimeEntry {
         }
 
         // Enter time
-        pom.etp.enterTime(project, "60", "", dateString)
+        pom.etp.enterTime(project, "1", "", dateString)
     }
 
     private fun loginAsUserAndCreateProject(user: String, project: String) {
@@ -267,7 +267,7 @@ class UITimeEntry {
         pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
         assertEquals("your time entries", pom.driver.title)
         assertEquals("2020-06-12", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .date")).text)
-        assertEquals("60", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
+        assertEquals("1.00", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }
 
 

@@ -70,17 +70,7 @@ class RegisterAPI(private val sd: ServerData) {
     private fun registerHTML() : String {
         val employees = sd.tru.listAllEmployees()
 
-        return """
-    <!DOCTYPE html>        
-    <html lang="en">
-      <head>
-          <title>register</title>
-          <link rel="stylesheet" href="general.css" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta apifile="RegisterAPI" >
-      </head>
-      <header><a class="home-button" href="homepage">r3z</a></header>
-      <body>
+        val body = """
         <br>
         <h2>Register a User</h2>
         
@@ -117,9 +107,8 @@ class RegisterAPI(private val sd: ServerData) {
             </tbody>
           </table>
         </form>
-      </body>
-    </html>
     """
+        return PageComponents.makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="register.css" />""")
     }
 
 }

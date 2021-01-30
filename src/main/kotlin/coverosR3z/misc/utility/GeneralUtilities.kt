@@ -38,6 +38,23 @@ fun checkParseToInt(value: String?,
  * Returns the value parsed as an int.  If this fails, returns
  * an [IllegalStateException] with the message
  */
+fun checkParseToDouble(value: String?,
+                    nullMsg: () -> String = {"Double must not be a null value"},
+                    blankMsg: () -> String = {"Double must not be blank"},
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as double"}): Double {
+    val notNullValue = requireNotNull(value){ nullMsg() }
+    require(notNullValue.isNotBlank()) { blankMsg() }
+    return try {
+        notNullValue.toDouble()
+    } catch (ex: java.lang.NumberFormatException) {
+        throw IllegalArgumentException(parseMsg())
+    }
+}
+
+/**
+ * Returns the value parsed as an int.  If this fails, returns
+ * an [IllegalStateException] with the message
+ */
 fun checkParseToLong(value: String?,
                     nullMsg: () -> String = {"Must not be a null value"},
                     blankMsg: () -> String = {"Must not be blank"},

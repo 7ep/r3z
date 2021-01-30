@@ -61,7 +61,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         val data = sd.ahd.data
         val tru = sd.tru
         val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
-        val time = Time.make(data.mapping[Elements.TIME_INPUT.getElemName()])
+        val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 
@@ -94,14 +94,16 @@ class EnterTimeAPI(private val sd: ServerData) {
     
                 <p>
                     <label for="project_entry">Project:</label>
-                    <select name="project_entry" id="project_entry"/>
-                    """ + projects.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""             <option selected disabled hidden>Choose here</option>
+                    <select name="project_entry" id="project_entry" required="required" />
+                        <option selected disabled hidden value="">Choose here</option>
+                        ${ViewTimeAPI.projectsToOptions(projects)}
+                
                 </select>
                 </p>
     
                 <p>
                     <label for="${Elements.TIME_INPUT.getElemName()}">Time:</label>
-                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="text" />
+                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="number" step="0.25" type="text" />
                 </p>
     
                 <p>
@@ -111,7 +113,7 @@ class EnterTimeAPI(private val sd: ServerData) {
                 
                 <p>
                     <label for="${Elements.DATE_INPUT.getElemName()}">Date:</label>
-                    <input name="${Elements.DATE_INPUT.getElemName()}" id="${Elements.DATE_INPUT.getId()}" type="date" />
+                    <input name="${Elements.DATE_INPUT.getElemName()}" id="${Elements.DATE_INPUT.getId()}" type="date" value="${Date.now().stringValue}" />
                 </p>
                 
                 <p>
@@ -120,7 +122,7 @@ class EnterTimeAPI(private val sd: ServerData) {
     
             </form>
     """
-        return PageComponents.makeTemplate("enter time", "EnterTimeAPI", body)
+        return PageComponents.makeTemplate("enter time", "EnterTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="entertime.css" />""")
     }
 
 }

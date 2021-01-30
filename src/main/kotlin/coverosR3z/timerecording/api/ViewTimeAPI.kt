@@ -65,6 +65,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         override val path: String
             get() = "timeentries"
 
+        fun projectsToOptions(projects: List<Project>) =
+            projects.sortedBy { it.name.value }.joinToString("") {
+                "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n"
+            }
+
     }
 
     private fun existingTimeEntriesHTML() : String {
@@ -76,9 +81,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         // the code will handle either properly
         val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
         val body = """
-                <p>
+                <h2>
                     Here are your entries, <span id="username">$username</span>
-                </p>
+                </h2>
                 <div class="container">
                 <table>
                     <thead>
@@ -103,13 +108,14 @@ class ViewTimeAPI(private val sd: ServerData) {
         idBeingEdited: Int?,
         projects: List<Project>
     ): String {
-        return te.joinToString("") {
+        return renderCreateTimeRow(projects) +
+        te.sortedBy { it.id.value }.joinToString("") {
             if (it.id.value == idBeingEdited) {
                 renderEditRow(it)
             } else {
                 renderReadOnlyRow(it)
             }
-        } + renderCreateTimeRow(projects)
+        }
     }
 
     private fun renderReadOnlyRow(it: TimeEntry) = """
@@ -119,7 +125,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     ${safeHtml(it.project.name.value)}
                                 </td>
                                 <td class="time">
-                                    ${it.time.numberOfMinutes}
+                                    ${it.time.getHoursAsString()}
                                 </td>
                                 <td class="details">
                                     ${safeHtml(it.details.value)}
@@ -143,7 +149,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     ${safeHtml(it.project.name.value)}
                                 </td>
                                 <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" value="${it.time.numberOfMinutes}" />
+                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" value="${it.time.getHoursAsString()}" />
                                 </td>
                                 <td class="details">
                                     <input name="${Elements.DETAIL_INPUT.getElemName()}" value="${safeHtml(it.details.value)}" />
@@ -162,19 +168,19 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
                             <form action="${EnterTimeAPI.path}" method="post">
                                 <td class="project">
-                                    <select name="project_entry" id="project_entry"/>
-                                        <option selected disabled hidden>Choose here</option>
+                                    <select name="project_entry" id="project_entry" required="required" />
+                                        <option selected disabled hidden value="">Choose here</option>
                                         ${projectsToOptions(projects)}
                                     </select>
                                 </td>
                                 <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" value="" />
+                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" />
                                 </td>
                                 <td class="details">
                                     <input name="${Elements.DETAIL_INPUT.getElemName()}" value="" />
                                 </td>
                                 <td class="date">
-                                    <input name="${Elements.DATE_INPUT.getElemName()}" value="" type="date" />
+                                    <input name="${Elements.DATE_INPUT.getElemName()}" value="${Date.now().stringValue}" type="date" />
                                 </td>
                                 <td>
                                     <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
@@ -183,16 +189,11 @@ class ViewTimeAPI(private val sd: ServerData) {
                         </tr>
                           """
 
-    private fun projectsToOptions(projects: List<Project>) =
-        projects.joinToString("") {
-            "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n"
-        }
-
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.tru
         val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
-        val time = Time.make(data.mapping[Elements.TIME_INPUT.getElemName()])
+        val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
         val entryId = TimeEntryId.make(data.mapping[Elements.ID_INPUT.getElemName()])

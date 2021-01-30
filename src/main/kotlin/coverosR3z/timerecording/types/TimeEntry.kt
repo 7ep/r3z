@@ -3,11 +3,13 @@ package coverosR3z.timerecording.types
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.utility.checkParseToDouble
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
+import kotlin.math.roundToInt
 
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
@@ -51,9 +53,25 @@ data class Time(val numberOfMinutes : Int) {
         require(numberOfMinutes <= 60*24) { lessThanTimeInDayMsg + numberOfMinutes }
     }
 
+    /**
+     * Returns the number of minutes as a number of hours, to two decimal places
+     */
+    fun getHoursAsString() : String {
+        val hours = numberOfMinutes / 60.0
+        return  "%.2f".format(hours)
+    }
+
     companion object {
         fun make(value: String?) : Time {
             return Time(checkParseToInt(value))
+        }
+
+        /**
+         * This assumes we are receiving the input as hours
+         */
+        fun makeHoursToMinutes(value: String?): Time {
+            val hours = checkParseToDouble(value)
+            return Time((hours * 60).roundToInt())
         }
     }
 }

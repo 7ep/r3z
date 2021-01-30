@@ -41,7 +41,7 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI() {
         val data = PostBodyData(mapOf(
                 EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
@@ -104,7 +104,7 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI_missingEmployee() {
         val data = PostBodyData(mapOf(
                 EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
@@ -177,7 +177,7 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI_aboveMaxTime() {
         val data = PostBodyData(mapOf(
             EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to ((60*60*24)+1).toString(),
+            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to ((24 * 60) + 0.01).toString(),
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
@@ -192,7 +192,7 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI_negativeTime() {
         val data = PostBodyData(mapOf(
             EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "-60",
+            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
@@ -230,7 +230,7 @@ class EnterTimeAPITests {
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("Must be able to parse aaa as integer", ex.message)
+        assertEquals("Must be able to parse aaa as double", ex.message)
     }
 
     /**

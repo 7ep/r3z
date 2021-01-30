@@ -30,7 +30,7 @@ class ViewTimeAPITests {
     fun testEditTime() {
         val data = PostBodyData(mapOf(
             Elements.PROJECT_INPUT.getElemName() to "1",
-            Elements.TIME_INPUT.getElemName() to "60",
+            Elements.TIME_INPUT.getElemName() to "1",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"

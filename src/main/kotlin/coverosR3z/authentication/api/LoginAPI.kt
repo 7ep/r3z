@@ -10,6 +10,7 @@ import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
+import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.successHTML
 
 class LoginAPI(val sd: ServerData) {
@@ -43,7 +44,8 @@ class LoginAPI(val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)
-            return doGETRequireUnauthenticated(sd.authStatus) { l.loginHTML }
+            return doGETRequireUnauthenticated(sd.authStatus)
+            { PageComponents.makeTemplate("login page", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="loginpage.css" />""")}
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
@@ -73,18 +75,6 @@ class LoginAPI(val sd: ServerData) {
     }
 
     private val loginHTML = """
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-              <title>register</title>
-              <link rel="stylesheet" href="general.css" />
-              <link rel="stylesheet" href="login.css" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <meta apifile="LoginAPI" >
-          </head>
-          <header><a class="home-button" href="homepage">r3z</a></header>
-          <body>
-            <br>
             <h2>Login</h2>
             
             <form  method="post" action="$path">
@@ -109,8 +99,6 @@ class LoginAPI(val sd: ServerData) {
                 </tbody>
               </table>
             </form>
-          </body>
-        </html>      
         """
 
 }

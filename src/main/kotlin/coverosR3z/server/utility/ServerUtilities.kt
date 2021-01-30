@@ -105,7 +105,7 @@ class ServerUtilities {
          * Use this to redirect to any particular page
          */
         fun redirectTo(path: String): PreparedResponseData {
-            return PreparedResponseData("", StatusCode.SEE_OTHER, listOf(ContentType.TEXT_HTML.value, "Location: $path"))
+            return PreparedResponseData("", StatusCode.SEE_OTHER, listOf("Location: $path"))
         }
 
         /**

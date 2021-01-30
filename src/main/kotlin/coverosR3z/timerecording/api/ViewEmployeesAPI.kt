@@ -25,9 +25,10 @@ class ViewEmployeesAPI(private val sd: ServerData) {
         val employees = sd.tru.listAllEmployees()
 
         val body = """
-                <p>
+                <h2>
                     Here are the employees at your company, <span id="username">${safeHtml(username)}</span>
-                </p>
+                </h2>
+                <div class="container">
                 <table>
                     <thead>
                         <tr>
@@ -39,7 +40,8 @@ class ViewEmployeesAPI(private val sd: ServerData) {
                     """ +employees.joinToString("") { "<tr><td>${it.id.value}</td><td>${safeHtml(it.name.value)}</td></tr>\n" } + """
                     </tbody>
                 </table>
+                </div>
         """
-            return PageComponents.makeTemplate("view employees", "ViewEmployeesAPI", body)
+            return PageComponents.makeTemplate("view employees", "ViewEmployeesAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewemployees.css" />""")
     }
 }

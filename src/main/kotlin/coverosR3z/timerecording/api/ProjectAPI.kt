@@ -60,24 +60,26 @@ class ProjectAPI(private val sd: ServerData) {
         val username = safeHtml(sd.ahd.user.name.value)
 
         val body = """
-        <form action="$path" method="post">
-        
-            <p>
-                Hello there, <span id="username">$username</span>!
-            </p>
-        
-            <p>
-                <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" />
-            </p>
-        
-            <p>
-                <button id="${Elements.CREATE_BUTTON.getId()}">Create new project</button>
-            </p>
-        
-        </form>
+        <div class="container">
+            <form action="$path" method="post">
+            
+                <p>
+                    Hello there, <span id="username">$username</span>!
+                </p>
+            
+                <p>
+                    <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
+                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" />
+                </p>
+            
+                <p>
+                    <button id="${Elements.CREATE_BUTTON.getId()}">Create new project</button>
+                </p>
+            
+            </form>
+        </div>
 """
-        return PageComponents.makeTemplate("create project", "ProjectAPI", body)
+        return PageComponents.makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
     }
 }
 

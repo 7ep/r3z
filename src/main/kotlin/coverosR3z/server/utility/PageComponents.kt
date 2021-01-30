@@ -15,7 +15,7 @@ class PageComponents {
         <meta apifile="$apiFile" >
     </head>
     <body>
-        ${PageComponents.standardHeader}
+        $standardHeader
         $body
     </body>
 </html>

@@ -85,13 +85,13 @@ class UIEditTime {
         val timeField =
             pom.driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
         timeField.clear()
-        timeField.sendKeys("120")
+        timeField.sendKeys("2")
 
         // save the new time
         pom.driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
 
         // confirm the change
-        assertEquals("120", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
+        assertEquals("2.00", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
     }
 
     private fun enterTimeForEmployee(project: String) {
@@ -102,7 +102,7 @@ class UIEditTime {
         }
 
         // Enter time
-        pom.etp.enterTime(project, "60", "", dateString)
+        pom.etp.enterTime(project, "1", "", dateString)
     }
 
     private fun loginAsUserAndCreateProject(user: String, project: String) {

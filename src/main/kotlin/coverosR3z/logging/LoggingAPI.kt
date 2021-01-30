@@ -106,54 +106,56 @@ class LoggingAPI(private val sd: ServerData) {
 
     private fun loggingConfigHtml() : String {
         val body = """
-            <form method="post" action="$path">
-                <fieldset>
-                    <legend>Info logging:</legend>
-                    <div>
-                      <input type="radio" id="${Elements.AUDIT_INPUT.getId()}true" name="${Elements.AUDIT_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
-                      <label for="${Elements.AUDIT_INPUT.getId()}true">True</label>
-                
-                      <input type="radio" id="${Elements.AUDIT_INPUT.getId()}false" name="${Elements.AUDIT_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
-                      <label for="${Elements.AUDIT_INPUT.getId()}false">False</label>
-                    </div>
-                </fieldset>
-    
-                <fieldset>
-                    <legend>Warn logging:</legend>
-                    <div>
-                      <input type="radio" id="${Elements.WARN_INPUT.getId()}true" name="${Elements.WARN_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
-                      <label for="${Elements.WARN_INPUT.getId()}true">True</label>
-                
-                      <input type="radio" id="${Elements.WARN_INPUT.getId()}false" name="${Elements.WARN_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
-                      <label for="${Elements.WARN_INPUT.getId()}false">False</label>
-                    </div>
-                </fieldset>
-    
-                <fieldset>
-                    <legend>Debug logging:</legend>
-                    <div>
-                      <input type="radio" id="${Elements.DEBUG_INPUT.getId()}true" name="${Elements.DEBUG_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
-                      <label for="${Elements.DEBUG_INPUT.getId()}true">True</label>
-                
-                      <input type="radio" id="${Elements.DEBUG_INPUT.getId()}false" name="${Elements.DEBUG_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
-                      <label for="${Elements.DEBUG_INPUT.getId()}false">False</label>
-                    </div>
-                </fieldset>
-                
-                <fieldset>
-                    <legend>Trace logging:</legend>
-                    <div>
-                      <input type="radio" id="${Elements.TRACE_INPUT.getId()}true" name="${Elements.TRACE_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
-                      <label for="${Elements.TRACE_INPUT.getId()}true">True</label>
-                
-                      <input type="radio" id="${Elements.TRACE_INPUT.getId()}false" name="${Elements.TRACE_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
-                      <label for="${Elements.TRACE_INPUT.getId()}false">False</label>
-                    </div>
-                </fieldset>
-                
-                <button id="${Elements.SAVE_BUTTON.getId()}">Save</button>
-            </form>
+            <div class="container">
+                <form method="post" action="$path">
+                    <fieldset>
+                        <legend>Info logging:</legend>
+                        <div>
+                          <input type="radio" id="${Elements.AUDIT_INPUT.getId()}true" name="${Elements.AUDIT_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
+                          <label for="${Elements.AUDIT_INPUT.getId()}true">True</label>
+                    
+                          <input type="radio" id="${Elements.AUDIT_INPUT.getId()}false" name="${Elements.AUDIT_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.AUDIT).isOff()}>
+                          <label for="${Elements.AUDIT_INPUT.getId()}false">False</label>
+                        </div>
+                    </fieldset>
+        
+                    <fieldset>
+                        <legend>Warn logging:</legend>
+                        <div>
+                          <input type="radio" id="${Elements.WARN_INPUT.getId()}true" name="${Elements.WARN_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.WARN).isOn()}>
+                          <label for="${Elements.WARN_INPUT.getId()}true">True</label>
+                    
+                          <input type="radio" id="${Elements.WARN_INPUT.getId()}false" name="${Elements.WARN_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.WARN).isOff()}>
+                          <label for="${Elements.WARN_INPUT.getId()}false">False</label>
+                        </div>
+                    </fieldset>
+        
+                    <fieldset>
+                        <legend>Debug logging:</legend>
+                        <div>
+                          <input type="radio" id="${Elements.DEBUG_INPUT.getId()}true" name="${Elements.DEBUG_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.DEBUG).isOn()}>
+                          <label for="${Elements.DEBUG_INPUT.getId()}true">True</label>
+                    
+                          <input type="radio" id="${Elements.DEBUG_INPUT.getId()}false" name="${Elements.DEBUG_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.DEBUG).isOff()}>
+                          <label for="${Elements.DEBUG_INPUT.getId()}false">False</label>
+                        </div>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Trace logging:</legend>
+                        <div>
+                          <input type="radio" id="${Elements.TRACE_INPUT.getId()}true" name="${Elements.TRACE_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.TRACE).isOn()}>
+                          <label for="${Elements.TRACE_INPUT.getId()}true">True</label>
+                    
+                          <input type="radio" id="${Elements.TRACE_INPUT.getId()}false" name="${Elements.TRACE_INPUT.getElemName()}" value="false" ${checkedIf(LogTypes.TRACE).isOff()}>
+                          <label for="${Elements.TRACE_INPUT.getId()}false">False</label>
+                        </div>
+                    </fieldset>
+                    
+                    <button id="${Elements.SAVE_BUTTON.getId()}">Save</button>
+                </form>
+            </div>
     """
-        return PageComponents.makeTemplate("Logging configuration", "LoggingAPI", body)
+        return PageComponents.makeTemplate("Logging configuration", "LoggingAPI", body, extraHeaderContent="""<link rel="stylesheet" href="loggingconfig.css" />""")
     }
 }
