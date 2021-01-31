@@ -80,7 +80,7 @@ class UIEditTime {
 
     private fun changeTime() {
         // put the row into edit mode
-        pom.driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
+        pom.driver.findElement(By.cssSelector("#time-entry-1 .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
 
         val timeField =
             pom.driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
@@ -91,7 +91,7 @@ class UIEditTime {
         pom.driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
 
         // confirm the change
-        assertEquals("2.00", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
+        assertEquals("2.00", pom.driver.findElement(By.cssSelector("#time-entry-1 .time")).text)
     }
 
     private fun enterTimeForEmployee(project: String) {

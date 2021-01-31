@@ -16,15 +16,17 @@ import coverosR3z.timerecording.types.*
 class ViewTimeAPI(private val sd: ServerData) {
 
     enum class Elements (private val elemName: String = "", private val id: String = "", private val elemClass: String = "") : Element {
-        PROJECT_INPUT("project_entry", "project_entry"),
+        PROJECT_INPUT(elemName = "project_entry"),
         CREATE_TIME_ENTRY_ROW(id="create_time_entry"),
-        TIME_INPUT("time_entry", "time_entry"),
-        DETAIL_INPUT("detail_entry", "detail_entry"),
+        TIME_INPUT(elemName = "time_entry"),
+        DETAIL_INPUT(elemName = "detail_entry"),
         EDIT_BUTTON(elemClass = "editbutton"),
         SAVE_BUTTON(elemClass = "savebutton"),
-        DATE_INPUT("date_entry", "date_entry"),
-        ID_INPUT("entry_id", "entry_id"),;
-
+        DATE_INPUT(elemName = "date_entry"),
+        ID_INPUT(elemName = "entry_id"),
+        READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
+        EDITABLE_ROW(elemClass = "editable-time-entry-row"),
+        ;
         override fun getId(): String {
             return this.id
         }
@@ -119,7 +121,7 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     private fun renderReadOnlyRow(it: TimeEntry) = """
-                         <tr id="time-entry-${it.employee.id.value}-${it.id.value}">
+                         <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
                             <div>
                                 <td class="project">
                                     ${safeHtml(it.project.name.value)}
@@ -141,7 +143,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         """
 
     private fun renderEditRow(it: TimeEntry) = """
-                        <tr id="time-entry-${it.employee.id.value}-${it.id.value}">
+                        <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.employee.id.value}-${it.id.value}">
                             <form action="$path" method="post">
                                 <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
                                 <td class="project">

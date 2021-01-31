@@ -168,7 +168,7 @@ class ServerTests {
     /**
      * What should the server return if we ask for something
      * the server does have, but it's not a suffix we recognize?
-     * See ServerUtilties.handleUnknownFiles
+     * See [coverosR3z.server.utility.ServerUtilities.Companion.loadStaticFilesToCache]
      */
     @IntegrationTest(usesPort = true)
     @Test
@@ -284,8 +284,6 @@ class ServerTests {
     /**
      * This is to try out a new client factory, so we send requests
      * with valid content and valid protocol more easily.
-     *
-     * Question: why does it take 6 seconds to run this 100 thousand times?
      */
     @IntegrationTest(usesPort = true)
     @PerformanceTest

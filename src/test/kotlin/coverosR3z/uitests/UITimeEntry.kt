@@ -266,8 +266,8 @@ class UITimeEntry {
         // Verify the entry
         pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
         assertEquals("your time entries", pom.driver.title)
-        assertEquals("2020-06-12", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .date")).text)
-        assertEquals("1.00", pom.driver.findElement(By.cssSelector("#time-entry-1-1 .time")).text)
+        assertEquals("2020-06-12", pom.driver.findElement(By.cssSelector("#time-entry-1 .date")).text)
+        assertEquals("1.00", pom.driver.findElement(By.cssSelector("#time-entry-1 .time")).text)
     }
 
 
