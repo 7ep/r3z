@@ -6,6 +6,7 @@ Table of contents
 
 - [New Developer Setup](#new-developer-setup)
 - [Guiding ideas](#guiding-ideas)
+- [Adding a completely new endpoint](#adding-a-completely-new-endpoint)  
 - [Version](#version)
 - [Threads](#threads)
 - [Types](#types)
@@ -63,6 +64,20 @@ Guiding ideas
 1. Take care of the pennies and the pounds will take care of themselves
 2. A stitch in time saves nine
 
+
+Adding a completely new endpoint
+--------------------------------
+
+To better understand how development takes place, it will be helpful to imagine
+creating an entirely-new endpoint.  
+
+As an example, let's say we want to add the concept of roles.  You could be
+- an administrator
+- an auditor
+- someone's supervisor
+- someone's report
+
+TODO: keep writing stuff here
 
 Version
 -------
