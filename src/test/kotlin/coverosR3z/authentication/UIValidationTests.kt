@@ -1,17 +1,20 @@
-package coverosR3z.uitests
+package coverosR3z.authentication
 
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.maxPasswordSize
 import coverosR3z.authentication.types.maxUserNameSize
 import coverosR3z.authentication.types.minPasswordSize
 import coverosR3z.authentication.types.minUserNameSize
+import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.UITest
+import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.openqa.selenium.By
 
-class UIValidation {
+class UIValidationTests {
 
     @UITest
     @Test

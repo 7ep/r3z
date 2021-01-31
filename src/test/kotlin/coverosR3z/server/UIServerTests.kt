@@ -1,13 +1,16 @@
-package coverosR3z.uitests
+package coverosR3z.server
 
 import coverosR3z.logging.LogTypes
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.UITest
+import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 
-class UIGeneral {
+class UIServerTests {
 
     @UITest
     @Test

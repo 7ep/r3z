@@ -1,4 +1,4 @@
-package coverosR3z.uitests
+package coverosR3z.timerecording
 
 import coverosR3z.bddframework.UserStory
 

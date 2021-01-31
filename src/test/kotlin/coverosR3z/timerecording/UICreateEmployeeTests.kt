@@ -1,8 +1,10 @@
-package coverosR3z.uitests
+package coverosR3z.timerecording
 
 import coverosR3z.bddframework.BDD
-import coverosR3z.timerecording.CreateEmployeeUserStory
 import coverosR3z.timerecording.api.ViewEmployeesAPI
+import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.UITest
+import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -10,7 +12,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
-class UICreateEmployee {
+class UICreateEmployeeTests {
 
     @BDD
     @UITest
