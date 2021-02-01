@@ -8,7 +8,6 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.successHTML
 
 class LoginAPI(val sd: ServerData) {
 

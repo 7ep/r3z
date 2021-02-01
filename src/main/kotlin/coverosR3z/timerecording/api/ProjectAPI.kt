@@ -6,9 +6,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.ProjectName
 
 class ProjectAPI(private val sd: ServerData) {

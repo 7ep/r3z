@@ -31,14 +31,18 @@ enum class Drivers(val driver: () -> WebDriver){
  *   and so we can have a testing-oriented API
  *   @param port the port our server will run on, and thus the port our client should target
  */
-fun startupTestForUI(port : Int) : PageObjectModel {
+fun startupTestForUI(domain: String = "http://localhost", port : Int) : PageObjectModelLocal {
     // start the server
     val server = Server(port)
     val pmd = Server.makeDatabase()
     val businessCode = Server.initializeBusinessCode(pmd)
     server.startServer(businessCode)
 
-    return PageObjectModel.make(webDriver.driver(), port, businessCode, server, pmd)
+    return PageObjectModelLocal.make(webDriver.driver(), port, businessCode, server, pmd, domain)
+}
+
+fun startupTestForUIWithoutServer(domain: String = "", port : Int) : PageObjectModel {
+    return PageObjectModel.make(webDriver.driver(), port, domain)
 }
 
 class EnterTimePage(private val driver: WebDriver, private val domain : String) {

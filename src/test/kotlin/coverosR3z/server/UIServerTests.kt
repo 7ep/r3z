@@ -2,13 +2,16 @@ package coverosR3z.server
 
 import coverosR3z.logging.LogTypes
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 
 class UIServerTests {
 
@@ -52,7 +55,7 @@ class UIServerTests {
 
     companion object {
         private const val port = 4005
-        private lateinit var pom : PageObjectModel
+        private lateinit var pom : PageObjectModelLocal
 
         @BeforeClass
         @JvmStatic
@@ -66,7 +69,7 @@ class UIServerTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port)
+        pom = startupTestForUI(port = port)
     }
 
     @After

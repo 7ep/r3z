@@ -4,7 +4,7 @@ import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
@@ -216,7 +216,7 @@ class UITimeEntryTests {
 
     companion object {
         private const val port = 4003
-        private lateinit var pom : PageObjectModel
+        private lateinit var pom : PageObjectModelLocal
 
         @BeforeClass
         @JvmStatic
@@ -230,7 +230,7 @@ class UITimeEntryTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port)
+        pom = startupTestForUI(port = port)
     }
 
     @After

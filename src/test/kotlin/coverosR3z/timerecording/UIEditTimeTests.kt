@@ -4,12 +4,15 @@ import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 
@@ -46,7 +49,7 @@ class UIEditTimeTests {
 
     companion object {
         private const val port = 4001
-        private lateinit var pom : PageObjectModel
+        private lateinit var pom : PageObjectModelLocal
 
         @BeforeClass
         @JvmStatic
@@ -60,7 +63,7 @@ class UIEditTimeTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port)
+        pom = startupTestForUI(port = port)
     }
 
     @After

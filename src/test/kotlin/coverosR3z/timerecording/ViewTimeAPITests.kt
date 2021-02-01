@@ -1,14 +1,11 @@
 package coverosR3z.timerecording
 
-import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.utility.toStr
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
-import coverosR3z.timerecording.types.StatusEnum
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before

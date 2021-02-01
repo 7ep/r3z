@@ -7,10 +7,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities
-import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.*
 
 class ViewTimeAPI(private val sd: ServerData) {

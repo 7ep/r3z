@@ -5,13 +5,16 @@ import coverosR3z.authentication.types.maxPasswordSize
 import coverosR3z.authentication.types.maxUserNameSize
 import coverosR3z.authentication.types.minPasswordSize
 import coverosR3z.authentication.types.minUserNameSize
-import coverosR3z.uitests.PageObjectModel
+import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import org.openqa.selenium.By
 
 class UIValidationTests {
@@ -98,7 +101,7 @@ class UIValidationTests {
 
     companion object {
         private const val port = 4004
-        private lateinit var pom : PageObjectModel
+        private lateinit var pom : PageObjectModelLocal
 
         @BeforeClass
         @JvmStatic
@@ -112,7 +115,7 @@ class UIValidationTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port)
+        pom = startupTestForUI(port = port)
     }
 
     @After

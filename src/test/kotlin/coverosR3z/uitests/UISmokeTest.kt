@@ -30,6 +30,51 @@ class UISmokeTest {
         `Each employee edits a time entry`()
     }
 
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+
+    companion object {
+        private const val port = 9999
+        private const val domain = "http://renomad.com"
+        private lateinit var pom : PageObjectModel
+        private const val TEST_PASSWORD = "password12345"
+        private val testUsers = listOf("matt", "byron")
+        private val testProjects = listOf("first_project", "second_project", "third_project")
+        private lateinit var dateString : String
+
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            // install the most-recent chromedriver
+            WebDriverManager.chromedriver().setup()
+            WebDriverManager.firefoxdriver().setup()
+        }
+
+    }
+
+    @Before
+    fun init() {
+        pom = startupTestForUIWithoutServer(domain, port)
+        dateString = if (pom.driver is ChromeDriver) {
+            "06122020"
+        } else {
+            DEFAULT_DATE_STRING
+        }
+    }
+
+    @After
+    fun cleanup() {
+        pom.driver.quit()
+    }
+
+
     private fun `Each employee edits a time entry`() {
         for (u in testUsers) {
             pom.lp.login(u, TEST_PASSWORD)
@@ -134,49 +179,6 @@ class UISmokeTest {
     }
 
 
-    /*
-     _ _       _                  __ __        _    _           _
-    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
-    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
-    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
-                 |_|
-     alt-text: Helper Methods
-     */
-
-
-    companion object {
-        private const val port = 4006
-        private lateinit var pom : PageObjectModel
-        private const val TEST_PASSWORD = "password12345"
-        private val testUsers = listOf("matt", "byron")
-        private val testProjects = listOf("first_project", "second_project", "third_project")
-        private lateinit var dateString : String
-
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            // install the most-recent chromedriver
-            WebDriverManager.chromedriver().setup()
-            WebDriverManager.firefoxdriver().setup()
-        }
-
-    }
-
-    @Before
-    fun init() {
-        pom = startupTestForUI(port)
-        dateString = if (pom.driver is ChromeDriver) {
-            "06122020"
-        } else {
-            DEFAULT_DATE_STRING
-        }
-    }
-
-    @After
-    fun cleanup() {
-        pom.server.halfOpenServerSocket.close()
-        pom.driver.quit()
-    }
 
     private fun logout() {
         pom.lop.go()
