@@ -32,6 +32,7 @@ class HomepageAPI(private val sd: ServerData)  {
     <p><a href="createproject">Create project</a></p>
     <p><a href="entertime">Enter time</a></p>
     <p><a href="timeentries">Show all time entries</a></p>
+    <p><a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a></p>
     <p><a href="logging">Log configuration</a></p>
     <p><a href="logout">Logout</a></p>
 </div>
