@@ -1,0 +1,56 @@
+body {
+  font-size: 2em;  
+}
+
+button {
+    font-size: .8em;
+    /* width: 100%; */
+    padding: .2em 0 .2em 0;
+}
+
+.date_title {
+    background-color: #8F5858;
+    color: white;
+    width: 100%;
+}
+.time_entry_row {
+    background-color: ##E3D7D7;
+    padding: .4em 0 .4em 0;
+}
+.container {
+    background-color: #E3D7D7;
+    display:  flex;
+    flex-direction: column;
+    align-self: center;
+/*     align-items: center; */
+}
+
+.project {
+    color: red;
+    margin: auto;
+}
+
+.notes {
+    color: grey;
+    background-color: inherit;
+    font-size: .8em;
+    width: 2em;
+    align-self: center;
+    align-content: center;
+}
+
+.time {
+    color: purple;
+    font-size: .8em;
+    align-content: flex-end;
+    width: 2em;
+}
+
+.add_new {
+    align-items: center;
+    justify-content: center;
+    color: pink;
+    width: 97%;
+    align-self: center;
+    display:  flex;
+}
