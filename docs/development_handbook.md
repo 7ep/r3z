@@ -77,7 +77,8 @@ As an example, let's say we want to add the concept of roles.  You could be
 - someone's supervisor
 - someone's report
 
-TODO: keep writing stuff here
+If we are following a test-driven approach to developing this, the first thing
+you will want to focus on is the utility - that is, the overarching business code.
 
 Version
 -------
