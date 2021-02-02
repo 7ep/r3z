@@ -2,6 +2,7 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
@@ -90,7 +91,6 @@ class ViewTimeAPI(private val sd: ServerData) {
                             <th>Project</th>
                             <th>Time</th>
                             <th>Details</th>
-                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -131,9 +131,6 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     <td class="details">
                                         $shortenedDetails
                                     </td>
-                                    <td class="date">
-                                        ${it.date.stringValue}
-                                    </td>
                                     <td>
                                         <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
                                     </td>
@@ -154,10 +151,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
                                 </td>
                                 <td class="details">
-                                    <textarea name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(it.details.value)}</textarea>
-                                </td>
-                                <td class="date">
-                                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${it.date.stringValue}" />
+                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
                                 </td>
                                 <td>
                                     <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
@@ -179,10 +173,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
                                 </td>
                                 <td class="details">
-                                    <textarea name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"></textarea>
-                                </td>
-                                <td class="date">
-                                    <input name="${Elements.DATE_INPUT.getElemName()}" value="${Date.now().stringValue}" type="date" />
+                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"/>
                                 </td>
                                 <td>
                                     <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
