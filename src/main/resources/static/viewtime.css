@@ -35,7 +35,7 @@ td.date {
   width: 10%;
 }
 td.details {
-  width: 90%
+  width: 1em;
 }
 td.project {
   width: 15%;
@@ -59,3 +59,10 @@ input[name=date_entry] {
 select#project_entry {
   width: 98%;
 }
+
+
+ @media all and (max-width: 500px) {
+  td.details {
+    width: 1em;
+  }
+ }

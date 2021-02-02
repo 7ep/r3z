@@ -117,27 +117,30 @@ class ViewTimeAPI(private val sd: ServerData) {
         }
     }
 
-    private fun renderReadOnlyRow(it: TimeEntry) = """
-                         <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-                            <div>
-                                <td class="project">
-                                    ${safeHtml(it.project.name.value)}
-                                </td>
-                                <td class="time">
-                                    ${it.time.getHoursAsString()}
-                                </td>
-                                <td class="details">
-                                    ${safeHtml(it.details.value)}
-                                </td>
-                                <td class="date">
-                                    ${it.date.stringValue}
-                                </td>
-                                <td>
-                                    <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
-                                </td>
-                            </div>
-                        </tr>
-                        """
+    private fun renderReadOnlyRow(it: TimeEntry): String {
+        val shortenedDetails = safeHtml(it.details.value.take(5)) + "..."
+        return """
+                             <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+                                <div>
+                                    <td class="project">
+                                        ${safeHtml(it.project.name.value)}
+                                    </td>
+                                    <td class="time">
+                                        ${it.time.getHoursAsString()}
+                                    </td>
+                                    <td class="details">
+                                        $shortenedDetails
+                                    </td>
+                                    <td class="date">
+                                        ${it.date.stringValue}
+                                    </td>
+                                    <td>
+                                        <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
+                                    </td>
+                                </div>
+                            </tr>
+                            """
+    }
 
     private fun renderEditRow(it: TimeEntry) = """
                         <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.employee.id.value}-${it.id.value}">
@@ -151,7 +154,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
                                 </td>
                                 <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="${safeHtml(it.details.value)}" maxlength="$MAX_DETAILS_LENGTH"/>
+                                    <textarea name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(it.details.value)}</textarea>
                                 </td>
                                 <td class="date">
                                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${it.date.stringValue}" />
@@ -176,7 +179,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
                                 </td>
                                 <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" value="" maxlength="$MAX_DETAILS_LENGTH"/>
+                                    <textarea name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"></textarea>
                                 </td>
                                 <td class="date">
                                     <input name="${Elements.DATE_INPUT.getElemName()}" value="${Date.now().stringValue}" type="date" />
