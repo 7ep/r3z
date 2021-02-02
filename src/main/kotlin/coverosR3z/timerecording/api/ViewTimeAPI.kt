@@ -140,10 +140,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
             </td>
             <td class="time">
-                <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+                <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
             </td>
             <td class="details">
-                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="$shortenedDetails"/>
+                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="$shortenedDetails"/>
             </td>
             <td class="action">
                 <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
@@ -167,10 +167,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
             </td>
             <td class="time">
-                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
             </td>
             <td class="details">
-                <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
+                <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
             </td>
             <td class="action">
                 <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
@@ -193,10 +193,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" />
                 </td>
                 <td class="time">
-                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
+                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24"  />
                 </td>
                 <td class="details">
-                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"/>
+                    <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </td>
                 <td class="action">
                     <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
