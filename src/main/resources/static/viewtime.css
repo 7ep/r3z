@@ -1,10 +1,11 @@
 h2 {
   text-align: center;
-  font-size: 140%;
+  font-size: 1.3em;
   margin: 10px;
   color: white;
 }
 
+/* To make the anchors look like buttons */
 a {
     color: black;
     text-decoration: none;
@@ -17,12 +18,13 @@ a:hover
      cursor:pointer;
 }
 
-tbody tr:nth-child(odd) {
+/* enabling alternate colors for each row, */
+tbody tr:nth-child(odd) input {
   background: #d9ced0;
   padding: 0;
 }
 
-tbody tr:nth-child(even) {
+tbody tr:nth-child(even) input {
   background: #fff;
   padding: 0;
 }
@@ -37,9 +39,14 @@ table {
   border-radius: .5em;
   background-color: white;
   opacity: 82%;
-  width: 97%;
   color: black;
 }
+
+td {
+  text-align: center;
+  width: 0
+}
+/*
 
 td.project {
   width: 2em;
@@ -47,7 +54,6 @@ td.project {
 
 td.time {
   width: 3.4em;
-  text-align: center;
 }
 
 td.action {
@@ -57,12 +63,13 @@ td.action {
 td.date {
   width: 8.7em;
 }
+*/
 
 input {
   background-color: #dfffdf;
   border: 0;
   height: 2.1em;
-  font-size: larger;
+  font-size: 1em;
   width: 6.8em;
 }
 
@@ -71,39 +78,45 @@ input[name=detail_entry]{
 }
 
 input[name=time_entry]{
-  width: 98%;
+  width: 2.9em;
 }
 
 input[name=date_entry] {
-  width: 8.9em;
-  height: 2.7em;
+  width: 7em;
+  /* date input requires a custom height, yuck */
+  /*height: 2.7em;*/
 }
 
 .project input {
     width: 4.7em;
 }
 
-select {
-  width: 4.9em;
-  font-size: larger;
+.project select {
+  width: 4.6em;
+  font-size: 1em;
+  /* select requires a custom height, yuck */
   height: 2.2em;
 }
 
 button.savebutton {
-    width: 3.7em;
-    font-size: larger;
-    height: 2em;
+    text-align : center;
+    width: 4.2em;
+    font-size: 1em;
+    height: 2.2em;
     border: 0;
     background-color: orange;
 }
 
+/* Make a link look like a button */
 td.action a {
-    width: 3em;
-    font-size: larger;
+    width: 3.2em;
+    font-size: 1em;
     text-align: center;
     appearance: auto;
     background-color: orange;
-    padding: 1px 6px;
+    padding: 11px 20px;
     border-width: 2px;
     border: 0;
+    -webkit-appearance: none;
+    border-radius: 0;
 }
