@@ -1,3 +1,7 @@
+/*
+The following is for resetting the CSS to defaults
+*/
+
 em, img,
 html, body, div, span,
 h1, h2, h3, h4, h5, h6, p, pre,
@@ -29,6 +33,10 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+
+/*
+RESET SECTION FINISHES
+*/
 
 header {
   color: rgb(0, 134, 159);
