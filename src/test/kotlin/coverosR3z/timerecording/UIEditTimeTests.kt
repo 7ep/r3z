@@ -88,15 +88,15 @@ class UIEditTimeTests {
         pom.driver.findElement(By.cssSelector("#time-entry-1 .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
 
         val timeField =
-            pom.driver.findElement(By.cssSelector("#time-entry-1-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+            pom.driver.findElement(By.cssSelector("#time-entry-1 input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
         timeField.clear()
         timeField.sendKeys("2")
 
         // save the new time
-        pom.driver.findElement(By.cssSelector("#time-entry-1-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
+        pom.driver.findElement(By.cssSelector("#time-entry-1 .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
 
         // confirm the change
-        assertEquals("2.00", pom.driver.findElement(By.cssSelector("#time-entry-1 .time")).text)
+        assertEquals("2.00", pom.vtp.getTimeForEntry(1))
     }
 
     private fun enterTimeForEmployee(project: String) {

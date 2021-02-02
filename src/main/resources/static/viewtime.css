@@ -1,17 +1,20 @@
 h2 {
   text-align: center;
-  font-size: 240%;
+  font-size: 140%;
   margin: 10px;
   color: white;
 }
 
-.container {
-  border: 1px solid #e2e2e2;
-  margin: auto;
-  border-radius: .5em;
-  background-color: white;
-  opacity: 82%;
-  width: 100%;
+a {
+    color: black;
+    text-decoration: none;
+}
+
+a:hover
+{
+     color:black;
+     text-decoration:none;
+     cursor:pointer;
 }
 
 tbody tr:nth-child(odd) {
@@ -24,64 +27,83 @@ tbody tr:nth-child(even) {
   padding: 0;
 }
 
-
-table {
-  color: black;
-/*   border-collapse: collapse; */
-  border-spacing: 1px solid black;
-
+tr {
+  line-height: 2.4em;
 }
 
-th {
-    width: inherit;
+
+table {
+  margin: auto;
+  border-radius: .5em;
+  background-color: white;
+  opacity: 82%;
+  width: 97%;
+  color: black;
+}
+
+td.project {
+  width: 2em;
+}
+
+td.time {
+  width: 3.4em;
+  text-align: center;
+}
+
+td.action {
+  width:2em
 }
 
 td.date {
-  width: 10%;
+  width: 8.7em;
 }
-td.details {
-  width: 8em;
-}
-td.project {
-  width: 50px;
-}
-td.time {
-  width: 20px;
-}
+
 input {
   background-color: #dfffdf;
   border: 0;
-}
-
-th {
-  width: 10%;
+  height: 2.1em;
+  font-size: larger;
+  width: 6.8em;
 }
 
 input[name=detail_entry]{
-  width: 98%;
-}
-
-input[name=detail_entry]:focus{
-  background-color: cyan;
-  width: 250px;
-  height: 150px;
-}
-input[name=time_entry]{
-  width: 98%;
-}
-input[name=date_entry] {
-  width: 10%
-}
-select#project_entry {
   width: 100%;
 }
 
-button.savebutton {
-    width: 100%;
+input[name=time_entry]{
+  width: 98%;
 }
-/* @media all and (max-width: 500px) {
-  td.details {
-    width: 1em;
-  }
- }
- */
+
+input[name=date_entry] {
+  width: 8.9em;
+  height: 2.7em;
+}
+
+.project input {
+    width: 4.7em;
+}
+
+select {
+  width: 4.9em;
+  font-size: larger;
+  height: 2.2em;
+}
+
+button.savebutton {
+    width: 3.7em;
+    font-size: larger;
+    height: 2em;
+    border: 0;
+    background-color: orange;
+}
+
+td.action a {
+    width: 3em;
+    font-size: larger;
+    text-align: center;
+    appearance: auto;
+    background-color: orange;
+    padding: 1px 6px;
+    border-width: 2px;
+    border: 0;
+}
