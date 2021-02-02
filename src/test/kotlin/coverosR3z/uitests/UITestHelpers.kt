@@ -152,3 +152,14 @@ class LogoutPage(private val driver: WebDriver, private val domain: String) {
     }
 
 }
+
+class ViewTimePage(private val driver: WebDriver, private val domain: String) {
+
+    fun getTimeForEntry(id: Int) : String {
+        return driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).getAttribute("value")
+    }
+
+    fun getDateForEntry(id: Int) : String {
+        return driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).getAttribute("value")
+    }
+}

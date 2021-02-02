@@ -1,6 +1,7 @@
 package coverosR3z.uitests
 
 import org.openqa.selenium.WebDriver
+import javax.swing.text.View
 
 /**
  * provides an API for testing the UI that is far
@@ -14,6 +15,7 @@ open class PageObjectModel {
     lateinit var eep : EnterEmployeePage
     lateinit var epp : EnterProjectPage
     lateinit var lop : LogoutPage
+    lateinit var vtp : ViewTimePage
     lateinit var domain : String
     lateinit var driver: WebDriver
 

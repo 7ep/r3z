@@ -67,8 +67,19 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         fun projectsToOptions(projects: List<Project>) =
             projects.sortedBy { it.name.value }.joinToString("") {
-                "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n"
+                "<option value =\"${it.id.value}\">${safeAttr(it.name.value)}</option>\n"
             }
+
+        fun projectsToOptionsOneSelected(projects: List<Project>, selectedProject : Project): String {
+            val sortedProjects = projects.sortedBy{it.name.value}
+            return sortedProjects.joinToString("\n") {
+                if (it == selectedProject) {
+                    "<option selected value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>"
+                } else {
+                    "<option value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>"
+                }
+            }
+        }
 
     }
 
@@ -84,20 +95,20 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <div class="container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Project</th>
-                            <th>Time</th>
-                            <th>Details</th>
+                            <th class="project">Project</th>
+                            <th class="date">Date</th>
+                            <th class="time">Time</th>
+                            <th class="details">Details</th>
+                            <th class="action">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                     ${renderTimeRows(te, idBeingEdited, projects)}
                     </tbody>
                 </table>
-                </div>
         """
         return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
     }
@@ -110,7 +121,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         return renderCreateTimeRow(projects) +
         te.sortedBy { it.id.value }.joinToString("") {
             if (it.id.value == idBeingEdited) {
-                renderEditRow(it)
+                renderEditRow(it, projects)
             } else {
                 renderReadOnlyRow(it)
             }
@@ -120,67 +131,79 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderReadOnlyRow(it: TimeEntry): String {
         val shortenedDetails = safeHtml(it.details.value.take(5)) + "..."
         return """
-                             <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-                                <div>
-                                    <td class="project">
-                                        ${safeHtml(it.project.name.value)}
-                                    </td>
-                                    <td class="time">
-                                        ${it.time.getHoursAsString()}
-                                    </td>
-                                    <td class="details">
-                                        $shortenedDetails
-                                    </td>
-                                    <td>
-                                        <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
-                                    </td>
-                                </div>
-                            </tr>
-                            """
+     <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+        <div>
+            <td class="project">
+                <input readonly name="${Elements.PROJECT_INPUT.getElemName()}" type="text" value="${safeAttr(it.project.name.value)}" />
+            </td>
+            <td class="date">
+                <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
+            </td>
+            <td class="time">
+                <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+            </td>
+            <td class="details">
+                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="$shortenedDetails"/>
+            </td>
+            <td class="action">
+                <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
+            </td>
+        </div>
+    </tr>
+    """
     }
 
-    private fun renderEditRow(it: TimeEntry) = """
-                        <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.employee.id.value}-${it.id.value}">
-                            <form action="$path" method="post">
-                                <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
-                                <td class="project">
-                                    <input type="hidden" name="${Elements.PROJECT_INPUT.getElemName()}" value="${it.project.id.value}" />
-                                    ${safeHtml(it.project.name.value)}
-                                </td>
-                                <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
-                                </td>
-                                <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
-                                </td>
-                                <td>
-                                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
-                                </td>
-                            </form>
-                        </tr>
-                          """
+    private fun renderEditRow(it: TimeEntry, projects: List<Project>): String {
+        return """
+    <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+        <form action="$path" method="post">
+            <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
+            <td class="project">
+                <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
+                    ${projectsToOptionsOneSelected(projects, it.project)}
+                </select>
+            </td>
+            <td class="date">
+                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
+            </td>
+            <td class="time">
+                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+            </td>
+            <td class="details">
+                <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
+            </td>
+            <td class="action">
+                <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
+            </td>
+        </form>
+    </tr>
+      """
+    }
 
     private fun renderCreateTimeRow(projects: List<Project>) = """
-                        <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
-                            <form action="${EnterTimeAPI.path}" method="post">
-                                <td class="project">
-                                    <select name="project_entry" id="project_entry" required="required" />
-                                        <option selected disabled hidden value="">Choose here</option>
-                                        ${projectsToOptions(projects)}
-                                    </select>
-                                </td>
-                                <td class="time">
-                                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
-                                </td>
-                                <td class="details">
-                                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"/>
-                                </td>
-                                <td>
-                                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
-                                </td>
-                            </form>
-                        </tr>
-                          """
+        <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
+            <form action="${EnterTimeAPI.path}" method="post">
+                <td class="project">
+                    <select name="project_entry" id="project_entry" required="required" />
+                        <option selected disabled hidden value="">Choose</option>
+                        ${projectsToOptions(projects)}
+                    </select>
+                </td>
+                <td class="date">
+                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" />
+                </td>
+                <td class="time">
+                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" step="0.25" min="0" max="24"  />
+                </td>
+                <td class="details">
+                    <input name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH"/>
+                </td>
+                <td class="action">
+                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
+                </td>
+            </form>
+        </tr>
+          """
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data

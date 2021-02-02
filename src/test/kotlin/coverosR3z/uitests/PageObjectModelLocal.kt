@@ -39,6 +39,7 @@ class PageObjectModelLocal : PageObjectModel() {
             pom.epp = EnterProjectPage(driver, pom.domain)
             pom.llp = LoggingPage(driver, pom.domain)
             pom.lop = LogoutPage(driver, pom.domain)
+            pom.vtp = ViewTimePage(driver, pom.domain)
             return pom
         }
     }
