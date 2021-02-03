@@ -40,6 +40,7 @@ table {
   background-color: white;
   opacity: 82%;
   color: black;
+  width: 98%;
 }
 
 td {
@@ -65,6 +66,10 @@ td.date {
 }
 */
 
+td.details {
+  width: 100%
+}
+
 input {
   background-color: #dfffdf;
   border: 0;
@@ -73,9 +78,7 @@ input {
   width: 6.8em;
 }
 
-input[name=detail_entry]{
-  width: 100%;
-}
+input[name=detail_entry]{width: 100%;}
 
 input[name=time_entry]{
   width: 2.9em;

@@ -129,7 +129,6 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     private fun renderReadOnlyRow(it: TimeEntry): String {
-        val shortenedDetails = safeHtml(it.details.value.take(5)) + "..."
         return """
      <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div>
@@ -143,7 +142,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
             </td>
             <td class="details">
-                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="$shortenedDetails"/>
+                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
             </td>
             <td class="action">
                 <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
