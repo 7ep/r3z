@@ -136,7 +136,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input readonly name="${Elements.PROJECT_INPUT.getElemName()}" type="text" value="${safeAttr(it.project.name.value)}" />
             </td>
             <td class="date">
-                <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
+                <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="text" value="${safeAttr(it.date.stringValue)}" />
             </td>
             <td class="time">
                 <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
