@@ -2,6 +2,10 @@ package coverosR3z.misc.types
 
 import coverosR3z.misc.utility.checkParseToInt
 import java.time.LocalDate
+import java.text.SimpleDateFormat
+
+
+
 
 const val dateNotNullMsg = "date must not be null"
 const val dateNotBlankMsg = "date must not be blank"
@@ -26,7 +30,17 @@ enum class Month(val ord: Int) {
 class Date(val epochDay : Int) : Comparable<Date> {
     constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
 
+    /**
+     * Normal format "YYYY-MM-DD"
+     */
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
+
+    private val sdf: SimpleDateFormat = SimpleDateFormat("MMDDYYYY")
+
+    /**
+     * Chrome format "MMDDYYYY"
+     */
+    val chromeStringValue: String = sdf.format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
 
     init {
         val beginDate = LocalDate.of(1980, 1, 1).toEpochDay()
