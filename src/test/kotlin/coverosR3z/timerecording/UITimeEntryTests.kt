@@ -3,6 +3,8 @@ package coverosR3z.timerecording
 import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.types.Date
+import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
@@ -138,9 +140,32 @@ class UITimeEntryTests {
     @Test
     fun `timeentry - I should see my existing time entries when I open the time entry page`() {
         val s = TimeEntryUserStory.getScenario("timeentry - I should see my existing time entries when I open the time entry page")
+
+        addSomeTimeEntries()
         s.markDone("Given I had previous entries this period")
+
+        verifyTimeEntries()
         s.markDone("when I open the time entry page")
         s.markDone("then I see my prior entries")
+    }
+
+    private fun verifyTimeEntries() {
+        // Verify the entries
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+
+        assertEquals("1.00", pom.vtp.getTimeForEntry(1))
+        assertEquals("2021-01-01",  pom.vtp.getDateForEntry(1))
+
+        assertEquals("1.00",  pom.vtp.getTimeForEntry(2))
+        assertEquals("2021-01-02",    pom.vtp.getDateForEntry(2))
+
+        assertEquals("1.00", pom.vtp.getTimeForEntry(3))
+        assertEquals("2021-01-03", pom.vtp.getDateForEntry(3))
+    }
+
+    private fun addSomeTimeEntries() {
+        loginAsUserAndCreateProject("alice", "projecta")
+        enterThreeEntriesForEmployee("projecta")
     }
 
     @UITest
@@ -253,6 +278,27 @@ class UITimeEntryTests {
         // Enter time
         pom.etp.enterTime(project, "1", "", dateString)
     }
+
+
+    private fun calcDateString(date : Date) : String {
+        return if (pom.driver is ChromeDriver) {
+            date.chromeStringValue // returns the chrome format
+        } else {
+            date.stringValue // returns the chrome format
+        }
+    }
+
+
+    private fun enterThreeEntriesForEmployee(project: String) {
+        val date = Date(2021, Month.JAN, 1)
+
+        // Enter time
+        pom.etp.enterTime(project, "1", "", calcDateString(date))
+        pom.etp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 1)))
+        pom.etp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 2)))
+    }
+
+
 
     private fun loginAsUserAndCreateProject(user: String, project: String) {
         val password = DEFAULT_PASSWORD.value
