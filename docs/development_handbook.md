@@ -80,6 +80,47 @@ As an example, let's say we want to add the concept of roles.  You could be
 If we are following a test-driven approach to developing this, the first thing
 you will want to focus on is the utility - that is, the overarching business code.
 
+If this is something that can fit inside an existing domain - like time recording -
+then it suits you to add that.  If it does not (and that might be the case for roles),
+then you can make another domain at the top level, under the coverosR3z package.
+
+Underneath that, the typical pattern for organizing the kinds of files are indicated
+in [Directories](#directories).
+
+If we are following a test-driven approach to developing this, the first thing
+you will want to focus on is the utility - that is, the overarching business code.
+
+Start by creating a test in the appropriate place in the tests directory, and
+using wishful thinking, test what you wish already existed.
+
+The utility class accesses the database through a ___Persistence file, so after you
+have started testing the utility class, you may find yourself needing to mock out
+some of the interaction with the database.  If you need a persistence file that does
+not yet exist, you will likely need to create a new mock as well - see any of the
+classes like "Fake___Persistence".
+
+Once your utility is well-tested from both unit-test and integration approaches,
+you will want to provide access to it through an endpoint.  An example of one of
+the simpler endpoints can be seen at CreateEmployeeAPI.
+
+Some key patterns to note:
+
+The class contains an "Elements" enum class that inherits from "Element".  This allows
+us to replace strings in the HTML text with constant values, giving us stronger
+typing - if the string needs to change, it can be done more safely than a simple
+string replacement command.
+
+It also contains a companion object that inherits from GetEndpoint and PostEndpoint,
+which requires us to implement several methods.  Those interfaces correspond to
+their obvious purpose - they allow handling requests for a GET or a POST.
+
+Using either of those interfaces will also require implementing the path property,
+which is used to indicate the URL path to this endpoint.
+
+When implementing handleGet or handlePost, it is imperative that you use some kind
+of authentication mechanism.  See the existing code and the authentication
+methods provided at AuthUtilities.
+
 Version
 -------
 
