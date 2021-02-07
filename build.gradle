@@ -300,4 +300,7 @@ static String getCurrentGitHash() {
     return result
 }
 
-compileKotlin.finalizedBy writeGitCommitToFile
+compileKotlin {
+    finalizedBy writeGitCommitToFile
+    kotlinOptions.useIR = true
+}
