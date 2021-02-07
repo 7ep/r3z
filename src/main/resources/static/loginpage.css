@@ -64,6 +64,13 @@ button:focus {
     border: 1.8px solid blue;
 }
 
+table {
+    table-layout: auto;
+    width: 93%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .container {
     background: white;
     width: 90%;
