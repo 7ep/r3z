@@ -67,14 +67,7 @@ body {
 
 /* This is necessary so Iphone doesn't override our styles */
 textarea,
-input.text,
-input[type="text"],
-input[type="date"],
-input[type="button"],
-input[type="submit"],
-input[type="number"],
-.input-checkbox,
+input,
  select {
 -webkit-appearance: none;
-border-radius: 0;
 }

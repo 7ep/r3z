@@ -31,3 +31,18 @@ button:focus {
     border-radius: .5em;
     border: 1.8px solid blue;
 }
+
+fieldset {
+    border: 1px solid black;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.7em;
+    padding-top: 0.4em;
+    border-radius: 0.5em;
+    text-align: center;
+    padding: 0.5em;
+}
+
+input[type=radio] {
+    appearance: inherit;
+    -webkit-appearance: checkbox;
+}

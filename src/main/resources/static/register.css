@@ -55,14 +55,14 @@ select {
 
 button {
   cursor: pointer;
-  font-size: 120%;
+  font-size: 2em;
   margin: 8px 0 1px 0;
   color: white;
-  background-color: #C65364;
+  background-color: #c35061;
   border: 1.8px solid #3b3b3b;
-  border-radius: .5em;
+  border-radius: .3em;
   width: 100%;
-  padding: 1em;
+  padding: 0.4em;
   box-sizing: border-box;
 }
 
@@ -73,7 +73,7 @@ button:hover {
 
 button:focus {
     outline: none;
-    border-radius: .5em;
+    border-radius: .3em;
     border: 1.8px solid blue;
 }
 

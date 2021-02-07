@@ -33,24 +33,11 @@ input {
   box-sizing: border-box;
 }
 
-select:focus,
 input:focus {
     outline: none;
     background-color: inherit;
     border-radius: .3em;
     border: 1.8px solid blue;
-}
-
-select {
-  margin-bottom: 1em;
-  font-size: 110%;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .3em;
-  width: 100%;
-  background-color: inherit;
-  padding: .8em 1em .8em 1em;
-  color: #333333;
-  box-sizing: border-box;
 }
 
 button {
@@ -60,7 +47,7 @@ button {
   color: white;
   background-color: #c35061;
   border: 1.8px solid #3b3b3b;
-  border-radius: .5em;
+  border-radius: .3em;
   width: 100%;
   padding: 0.4em;
   box-sizing: border-box;
@@ -73,15 +60,8 @@ button:hover {
 
 button:focus {
     outline: none;
-    border-radius: .5em;
+    border-radius: .3em;
     border: 1.8px solid blue;
-}
-
-table {
-    table-layout: auto;
-    width: 93%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .container {

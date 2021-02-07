@@ -22,32 +22,27 @@ class HomepageAPI(private val sd: ServerData)  {
     }
 
     private fun authHomePageHTML(): String {
-        val username = safeHtml(sd.ahd.user.name.value)
         val body =
 """
-<h2>You are on the authenticated homepage, $username</h2>
 <nav>
-    <ul>
-        <li><a href="createemployee">Create employee</a></li>
-        <li><a href="employees">Show all employees</a></li>
-        <li><a href="createproject">Create project</a></li>
-        <li><a href="entertime">Enter time</a></li>
-        <li><a href="timeentries">Show all time entries</a></li>
-        <li><a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a></li>
-        <li><a href="logging">Log configuration</a></li>
-        <li><a href="logout">Logout</a></li>
-    </ul>
+        <a href="createemployee">Create employee</a>
+        <a href="employees">Show all employees</a>
+        <a href="createproject">Create project</a>
+        <a href="entertime">Enter time</a>
+        <a href="timeentries">Show all time entries</a>
+        <a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a>
+        <a href="logging">Log configuration</a>
+        <a href="logout">Logout</a>
 </nav>
 """
         return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
     }
 
     private val homepageHTML = """
-        <h2>You are on the homepage</h2>
-        <div class="container">
-            <p><a href="login">Login</a></p>
-            <p><a href="register">Register</a></p>
-        </div>
+        <nav>
+            <a href="login">Login</a>
+            <a href="register">Register</a>
+        </nav>
 """
 
 }
