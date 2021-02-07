@@ -2,7 +2,7 @@ package coverosR3z.server.utility
 
 class PageComponents {
     companion object {
-        private const val standardHeader = """<header><a class="home-button" href="homepage">r3z</a></header>"""
+        private const val standardHeader = """<header><a class="home-button" href="homepage">homepage</a></header>"""
 
         fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """
 <!DOCTYPE html>    

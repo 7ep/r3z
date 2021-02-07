@@ -97,3 +97,5 @@
 2021-02-02	numberThreads: 10	numberRequests: 500	time: 275
 2021-02-03	numberThreads: 10	numberRequests: 500	time: 332
 2021-02-03	numberThreads: 10	numberRequests: 500	time: 273
+2021-02-07	numberThreads: 10	numberRequests: 500	time: 241
+2021-02-07	numberThreads: 10	numberRequests: 500	time: 169

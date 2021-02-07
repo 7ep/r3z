@@ -95,7 +95,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <table>
+                <table role="presentation">
                     <thead>
                         <tr>
                             <th class="project">Project</th>
@@ -144,9 +144,14 @@ class ViewTimeAPI(private val sd: ServerData) {
             <td class="details">
                 <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
             </td>
+            
             <td class="action">
-                <a class="${Elements.EDIT_BUTTON.getElemClass()}" href="$path?editid=${it.id.value}">edit</a>
+                <form action="$path">
+                    <input type="hidden" name="editid" value="${it.id.value}" /> 
+                    <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
+                </form>
             </td>
+            
         </div>
     </tr>
     """
@@ -183,16 +188,16 @@ class ViewTimeAPI(private val sd: ServerData) {
         <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
                 <td class="project">
-                    <select name="project_entry" id="project_entry" required="required" />
-                        <option selected disabled hidden value="">Choose</option>
+                    <select name="project_entry" id="project_entry" required  />
+                        <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </td>
-                <td class="date">
-                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" />
+                <td class="date" >
+                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" required />
                 </td>
                 <td class="time">
-                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24"  />
+                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </td>
                 <td class="details">
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>

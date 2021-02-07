@@ -26,18 +26,20 @@ class HomepageAPI(private val sd: ServerData)  {
         val body =
 """
 <h2>You are on the authenticated homepage, $username</h2>
-<div class="container">
-    <p><a href="createemployee">Create employee</a></p>
-    <p><a href="employees">Show all employees</a></p>
-    <p><a href="createproject">Create project</a></p>
-    <p><a href="entertime">Enter time</a></p>
-    <p><a href="timeentries">Show all time entries</a></p>
-    <p><a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a></p>
-    <p><a href="logging">Log configuration</a></p>
-    <p><a href="logout">Logout</a></p>
-</div>
+<nav>
+    <ul>
+        <li><a href="createemployee">Create employee</a></li>
+        <li><a href="employees">Show all employees</a></li>
+        <li><a href="createproject">Create project</a></li>
+        <li><a href="entertime">Enter time</a></li>
+        <li><a href="timeentries">Show all time entries</a></li>
+        <li><a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a></li>
+        <li><a href="logging">Log configuration</a></li>
+        <li><a href="logout">Logout</a></li>
+    </ul>
+</nav>
 """
-        return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")
+        return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
     }
 
     private val homepageHTML = """

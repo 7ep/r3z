@@ -71,22 +71,21 @@ class RegisterAPI(private val sd: ServerData) {
         val employees = sd.tru.listAllEmployees()
 
         val body = """
-        <br>
-        <h2>Register a User</h2>
+        <h2 role="heading">Register a User</h2>
         
         <form method="post" action="$path">
-          <table> 
+          <table role="presentation"> 
               <tbody>
                 <tr>
                     <td>
                         <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label><br>
-                        <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
+                        <input aria-invalid="false" type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label><br>
-                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
+                        <input aria-invalid="false" type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                     </td>
                 </tr>
                 <tr>

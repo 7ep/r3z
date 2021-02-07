@@ -71,21 +71,21 @@ class LoginAPI(val sd: ServerData) {
     }
 
     private val loginHTML = """
-<h2>Login</h2>
+<h2 role="heading">Login</h2>
 
 <form method="post" action="$path">
   <table role="presentation"> 
     <tbody>
         <tr>
             <td>
-                <label for="${Elements.USERNAME_INPUT.getElemName()}">Username (required)</label>
-                <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
+                <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
+                <input aria-invalid="false" type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required>
             </td>
         </tr>
         <tr>
             <td>
                 <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
-                <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
+                <input aria-invalid="false" type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required>
             </td>
         </tr>    
             <td>

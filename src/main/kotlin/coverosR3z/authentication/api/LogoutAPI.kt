@@ -4,6 +4,7 @@ import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
+import coverosR3z.server.utility.PageComponents
 
 class LogoutAPI(private val sd: ServerData) {
 
@@ -21,27 +22,17 @@ class LogoutAPI(private val sd: ServerData) {
 
     fun generateLogoutPage(): String {
         sd.au.logout(sd.ahd.user)
-        return logoutHTML
+        return PageComponents.makeTemplate("You have logged out", "LogoutAPI", logoutHTML, extraHeaderContent="""<link rel="stylesheet" href="logoutpage.css" />""")
     }
 
-    private val logoutHTML = """
-<!DOCTYPE html>    
-<html lang="en">
-    <head>
-        <title>Logout</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta apifile="LogoutAPI" >
-        <link rel="stylesheet" href="general.css" />
-    </head>
-    <body>
-        <div class="container">
-            <p>
-                You are now logged out
-            </p>
+    private val logoutHTML =
+"""
+<div class="container">
+    <p>
+        You are now logged out
+    </p>
 
-            <p><a href="homepage">Homepage</a></p>
-        </div>
-    </body>
-</html>    
+    <p><a href="homepage">Homepage</a></p>
+</div>
 """
 }

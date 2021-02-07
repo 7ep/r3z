@@ -47,7 +47,7 @@ class Server(val port: Int) {
             try {
                 cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
                 systemReady = true
-                logImperative("System is ready on port $port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+                logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
                 while (true) {
                     logTrace { "waiting for socket connection" }
                     val server = SocketWrapper(halfOpenServerSocket.accept(), "server")

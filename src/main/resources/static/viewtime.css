@@ -5,12 +5,6 @@ h2 {
   color: white;
 }
 
-/* To make the anchors look like buttons */
-a {
-    color: black;
-    text-decoration: none;
-}
-
 a:hover
 {
      color:black;
@@ -76,6 +70,7 @@ input {
   height: 2.1em;
   font-size: 1em;
   width: 6.8em;
+  text-align: center;
 }
 
 input[name=detail_entry]{width: 100%;}
@@ -101,25 +96,11 @@ input[name=date_entry] {
   height: 2.2em;
 }
 
-button.savebutton {
+button {
     text-align : center;
     width: 4.2em;
     font-size: 1em;
     height: 2.2em;
     border: 0;
     background-color: orange;
-}
-
-/* Make a link look like a button */
-td.action a {
-    width: 3.2em;
-    font-size: 1em;
-    text-align: center;
-    appearance: auto;
-    background-color: orange;
-    padding: 11px 20px;
-    border-width: 2px;
-    border: 0;
-    -webkit-appearance: none;
-    border-radius: 0;
 }

@@ -1,0 +1,18 @@
+h2 {
+  text-align: center;
+  font-size: 240%;
+  margin: 10px;
+  color: white;
+}
+
+
+nav {
+    background: white;
+    width: 90%;
+    margin: auto;
+    font-size: x-large;
+    padding: 10px;
+    height: max-content;
+    margin-top: 20px;
+    padding-bottom: 100px;
+}
