@@ -93,7 +93,7 @@ class UISmokeTest {
 
             // new page
             val editedTimeEntryRow = pom.driver.findElement(By.id("time-entry-$idChanged"))
-            val newTime = editedTimeEntryRow.findElement(By.className("time")).text
+            val newTime = editedTimeEntryRow.findElement(By.cssSelector(".time input")).getAttribute("value")
             assertEquals("2.00", newTime)
             logout()
         }
@@ -111,9 +111,9 @@ class UISmokeTest {
             assertEquals("your time entries", pom.driver.title)
             val timeEntryRows = pom.driver.findElements(By.className(ViewTimeAPI.Elements.READ_ONLY_ROW.getElemClass()))
             for (row in timeEntryRows) {
-                assertEquals("1.00", row.findElement(By.className("time")).text)
-                assertEquals("", row.findElement(By.className("details")).text)
-                assertEquals("2020-06-12", row.findElement(By.className("date")).text)
+                assertEquals("1.00", row.findElement(By.cssSelector(".time input")).getAttribute("value"))
+                assertEquals("", row.findElement(By.cssSelector(".details input")).getAttribute("value"))
+                assertEquals("2020-06-12", row.findElement(By.cssSelector(".date input")).getAttribute("value"))
             }
             logout()
         }
