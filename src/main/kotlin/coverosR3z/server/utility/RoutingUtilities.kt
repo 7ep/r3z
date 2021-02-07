@@ -37,7 +37,6 @@ class RoutingUtilities {
                 Pair(Verb.GET, ProjectAPI.path) -> ProjectAPI.handleGet(sd)
                 Pair(Verb.GET, LogoutAPI.path) -> LogoutAPI.handleGet(sd)
                 Pair(Verb.GET, LoggingAPI.path) -> LoggingAPI.handleGet(sd)
-                Pair(Verb.GET, TimeEntryMobileAPI.path) -> TimeEntryMobileAPI.handleGet(sd)
 
                 // POST
 

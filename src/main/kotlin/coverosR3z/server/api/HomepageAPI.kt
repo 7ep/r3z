@@ -1,6 +1,5 @@
 package coverosR3z.server.api
 
-import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
@@ -30,7 +29,6 @@ class HomepageAPI(private val sd: ServerData)  {
         <a href="createproject">Create project</a>
         <a href="entertime">Enter time</a>
         <a href="timeentries">Show all time entries</a>
-        <a href="timeentrymobile?date=2020-06-20">Show all time entries for mobile</a>
         <a href="logging">Log configuration</a>
         <a href="logout">Logout</a>
 </nav>
