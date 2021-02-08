@@ -241,7 +241,7 @@ class TimeEntryPersistenceTests {
      *
      */
     @Test
-    fun testIsSubmitted_SuckyPath() {
+    fun testSubmittedTimePeriods_addingNew() {
         val employeeId = EmployeeId(1)
         tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
 
@@ -251,8 +251,8 @@ class TimeEntryPersistenceTests {
     }
 
     @Test
-    fun testIsntSubmitted_HappierPath() {
+    fun testSubmittedTimePeriods_noneFOund() {
         val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
-        assertFalse("Yes, if nothing has been submitted, nothing will be submitted", result)
+        assertFalse("nothing has been submitted, shouldn't be true", result)
     }
 }

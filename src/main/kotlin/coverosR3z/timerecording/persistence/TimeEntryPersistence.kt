@@ -139,7 +139,7 @@ class TimeEntryPersistence(
             val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employeeId,
                 TimePeriod(startDate, endDate))
-            // log something, eventually
+            logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
             submissions.add(newSubmission)
             newSubmission
         }

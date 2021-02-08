@@ -1,7 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.types.*
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOnAllLogging
 import coverosR3z.misc.*
@@ -342,23 +341,9 @@ class TimeRecordingUtilityTests {
     }
 
     @Test
-    fun testSubmitTime() {
-        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_USER))
-        val startDate = Date.make( "2021-02-01")
-        val endDate = Date.make( "2021-02-15")
-        val timePeriod = TimePeriod(startDate, endDate)
-
-        val result = tru.submitTimePeriod(timePeriod)
-
-        assertTrue("cause it works", result)
-    }
-
-    @Test
-    fun testSubmitTime_expectLockedTimeEntries() {
+    fun testSubmitTime_expectLockedTimeEntries_editingTimeEntry() {
         val ftep = FakeTimeEntryPersistence()
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
-        val timePeriod = TimePeriod(DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
-        //tru.submitTimePeriod(timePeriod)
         ftep.setLockedEmployeeDateBehavior = {true}
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
@@ -368,9 +353,41 @@ class TimeRecordingUtilityTests {
                 DEFAULT_EMPLOYEE,
                 DEFAULT_PROJECT,
                 DEFAULT_TIME,
-                Date.make( "2021-02-03")))
+                DEFAULT_PERIOD_END_DATE))
 
-        assertEquals("When a time entry has been submitted, it's locked, cannot be changed",
+        assertEquals("When a time period has been submitted, it's locked, cannot be changed",
+            expected, result)
+    }
+
+    @Test
+    fun testSubmitTime_expectLockedTimeEntries_creatingTimeEntry() {
+        val ftep = FakeTimeEntryPersistence()
+        val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
+        ftep.setLockedEmployeeDateBehavior = {true}
+        val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
+
+        val result = tru.recordTime(createTimeEntryPreDatabase(date = DEFAULT_PERIOD_START_DATE))
+
+        assertEquals("When a time period has been submitted, it's locked, cannot be changed",
+            expected, result)
+    }
+
+    @IntegrationTest
+    @Test
+    fun testSubmitTime() {
+        val pmd = PureMemoryDatabase()
+        val tep = TimeEntryPersistence(pmd)
+        val tru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_USER))
+        val project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        tru.changeUser(CurrentUser(User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, employee.id)))
+        val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
+        // this locks the time entries for the period
+        tru.submitTimePeriod(DEFAULT_TIMEPERIOD)
+
+        val result = tru.recordTime(TimeEntryPreDatabase(employee, project, Time(60), DEFAULT_PERIOD_START_DATE))
+
+        assertEquals("When a time period has been submitted, it's locked, cannot be changed",
             expected, result)
     }
 
