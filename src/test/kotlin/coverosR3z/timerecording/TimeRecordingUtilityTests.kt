@@ -339,4 +339,11 @@ class TimeRecordingUtilityTests {
         assertEquals(expected, result)
     }
 
+    @Test
+    fun testSubmitTime() {
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
+        val result = tru.submitTimePeriod()
+        assertTrue("cause it works", result)
+    }
+
 }

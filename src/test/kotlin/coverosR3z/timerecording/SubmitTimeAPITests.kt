@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.server.types.*
+import coverosR3z.timerecording.api.SubmitTimeAPI
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
