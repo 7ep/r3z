@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.misc.DEFAULT_SUBMITTED_PERIOD
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -22,7 +23,7 @@ class FakeTimeRecordingUtilities(
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
     var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
     var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
-    var submitTimePeriodBehavior : () -> Boolean = { true }
+    var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD }
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -68,7 +69,7 @@ class FakeTimeRecordingUtilities(
     override fun listAllEmployees(): List<Employee> {
         return listAllEmployeesBehavior()
     }
-    override fun submitTimePeriod(timePeriod: TimePeriod): Boolean{
+    override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod{
         return submitTimePeriodBehavior()
     }
 }

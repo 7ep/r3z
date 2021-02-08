@@ -251,7 +251,7 @@ class TimeEntryPersistenceTests {
     }
 
     @Test
-    fun testSubmittedTimePeriods_noneFOund() {
+    fun testSubmittedTimePeriods_noneFound() {
         val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
         assertFalse("nothing has been submitted, shouldn't be true", result)
     }
