@@ -134,6 +134,14 @@ class TimeEntryPersistence(
         }
     }
 
+    override fun persistNewSubmittedTimePeriod(
+        employeeId: EmployeeId,
+        startDate: Date,
+        endDate: Date
+    ): SubmittedPeriod {
+        TODO("Not yet implemented")
+    }
+
     companion object {
         const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
         const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"

@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PROJECT
+import coverosR3z.misc.DEFAULT_SUBMITTED_PERIOD
 import coverosR3z.misc.DEFAULT_TIME_ENTRY
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
@@ -20,7 +21,8 @@ class FakeTimeEntryPersistence(
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() },
-    var setLockedEmployeeDateBehavior : () -> Boolean = { false }
+    var setLockedEmployeeDateBehavior : () -> Boolean = { false },
+    var persistNewSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD }
 ) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
@@ -79,6 +81,10 @@ class FakeTimeEntryPersistence(
 
     override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
         return setLockedEmployeeDateBehavior()
+    }
+
+    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, startDate: Date, endDate: Date) : SubmittedPeriod{
+        return persistNewSubmittedTimePeriodBehavior()
     }
 
 }

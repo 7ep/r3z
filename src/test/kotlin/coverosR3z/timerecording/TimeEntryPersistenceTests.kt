@@ -242,8 +242,10 @@ class TimeEntryPersistenceTests {
      */
     @Test
     fun testIsSubmitted_SuckyPath() {
-        // TODO do something to submit it first
-        val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
+        val employeeId = EmployeeId(1)
+        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_START_DATE)
+
+        val result = tep.isInASubmittedPeriod(employeeId, Date.make("2021-02-03"))
         assertTrue("Yes, a time entry on this date with this employee, is submitted", result)
     }
 
