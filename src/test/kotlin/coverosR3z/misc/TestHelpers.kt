@@ -39,6 +39,10 @@ val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
 val DEFAULT_TIME_ENTRY = TimeEntry(TimeEntryId(1), DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020)
+val DEFAULT_PERIOD_START_DATE = Date.make( "2021-02-01")
+val DEFAULT_PERIOD_END_DATE = Date.make( "2021-02-15")
+val DEFAULT_TIMEPERIOD = TimePeriod(DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
+val DEFAULT_SUBMITTED_PERIOD = SubmittedPeriod(SubmissionId(1), DEFAULT_EMPLOYEE.id, DEFAULT_TIMEPERIOD)
 const val DEFAULT_SESSION_TOKEN = "abc123"
 const val granularPerfArchiveDirectory = "docs/performance_archive/granular_tests/"
 

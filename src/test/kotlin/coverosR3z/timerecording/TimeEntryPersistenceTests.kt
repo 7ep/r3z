@@ -1,12 +1,12 @@
 package coverosR3z.timerecording
 
 import coverosR3z.misc.*
+import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -236,4 +236,23 @@ class TimeEntryPersistenceTests {
         assertEquals("a time entry with no employee is invalid", ex.message)
     }
 
+
+    /**
+     *
+     */
+    @Test
+    fun testSubmittedTimePeriods_addingNew() {
+        val employeeId = EmployeeId(1)
+        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_TIMEPERIOD)
+
+        val result = tep.isInASubmittedPeriod(employeeId, Date.make("2021-02-03"))
+        val expected = true
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testSubmittedTimePeriods_noneFound() {
+        val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
+        assertFalse("nothing has been submitted, shouldn't be true", result)
+    }
 }

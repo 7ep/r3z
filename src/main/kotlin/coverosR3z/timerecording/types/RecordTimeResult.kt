@@ -8,6 +8,7 @@ enum class StatusEnum {
      * Error message for logged in user does not match employee's time being entered
      */
     USER_EMPLOYEE_MISMATCH,
+    LOCKED_ALREADY_SUBMITTED,
     NULL}
 
 /**

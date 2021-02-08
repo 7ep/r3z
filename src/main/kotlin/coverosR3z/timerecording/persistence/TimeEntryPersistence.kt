@@ -124,6 +124,27 @@ class TimeEntryPersistence(
         return pmd.EmployeeDataAccess().read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
+    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+        // The following closure returns a boolean depending on whether the provided date falls within
+        // any of the submission date ranges for the provided employee
+        return pmd.SubmittedPeriodsAccess().read {
+                submissions -> submissions
+                    .filter{it.employeeId == employeeId}
+                    .any{it.bounds.contains(date)}
+        }
+    }
+
+    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
+        return pmd.SubmittedPeriodsAccess().actOn{ submissions ->
+            val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
+                employeeId,
+                timePeriod)
+            logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
+            submissions.add(newSubmission)
+            newSubmission
+        }
+    }
+
     companion object {
         const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
         const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"

@@ -28,4 +28,6 @@ interface ITimeEntryPersistence {
     fun getAllProjects(): List<Project>
     fun getAllEmployees(): List<Employee>
     fun getEmployeeById(id: EmployeeId): Employee
+    fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
+    fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod) : SubmittedPeriod
 }

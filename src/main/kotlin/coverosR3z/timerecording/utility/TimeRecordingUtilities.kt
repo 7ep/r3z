@@ -44,6 +44,9 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         }
         logAudit(cu) {"Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\""}
         confirmLessThan24Hours(entry.time, entry.employee, entry.date)
+        if(persistence.isInASubmittedPeriod(entry.employee.id, entry.date)){
+            return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
+        }
         return try {
             val newTimeEntry = behavior()
             RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
@@ -128,6 +131,10 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
 
     override fun listAllEmployees(): List<Employee> {
         return persistence.getAllEmployees()
+    }
+
+    override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
+        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
     }
 
 }

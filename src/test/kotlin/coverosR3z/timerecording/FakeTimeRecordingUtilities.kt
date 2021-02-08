@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.misc.DEFAULT_SUBMITTED_PERIOD
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -16,12 +17,13 @@ class FakeTimeRecordingUtilities(
     var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
-    var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = {emptySet() },
+    var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = { emptySet() },
     var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
-    var listAllProjectsBehavior : () -> List<Project> = {emptyList()},
+    var listAllProjectsBehavior : () -> List<Project> = { emptyList() },
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
-    var listAllEmployeesBehavior : () -> List<Employee> = {emptyList()},
-    var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE }
+    var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
+    var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
+    var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD }
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -66,5 +68,8 @@ class FakeTimeRecordingUtilities(
 
     override fun listAllEmployees(): List<Employee> {
         return listAllEmployeesBehavior()
+    }
+    override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod{
+        return submitTimePeriodBehavior()
     }
 }
