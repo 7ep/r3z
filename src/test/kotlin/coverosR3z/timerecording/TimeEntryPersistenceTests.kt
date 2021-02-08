@@ -243,7 +243,7 @@ class TimeEntryPersistenceTests {
     @Test
     fun testSubmittedTimePeriods_addingNew() {
         val employeeId = EmployeeId(1)
-        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
+        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_TIMEPERIOD)
 
         val result = tep.isInASubmittedPeriod(employeeId, Date.make("2021-02-03"))
         val expected = true

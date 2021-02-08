@@ -83,7 +83,7 @@ class FakeTimeEntryPersistence(
         return setLockedEmployeeDateBehavior()
     }
 
-    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, startDate: Date, endDate: Date) : SubmittedPeriod{
+    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod) : SubmittedPeriod{
         return persistNewSubmittedTimePeriodBehavior()
     }
 

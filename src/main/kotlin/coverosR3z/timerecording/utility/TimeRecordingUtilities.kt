@@ -134,7 +134,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     }
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
-        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod.start, timePeriod.end)
+        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
     }
 
 }
