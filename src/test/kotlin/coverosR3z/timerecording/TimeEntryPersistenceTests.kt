@@ -241,15 +241,15 @@ class TimeEntryPersistenceTests {
      *
      */
     @Test
-    fun testIsSubmitted_HappyPath() {
-        // TODO do something to lock it first
+    fun testIsSubmitted_SuckyPath() {
+        // TODO do something to submit it first
         val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
-        assertTrue("Yes, a time entry on this date with this employee, is locked", result)
+        assertTrue("Yes, a time entry on this date with this employee, is submitted", result)
     }
 
     @Test
     fun testIsntSubmitted_HappierPath() {
         val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
-        assertFalse("Yes, if nothing has been submitted, nothing will be locked", result)
+        assertFalse("Yes, if nothing has been submitted, nothing will be submitted", result)
     }
 }

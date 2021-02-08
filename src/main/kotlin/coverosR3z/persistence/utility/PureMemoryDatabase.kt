@@ -40,6 +40,7 @@ open class PureMemoryDatabase(
             projects = this.projects.toList().toChangeTrackingSet(),
             timeEntries = this.timeEntries.toList().toChangeTrackingSet(),
             sessions = this.sessions.toList().toChangeTrackingSet(),
+            submittedPeriods = this.submittedPeriods.toList().toChangeTrackingSet(),
         )
     }
 

@@ -128,7 +128,9 @@ class TimeEntryPersistence(
         // The following closure returns a boolean depending on whether the provided date falls within
         // any of the submission date ranges for the provided employee
         return pmd.SubmittedPeriodsAccess().read {
-                submissions -> submissions.filter{it.employeeId == employeeId}.any{it.bounds.contains(date)}
+                submissions -> submissions
+                    .filter{it.employeeId == employeeId}
+                    .any{it.bounds.contains(date)}
         }
     }
 
