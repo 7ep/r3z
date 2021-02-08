@@ -77,7 +77,7 @@ class FakeTimeEntryPersistence(
         return overwriteTimeEntryBehavior()
     }
 
-    override fun lockedEmployeeDate(entry: TimeEntryPreDatabase): Boolean {
+    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
         return setLockedEmployeeDateBehavior()
     }
 

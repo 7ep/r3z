@@ -8,10 +8,7 @@ import coverosR3z.persistence.types.AbstractDataAccess
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.toChangeTrackingSet
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.Employee
-import coverosR3z.timerecording.types.EmployeeName
-import coverosR3z.timerecording.types.Project
-import coverosR3z.timerecording.types.TimeEntry
+import coverosR3z.timerecording.types.*
 
 
 /**
@@ -23,12 +20,14 @@ import coverosR3z.timerecording.types.TimeEntry
  * @param dbDirectory if this is null, the database won't use the disk at all.  If you set it to a directory, like
  *                      File("db/") the database will use that directory for all persistence.
  */
-open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
-                         protected val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
-                         protected val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
-                         protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
-                         protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
-                         protected val dbDirectory : String? = null
+open class PureMemoryDatabase(
+    protected val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
+    protected val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
+    protected val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
+    protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
+    protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
+    protected val submittedPeriods: ChangeTrackingSet<SubmittedPeriod> = ChangeTrackingSet(),
+    protected val dbDirectory : String? = null
 ) {
 
     private val actionQueue = ActionQueue("DatabaseWriter")
@@ -53,6 +52,7 @@ open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employe
     inner class UserDataAccess : AbstractDataAccess<User>(users, diskPersistence, User.directoryName)
     inner class SessionDataAccess : AbstractDataAccess<Session>(sessions, diskPersistence, Session.directoryName)
     inner class TimeEntryDataAccess : AbstractDataAccess<TimeEntry>(timeEntries, diskPersistence, TimeEntry.directoryName)
+    inner class SubmittedPeriodsAccess : AbstractDataAccess<SubmittedPeriod>(submittedPeriods, diskPersistence, SubmittedPeriod.directoryName)
 
 
     ////////////////////////////////////
@@ -72,6 +72,7 @@ open class PureMemoryDatabase(protected val employees: ChangeTrackingSet<Employe
         if (projects != other.projects) return false
         if (timeEntries != other.timeEntries) return false
         if (sessions != other.sessions) return false
+        if (submittedPeriods != other.submittedPeriods) return false
 
         return true
     }

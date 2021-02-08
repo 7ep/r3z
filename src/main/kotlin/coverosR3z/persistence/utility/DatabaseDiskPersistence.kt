@@ -139,7 +139,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
             val employees = readAndDeserialize(dbDirectory, Employee.directoryName) { Employee.Deserializer().deserialize(it) }
             val timeEntries = readAndDeserialize(dbDirectory, TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
 
-            return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, dbDirectory)
+            return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, ChangeTrackingSet(), dbDirectory)
         }
 
         private fun <T : Indexed> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {

@@ -1,12 +1,12 @@
 package coverosR3z.timerecording
 
 import coverosR3z.misc.*
+import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -236,4 +236,20 @@ class TimeEntryPersistenceTests {
         assertEquals("a time entry with no employee is invalid", ex.message)
     }
 
+
+    /**
+     *
+     */
+    @Test
+    fun testIsSubmitted_HappyPath() {
+        // TODO do something to lock it first
+        val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
+        assertTrue("Yes, a time entry on this date with this employee, is locked", result)
+    }
+
+    @Test
+    fun testIsntSubmitted_HappierPath() {
+        val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
+        assertFalse("Yes, if nothing has been submitted, nothing will be locked", result)
+    }
 }
