@@ -19,7 +19,8 @@ class FakeTimeEntryPersistence(
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
-    var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() }
+    var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() },
+    var setLockedEmployeeDateBehavior : () -> Boolean = { false }
 ) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
@@ -74,6 +75,10 @@ class FakeTimeEntryPersistence(
 
     override fun overwriteTimeEntry(newEntry: TimeEntry): TimeEntry {
         return overwriteTimeEntryBehavior()
+    }
+
+    override fun lockedEmployeeDate(entry: TimeEntryPreDatabase): Boolean {
+        return setLockedEmployeeDateBehavior()
     }
 
 }

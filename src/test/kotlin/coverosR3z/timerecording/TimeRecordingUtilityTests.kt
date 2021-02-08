@@ -355,11 +355,13 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun testSubmitTime_expectLockedTimeEntries() {
-        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_USER))
+        val ftep = FakeTimeEntryPersistence()
+        val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
         val startDate = Date.make( "2021-02-01")
         val endDate = Date.make( "2021-02-15")
         val timePeriod = TimePeriod(startDate, endDate)
-        tru.submitTimePeriod(timePeriod)
+        //tru.submitTimePeriod(timePeriod)
+        ftep.setLockedEmployeeDateBehavior = {true}
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         val result = tru.changeEntry(

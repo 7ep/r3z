@@ -124,6 +124,10 @@ class TimeEntryPersistence(
         return pmd.EmployeeDataAccess().read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
+    override fun lockedEmployeeDate(entry: TimeEntryPreDatabase): Boolean {
+        TODO("Not yet implemented")
+    }
+
     companion object {
         const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
         const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"
