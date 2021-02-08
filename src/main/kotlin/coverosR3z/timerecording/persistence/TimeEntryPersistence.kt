@@ -134,12 +134,15 @@ class TimeEntryPersistence(
         }
     }
 
-    override fun persistNewSubmittedTimePeriod(
-        employeeId: EmployeeId,
-        startDate: Date,
-        endDate: Date
-    ): SubmittedPeriod {
-        TODO("Not yet implemented")
+    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, startDate: Date, endDate: Date): SubmittedPeriod {
+        return pmd.SubmittedPeriodsAccess().actOn{ submissions ->
+            val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
+                employeeId,
+                TimePeriod(startDate, endDate))
+            // log something, eventually
+            submissions.add(newSubmission)
+            newSubmission
+        }
     }
 
     companion object {
