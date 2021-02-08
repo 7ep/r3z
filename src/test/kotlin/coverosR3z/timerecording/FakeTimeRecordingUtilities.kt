@@ -16,12 +16,13 @@ class FakeTimeRecordingUtilities(
     var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
-    var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = {emptySet() },
+    var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = { emptySet() },
     var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
-    var listAllProjectsBehavior : () -> List<Project> = {emptyList()},
+    var listAllProjectsBehavior : () -> List<Project> = { emptyList() },
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
-    var listAllEmployeesBehavior : () -> List<Employee> = {emptyList()},
-    var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE }
+    var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
+    var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
+    var submitTimePeriodBehavior : () -> Boolean = { true }
         ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -66,5 +67,8 @@ class FakeTimeRecordingUtilities(
 
     override fun listAllEmployees(): List<Employee> {
         return listAllEmployeesBehavior()
+    }
+    override fun submitTimePeriod(timePeriod: TimePeriod): Boolean{
+        return submitTimePeriodBehavior()
     }
 }

@@ -5,10 +5,12 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.resetLogSettingsToDefault
 import coverosR3z.logging.turnOnAllLogging
 import coverosR3z.misc.*
+import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.types.TimePeriod
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
@@ -341,9 +343,35 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun testSubmitTime() {
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase()), CurrentUser(DEFAULT_USER))
-        val result = tru.submitTimePeriod()
+        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_USER))
+        val startDate = Date.make( "2021-02-01")
+        val endDate = Date.make( "2021-02-15")
+        val timePeriod = TimePeriod(startDate, endDate)
+
+        val result = tru.submitTimePeriod(timePeriod)
+
         assertTrue("cause it works", result)
+    }
+
+    @Test
+    fun testSubmitTime_expectLockedTimeEntries() {
+        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_USER))
+        val startDate = Date.make( "2021-02-01")
+        val endDate = Date.make( "2021-02-15")
+        val timePeriod = TimePeriod(startDate, endDate)
+        tru.submitTimePeriod(timePeriod)
+        val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
+
+        val result = tru.changeEntry(
+            TimeEntry(
+                TimeEntryId(1),
+                DEFAULT_EMPLOYEE,
+                DEFAULT_PROJECT,
+                DEFAULT_TIME,
+                Date.make( "2021-02-03")))
+
+        assertEquals("When a time entry has been submitted, it's locked, cannot be changed",
+            expected, result)
     }
 
 }

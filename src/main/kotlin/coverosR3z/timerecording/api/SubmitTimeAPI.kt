@@ -59,7 +59,7 @@ class SubmitTimeAPI(private val sd: ServerData){
         // potentially all the time entries that are part of it.
         // val timePeriod = TimePeriod(employee, startDate, endDate);
 
-        tru.submitTimePeriod()
+        //tru.submitTimePeriod()
 
         return ServerUtilities.redirectTo(ViewTimeAPI.path)
     }

@@ -130,4 +130,8 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.getAllEmployees()
     }
 
+    override fun submitTimePeriod(timePeriod: TimePeriod): Boolean {
+        return true
+    }
+
 }
