@@ -75,7 +75,7 @@ class EnterTimeAPI(private val sd: ServerData) {
                 date,
                 details)
 
-        tru.recordTime(timeEntry)
+        tru.createTimeEntry(timeEntry)
 
         return redirectTo(ViewTimeAPI.path)
     }

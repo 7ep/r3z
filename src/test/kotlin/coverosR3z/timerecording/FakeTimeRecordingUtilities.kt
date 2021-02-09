@@ -12,7 +12,7 @@ import coverosR3z.timerecording.utility.ITimeRecordingUtilities
  * Used as a mock object for testing
  */
 class FakeTimeRecordingUtilities(
-    var recordTimeBehavior : () -> RecordTimeResult = { RecordTimeResult() },
+    var createTimeEntryBehavior : () -> RecordTimeResult = { RecordTimeResult() },
     var changeEntryBehavior : () -> RecordTimeResult = { RecordTimeResult() },
     var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
@@ -30,8 +30,8 @@ class FakeTimeRecordingUtilities(
         return changeUserBehavior()
     }
 
-    override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
-        return recordTimeBehavior()
+    override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
+        return createTimeEntryBehavior()
     }
 
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{

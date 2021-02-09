@@ -117,7 +117,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = generateSomeEntriesPreDatabase()
 
         for (entry in entries) {
-            tru.recordTime(entry)
+            tru.createTimeEntry(entry)
         }
 
         return Pair(tru, entries)
