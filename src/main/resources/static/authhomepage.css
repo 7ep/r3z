@@ -31,3 +31,7 @@ nav a:focus {
     border-radius: .3em;
     border: 1.8px solid blue;
 }
+
+li {
+    display: grid;
+}

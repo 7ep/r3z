@@ -24,23 +24,27 @@ class HomepageAPI(private val sd: ServerData)  {
         val body =
 """
 <nav>
-        <a href="createemployee">Create employee</a>
-        <a href="employees">Show all employees</a>
-        <a href="createproject">Create project</a>
-        <a href="entertime">Enter time</a>
-        <a href="timeentries">Show all time entries</a>
-        <a href="logging">Log configuration</a>
-        <a href="logout">Logout</a>
+    <ul>
+        <li><a href="createemployee">Create employee</a></li>
+        <li><a href="employees">Show all employees</a></li>
+        <li><a href="createproject">Create project</a></li>
+        <li><a href="entertime">Enter time</a></li>
+        <li><a href="timeentries">Show all time entries</a></li>
+        <li><a href="logging">Log configuration</a></li>
+        <li><a href="logout">Logout</a></li>
+    </ul>
 </nav>
 """
         return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
     }
 
     private val homepageHTML = """
-        <nav>
-            <a href="login">Login</a>
-            <a href="register">Register</a>
-        </nav>
+<nav>
+    <ul>
+        <li><a href="login">Login</a></li>
+        <li><a href="register">Register</a></li>
+    </ul>
+</nav>
 """
 
 }
