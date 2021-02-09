@@ -13,6 +13,13 @@ enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
 
+    /**
+     * Give the length of the month the provided date is within
+     */
+    fun calculateLength(year: Int): Int {
+        return LocalDate.of(year, this.ordinal, 1).lengthOfMonth()
+    }
+
     companion object {
         fun from(ord: Int): Month {
             check (ord in 1..12) { "Month must comply with arbitrary human divisions of time into 12 similarly sized chunks a year. You tried $ord."}
@@ -50,6 +57,10 @@ class Date(val epochDay : Int) : Comparable<Date> {
         }
     }
 
+    fun day() : Int {
+        return LocalDate.ofEpochDay(epochDay.toLong()).dayOfMonth
+    }
+
     fun month() : Int {
         return LocalDate.ofEpochDay(epochDay.toLong()).monthValue
     }
@@ -57,6 +68,7 @@ class Date(val epochDay : Int) : Comparable<Date> {
     fun year() : Int {
         return LocalDate.ofEpochDay(epochDay.toLong()).year
     }
+
 
     /**
      * All we care about is the epoch day, making
@@ -104,6 +116,8 @@ class Date(val epochDay : Int) : Comparable<Date> {
 
             return Date(checkParseToInt(split[0]), Month.from(checkParseToInt(split[1])), checkParseToInt(split[2]))
         }
+
+
     }
 
 }

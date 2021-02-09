@@ -2,6 +2,7 @@ package coverosR3z.timerecording.types
 
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
+import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -28,7 +29,9 @@ class TimePeriodTests {
      */
     @Test
     fun testShouldValidateTimePeriod() {
-        assertThrows(InvalidTimePeriodException::class.java) {TimePeriod.make((Date(2021, Month.FEB, 1), Date(2021, Month.FEB, 14))}
+        assertThrows(InvalidTimePeriodException::class.java) {
+            TimePeriod.make((Date(2021, Month.FEB, 1), Date(2021, Month.FEB, 14))
+        }
     }
 
 }
