@@ -10,4 +10,8 @@ data class TimePeriod(val start: Date, val end: Date) {
     fun contains(date: Date) : Boolean {
         return date in start .. end
     }
+
+    fun getTodayTimePeriod() : TimePeriod {
+
+    }
 }

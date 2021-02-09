@@ -340,6 +340,10 @@ class TimeRecordingUtilityTests {
         assertEquals(expected, result)
     }
 
+    /**
+     * If we submit time on a period, and try to edit a time entry
+     * that in in that period, it won't be allowed - it will be locked
+     */
     @Test
     fun testSubmitTime_expectLockedTimeEntries_editingTimeEntry() {
         val ftep = FakeTimeEntryPersistence()
@@ -359,6 +363,10 @@ class TimeRecordingUtilityTests {
             expected, result)
     }
 
+    /**
+     * If we submit time on a period, and try to create a time entry
+     * that in in that period, it won't be allowed - it will be locked
+     */
     @Test
     fun testSubmitTime_expectLockedTimeEntries_creatingTimeEntry() {
         val ftep = FakeTimeEntryPersistence()
