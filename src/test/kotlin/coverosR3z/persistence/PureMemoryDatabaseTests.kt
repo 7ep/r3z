@@ -44,7 +44,7 @@ class PureMemoryDatabaseTests {
      */
     @PerformanceTest
     @Test
-    fun `PERFORMANCE should get responses from the database quickly`() {
+    fun `should get responses from the database quickly_PERFORMANCE`() {
         val numberOfEmployees = 30
         val numberOfProjects = 30
         val numberOfDays = 31
@@ -59,7 +59,7 @@ class PureMemoryDatabaseTests {
         }
 
         logAudit { "It took a total of $totalTime milliseconds for this code" }
-        File("${granularPerfArchiveDirectory}PERFORMANCE_should_get_responses_from_the_database_quickly")
+        File("${granularPerfArchiveDirectory}should_get_responses_from_the_database_quickly_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttime: $totalTime\n")
     }
 
