@@ -2,6 +2,7 @@ package coverosR3z.timerecording.types
 
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
+import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import java.time.LocalDate
 
 data class TimePeriod(val start: Date, val end: Date) {
@@ -28,6 +29,12 @@ data class TimePeriod(val start: Date, val end: Date) {
             } else {
                 return TimePeriod(Date(year, month, 16), Date(year, month, month.calculateLength(year)))
             }
+        }
+
+        fun make(beginDate: Date, endDate: Date) : TimePeriod {
+            val generatedTimePeriod : TimePeriod = getTimePeriodForDate(beginDate)
+            if(generatedTimePeriod != TimePeriod(beginDate,endDate)) throw InvalidTimePeriodException()
+            return generatedTimePeriod
         }
     }
 }

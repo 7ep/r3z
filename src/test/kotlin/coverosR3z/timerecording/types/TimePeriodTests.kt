@@ -30,7 +30,7 @@ class TimePeriodTests {
     @Test
     fun testShouldValidateTimePeriod() {
         assertThrows(InvalidTimePeriodException::class.java) {
-            TimePeriod.make((Date(2021, Month.FEB, 1), Date(2021, Month.FEB, 14))
+            TimePeriod.make(Date(2021, Month.FEB, 1), Date(2021, Month.FEB, 14))
         }
     }
 
