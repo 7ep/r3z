@@ -165,13 +165,7 @@ Behavior-Driven Development (BDD)
 BDD files will often have a suffix of "BDD".  See "EnteringTimeBDD" for a sample.
 
 Note that there is a type in the system called "UserStory" and one called "BDDScenario",
-both of which are in the test source code.  All the user stories are located in
-src/test/kotlin/coverosR3z/bdd, and if you "find usages" on any of them (e.g. EditTimeUserStory),
-it will lead to the related scenario, such as:
-
-    editTime - An employee should be able to edit the number of hours worked from a previous time entry
-
-Examine that method for an example of how this works.
+both of which are in the test source code.
 
 Once all the tests are complete, you will see the BDD results written to build/bdd
 
