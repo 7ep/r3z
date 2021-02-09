@@ -34,7 +34,7 @@ class EnteringTimeBDD {
         val (tru, entry) = addingProjectHoursWithNotes()
         s.markDone("Given I have worked 6 hours on project A on Monday with a lot of notes,")
 
-        val recordStatus = tru.recordTime(entry)
+        val recordStatus = tru.createTimeEntry(entry)
         s.markDone("when I enter in that time,")
 
         assertEquals("the system indicates it has persisted the new information", StatusEnum.SUCCESS, recordStatus.status)
@@ -52,7 +52,7 @@ class EnteringTimeBDD {
         val entry = createTimeEntryPreDatabase(time = Time(30), project = newProject, employee = newEmployee)
         s.markDone("when they enter in a new time entry for one hour,")
 
-        assertThrows(ExceededDailyHoursAmountException::class.java) { tru.recordTime(entry) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { tru.createTimeEntry(entry) }
         s.markDone("then the system disallows it.")
     }
 
@@ -107,7 +107,7 @@ class EnteringTimeBDD {
         val (_, user) = au.login(newUsername, DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
-        tru.recordTime(existingTimeForTheDay)
+        tru.createTimeEntry(existingTimeForTheDay)
         return Triple(tru, newProject, newEmployee)
     }
 

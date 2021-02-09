@@ -32,7 +32,7 @@ class AuthenticationBDD {
         s.markDone("Given I am logged in as user alice and employees Sarah and Alice exist in the database,")
 
         val preparedEntry = createTimeEntryPreDatabase(sarah)
-        val result = tru.recordTime(preparedEntry)
+        val result = tru.createTimeEntry(preparedEntry)
         s.markDone("when I try to add a time-entry for Sarah,")
 
         assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null), result)

@@ -7,7 +7,7 @@ import coverosR3z.timerecording.types.*
 interface ITimeRecordingUtilities {
     fun changeUser(cu : CurrentUser) : ITimeRecordingUtilities
 
-    fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult
+    fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult
 
     /**
      * This assumes you are changing your own time entries,

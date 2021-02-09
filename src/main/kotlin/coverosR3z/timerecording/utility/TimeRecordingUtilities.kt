@@ -17,7 +17,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return TimeRecordingUtilities(persistence, cu)
     }
 
-    override fun recordTime(entry: TimeEntryPreDatabase): RecordTimeResult {
+    override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             logDebug(cu) {"recorded time successfully"}
