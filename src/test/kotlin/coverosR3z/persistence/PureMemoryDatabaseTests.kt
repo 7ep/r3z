@@ -10,6 +10,8 @@ import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
+import coverosR3z.persistence.types.IndexableSerializable
+import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -21,6 +23,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -505,6 +508,190 @@ class PureMemoryDatabaseTests {
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Session.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
         
         assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+    }
+
+    enum class InvalidKeyHasSpace(private val keyString: String) : SerializationKeys {
+        ID("id id");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
+    /**
+     * Serialization keys cannot contain spaces
+     */
+    @Test
+    fun testSerializationDisallowsSpaces() {
+
+        class Foo : IndexableSerializable() {
+
+            override fun getIndex(): Int {
+                // no need to implement
+                return 0
+            }
+
+            override val dataMappings: Map<SerializationKeys, String>
+                get() = mapOf(
+                    InvalidKeyHasSpace.ID to "DOES_NOT_MATTER",
+                )
+        }
+
+        val ex = assertThrows(IllegalStateException::class.java) { Foo().serialize() }
+        assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: id id", ex.message)
+    }
+
+
+    enum class InvalidKeyTooLong(private val keyString: String) : SerializationKeys {
+        ID("bcdefghijkl");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
+    /**
+     * Serialization keys cannot be longer than allowable
+     */
+    @Test
+    fun testSerializationDisallowsTooLong() {
+
+        class Foo : IndexableSerializable() {
+
+            override fun getIndex(): Int {
+                // no need to implement
+                return 0
+            }
+
+            override val dataMappings: Map<SerializationKeys, String>
+                get() = mapOf(
+                    InvalidKeyTooLong.ID to "DOES_NOT_MATTER",
+                )
+        }
+
+        val ex = assertThrows(IllegalStateException::class.java) { Foo().serialize() }
+        assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: bcdefghijkl", ex.message)
+    }
+
+    enum class InvalidKeyTooShort(private val keyString: String) : SerializationKeys {
+        ID("");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
+    /**
+     * Serialization keys must be at least one character
+     */
+    @Test
+    fun testSerializationDisallowsTooShort() {
+
+        class Foo : IndexableSerializable() {
+
+            override fun getIndex(): Int {
+                // no need to implement
+                return 0
+            }
+
+            override val dataMappings: Map<SerializationKeys, String>
+                get() = mapOf(
+                    InvalidKeyTooShort.ID to "DOES_NOT_MATTER",
+                )
+        }
+
+        val ex = assertThrows(IllegalStateException::class.java) { Foo().serialize() }
+        assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: (BLANK)", ex.message)
+    }
+
+    enum class InvalidKeyNumbers(private val keyString: String) : SerializationKeys {
+        ID("abcd123");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
+    /**
+     * Serialization keys cannot contain numbers
+     */
+    @Test
+    fun testSerializationDisallowsNumbers() {
+
+        class Foo : IndexableSerializable() {
+
+            override fun getIndex(): Int {
+                // no need to implement
+                return 0
+            }
+
+            override val dataMappings: Map<SerializationKeys, String>
+                get() = mapOf(
+                    InvalidKeyNumbers.ID to "DOES_NOT_MATTER",
+                )
+        }
+
+        val ex = assertThrows(IllegalStateException::class.java) { Foo().serialize() }
+        assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: abcd123", ex.message)
+    }
+
+    enum class InvalidKeysNonUnique(private val keyString: String) : SerializationKeys {
+        ID("id"),
+        OTHER_ID("id");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
+    /**
+     * Serialization keys be duplicates.
+     * two keys with the string "id" is disallowed.
+     */
+    @Test
+    fun testSerializationDisallowsNonUnique() {
+
+        class Foo : IndexableSerializable() {
+
+            override fun getIndex(): Int {
+                // no need to implement
+                return 0
+            }
+
+            override val dataMappings: Map<SerializationKeys, String>
+                get() = mapOf(
+                    InvalidKeysNonUnique.ID to "DOES_NOT_MATTER",
+                    InvalidKeysNonUnique.OTHER_ID to "DOES_NOT_MATTER",
+                )
+        }
+
+        val ex = assertThrows(IllegalStateException::class.java) { Foo().serialize() }
+        assertEquals("Serialization keys must be unique.  Here are your keys: [id, id]", ex.message)
     }
 
     @Test

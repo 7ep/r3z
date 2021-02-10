@@ -20,11 +20,28 @@ abstract class Serializable {
      */
     abstract val dataMappings: Map<SerializationKeys, String>
 
+    companion object {
+        /**
+         * This is used as a boundary of what is acceptable for a key string
+         * used in our serialization process.  There's no need to complicate
+         * things.  Keys should be short and sweet.  No need for symbols or
+         * numbers or whitespace - it just would complicate deserialization later.
+         */
+        val validKeyRegex = """[a-zA-Z]{1,10}""".toRegex()
+    }
+
+
     /**
      * converts the data in this object to a form easily written to disk.
      * See [dataMappings] to see how we map a name to a value
      */
     fun serialize(): String {
+        val allKeys = dataMappings.keys.map { it.getKey() }
+        check(allKeys.size == allKeys.toSet().size) {"Serialization keys must be unique.  Here are your keys: $allKeys"}
+        dataMappings.keys.forEach {
+            check(it.getKey().isNotBlank()) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: (BLANK)"}
+            check(validKeyRegex.matches(it.getKey())) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: ${it.getKey()}"}
+        }
         return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.getKey()}: ${encode(it.value)}" }  +" }"
     }
 }

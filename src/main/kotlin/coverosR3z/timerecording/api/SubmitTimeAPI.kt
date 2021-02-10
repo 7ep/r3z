@@ -29,8 +29,8 @@ class SubmitTimeAPI(private val sd: ServerData){
     companion object : PostEndpoint {
 
         override val requiredInputs = setOf(
-            SubmitTimeAPI.Elements.START_DATE,
-            SubmitTimeAPI.Elements.END_DATE,
+            Elements.START_DATE,
+            Elements.END_DATE,
         )
         override val path: String
             get() = "submittime"
@@ -49,8 +49,8 @@ class SubmitTimeAPI(private val sd: ServerData){
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.tru // time recording utilities
-        val startDate = Date.make(data.mapping[SubmitTimeAPI.Elements.START_DATE.getElemName()])
-        val endDate = Date.make(data.mapping[SubmitTimeAPI.Elements.END_DATE.getElemName()])
+        val startDate = Date.make(data.mapping[Elements.START_DATE.getElemName()])
+        val endDate = Date.make(data.mapping[Elements.END_DATE.getElemName()])
         val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
 
         // UNFINISHED: Have not implemented time periods yet.

@@ -1,7 +1,6 @@
 package coverosR3z.uitests
 
 import org.openqa.selenium.WebDriver
-import javax.swing.text.View
 
 /**
  * provides an API for testing the UI that is far
