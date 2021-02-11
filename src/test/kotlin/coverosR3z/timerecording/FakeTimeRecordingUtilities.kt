@@ -23,8 +23,9 @@ class FakeTimeRecordingUtilities(
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
     var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
     var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
-    var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD }
-        ) : ITimeRecordingUtilities {
+    var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
         return changeUserBehavior()
@@ -71,5 +72,9 @@ class FakeTimeRecordingUtilities(
     }
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod{
         return submitTimePeriodBehavior()
+    }
+
+    override fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
+        return getSubmittedTimePeriodBehavior()
     }
 }

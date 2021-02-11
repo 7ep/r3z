@@ -2,6 +2,8 @@ package coverosR3z.timerecording
 
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.exceptions.MultipleSubmissionsInPeriodException
+import coverosR3z.persistence.exceptions.SubmissionNotFoundException
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -243,7 +245,7 @@ class TimeEntryPersistenceTests {
     @Test
     fun testSubmittedTimePeriods_addingNew() {
         val employeeId = EmployeeId(1)
-        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_TIMEPERIOD)
+        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_TIME_PERIOD)
 
         val result = tep.isInASubmittedPeriod(employeeId, Date.make("2021-02-03"))
         val expected = true
@@ -254,5 +256,26 @@ class TimeEntryPersistenceTests {
     fun testSubmittedTimePeriods_noneFound() {
         val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
         assertFalse("nothing has been submitted, shouldn't be true", result)
+    }
+
+    @Test
+    fun testGetSubmittedPeriod() {
+        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        val submittedTimePeriod = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD);
+
+        assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
+    }
+
+    @Test
+    fun testFailToGetNonexistentSubmission() {
+        val ex = assertThrows(SubmissionNotFoundException::class.java) { tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)}
+        assertEquals("no submission was found with EmployeeId(value=1) on TimePeriod(start=Date(epochDay=18659, 2021-02-01), end=Date(epochDay=18673, 2021-02-15))", ex.message)
+    }
+
+    @Test
+    fun testCannotPersistTheSameSubmissionTwice() {
+        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        val ex = assertThrows(MultipleSubmissionsInPeriodException::class.java) { tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD) }
+        assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.id} on ${DEFAULT_TIME_PERIOD}", ex.message)
     }
 }

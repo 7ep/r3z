@@ -5,8 +5,11 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.logDebug
 import coverosR3z.logging.logTrace
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.exceptions.MultipleSubmissionsInPeriodException
+import coverosR3z.persistence.exceptions.SubmissionNotFoundException
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
+import java.util.NoSuchElementException
 
 class TimeEntryPersistence(
     private val pmd : PureMemoryDatabase,
@@ -135,6 +138,11 @@ class TimeEntryPersistence(
     }
 
     override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
+        val alreadyExists = pmd.SubmittedPeriodsAccess().read { submissions -> submissions.any{ it.employeeId == employeeId && it.bounds == timePeriod} }
+        if (alreadyExists) {
+            throw MultipleSubmissionsInPeriodException("A submission already exists for $employeeId on $timePeriod")
+        }
+
         return pmd.SubmittedPeriodsAccess().actOn{ submissions ->
             val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employeeId,
@@ -142,6 +150,16 @@ class TimeEntryPersistence(
             logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
             submissions.add(newSubmission)
             newSubmission
+        }
+    }
+
+    override fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
+        try {
+            return pmd.SubmittedPeriodsAccess().read { submissions ->
+                submissions.single { it.employeeId == employeeId && it.bounds == timePeriod }
+            }
+        } catch (ex: NoSuchElementException) {
+            throw SubmissionNotFoundException("no submission was found with $employeeId on $timePeriod")
         }
     }
 
