@@ -24,6 +24,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         ID_INPUT(elemName = "entry_id"),
         READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
         EDITABLE_ROW(elemClass = "editable-time-entry-row"),
+        SUBMIT_BUTTON(elemClass = "submitbutton"),
         ;
         override fun getId(): String {
             return this.id
@@ -95,6 +96,9 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
+                <form action="${EnterTimeAPI.path}" method="post">
+                    <button class="${Elements.SUBMIT_BUTTON.getElemClass()}">SUBMIT</button>
+                </form>
                 <table role="presentation">
                     <thead>
                         <tr>
