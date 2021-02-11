@@ -6,7 +6,6 @@ import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITest
 import coverosR3z.uitests.startupTestForUI
@@ -151,7 +150,7 @@ class UITimeEntryTests {
 
     private fun verifyTimeEntries() {
         // Verify the entries
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?${ViewTimeAPI.Elements.TIME_PERIOD.getElemName()}=2021-01-01")
 
         assertEquals("1.00", pom.vtp.getTimeForEntry(1))
         assertEquals("2021-01-01",  pom.vtp.getDateForEntry(1))
@@ -313,7 +312,7 @@ class UITimeEntryTests {
 
     private fun verifyTheEntry() {
         // Verify the entry
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
         assertEquals("your time entries", pom.driver.title)
         assertEquals("2020-06-12", pom.vtp.getDateForEntry(1))
         assertEquals("1.00", pom.vtp.getTimeForEntry(1))

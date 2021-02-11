@@ -33,6 +33,8 @@ interface ITimeRecordingUtilities {
     fun findEmployeeById(id: EmployeeId): Employee
     fun listAllEmployees(): List<Employee>
     fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+    fun unsubmitTimePeriod(timePeriod: TimePeriod)
     fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-    fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry>
+    fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
+    fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
 }

@@ -10,7 +10,6 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.*
-import coverosR3z.timerecording.utility.TimeRecordingUtilities
 
 class ViewTimeAPI(private val sd: ServerData) {
 
@@ -23,6 +22,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         SAVE_BUTTON(elemClass = "savebutton"),
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
+        TIME_PERIOD(elemName = "date"),
         READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
         EDITABLE_ROW(elemClass = "editable-time-entry-row"),
         SUBMIT_BUTTON(id = "submitbutton"),
@@ -86,8 +86,17 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     private fun existingTimeEntriesHTML() : String {
+        // if we receive a query string like ?date=2020-06-12 we'll get
+        // the time period it fits in
+        val dateQueryString: String? = sd.ahd.queryString[Elements.TIME_PERIOD.getElemName()]
+        val currentPeriod = if (dateQueryString != null) {
+            val date = Date.make(dateQueryString)
+            TimePeriod.getTimePeriodForDate(date)
+        } else {
+            TimePeriod.getTimePeriodForDate(Date.now())
+        }
         val username = safeHtml(sd.ahd.user.name.value)
-        val te = sd.tru.getAllEntriesForEmployee(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id)
+        val te = sd.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id, currentPeriod)
         val editidValue = sd.ahd.queryString["editid"]
         val projects = sd.tru.listAllProjects()
         // either get the id as an integer or get null,
@@ -95,30 +104,30 @@ class ViewTimeAPI(private val sd: ServerData) {
         val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
 
         // Figure out time period date from viewTimeAPITests
-        val today = Date.now()
-        val timePeriod = TimePeriod.getTimePeriodForDate(today)
-        val periodStartDate = timePeriod.start
-        val periodEndDate = timePeriod.end
-
+        val periodStartDate = currentPeriod.start
+        val periodEndDate = currentPeriod.end
+        val inASubmittedPeriod = sd.tru.isInASubmittedPeriod(sd.ahd.user.employeeId!!, periodStartDate)
+        val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
+        val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <form action="${SubmitTimeAPI.path}" method="post">
-                    <button id="${Elements.SUBMIT_BUTTON.getId()}">SUBMIT</button>
+                <form action="$submitButtonAction" method="post">
+                    <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
                     <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
                     <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
                 </form>
                 <nav class="time_period_selector">
                     <label for="previous_period_link">prev</label>
-                    <a id="previous_period_link" href="#PREVIOUS_HERE">PREVIOUS_PERIOD_DATE</a>
+                    <a id="previous_period_link" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getPrevious().start.stringValue}">${currentPeriod.getPrevious().start.stringValue}</a>
                     <select>
                         <option value="UNSURE_WHAT_GOES_HERE">PREVIOUS_PERIOD</option>
-                        <option selected value="UNSURE_WHAT_GOES_HERE">CURRENT_PERIOD_HERE</option>
+                        <option selected value="current">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</option>
                         <option value="UNSURE_WHAT_GOES_HERE">SUBSEQUENT_PERIOD</option>
                     </select> 
                     <label for="next_period_link">prev</label>
-                    <a id="next_period_link" href="#PREVIOUS_HERE">NEXT_PERIOD_DATE</a>
+                    <a id="next_period_link" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
                 </nav>
                 <table role="presentation">
                     <thead>
@@ -131,7 +140,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         </tr>
                     </thead>
                     <tbody>
-                    ${renderTimeRows(te, idBeingEdited, projects)}
+                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
                     </tbody>
                 </table>
         """
@@ -141,19 +150,20 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderTimeRows(
         te: Set<TimeEntry>,
         idBeingEdited: Int?,
-        projects: List<Project>
+        projects: List<Project>,
+        currentPeriod: TimePeriod
     ): String {
         return renderCreateTimeRow(projects) +
         te.sortedBy { it.id.value }.joinToString("") {
             if (it.id.value == idBeingEdited) {
-                renderEditRow(it, projects)
+                renderEditRow(it, projects, currentPeriod)
             } else {
-                renderReadOnlyRow(it)
+                renderReadOnlyRow(it, currentPeriod)
             }
         }
     }
 
-    private fun renderReadOnlyRow(it: TimeEntry): String {
+    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod): String {
         return """
      <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div>
@@ -173,6 +183,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <td class="action">
                 <form action="$path">
                     <input type="hidden" name="editid" value="${it.id.value}" /> 
+                    <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
                     <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
                 </form>
             </td>
@@ -182,11 +193,12 @@ class ViewTimeAPI(private val sd: ServerData) {
     """
     }
 
-    private fun renderEditRow(it: TimeEntry, projects: List<Project>): String {
+    private fun renderEditRow(it: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
         return """
     <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <form action="$path" method="post">
             <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
+            <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
             <td class="project">
                 <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
                     ${projectsToOptionsOneSelected(projects, it.project)}
@@ -249,7 +261,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
         tru.changeEntry(timeEntry)
 
-        return redirectTo(path)
+        val currentPeriod = data.mapping[Elements.TIME_PERIOD.getElemName()]
+        val viewEntriesPage = path + if (currentPeriod.isNullOrBlank()) "" else "" + "?" + Elements.TIME_PERIOD.getElemName() + "=" + currentPeriod
+        return redirectTo(viewEntriesPage)
     }
 
 }

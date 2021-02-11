@@ -289,7 +289,7 @@ class TimeEntryPersistenceTests {
                 employee = employee,
                 date = DEFAULT_PERIOD_START_DATE))
 
-        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee.id, DEFAULT_TIME_PERIOD)
 
         assertEquals(inputTimeEntry, result.first())
     }
@@ -308,7 +308,7 @@ class TimeEntryPersistenceTests {
                 employee = employee,
                 date = A_RANDOM_DAY_IN_JUNE_2020))
 
-        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee.id, DEFAULT_TIME_PERIOD)
 
         assertFalse("There should be no time entries found because they exist outside our time period", result.any())
     }

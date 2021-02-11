@@ -1,12 +1,10 @@
 package coverosR3z.timerecording.types
 
-import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence
 
 private const val minIdMsg = "Valid identifier values are 1 or above"
 
@@ -57,9 +55,9 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
 
         enum class Keys(private val keyString: String) : SerializationKeys {
             ID("id"),
-            EMPLOYEE_ID("employee_id"),
-            START_BOUND("start_bound"),
-            END_BOUND("end_bound");
+            EMPLOYEE_ID("eid"),
+            START_BOUND("start"),
+            END_BOUND("end");
 
             /**
              * This needs to be a method and not just a value of the class

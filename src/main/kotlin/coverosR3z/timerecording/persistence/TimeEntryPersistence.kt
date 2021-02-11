@@ -163,10 +163,17 @@ class TimeEntryPersistence(
         }
     }
 
-    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
         return pmd.TimeEntryDataAccess().read {
             timeEntries ->
-                timeEntries.filter { it.employee == employee && timePeriod.contains(it.date)}.toSet()
+                timeEntries.filter { it.employee.id == employeeId && timePeriod.contains(it.date)}.toSet()
+        }
+    }
+
+    override fun unsubmitTimePeriod(stp: SubmittedPeriod) {
+        pmd.SubmittedPeriodsAccess().actOn { submissions ->
+            submissions.remove(stp)
+            logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employeeId.value}\", id: ${stp.id.value}, from the database" }
         }
     }
 

@@ -15,14 +15,9 @@ import kotlin.concurrent.thread
 
 class AuthenticationPersistenceTests {
 
-    private lateinit var ap : IAuthPersistence
-
-    @Before
-    fun init() {
-        ap = AuthenticationPersistence(PureMemoryDatabase())
-    }
     @Test
     fun `Should fail to find an unregistered user`() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         val result = ap.isUserRegistered(UserName("mitch"))
 
         assertEquals("we haven't registered anyone yet, so mitch shouldn't be registered", false, result)
@@ -30,6 +25,7 @@ class AuthenticationPersistenceTests {
 
     @Test
     fun `Should be able to create a new user`() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, null)
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
@@ -40,6 +36,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldAddSession() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, ap.getUserForSession(DEFAULT_SESSION_TOKEN))
     }
@@ -49,6 +46,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldAddSession_Duplicate() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         val ex = Assert.assertThrows(IllegalArgumentException::class.java) {
             ap.addNewSession(
@@ -66,6 +64,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldRemoveSession() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, ap.getUserForSession(DEFAULT_SESSION_TOKEN))
         ap.deleteSession(DEFAULT_USER)
@@ -77,6 +76,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldComplainIfTryingToRemoveNonexistentSession() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         val ex = Assert.assertThrows(IllegalStateException::class.java) { ap.deleteSession(DEFAULT_USER) }
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
@@ -87,6 +87,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testCorruptingSessionDataWithMultiThreading() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         val listOfThreads = mutableListOf<Thread>()
         val numberNewSessionsAdded = 20
         for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
@@ -105,6 +106,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testCorruptingUserDataWithMultiThreading() {
+        val ap = AuthenticationPersistence(PureMemoryDatabase())
         val listOfThreads = mutableListOf<Thread>()
         val numberNewUsersAdded = 20
         repeat(numberNewUsersAdded) { // each thread calls the add a single time

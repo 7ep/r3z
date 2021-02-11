@@ -418,7 +418,7 @@ class TimeRecordingUtilityTests {
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
         ftep.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
 
-        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
 
         assertTrue(allEntriesForPeriod.any())
     }

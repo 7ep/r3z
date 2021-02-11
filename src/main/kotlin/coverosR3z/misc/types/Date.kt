@@ -17,7 +17,7 @@ enum class Month(val ord: Int) {
      * Give the length of the month the provided date is within
      */
     fun calculateLength(year: Int): Int {
-        return LocalDate.of(year, this.ordinal, 1).lengthOfMonth()
+        return LocalDate.of(year, this.ord, 1).lengthOfMonth()
     }
 
     companion object {

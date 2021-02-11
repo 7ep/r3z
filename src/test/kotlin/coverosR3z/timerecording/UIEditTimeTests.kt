@@ -80,7 +80,7 @@ class UIEditTimeTests {
     private fun enterInitialTime() {
         // when the employee enters their time
         enterTimeForEmployee("projectb")
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
     }
 
     private fun changeTime() {

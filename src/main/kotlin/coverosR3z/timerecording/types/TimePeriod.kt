@@ -3,6 +3,7 @@ package coverosR3z.timerecording.types
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
+import java.time.LocalDate
 
 data class TimePeriod(val start: Date, val end: Date) {
 
@@ -11,6 +12,18 @@ data class TimePeriod(val start: Date, val end: Date) {
      */
     fun contains(date: Date) : Boolean {
         return date in start .. end
+    }
+
+    fun getNext() : TimePeriod {
+        val localDate = LocalDate.ofEpochDay(end.epochDay.toLong())
+        val nextDay = localDate.plusDays(1)
+        return getTimePeriodForDate(Date(nextDay.toEpochDay().toInt()))
+    }
+
+    fun getPrevious() : TimePeriod {
+        val localDate = LocalDate.ofEpochDay(start.epochDay.toLong())
+        val nextDay = localDate.minusDays(1)
+        return getTimePeriodForDate(Date(nextDay.toEpochDay().toInt()))
     }
 
     companion object {
