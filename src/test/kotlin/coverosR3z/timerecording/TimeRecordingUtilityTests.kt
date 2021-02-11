@@ -408,4 +408,19 @@ class TimeRecordingUtilityTests {
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
     }
 
+    /**
+     * We shall have an easy way to obtain the list of
+     * [TimeEntry] for a particular [TimePeriod]
+     */
+    @Test
+    fun testGetTimeEntriesForPeriod() {
+        val ftep = FakeTimeEntryPersistence()
+        val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
+        ftep.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
+
+        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+
+        assertTrue(allEntriesForPeriod.any())
+    }
+
 }

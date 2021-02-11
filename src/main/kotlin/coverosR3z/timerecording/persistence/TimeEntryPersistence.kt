@@ -163,6 +163,13 @@ class TimeEntryPersistence(
         }
     }
 
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+        return pmd.TimeEntryDataAccess().read {
+            timeEntries ->
+                timeEntries.filter { it.employee == employee && timePeriod.contains(it.date)}.toSet()
+        }
+    }
+
     companion object {
         const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
         const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"
