@@ -24,6 +24,7 @@ class FakeTimeEntryPersistence(
     var setLockedEmployeeDateBehavior : () -> Boolean = { false },
     var persistNewSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    var getTimeEntriesForTimePeriodBehavior : () -> Set<TimeEntry> = { emptySet() },
 ) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
@@ -90,6 +91,10 @@ class FakeTimeEntryPersistence(
 
     override fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
         return getSubmittedTimePeriodBehavior()
+    }
+
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+        return getTimeEntriesForTimePeriodBehavior()
     }
 
 }

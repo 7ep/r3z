@@ -34,4 +34,5 @@ interface ITimeRecordingUtilities {
     fun listAllEmployees(): List<Employee>
     fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
     fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+    fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry>
 }

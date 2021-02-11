@@ -18,6 +18,7 @@ class FakeTimeRecordingUtilities(
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
     var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = { emptySet() },
+    var getTimeEntriesForTimePeriodBehavior : () -> Set<TimeEntry> = { emptySet() },
     var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
     var listAllProjectsBehavior : () -> List<Project> = { emptyList() },
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
@@ -76,5 +77,9 @@ class FakeTimeRecordingUtilities(
 
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         return getSubmittedTimePeriodBehavior()
+    }
+
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+        return getTimeEntriesForTimePeriodBehavior()
     }
 }

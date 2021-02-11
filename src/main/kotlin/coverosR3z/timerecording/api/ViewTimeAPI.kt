@@ -109,6 +109,17 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
                     <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
                 </form>
+                <nav class="time_period_selector">
+                    <label for="previous_period_link">prev</label>
+                    <a id="previous_period_link" href="#PREVIOUS_HERE">PREVIOUS_PERIOD_DATE</a>
+                    <select>
+                        <option value="UNSURE_WHAT_GOES_HERE">PREVIOUS_PERIOD</option>
+                        <option selected value="UNSURE_WHAT_GOES_HERE">CURRENT_PERIOD_HERE</option>
+                        <option value="UNSURE_WHAT_GOES_HERE">SUBSEQUENT_PERIOD</option>
+                    </select> 
+                    <label for="next_period_link">prev</label>
+                    <a id="next_period_link" href="#PREVIOUS_HERE">NEXT_PERIOD_DATE</a>
+                </nav>
                 <table role="presentation">
                     <thead>
                         <tr>

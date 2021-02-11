@@ -278,4 +278,40 @@ class TimeEntryPersistenceTests {
         val ex = assertThrows(MultipleSubmissionsInPeriodException::class.java) { tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD) }
         assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.id} on $DEFAULT_TIME_PERIOD", ex.message)
     }
+
+    @Test
+    fun testGetTimeEntriesForPeriod() {
+        val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val inputTimeEntry = tep.persistNewTimeEntry(
+            createTimeEntryPreDatabase(
+                project = project,
+                employee = employee,
+                date = DEFAULT_PERIOD_START_DATE))
+
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
+
+        assertEquals(inputTimeEntry, result.first())
+    }
+
+    /**
+     * If I only have a time entry that is outside the time period,
+     * we'll find nothing.
+     */
+    @Test
+    fun testGetTimeEntriesForPeriod_outOfRange() {
+        val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        tep.persistNewTimeEntry(
+            createTimeEntryPreDatabase(
+                project = project,
+                employee = employee,
+                date = A_RANDOM_DAY_IN_JUNE_2020))
+
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
+
+        assertFalse("There should be no time entries found because they exist outside our time period", result.any())
+    }
+
+
 }
