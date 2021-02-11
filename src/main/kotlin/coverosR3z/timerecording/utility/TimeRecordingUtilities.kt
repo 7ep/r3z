@@ -137,11 +137,20 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
     }
 
+    override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
+        val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
+        return persistence.unsubmitTimePeriod(submittedPeriod)
+    }
+
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod) : SubmittedPeriod {
         return persistence.getSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
     }
 
-    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
-        return persistence.getTimeEntriesForTimePeriod(employee, timePeriod)
+    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
+        return persistence.getTimeEntriesForTimePeriod(employeeId, timePeriod)
+    }
+
+    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+        return persistence.isInASubmittedPeriod(employeeId, date)
     }
 }

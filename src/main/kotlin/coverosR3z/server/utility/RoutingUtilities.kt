@@ -48,6 +48,7 @@ class RoutingUtilities {
                 Pair(Verb.POST, LoggingAPI.path) -> LoggingAPI.handlePost(sd)
                 Pair(Verb.POST, ViewTimeAPI.path) -> ViewTimeAPI.handlePost(sd)
                 Pair(Verb.POST, SubmitTimeAPI.path) -> SubmitTimeAPI.handlePost(sd)
+                Pair(Verb.POST, UnsubmitTimeAPI.path) -> UnsubmitTimeAPI.handlePost(sd)
 
                 else -> {
                     handleNotFound()

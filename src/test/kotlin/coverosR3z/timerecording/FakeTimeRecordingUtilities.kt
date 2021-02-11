@@ -25,7 +25,9 @@ class FakeTimeRecordingUtilities(
     var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
     var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
     var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    var unsubmitTimePeriodBehavior : () -> Unit = {},
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    var isInASubmittedPeriodBehavior : () -> Boolean = { false },
     ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -75,11 +77,19 @@ class FakeTimeRecordingUtilities(
         return submitTimePeriodBehavior()
     }
 
+    override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
+        unsubmitTimePeriodBehavior()
+    }
+
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         return getSubmittedTimePeriodBehavior()
     }
 
-    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
         return getTimeEntriesForTimePeriodBehavior()
+    }
+
+    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+        return isInASubmittedPeriodBehavior()
     }
 }

@@ -233,31 +233,6 @@ class EnterTimeAPITests {
     }
 
     /**
-     * What should happen if we send too many inputs to the API?
-     * It should complain.  We want precision.
-     *
-     * In this test we expect project, time, detail, and date to
-     * be sent.  If we get project, time, detail, FOO, and date,
-     * we throw the exception
-     *
-     * See [InexactInputsException]
-     */
-    @Test
-    fun testDoPOST_TooManyInputs() {
-        val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                "foo" to "bar",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
-        val ex = assertThrows(InexactInputsException::class.java) { EnterTimeAPI.handlePost(sd) }
-        assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, detail_entry, foo, date_entry]", ex.message)
-    }
-
-    /**
      * Just how quickly does it go, from this level?
      *
      * With 1000 requests, it takes .180 seconds = 5,555 requests per second.
