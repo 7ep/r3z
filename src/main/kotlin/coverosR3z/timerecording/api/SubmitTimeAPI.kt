@@ -51,15 +51,15 @@ class SubmitTimeAPI(private val sd: ServerData){
         val tru = sd.tru // time recording utilities
         val startDate = Date.make(data.mapping[Elements.START_DATE.getElemName()])
         val endDate = Date.make(data.mapping[Elements.END_DATE.getElemName()])
-        val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
+        // val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
 
         // UNFINISHED: Have not implemented time periods yet.
 
         // next step: figure out the actual timePeriod for the employee for the start/end dates that has
         // potentially all the time entries that are part of it.
-        // val timePeriod = TimePeriod(employee, startDate, endDate);
+        val timePeriod = TimePeriod(startDate, endDate);
 
-        //tru.submitTimePeriod()
+        tru.submitTimePeriod(timePeriod)
 
         return ServerUtilities.redirectTo(ViewTimeAPI.path)
     }

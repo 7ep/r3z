@@ -26,9 +26,15 @@ class SubmitTimeAPITests {
         ))
         val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
         val response = SubmitTimeAPI.handlePost(sd).statusCode
+
         Assert.assertEquals(
             "We should have gotten redirected to the viewTime page",
             StatusCode.SEE_OTHER, response
         )
+
+        // Validate that it was actually submitted and/or locked date entries
+        // test handlePost()
+        TODO("trigger the handlePost for submit time entry")
+
     }
 }

@@ -30,4 +30,5 @@ interface ITimeEntryPersistence {
     fun getEmployeeById(id: EmployeeId): Employee
     fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
     fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod) : SubmittedPeriod
+    fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod) : SubmittedPeriod
 }

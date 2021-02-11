@@ -22,6 +22,9 @@ data class SubmissionId(val value: Int) {
     }
 }
 
+/**
+ * A submitted TimePeriod in the database
+ */
 data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val bounds: TimePeriod): IndexableSerializable() {
 
     override fun getIndex(): Int {

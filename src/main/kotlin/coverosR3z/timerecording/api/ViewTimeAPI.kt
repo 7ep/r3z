@@ -10,6 +10,7 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 
 class ViewTimeAPI(private val sd: ServerData) {
 
@@ -92,12 +93,21 @@ class ViewTimeAPI(private val sd: ServerData) {
         // either get the id as an integer or get null,
         // the code will handle either properly
         val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
+
+        // Figure out time period date from viewTimeAPITests
+        val today = Date.now()
+        val timePeriod = TimePeriod.getTimePeriodForDate(today)
+        val periodStartDate = timePeriod.start
+        val periodEndDate = timePeriod.end
+
         val body = """
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <form action="${EnterTimeAPI.path}" method="post">
+                <form action="${SubmitTimeAPI.path}" method="post">
                     <button class="${Elements.SUBMIT_BUTTON.getElemClass()}">SUBMIT</button>
+                    <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
+                    <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
                 </form>
                 <table role="presentation">
                     <thead>
