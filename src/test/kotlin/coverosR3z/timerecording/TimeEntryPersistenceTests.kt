@@ -261,7 +261,7 @@ class TimeEntryPersistenceTests {
     @Test
     fun testGetSubmittedPeriod() {
         tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
-        val submittedTimePeriod = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD);
+        val submittedTimePeriod = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
 
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
     }
@@ -276,6 +276,6 @@ class TimeEntryPersistenceTests {
     fun testCannotPersistTheSameSubmissionTwice() {
         tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
         val ex = assertThrows(MultipleSubmissionsInPeriodException::class.java) { tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD) }
-        assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.id} on ${DEFAULT_TIME_PERIOD}", ex.message)
+        assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.id} on $DEFAULT_TIME_PERIOD", ex.message)
     }
 }

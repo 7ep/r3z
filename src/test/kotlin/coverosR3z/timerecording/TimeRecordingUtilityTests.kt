@@ -388,6 +388,7 @@ class TimeRecordingUtilityTests {
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         tru.changeUser(CurrentUser(User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, employee.id)))
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
+
         // this locks the time entries for the period
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
 
@@ -401,17 +402,9 @@ class TimeRecordingUtilityTests {
     fun testGetSubmittedPeriod() {
         val ftep = FakeTimeEntryPersistence()
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER))
-        // maybe: alter ftep.getSubmittedTimePeriodBehavior to return something other than default period
 
-        // NOTE: We could construct a time period and modify the "behavior" of the fake to return that instead of the default
-        //        val today = Date.now()
-        //        val timePeriod = TimePeriod.getTimePeriodForDate(today)
-        //        val periodStartDate = timePeriod.start
-        //        val periodEndDate = timePeriod.end
+        val submittedTimePeriod = tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
 
-        val submittedTimePeriod = tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD);
-
-        // TODO: Add more positive/negative tests
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
     }
 

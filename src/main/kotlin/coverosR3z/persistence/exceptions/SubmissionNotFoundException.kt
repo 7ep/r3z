@@ -1,3 +1,3 @@
 package coverosR3z.persistence.exceptions
 
-class SubmissionNotFoundException (message: String="") : Exception(message)
+class SubmissionNotFoundException (message: String = "") : Exception(message)
