@@ -2,7 +2,7 @@ package coverosR3z.server.utility
 
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.User
-import coverosR3z.misc.utility.checkHasInputs
+import coverosR3z.misc.utility.checkHasRequiredInputs
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.AuthStatus
@@ -74,7 +74,7 @@ class AuthUtilities {
         ): PreparedResponseData {
             return when (authStatus) {
                 AuthStatus.AUTHENTICATED -> {
-                    checkHasInputs(data.mapping.keys, requiredInputs)
+                    checkHasRequiredInputs(data.mapping.keys, requiredInputs)
                     handler()
                 }
                 AuthStatus.UNAUTHENTICATED -> handleUnauthorized()
@@ -94,7 +94,7 @@ class AuthUtilities {
         ): PreparedResponseData {
             return when (authStatus) {
                 AuthStatus.UNAUTHENTICATED -> {
-                    checkHasInputs(data.mapping.keys, requiredInputs)
+                    checkHasRequiredInputs(data.mapping.keys, requiredInputs)
                     handler()
                 }
                 AuthStatus.AUTHENTICATED -> redirectTo(HomepageAPI.path)

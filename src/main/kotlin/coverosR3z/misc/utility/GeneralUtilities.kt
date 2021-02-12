@@ -75,7 +75,7 @@ fun checkParseToLong(value: String?,
  * @param receivedKeys the data sent to the API
  * @param requiredKeys the exact keys required
  */
-fun checkHasInputs(receivedKeys: Set<String>, requiredKeys: Set<Element>) {
+fun checkHasRequiredInputs(receivedKeys: Set<String>, requiredKeys: Set<Element>) {
     val requiredKeyStrings = requiredKeys.map { it.getElemName() }.toSet()
     if (!receivedKeys.containsAll(requiredKeyStrings)) {
         throw InexactInputsException("expected keys: ${requiredKeyStrings}. received keys: $receivedKeys")
