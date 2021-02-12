@@ -25,8 +25,10 @@ import org.junit.Test
 import java.io.File
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.concurrent.thread
 
 class PureMemoryDatabaseTests {
 
@@ -147,16 +149,17 @@ class PureMemoryDatabaseTests {
     @Test
     fun testCorruptingEmployeeDataWithMultiThreading() {
         val tep = TimeEntryPersistence(pmd)
-        val listOfThreads = mutableListOf<Thread>()
+        val listOfThreads = mutableListOf<Future<*>>()
         val numberNewEmployeesAdded = 20
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         turnOffAllLogging()
         repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
+            listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-            })
+            }))
         }
         // wait for all those threads
-        listOfThreads.forEach{it.join()}
+        listOfThreads.forEach{it.get()}
         resetLogSettingsToDefault()
         assertEquals(numberNewEmployeesAdded, tep.getAllEmployees().size)
     }
@@ -168,16 +171,17 @@ class PureMemoryDatabaseTests {
     @Test
     fun testCorruptingProjectDataWithMultiThreading() {
         val tep = TimeEntryPersistence(pmd)
-        val listOfThreads = mutableListOf<Thread>()
+        val listOfThreads = mutableListOf<Future<*>>()
         val numberNewProjectsAdded = 20
         turnOffAllLogging()
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewProjectsAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
+            listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewProject(DEFAULT_PROJECT_NAME)
-            })
+            }))
         }
         // wait for all those threads
-        listOfThreads.forEach{it.join()}
+        listOfThreads.forEach{it.get()}
         resetLogSettingsToDefault()
         assertEquals(numberNewProjectsAdded, tep.getAllProjects().size)
     }
@@ -188,18 +192,19 @@ class PureMemoryDatabaseTests {
     @Test
     fun testCorruptingTimeEntryDataWithMultiThreading() {
         val tep = TimeEntryPersistence(pmd)
-        val listOfThreads = mutableListOf<Thread>()
+        val listOfThreads = mutableListOf<Future<*>>()
         val numberTimeEntriesAdded = 20
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         turnOffAllLogging()
         repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
+            listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
-            })
+            }))
         }
         // wait for all those threads
-        listOfThreads.forEach{it.join()}
+        listOfThreads.forEach{it.get()}
         resetLogSettingsToDefault()
         assertEquals(numberTimeEntriesAdded, tep.readTimeEntries(DEFAULT_EMPLOYEE).size)
     }

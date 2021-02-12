@@ -9,9 +9,10 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
-import kotlin.concurrent.thread
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class AuthenticationPersistenceTests {
 
@@ -88,15 +89,16 @@ class AuthenticationPersistenceTests {
     @Test
     fun testCorruptingSessionDataWithMultiThreading() {
         val ap = AuthenticationPersistence(PureMemoryDatabase())
-        val listOfThreads = mutableListOf<Thread>()
+        val listOfThreads = mutableListOf<Future<*>>()
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val numberNewSessionsAdded = 20
         for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
+            listOfThreads.add(cachedThreadPool.submit(Thread {
                 ap.addNewSession(DEFAULT_SESSION_TOKEN +i, DEFAULT_USER, DEFAULT_DATETIME)
-            })
+            }))
         }
         // wait for all those threads
-        listOfThreads.forEach{it.join()}
+        listOfThreads.forEach{it.get()}
         assertEquals(numberNewSessionsAdded, ap.getAllSessions().size)
     }
 
@@ -107,15 +109,16 @@ class AuthenticationPersistenceTests {
     @Test
     fun testCorruptingUserDataWithMultiThreading() {
         val ap = AuthenticationPersistence(PureMemoryDatabase())
-        val listOfThreads = mutableListOf<Thread>()
+        val listOfThreads = mutableListOf<Future<*>>()
         val numberNewUsersAdded = 20
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewUsersAdded) { // each thread calls the add a single time
-            listOfThreads.add(thread {
+            listOfThreads.add(cachedThreadPool.submit(Thread {
                 ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-            })
+            }))
         }
         // wait for all those threads
-        listOfThreads.forEach{it.join()}
+        listOfThreads.forEach{it.get()}
         assertEquals(numberNewUsersAdded, ap.getAllUsers().size)
     }
 

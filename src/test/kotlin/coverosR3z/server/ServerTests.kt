@@ -24,8 +24,11 @@ import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import java.io.File
 import java.net.Socket
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
@@ -326,11 +329,13 @@ class ServerTests {
         val numberOfThreads = 10
         val numberOfRequests = 300
 
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
         val (time, _) = getTime {
-            val threadList = (1..numberOfThreads).map {  makeClientThreadRepeatedRequestsHomepage(numberOfRequests, testPort) }
-            threadList.forEach { it.join() }
+            val threadList = (1..numberOfThreads).map {  cachedThreadPool.submit(makeClientThreadRepeatedRequestsHomepage(numberOfRequests, testPort)) }
+            threadList.forEach { it.get() }
         }
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testHomepage_PERFORMANCE")
@@ -351,11 +356,14 @@ class ServerTests {
         val threadCount = 10
         val requestCount = 100
 
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
         // so we don't see spam
         logSettings[LogTypes.DEBUG] = false
+        au.getUserForSessionBehavior = { DEFAULT_USER }
         val (time, _) = getTime {
-            val threadList = (1..threadCount).map {  makeClientThreadRepeatedTimeEntries(requestCount, testPort) }
-            threadList.forEach { it.join() }
+            val threadList = (1..threadCount).map {  cachedThreadPool.submit(makeClientThreadRepeatedTimeEntries(requestCount, testPort)) }
+            threadList.forEach { it.get() }
         }
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testEnterTime_PERFORMANCE")
@@ -369,7 +377,7 @@ class ServerTests {
      * Simply GETs from the homepage many times
      */
     private fun makeClientThreadRepeatedRequestsHomepage(numRequests : Int, port : Int): Thread {
-        return thread {
+        return Thread {
             val client =
                 Client.make(Verb.GET, HomepageAPI.path, listOf("Connection: keep-alive"), authUtilities = au, port = port)
             for (i in 1..numRequests) {
@@ -384,7 +392,7 @@ class ServerTests {
      * Enters time for a user on many days
      */
     private fun makeClientThreadRepeatedTimeEntries(numRequests : Int, port : Int): Thread {
-        return thread {
+        return Thread {
 
             val client =
                 Client.make(
@@ -403,7 +411,8 @@ class ServerTests {
                 val clientWithData = client.addPostData(data)
                 clientWithData.send()
                 val result = clientWithData.read()
-                assertEquals(StatusCode.OK, result.statusCode)
+                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+                assertTrue("headers: ${result.headers}", result.headers.contains("Location: timeentries"))
             }
         }
     }

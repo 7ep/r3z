@@ -21,8 +21,8 @@ import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
 import org.junit.*
 import java.io.File
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.concurrent.thread
 
 /**
  * This is a heavyweight full-integration testing harness for
@@ -90,9 +90,11 @@ class ServerPerformanceTests {
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
         val (time, _) = getTime {
-            val threadList = (1..numberThreads).map { makeClientThreadRepeatedTimeEntries(numberRequests, newProject, port) }
-            threadList.forEach { it.join() }
+            val threadList = (1..numberThreads).map { cachedThreadPool.submit(makeClientThreadRepeatedTimeEntries(numberRequests, newProject, port)) }
+            threadList.forEach { it.get() }
         }
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testEnterTimeReal_PERFORMANCE")
@@ -127,12 +129,14 @@ class ServerPerformanceTests {
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
-        val makeTimeEntriesThreads = (1..2).map { makeClientThreadRepeatedTimeEntries(20, newProject, port) }
-        makeTimeEntriesThreads.forEach { it.join() }
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
+        val makeTimeEntriesThreads = (1..2).map { cachedThreadPool.submit(makeClientThreadRepeatedTimeEntries(20, newProject, port)) }
+        makeTimeEntriesThreads.forEach { it.get() }
 
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests, port) }
-            viewTimeEntriesThreads.forEach { it.join() }
+            val viewTimeEntriesThreads = (1..numberThreads).map { cachedThreadPool.submit(makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests, port)) }
+            viewTimeEntriesThreads.forEach { it.get() }
         }
 
         println("Time was $time")
@@ -167,9 +171,11 @@ class ServerPerformanceTests {
         val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
         ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
 
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsViewHomepage(numberRequests, port) }
-            viewTimeEntriesThreads.forEach { it.join() }
+            val viewTimeEntriesThreads = (1..numberThreads).map { cachedThreadPool.submit(makeClientThreadRepeatedRequestsViewHomepage(numberRequests, port)) }
+            viewTimeEntriesThreads.forEach { it.get() }
         }
 
         println("Time was $time")
@@ -201,9 +207,11 @@ class ServerPerformanceTests {
         LogConfig.logSettings[LogTypes.DEBUG] = false
         LogConfig.logSettings[LogTypes.AUDIT] = false
 
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
         val (time, _) = getTime {
-            val viewTimeEntriesThreads = (1..numberThreads).map { makeClientThreadRepeatedRequestsGetStaticFile(numberRequests, port) }
-            viewTimeEntriesThreads.forEach { it.join() }
+            val viewTimeEntriesThreads = (1..numberThreads).map { cachedThreadPool.submit(makeClientThreadRepeatedRequestsGetStaticFile(numberRequests, port)) }
+            viewTimeEntriesThreads.forEach { it.get() }
         }
 
         println("Time was $time")
@@ -230,7 +238,7 @@ class ServerPerformanceTests {
      * Simply GETs a user's time entries page
      */
     private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int, port : Int): Thread {
-        return thread {
+        return Thread {
             val client =
                 Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
@@ -245,7 +253,7 @@ class ServerPerformanceTests {
      * Simply GETs the homepage
      */
     private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int, port : Int): Thread {
-        return thread {
+        return Thread {
             val client =
                 Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
@@ -261,7 +269,7 @@ class ServerPerformanceTests {
      * Simply GETs the general.css file
      */
     private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int, port : Int): Thread {
-        return thread {
+        return Thread {
             val client =
                 Client.make(Verb.GET, "sample.js", listOf("Connection: keep-alive"), authUtilities = fakeAuth, port = port)
             for (i in 1..numRequests) {
@@ -277,7 +285,7 @@ class ServerPerformanceTests {
      * @param numRequests The number of requests this client will send to the server.
      */
     private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project, port : Int): Thread {
-        return thread {
+        return Thread {
 
             val client =
                 Client.make(
@@ -289,7 +297,7 @@ class ServerPerformanceTests {
                 )
             for (i in 1..numRequests) {
                 val data = PostBodyData(mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 20).stringValue,
+                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i).stringValue,
                     EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
                     EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.id.value.toString(),
                     EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
