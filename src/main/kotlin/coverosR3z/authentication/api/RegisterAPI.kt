@@ -79,13 +79,13 @@ class RegisterAPI(private val sd: ServerData) {
                 <tr>
                     <td>
                         <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label><br>
-                        <input aria-invalid="false" type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
+                        <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label><br>
-                        <input aria-invalid="false" type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
+                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                     </td>
                 </tr>
                 <tr>

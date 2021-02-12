@@ -35,6 +35,7 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
      * Gets the current changes to the data, clearing
      * it in the process
      */
+    @Synchronized
     fun getChangedData(): Set<Pair<T, DataAction>> {
         val mySet = modified.toSet()
         modified.clear()
