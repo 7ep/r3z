@@ -11,10 +11,7 @@ import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.*
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.Employee
-import coverosR3z.timerecording.types.EmployeeName
-import coverosR3z.timerecording.types.Project
-import coverosR3z.timerecording.types.TimeEntry
+import coverosR3z.timerecording.types.*
 import java.io.File
 
 /**
@@ -138,8 +135,9 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
             val sessions = readAndDeserialize(dbDirectory, Session.directoryName) { Session.Deserializer(users).deserialize(it) }
             val employees = readAndDeserialize(dbDirectory, Employee.directoryName) { Employee.Deserializer().deserialize(it) }
             val timeEntries = readAndDeserialize(dbDirectory, TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
+            val submittedPeriods = readAndDeserialize(dbDirectory, SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
 
-            return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, ChangeTrackingSet(), dbDirectory)
+            return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, submittedPeriods, dbDirectory)
         }
 
         private fun <T : Indexed> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
