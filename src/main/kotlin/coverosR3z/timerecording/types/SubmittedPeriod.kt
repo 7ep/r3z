@@ -1,6 +1,9 @@
 package coverosR3z.timerecording.types
 
+import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.persistence.exceptions.DatabaseCorruptedException
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
@@ -37,11 +40,23 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
             Keys.END_BOUND to bounds.end.stringValue
         )
 
-    class Deserializer : Deserializable<SubmittedPeriod> {
+    class Deserializer(val employees: Set<Employee>) : Deserializable<SubmittedPeriod> {
 
-        override fun deserialize(str: String) : SubmittedPeriod {
-            TODO("Not Implemented")
+        override fun deserialize(str: String): SubmittedPeriod {
+            return deserialize(str, Companion) { entries ->
+                try {
+                    val id = SubmissionId.make(entries[Keys.ID])
+                    val employeeId = EmployeeId.make(entries[Keys.ID])
+                    val bounds = TimePeriod(Date.make(entries[Keys.START_BOUND]), Date.make(entries[Keys.END_BOUND]))
+                    SubmittedPeriod(id, employeeId, bounds)
+                } catch (ex : DatabaseCorruptedException) {
+                    throw ex
+                } catch (ex : Throwable) {
+                    throw DatabaseCorruptedException("Unable to deserialize this text as time entry data: $str", ex)
+                }
+            }
         }
+
     }
 
     companion object : SerializableCompanion {
