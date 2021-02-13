@@ -51,7 +51,9 @@ class ServerPerformanceTests {
 
     private fun startServer(port : Int) {
         serverObject = Server(port)
-        serverThread = serverObject.startServer(Server.initializeBusinessCode(pmd))
+        serverThread = serverObject.createServerThread(Server.initializeBusinessCode(pmd))
+        val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+        executor.submit(serverThread)
         if (!serverObject.systemReady) {
             Thread.sleep(50)
         }

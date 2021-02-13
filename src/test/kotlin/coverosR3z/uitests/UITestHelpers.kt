@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
+import java.util.concurrent.Executors
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX({ FirefoxDriver() }),
@@ -37,7 +38,9 @@ fun startupTestForUI(domain: String = "http://localhost", port : Int, driver: ()
     val server = Server(port)
     val pmd = Server.makeDatabase()
     val businessCode = Server.initializeBusinessCode(pmd)
-    server.startServer(businessCode)
+    val serverThread = server.createServerThread(businessCode)
+    val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+    executor.submit(serverThread)
 
     return PageObjectModelLocal.make(driver(), port, businessCode, server, pmd, domain)
 }
