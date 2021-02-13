@@ -33,7 +33,9 @@ class DatabaseDiskPersistenceTests {
         val dbs = DatabaseDiskPersistence(dbDirectory)
 
         val subDirectory = "project"
-        dbs.persistToDisk(projects, subDirectory)
+        projects.forEach {
+            dbs.persistToDisk(it, subDirectory)
+        }
         dbs.stop()
 
         assertDirectoryAndFilesAsExpected(dbDirectory, subDirectory, projects)
@@ -54,10 +56,10 @@ class DatabaseDiskPersistenceTests {
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
         val dbs = DatabaseDiskPersistence(dbDirectory)
-        dbs.persistToDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        dbs.persistToDisk(DEFAULT_PROJECT, subDirectory)
 
         val revisedProject = Project(DEFAULT_PROJECT.id, ProjectName("this is new"))
-        dbs.persistToDisk(setOf(revisedProject), subDirectory)
+        dbs.persistToDisk(revisedProject, subDirectory)
         dbs.stop()
 
         val text = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").readText()
@@ -72,9 +74,9 @@ class DatabaseDiskPersistenceTests {
         val subDirectory = "project"
         File(dbDirectory).deleteRecursively()
         val dbs = DatabaseDiskPersistence(dbDirectory)
-        dbs.persistToDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        dbs.persistToDisk(DEFAULT_PROJECT, subDirectory)
 
-        dbs.deleteOnDisk(setOf(DEFAULT_PROJECT), subDirectory)
+        dbs.deleteOnDisk(DEFAULT_PROJECT, subDirectory)
         dbs.stop()
 
         val doesExist = File("$dbDirectory$subDirectory/${DEFAULT_PROJECT.id.value}$databaseFileSuffix").exists()

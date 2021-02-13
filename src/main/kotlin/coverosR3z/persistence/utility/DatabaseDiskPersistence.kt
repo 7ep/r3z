@@ -40,36 +40,43 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
     /**
      * takes any serializable data and writes it to disk
      *
-     * @param set the data we are serializing and writing
+     * @param item the data we are serializing and writing
      * @param name the name of the data
      */
-    fun <T: IndexableSerializable> persistToDisk(set : Set<T>, name: String) {
+    fun <T: IndexableSerializable> persistToDisk(item : T, name: String) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping serialization for $name" }
             return
         }
 
-        for (item in set) {
-            val parentDirectory = "$dbDirectory$name"
-            actionQueue.enqueue { File(parentDirectory).mkdirs() }
+        val parentDirectory = "$dbDirectory$name"
+        actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
-            val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-            actionQueue.enqueue { File(fullPath).writeText(item.serialize()) }
-        }
+        val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
+        actionQueue.enqueue { File(fullPath).writeText(item.serialize()) }
     }
 
-    fun <T: IndexableSerializable> deleteOnDisk(set: Set<T>, subDirectory: String) {
+    /**
+     * Deletes a piece of data from the disk
+     *
+     * Our data consists of directories as containers and each
+     * individual piece of data (e.g. [TimeEntry], [Project], etc.) as
+     * a file in that directory.  This method simply finds the proper
+     * file and deletes it.
+     *
+     * @param item the data we are serializing and writing
+     * @param subDirectory the name of the data, for finding the directory
+     */
+    fun <T: IndexableSerializable> deleteOnDisk(item: T, subDirectory: String) {
         if (dbDirectory == null) {
             logTrace { "database directory was null, skipping delete for $subDirectory" }
             return
         }
 
-        for (item in set) {
-            val parentDirectory = "$dbDirectory$subDirectory"
+        val parentDirectory = "$dbDirectory$subDirectory"
 
-            val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-            actionQueue.enqueue { File(fullPath).delete() }
-        }
+        val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
+        actionQueue.enqueue { File(fullPath).delete() }
     }
 
 
