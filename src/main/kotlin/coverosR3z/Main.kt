@@ -18,16 +18,22 @@ fun main(args: Array<String>) {
 
     val serverOptions = extractCommandLineOptions(args)
 
-    logImperative("starting server on port ${serverOptions.port}")
+    logImperative("starting server on port ${serverOptions.port} and sslPort ${serverOptions.sslPort}")
     logImperative("database directory is ${serverOptions.dbDirectory}")
 
     val pmd = Server.makeDatabase(dbDirectory = serverOptions.dbDirectory)
     val businessObjects = Server.initializeBusinessCode(pmd)
-    val server = Server(serverOptions.port)
-    val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-    val serverThread = server.createServerThread(businessObjects)
-    executor.submit(serverThread)
-    server.addShutdownHook(pmd, serverThread)
+    val server = Server(serverOptions.port, serverOptions.sslPort)
+    val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+    val serverFuture = serverExecutor.submit(server.createServerThread(businessObjects))
+
+    if (serverOptions.sslPort != null) {
+        val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+        val sslServerFuture = sslServerExecutor.submit(server.createSecureServerThread(businessObjects))
+        server.addShutdownHook(pmd, serverFuture, sslServerFuture)
+    }
+
+    server.addShutdownHook(pmd, serverFuture)
 }
 
 /**

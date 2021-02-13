@@ -21,20 +21,42 @@ import java.net.ServerSocket
 import java.net.SocketException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
+import javax.net.ssl.SSLServerSocket
+import javax.net.ssl.SSLServerSocketFactory
 
 
 /**
  * This is the top-level entry into the web server
  * @param port the port the server will run on
+ * @param sslPort the secure port
  */
-class Server(val port: Int) {
+class Server(val port: Int, private val sslPort: Int? = null) {
 
+    // create the non-secure socket
+    val halfOpenServerSocket = ServerSocket(port)
 
-    lateinit var halfOpenServerSocket : ServerSocket
-    private lateinit var cachedThreadPool: ExecutorService
+    // create the secure SSL (TLS 1.3) socket
+    private lateinit var sslHalfOpenServerSocket : SSLServerSocket
+
+    private val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
     var systemReady = false
+
+    init {
+        // set up the secure server socket, if we were given a port
+        if (sslPort != null) {
+            sslHalfOpenServerSocket = SSLServerSocketFactory.getDefault().createServerSocket(sslPort) as SSLServerSocket
+            sslHalfOpenServerSocket.enabledProtocols = arrayOf("TLSv1.3")
+            sslHalfOpenServerSocket.enabledCipherSuites = arrayOf("TLS_AES_128_GCM_SHA256")
+        }
+
+        // get the static files like CSS, JS, etc loaded into a cache
+        loadStaticFilesToCache(staticFileCache)
+
+        systemReady = true
+        logImperative("System is ready at http://localhost:$port and https://localhost:$sslPort.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+    }
 
     /**
      * This requires a [BusinessCode] object, see [initializeBusinessCode]
@@ -42,12 +64,7 @@ class Server(val port: Int) {
      */
     fun createServerThread(businessObjects : BusinessCode) : Thread {
         return Thread {
-            halfOpenServerSocket = ServerSocket(port)
-            loadStaticFilesToCache(staticFileCache)
             try {
-                cachedThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-                systemReady = true
-                logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
                 while (true) {
                     logTrace { "waiting for socket connection" }
                     val server = SocketWrapper(halfOpenServerSocket.accept(), "server")
@@ -56,7 +73,26 @@ class Server(val port: Int) {
             } catch (ex: SocketException) {
                 if (ex.message == "Interrupted function call: accept failed") {
                     logImperative("Server was shutdown while waiting on accept")
-                    systemReady = false
+                }
+            }
+        }
+    }
+
+    /**
+     * This requires a [BusinessCode] object, see [initializeBusinessCode]
+     * for the typical way to create this.
+     */
+    fun createSecureServerThread(businessObjects : BusinessCode) : Thread {
+        return Thread {
+            try {
+                while (true) {
+                    logTrace { "waiting for socket connection" }
+                    val server = SocketWrapper(sslHalfOpenServerSocket.accept(), "server")
+                    cachedThreadPool.submit(Thread { processConnectedClient(server, businessObjects) })
+                }
+            } catch (ex: SocketException) {
+                if (ex.message == "Interrupted function call: accept failed") {
+                    logImperative("Server was shutdown while waiting on accept")
                 }
             }
         }
@@ -85,20 +121,23 @@ class Server(val port: Int) {
      * server socket will be shutdown and some messages about closing the server
      * will log
      */
-    fun addShutdownHook(pmd: PureMemoryDatabase, serverThread: Thread) : Server {
+    fun addShutdownHook(pmd: PureMemoryDatabase, serverThread: Future<*>, sslServerFuture: Future<*>? = null) : Server {
         Runtime.getRuntime().addShutdownHook(
             Thread {
-                serverShutdown(pmd, serverThread)
+                serverShutdown(pmd, serverThread, sslServerFuture)
             })
         return this
     }
 
-    private fun serverShutdown(pmd: PureMemoryDatabase, serverThread: Thread) {
+    private fun serverShutdown(pmd: PureMemoryDatabase, serverFuture: Future<*>, sslServerFuture: Future<*>? = null) {
         logImperative("Received shutdown command")
         logImperative("Shutting down main server thread")
         cachedThreadPool.shutdown()
         cachedThreadPool.awaitTermination(10, TimeUnit.SECONDS)
         halfOpenServerSocket.close()
+        if (sslPort != null) {
+            sslHalfOpenServerSocket.close()
+        }
 
         logImperative("Shutting down logging")
         loggerPrinter.stop()
@@ -106,9 +145,15 @@ class Server(val port: Int) {
         logImperative("Shutting down the database")
         pmd.stop()
 
-        logImperative("Waiting for the main server thread")
-        serverThread.join()
+        logImperative("Waiting for the non-ssl server thread")
+        serverFuture.get()
 
+        if (sslServerFuture != null) {
+            logImperative("Waiting for the ssl server thread")
+            sslServerFuture.get()
+        }
+
+        systemReady = false
         logImperative("Goodbye world!")
     }
 
