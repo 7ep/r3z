@@ -30,7 +30,6 @@ import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
 /**
@@ -52,7 +51,9 @@ class ServerTests {
         testPort = port.getAndIncrement()
         val sleeptime = 50L
         serverObject = Server(testPort)
-        serverObject.startServer(BusinessCode(tru, au))
+        val serverThread = serverObject.createServerThread(BusinessCode(tru, au))
+        val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+        executor.submit(serverThread)
         while (!serverObject.systemReady) {
             logImperative("System is not ready, sleeping for $sleeptime milliseconds")
             Thread.sleep(sleeptime)

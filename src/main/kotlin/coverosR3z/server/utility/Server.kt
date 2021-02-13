@@ -40,8 +40,8 @@ class Server(val port: Int) {
      * This requires a [BusinessCode] object, see [initializeBusinessCode]
      * for the typical way to create this.
      */
-    fun startServer(businessObjects : BusinessCode) : Thread {
-        return thread {
+    fun createServerThread(businessObjects : BusinessCode) : Thread {
+        return Thread {
             halfOpenServerSocket = ServerSocket(port)
             loadStaticFilesToCache(staticFileCache)
             try {

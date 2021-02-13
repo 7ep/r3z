@@ -6,6 +6,7 @@ import coverosR3z.config.utility.SystemOptions
 import coverosR3z.server.utility.Server
 import coverosR3z.config.utility.SystemOptions.Companion.extractOptions
 import java.io.File
+import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
 /**
@@ -23,7 +24,9 @@ fun main(args: Array<String>) {
     val pmd = Server.makeDatabase(dbDirectory = serverOptions.dbDirectory)
     val businessObjects = Server.initializeBusinessCode(pmd)
     val server = Server(serverOptions.port)
-    val serverThread = server.startServer(businessObjects)
+    val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+    val serverThread = server.createServerThread(businessObjects)
+    executor.submit(serverThread)
     server.addShutdownHook(pmd, serverThread)
 }
 
