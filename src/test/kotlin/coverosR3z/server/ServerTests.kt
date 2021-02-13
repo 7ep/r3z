@@ -374,21 +374,6 @@ class ServerTests {
         logSettings[LogTypes.DEBUG] = true
     }
 
-    /**
-     * If we ask for the homepage on a secure server, we'll get a 200 OK
-     */
-    @IntegrationTest(usesPort = true)
-    @Test
-    @Ignore("next up for design")
-    fun testShouldGet200Response_Secure() {
-        client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
-
-        val statusline = client.readLine()
-
-        assertEquals("HTTP/1.1 200 OK", statusline)
-    }
-
-
     /*
  _ _       _                  __ __        _    _           _
 | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___

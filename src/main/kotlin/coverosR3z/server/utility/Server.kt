@@ -55,7 +55,8 @@ class Server(val port: Int, private val sslPort: Int? = null) {
         loadStaticFilesToCache(staticFileCache)
 
         systemReady = true
-        logImperative("System is ready at http://localhost:$port and https://localhost:$sslPort.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+        val extraSslText =  if (sslPort != null) " and https://localhost:$sslPort" else ""
+        logImperative("System is ready at http://localhost:$port$extraSslText.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
     }
 
     /**
