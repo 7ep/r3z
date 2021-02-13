@@ -28,7 +28,7 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.add(DEFAULT_PROJECT)
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
@@ -40,7 +40,7 @@ class ChangeTrackingSetTests {
         projects.clearModifications()
         projects.remove(DEFAULT_PROJECT)
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, DELETE)), data)
     }
@@ -57,7 +57,7 @@ class ChangeTrackingSetTests {
         projects.remove(DEFAULT_PROJECT)
         projects.add(newProject)
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, DELETE), Pair(newProject, CREATE)), data)
     }
@@ -69,7 +69,7 @@ class ChangeTrackingSetTests {
         projects.add(DEFAULT_PROJECT)
         projects.add(DEFAULT_PROJECT)
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
@@ -80,7 +80,7 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT))
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
@@ -94,7 +94,7 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT, DEFAULT_PROJECT))
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
@@ -108,7 +108,7 @@ class ChangeTrackingSetTests {
         val projects = ChangeTrackingSet<Project>()
         projects.addAll(listOf(DEFAULT_PROJECT, newProject))
 
-        val data = projects.getChangedData()
+        val data = projects.modified.toSet()
 
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE), Pair(newProject, CREATE)), data)
     }

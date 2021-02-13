@@ -26,12 +26,16 @@ abstract class AbstractDataAccess<T> (
     override fun <R> actOn(action: (ChangeTrackingSet<T>) -> R): R {
         val result = action.invoke(data)
 
-        data.getChangedData().forEach {
-            when (it.second) {
-                CREATE -> dbp.persistToDisk(setOf(it.first), name)
-                DELETE -> dbp.deleteOnDisk(setOf(it.first), name)
+        do {
+            val nextItem = data.modified.poll()
+            if (nextItem != null) {
+                when (nextItem.second) {
+                    CREATE -> dbp.persistToDisk(nextItem.first, name)
+                    DELETE -> dbp.deleteOnDisk(nextItem.first, name)
+                }
             }
         }
+        while (nextItem != null)
 
         return result
     }

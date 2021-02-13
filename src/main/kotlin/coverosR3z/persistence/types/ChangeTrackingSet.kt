@@ -2,6 +2,7 @@ package coverosR3z.persistence.types
 
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Similar to [ConcurrentSet] except that it tracks any changes
@@ -29,18 +30,8 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         DELETE
     }
 
-    private val modified = ConcurrentSet<Pair<T, DataAction>>()
+    val modified = ConcurrentLinkedQueue<Pair<T, DataAction>>()
 
-    /**
-     * Gets the current changes to the data, clearing
-     * it in the process
-     */
-    @Synchronized
-    fun getChangedData(): Set<Pair<T, DataAction>> {
-        val mySet = modified.toSet()
-        modified.clear()
-        return mySet
-    }
 
     /**
      * clears the set of tracked changed data
