@@ -28,12 +28,18 @@ fun main(args: Array<String>) {
     val serverFuture = serverExecutor.submit(server.createServerThread(businessObjects))
 
     if (serverOptions.sslPort != null) {
+        val props = System.getProperties()
+        props.setProperty("javax.net.ssl.keyStore", "r3zkeystore.key")
+        props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
+        props.setProperty("javax.net.ssl.trustStore", "truststore")
+        props.setProperty("javax.net.ssl.trustStorePassword", "passphrase")
+
         val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
         val sslServerFuture = sslServerExecutor.submit(server.createSecureServerThread(businessObjects))
         server.addShutdownHook(pmd, serverFuture, sslServerFuture)
+    } else {
+        server.addShutdownHook(pmd, serverFuture)
     }
-
-    server.addShutdownHook(pmd, serverFuture)
 }
 
 /**
