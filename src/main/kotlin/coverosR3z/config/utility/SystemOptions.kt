@@ -8,6 +8,13 @@ data class SystemOptions(
          * The port the server will use
          */
         val port : Int = defaultPort,
+
+        /**
+         * The secure port
+         */
+        val sslPort : Int? = null,
+
+
         /**
          * the directory in which we will store the data
          * if this is set to null, we won't store anything to disk,
@@ -31,7 +38,23 @@ data class SystemOptions(
                 val makePort = if (port.isNotBlank()) checkParseToInt(port) else defaultPort
                 if (makePort < 1 || makePort > 65535) {throw SystemOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $makePort")
                 }
-                return SystemOptions(port = makePort, dbDirectory = dbDirectory)
+                return this.copy(port = makePort)
+        }
+
+
+        private fun setSslPort(port: String): SystemOptions {
+                val makePort = if (port.isNotBlank()) {
+                        val parsedPort = checkParseToInt(port)
+                        if (parsedPort < 1 || parsedPort > 65535) {
+                                throw SystemOptionsException("port number was out of range.  Range is 1-65535.  Your input was: $parsedPort")
+                        } else {
+                                parsedPort
+                        }
+                } else {
+                        null
+                }
+
+                return this.copy(sslPort = makePort)
         }
 
         /**
@@ -48,19 +71,17 @@ data class SystemOptions(
                                 else -> "db/"
                         }
 
-                return SystemOptions(port = port, dbDirectory = makeDBDir)
+                return this.copy(dbDirectory = makeDBDir)
         }
 
         fun setLoggingOff(allLoggingOff: String) : SystemOptions {
-                return SystemOptions(
-                        port = port,
-                        dbDirectory = dbDirectory,
-                        allLoggingOff = allLoggingOff == "true")
+                return this.copy(allLoggingOff = allLoggingOff == "true")
         }
 
         companion object{
 
                 const val defaultPort = 12345
+                const val defaultSslPort = 12443
 
                 /**
                  * Given the command-line arguments, returns the first value
@@ -96,6 +117,7 @@ data class SystemOptions(
 
                         val directoryOption = Option(false, "")
                         val portOption = Option(false, "")
+                        val sslPortOption = Option(false, "")
                         val diskPersistenceOption = Option(false, "", isFlag = true)
                         val loggingOption = Option(false, "", isFlag = true)
 
@@ -104,6 +126,8 @@ data class SystemOptions(
                                 OptionGroup("--dbdirectory", directoryOption),
                                 OptionGroup("-p", portOption),
                                 OptionGroup("--port", portOption),
+                                OptionGroup("-s", sslPortOption),
+                                OptionGroup("--sslport", sslPortOption),
                                 OptionGroup("--no-disk-persistence", diskPersistenceOption),
                                 OptionGroup("--no-logging", loggingOption))
 
@@ -131,6 +155,7 @@ data class SystemOptions(
 
                                 return SystemOptions()
                                         .setPort(portOption.value)
+                                        .setSslPort(sslPortOption.value)
                                         .setDirectory(directoryOption.value, diskPersistenceOption.value)
                                         .setLoggingOff(loggingOption.value)
                         }
@@ -170,6 +195,7 @@ The options available are:
 
 -h                     prints this help message
 -p PORT_NUMBER         set the port number for the server
+-s PORT_NUMBER         set the ssl port number for the server
 -d DIRECTORY           the directory to store data
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing

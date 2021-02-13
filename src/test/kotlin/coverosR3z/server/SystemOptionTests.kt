@@ -40,7 +40,7 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_NoDiskPersistenceOption() {
         val serverOptions = extractOptions(arrayOf("--no-disk-persistence"))
-        assertEquals(SystemOptions(12345, null), serverOptions)
+        assertEquals(SystemOptions(12345, dbDirectory = null), serverOptions)
     }
 
     @Test
@@ -162,31 +162,31 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
         val serverOptions = extractOptions(arrayOf("-p54321", "-dbuild/db"))
-        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p54321"))
-        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
-        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
-        assertEquals(SystemOptions(54321, "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_setAllLoggingOff() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321", "--no-logging"))
-        assertEquals(SystemOptions(54321, "build/db/", allLoggingOff = true), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = "build/db/", allLoggingOff = true), serverOptions)
     }
 
     /**
@@ -197,6 +197,25 @@ class SystemOptionTests {
     fun testShouldHelpUser() {
         val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-h"))}
         assertEquals(fullHelpMessage, ex.message!!.trimIndent())
+    }
+
+    /**
+     * Allow a user to set the port for SSL communication
+     */
+    @Test
+    fun testShouldSetSslPort() {
+        val serverOptions = extractOptions(arrayOf("-s", "54321"))
+        assertEquals(SystemOptions(sslPort = 54321), serverOptions)
+    }
+
+    /**
+     * if no ssl port is set, it should be null, and the ssl server
+     * should not start (the regular unencrypted server should start)
+     */
+    @Test
+    fun testShouldSetSslPort_NothingSet() {
+        val serverOptions = extractOptions(arrayOf("-p", "54321"))
+        assertEquals(SystemOptions(port = 54321, sslPort = null), serverOptions)
     }
 
 }
