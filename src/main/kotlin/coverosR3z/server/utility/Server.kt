@@ -23,8 +23,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.*
 import javax.net.ssl.SSLServerSocket
-import javax.net.ssl.SSLServerSocketFactory
+
 
 
 /**
@@ -46,9 +47,12 @@ class Server(val port: Int, private val sslPort: Int? = null) {
     init {
         // set up the secure server socket, if we were given a port
         if (sslPort != null) {
+            val props = System.getProperties()
+            props.setProperty("javax.net.ssl.keyStore", "src/test/resources/certs/keystore")
+            props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
+            props.setProperty("javax.net.ssl.trustStore", "src/test/resources/certs/truststore")
+            props.setProperty("javax.net.ssl.trustStorePassword", "passphrase")
             sslHalfOpenServerSocket = SSLServerSocketFactory.getDefault().createServerSocket(sslPort) as SSLServerSocket
-            sslHalfOpenServerSocket.enabledProtocols = arrayOf("TLSv1.3")
-            sslHalfOpenServerSocket.enabledCipherSuites = arrayOf("TLS_AES_128_GCM_SHA256")
         }
 
         // get the static files like CSS, JS, etc loaded into a cache

@@ -27,7 +27,14 @@ data class SystemOptions(
          * all logging turned off, except IMPERATIVE, which
          * cannot be turned off.
          */
-        val allLoggingOff : Boolean = false){
+        val allLoggingOff : Boolean = false,
+
+        /**
+         * If set to tru, starts server with
+         * all logging on
+         */
+        val allLoggingOn : Boolean = false,
+){
 
 
         /**
@@ -78,6 +85,11 @@ data class SystemOptions(
                 return this.copy(allLoggingOff = allLoggingOff == "true")
         }
 
+
+        fun setLoggingOn(allLoggingOn: String): SystemOptions {
+                return this.copy(allLoggingOn = allLoggingOn == "true")
+        }
+
         companion object{
 
                 const val defaultPort = 12345
@@ -119,7 +131,8 @@ data class SystemOptions(
                         val portOption = Option(false, "")
                         val sslPortOption = Option(false, "")
                         val diskPersistenceOption = Option(false, "", isFlag = true)
-                        val loggingOption = Option(false, "", isFlag = true)
+                        val loggingOffOption = Option(false, "", isFlag = true)
+                        val loggingOnOption = Option(false, "", isFlag = true)
 
                         val possibleOptions = listOf(
                                 OptionGroup("-d", directoryOption),
@@ -129,7 +142,9 @@ data class SystemOptions(
                                 OptionGroup("-s", sslPortOption),
                                 OptionGroup("--sslport", sslPortOption),
                                 OptionGroup("--no-disk-persistence", diskPersistenceOption),
-                                OptionGroup("--no-logging", loggingOption))
+                                OptionGroup("--no-logging", loggingOffOption),
+                                OptionGroup("--full-logging", loggingOnOption),
+                        )
 
                         val fullInput = args.joinToString(" ")
                         return if (args.isEmpty() || args[0].isBlank()) {
@@ -157,7 +172,8 @@ data class SystemOptions(
                                         .setPort(portOption.value)
                                         .setSslPort(sslPortOption.value)
                                         .setDirectory(directoryOption.value, diskPersistenceOption.value)
-                                        .setLoggingOff(loggingOption.value)
+                                        .setLoggingOff(loggingOffOption.value)
+                                        .setLoggingOn(loggingOnOption.value)
                         }
                 }
 
@@ -201,6 +217,7 @@ The options available are:
                        that this is primarily (exclusively?) for testing
 --no-logging           start the server with all logging turned
                        off, except for "IMPERATIVE"
+--full-logging         start with all logging on                       
     """.trimIndent()
 
         }
