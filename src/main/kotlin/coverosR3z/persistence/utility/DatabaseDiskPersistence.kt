@@ -160,7 +160,6 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
                 .walkTopDown()
                 .filter {it.isFile }
                 .forEach {
-                    logTrace { "about to read ${it.name}" }
                     val fileContents = it.readText()
                     if (fileContents.isBlank()) {
                         logWarn { "${it.name} file exists but empty, skipping" }

@@ -42,12 +42,6 @@ class SslServerTests {
 
     @Before
     fun initServer() {
-        val props = System.getProperties()
-        props.setProperty("javax.net.ssl.keyStore", "src/test/resources/certs/keystore")
-        props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
-        props.setProperty("javax.net.ssl.trustStore", "src/test/resources/certs/truststore")
-        props.setProperty("javax.net.ssl.trustStorePassword", "passphrase")
-
         testPort = port.getAndIncrement()
         sslTestPort = 12443
         val sleeptime = 50L
@@ -69,9 +63,6 @@ class SslServerTests {
             Thread.sleep(sleeptime)
         }
 
-        // create a SSL client (this requires system properties to be set, since
-        // it won't connect to the server unless it is trusted.  That is why we
-        // need both tht keystore and truststore, and their associated passwords
         val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
         sslClientSocket.enabledProtocols = arrayOf("TLSv1.3")
         sslClientSocket.enabledCipherSuites = arrayOf("TLS_AES_128_GCM_SHA256")
