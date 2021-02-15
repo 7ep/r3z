@@ -39,7 +39,6 @@ class MainTests {
         System.setOut(previousOut)
 
         val expectedResults = listOf(
-            "IMPERATIVE: starting server on port 54321",
             "IMPERATIVE: database directory is build/db/maintest/",
             "IMPERATIVE: directory build/db/maintest/1/ did not exist.  Returning null for the PureMemoryDatabase",
             "IMPERATIVE: No existing database found, building new database",
