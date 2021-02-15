@@ -6,6 +6,7 @@ import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.IntegrationTest
+import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.*
@@ -27,8 +28,8 @@ class SubmitTimeAPITests {
     fun init() {
         val pmd = PureMemoryDatabase()
         val cu = CurrentUser(DEFAULT_USER)
-        au = AuthenticationUtilities(AuthenticationPersistence(pmd))
-        tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), cu)
+        au = AuthenticationUtilities(AuthenticationPersistence(pmd, logger = testLogger), testLogger)
+        tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), cu, testLogger)
     }
 
 
@@ -41,7 +42,7 @@ class SubmitTimeAPITests {
             SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
             SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger)
 
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode

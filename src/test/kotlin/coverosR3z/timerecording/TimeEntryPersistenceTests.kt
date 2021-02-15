@@ -14,10 +14,10 @@ import org.junit.Test
 
 class TimeEntryPersistenceTests {
 
-    private var tep : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
+    private var tep : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger)
 
     @Before fun init() {
-        tep = TimeEntryPersistence(PureMemoryDatabase())
+        tep = TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger)
     }
 
     @Test fun `can record a time entry to the database`() {

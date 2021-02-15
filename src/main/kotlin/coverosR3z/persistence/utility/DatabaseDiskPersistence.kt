@@ -3,9 +3,8 @@ package coverosR3z.persistence.utility
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
 import coverosR3z.config.CURRENT_DATABASE_VERSION
-import coverosR3z.logging.logImperative
-import coverosR3z.logging.logTrace
-import coverosR3z.logging.logWarn
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
@@ -19,9 +18,14 @@ import java.io.File
  *
  * The pattern is to group it by index
  */
-class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
+class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logger: ILogger) {
 
     private val actionQueue = ActionQueue("DatabaseWriter")
+
+    /**
+     * Includes the version
+     */
+    private var dbDirectoryWithVersion : String? = null
 
     /**
      * This function will stop the database persistence cleanly.
@@ -44,12 +48,12 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
      * @param name the name of the data
      */
     fun <T: IndexableSerializable> persistToDisk(item : T, name: String) {
-        if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping serialization for $name" }
+        if (dbDirectoryWithVersion == null) {
+            logger.logTrace { "database directory was null, skipping serialization for $name" }
             return
         }
 
-        val parentDirectory = "$dbDirectory$name"
+        val parentDirectory = "$dbDirectoryWithVersion$name"
         actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
         val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
@@ -68,109 +72,108 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null) {
      * @param subDirectory the name of the data, for finding the directory
      */
     fun <T: IndexableSerializable> deleteOnDisk(item: T, subDirectory: String) {
-        if (dbDirectory == null) {
-            logTrace { "database directory was null, skipping delete for $subDirectory" }
+        if (dbDirectoryWithVersion == null) {
+            logger.logTrace { "database directory was null, skipping delete for $subDirectory" }
             return
         }
 
-        val parentDirectory = "$dbDirectory$subDirectory"
+        val parentDirectory = "$dbDirectoryWithVersion$subDirectory"
 
         val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
         actionQueue.enqueue { File(fullPath).delete() }
     }
 
+    /**
+     * This factory method handles the nitty-gritty about starting
+     * the database with respect to the files on disk.  If you plan
+     * to use the database with the disk, here's a great place to
+     * start.  If you are just going to use the database in memory-only,
+     * check out [PureMemoryDatabase.startMemoryOnly]
+     */
+    fun startWithDiskPersistence() : PureMemoryDatabase {
+
+        dbDirectoryWithVersion = "$dbDirectory$CURRENT_DATABASE_VERSION/"
+
+        // first we assume the database has been previously persisted
+        val restoredPMD = deserializeFromDisk()
+
+        return if (restoredPMD != null) {
+            restoredPMD
+        } else {
+            Logger.logImperative("No existing database found, building new database")
+            // if nothing is there, we build a new database
+            // and add a clean set of directories
+            val pmd = PureMemoryDatabase(dbDirectory = dbDirectoryWithVersion, diskPersistence = this)
+            Logger.logImperative("Created new PureMemoryDatabase")
+
+            File(checkNotNull(dbDirectoryWithVersion)).mkdirs()
+            Logger.logImperative("Created the database directory at \"$dbDirectoryWithVersion\"")
+
+            val versionFilename = "currentVersion.txt"
+            File(dbDirectory + versionFilename).writeText(CURRENT_DATABASE_VERSION.toString())
+            Logger.logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
+
+
+            val tep = TimeEntryPersistence(pmd, logger = logger)
+            tep.persistNewEmployee(EmployeeName("Administrator"))
+            Logger.logImperative("Created an initial employee")
+
+            pmd
+        }
+    }
+
+
+    /**
+     * Deserializes the database from files, or returns null if no
+     * database directory exists
+     */
+    private fun deserializeFromDisk(): PureMemoryDatabase? {
+        val topDirectory = File(checkNotNull(dbDirectoryWithVersion))
+        val innerFiles = topDirectory.listFiles()
+        if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
+            Logger.logImperative("directory $dbDirectoryWithVersion did not exist.  Returning null for the PureMemoryDatabase")
+            return null
+        }
+
+        val projects = readAndDeserialize(Project.directoryName) { Project.Deserializer().deserialize(it) }
+        val users = readAndDeserialize(User.directoryName) { User.Deserializer().deserialize(it) }
+        val sessions = readAndDeserialize(Session.directoryName) { Session.Deserializer(users).deserialize(it) }
+        val employees = readAndDeserialize(Employee.directoryName) { Employee.Deserializer().deserialize(it) }
+        val timeEntries = readAndDeserialize(TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
+        val submittedPeriods = readAndDeserialize(SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
+
+        return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, submittedPeriods, dbDirectoryWithVersion, this)
+    }
+
+    private fun <T : Indexed> readAndDeserialize(filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+        val dataDirectory = File("$dbDirectoryWithVersion$filename")
+
+        if (! dataDirectory.exists()) {
+            logger.logWarn { "$filename directory missing, creating empty set of data" }
+            return ChangeTrackingSet()
+        }
+
+        val data = ChangeTrackingSet<T>()
+        dataDirectory
+            .walkTopDown()
+            .filter {it.isFile }
+            .forEach {
+                val fileContents = it.readText()
+                if (fileContents.isBlank()) {
+                    logger.logWarn { "${it.name} file exists but empty, skipping" }
+                } else {
+                    data.addWithoutTracking(deserializer(fileContents))
+                }
+            }
+
+        data.nextIndex.set(data.maxOfOrNull { it.getIndex() }?.inc() ?: 1)
+        return data
+    }
 
     companion object {
         const val databaseFileSuffix = ".db"
 
         private val serializedStringRegex = """ (.*?): (.*?) """.toRegex()
-
-        /**
-         * This factory method handles the nitty-gritty about starting
-         * the database with respect to the files on disk.  If you plan
-         * to use the database with the disk, here's a great place to
-         * start.  If you are just going to use the database in memory-only,
-         * check out [PureMemoryDatabase.startMemoryOnly]
-         */
-        fun startWithDiskPersistence(dbDirectory: String) : PureMemoryDatabase {
-
-            val fullDbDirectory = "$dbDirectory$CURRENT_DATABASE_VERSION/"
-
-            // first we assume the database has been previously persisted
-            val restoredPMD = deserializeFromDisk(fullDbDirectory)
-
-            return if (restoredPMD != null) {
-                restoredPMD
-            } else {
-                logImperative("No existing database found, building new database")
-                // if nothing is there, we build a new database
-                // and add a clean set of directories
-                val pmd = PureMemoryDatabase(dbDirectory = fullDbDirectory)
-                logImperative("Created new PureMemoryDatabase")
-
-                File(fullDbDirectory).mkdirs()
-                logImperative("Created the database directory at \"$fullDbDirectory\"")
-
-                val versionFilename = "currentVersion.txt"
-                File(dbDirectory + versionFilename).writeText(CURRENT_DATABASE_VERSION.toString())
-                logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
-
-
-                val tep = TimeEntryPersistence(pmd)
-                tep.persistNewEmployee(EmployeeName("Administrator"))
-                logImperative("Created an initial employee")
-
-                pmd
-            }
-        }
-
-
-        /**
-         * Deserializes the database from files, or returns null if no
-         * database directory exists
-         */
-        private fun deserializeFromDisk(dbDirectory: String): PureMemoryDatabase? {
-            val topDirectory = File(dbDirectory)
-            val innerFiles = topDirectory.listFiles()
-            if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
-                logImperative("directory $dbDirectory did not exist.  Returning null for the PureMemoryDatabase")
-                return null
-            }
-
-            val projects = readAndDeserialize(dbDirectory, Project.directoryName) { Project.Deserializer().deserialize(it) }
-            val users = readAndDeserialize(dbDirectory, User.directoryName) { User.Deserializer().deserialize(it) }
-            val sessions = readAndDeserialize(dbDirectory, Session.directoryName) { Session.Deserializer(users).deserialize(it) }
-            val employees = readAndDeserialize(dbDirectory, Employee.directoryName) { Employee.Deserializer().deserialize(it) }
-            val timeEntries = readAndDeserialize(dbDirectory, TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
-            val submittedPeriods = readAndDeserialize(dbDirectory, SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
-
-            return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, submittedPeriods, dbDirectory)
-        }
-
-        private fun <T : Indexed> readAndDeserialize(dbDirectory: String, filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
-            val dataDirectory = File("$dbDirectory$filename")
-
-            if (! dataDirectory.exists()) {
-                logWarn { "$filename directory missing, creating empty set of data" }
-                return ChangeTrackingSet()
-            }
-
-            val data = ChangeTrackingSet<T>()
-            dataDirectory
-                .walkTopDown()
-                .filter {it.isFile }
-                .forEach {
-                    val fileContents = it.readText()
-                    if (fileContents.isBlank()) {
-                        logWarn { "${it.name} file exists but empty, skipping" }
-                    } else {
-                        data.addWithoutTracking(deserializer(fileContents))
-                    }
-                }
-
-            data.nextIndex.set(data.maxOfOrNull { it.getIndex() }?.inc() ?: 1)
-            return data
-        }
 
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate

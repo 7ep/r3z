@@ -1,6 +1,6 @@
 package coverosR3z.server.utility
 
-import coverosR3z.logging.logTrace
+import coverosR3z.FullSystem
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -10,12 +10,22 @@ import java.net.Socket
  * Provides access to the reading and writing functions on a socket
  * in a standardized, tightly-controlled way
  */
-class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrapper {
+class SocketWrapper(val socket: Socket, val name: String? = null, private val fullSystem: FullSystem? = null) : ISocketWrapper {
     private val writer: OutputStream = socket.getOutputStream()
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
+    init {
+        // setting a timeout on a socket reading.  This is
+        // necessary because without it, a client might make
+        // a connection and keep us listening forever, without
+        // continuing on.
+        val seconds = 10
+        socket.soTimeout = seconds * 1000
+        fullSystem?.addRunningSocket(socket)
+    }
+
     override fun write(input: String) {
-        logTrace{"${name ?: socket} is sending: ${input.replace("\r", "(CR)").replace("\n", "(LF)")}"}
+        fullSystem?.logger?.logTrace{"${name ?: socket} is sending: ${input.replace("\r", "(CR)").replace("\n", "(LF)")}"}
 
         writer.write(input.toByteArray())
     }
@@ -32,7 +42,7 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
             else -> valueRead
         }
 
-        logTrace{"${name ?: socket} read this line: $readResult"}
+        fullSystem?.logger?.logTrace{"${name ?: socket} read this line: $readResult"}
         return valueRead
     }
 
@@ -40,12 +50,12 @@ class SocketWrapper(val socket: Socket, val name : String? = null) : ISocketWrap
         val buf = CharArray(len)
         val lengthRead = reader.read(buf, 0, len)
         val body = buf.slice(0 until lengthRead).joinToString("")
-        logTrace{"$name actually read $lengthRead bytes.  body: $body"}
+        fullSystem?.logger?.logTrace{"$name actually read $lengthRead bytes.  body: $body"}
         return body
     }
 
     override fun close() {
         socket.close()
+        fullSystem?.removeRunningSocket(socket)
     }
-
 }

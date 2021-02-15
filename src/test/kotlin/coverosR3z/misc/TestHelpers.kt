@@ -2,6 +2,8 @@ package coverosR3z.misc
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.logging.Logger
+import coverosR3z.logging.TestLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.types.Month
@@ -45,6 +47,7 @@ val DEFAULT_TIME_PERIOD = TimePeriod(DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_E
 val DEFAULT_SUBMITTED_PERIOD = SubmittedPeriod(SubmissionId(1), DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
 const val DEFAULT_SESSION_TOKEN = "abc123"
 const val granularPerfArchiveDirectory = "docs/performance_archive/granular_tests/"
+val testLogger = TestLogger()
 
 /**
  * Helper to easily put together a time entry
@@ -62,8 +65,8 @@ fun createTimeEntryPreDatabase(
  * with a real database connected
  */
 fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase())
-        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user))
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger)
+        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)
 }
 
 /**
@@ -71,16 +74,16 @@ fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilitie
  */
 fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val pmd = PureMemoryDatabase()
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+        val authPersistence = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
 
-        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(SYSTEM_USER), testLogger)
         val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
 
         au.register(UserName("alice"), DEFAULT_PASSWORD, aliceEmployee.id)
         val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(aliceUser))
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(aliceUser), testLogger)
 
         // Perform some quick checks
         Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))

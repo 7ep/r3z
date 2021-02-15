@@ -143,7 +143,8 @@ class AuthenticationBDD {
             au,
             FakeTimeRecordingUtilities(),
             AnalyzedHttpData(data = data, user = DEFAULT_USER),
-            authStatus = AuthStatus.UNAUTHENTICATED
+            authStatus = AuthStatus.UNAUTHENTICATED,
+            testLogger
         )
         return assertThrows(IllegalArgumentException::class.java) { RegisterAPI.handlePost(sd) }
     }
@@ -152,8 +153,8 @@ class AuthenticationBDD {
         au.login(DEFAULT_USER.name, Password("I'm not even trying to be a good password"))
 
     private fun doSuccessfulRegistration(): AuthenticationUtilities {
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
         val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
         return au
@@ -168,15 +169,15 @@ class AuthenticationBDD {
     }
 
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
-        val authPersistence = AuthenticationPersistence(PureMemoryDatabase())
-        val au = AuthenticationUtilities(authPersistence)
+        val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
         return au
     }
@@ -185,7 +186,7 @@ class AuthenticationBDD {
         pmd: PureMemoryDatabase,
         au: AuthenticationUtilities
     ) {
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd), CurrentUser(SYSTEM_USER))
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(SYSTEM_USER), testLogger)
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
@@ -193,8 +194,8 @@ class AuthenticationBDD {
 
     private fun startWithEmptyDatabase(): Pair<PureMemoryDatabase, AuthenticationUtilities> {
         val pmd = PureMemoryDatabase()
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+        val authPersistence = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
         return Pair(pmd, au)
     }
 

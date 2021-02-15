@@ -1,6 +1,5 @@
 package coverosR3z.logging
 
-import coverosR3z.logging.LogConfig.logSettings
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.successHTML
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
@@ -65,11 +64,11 @@ class LoggingAPI(private val sd: ServerData) {
 
         // depending on what the user chose, we set the configuration for that logging type here
         when (userInputLogConfig) {
-            "true" -> logSettings[lt] = true
-            "false" -> logSettings[lt] = false
+            "true" -> sd.logger.logSettings[lt] = true
+            "false" -> sd.logger.logSettings[lt] = false
             else -> throw IllegalArgumentException(badInputLoggingDataMsg)
         }
-        logImperative("Configured logging for ${lt.name}: ${logSettings[lt]}")
+        Logger.logImperative("Configured logging for ${lt.name}: ${sd.logger.logSettings[lt]}")
     }
 
     fun handlePOST() : PreparedResponseData {
@@ -99,7 +98,7 @@ class LoggingAPI(private val sd: ServerData) {
      *
      */
     private fun checkedIf(lt : LogTypes) : LogTypeState {
-        return LogTypeState(logSettings[lt] == true)
+        return LogTypeState(sd.logger.logSettings[lt] == true)
     }
 
 

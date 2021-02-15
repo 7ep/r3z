@@ -94,7 +94,6 @@ data class SystemOptions(
         companion object{
 
                 const val defaultPort = 12345
-                const val defaultSslPort = 12443
 
                 /**
                  * Given the command-line arguments, returns the first value

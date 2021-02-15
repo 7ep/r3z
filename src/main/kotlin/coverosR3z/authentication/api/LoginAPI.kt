@@ -1,7 +1,6 @@
 package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
-import coverosR3z.logging.logDebug
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
@@ -65,7 +64,7 @@ class LoginAPI(val sd: ServerData) {
             val cookie = "Set-Cookie: sessionId=$newSessionToken; SameSite=Strict; HttpOnly"
             PreparedResponseData("", StatusCode.SEE_OTHER, listOf(cookie, "Location: ${HomepageAPI.path}"))
         } else {
-            logDebug { "User ($username) failed to login" }
+            sd.logger.logDebug { "User ($username) failed to login" }
             handleUnauthorized()
         }
     }

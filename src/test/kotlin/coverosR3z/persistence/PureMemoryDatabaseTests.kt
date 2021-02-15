@@ -3,9 +3,6 @@ package coverosR3z.persistence
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.config.CURRENT_DATABASE_VERSION
-import coverosR3z.logging.logAudit
-import coverosR3z.logging.resetLogSettingsToDefault
-import coverosR3z.logging.turnOffAllLogging
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
@@ -54,7 +51,7 @@ class PureMemoryDatabaseTests {
         val numberOfProjects = 30
         val numberOfDays = 31
 
-        val tep = TimeEntryPersistence(pmd)
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val allEmployees = recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
 
 
@@ -63,7 +60,7 @@ class PureMemoryDatabaseTests {
             accumulateMinutesPerEachEmployee(tep, allEmployees)
         }
 
-        logAudit { "It took a total of $totalTime milliseconds for this code" }
+        testLogger.logAudit { "It took a total of $totalTime milliseconds for this code" }
         File("${granularPerfArchiveDirectory}should_get_responses_from_the_database_quickly_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttime: $totalTime\n")
     }
@@ -100,8 +97,8 @@ class PureMemoryDatabaseTests {
 
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldWriteAndReadToDisk_PERFORMANCE/"
         File(dbDirectory).deleteRecursively()
-        pmd = DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory)
-        val tep = TimeEntryPersistence(pmd)
+        pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
 
         val (totalTimeWriting, _) = getTime {
             recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
@@ -109,7 +106,7 @@ class PureMemoryDatabaseTests {
         }
 
         val (totalTimeReading, readPmd) = getTime {
-            DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory)
+            DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         }
 
         assertEquals("The database should be exactly the same after the reload", pmd, readPmd)
@@ -117,7 +114,7 @@ class PureMemoryDatabaseTests {
         val totalTime = totalTimeReading + totalTimeWriting
         File("${granularPerfArchiveDirectory}testShouldWriteAndReadToDisk_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberOfProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttotalTime: $totalTime\n")
-        logAudit { "Total time taken for serialization / deserialzation was $totalTime milliseconds" }
+        testLogger.logAudit { "Total time taken for serialization / deserialzation was $totalTime milliseconds" }
     }
 
     /**
@@ -148,11 +145,11 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testCorruptingEmployeeDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd)
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewEmployeesAdded = 20
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -160,7 +157,7 @@ class PureMemoryDatabaseTests {
         }
         // wait for all those threads
         listOfThreads.forEach{it.get()}
-        resetLogSettingsToDefault()
+        testLogger.resetLogSettingsToDefault()
         assertEquals(numberNewEmployeesAdded, tep.getAllEmployees().size)
     }
 
@@ -170,10 +167,10 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testCorruptingProjectDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd)
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewProjectsAdded = 20
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewProjectsAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
@@ -182,7 +179,7 @@ class PureMemoryDatabaseTests {
         }
         // wait for all those threads
         listOfThreads.forEach{it.get()}
-        resetLogSettingsToDefault()
+        testLogger.resetLogSettingsToDefault()
         assertEquals(numberNewProjectsAdded, tep.getAllProjects().size)
     }
 
@@ -191,13 +188,13 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testCorruptingTimeEntryDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd)
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberTimeEntriesAdded = 20
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
@@ -205,7 +202,7 @@ class PureMemoryDatabaseTests {
         }
         // wait for all those threads
         listOfThreads.forEach{it.get()}
-        resetLogSettingsToDefault()
+        testLogger.resetLogSettingsToDefault()
         assertEquals(numberTimeEntriesAdded, tep.readTimeEntries(DEFAULT_EMPLOYEE).size)
     }
 
@@ -220,7 +217,7 @@ class PureMemoryDatabaseTests {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingAllFilesButDirectoryExists/"
         File(dbDirectory).deleteRecursively()
         File(dbDirectory).mkdirs()
-        DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory)
+        DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         assertTrue("a new database will store its version", File(dbDirectory + "currentVersion.txt").exists())
     }
 
@@ -233,7 +230,7 @@ class PureMemoryDatabaseTests {
     fun testPersistence_Read_MissingDbDirectory() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingDbDirectory/"
         File(dbDirectory).deleteRecursively()
-        DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory)
+        DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         assertTrue("a new database will store its version", File(dbDirectory + "currentVersion.txt").exists())
     }
 
@@ -395,7 +392,11 @@ class PureMemoryDatabaseTests {
         // corrupt the time-entries data file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${TimeEntry.directoryName}/2$databaseFileSuffix").writeText("BAD DATA HERE")
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to deserialize this text as time entry data: BAD DATA HERE", ex.message)
     }
 
@@ -411,7 +412,11 @@ class PureMemoryDatabaseTests {
         // create a bogus corrupt employee id file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}/27$databaseFileSuffix").writeText("BAD DATA HERE")
         
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to deserialize this text from the employees directory: BAD DATA HERE", ex.message)
     }
 
@@ -430,7 +435,12 @@ class PureMemoryDatabaseTests {
         // delete a necessary file store for all employees (entire directory)
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}").deleteRecursively()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
+
         // expect it to fail while reading time entries and attempting to associate with (now missing) employee
         assertEquals("Unable to find an employee with the id of 2 while deserializing a time entry.  Employee set size: 0", ex.message)
     }
@@ -446,8 +456,12 @@ class PureMemoryDatabaseTests {
 
         // create a corrupt user data file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${User.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
-        
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to deserialize this text from the users directory: BAD DATA HERE", ex.message)
     }
     
@@ -463,7 +477,11 @@ class PureMemoryDatabaseTests {
         // delete the file store representing the entire users set (directory in this case)
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${User.directoryName}").deleteRecursively()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
@@ -478,9 +496,13 @@ class PureMemoryDatabaseTests {
         val project = pmd.ProjectDataAccess().read { p -> p.single{ it.name == DEFAULT_PROJECT_NAME }}
 
         // corrupt the projects data file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id}$databaseFileSuffix").writeText("BAD DATA HERE")
-        
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id.value}$databaseFileSuffix").writeText("BAD DATA HERE")
+
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to deserialize this text from the projects directory: BAD DATA HERE", ex.message)
     }
     
@@ -496,7 +518,11 @@ class PureMemoryDatabaseTests {
         // delete a necessary file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}").deleteRecursively()
 
-        val ex = assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+        val ex = assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
         assertEquals("Unable to find a project with the id of 1 while deserializing a time entry.  Project set size: 0", ex.message)
     }
     
@@ -511,8 +537,12 @@ class PureMemoryDatabaseTests {
 
         // create corrupt bogus time-entries data file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Session.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
-        
-        assertThrows(DatabaseCorruptedException::class.java) { DatabaseDiskPersistence.startWithDiskPersistence("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/")}
+
+        assertThrows(DatabaseCorruptedException::class.java) {
+            DatabaseDiskPersistence(
+                "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
+                .startWithDiskPersistence()
+        }
     }
 
     enum class InvalidKeyHasSpace(private val keyString: String) : SerializationKeys {
@@ -903,9 +933,9 @@ class PureMemoryDatabaseTests {
         val databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
 
         File(databaseDirectory).deleteRecursively()
-        pmd = DatabaseDiskPersistence.startWithDiskPersistence(databaseDirectory)
-        val ap = AuthenticationPersistence(pmd)
-        val tep = TimeEntryPersistence(pmd)
+        pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+        val ap = AuthenticationPersistence(pmd, testLogger)
+        val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val newEmployee = if (! skipCreatingEmployees) {
             tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         } else {
@@ -928,7 +958,7 @@ class PureMemoryDatabaseTests {
         pmd.stop()
 
         return if (! skipRestarting) {
-            DatabaseDiskPersistence.startWithDiskPersistence(databaseDirectory)
+            DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         } else {
             null
         }
@@ -949,20 +979,20 @@ class PureMemoryDatabaseTests {
             val minutesPerEmployeeTotal =
                     allEmployees.map { e -> tep.readTimeEntries(e).sumBy { te -> te.time.numberOfMinutes } }
                             .toList()
-            logAudit { "the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}" }
-            logAudit { "the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}" }
+            testLogger.logAudit { "the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}" }
+            testLogger.logAudit { "the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}" }
         }
 
-        logAudit { "It took $timeToAccumulate milliseconds to accumulate the minutes per employee" }
+        testLogger.logAudit { "It took $timeToAccumulate milliseconds to accumulate the minutes per employee" }
     }
 
     private fun readTimeEntriesForOneEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
         val (timeToGetAllTimeEntries) = getTime { tep.readTimeEntries(allEmployees[0]) }
-        logAudit { "It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee" }
+        testLogger.logAudit { "It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee" }
     }
 
     private fun enterTimeEntries(tep: ITimeEntryPersistence, numberOfDays: Int, allEmployees: List<Employee>, allProjects: List<Project>, numberOfEmployees: Int) {
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         val (timeToEnterAllTimeEntries) = getTime {
             for (day in 1..numberOfDays) {
                 for (employee in allEmployees) {
@@ -973,42 +1003,42 @@ class PureMemoryDatabaseTests {
                 }
             }
         }
-        resetLogSettingsToDefault()
-        logAudit { "It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees" }
-        logAudit { "(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)" }
+        testLogger.resetLogSettingsToDefault()
+        testLogger.logAudit { "It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees" }
+        testLogger.logAudit { "(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)" }
     }
 
     private fun readProjectsFromDatabase(tep: ITimeEntryPersistence): List<Project> {
         val (timeToReadAllProjects, allProjects) = getTime { tep.getAllProjects()}
-        logAudit { "It took $timeToReadAllProjects milliseconds to read all the projects" }
+        testLogger.logAudit { "It took $timeToReadAllProjects milliseconds to read all the projects" }
         return allProjects
     }
 
     private fun persistProjectsToDatabase(tep: ITimeEntryPersistence, numberOfProjects: Int) {
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         val (timeToCreateProjects) =
                 getTime { (1..numberOfProjects).forEach { i -> tep.persistNewProject(ProjectName("project$i")) } }
-        resetLogSettingsToDefault()
-        logAudit { "It took $timeToCreateProjects milliseconds to create $numberOfProjects projects" }
+        testLogger.resetLogSettingsToDefault()
+        testLogger.logAudit { "It took $timeToCreateProjects milliseconds to create $numberOfProjects projects" }
     }
 
     private fun readEmployeesFromDatabase(tep: ITimeEntryPersistence): List<Employee> {
         val (timeToReadAllEmployees, allEmployees) = getTime {
             tep.getAllEmployees()
         }
-        logAudit { "It took $timeToReadAllEmployees milliseconds to read all the employees" }
+        testLogger.logAudit { "It took $timeToReadAllEmployees milliseconds to read all the employees" }
         return allEmployees
     }
 
     private fun persistEmployeesToDatabase(tep: ITimeEntryPersistence, numberOfEmployees: Int, lotsOfEmployees: List<String>) {
-        turnOffAllLogging()
+        testLogger.turnOffAllLogging()
         val (timeToEnterEmployees) = getTime {
             for (i in 1..numberOfEmployees) {
                 tep.persistNewEmployee(EmployeeName(lotsOfEmployees[i]))
             }
         }
-        resetLogSettingsToDefault()
-        logAudit { "It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees" }
+        testLogger.resetLogSettingsToDefault()
+        testLogger.logAudit { "It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees" }
     }
 
     private fun generateEmployeeNames(): List<String> {
@@ -1019,7 +1049,7 @@ class PureMemoryDatabaseTests {
             // if you want to make a lot more names, uncomment below
             // lotsOfEmployees = (1..10).flatMap { n -> employeenames.map { u -> "$u$n" } }.toList()
         }
-        logAudit { "It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames" }
+        testLogger.logAudit { "It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames" }
         return lotsOfEmployees
     }
 

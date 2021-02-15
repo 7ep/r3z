@@ -2,8 +2,8 @@ package coverosR3z.timerecording.persistence
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.logging.logDebug
-import coverosR3z.logging.logTrace
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.persistence.exceptions.SubmissionNotFoundException
@@ -13,10 +13,12 @@ import java.util.NoSuchElementException
 
 class TimeEntryPersistence(
     private val pmd : PureMemoryDatabase,
-    private val cu : CurrentUser = CurrentUser(SYSTEM_USER)) : ITimeEntryPersistence {
+    private val cu : CurrentUser = CurrentUser(SYSTEM_USER),
+    private val logger: ILogger
+) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
-        return TimeEntryPersistence(pmd, cu)
+        return TimeEntryPersistence(pmd, cu, logger)
     }
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
@@ -26,7 +28,7 @@ class TimeEntryPersistence(
             // add the new data
             val newIndex = entries.nextIndex.getAndIncrement()
 
-            logTrace(cu) {"new time-entry index is $newIndex" }
+            logger.logTrace(cu) {"new time-entry index is $newIndex" }
             val newTimeEntry = TimeEntry(
                 TimeEntryId(newIndex),
                 entry.employee,
@@ -36,7 +38,7 @@ class TimeEntryPersistence(
                 entry.details
             )
             entries.add(newTimeEntry)
-            logDebug(cu) {"recorded a new timeEntry: $newTimeEntry"}
+            logger.logDebug(cu) {"recorded a new timeEntry: $newTimeEntry"}
             newTimeEntry
         }
     }
@@ -54,8 +56,8 @@ class TimeEntryPersistence(
             entries.add(newEntry)
         }
 
-        logDebug(cu) {"modified an existing timeEntry: $newEntry"}
-        logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $newEntry" }
+        logger.logDebug(cu) {"modified an existing timeEntry: $newEntry"}
+        logger.logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $newEntry" }
         return newEntry
     }
 
@@ -75,7 +77,7 @@ class TimeEntryPersistence(
         return pmd.ProjectDataAccess().actOn { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
             projects.add(newProject)
-            logDebug(cu) { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
+            logger.logDebug(cu) { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
             newProject
         }
     }
@@ -84,7 +86,7 @@ class TimeEntryPersistence(
         return pmd.EmployeeDataAccess().actOn { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
-            logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
+            logger.logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
             newEmployee
         }
     }
@@ -147,7 +149,7 @@ class TimeEntryPersistence(
             val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employeeId,
                 timePeriod)
-            logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
+            logger.logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
             submissions.add(newSubmission)
             newSubmission
         }
@@ -173,7 +175,7 @@ class TimeEntryPersistence(
     override fun unsubmitTimePeriod(stp: SubmittedPeriod) {
         pmd.SubmittedPeriodsAccess().actOn { submissions ->
             submissions.remove(stp)
-            logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employeeId.value}\", id: ${stp.id.value}, from the database" }
+            logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employeeId.value}\", id: ${stp.id.value}, from the database" }
         }
     }
 

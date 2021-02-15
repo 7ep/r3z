@@ -2,25 +2,29 @@ package coverosR3z.timerecording.utility
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.logging.logAudit
-import coverosR3z.logging.logDebug
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
-class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, private val cu : CurrentUser) :
+class TimeRecordingUtilities(
+    private val persistence: ITimeEntryPersistence,
+    private val cu: CurrentUser,
+    private val logger: ILogger
+) :
     ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        return TimeRecordingUtilities(persistence, cu)
+        return TimeRecordingUtilities(persistence, cu, logger)
     }
 
     override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
-            logDebug(cu) {"recorded time successfully"}
+            logger.logDebug(cu) {"recorded time successfully"}
             newTimeEntry
         }
     }
@@ -28,7 +32,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{
         return createOrModifyEntry(entry.toTimeEntryPreDatabase()) {
             val newTimeEntry = persistence.overwriteTimeEntry(entry)
-            logDebug(cu) {"modified time successfully"}
+            logger.logDebug(cu) {"modified time successfully"}
             newTimeEntry
         }
     }
@@ -38,11 +42,11 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
-            logAudit(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
+            logger.logAudit(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
                     "to modify time for ${entry.employee.name.value}"}
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
-        logAudit(cu) {"Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\""}
+        logger.logAudit(cu) {"Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\""}
         confirmLessThan24Hours(entry.time, entry.employee, entry.date)
         if(persistence.isInASubmittedPeriod(entry.employee.id, entry.date)){
             return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
@@ -51,7 +55,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
             val newTimeEntry = behavior()
             RecordTimeResult(StatusEnum.SUCCESS, newTimeEntry)
         } catch (ex : IllegalStateException) {
-            logDebug(cu) {"Error adding time entry: ${ex.message}"}
+            logger.logDebug(cu) {"Error adding time entry: ${ex.message}"}
 
             when (ex.message) {
                 TimeEntryPersistence.timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
@@ -64,14 +68,14 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
     }
 
     private fun confirmLessThan24Hours(time: Time, employee: Employee, date: Date) {
-        logDebug(cu) {"confirming total time is less than 24 hours"}
+        logger.logDebug(cu) {"confirming total time is less than 24 hours"}
         // make sure the employee has a total (new plus existing) of less than 24 hours
         val minutesRecorded : Time = persistence.queryMinutesRecorded(employee, date)
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
         val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + time.numberOfMinutes
         if (existingPlusNewMinutes > twentyFourHours) {
-            logDebug(cu) {"More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)"}
+            logger.logDebug(cu) {"More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)"}
             throw ExceededDailyHoursAmountException()
         }
     }
@@ -86,7 +90,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
+        logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
         return persistence.persistNewProject(projectName)
     }
@@ -103,7 +107,7 @@ class TimeRecordingUtilities(private val persistence: ITimeEntryPersistence, pri
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
 
         val newEmployee = persistence.persistNewEmployee(employeename)
-        logAudit(cu) {"Creating a new employee, \"${newEmployee.name.value}\""}
+        logger.logAudit(cu) {"Creating a new employee, \"${newEmployee.name.value}\""}
         return newEmployee
     }
 
