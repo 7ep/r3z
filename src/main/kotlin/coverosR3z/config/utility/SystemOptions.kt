@@ -2,6 +2,7 @@ package coverosR3z.config.utility
 
 import coverosR3z.misc.exceptions.SystemOptionsException
 import coverosR3z.misc.utility.checkParseToInt
+import kotlin.system.exitProcess
 
 data class SystemOptions(
         /**
@@ -106,6 +107,19 @@ data class SystemOptions(
                         }
                         catch (ex: Throwable) {
                                 throw SystemOptionsException(ex.message + "\n" + fullHelpMessage)
+                        }
+                }
+
+                /**
+                 * The user can provide command-line options when running this.
+                 * See [SystemOptions] and [extractOptions]
+                 */
+                fun extractCommandLineOptions(args: Array<String>): SystemOptions {
+                        return try {
+                                extractOptions(args)
+                        } catch (ex: SystemOptionsException) {
+                                println(ex.message)
+                                exitProcess(0)
                         }
                 }
 

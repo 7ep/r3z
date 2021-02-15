@@ -2,6 +2,7 @@ package coverosR3z.logging
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.config.utility.SystemOptions
 import coverosR3z.misc.utility.ActionQueue
 
 enum class LogTypes {
@@ -93,4 +94,18 @@ fun logWarn(cu : CurrentUser = CurrentUser(SYSTEM_USER), msg: () -> String) {
  */
 fun logImperative(msg: String) {
     println("${getCurrentMillis()} IMPERATIVE: $msg")
+}
+
+
+/**
+ * Sets logging per the [SystemOptions], if the user requested
+ * something
+ */
+fun configureLogging(serverOptions: SystemOptions) {
+    if (serverOptions.allLoggingOff) {
+        turnOffAllLogging()
+    }
+    if (serverOptions.allLoggingOn) {
+        turnOnAllLogging()
+    }
 }
