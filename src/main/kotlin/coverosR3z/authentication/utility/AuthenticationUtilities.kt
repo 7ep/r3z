@@ -2,12 +2,13 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.logging.logDebug
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.types.DateTime
 import coverosR3z.timerecording.types.EmployeeId
 
 
-class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticationUtilities {
+class AuthenticationUtilities(private val ap: IAuthPersistence, val logger: ILogger) : IAuthenticationUtilities {
 
     /**
      * Register a user through auth persistent, providing a username, password, and
@@ -18,10 +19,10 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
             val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
-            logDebug { "User registration successful for \"${username.value}\"" }
+            logger.logDebug { "User registration successful for \"${username.value}\"" }
             RegistrationResult(RegistrationResultStatus.SUCCESS, newUser)
         } else {
-            logDebug { "User ${username.value} could not be registered: already registered" }
+            logger.logDebug { "User ${username.value} could not be registered: already registered" }
             RegistrationResult(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, NO_USER)
         }
     }
@@ -38,17 +39,17 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
         val user = ap.getUser(username)
 
         if (user == NO_USER) {
-            logDebug { "Login failed: user ${user.name.value} is not registered." }
+            logger.logDebug { "Login failed: user ${user.name.value} is not registered." }
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
         val hashedSaltedPassword = Hash.createHash(password,user.salt)
         if (user.hash != hashedSaltedPassword) {
-            logDebug { "Login failed for user \"${user.name.value}\": Incorrect password." }
+            logger.logDebug { "Login failed for user \"${user.name.value}\": Incorrect password." }
             return Pair(LoginResult.FAILURE, NO_USER)
         }
 
-        logDebug { "Login successful for user ${user.name.value}." }
+        logger.logDebug { "Login successful for user ${user.name.value}." }
         return Pair(LoginResult.SUCCESS, user)
     }
 
@@ -67,7 +68,7 @@ class AuthenticationUtilities(private val ap : IAuthPersistence) : IAuthenticati
      */
     override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
         val sessionId = rand()
-        logDebug { "New session ID ($sessionId) generated for user (${user.name.value})" }
+        logger.logDebug { "New session ID ($sessionId) generated for user (${user.name.value})" }
         ap.addNewSession(sessionId, user, time)
         return sessionId
     }

@@ -2,8 +2,8 @@ package coverosR3z.persistence.utility
 
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
-import coverosR3z.logging.logImperative
-import coverosR3z.misc.utility.ActionQueue
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.persistence.types.AbstractDataAccess
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.toChangeTrackingSet
@@ -27,11 +27,13 @@ open class PureMemoryDatabase(
     protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
     protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
     protected val submittedPeriods: ChangeTrackingSet<SubmittedPeriod> = ChangeTrackingSet(),
-    protected val dbDirectory : String? = null
+    protected val dbDirectory : String? = null,
+    private val diskPersistence : DatabaseDiskPersistence? = null
 ) {
 
-    private val actionQueue = ActionQueue("DatabaseWriter")
-    private val diskPersistence = DatabaseDiskPersistence(dbDirectory)
+    fun stop() {
+        diskPersistence?.stop()
+    }
 
     fun copy(): PureMemoryDatabase {
         return PureMemoryDatabase(
@@ -92,20 +94,6 @@ open class PureMemoryDatabase(
     //   DATABASE CONTROL
     ////////////////////////////////////
 
-
-    /**
-     * This function will stop the database cleanly.
-     *
-     * In order to do this, we need to wait for our threads
-     * to finish their work.  In particular, we
-     * have offloaded our file writes to [actionQueue], which
-     * has an internal thread for serializing all actions
-     * on our database
-     */
-    fun stop() {
-        diskPersistence.stop()
-    }
-
     companion object {
 
         /**
@@ -114,11 +102,11 @@ open class PureMemoryDatabase(
          * used for testing purposes.  For production use,
          * check out [DatabaseDiskPersistence.startWithDiskPersistence]
          */
-        fun startMemoryOnly() : PureMemoryDatabase {
+        fun startMemoryOnly(logger: ILogger): PureMemoryDatabase {
             val pmd = PureMemoryDatabase()
 
-            logImperative("creating an initial employee")
-            val tep = TimeEntryPersistence(pmd)
+            Logger.logImperative("creating an initial employee")
+            val tep = TimeEntryPersistence(pmd, logger = logger)
             tep.persistNewEmployee(EmployeeName("Administrator"))
 
             return pmd

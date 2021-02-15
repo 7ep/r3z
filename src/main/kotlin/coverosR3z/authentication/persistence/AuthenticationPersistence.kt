@@ -1,16 +1,17 @@
 package coverosR3z.authentication.persistence
 
 import coverosR3z.authentication.types.*
-import coverosR3z.logging.logTrace
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.types.DateTime
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.EmployeeId
 
-class AuthenticationPersistence(private val pmd : PureMemoryDatabase) : IAuthPersistence {
+class AuthenticationPersistence(private val pmd : PureMemoryDatabase, private val logger: ILogger) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
         return pmd.UserDataAccess().actOn { users ->
-            logTrace { "PMD: adding new user, \"${name.value}\"" }
+            logger.logTrace { "PMD: adding new user, \"${name.value}\"" }
             val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)
             users.add(newUser)
             newUser

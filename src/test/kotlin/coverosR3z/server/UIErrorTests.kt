@@ -64,7 +64,7 @@ class UIErrorTests {
     }
     @After
     fun cleanup() {
-        pom.server.halfOpenServerSocket.close()
+        pom.fs.shutdown()
         pom.driver.quit()
     }
 }

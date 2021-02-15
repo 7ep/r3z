@@ -1,7 +1,7 @@
 package coverosR3z.misc.utility
 
+import coverosR3z.logging.Logger
 import coverosR3z.misc.exceptions.AttemptToAddToStoppingQueueException
-import coverosR3z.logging.logImperative
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 
@@ -31,7 +31,7 @@ class ActionQueue(val name : String) {
             this only gets called when we are trying to shut everything
             down cleanly
              */
-            logImperative("ActionQueue for $name is stopped.")
+            Logger.logImperative("ActionQueue for $name is stopped.")
         }
     }
 

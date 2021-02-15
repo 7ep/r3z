@@ -1,7 +1,7 @@
 package coverosR3z
 
-import coverosR3z.Ignition.Companion.createSystemRunningMarker
-import coverosR3z.Ignition.Companion.startSystem
+import coverosR3z.FullSystem.Companion.createSystemRunningMarker
+import coverosR3z.FullSystem.Companion.startSystem
 import coverosR3z.config.utility.SystemOptions.Companion.extractCommandLineOptions
 
 /**
@@ -12,7 +12,8 @@ fun main(args: Array<String>) {
 
     val serverOptions = extractCommandLineOptions(args)
 
-    startSystem(serverOptions)
+    val fullSystem = startSystem(serverOptions)
+    fullSystem.addShutdownHook()
 }
 
 

@@ -1,8 +1,10 @@
 package coverosR3z.uitests
 
+import coverosR3z.FullSystem
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
+import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.utility.Server
@@ -35,14 +37,9 @@ enum class Drivers(val driver: () -> WebDriver){
  */
 fun startupTestForUI(domain: String = "http://localhost", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModelLocal {
     // start the server
-    val server = Server(port)
-    val pmd = Server.makeDatabase()
-    val businessCode = Server.initializeBusinessCode(pmd)
-    val serverThread = server.createServerThread(businessCode)
-    val executor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-    executor.submit(serverThread)
+    val fs = FullSystem.startSystem(SystemOptions(port = port, dbDirectory = null))
 
-    return PageObjectModelLocal.make(driver(), port, businessCode, server, pmd, domain)
+    return PageObjectModelLocal.make(driver(), port, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }
 
 fun startupTestForUIWithoutServer(domain: String = "", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModel {
@@ -116,7 +113,6 @@ class LoggingPage(private val driver: WebDriver, private val domain: String) {
             LogTypes.WARN -> (LoggingAPI.Elements.WARN_INPUT.getId() + "true")
             LogTypes.DEBUG -> (LoggingAPI.Elements.DEBUG_INPUT.getId() + "true")
             LogTypes.TRACE -> (LoggingAPI.Elements.TRACE_INPUT.getId() + "true")
-            else -> throw Exception("Test failed - LogType was $lt")
         }
         driver.findElement(By.id(id)).click()
     }
@@ -127,7 +123,6 @@ class LoggingPage(private val driver: WebDriver, private val domain: String) {
             LogTypes.WARN -> (LoggingAPI.Elements.WARN_INPUT.getId() + "false")
             LogTypes.DEBUG -> (LoggingAPI.Elements.DEBUG_INPUT.getId() + "false")
             LogTypes.TRACE -> (LoggingAPI.Elements.TRACE_INPUT.getId() + "false")
-            else -> throw Exception("Test failed - LogType was $lt")
         }
         driver.findElement(By.id(id)).click()
     }
@@ -142,7 +137,6 @@ class LoggingPage(private val driver: WebDriver, private val domain: String) {
             LogTypes.WARN -> (LoggingAPI.Elements.WARN_INPUT.getId() + "true")
             LogTypes.DEBUG -> (LoggingAPI.Elements.DEBUG_INPUT.getId() + "true")
             LogTypes.TRACE -> (LoggingAPI.Elements.TRACE_INPUT.getId() + "true")
-            else -> throw Exception("Test failed - LogType was $lt")
         }
         return driver.findElement(By.id(id)).getAttribute("checked") == "true"
     }

@@ -1,7 +1,6 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
@@ -18,7 +17,7 @@ class AuthenticationPersistenceTests {
 
     @Test
     fun `Should fail to find an unregistered user`() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val result = ap.isUserRegistered(UserName("mitch"))
 
         assertEquals("we haven't registered anyone yet, so mitch shouldn't be registered", false, result)
@@ -26,7 +25,7 @@ class AuthenticationPersistenceTests {
 
     @Test
     fun `Should be able to create a new user`() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, null)
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
@@ -37,7 +36,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldAddSession() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, ap.getUserForSession(DEFAULT_SESSION_TOKEN))
     }
@@ -47,7 +46,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldAddSession_Duplicate() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         val ex = Assert.assertThrows(IllegalArgumentException::class.java) {
             ap.addNewSession(
@@ -65,7 +64,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldRemoveSession() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         ap.addNewSession(DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)
         assertEquals(DEFAULT_USER, ap.getUserForSession(DEFAULT_SESSION_TOKEN))
         ap.deleteSession(DEFAULT_USER)
@@ -77,7 +76,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testShouldComplainIfTryingToRemoveNonexistentSession() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val ex = Assert.assertThrows(IllegalStateException::class.java) { ap.deleteSession(DEFAULT_USER) }
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
@@ -88,7 +87,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testCorruptingSessionDataWithMultiThreading() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val numberNewSessionsAdded = 20
@@ -108,7 +107,7 @@ class AuthenticationPersistenceTests {
      */
     @Test
     fun testCorruptingUserDataWithMultiThreading() {
-        val ap = AuthenticationPersistence(PureMemoryDatabase())
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewUsersAdded = 20
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())

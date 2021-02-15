@@ -259,7 +259,7 @@ class UITimeEntryTests {
 
     @After
     fun cleanup() {
-        pom.server.halfOpenServerSocket.close()
+        pom.fs.shutdown()
         pom.driver.quit()
     }
 

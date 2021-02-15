@@ -1,13 +1,12 @@
 package coverosR3z.server.utility
 
-import coverosR3z.config.STATIC_FILES_DIRECTORY
-import coverosR3z.logging.logImperative
-import coverosR3z.logging.logTrace
-import coverosR3z.misc.utility.FileReader
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.toBytes
-import coverosR3z.server.api.handleNotFound
+import coverosR3z.server.api.handleBadRequest
+import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
-import java.nio.file.*
 
 
 /**
@@ -22,52 +21,8 @@ const val CRLF = "\r\n"
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
-class ServerUtilities {
+class ServerUtilities() {
     companion object {
-
-
-        /**
-         * This is used at server startup to load the cache with all
-         * our static files.
-         *
-         * The code for looping through the files in the jar was
-         * harder than I thought, since we're asking to loop through
-         * a zip file, not an ordinary file system.
-         *
-         * Maybe some opportunity for refactoring here.
-         */
-        fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
-            logImperative("Loading all static files into cache")
-
-            val urls = checkNotNull(FileReader.getResources(STATIC_FILES_DIRECTORY))
-            for (url in urls) {
-                val uri = url.toURI()
-
-                val myPath = if (uri.scheme == "jar") {
-                    val fileSystem: FileSystem = FileSystems.newFileSystem(uri, emptyMap<String, Any>())
-                    fileSystem.getPath(STATIC_FILES_DIRECTORY)
-                } else {
-                    Paths.get(uri)
-                }
-
-                for (path: Path in Files.walk(myPath, 1)) {
-                    val fileContents = FileReader.read(STATIC_FILES_DIRECTORY + path.fileName.toString()) ?: continue
-                    val filename = path.fileName.toString()
-                    val result =
-                        when {
-                            filename.takeLast(4) == ".css" -> okCSS(fileContents)
-                            filename.takeLast(3) == ".js" -> okJS(fileContents)
-                            filename.takeLast(4) == ".jpg" -> okJPG(fileContents)
-                            filename.takeLast(5) == ".webp" -> okWEBP(fileContents)
-                            filename.takeLast(5) == ".html" || filename.takeLast(4) == ".htm" -> okHTML(fileContents)
-                            else -> handleNotFound()
-                        }
-
-                    cache[filename] = result
-                    logTrace { "Added $filename to the cache" }
-                }
-            }
-        }
 
         /**
          * If you are responding with a success message and it is HTML
@@ -84,18 +39,18 @@ class ServerUtilities {
         /**
          * If you are responding with a success message and it is CSS
          */
-        private fun okCSS(contents : ByteArray) =
+        fun okCSS(contents : ByteArray) =
                 ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
         /**
          * If you are responding with a success message and it is JavaScript
          */
-        private fun okJS (contents : ByteArray) =
+        fun okJS (contents : ByteArray) =
                 ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
 
-        private fun okJPG (contents : ByteArray) =
+        fun okJPG (contents : ByteArray) =
             ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
 
-        private fun okWEBP (contents : ByteArray) =
+        fun okWEBP (contents : ByteArray) =
                 ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
 
         private fun ok (contents: ByteArray, ct : List<String>) =
@@ -112,10 +67,10 @@ class ServerUtilities {
          * sends data as the body of a response from server
          * Also adds necessary across-the-board headers
          */
-        fun returnData(server: ISocketWrapper, data: PreparedResponseData) {
-            logTrace { "Assembling data just before shipping to client" }
+        fun returnData(server: ISocketWrapper, data: PreparedResponseData, logger: ILogger) {
+            logger.logTrace { "Assembling data just before shipping to client" }
             val status = "HTTP/1.1 ${data.statusCode.value}"
-            logTrace { "status: $status" }
+            logger.logTrace { "status: $status" }
             val basicServerHeaders = generateBasicServerResponseHeaders(data)
             val allHeaders = basicServerHeaders + data.headers
 
@@ -138,6 +93,67 @@ class ServerUtilities {
                 "server: cerver",
             )
         }
+
+        fun processConnectedClient(
+            server: SocketWrapper,
+            businessCode: BusinessCode,
+            serverObjects: ServerObjects,
+        ) {
+            val logger = serverObjects.logger
+            logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
+            do {
+                val requestData = handleRequest(server, businessCode, serverObjects)
+                val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                if (shouldKeepAlive) {
+                    logger.logTrace { "This is a keep-alive connection" }
+                }
+            } while (shouldKeepAlive)
+
+            logger.logTrace { "closing server socket" }
+            server.close()
+        }
+
+        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
+            lateinit var analyzedHttpData : AnalyzedHttpData
+            val responseData: PreparedResponseData = try {
+                analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
+
+                serverObjects.logger.logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
+                if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
+                    return analyzedHttpData
+                }
+
+                if (analyzedHttpData.verb == Verb.INVALID) {
+                    handleBadRequest()
+                } else {
+                    // if we can just return a static file now, do that...
+                    val staticResponse : PreparedResponseData? = serverObjects.staticFileCache[analyzedHttpData.path]
+                    if (staticResponse != null) {
+                        staticResponse
+                    } else {
+                        // otherwise review the routing
+                        // now that we know who the user is (if they authenticated) we can update the current user
+                        val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
+                        RoutingUtilities.routeToEndpoint(
+                            ServerData(
+                                businessCode.au,
+                                truWithUser,
+                                analyzedHttpData,
+                                AuthUtilities.isAuthenticated(analyzedHttpData.user),
+                                serverObjects.logger
+                            )
+                        )
+                    }
+                }
+            } catch (ex: Exception) {
+                // If there ane any complaints whatsoever, we return them here
+                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
+            }
+
+            returnData(server, responseData, serverObjects.logger)
+            return analyzedHttpData
+        }
+
 
     }
 }

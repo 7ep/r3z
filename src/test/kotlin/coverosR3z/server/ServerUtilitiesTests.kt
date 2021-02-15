@@ -4,6 +4,7 @@ import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.PerformanceTest
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.granularPerfArchiveDirectory
+import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
@@ -149,7 +150,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("POST /${EnterTimeAPI.path} HTTP/1.1")
         val expected = Triple(Verb.POST, EnterTimeAPI.path, mapOf<String,String>())
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -162,7 +163,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test HTTP/1.1")
         val expected = Triple(Verb.GET, "test", mapOf<String,String>())
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -175,7 +176,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test.utl HTTP/1.1")
         val expected = Triple(Verb.GET, "test.utl", mapOf<String,String>())
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -188,7 +189,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test.css HTTP/1.1")
         val expected = Triple(Verb.GET, "test.css", mapOf<String,String>())
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -201,7 +202,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test.js HTTP/1.1")
         val expected = Triple(Verb.GET, "test.js", mapOf<String,String>())
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -215,7 +216,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc=123 HTTP/1.1")
         val expected = Triple(Verb.GET, "test", mapOf("abc" to "123"))
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -229,7 +230,7 @@ class ServerUtilitiesTests {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc=123&def=456 HTTP/1.1")
         val expected = Triple(Verb.GET, "test", mapOf("abc" to "123", "def" to "456"))
 
-        val result = parseStatusLineAsServer(input!!)
+        val result = parseStatusLineAsServer(input!!, testLogger)
 
         assertEquals(expected, result)
     }
@@ -238,7 +239,7 @@ class ServerUtilitiesTests {
     fun testShouldParseQueryString_badlyFormed_multipleQuestionMarks() {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc=123?def=456 HTTP/1.1")
 
-        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!)}
+        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!, testLogger)}
     }
 
     /**
@@ -251,7 +252,7 @@ class ServerUtilitiesTests {
     fun testShouldParseQueryString_badlyFormed_NoValueButOnlyKey() {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc HTTP/1.1")
 
-        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!)}
+        assertThrows(IllegalStateException::class.java) {parseStatusLineAsServer(input!!, testLogger)}
     }
 
     /**
@@ -264,7 +265,7 @@ class ServerUtilitiesTests {
     fun testShouldParseQueryString_badlyFormed_OnlyValue() {
         val input = serverStatusLineRegex.matchEntire("GET /test?=abc HTTP/1.1")
 
-        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!) }
+        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!, testLogger) }
     }
 
     /**
@@ -274,7 +275,7 @@ class ServerUtilitiesTests {
     fun testShouldParseQueryString_badlyFormed_TooLarge() {
         val input = serverStatusLineRegex.matchEntire("GET /test?=${"a".repeat(maxQueryStringLength+1)} HTTP/1.1")
 
-        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!) }
+        assertThrows(IllegalStateException::class.java) { parseStatusLineAsServer(input!!, testLogger) }
     }
 
     /**
@@ -284,7 +285,7 @@ class ServerUtilitiesTests {
     fun testShouldParseQueryString_badlyFormed_TooSmall() {
         val input = serverStatusLineRegex.matchEntire("GET /test? HTTP/1.1")
 
-        val ex = assertThrows(IllegalArgumentException::class.java) { parseStatusLineAsServer(input!!) }
+        val ex = assertThrows(IllegalArgumentException::class.java) { parseStatusLineAsServer(input!!, testLogger) }
         assertEquals("The URL-encoded content was empty", ex.message)
     }
 

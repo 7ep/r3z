@@ -1,14 +1,15 @@
 package coverosR3z.logging
 
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.misc.utility.ActionQueue
 
 fun getCurrentMillis() : Long {
     return System.currentTimeMillis()
 }
-class Logger : ILogger {
-    private val loggerPrinter = ActionQueue("loggerPrinter")
+
+class TestLogger : ILogger {
 
     /**
      * Set the system to standard configuration for which
@@ -43,7 +44,7 @@ class Logger : ILogger {
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
         if (logSettings[LogTypes.AUDIT] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: ${msg()}") }
+            println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: ${msg()}")
         }
     }
 
@@ -52,7 +53,7 @@ class Logger : ILogger {
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.DEBUG] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: ${msg()}") }
+            println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: ${msg()}")
         }
     }
 
@@ -61,7 +62,7 @@ class Logger : ILogger {
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.TRACE] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: ${cu.user.name.value}: ${msg()}") }
+            println("${getCurrentMillis()} TRACE: ${cu.user.name.value}: ${msg()}")
         }
     }
 
@@ -71,7 +72,7 @@ class Logger : ILogger {
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.WARN] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} ${cu.user.name.value}: WARN: ${msg()}") }
+            println("${getCurrentMillis()} ${cu.user.name.value}: WARN: ${msg()}")
         }
     }
 
@@ -89,7 +90,7 @@ class Logger : ILogger {
     }
 
     override fun stop() {
-        loggerPrinter.stop()
+        // does nothing
     }
 
     companion object {

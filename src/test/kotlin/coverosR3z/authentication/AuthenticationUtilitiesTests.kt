@@ -22,7 +22,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap)
+        authUtils = AuthenticationUtilities(ap, testLogger)
     }
 
     @Test
@@ -292,9 +292,9 @@ class AuthenticationUtilitiesTests {
     fun testShouldClearAllSessionsWhenLogout() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"
         File(dbDirectory).deleteRecursively()
-        val pmd = DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory = dbDirectory)
-        val authPersistence = AuthenticationPersistence(pmd)
-        val au = AuthenticationUtilities(authPersistence)
+        val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
+        val authPersistence = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger)
 
         // we have to register users so reloading the data from disk works
         val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
@@ -313,8 +313,8 @@ class AuthenticationUtilitiesTests {
         pmd.stop()
 
         // test out loading it from the disk
-        val pmd2 = DatabaseDiskPersistence.startWithDiskPersistence(dbDirectory = dbDirectory)
-        val authPersistence2 = AuthenticationPersistence(pmd2)
+        val pmd2 = DatabaseDiskPersistence(dbDirectory = dbDirectory, logger = testLogger).startWithDiskPersistence()
+        val authPersistence2 = AuthenticationPersistence(pmd2, testLogger)
         assertTrue(authPersistence2.getAllSessions().none{it.user == user1})
         assertEquals(1, authPersistence2.getAllSessions().filter {it.user == user2}.size)
     }
@@ -326,7 +326,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
         val pmd = PureMemoryDatabase()
-        val au = AuthenticationUtilities(AuthenticationPersistence(pmd))
+        val au = AuthenticationUtilities(AuthenticationPersistence(pmd, testLogger), testLogger)
 
         val ex = assertThrows(IllegalStateException::class.java) { au.logout(DEFAULT_USER) }
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)

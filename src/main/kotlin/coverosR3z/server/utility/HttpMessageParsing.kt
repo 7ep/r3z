@@ -3,7 +3,8 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.IAuthenticationUtilities
-import coverosR3z.logging.logTrace
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.decode
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.server.types.AnalyzedHttpData
@@ -66,17 +67,19 @@ const val maxQueryStringLength = 1024
  * Analyze the data following HTTP protocol and create a
  * [AnalyzedHttpData] to store the vital information
  */
-fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
+fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities, logger: ILogger): AnalyzedHttpData {
     // read the first line for the fundamental request
     val statusLine = socketWrapper.readLine()
-    logTrace { "statusLine: $statusLine" }
+    logger.logTrace { "statusLine: $statusLine" }
     if (statusLine.isNullOrBlank()) {
         return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION)
     }
 
     return when {
-        clientStatusLineRegex.containsMatchIn(statusLine) -> analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper)
-        serverStatusLineRegex.containsMatchIn(statusLine) -> analyzeAsServer(checkNotNull(serverStatusLineRegex.matchEntire(statusLine)), socketWrapper, au)
+        clientStatusLineRegex.containsMatchIn(statusLine) ->
+            analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper, logger)
+        serverStatusLineRegex.containsMatchIn(statusLine) ->
+            analyzeAsServer(checkNotNull(serverStatusLineRegex.matchEntire(statusLine)), socketWrapper, au, logger)
         else -> AnalyzedHttpData(Verb.INVALID)
     }
 
@@ -87,8 +90,8 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
 /**
  * If we are reviewing an HTTP message as a server
  */
-private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities): AnalyzedHttpData {
-    val (verb, path, queryString) = parseStatusLineAsServer(statusLineMatches)
+private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities, logger: ILogger): AnalyzedHttpData {
+    val (verb, path, queryString) = parseStatusLineAsServer(statusLineMatches, logger)
     val headers = getHeaders(socketWrapper)
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
@@ -101,8 +104,8 @@ private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISock
 /**
  * If we are reviewing an HTTP message as a client
  */
-private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper): AnalyzedHttpData {
-    val statusCode = parseStatusLineAsClient(statusLineMatches)
+private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, logger: ILogger): AnalyzedHttpData {
+    val statusCode = parseStatusLineAsClient(statusLineMatches, logger)
     val headers = getHeaders(socketWrapper)
     val rawData = if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase())}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
@@ -145,11 +148,11 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
 /**
  * The first line tells us a lot. See [serverStatusLineRegex]
  */
-fun parseStatusLineAsServer(matchResult: MatchResult): Triple<Verb, String, Map<String,String>> {
+fun parseStatusLineAsServer(matchResult: MatchResult, logger: ILogger): Triple<Verb, String, Map<String,String>> {
     val verb: Verb = Verb.valueOf(checkNotNull(matchResult.groups[1]){"The HTTP verb must not be missing"}.value)
-    logTrace { "verb from client was: $verb" }
+    logger.logTrace { "verb from client was: $verb" }
     val pathAndQuery = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
-    logTrace { "full path from client was: $pathAndQuery" }
+    logger.logTrace { "full path from client was: $pathAndQuery" }
     val split = pathAndQuery.split("?")
     check(split.size in 1..2)
     val path = split[0]
@@ -164,9 +167,9 @@ fun parseStatusLineAsServer(matchResult: MatchResult): Triple<Verb, String, Map<
  * The first line tells us a lot. See [clientStatusLineRegex]
  * Also see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
  */
-fun parseStatusLineAsClient(matchResult: MatchResult): StatusCode {
+fun parseStatusLineAsClient(matchResult: MatchResult, logger: ILogger): StatusCode {
     val statusCode: StatusCode = StatusCode.fromCode(checkNotNull(matchResult.groups[1]){"The status code must not be missing"}.value)
-    logTrace { "status code from client was: $statusCode" }
+    logger.logTrace { "status code from client was: $statusCode" }
     return statusCode
 }
 

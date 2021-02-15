@@ -18,7 +18,7 @@ import java.util.*
  */
 abstract class AbstractDataAccess<T> (
     private val data : ChangeTrackingSet<T>,
-    private val dbp : DatabaseDiskPersistence,
+    private val dbp : DatabaseDiskPersistence? = null,
     private val name: String)
     : DataAccess<T>
         where T : IndexableSerializable {
@@ -30,8 +30,8 @@ abstract class AbstractDataAccess<T> (
             val nextItem = data.modified.poll()
             if (nextItem != null) {
                 when (nextItem.second) {
-                    CREATE -> dbp.persistToDisk(nextItem.first, name)
-                    DELETE -> dbp.deleteOnDisk(nextItem.first, name)
+                    CREATE -> dbp?.persistToDisk(nextItem.first, name)
+                    DELETE -> dbp?.deleteOnDisk(nextItem.first, name)
                 }
             }
         }

@@ -1,6 +1,7 @@
 package coverosR3z.server.api
 
-import coverosR3z.logging.logTrace
+import coverosR3z.logging.ILogger
+import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.ContentType
 import coverosR3z.server.types.PreparedResponseData
@@ -18,8 +19,8 @@ fun handleUnauthorized() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, StatusCode.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
-fun handleInternalServerError(shortMessage : String, fullStackTrace : String) : PreparedResponseData {
-    logTrace { "handling internal server error: $fullStackTrace" }
+fun handleInternalServerError(shortMessage : String, fullStackTrace : String, logger: ILogger) : PreparedResponseData {
+    logger.logTrace { "handling internal server error: $fullStackTrace" }
     return PreparedResponseData(
         internalServerErrorHTML(shortMessage), StatusCode.INTERNAL_SERVER_ERROR, listOf(
         ContentType.TEXT_HTML.value))
