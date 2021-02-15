@@ -196,6 +196,7 @@ class Server(val port: Int, private val sslPort: Int? = null) {
             pmd: PureMemoryDatabase? = null,
             dbDirectory: String? = null
         ): PureMemoryDatabase {
+            logImperative("database directory is $dbDirectory")
             return pmd ?: if (dbDirectory == null) {
                 PureMemoryDatabase.startMemoryOnly()
             } else {

@@ -15,29 +15,50 @@ import kotlin.system.exitProcess
  * Entry point for the application.  KISS.
  */
 fun main(args: Array<String>) {
-    File("SYSTEM_RUNNING").writeText("This file serves as a marker to indicate the system is running.")
-    File("SYSTEM_RUNNING").deleteOnExit()
+    createSystemRunningMarker()
 
     val serverOptions = extractCommandLineOptions(args)
 
-    logImperative("starting server on port ${serverOptions.port} and sslPort ${serverOptions.sslPort}")
-    logImperative("database directory is ${serverOptions.dbDirectory}")
+    startSystem(serverOptions)
+}
 
+/**
+ * Kicks off a multitude of components, including the database
+ * and the server
+ */
+private fun startSystem(serverOptions: SystemOptions) {
     configureLogging(serverOptions)
 
+    // start the database
     val pmd = Server.makeDatabase(dbDirectory = serverOptions.dbDirectory)
+
+    // create the utilities that the API's will use by instantiating
+    // them with the database as a parameter
     val businessObjects = Server.initializeBusinessCode(pmd)
+
+    // create a server object
     val server = Server(serverOptions.port, serverOptions.sslPort)
+
     val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
     val serverFuture = serverExecutor.submit(server.createServerThread(businessObjects))
 
-    if (serverOptions.sslPort != null) {
+    val sslServerFuture = if (serverOptions.sslPort != null) {
         val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-        val sslServerFuture = sslServerExecutor.submit(server.createSecureServerThread(businessObjects))
-        server.addShutdownHook(pmd, serverFuture, sslServerFuture)
+        sslServerExecutor.submit(server.createSecureServerThread(businessObjects))
     } else {
-        server.addShutdownHook(pmd, serverFuture)
+        null
     }
+
+    server.addShutdownHook(pmd, serverFuture, sslServerFuture)
+}
+
+/**
+ * this saves a file to the home directory, SYSTEM_RUNNING,
+ * that will indicate the system is active
+ */
+private fun createSystemRunningMarker() {
+    File("SYSTEM_RUNNING").writeText("This file serves as a marker to indicate the system is running.")
+    File("SYSTEM_RUNNING").deleteOnExit()
 }
 
 /**
