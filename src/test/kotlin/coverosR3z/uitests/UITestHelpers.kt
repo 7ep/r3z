@@ -160,4 +160,26 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun getDateForEntry(id: Int) : String {
         return driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).getAttribute("value")
     }
+
+    fun submitTimeForPeriod() {
+        val submitButton = driver.findElement(By.cssSelector("#${ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()}"))
+        check(submitButton.text == "SUBMIT")
+        return submitButton.click()
+    }
+
+    fun verifyPeriodIsSubmitted() : Boolean {
+        val submitButton = driver.findElement(By.cssSelector("#${ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()}"))
+        return submitButton.text == "UNSUBMIT"
+    }
+
+    fun verifyPeriodIsUnsubmitted() : Boolean{
+        val submitButton = driver.findElement(By.cssSelector("#${ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()}"))
+        return submitButton.text == "SUBMIT"
+    }
+
+    fun unsubmitForTimePeriod() {
+        val submitButton = driver.findElement(By.cssSelector("#${ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()}"))
+        check(submitButton.text == "UNSUBMIT")
+        return submitButton.click()
+    }
 }

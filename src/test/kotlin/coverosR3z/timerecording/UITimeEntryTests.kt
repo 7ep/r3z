@@ -12,6 +12,7 @@ import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UITimeEntryTests {
@@ -83,22 +84,32 @@ class UITimeEntryTests {
     @BDD
     @UITest
     @Test
-    @Ignore("Not started yet")
     fun `timeentry - should be able to submit time for a certain period`() {
         val s = TimeEntryUserStory.getScenario("timeentry - should be able to submit time for a certain period")
+        addSomeTimeEntries()
         s.markDone("Given that I am done entering my time for the period")
+
+        submitTheEntries()
         s.markDone("When I submit my time")
+
+        checkEntriesAreSubmitted()
         s.markDone("Then the time period is ready to be approved")
     }
 
     @BDD
     @UITest
     @Test
-    @Ignore("Not started yet")
     fun `timeentry - should be able to unsubmit a period`() {
         val s = TimeEntryUserStory.getScenario("timeentry - should be able to unsubmit a period")
+
+        addSomeTimeEntries()
+        submitTheEntries()
         s.markDone("Given that I had submitted my time but need to make a change")
+
+        unsubmitEntries()
         s.markDone("When I unsubmit my time")
+
+        checkPeriodIsUnlocked()
         s.markDone("Then the time period is ready for more editing")
     }
 
@@ -160,11 +171,6 @@ class UITimeEntryTests {
 
         assertEquals("1.00", pom.vtp.getTimeForEntry(3))
         assertEquals("2021-01-03", pom.vtp.getDateForEntry(3))
-    }
-
-    private fun addSomeTimeEntries() {
-        loginAsUserAndCreateProject("alice", "projecta")
-        enterThreeEntriesForEmployee("projecta")
     }
 
     @UITest
@@ -316,6 +322,27 @@ class UITimeEntryTests {
         assertEquals("your time entries", pom.driver.title)
         assertEquals("2020-06-12", pom.vtp.getDateForEntry(1))
         assertEquals("1.00", pom.vtp.getTimeForEntry(1))
+    }
+
+    private fun addSomeTimeEntries() {
+        loginAsUserAndCreateProject("alice", "projecta")
+        enterThreeEntriesForEmployee("projecta")
+    }
+
+    private fun submitTheEntries() {
+        pom.vtp.submitTimeForPeriod()
+    }
+
+    private fun checkEntriesAreSubmitted() {
+        assertTrue(pom.vtp.verifyPeriodIsSubmitted())
+    }
+
+    private fun checkPeriodIsUnlocked() {
+        assertTrue(pom.vtp.verifyPeriodIsUnsubmitted())
+    }
+
+    private fun unsubmitEntries() {
+        pom.vtp.unsubmitForTimePeriod()
     }
 
 
