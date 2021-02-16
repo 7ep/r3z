@@ -45,7 +45,7 @@ class TimeEntryPersistence(
 
     override fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry {
         isEntryValid(newEntry.toTimeEntryPreDatabase())
-        val oldEntry = pmd.TimeEntryDataAccess().actOn {entries ->
+        val oldEntry = pmd.TimeEntryDataAccess().read {entries ->
             entries.single{it.id == newEntry.id}
         }
 

@@ -2,11 +2,11 @@ package coverosR3z.server.utility
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
+import java.net.SocketTimeoutException
 
 
 /**
@@ -101,20 +101,28 @@ class ServerUtilities() {
         ) {
             val logger = serverObjects.logger
             logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
-            do {
+            var shouldKeepAlive : Boolean
+            do try {
                 val requestData = handleRequest(server, businessCode, serverObjects)
-                val shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                shouldKeepAlive =
+                    requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
                 if (shouldKeepAlive) {
                     logger.logTrace { "This is a keep-alive connection" }
                 }
-            } while (shouldKeepAlive)
+            } catch (ex : SocketTimeoutException) {
+                // we get here if we wait too long on reading from the socket
+                // without getting anything.  See SocketWrapper and soTimeout
+                logger.logTrace { "read timed out" }
+                shouldKeepAlive = false
+            }
+            while (shouldKeepAlive)
 
             logger.logTrace { "closing server socket" }
             server.close()
         }
 
         private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
-            lateinit var analyzedHttpData : AnalyzedHttpData
+            var analyzedHttpData = AnalyzedHttpData()
             val responseData: PreparedResponseData = try {
                 analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
 
@@ -145,7 +153,10 @@ class ServerUtilities() {
                         )
                     }
                 }
-            } catch (ex: Exception) {
+            } catch (ex : SocketTimeoutException) {
+                throw ex
+            }
+            catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
                 handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
             }
