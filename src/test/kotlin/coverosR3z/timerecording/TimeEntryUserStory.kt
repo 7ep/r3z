@@ -61,6 +61,14 @@ object TimeEntryUserStory : UserStory(
                 "Then the time entry is removed"
         )
 
+        addScenario(
+            "timeentry - I should be able to view previous time periods when viewing entries",
+
+                "Given I have made entries in a previous period",
+                "When I go to review them",
+                "Then I can see my entries"
+        )
+
     }
 }
 

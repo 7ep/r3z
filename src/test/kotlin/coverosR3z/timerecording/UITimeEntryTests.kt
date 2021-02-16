@@ -116,18 +116,6 @@ class UITimeEntryTests {
     @UITest
     @Test
     @Ignore("Not started yet")
-    fun `should be able to edit make multiple entries at once`() {
-        // Given I spent half my day on training and half on client work
-        // There should be fields available to record both these things
-
-        // I put info in both
-
-        // my time has been recorded
-    }
-
-    @UITest
-    @Test
-    @Ignore("Not started yet")
     fun `a blind person should have equivalent accommodation for entering time`() {
         // I am blind, so I use a screen reader
         // I enter my time using the screen reader
@@ -159,27 +147,22 @@ class UITimeEntryTests {
         s.markDone("then I see my prior entries")
     }
 
-    private fun verifyTimeEntries() {
-        // Verify the entries
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?${ViewTimeAPI.Elements.TIME_PERIOD.getElemName()}=2021-01-01")
-
-        assertEquals("1.00", pom.vtp.getTimeForEntry(1))
-        assertEquals("2021-01-01",  pom.vtp.getDateForEntry(1))
-
-        assertEquals("1.00",  pom.vtp.getTimeForEntry(2))
-        assertEquals("2021-01-02",    pom.vtp.getDateForEntry(2))
-
-        assertEquals("1.00", pom.vtp.getTimeForEntry(3))
-        assertEquals("2021-01-03", pom.vtp.getDateForEntry(3))
-    }
-
+    @BDD
     @UITest
     @Test
-    @Ignore("Not started yet")
-    fun `should be able to navigate the time periods`() {
+    fun `timeentry - I should be able to view previous time periods when viewing entries`() {
+        val s = TimeEntryUserStory.getScenario("timeentry - I should be able to view previous time periods when viewing entries")
 
+        addSomeTimeEntries()
+        makeSureWereOnANewPeriod()
+        s.markDone("Given I have made entries in a previous period")
+
+        navigateToPreviousPeriod()
+        s.markDone("When I go to review them")
+
+        verifySubmissionsAreThere()
+        s.markDone("Then I can see my entries")
     }
-
 
     /**
      * Just to confirm that I am allowed to enter all the time in the future I
@@ -329,6 +312,14 @@ class UITimeEntryTests {
         enterThreeEntriesForEmployee("projecta")
     }
 
+    private fun makeSureWereOnANewPeriod() {
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?date=2021-01-16")
+    }
+
+    private fun navigateToPreviousPeriod() {
+        pom.vtp.goToPreviousPeriod()
+    }
+
     private fun submitTheEntries() {
         pom.vtp.submitTimeForPeriod()
     }
@@ -345,5 +336,22 @@ class UITimeEntryTests {
         pom.vtp.unsubmitForTimePeriod()
     }
 
+    private fun verifyTimeEntries() {
+        // Verify the entries
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?${ViewTimeAPI.Elements.TIME_PERIOD.getElemName()}=2021-01-01")
 
+        assertEquals("1.00", pom.vtp.getTimeForEntry(1))
+        assertEquals("2021-01-01",  pom.vtp.getDateForEntry(1))
+
+        assertEquals("1.00",  pom.vtp.getTimeForEntry(2))
+        assertEquals("2021-01-02",    pom.vtp.getDateForEntry(2))
+
+        assertEquals("1.00", pom.vtp.getTimeForEntry(3))
+        assertEquals("2021-01-03", pom.vtp.getDateForEntry(3))
+    }
+
+    private fun verifySubmissionsAreThere() {
+        val period = pom.vtp.getCurrentPeriod()
+        assertEquals("2021-01-01 - 2021-01-15", period)
+    }
 }

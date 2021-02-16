@@ -10,6 +10,7 @@ import coverosR3z.logging.LoggingAPI
 import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.api.SubmitTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
@@ -181,5 +182,19 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         val submitButton = driver.findElement(By.cssSelector("#${ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()}"))
         check(submitButton.text == "UNSUBMIT")
         return submitButton.click()
+    }
+
+    fun goToPreviousPeriod() {
+        driver.findElement(By.id(ViewTimeAPI.Elements.PREVIOUS_PERIOD.getId())).click()
+    }
+
+    fun goToNextPeriod() {
+        driver.findElement(By.id(ViewTimeAPI.Elements.NEXT_PERIOD.getId())).click()
+    }
+
+    fun getCurrentPeriod() : String{
+        val start = driver.findElement(By.name(SubmitTimeAPI.Elements.START_DATE.getElemName())).getAttribute("value")
+        val end = driver.findElement(By.name(SubmitTimeAPI.Elements.END_DATE.getElemName())).getAttribute("value")
+        return "$start - $end"
     }
 }
