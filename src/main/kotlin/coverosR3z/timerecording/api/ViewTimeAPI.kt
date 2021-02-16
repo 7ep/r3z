@@ -23,6 +23,8 @@ class ViewTimeAPI(private val sd: ServerData) {
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
         TIME_PERIOD(elemName = "date"),
+        PREVIOUS_PERIOD(id="previous_period"),
+        NEXT_PERIOD(id="next_period"),
         READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
         EDITABLE_ROW(elemClass = "editable-time-entry-row"),
         SUBMIT_BUTTON(id = "submitbutton"),
@@ -120,14 +122,14 @@ class ViewTimeAPI(private val sd: ServerData) {
                 </form>
                 <nav class="time_period_selector">
                     <label for="previous_period_link">prev</label>
-                    <a id="previous_period_link" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getPrevious().start.stringValue}">${currentPeriod.getPrevious().start.stringValue}</a>
+                    <a id="${Elements.PREVIOUS_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getPrevious().start.stringValue}">${currentPeriod.getPrevious().start.stringValue}</a>
                     <select>
                         <option value="UNSURE_WHAT_GOES_HERE">PREVIOUS_PERIOD</option>
                         <option selected value="current">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</option>
                         <option value="UNSURE_WHAT_GOES_HERE">SUBSEQUENT_PERIOD</option>
                     </select> 
                     <label for="next_period_link">prev</label>
-                    <a id="next_period_link" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
+                    <a id="${Elements.NEXT_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
                 </nav>
                 <table role="presentation">
                     <thead>
