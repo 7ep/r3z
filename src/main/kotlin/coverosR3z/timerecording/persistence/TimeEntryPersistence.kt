@@ -69,7 +69,7 @@ class TimeEntryPersistence(
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
         check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidNoProject}
         check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidNoEmployee}
-        check(pmd.EmployeeDataAccess().actOn { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
+        check(pmd.EmployeeDataAccess().read { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
         check(pmd.ProjectDataAccess().read { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
     }
 
