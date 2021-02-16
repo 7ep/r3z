@@ -1,8 +1,8 @@
 The Lab
 =======
 
-The lab is an educational initiative at Coveros, focusing on agile
-engineering practices.  It is led by Byron Katz, an experienced
+The lab is an educational initiative at [Coveros](https://www.coveros.com/), 
+focusing on agile engineering practices.  It is led by Byron Katz, an experienced
 developer and agile expert.
 
 When a new developer is starting out, they require strong guidance -
@@ -60,7 +60,7 @@ is allowable.
 
 By the way, there are different kinds of failure.  Small failures are
 a necessity to success.  Big failures kill the project.  By avoiding
-all failures, companies invite the catastrophic flavor.
+all failures, companies invite the catastrophic variety.
 
 We embrace simplicity.  Systems that are built as simply as possible
 from the ground up are far likelier to succeed.  Given the
@@ -116,7 +116,7 @@ the discomfort of spending sufficient time practicing non-intuitive
 behaviors until the reason for them becomes apparent.
 
 An interestingly apt metaphor for the agile approach is to consider it
-a foreign language.  Many of our agile "experts" are really speaking
+a foreign language.  Many agile "experts" are really speaking
 their original non-agile language with an agile accent.  Just how it
 is easier to speak English with a French accent and insist we are
 speaking French, it is easier to change titles and add new ceremonies
