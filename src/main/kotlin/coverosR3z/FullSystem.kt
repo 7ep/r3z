@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
  * This serves as a central location for the code
  * needed to start the system, called by Main.
  */
-class FullSystem(
+class FullSystem private constructor(
     val pmd: PureMemoryDatabase?,
     val businessCode: BusinessCode,
     val logger: ILogger,
