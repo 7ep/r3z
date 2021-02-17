@@ -1,8 +1,10 @@
 package coverosR3z
 
 import coverosR3z.misc.IntegrationTest
+import coverosR3z.misc.IntegrationTestCategory
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.*
 import kotlin.concurrent.thread
 
@@ -22,6 +24,7 @@ class MainTests {
      * it should indicate that during startup
      */
     @IntegrationTest(usesPort = true, usesDirectory = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testMain() {
         val dbPath = "build/db/maintest/"

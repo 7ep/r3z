@@ -11,6 +11,7 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
@@ -288,6 +289,7 @@ class AuthenticationUtilitiesTests {
      * the database and confirm we get the same results
      */
     @IntegrationTest(usesDirectory = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldClearAllSessionsWhenLogout() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"

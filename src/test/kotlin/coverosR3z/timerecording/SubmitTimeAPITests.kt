@@ -5,10 +5,10 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.misc.IntegrationTest
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.SubmitTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -18,6 +18,7 @@ import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class SubmitTimeAPITests {
 
@@ -33,7 +34,7 @@ class SubmitTimeAPITests {
     }
 
 
-    @IntegrationTest
+    @Category(APITestCategory::class)
     @Test
     fun testSubmittingTime() {
         val startDate = "2021-01-01"

@@ -25,6 +25,7 @@ import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.experimental.categories.Category
 import java.io.File
 import java.net.Socket
 import java.util.concurrent.ExecutorService
@@ -50,6 +51,9 @@ class ServerTests {
 
 
     companion object {
+
+        val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
+
         const val port = 2000
         const val sslTestPort = 12443
         private lateinit var fs : FullSystem
@@ -75,6 +79,7 @@ class ServerTests {
      * receive a 401 error page
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldReturnUnauthenticatedAs401Page() {
         client.write("POST /entertime HTTP/1.1$CRLF")
@@ -91,6 +96,7 @@ class ServerTests {
      * If we ask for the homepage, we'll get a 200 OK
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGet200Response() {
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
@@ -104,6 +110,7 @@ class ServerTests {
      * If the client asks for a file, give it
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetFileResponse() {
         client.write("GET /sample.html HTTP/1.1$CRLF$CRLF")
@@ -119,6 +126,7 @@ class ServerTests {
      * CSS edition
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetFileResponse_CSS() {
         client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
@@ -134,6 +142,7 @@ class ServerTests {
      * JS edition
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetFileResponse_JS() {
         client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
@@ -148,6 +157,7 @@ class ServerTests {
      * Action for an invalid request
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
         client.write("FOO /test.utl HTTP/1.1$CRLF$CRLF")
@@ -162,6 +172,7 @@ class ServerTests {
      * the server doesn't have?
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
         client.write("GET /doesnotexist.html HTTP/1.1$CRLF$CRLF")
@@ -177,6 +188,7 @@ class ServerTests {
      * See [coverosR3z.server.utility.StaticFilesUtilities.Companion.loadStaticFilesToCache]
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetHtmlFileResponseFromServer_unfoundUnknownSuffix() {
         client.write("GET /sample_template.utl HTTP/1.1$CRLF$CRLF")
@@ -191,6 +203,7 @@ class ServerTests {
      * When we POST some data unauthorized, we should receive that message
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetUnauthorizedResponseAfterPost() {
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF$CRLF")
@@ -204,6 +217,7 @@ class ServerTests {
      * When we POST some data, we should receive a success message back
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetSuccessResponseAfterPost() {
         au.getUserForSessionBehavior = { NO_USER }
@@ -220,6 +234,7 @@ class ServerTests {
      * When we POST some data that lacks all the types needed, get a 500 error
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetInternalServerError() {
         au.getUserForSessionBehavior = { DEFAULT_USER }
@@ -239,6 +254,7 @@ class ServerTests {
      * and a value separated by an =
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetInternalServerError_improperlyFormedBody() {
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
@@ -257,6 +273,7 @@ class ServerTests {
      * we should see a CLIENT_CLOSED_CONNECTION remark
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldIndicateClientClosedConnection() {
         client.socket.shutdownOutput()
@@ -273,6 +290,7 @@ class ServerTests {
      * homepage
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
         au.getUserForSessionBehavior = { DEFAULT_USER }
@@ -292,7 +310,7 @@ class ServerTests {
      * with valid content and valid protocol more easily.
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testWithValidClient_LoginPage_PERFORMANCE() {
         val numberOfRequests = 100
@@ -326,7 +344,7 @@ class ServerTests {
      * 25,000 requests per second on 12/26/2020
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testHomepage_PERFORMANCE() {
         val numberOfThreads = 10
@@ -353,7 +371,7 @@ class ServerTests {
      * 25,000 requests per second on 12/26/2020
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testEnterTime_PERFORMANCE() {
         val threadCount = 10
@@ -380,6 +398,7 @@ class ServerTests {
      * If we ask for the homepage on a secure server, we'll get a 200 OK
      */
     @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldGet200Response_Secure() {
         val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
@@ -440,7 +459,7 @@ class ServerTests {
                 clientWithData.send()
                 val result = clientWithData.read()
                 assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-                assertTrue("headers: ${result.headers}", result.headers.contains("Location: timeentries"))
+                assertTrue("headers: ${result.headers}", result.headers.any {it.matches(redirectRegex)})
             }
         }
     }
@@ -466,7 +485,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
     }
 
     companion object {
-        
+
         fun make(
             verb : Verb,
             path : String,

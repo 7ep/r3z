@@ -1,7 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -9,24 +9,25 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class UIErrorTests {
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `errors - should get a 404 error on page not found`() {
         pom.driver.get("${pom.domain}/does-not-exist")
         assertEquals("404 error", pom.driver.title)
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `errors - should get a 401 error if I fail to login`() {
         pom.lp.login("userabc", "password12345")
         assertEquals("401 error", pom.driver.title)
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `errors - should get a failure message if I register an already-registered user`() {
         pom.rp.register("usera", "password12345", "Administrator")

@@ -7,18 +7,19 @@ import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.experimental.categories.Category
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UITimeEntryTests {
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `timeentry - An employee should be able to enter time for a specified date`() {
         val s = TimeEntryUserStory.getScenario("timeentry - An employee should be able to enter time for a specified date")
@@ -54,27 +55,27 @@ class UITimeEntryTests {
      * - in valid day range for month in given year
      * - between 1980 and 2200
      */
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `all inputs should restrict to valid values` () {
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `date entry should default to today's date`() {
 
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `should group time entries by period`() {
 
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `should allow sorting time entries by any field`() {
@@ -82,7 +83,7 @@ class UITimeEntryTests {
     }
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `timeentry - should be able to submit time for a certain period`() {
         val s = TimeEntryUserStory.getScenario("timeentry - should be able to submit time for a certain period")
@@ -97,7 +98,7 @@ class UITimeEntryTests {
     }
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `timeentry - should be able to unsubmit a period`() {
         val s = TimeEntryUserStory.getScenario("timeentry - should be able to unsubmit a period")
@@ -113,7 +114,19 @@ class UITimeEntryTests {
         s.markDone("Then the time period is ready for more editing")
     }
 
-    @UITest
+    @Category(UITestCategory::class)
+    @Test
+    @Ignore("Not started yet")
+    fun `should be able to edit make multiple entries at once`() {
+        // Given I spent half my day on training and half on client work
+        // There should be fields available to record both these things
+
+        // I put info in both
+
+        // my time has been recorded
+    }
+
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `a blind person should have equivalent accommodation for entering time`() {
@@ -123,7 +136,7 @@ class UITimeEntryTests {
     }
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("for now, projects allow future entry, this will require changes to the project data structure")
     fun `timeentry - should be possible to disallow time entry on future days for certain projects`() {
@@ -134,7 +147,7 @@ class UITimeEntryTests {
     }
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `timeentry - I should see my existing time entries when I open the time entry page`() {
         val s = TimeEntryUserStory.getScenario("timeentry - I should see my existing time entries when I open the time entry page")
@@ -147,8 +160,7 @@ class UITimeEntryTests {
         s.markDone("then I see my prior entries")
     }
 
-    @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `timeentry - I should be able to view previous time periods when viewing entries`() {
         val s = TimeEntryUserStory.getScenario("timeentry - I should be able to view previous time periods when viewing entries")
@@ -168,21 +180,21 @@ class UITimeEntryTests {
      * Just to confirm that I am allowed to enter all the time in the future I
      * need for PTO
      */
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("for now, projects allow future entry, this will require changes to the project data structure")
     fun `I should be able to enter future time on PTO`() {
 
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `I should not need to enter details on a time entry`() {
 
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `all data entry should be automatically saved as I work`() {
@@ -194,7 +206,7 @@ class UITimeEntryTests {
      * when they see the new current time period it has projects
      * pre-populated to the last period's projects.
      */
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `a new time period should typically populate default projects`() {
@@ -207,7 +219,7 @@ class UITimeEntryTests {
      * project.  If unchecked, tabbing moves from project to project in
      * a single day
      */
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     @Ignore("Not started yet")
     fun `should be an option to quickly enter time per project or per day `() {

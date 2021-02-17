@@ -70,7 +70,7 @@ class LoginAPI(val sd: ServerData) {
     }
 
     private val loginHTML = """
-<h2 role="heading">Login</h2>
+<h2>Login</h2>
 
 <form method="post" action="$path">
   <table role="presentation"> 

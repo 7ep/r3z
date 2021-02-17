@@ -184,6 +184,10 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         return submitButton.click()
     }
 
+    fun gotoDate(date: String) {
+        driver.get("$domain/${ViewTimeAPI.path}?date=$date")
+    }
+
     fun goToPreviousPeriod() {
         driver.findElement(By.id(ViewTimeAPI.Elements.PREVIOUS_PERIOD.getId())).click()
     }

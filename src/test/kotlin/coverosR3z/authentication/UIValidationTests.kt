@@ -6,7 +6,7 @@ import coverosR3z.authentication.types.maxUserNameSize
 import coverosR3z.authentication.types.minPasswordSize
 import coverosR3z.authentication.types.minUserNameSize
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -15,11 +15,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
 
 class UIValidationTests {
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `validation - Validation should stop me entering invalid input on the registration page`() {
         // validation won't allow it through - missing username

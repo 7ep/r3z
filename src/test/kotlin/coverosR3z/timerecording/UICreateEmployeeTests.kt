@@ -3,7 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.bddframework.BDD
 import coverosR3z.timerecording.api.ViewEmployeesAPI
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -11,11 +11,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class UICreateEmployeeTests {
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `createEmployee - I should be able to create an employee`() {
         val s = CreateEmployeeUserStory.getScenario("createEmployee - I should be able to create an employee")

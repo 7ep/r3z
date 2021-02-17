@@ -3,7 +3,7 @@ package coverosR3z.server
 import coverosR3z.logging.LogTypes
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -12,10 +12,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class UIServerTests {
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `general - should be able to see the homepage and the authenticated homepage`() {
         pom.driver.get("${pom.domain}/${HomepageAPI.path}")
@@ -27,7 +28,7 @@ class UIServerTests {
         logout()
     }
 
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `general - I should be able to change the logging settings`() {
         // Given I am an admin

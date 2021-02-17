@@ -9,6 +9,7 @@ import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.ServerPerformanceTests
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.EnterTimeAPI
@@ -18,6 +19,7 @@ import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.File
 
 class EnterTimeAPITests {
@@ -34,6 +36,7 @@ class EnterTimeAPITests {
     /**
      * If we pass in valid information, it should indicate success
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI() {
         val data = PostBodyData(mapOf(
@@ -52,6 +55,7 @@ class EnterTimeAPITests {
     /**
      * If we are missing required data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_missingProject() {
         val data = PostBodyData(mapOf(
@@ -67,6 +71,7 @@ class EnterTimeAPITests {
     /**
      * If we are missing required data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_missingTimeEntry() {
         val data = PostBodyData(mapOf(
@@ -82,6 +87,7 @@ class EnterTimeAPITests {
     /**
      * If we are missing required data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_missingDetailEntry() {
         val data = PostBodyData(mapOf(
@@ -97,6 +103,7 @@ class EnterTimeAPITests {
     /**
      * If we are missing required data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_missingEmployee() {
         val data = PostBodyData(mapOf(
@@ -113,6 +120,7 @@ class EnterTimeAPITests {
     /**
      * If we pass in something that cannot be parsed as an integer as the project id
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_nonNumericProject() {
         val data = PostBodyData(mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60", EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
@@ -124,6 +132,7 @@ class EnterTimeAPITests {
     /**
      * If we pass in a negative number as the project id
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_negativeProject() {
         val data = PostBodyData(mapOf(
@@ -139,6 +148,7 @@ class EnterTimeAPITests {
     /**
      * If we pass in 0 as the project id
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_zeroProject() {
         val data = PostBodyData(mapOf(
@@ -154,6 +164,7 @@ class EnterTimeAPITests {
     /**
      * If the project id passed is above the maximum id
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_aboveMaxProject() {
         val data = PostBodyData(mapOf(
@@ -170,6 +181,7 @@ class EnterTimeAPITests {
     /**
      * If the time entered is more than a day's worth
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_aboveMaxTime() {
         val data = PostBodyData(mapOf(
@@ -185,6 +197,7 @@ class EnterTimeAPITests {
     /**
      * If the time entered is negative
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_negativeTime() {
         val data = PostBodyData(mapOf(
@@ -200,6 +213,7 @@ class EnterTimeAPITests {
     /**
      * If the time entered is zero, it's fine.
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_zeroTime() {
         val data = PostBodyData(mapOf(
@@ -217,6 +231,7 @@ class EnterTimeAPITests {
     /**
      * If the time entered is non-numeric, like "a"
      */
+    @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_nonNumericTime() {
         val data = PostBodyData(mapOf(
@@ -237,7 +252,7 @@ class EnterTimeAPITests {
      *
      * See [ServerPerformanceTests.testEnterTimeReal_PERFORMANCE]
      */
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testEnterTimeAPI_PERFORMANCE() {
         val numberOfRequests = 200
@@ -291,7 +306,11 @@ class EnterTimeAPITests {
      */
     private fun assertSuccessfulTimeEntry(result: PreparedResponseData) {
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.contains("Location: timeentries"))
+        assertTrue(result.headers.any { it.matches(redirectRegex)})
+    }
+
+    companion object {
+        val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
     }
 
 }

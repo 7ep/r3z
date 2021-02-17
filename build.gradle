@@ -180,6 +180,66 @@ jar {
     }
 }
 
+task performancetest(type: Test) {
+    group = "Verification"
+    description 'Runs the performance tests.'
+    useJUnit {
+        includeCategories 'coverosR3z.misc.PerformanceTestCategory'
+    }
+}
+
+task apitest(type: Test) {
+    group = "Verification"
+    description 'Runs the API tests.'
+    useJUnit {
+        includeCategories 'coverosR3z.server.APITestCategory'
+    }
+}
+
+task unittest(type: Test) {
+    group = "Verification"
+    description 'Runs the fastest set of tests.'
+    useJUnit {
+        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
+                'coverosR3z.uitests.UITestCategory',
+                'coverosR3z.misc.IntegrationTestCategory',
+                'coverosR3z.server.APITestCategory'
+    }
+}
+
+task fasttest(type: Test) {
+    group = "Verification"
+    description 'Runs the fastest set of tests - Unit, integration, API'
+    useJUnit {
+        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
+                'coverosR3z.uitests.UITestCategory'
+    }
+}
+
+task nouitest(type: Test) {
+    group = "Verification"
+    description 'Runs all the tests but UI'
+    useJUnit {
+        excludeCategories 'coverosR3z.uitests.UITestCategory'
+    }
+}
+
+task uitest(type: Test) {
+    group = "Verification"
+    description 'Runs the user interface (UI) tests. That is, uses the browser.'
+    useJUnit {
+        includeCategories 'coverosR3z.uitests.UITestCategory'
+    }
+}
+
+task integrationtest(type: Test) {
+    group = "Verification"
+    description 'Runs the integration tests.  These run a little slower than unit tests.'
+    useJUnit {
+        includeCategories 'coverosR3z.misc.IntegrationTestCategory'
+    }
+}
+
 test {
 
     maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1

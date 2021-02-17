@@ -71,7 +71,7 @@ class RegisterAPI(private val sd: ServerData) {
         val employees = sd.tru.listAllEmployees()
 
         val body = """
-        <h2 role="heading">Register a User</h2>
+        <h2>Register a User</h2>
         
         <form method="post" action="$path">
           <table role="presentation"> 
