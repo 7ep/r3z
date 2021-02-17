@@ -4,6 +4,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
@@ -11,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class ViewTimeAPITests {
 
@@ -24,6 +26,7 @@ class ViewTimeAPITests {
     }
 
     // test editing a time entry
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime() {
         val data = PostBodyData(mapOf(
@@ -41,6 +44,7 @@ class ViewTimeAPITests {
         )
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime_Negative_MissingId() {
         val data = PostBodyData(mapOf(
@@ -56,6 +60,7 @@ class ViewTimeAPITests {
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime_Negative_MissingProject() {
         val data = PostBodyData(mapOf(
@@ -71,6 +76,7 @@ class ViewTimeAPITests {
                 "received keys: [${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime_Negative_MissingTime() {
         val data = PostBodyData(mapOf(
@@ -86,6 +92,7 @@ class ViewTimeAPITests {
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime_Negative_MissingDetail() {
         val data = PostBodyData(mapOf(
@@ -101,6 +108,7 @@ class ViewTimeAPITests {
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testEditTime_Negative_MissingDate() {
         val data = PostBodyData(mapOf(

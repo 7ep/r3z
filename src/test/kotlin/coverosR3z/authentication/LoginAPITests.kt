@@ -10,6 +10,7 @@ import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.utility.toStr
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -18,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class LoginAPITests {
 
@@ -33,6 +35,7 @@ class LoginAPITests {
     /**
      * Happy path - all values provided as needed
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_happyPath() {
         val data = PostBodyData(mapOf(
@@ -53,6 +56,7 @@ class LoginAPITests {
                 responseData.headers.any { it.contains("Set-Cookie") })
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_failedLogin() {
         au.loginBehavior = {Pair(LoginResult.FAILURE, NO_USER)}
@@ -72,6 +76,7 @@ class LoginAPITests {
     /**
      * Error path - username is not passed in
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_missingUser() {
         val data = PostBodyData(mapOf(
@@ -86,6 +91,7 @@ class LoginAPITests {
     /**
      * Error path - username is blank
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_blankUser() {
         val data = PostBodyData(mapOf(
@@ -101,6 +107,7 @@ class LoginAPITests {
     /**
      * Error path - password is not passed in
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_missingPassword() {
         val data = PostBodyData(mapOf(
@@ -115,6 +122,7 @@ class LoginAPITests {
     /**
      * Error path - password is blank
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePostLogin_blankPassword() {
         val data = PostBodyData(mapOf(

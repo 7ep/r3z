@@ -188,22 +188,39 @@ task performancetest(type: Test) {
     }
 }
 
+task apitest(type: Test) {
+    group = "Verification"
+    description 'Runs the API tests.'
+    useJUnit {
+        includeCategories 'coverosR3z.server.APITestCategory'
+    }
+}
+
 task unittest(type: Test) {
     group = "Verification"
     description 'Runs the fastest set of tests.'
     useJUnit {
         excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
                 'coverosR3z.uitests.UITestCategory',
-                'coverosR3z.misc.IntegrationTestCategory'
+                'coverosR3z.misc.IntegrationTestCategory',
+                'coverosR3z.server.APITestCategory'
     }
 }
 
-task unitandintegrationtest(type: Test) {
+task fasttest(type: Test) {
     group = "Verification"
-    description 'Runs the fastest set of tests and the integration tests'
+    description 'Runs the fastest set of tests - Unit, integration, API'
     useJUnit {
         excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
                 'coverosR3z.uitests.UITestCategory'
+    }
+}
+
+task nouitest(type: Test) {
+    group = "Verification"
+    description 'Runs all the tests but UI'
+    useJUnit {
+        excludeCategories 'coverosR3z.uitests.UITestCategory'
     }
 }
 

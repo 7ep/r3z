@@ -6,6 +6,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.CreateEmployeeAPI.Elements
@@ -14,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class CreateEmployeeAPITests {
 
@@ -30,6 +32,7 @@ class CreateEmployeeAPITests {
     /**
      * A basic happy path
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
@@ -41,6 +44,7 @@ class CreateEmployeeAPITests {
     /**
      * Huge name
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
@@ -54,6 +58,7 @@ class CreateEmployeeAPITests {
     /**
      * Big name, but acceptable
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(30)))
@@ -65,6 +70,7 @@ class CreateEmployeeAPITests {
     /**
      * Missing data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = PostBodyData()

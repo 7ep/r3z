@@ -4,6 +4,7 @@ import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.PostBodyData
@@ -14,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class LoggingAPITests {
 
@@ -27,9 +29,7 @@ class LoggingAPITests {
         testLogger.resetLogSettingsToDefault()
     }
 
-    /**
-     * If we
-     */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_setAuditTrueOnly() {
         val data = allFalse(audit = "true")
@@ -43,6 +43,7 @@ class LoggingAPITests {
         assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_setWarnTrueOnly() {
         val data = allFalse(warn = "true")
@@ -56,6 +57,7 @@ class LoggingAPITests {
         assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_setDebugTrueOnly() {
         val data = allFalse(debug = "true")
@@ -69,6 +71,7 @@ class LoggingAPITests {
         assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_setTraceTrueOnly() {
         val data = allFalse(trace = "true")
@@ -82,6 +85,7 @@ class LoggingAPITests {
         assertEquals(true,  testLogger.logSettings[LogTypes.TRACE])
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_allOn() {
         val data = allTrue()
@@ -95,6 +99,7 @@ class LoggingAPITests {
         assertEquals(true, testLogger.logSettings[LogTypes.TRACE])
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldChangeConfiguration_allOff() {
         val data = allFalse()
@@ -111,6 +116,7 @@ class LoggingAPITests {
     /**
      * We require four inputs from the user.  If any are missing, complain
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplain_missingAudit() {
         val data = PostBodyData(mapOf(
@@ -124,6 +130,7 @@ class LoggingAPITests {
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [warn, debug, trace]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplain_missingWarn() {
         val data = PostBodyData(mapOf(
@@ -137,6 +144,7 @@ class LoggingAPITests {
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, debug, trace]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplain_missingDebug() {
         val data = PostBodyData(mapOf(
@@ -151,6 +159,7 @@ class LoggingAPITests {
         assertEquals("expected keys: [audit, warn, debug, trace]. received keys: [audit, warn, trace]", ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplain_missingTrace() {
         val data = PostBodyData(mapOf(
@@ -169,6 +178,7 @@ class LoggingAPITests {
     /**
      * If the user somehow sets the inputs to something other than "true" or "false", complain
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_audit() {
         val data = allTrue(audit = "foo")
@@ -179,6 +189,7 @@ class LoggingAPITests {
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_warn() {
         val data = allTrue(warn = "foo")
@@ -189,6 +200,7 @@ class LoggingAPITests {
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_debug() {
         val data = allTrue(debug = "foo")
@@ -199,6 +211,7 @@ class LoggingAPITests {
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_trace() {
         val data = allTrue(trace = "foo")

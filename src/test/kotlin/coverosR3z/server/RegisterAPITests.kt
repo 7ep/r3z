@@ -19,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 /**
  * Tests related to registering a user through the API
@@ -39,6 +40,7 @@ class RegisterAPITests {
      * values properly, it shouldn't complain
      * Basically a happy path
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleValidInputs() {
         val data = PostBodyData(mapOf(
@@ -57,6 +59,7 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_blankName() {
         val data = PostBodyData(mapOf(
@@ -70,6 +73,7 @@ class RegisterAPITests {
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_blankPassword() {
         val data = PostBodyData(mapOf(
@@ -83,6 +87,7 @@ class RegisterAPITests {
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_blankEmployee() {
         val data = PostBodyData(mapOf(
@@ -96,6 +101,7 @@ class RegisterAPITests {
         assertEquals(employeeIdCannotBeBlank, ex.message)
     }
 
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_nonNumericEmployee() {
         val employee = "abc"
@@ -113,6 +119,7 @@ class RegisterAPITests {
     /**
      * If the employee id is zero
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_ZeroEmployee() {
         val data = PostBodyData(mapOf(
@@ -129,6 +136,7 @@ class RegisterAPITests {
     /**
      * If the employee id is below zero
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_NegativeEmployee() {
         val data = PostBodyData(mapOf(
@@ -145,6 +153,7 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_missingUsername() {
         val data = PostBodyData(mapOf(
@@ -160,6 +169,7 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_missingPassword() {
         val data = PostBodyData(mapOf(
@@ -175,6 +185,7 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
+    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_missingEmployee() {
         val data = PostBodyData(mapOf(

@@ -6,6 +6,7 @@ import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
+import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.types.maxProjectNameSizeMsg
@@ -14,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class ProjectAPITests {
 
@@ -30,6 +32,7 @@ class ProjectAPITests {
     /**
      * A basic happy path
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
@@ -41,6 +44,7 @@ class ProjectAPITests {
     /**
      * Huge name
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_HugeName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(31)))
@@ -54,6 +58,7 @@ class ProjectAPITests {
     /**
      * Big name, but acceptable
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_BigName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(30)))
@@ -65,6 +70,7 @@ class ProjectAPITests {
     /**
      * Missing data
      */
+    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_noBody() {
         val data = PostBodyData()
