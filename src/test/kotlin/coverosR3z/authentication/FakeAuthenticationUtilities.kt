@@ -17,7 +17,7 @@ class FakeAuthenticationUtilities (
     var logoutBehavior: () -> Unit = {},
     ) : IAuthenticationUtilities {
 
-    override fun register(username: UserName, password: Password, employeeId: EmployeeId?): RegistrationResult {
+    override fun register(username: UserName, password: Password, employeeId: EmployeeId): RegistrationResult {
        return registerBehavior()
     }
 

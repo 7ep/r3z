@@ -112,7 +112,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
         val ex = assertThrows(IllegalStateException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals(employeeIdNotNullMsg, ex.message)
     }

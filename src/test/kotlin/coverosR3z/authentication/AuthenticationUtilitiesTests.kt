@@ -121,7 +121,7 @@ class AuthenticationUtilitiesTests {
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.register(DEFAULT_USER.name, DEFAULT_PASSWORD, null)
+        val result = authUtils.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
 
         assertEquals(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, result.status)
     }
@@ -230,7 +230,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null) }
+        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -240,7 +240,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, null) }
+        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }
@@ -299,8 +299,8 @@ class AuthenticationUtilitiesTests {
         val au = AuthenticationUtilities(authPersistence, testLogger)
 
         // we have to register users so reloading the data from disk works
-        val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
-        val (_, user2) = au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD)
+        val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        val (_, user2) = au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
 
         au.createNewSession(user1, DEFAULT_DATETIME) { "abc" }
         au.createNewSession(user1, DEFAULT_DATETIME) { "def" }

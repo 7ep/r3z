@@ -1,9 +1,9 @@
 package coverosR3z.timerecording
 
 import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
-import coverosR3z.misc.DEFAULT_USER_NO_EMPLOYEE
 import coverosR3z.authentication.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.misc.DEFAULT_USER_SYSTEM_EMPLOYEE
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
@@ -36,7 +36,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
@@ -48,7 +48,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ CreateEmployeeAPI.handlePost(sd)}
 
@@ -62,7 +62,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(30)))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
@@ -74,7 +74,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = PostBodyData()
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
         val ex = assertThrows(InexactInputsException::class.java){ CreateEmployeeAPI.handlePost(sd) }
         assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }

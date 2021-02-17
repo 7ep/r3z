@@ -2,10 +2,12 @@ package coverosR3z.timerecording
 
 import coverosR3z.bddframework.BDD
 import coverosR3z.misc.DEFAULT_DATE_STRING
+import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -66,29 +68,37 @@ class UITimeEntryTests {
         }
 
         loginAsUserAndCreateProject("alice", "projecta")
-        badDateEntry()
+
+        badProjectEntry(pom)
+        //        badDateEntry()
+        // badTimeEntry()
+        // badDescriptionEntry()
     }
 
-    fun template(pom : PageObjectModelLocal) {
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
-        val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
-        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
-        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
-        assertEquals("your time entries", driver.title)
-    }
+//    fun template(pom : PageObjectModelLocal) {
+//        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+//        val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+//        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+//        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+//        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
+//        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
+//        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
+//        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+//        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
+//        assertEquals("your time entries", driver.title)
+//    }
 
     /**
      * If I just click save without doing anything, the project being empty will stop us
      */
     fun badProjectEntry(pom : PageObjectModelLocal) {
+        val currentUser = (pom.businessCode.tru as TimeRecordingUtilities).cu
+        val entriesLength = pom.businessCode.tru.getAllEntriesForEmployee(currentUser.user.employeeId).size
         pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
         val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
         createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        // Confirm we don't have any new entries
+        assertEquals(entriesLength, pom.businessCode.tru.getAllEntriesForEmployee(currentUser.user.employeeId).size)
     }
 
     @Category(UITestCategory::class)

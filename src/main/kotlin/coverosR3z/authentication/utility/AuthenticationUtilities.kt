@@ -14,7 +14,7 @@ class AuthenticationUtilities(private val ap: IAuthPersistence, val logger: ILog
      * Register a user through auth persistent, providing a username, password, and
      * optional employeeId (defaults to null)
      */
-    override fun register(username: UserName, password: Password, employeeId: EmployeeId?) : RegistrationResult {
+    override fun register(username: UserName, password: Password, employeeId: EmployeeId) : RegistrationResult {
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()

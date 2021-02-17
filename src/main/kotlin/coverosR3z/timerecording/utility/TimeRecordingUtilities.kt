@@ -12,7 +12,7 @@ import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(
     private val persistence: ITimeEntryPersistence,
-    private val cu: CurrentUser,
+    val cu: CurrentUser,
     private val logger: ILogger
 ) :
     ITimeRecordingUtilities {
