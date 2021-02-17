@@ -108,7 +108,7 @@ class UIEditTimeTests {
         }
 
         // Enter time
-        pom.etp.enterTime(project, "1", "", dateString)
+        pom.vtp.enterTime(project, "1", "", dateString)
     }
 
     private fun loginAsUserAndCreateProject(user: String, project: String) {

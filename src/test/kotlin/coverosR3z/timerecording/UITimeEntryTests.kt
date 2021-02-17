@@ -57,8 +57,15 @@ class UITimeEntryTests {
      */
     @Category(UITestCategory::class)
     @Test
-    @Ignore("Not started yet")
     fun `all inputs should restrict to valid values` () {
+        val dateString = if (pom.driver is ChromeDriver) {
+            "06122020"
+        } else {
+            DEFAULT_DATE_STRING
+        }
+
+        loginAsUserAndCreateProject("alice", "projecta")
+        pom.vtp.enterTime("projecta", dateString, "1", "some details here")
     }
 
     @Category(UITestCategory::class)
@@ -276,7 +283,7 @@ class UITimeEntryTests {
         }
 
         // Enter time
-        pom.etp.enterTime(project, "1", "", dateString)
+        pom.vtp.enterTime(project, "1", "", dateString)
     }
 
 
@@ -293,9 +300,9 @@ class UITimeEntryTests {
         val date = Date(2021, Month.JAN, 1)
 
         // Enter time
-        pom.etp.enterTime(project, "1", "", calcDateString(date))
-        pom.etp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 1)))
-        pom.etp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 2)))
+        pom.vtp.enterTime(project, "1", "", calcDateString(date))
+        pom.vtp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 1)))
+        pom.vtp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 2)))
     }
 
 

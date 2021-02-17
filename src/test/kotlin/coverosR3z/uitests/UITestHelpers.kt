@@ -47,22 +47,6 @@ fun startupTestForUIWithoutServer(domain: String = "", port : Int, driver: () ->
     return PageObjectModel.make(driver(), port, domain)
 }
 
-class EnterTimePage(private val driver: WebDriver, private val domain : String) {
-
-    fun enterTime(project: String, time: String, details: String, date: String) {
-        driver.get("$domain/${ViewTimeAPI.path}")
-        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
-        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
-        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
-        assertEquals("your time entries", driver.title)
-    }
-}
-
 class LoginPage(private val driver: WebDriver, private val domain : String) {
 
     fun login(username: String, password: String) {
@@ -200,5 +184,18 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         val start = driver.findElement(By.name(SubmitTimeAPI.Elements.START_DATE.getElemName())).getAttribute("value")
         val end = driver.findElement(By.name(SubmitTimeAPI.Elements.END_DATE.getElemName())).getAttribute("value")
         return "$start - $end"
+    }
+
+    fun enterTime(project: String, time: String, details: String, date: String) {
+        driver.get("$domain/${ViewTimeAPI.path}")
+        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
+        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
+        assertEquals("your time entries", driver.title)
     }
 }

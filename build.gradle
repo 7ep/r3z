@@ -226,6 +226,7 @@ task nouitest(type: Test) {
 
 task uitest(type: Test) {
     group = "Verification"
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     description 'Runs the user interface (UI) tests. That is, uses the browser.'
     useJUnit {
         includeCategories 'coverosR3z.uitests.UITestCategory'

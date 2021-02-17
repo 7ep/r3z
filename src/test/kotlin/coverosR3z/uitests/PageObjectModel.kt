@@ -10,7 +10,6 @@ open class PageObjectModel {
     lateinit var rp : RegisterPage
     lateinit var lp : LoginPage
     lateinit var llp : LoggingPage
-    lateinit var etp : EnterTimePage
     lateinit var eep : EnterEmployeePage
     lateinit var epp : EnterProjectPage
     lateinit var lop : LogoutPage
@@ -30,7 +29,6 @@ open class PageObjectModel {
 
             pom.rp = RegisterPage(driver, pom.domain)
             pom.lp = LoginPage(driver, pom.domain)
-            pom.etp = EnterTimePage(driver, pom.domain)
             pom.eep = EnterEmployeePage(driver, pom.domain)
             pom.epp = EnterProjectPage(driver, pom.domain)
             pom.llp = LoggingPage(driver, pom.domain)

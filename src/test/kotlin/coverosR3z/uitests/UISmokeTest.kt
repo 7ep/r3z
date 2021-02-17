@@ -104,7 +104,7 @@ class UISmokeTest {
         for (u in testUsers) {
             pom.lp.login(u, TEST_PASSWORD)
             for (p in testProjects) {
-                pom.etp.enterTime(p, "1", "", dateString)
+                pom.vtp.enterTime(p, "1", "", dateString)
             }
 
             // Verify the entries
