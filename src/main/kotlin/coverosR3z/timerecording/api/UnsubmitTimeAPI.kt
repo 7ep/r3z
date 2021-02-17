@@ -55,7 +55,7 @@ class UnsubmitTimeAPI(private val sd: ServerData){
 
         tru.unsubmitTimePeriod(timePeriod)
 
-        return ServerUtilities.redirectTo(ViewTimeAPI.path)
+        return ServerUtilities.redirectTo(ViewTimeAPI.path + "?date=" + startDate.stringValue)
     }
 
 }

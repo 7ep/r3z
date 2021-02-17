@@ -19,6 +19,7 @@ import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
 import org.junit.*
+import org.junit.experimental.categories.Category
 import java.io.File
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -60,7 +61,7 @@ class ServerPerformanceTests {
      *
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testEnterTimeReal_PERFORMANCE() {
         val numberThreads = 5
@@ -101,7 +102,7 @@ class ServerPerformanceTests {
      * that's 200,000 requests in 15.623 seconds,
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testViewTime_PERFORMANCE() {
         val numberThreads = 20
@@ -145,7 +146,7 @@ class ServerPerformanceTests {
      * fastest was 41,946 responses.  20 threads, 10,000 requests each, in 4.768 seconds
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testViewStaticContentAuthenticated_PERFORMANCE() {
         val numberThreads = 20
@@ -184,7 +185,7 @@ class ServerPerformanceTests {
      *
      */
     @IntegrationTest(usesPort = true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testViewStaticContentUnauthenticated_PERFORMANCE() {
         val numberThreads = 10

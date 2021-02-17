@@ -9,6 +9,7 @@ import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class TimeRecordingUtilityTests {
 
@@ -31,6 +32,7 @@ class TimeRecordingUtilityTests {
      * time for an invalid project?
      */
     @IntegrationTest
+    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
@@ -50,6 +52,7 @@ class TimeRecordingUtilityTests {
      * time for an invalid employee?
      */
     @IntegrationTest
+    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should fail to record time for non-existent employee`() {
         // it's an invalid project because the project doesn't exist
@@ -71,6 +74,7 @@ class TimeRecordingUtilityTests {
      * (It should throw an exception)
      */
     @IntegrationTest
+    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
         val twentyFourHours = Time(24 * 60)
@@ -381,6 +385,7 @@ class TimeRecordingUtilityTests {
     }
 
     @IntegrationTest
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmitTime() {
         val pmd = PureMemoryDatabase()

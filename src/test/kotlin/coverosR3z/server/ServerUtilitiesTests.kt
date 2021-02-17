@@ -1,8 +1,8 @@
 package coverosR3z.server
 
 import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.misc.PerformanceTest
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.misc.PerformanceTestCategory
 import coverosR3z.misc.granularPerfArchiveDirectory
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
@@ -15,6 +15,7 @@ import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.File
 
 class ServerUtilitiesTests {
@@ -50,7 +51,7 @@ class ServerUtilitiesTests {
     /**
      * Make sure it doesn't choke on huge inputs
      */
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testShouldParseData_PERFORMANCE() {
         val numberOfParsings = 1000

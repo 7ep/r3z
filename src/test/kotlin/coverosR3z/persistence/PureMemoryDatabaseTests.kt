@@ -19,6 +19,7 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.File
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
@@ -44,7 +45,7 @@ class PureMemoryDatabaseTests {
     /**
      * This will typically complete in 40 milliseconds
      */
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun `should get responses from the database quickly_PERFORMANCE`() {
         val numberOfEmployees = 30
@@ -88,7 +89,7 @@ class PureMemoryDatabaseTests {
      * Test writing the whole database and reading the whole database
      */
     @IntegrationTest(usesDirectory=true)
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testShouldWriteAndReadToDisk_PERFORMANCE() {
         val numberOfEmployees = 20
@@ -212,6 +213,7 @@ class PureMemoryDatabaseTests {
      * still work as before
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingAllFilesButDirectoryExists() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingAllFilesButDirectoryExists/"
@@ -226,6 +228,7 @@ class PureMemoryDatabaseTests {
      * database directory.  Just make one.
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingDbDirectory() {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testPersistence_Read_MissingDbDirectory/"
@@ -239,6 +242,7 @@ class PureMemoryDatabaseTests {
      * it back properly?
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_HappyPath() {
         val readPmd = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = "testPersistence_Read_HappyPath")
@@ -254,6 +258,7 @@ class PureMemoryDatabaseTests {
      * Here there are no users, so there cannot be any sessions either
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingUsers() {
         val readPmd = arrangeFullDatabaseWithDisk(skipCreatingUser = true, databaseDirectorySuffix = "testPersistence_Read_MissingUsers")
@@ -269,6 +274,7 @@ class PureMemoryDatabaseTests {
      * Here there are no sessions, which might mean no one was logged in
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingSessions() {
         val readPmd = arrangeFullDatabaseWithDisk(skipCreatingSession = true, databaseDirectorySuffix = "testPersistence_Read_MissingSessions")
@@ -282,6 +288,7 @@ class PureMemoryDatabaseTests {
      * where the sessions file is empty, instead of missing
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_EmptySessionsFile() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptySessionsFile"
@@ -300,6 +307,7 @@ class PureMemoryDatabaseTests {
      * because no entries have been added, not because it's become corrupted.
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingTimeEntries() {
         val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingTimeEntries")
@@ -315,6 +323,7 @@ class PureMemoryDatabaseTests {
      * here there are no employees, so there cannot be any time entries
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingEmployees() {
         val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingEmployees")
@@ -329,6 +338,7 @@ class PureMemoryDatabaseTests {
      * where the file is empty, instead of missing
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_EmptyEmployees() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptyEmployees"
@@ -349,6 +359,7 @@ class PureMemoryDatabaseTests {
      * Here, there are no projects, which also means there cannot be time entries
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingProjects() {
         val readPmd = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingProjects")
@@ -364,6 +375,7 @@ class PureMemoryDatabaseTests {
      * where the file is empty, instead of missing
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_EmptyProjects() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptyProjects"
@@ -384,6 +396,7 @@ class PureMemoryDatabaseTests {
      * bets are off, we won't have enough information to properly recover.
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_TimeEntries_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_TimeEntries_BadData"
@@ -404,6 +417,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Employees_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Employees_BadData"
@@ -427,6 +441,7 @@ class PureMemoryDatabaseTests {
      * bets are off, we won't have enough information to properly recover.
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Employees_MissingFile() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Employees_MissingFile"
@@ -449,6 +464,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Users_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Users_BadData"
@@ -469,6 +485,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Users_MissingFile() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Users_MissingFile"
@@ -489,6 +506,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Projects_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Projects_BadData"
@@ -510,6 +528,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_Employees_MissingFile]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Projects_MissingFile() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Projects_MissingFile"
@@ -530,6 +549,7 @@ class PureMemoryDatabaseTests {
      * See [testPersistence_Read_CorruptedData_TimeEntries_BadData]
      */
     @IntegrationTest(usesDirectory=true)
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_CorruptedData_Sessions_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Sessions_BadData"

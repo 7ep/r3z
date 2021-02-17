@@ -5,7 +5,7 @@ import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.uitests.PageObjectModelLocal
-import coverosR3z.uitests.UITest
+import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
@@ -13,13 +13,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UIEditTimeTests {
 
     @BDD
-    @UITest
+    @Category(UITestCategory::class)
     @Test
     fun `editTime - An employee should be able to edit the number of hours worked from a previous time entry` () {
         val s = EditTimeUserStory.getScenario("editTime - An employee should be able to edit the number of hours worked from a previous time entry")

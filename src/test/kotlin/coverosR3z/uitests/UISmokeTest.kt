@@ -7,6 +7,7 @@ import coverosR3z.timerecording.api.ViewTimeAPI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
 import org.junit.Assert.*
+import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 
@@ -15,7 +16,8 @@ class UISmokeTest {
     /**
      * This test tries to use as many parts of the system as possible in one test
      */
-    @UITest
+    @Category(UITestCategory::class)
+    @Test
     fun `the smoke test`() {
         `Go to an unknown page, expecting a not-found error`()
         `Try logging in with invalid credentials, expecting to be forbidden`()
@@ -42,8 +44,7 @@ class UISmokeTest {
 
     companion object {
         private const val port = 9999
-        private const val domain = "http://renomad.com"
-        private lateinit var pom : PageObjectModel
+        private lateinit var pom : PageObjectModelLocal
         private const val TEST_PASSWORD = "password12345"
         private val testUsers = listOf("matt", "byron")
         private val testProjects = listOf("first_project", "second_project", "third_project")
@@ -61,7 +62,7 @@ class UISmokeTest {
 
     @Before
     fun init() {
-        pom = startupTestForUIWithoutServer(domain, port)
+        pom = startupTestForUI(port = port)
         dateString = if (pom.driver is ChromeDriver) {
             "06122020"
         } else {
@@ -78,7 +79,7 @@ class UISmokeTest {
     private fun `Each employee edits a time entry`() {
         for (u in testUsers) {
             pom.lp.login(u, TEST_PASSWORD)
-            pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+            pom.vtp.gotoDate(DEFAULT_DATE_STRING)
             assertEquals("your time entries", pom.driver.title)
             val firstTimeEntry = pom.driver.findElements(By.className(ViewTimeAPI.Elements.READ_ONLY_ROW.getElemClass()))[0]
             firstTimeEntry.findElement(By.className(ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass())).click()
@@ -177,8 +178,6 @@ class UISmokeTest {
         pom.driver.get("${pom.domain}/does-not-exist")
         assertEquals("404 error", pom.driver.title)
     }
-
-
 
     private fun logout() {
         pom.lop.go()

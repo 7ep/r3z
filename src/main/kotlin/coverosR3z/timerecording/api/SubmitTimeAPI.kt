@@ -55,7 +55,7 @@ class SubmitTimeAPI(private val sd: ServerData){
 
         tru.submitTimePeriod(timePeriod)
 
-        return ServerUtilities.redirectTo(ViewTimeAPI.path)
+        return ServerUtilities.redirectTo(ViewTimeAPI.path + "?date=" + startDate.stringValue)
     }
 
 }

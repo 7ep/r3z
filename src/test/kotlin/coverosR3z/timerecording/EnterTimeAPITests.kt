@@ -18,6 +18,7 @@ import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.io.File
 
 class EnterTimeAPITests {
@@ -237,7 +238,7 @@ class EnterTimeAPITests {
      *
      * See [ServerPerformanceTests.testEnterTimeReal_PERFORMANCE]
      */
-    @PerformanceTest
+    @Category(PerformanceTestCategory::class)
     @Test
     fun testEnterTimeAPI_PERFORMANCE() {
         val numberOfRequests = 200
@@ -291,7 +292,11 @@ class EnterTimeAPITests {
      */
     private fun assertSuccessfulTimeEntry(result: PreparedResponseData) {
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.contains("Location: timeentries"))
+        assertTrue(result.headers.any { it.matches(redirectRegex)})
+    }
+
+    companion object {
+        val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
     }
 
 }

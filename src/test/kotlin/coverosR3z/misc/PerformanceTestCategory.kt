@@ -8,4 +8,4 @@ package coverosR3z.misc
  * A good performance test should indicate the general
  * expected performance in the documentation for the test
  */
-annotation class PerformanceTest
+interface PerformanceTestCategory
