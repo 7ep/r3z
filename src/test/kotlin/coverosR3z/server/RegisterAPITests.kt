@@ -117,23 +117,6 @@ class RegisterAPITests {
     }
 
     /**
-     * If the employee id is zero
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldHandleInvalidInputs_ZeroEmployee() {
-        val data = PostBodyData(mapOf(
-            RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-            RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to "0"))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
-
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
-
-        assertEquals(minEmployeeIdMsg, ex.message)
-    }
-
-    /**
      * If the employee id is below zero
      */
     @Category(APITestCategory::class)

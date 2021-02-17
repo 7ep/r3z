@@ -98,7 +98,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
         val username = safeHtml(sd.ahd.user.name.value)
-        val te = sd.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId ?: NO_EMPLOYEE.id, currentPeriod)
+        val te = sd.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId, currentPeriod)
         val editidValue = sd.ahd.queryString["editid"]
         val projects = sd.tru.listAllProjects()
         // either get the id as an integer or get null,
@@ -108,7 +108,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         // Figure out time period date from viewTimeAPITests
         val periodStartDate = currentPeriod.start
         val periodEndDate = currentPeriod.end
-        val inASubmittedPeriod = sd.tru.isInASubmittedPeriod(sd.ahd.user.employeeId!!, periodStartDate)
+        val inASubmittedPeriod = sd.tru.isInASubmittedPeriod(sd.ahd.user.employeeId, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """

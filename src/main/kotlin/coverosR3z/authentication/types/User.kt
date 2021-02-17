@@ -89,7 +89,7 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
             Keys.NAME to name.value,
             Keys.HASH to hash.value,
             Keys.SALT to salt.value,
-            Keys.EMPLOYEE_ID to "${employeeId?.value ?: "null"}"
+            Keys.EMPLOYEE_ID to "${employeeId.value}"
         )
 
     class Deserializer : Deserializable<User> {
