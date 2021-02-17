@@ -1,6 +1,8 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.types.earliestAllowableDate
+import coverosR3z.misc.types.latestAllowableDate
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
@@ -176,10 +178,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="text" value="${safeAttr(it.date.stringValue)}" />
             </td>
             <td class="time">
-                <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+                <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" value="${it.time.getHoursAsString()}" />
             </td>
             <td class="details">
-                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
+                <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" value="${safeAttr(it.details.value)}"/>
             </td>
             
             <td class="action">
@@ -207,7 +209,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 </select>
             </td>
             <td class="date">
-                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${safeAttr(it.date.stringValue)}" />
+                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(it.date.stringValue)}" />
             </td>
             <td class="time">
                 <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
@@ -233,7 +235,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </select>
                 </td>
                 <td class="date" >
-                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" required />
+                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </td>
                 <td class="time">
                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />

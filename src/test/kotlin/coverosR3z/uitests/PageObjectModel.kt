@@ -1,6 +1,8 @@
 package coverosR3z.uitests
 
+import coverosR3z.misc.types.Date
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
 
 /**
  * provides an API for testing the UI that is far
@@ -16,6 +18,19 @@ open class PageObjectModel {
     lateinit var vtp : ViewTimePage
     lateinit var domain : String
     lateinit var driver: WebDriver
+
+    /**
+     * Chrome takes date input differently than other browsers.
+     * This helps us avoid a bit of boilerplate so we can use
+     * the proper
+     */
+    fun calcDateString(date : Date) : String {
+        return if (driver is ChromeDriver) {
+            date.chromeStringValue // returns the chrome format
+        } else {
+            date.stringValue // returns the chrome format
+        }
+    }
 
     companion object {
         fun make(

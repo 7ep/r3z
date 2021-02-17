@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat
 
 const val dateNotNullMsg = "date must not be null"
 const val dateNotBlankMsg = "date must not be blank"
+val earliestAllowableDate = LocalDate.of(1980, 1, 1)
+val latestAllowableDate = LocalDate.of(2200, 1, 1)
+
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
@@ -42,17 +45,20 @@ class Date(val epochDay : Int) : Comparable<Date> {
      */
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
 
-    private val sdf: SimpleDateFormat = SimpleDateFormat("MMDDYYYY")
+    /**
+     * See here for the description of this formatting: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+     */
+    private val sdf: SimpleDateFormat = SimpleDateFormat("MMddYYYY")
 
     /**
-     * Chrome format "MMDDYYYY"
+     * Chrome format "MMddYYYY"
      */
     val chromeStringValue: String = sdf.format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
 
     init {
-        val beginDate = LocalDate.of(1980, 1, 1).toEpochDay()
-        val endDate = LocalDate.of(2200, 1, 1).toEpochDay()
-        require(epochDay.toLong() in beginDate..endDate) {
+        val beginDate = earliestAllowableDate
+        val endDate = latestAllowableDate
+        require(epochDay.toLong() in (beginDate.toEpochDay())..(endDate.toEpochDay())) {
             "no way on earth people are using this before $beginDate or past $endDate, you had a date of $stringValue"
         }
     }

@@ -1,13 +1,13 @@
 package coverosR3z.timerecording
 
 import coverosR3z.bddframework.BDD
+import coverosR3z.misc.DEFAULT_DATE
 import coverosR3z.misc.DEFAULT_DATE_STRING
-import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PASSWORD
-import coverosR3z.misc.types.Date
-import coverosR3z.misc.types.Month
+import coverosR3z.misc.types.*
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.timerecording.utility.TimeRecordingUtilities
+import coverosR3z.timerecording.types.MAX_DETAILS_LENGTH
+import coverosR3z.timerecording.types.TimeEntry
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -61,19 +61,40 @@ class UITimeEntryTests {
     @Category(UITestCategory::class)
     @Test
     fun `all inputs should restrict to valid values` () {
-        val dateString = if (pom.driver is ChromeDriver) {
-            "06122020"
-        } else {
-            DEFAULT_DATE_STRING
-        }
+        val projecta = "projecta"
+        val projectb = "projectb"
+        val dateString = pom.calcDateString(DEFAULT_DATE)
+        loginAsUserAndCreateProject("alice", projecta)
 
-        loginAsUserAndCreateProject("alice", "projecta")
+        // Create another project
+        pom.epp.enter(projectb)
 
-        badProjectEntry(pom)
-        //        badDateEntry()
-        // badTimeEntry()
-        // badDescriptionEntry()
+        noProjectOrTime()
+        includesProjectButNoTime(projecta)
+        includesTimeButNoProject()
+        badDateSyntax(projecta)
+        badDateBefore1980(projecta)
+        badDateAfter2200(projecta)
+
+        timeBelowZero(projecta, dateString)
+        timeAboveTwentyFour(projecta, dateString)
+        timeNotOnValidDivision(projecta, dateString)
+        invalidSyntaxOnTimeInput(projecta, dateString)
+
+        // this one actually does create a time entry
+        val timeEntry = badDescriptionEntry(projecta, dateString)
+
+        setNoTimeOnEdit(timeEntry)
+        badDateSyntaxOnEdit(timeEntry)
+        badDateBefore1980OnEdit(timeEntry)
+        badDateAfter2200OnEdit(timeEntry)
+
+        timeBelowZeroOnEdit(timeEntry)
+        timeAboveTwentyFourOnEdit(timeEntry)
+        timeNotOnValidDivisionOnEdit(timeEntry)
+        invalidSyntaxOnTimeInputOnEdit(timeEntry)
     }
+
 
 //    fun template(pom : PageObjectModelLocal) {
 //        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
@@ -88,18 +109,6 @@ class UITimeEntryTests {
 //        assertEquals("your time entries", driver.title)
 //    }
 
-    /**
-     * If I just click save without doing anything, the project being empty will stop us
-     */
-    fun badProjectEntry(pom : PageObjectModelLocal) {
-        val currentUser = (pom.businessCode.tru as TimeRecordingUtilities).cu
-        val entriesLength = pom.businessCode.tru.getAllEntriesForEmployee(currentUser.user.employeeId).size
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
-        val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
-        // Confirm we don't have any new entries
-        assertEquals(entriesLength, pom.businessCode.tru.getAllEntriesForEmployee(currentUser.user.employeeId).size)
-    }
 
     @Category(UITestCategory::class)
     @Test
@@ -309,33 +318,16 @@ class UITimeEntryTests {
     }
 
     private fun enterTimeForEmployee(project: String) {
-        val dateString = if (pom.driver is ChromeDriver) {
-            "06122020"
-        } else {
-            DEFAULT_DATE_STRING
-        }
-
-        // Enter time
-        pom.vtp.enterTime(project, "1", "", dateString)
+        pom.vtp.enterTime(project, "1", "", pom.calcDateString(DEFAULT_DATE))
     }
-
-
-    private fun calcDateString(date : Date) : String {
-        return if (pom.driver is ChromeDriver) {
-            date.chromeStringValue // returns the chrome format
-        } else {
-            date.stringValue // returns the chrome format
-        }
-    }
-
 
     private fun enterThreeEntriesForEmployee(project: String) {
         val date = Date(2021, Month.JAN, 1)
 
         // Enter time
-        pom.vtp.enterTime(project, "1", "", calcDateString(date))
-        pom.vtp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 1)))
-        pom.vtp.enterTime(project, "1", "", calcDateString(Date(date.epochDay + 2)))
+        pom.vtp.enterTime(project, "1", "", pom.calcDateString(date))
+        pom.vtp.enterTime(project, "1", "", pom.calcDateString(Date(date.epochDay + 1)))
+        pom.vtp.enterTime(project, "1", "", pom.calcDateString(Date(date.epochDay + 2)))
     }
 
 
@@ -406,4 +398,315 @@ class UITimeEntryTests {
         val period = pom.vtp.getCurrentPeriod()
         assertEquals("2021-01-01 - 2021-01-15", period)
     }
+
+
+    /**
+     * If I just click save without doing anything, the project being empty will stop us
+     */
+    private fun noProjectOrTime() {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * If I click save after entering a project, the time being empty will stop us
+     */
+    private fun includesProjectButNoTime(project: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * If I click save without the project, the project being empty will stop us
+     */
+    private fun includesTimeButNoProject() {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1")
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the date
+     * field has been cleared.
+     */
+    private fun badDateSyntax(project: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.clearTheNewEntryDateEntry()
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the
+     * date field is too far in the past
+     * @see [earliestAllowableDate]
+     */
+    private fun badDateBefore1980(project: String) {
+        val pastDateString = if (pom.driver is ChromeDriver) "1979-12-31" else "12311979"
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(pastDateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided a date before 1980
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the date
+     * field is too far in the future
+     * @see [latestAllowableDate]
+     */
+    private fun badDateAfter2200(project: String) {
+        val futureDateString = if (pom.driver is ChromeDriver) "2200-01-01" else "01012200"
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(futureDateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided a date before 1980
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Everything required has been set (project, time, date) but the time is too low
+     */
+    private fun timeBelowZero(project: String, dateString: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("-0.25")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(dateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+
+    /**
+     * Everything required has been set (project, time, date) but the time is too high
+     */
+    private fun timeAboveTwentyFour(project: String, dateString: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("24.25")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(dateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Our time entry only allows 0 to 24 and quarter hours.  If we
+     * enter 1.23, it shouldn't work.
+     */
+    private fun timeNotOnValidDivision(project: String, dateString: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1.23")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(dateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+
+    /**
+     * Our time entry only allows 0 to 24 and quarter hours.  If we
+     * enter a letter, it shouldn't work
+     */
+    private fun invalidSyntaxOnTimeInput(project: String, dateString: String) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.setTimeForNewEntry("1.23")
+        pom.vtp.setProjectForNewEntry(project)
+        pom.vtp.setDateForNewEntry(dateString)
+        pom.vtp.clickCreateNewTimeEntry()
+
+        // Confirm we don't have any new entries because we provided no project or time
+        val isTimeEntriesEmpty = pom.pmd.TimeEntryDataAccess().read { it.isEmpty() }
+        assertTrue(isTimeEntriesEmpty)
+    }
+    /**
+     * The description can be up to [coverosR3z.timerecording.types.MAX_DETAILS_LENGTH]
+     * anything past that won't get recorded.
+     *
+     * this will indeed create a time entry, but when we examine the resultant
+     * time entry in the database it will only be that max length, everything beyond
+     * will get truncated
+     */
+    private fun badDescriptionEntry(project: String, dateString: String) : TimeEntry {
+        pom.vtp.enterTime(project, "1", "a".repeat(MAX_DETAILS_LENGTH + 1), dateString)
+
+        // Confirm our only time entry has a details that's exactly MAX_DETAILS_LENGTH long
+        val oneAndOnlyTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(MAX_DETAILS_LENGTH, oneAndOnlyTimeEntry.details.value.length)
+        return oneAndOnlyTimeEntry
+    }
+
+    /**
+     * If we clear the time field and try to save, it won't happen
+     */
+    private fun setNoTimeOnEdit(expectedTimeEntry : TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "")
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the date
+     * field has been cleared.
+     */
+    private fun badDateSyntaxOnEdit(expectedTimeEntry : TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clearTheDateEntryOnEdit(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the
+     * date field is too far in the past
+     * @see [earliestAllowableDate]
+     */
+    private fun badDateBefore1980OnEdit(expectedTimeEntry: TimeEntry) {
+        val pastDateString = if (pom.driver is ChromeDriver) "1979-12-31" else "12311979"
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, pastDateString)
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Everything required has been set (project, time) but the date
+     * field is too far in the future
+     * @see [latestAllowableDate]
+     */
+    private fun badDateAfter2200OnEdit(expectedTimeEntry: TimeEntry) {
+        val futureDateString = if (pom.driver is ChromeDriver) "2200-01-01" else "01012200"
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, futureDateString)
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Everything required has been set (project, time, date) but the time is too low
+     */
+    private fun timeBelowZeroOnEdit(expectedTimeEntry: TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "-0.25")
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+
+    /**
+     * Everything required has been set (project, time, date) but the time is too high
+     */
+    private fun timeAboveTwentyFourOnEdit(expectedTimeEntry: TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "24.25")
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Our time entry only allows 0 to 24 and quarter hours.  If we
+     * enter 1.23, it shouldn't work.
+     */
+    private fun timeNotOnValidDivisionOnEdit(expectedTimeEntry: TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "1.24")
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * Our time entry only allows 0 to 24 and quarter hours.  If we
+     * enter a letter, it shouldn't work
+     */
+    private fun invalidSyntaxOnTimeInputOnEdit(expectedTimeEntry: TimeEntry) {
+        pom.vtp.gotoDate(DEFAULT_DATE_STRING)
+        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "a")
+        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+
+        // Confirm we still have the unchanged time entry
+        val existingTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(expectedTimeEntry, existingTimeEntry)
+    }
+
+    /**
+     * The description can be up to [coverosR3z.timerecording.types.MAX_DETAILS_LENGTH]
+     * anything past that won't get recorded.
+     *
+     * this will indeed create a time entry, but when we examine the resultant
+     * time entry in the database it will only be that max length, everything beyond
+     * will get truncated
+     */
+    private fun badDescriptionEntryOnEdit(project: String, dateString: String) {
+        pom.vtp.enterTime(project, "1", "a".repeat(MAX_DETAILS_LENGTH + 1), dateString)
+
+        // Confirm our only time entry has a details that's exactly MAX_DETAILS_LENGTH long
+        val oneAndOnlyTimeEntry = pom.pmd.TimeEntryDataAccess().read { it.single() }
+        assertEquals(MAX_DETAILS_LENGTH, oneAndOnlyTimeEntry.details.value.length)
+    }
+
+
+
 }

@@ -26,6 +26,7 @@ val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
  * HTML5 sends dates in this format
  */
 const val DEFAULT_DATE_STRING = "2020-06-12"
+val DEFAULT_DATE = Date.make(DEFAULT_DATE_STRING)
 val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = Salt("12345")
@@ -92,4 +93,3 @@ fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
 
         return Pair(tru, aliceEmployee)
 }
-
