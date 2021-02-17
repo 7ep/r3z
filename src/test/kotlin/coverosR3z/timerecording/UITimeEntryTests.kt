@@ -14,6 +14,7 @@ import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.experimental.categories.Category
+import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 
 class UITimeEntryTests {
@@ -65,7 +66,29 @@ class UITimeEntryTests {
         }
 
         loginAsUserAndCreateProject("alice", "projecta")
-        pom.vtp.enterTime("projecta", dateString, "1", "some details here")
+        badDateEntry()
+    }
+
+    fun template(pom : PageObjectModelLocal) {
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
+        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
+        assertEquals("your time entries", driver.title)
+    }
+
+    /**
+     * If I just click save without doing anything, the project being empty will stop us
+     */
+    fun badProjectEntry(pom : PageObjectModelLocal) {
+        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}")
+        val createTimeEntryRow = pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
     }
 
     @Category(UITestCategory::class)
