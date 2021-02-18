@@ -133,20 +133,9 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <label for="next_period_link">prev</label>
                     <a id="${Elements.NEXT_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
                 </nav>
-                <table role="presentation">
-                    <thead>
-                        <tr>
-                            <th class="project">Project</th>
-                            <th class="date">Date</th>
-                            <th class="time">Time</th>
-                            <th class="details">Details</th>
-                            <th class="action">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
-                    </tbody>
-                </table>
+                <div class="flex-container">
+                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
+                </div>
         """
         return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
     }
@@ -169,85 +158,94 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod): String {
         return """
-     <tr class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-        <div>
-            <td class="project">
+     <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+        <div class="project-date-and-time">
+            <div class="project">
                 <input readonly name="${Elements.PROJECT_INPUT.getElemName()}" type="text" value="${safeAttr(it.project.name.value)}" />
-            </td>
-            <td class="date">
+            </div>
+            <div class="date">
                 <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="text" value="${safeAttr(it.date.stringValue)}" />
-            </td>
-            <td class="time">
+            </div>
+            <div class="time">
                 <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" value="${it.time.getHoursAsString()}" />
-            </td>
-            <td class="details">
+            </div>
+        </div>
+        <div class="details-and-button">
+            <div class="details">
                 <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" value="${safeAttr(it.details.value)}"/>
-            </td>
+            </div>
             
-            <td class="action">
+            <div class="action">
                 <form action="$path">
                     <input type="hidden" name="editid" value="${it.id.value}" /> 
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
                     <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
                 </form>
-            </td>
-            
+            </div>
         </div>
-    </tr>
+    </div>
     """
     }
 
     private fun renderEditRow(it: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
         return """
-    <tr class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+    <div class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <form action="$path" method="post">
             <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
-            <td class="project">
-                <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
-                    ${projectsToOptionsOneSelected(projects, it.project)}
-                </select>
-            </td>
-            <td class="date">
-                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(it.date.stringValue)}" />
-            </td>
-            <td class="time">
-                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
-            </td>
-            <td class="details">
-                <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
-            </td>
-            <td class="action">
-                <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
-            </td>
+            <div class="project-date-and-time">
+                <div class="project">
+                    <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
+                        ${projectsToOptionsOneSelected(projects, it.project)}
+                    </select>
+                </div>
+                <div class="date">
+                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(it.date.stringValue)}" />
+                </div>
+                <div class="time">
+                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+                </div>
+            </div>
+            <div class="details-and-button">
+                <div class="details">
+                    <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
+                </div>
+                <div class="action">
+                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
+                </div>
+            </div>
         </form>
-    </tr>
+    </div>
       """
     }
 
     private fun renderCreateTimeRow(projects: List<Project>) = """
-        <tr id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
+        <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
-                <td class="project">
-                    <select name="project_entry" id="project_entry" required  />
-                        <option selected disabled hidden value="">Choose a project</option>
-                        ${projectsToOptions(projects)}
-                    </select>
-                </td>
-                <td class="date" >
-                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
-                </td>
-                <td class="time">
-                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
-                </td>
-                <td class="details">
-                    <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
-                </td>
-                <td class="action">
-                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
-                </td>
+                <div class="project-date-and-time">
+                    <div class="project">
+                        <select name="project_entry" id="project_entry" required  />
+                            <option selected disabled hidden value="">Choose a project</option>
+                            ${projectsToOptions(projects)}
+                        </select>
+                    </div>
+                    <div class="date" >
+                        <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
+                    </div>
+                    <div class="time">
+                        <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
+                    </div>
+                </div>
+                <div class="details-and-button">
+                    <div class="details">
+                        <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
+                    </div>
+                    <div class="action">
+                        <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
+                    </div>
+                </div>
             </form>
-        </tr>
+        </div>
           """
 
     fun handlePOST() : PreparedResponseData {
