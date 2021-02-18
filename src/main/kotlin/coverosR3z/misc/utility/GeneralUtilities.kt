@@ -5,6 +5,7 @@ import coverosR3z.server.types.Element
 import java.lang.IllegalArgumentException
 import java.net.URLDecoder
 import java.net.URLEncoder
+import java.nio.charset.Charset
 import kotlin.random.Random
 
 /**
@@ -133,7 +134,7 @@ fun safeAttr(input : String) : String {
  * Encodes UTF-8 text using URL-encoding
  */
 fun encode(str : String) : String {
-    return URLEncoder.encode(str, Charsets.UTF_8)
+    return URLEncoder.encode(str, "UTF-8")
 }
 
 /**
@@ -141,5 +142,5 @@ fun encode(str : String) : String {
  */
 fun decode(str : String?) : String {
     requireNotNull(str)
-    return URLDecoder.decode(str, Charsets.UTF_8)
+    return URLDecoder.decode(str,  "UTF-8")
 }
