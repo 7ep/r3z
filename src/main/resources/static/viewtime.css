@@ -16,25 +16,25 @@ input {
   background-color: #dfffdf;
   border: 1px white solid;
   font-size: 1em;
-/*   width: 6.8em;
-  text-align: center;
-  width: 100%; */
 }
 
 .project {
   width: 10em;
 }
 
-.date input {
-  height: 1em;
+.project select {
+  width: inherit;
+  /* select requires a custom height, yuck */
+  height: 1.5em;
+}
+
+.date {
   width: 100%;
+  max-width: 8em;
 }
 
-.details {
-  width: 15em;
-}
-
-.details input {
+.date input {
+  height: inherit;
   width: 100%;
 }
 
@@ -42,23 +42,21 @@ input {
  width: 4em;
 }
 
-.project select {
+.time input {
   width: 100%;
-  /* select requires a custom height, yuck */
-  height: inherit;
 }
+
 
 button {
     cursor: pointer;
     text-align : center;
-    /* width: 4.2em; */
     font-size: 1em;
-    height: 2.2em;
-    border: 2px solid #e2e2e2;
+    height: inherit;
+    border: 0px solid #e2e2e2;
     background-color: #c35061;
     border-radius: .5em;
     margin: auto;
-    padding: .4em;
+    min-width: 5em;
 }
 
 button:hover {
@@ -72,27 +70,47 @@ button:focus {
     border: 1.8px solid blue;
 }
 
+
 .flex-container {
   flex-direction: column;
   display: flex;
   background-color: white;
   opacity: 82%;
+  max-width: 700px;
+  margin: auto;
+  border-radius: .4em;
 }
+
+@media only screen and (max-width: 700px) {
+.flex-container {
+    padding: 4px;
+  }
+ }
 
 .create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+/*   justify-content: center; */
+/*   flex-wrap: wrap; */
   border: 2px white solid;
-/*   height: 2.1em; */
+  margin: auto;
+}
+
+@media only screen and (max-width: 500px) {
+create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+  display: flex;
+/*   flex-direction: column; */
+  flex-wrap: wrap;
+  }
 }
 
 form {
-  display: inherit;
-  flex-wrap: inherit;
+    display: flex;
 }
 
-.project-date-and-time, .details-and-button {
+
+/* .project-date-and-time, .details-and-button {
   display: flex;
   flex-direction: row;
 }
+*/
