@@ -39,7 +39,7 @@ val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Pas
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), null)
+val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0))
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -76,7 +76,7 @@ data class Salt(val value: String) {
 
 }
 
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId?) :
+data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId) :
     IndexableSerializable() {
 
     override fun getIndex(): Int {
@@ -89,7 +89,7 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
             Keys.NAME to name.value,
             Keys.HASH to hash.value,
             Keys.SALT to salt.value,
-            Keys.EMPLOYEE_ID to "${employeeId?.value ?: "null"}"
+            Keys.EMPLOYEE_ID to "${employeeId.value}"
         )
 
     class Deserializer : Deserializable<User> {
@@ -99,9 +99,7 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
 
                 val id = checkParseToInt(entries[Keys.ID])
 
-                val empId: EmployeeId? = if (entries[Keys.EMPLOYEE_ID] == "null") {
-                    null
-                } else EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID]))
+                val empId = EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID]))
 
                 User(
                     UserId(id),

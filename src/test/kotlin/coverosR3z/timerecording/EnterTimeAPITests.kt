@@ -101,23 +101,6 @@ class EnterTimeAPITests {
     }
 
     /**
-     * If we are missing required data
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testEnterTimeAPI_missingEmployee() {
-        val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER_NO_EMPLOYEE), authStatus = AuthStatus.AUTHENTICATED, testLogger)
-        val ex = assertThrows(IllegalStateException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals(employeeIdNotNullMsg, ex.message)
-    }
-
-    /**
      * If we pass in something that cannot be parsed as an integer as the project id
      */
     @Category(APITestCategory::class)

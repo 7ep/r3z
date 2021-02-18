@@ -6,6 +6,7 @@ import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
+import java.net.SocketException
 import java.net.SocketTimeoutException
 
 
@@ -114,6 +115,13 @@ class ServerUtilities() {
                 // without getting anything.  See SocketWrapper and soTimeout
                 logger.logTrace { "read timed out" }
                 shouldKeepAlive = false
+            } catch (ex : SocketException) {
+                if (ex.message?.contains("Connection reset") == true) {
+                    logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
+                    shouldKeepAlive = false
+                } else {
+                    throw ex
+                }
             }
             while (shouldKeepAlive)
 
@@ -155,8 +163,9 @@ class ServerUtilities() {
                 }
             } catch (ex : SocketTimeoutException) {
                 throw ex
-            }
-            catch (ex: Exception) {
+            } catch (ex : SocketException) {
+                throw ex
+            } catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
                 handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
             }

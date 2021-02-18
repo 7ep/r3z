@@ -35,7 +35,6 @@ class PageObjectModelLocal : PageObjectModel() {
 
             pom.rp = RegisterPage(driver, pom.domain)
             pom.lp = LoginPage(driver, pom.domain)
-            pom.etp = EnterTimePage(driver, pom.domain)
             pom.eep = EnterEmployeePage(driver, pom.domain)
             pom.epp = EnterProjectPage(driver, pom.domain)
             pom.llp = LoggingPage(driver, pom.domain)

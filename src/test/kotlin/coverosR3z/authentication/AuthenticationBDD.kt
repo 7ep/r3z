@@ -62,7 +62,7 @@ class AuthenticationBDD {
         val au = setupPreviousRegisteredUser()
         s.markDone("Given I have previously been registered,")
 
-        val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         s.markDone("when I try to register again,")
 
         assertEquals("The user shouldn't be allowed to register again",
@@ -155,7 +155,7 @@ class AuthenticationBDD {
     private fun doSuccessfulRegistration(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
         return au
     }
@@ -171,14 +171,14 @@ class AuthenticationBDD {
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD)
+        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         return au
     }
 

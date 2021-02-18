@@ -7,7 +7,6 @@ import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
-import coverosR3z.server.utility.Server
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.SubmitTimeAPI
@@ -45,22 +44,6 @@ fun startupTestForUI(domain: String = "http://localhost", port : Int, driver: ()
 
 fun startupTestForUIWithoutServer(domain: String = "", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModel {
     return PageObjectModel.make(driver(), port, domain)
-}
-
-class EnterTimePage(private val driver: WebDriver, private val domain : String) {
-
-    fun enterTime(project: String, time: String, details: String, date: String) {
-        driver.get("$domain/${ViewTimeAPI.path}")
-        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
-        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
-        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
-        assertEquals("your time entries", driver.title)
-    }
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {
@@ -184,6 +167,9 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         return submitButton.click()
     }
 
+    /**
+     * Open the view time page for a particular time period.
+     */
     fun gotoDate(date: String) {
         driver.get("$domain/${ViewTimeAPI.path}?date=$date")
     }
@@ -201,4 +187,112 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         val end = driver.findElement(By.name(SubmitTimeAPI.Elements.END_DATE.getElemName())).getAttribute("value")
         return "$start - $end"
     }
+
+    fun enterTime(project: String, time: String, details: String, date: String) {
+        driver.get("$domain/${ViewTimeAPI.path}")
+        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
+        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
+        assertEquals("your time entries", driver.title)
+    }
+
+    fun setProjectForNewEntry(project: String) {
+        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+    }
+
+    fun setProjectForEditEntry(id: Int, project: String) {
+        val projectSelector = driver
+            .findElement(
+                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.PROJECT_INPUT.getElemClass()}"))
+
+        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+    }
+
+    /**
+     * simply clicks the CREATE button on the page
+     */
+    fun clickCreateNewTimeEntry() {
+        driver
+            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+            .findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+    }
+
+    /**
+     * simply clicks the SAVE button on a particular edit row
+     */
+    fun clickSaveTimeEntry(id : Int) {
+        driver
+            .findElement(
+                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
+    }
+
+    /**
+     * simply clicks the EDIT button on a particular read-only row
+     */
+    fun clickEditTimeEntry(id : Int) {
+        driver
+            .findElement(
+                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
+    }
+
+    /**
+     * Understand: this is for creating a *new* time entry, not for editing
+     * existing time entries
+     */
+    fun setTimeForNewEntry(time: String) {
+        val timeInput = driver
+            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+        timeInput.clear()
+        timeInput.sendKeys(time)
+    }
+
+    /**
+     * Understand: this is for creating a *new* time entry, not for editing
+     * existing time entries
+     */
+    fun setDateForNewEntry(date: String) {
+        val dateInput = driver
+            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        dateInput.clear()
+        dateInput.sendKeys(date)
+    }
+
+    /**
+     * Understand: this is for editing an existing time entry
+     * @param time the time in hours to enter
+     * @param id the id of the time entry, that's how we select the right row on the page
+     */
+    fun setTimeForEditingTimeEntry(id: Int, time: String) {
+        val timeInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+        timeInput.clear()
+        timeInput.sendKeys(time)
+    }
+
+
+    fun clearTheDateEntryOnEdit(id: Int) {
+        val dateInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        dateInput.clear()
+    }
+
+    fun setTheDateEntryOnEdit(id: Int, dateString: String) {
+        val dateInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        dateInput.clear()
+        dateInput.sendKeys(dateString)
+    }
+
+    fun clearTheNewEntryDateEntry() {
+        driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).clear()
+    }
+
+
 }

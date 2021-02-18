@@ -10,10 +10,9 @@ import java.time.ZoneOffset
 
 interface IAuthenticationUtilities {
     /**
-     * Register a user through auth persistent, providing a username, password, and
-     * optional employeeId (defaults to null)
+     * Register a user through auth persistent, providing a username, password, and employeeId
      */
-    fun register(username: UserName, password: Password, employeeId: EmployeeId? = null) : RegistrationResult
+    fun register(username: UserName, password: Password, employeeId: EmployeeId) : RegistrationResult
 
     /**
      * Takes a user's username and password and returns a result, and a user

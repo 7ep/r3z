@@ -9,7 +9,7 @@ import coverosR3z.timerecording.types.EmployeeId
 
 class AuthenticationPersistence(private val pmd : PureMemoryDatabase, private val logger: ILogger) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId?) : User {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId) : User {
         return pmd.UserDataAccess().actOn { users ->
             logger.logTrace { "PMD: adding new user, \"${name.value}\"" }
             val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)

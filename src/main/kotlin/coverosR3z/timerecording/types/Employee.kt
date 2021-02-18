@@ -11,7 +11,7 @@ private const val maxEmployeeCount = 100_000_000
 private const val maxEmployeeNameSize = 30
 private const val maxEmployeeNameSizeMsg = "Max size of employee name is $maxEmployeeNameSize"
 private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
-const val minEmployeeIdMsg = "Valid identifier values are 1 or above"
+const val minEmployeeIdMsg = "Valid identifier values are 0 or above, with 0 reserved for the system user"
 private const val employeeNameCannotBeEmptyMsg = "All employees must have a non-empty name"
 const val employeeIdNotNullMsg = "The employee id must not be null"
 const val employeeNameNotNullMsg = "The employee name must not be null"
@@ -45,7 +45,7 @@ data class EmployeeId(val value: Int) {
 
     init {
         require(value < maxEmployeeCount) { maxEmployeeMsg }
-        require(value > 0) { minEmployeeIdMsg }
+        require(value >= 0) { minEmployeeIdMsg }
     }
 
     companion object {

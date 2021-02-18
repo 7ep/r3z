@@ -763,19 +763,6 @@ class PureMemoryDatabaseTests {
     }
 
     @Test
-    fun testSerialization_UserWithNullEmployee() {
-        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("mysalt"), null)
-
-        val result = user.serialize()
-
-        assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt , empId: null }""", result)
-
-        val deserialized = User.Deserializer().deserialize(result)
-
-        assertEquals(user, deserialized)
-    }
-
-    @Test
     fun testSerialization_UserWithMultilineText() {
         val user = User(
             UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
