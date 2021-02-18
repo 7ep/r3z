@@ -26,9 +26,9 @@ open class PageObjectModel {
      */
     fun calcDateString(date : Date) : String {
         return if (driver is ChromeDriver) {
-            date.chromeStringValue // returns the chrome format
+            date.chromeStringValue
         } else {
-            date.stringValue // returns the chrome format
+            date.stringValue
         }
     }
 
