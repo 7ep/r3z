@@ -2,7 +2,6 @@ package coverosR3z.server.types
 
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
 /**

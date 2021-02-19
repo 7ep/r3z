@@ -37,11 +37,6 @@ class PureMemoryDatabaseTests {
         pmd = PureMemoryDatabase()
     }
 
-    @After
-    fun cleanup() {
-        pmd.stop()
-    }
-
     /**
      * This will typically complete in 40 milliseconds
      */
@@ -245,7 +240,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_HappyPath() {
-        val readPmd = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = "testPersistence_Read_HappyPath")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = "testPersistence_Read_HappyPath")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -261,7 +256,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingUsers() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingUser = true, databaseDirectorySuffix = "testPersistence_Read_MissingUsers")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingUser = true, databaseDirectorySuffix = "testPersistence_Read_MissingUsers")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -277,7 +272,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingSessions() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingSession = true, databaseDirectorySuffix = "testPersistence_Read_MissingSessions")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingSession = true, databaseDirectorySuffix = "testPersistence_Read_MissingSessions")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -292,7 +287,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_EmptySessionsFile() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptySessionsFile"
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the sessions file to empty
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Session.directoryName}$databaseFileSuffix").delete()
@@ -310,7 +305,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingTimeEntries() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingTimeEntries")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingTimeEntries")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -326,7 +321,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingEmployees() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingEmployees")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingEmployees")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -342,7 +337,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_EmptyEmployees() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptyEmployees"
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the file to empty
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}$databaseFileSuffix").delete()
@@ -362,7 +357,7 @@ class PureMemoryDatabaseTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testPersistence_Read_MissingProjects() {
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingProjects")
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingProjects = true, skipCreatingTimeEntries = true, databaseDirectorySuffix = "testPersistence_Read_MissingProjects")
 
         assertEquals(pmd, readPmd)
         assertEquals(pmd.hashCode(), readPmd.hashCode())
@@ -379,7 +374,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testPersistence_Read_EmptyProjects() {
         val databaseDirectorySuffix = "testPersistence_Read_EmptyProjects"
-        val readPmd = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
+        val (pmd, readPmd) = arrangeFullDatabaseWithDisk(skipCreatingTimeEntries = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // set the file to empty
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}$databaseFileSuffix").delete()
@@ -913,6 +908,18 @@ class PureMemoryDatabaseTests {
         assertEquals("Unable to deserialize this text as time entry data: { id: aaaaaa , eid: 1 , start: 2021-02-01 , end: 2021-02-15 }", ex.message)
     }
 
+    /**
+     * If we submit a time period, then restart the database, it
+     * should still be there.
+     */
+    @Test
+    fun testRestoreSubmittedPeriods() {
+        val databaseDirectorySuffix = "testRestoreSubmittedPeriods"
+        val (before, after) = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = databaseDirectorySuffix)
+
+        assertEquals(before, after)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -927,6 +934,9 @@ class PureMemoryDatabaseTests {
      * Helps us avoid a lot of repetition in the set of tests related to
      * corrupting data entries on disk and also reloading the database after
      * not having done certain things, like for example: not ever having logged in.
+     *
+     * @return first returned value is the database *before* restarting, second is
+     *         the one *after* restarting
      */
     private fun arrangeFullDatabaseWithDisk(
         databaseDirectorySuffix : String = "",
@@ -935,7 +945,8 @@ class PureMemoryDatabaseTests {
         skipCreatingTimeEntries : Boolean = false,
         skipCreatingEmployees : Boolean = false,
         skipCreatingProjects : Boolean = false,
-        skipRestarting : Boolean = false): PureMemoryDatabase? {
+        skipCreatingSubmissions : Boolean = false,
+        skipRestarting : Boolean = false): Pair<PureMemoryDatabase, PureMemoryDatabase?> {
 
         val databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
 
@@ -962,12 +973,15 @@ class PureMemoryDatabaseTests {
         if (! skipCreatingTimeEntries) {
             tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
         }
+        if(! skipCreatingSubmissions) {
+            tep.persistNewSubmittedTimePeriod(newEmployee.id, TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
+        }
         pmd.stop()
 
         return if (! skipRestarting) {
-            DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+            Pair(pmd, DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence())
         } else {
-            null
+            Pair(pmd, null)
         }
     }
 

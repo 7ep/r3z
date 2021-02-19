@@ -86,6 +86,7 @@ open class PureMemoryDatabase(
         result = 31 * result + projects.hashCode()
         result = 31 * result + timeEntries.hashCode()
         result = 31 * result + sessions.hashCode()
+        result = 31 * result + submittedPeriods.hashCode()
         return result
     }
 

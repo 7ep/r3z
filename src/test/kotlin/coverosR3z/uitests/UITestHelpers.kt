@@ -18,7 +18,6 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
-import java.util.concurrent.Executors
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX({ FirefoxDriver() }),
@@ -35,9 +34,13 @@ enum class Drivers(val driver: () -> WebDriver){
  *   and so we can have a testing-oriented API
  *   @param port the port our server will run on, and thus the port our client should target
  */
-fun startupTestForUI(domain: String = "http://localhost", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModelLocal {
+fun startupTestForUI(
+    domain: String = "http://localhost",
+    port : Int, driver: () -> WebDriver = webDriver.driver,
+    directory : String? = null
+) : PageObjectModelLocal {
     // start the server
-    val fs = FullSystem.startSystem(SystemOptions(port = port, dbDirectory = null))
+    val fs = FullSystem.startSystem(SystemOptions(port = port, dbDirectory = directory))
 
     return PageObjectModelLocal.make(driver(), port, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }
@@ -207,10 +210,10 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
     }
 
-    fun setProjectForEditEntry(id: Int, project: String) {
+    private fun setProjectForEditEntry(id: Int, project: String) {
         val projectSelector = driver
             .findElement(
-                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.PROJECT_INPUT.getElemClass()}"))
+                By.cssSelector("#time-entry-$id [name=${ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()}]"))
 
         projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
     }
@@ -277,6 +280,12 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         timeInput.sendKeys(time)
     }
 
+    private fun setDetailsForEditingTimeEntry(id: Int, details: String) {
+        val detailInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()}]"))
+        detailInput.clear()
+        detailInput.sendKeys(details)
+    }
+
 
     fun clearTheDateEntryOnEdit(id: Int) {
         val dateInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
@@ -292,6 +301,18 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clearTheNewEntryDateEntry() {
         driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
             .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).clear()
+    }
+
+    /**
+     * @param id the id of the time entry we want to edit
+     */
+    fun editTime(id: Int, project: String, time: String, details: String, dateString: String) {
+        clickEditTimeEntry(id)
+        setProjectForEditEntry(id, project)
+        setTimeForEditingTimeEntry(id, time)
+        setDetailsForEditingTimeEntry(id, details)
+        setTheDateEntryOnEdit(id, dateString)
+        clickSaveTimeEntry(id)
     }
 
 

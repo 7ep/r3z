@@ -12,95 +12,105 @@ a:hover
      cursor:pointer;
 }
 
-/* enabling alternate colors for each row, */
-tbody tr:nth-child(odd) input {
-  background: #d9ced0;
-  padding: 0;
-}
-
-tbody tr:nth-child(even) input {
-  background: #fff;
-  padding: 0;
-}
-
-tr {
-  line-height: 2.4em;
-}
-
-
-table {
-  margin: auto;
-  border-radius: .5em;
-  background-color: white;
-  opacity: 82%;
-  color: black;
-  width: 98%;
-}
-
-td {
-  text-align: center;
-  width: 0
-}
-/*
-
-td.project {
-  width: 2em;
-}
-
-td.time {
-  width: 3.4em;
-}
-
-td.action {
-  width:2em
-}
-
-td.date {
-  width: 8.7em;
-}
-*/
-
-td.details {
-  width: 100%
-}
-
 input {
   background-color: #dfffdf;
-  border: 0;
-  height: 2.1em;
+  border: 1px white solid;
   font-size: 1em;
-  width: 6.8em;
-  text-align: center;
 }
 
-input[name=detail_entry]{width: 100%;}
-
-input[name=time_entry]{
-  width: 2.9em;
-}
-
-input[name=date_entry] {
-  width: 7em;
-  /* date input requires a custom height, yuck */
-  /*height: 2.7em;*/
-}
-
-.project input {
-    width: 4.7em;
+.project {
+  width: 10em;
 }
 
 .project select {
-  width: 4.6em;
-  font-size: 1em;
+  width: inherit;
   /* select requires a custom height, yuck */
-  height: 2.2em;
+  height: 1.5em;
 }
 
-button {
-    text-align : center;
-    width: 4.2em;
-    font-size: 1em;
-    height: 2.2em;
-    border: 0;
-    background-color: orange;
+.date {
+  width: 100%;
+  max-width: 8em;
 }
+
+.date input {
+  height: inherit;
+  width: 100%;
+}
+
+.time {
+ width: 4em;
+}
+
+.time input {
+  width: 100%;
+}
+
+
+button {
+    cursor: pointer;
+    text-align : center;
+    font-size: 1em;
+    height: inherit;
+    border: 0px solid #e2e2e2;
+    background-color: #c35061;
+    border-radius: .5em;
+    margin: auto;
+    min-width: 5em;
+}
+
+button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
+
+button:focus {
+    outline: none;
+    border-radius: .3em;
+    border: 1.8px solid blue;
+}
+
+
+.flex-container {
+  flex-direction: column;
+  display: flex;
+  background-color: white;
+  opacity: 82%;
+  max-width: 700px;
+  margin: auto;
+  border-radius: .4em;
+}
+
+@media only screen and (max-width: 700px) {
+.flex-container {
+    padding: 4px;
+  }
+ }
+
+.create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+  display: flex;
+  flex-direction: row;
+/*   justify-content: center; */
+/*   flex-wrap: wrap; */
+  border: 2px white solid;
+  margin: auto;
+}
+
+@media only screen and (max-width: 500px) {
+create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+  display: flex;
+/*   flex-direction: column; */
+  flex-wrap: wrap;
+  }
+}
+
+form {
+    display: flex;
+}
+
+
+/* .project-date-and-time, .details-and-button {
+  display: flex;
+  flex-direction: row;
+}
+*/

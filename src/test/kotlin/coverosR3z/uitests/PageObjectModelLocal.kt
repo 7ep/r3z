@@ -3,7 +3,6 @@ package coverosR3z.uitests
 import coverosR3z.FullSystem
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
-import coverosR3z.server.utility.Server
 import org.openqa.selenium.WebDriver
 
 /**

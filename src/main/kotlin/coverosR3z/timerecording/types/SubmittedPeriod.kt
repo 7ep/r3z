@@ -46,7 +46,7 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
             return deserialize(str, Companion) { entries ->
                 try {
                     val id = SubmissionId.make(entries[Keys.ID])
-                    val employeeId = EmployeeId.make(entries[Keys.ID])
+                    val employeeId = EmployeeId.make(entries[Keys.EMPLOYEE_ID])
                     val bounds = TimePeriod(Date.make(entries[Keys.START_BOUND]), Date.make(entries[Keys.END_BOUND]))
                     SubmittedPeriod(id, employeeId, bounds)
                 } catch (ex : DatabaseCorruptedException) {

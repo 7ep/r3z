@@ -2,7 +2,6 @@ package coverosR3z.misc
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.logging.Logger
 import coverosR3z.logging.TestLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
