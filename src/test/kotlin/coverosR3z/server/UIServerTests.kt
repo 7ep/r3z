@@ -11,7 +11,6 @@ import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.testLogger
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.timerecording.UITimeEntryTests
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
