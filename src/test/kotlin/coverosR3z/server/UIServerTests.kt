@@ -6,8 +6,12 @@ import coverosR3z.authentication.types.maxUserNameSize
 import coverosR3z.authentication.types.minPasswordSize
 import coverosR3z.authentication.types.minUserNameSize
 import coverosR3z.logging.LogTypes
+import coverosR3z.misc.DEFAULT_DB_DIRECTORY
 import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.testLogger
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.timerecording.UITimeEntryTests
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -20,6 +24,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
+import java.io.File
 
 class UIServerTests {
 
@@ -96,8 +101,9 @@ class UIServerTests {
 
 
     companion object {
-        private const val port = 4005
+        private const val port = 4001
         private lateinit var pom : PageObjectModelLocal
+        private lateinit var databaseDirectory : String
 
         @BeforeClass
         @JvmStatic
@@ -111,12 +117,17 @@ class UIServerTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port = port)
+        val databaseDirectorySuffix = "uiservertests_on_port_$port"
+        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
+        File(databaseDirectory).deleteRecursively()
+        pom = startupTestForUI(port = port, directory = databaseDirectory)
     }
 
     @After
-    fun cleanup() {
+    fun finish() {
         pom.fs.shutdown()
+        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+        assertEquals(pom.pmd, pmd)
         pom.driver.quit()
     }
 

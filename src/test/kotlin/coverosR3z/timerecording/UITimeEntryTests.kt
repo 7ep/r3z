@@ -1,10 +1,9 @@
 package coverosR3z.timerecording
 
 import coverosR3z.bddframework.BDD
-import coverosR3z.misc.DEFAULT_DATE
-import coverosR3z.misc.DEFAULT_DATE_STRING
-import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.*
 import coverosR3z.misc.types.*
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.types.MAX_DETAILS_LENGTH
 import coverosR3z.timerecording.types.TimeEntry
@@ -16,6 +15,7 @@ import org.junit.*
 import org.junit.Assert.*
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.chrome.ChromeDriver
+import java.io.File
 
 class UITimeEntryTests {
 
@@ -292,8 +292,9 @@ class UITimeEntryTests {
 
 
     companion object {
-        private const val port = 4003
+        private const val port = 4000
         private lateinit var pom: PageObjectModelLocal
+        private lateinit var databaseDirectory : String
 
         @BeforeClass
         @JvmStatic
@@ -307,12 +308,17 @@ class UITimeEntryTests {
 
     @Before
     fun init() {
-        pom = startupTestForUI(port = port)
+        val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
+        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
+        File(databaseDirectory).deleteRecursively()
+        pom = startupTestForUI(port = port, directory = databaseDirectory)
     }
 
     @After
-    fun cleanup() {
+    fun finish() {
         pom.fs.shutdown()
+        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+        assertEquals(pom.pmd, pmd)
         pom.driver.quit()
     }
 

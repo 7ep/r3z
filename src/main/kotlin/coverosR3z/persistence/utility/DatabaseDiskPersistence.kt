@@ -6,6 +6,7 @@ import coverosR3z.config.CURRENT_DATABASE_VERSION
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.ActionQueue
+import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.*
@@ -57,7 +58,13 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
         val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-        actionQueue.enqueue { File(fullPath).writeText(item.serialize()) }
+        // we save the next index each time.  This way we can be more consistent
+        // since we allow deleting data, even to the point that all data can be deleted.
+        val nextIndexPath = "$parentDirectory/$nextIndexFileName$databaseFileSuffix"
+        actionQueue.enqueue {
+            File(fullPath).writeText(item.serialize())
+            File(nextIndexPath).writeText((item.getIndex() + 1).toString())
+        }
     }
 
     /**
@@ -145,18 +152,18 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, submittedPeriods, dbDirectoryWithVersion, this)
     }
 
-    private fun <T : Indexed> readAndDeserialize(filename: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
-        val dataDirectory = File("$dbDirectoryWithVersion$filename")
+    private fun <T : Indexed> readAndDeserialize(dataName: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+        val dataDirectory = File("$dbDirectoryWithVersion$dataName")
 
         if (! dataDirectory.exists()) {
-            logger.logWarn { "$filename directory missing, creating empty set of data" }
+            logger.logWarn { "$dataName directory missing, creating empty set of data" }
             return ChangeTrackingSet()
         }
 
         val data = ChangeTrackingSet<T>()
         dataDirectory
             .walkTopDown()
-            .filter {it.isFile }
+            .filter {it.isFile && it.nameWithoutExtension != nextIndexFileName}
             .forEach {
                 val fileContents = it.readText()
                 if (fileContents.isBlank()) {
@@ -166,12 +173,16 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
                 }
             }
 
-        data.nextIndex.set(data.maxOfOrNull { it.getIndex() }?.inc() ?: 1)
+
+        val nextIndexFile = File("$dbDirectoryWithVersion$dataName/$nextIndexFileName$databaseFileSuffix")
+        val nextIndex = if (! nextIndexFile.exists()) 1 else checkParseToInt(nextIndexFile.readText())
+        data.nextIndex.set(nextIndex)
         return data
     }
 
     companion object {
         const val databaseFileSuffix = ".db"
+        const val nextIndexFileName = "nextindex"
 
         private val serializedStringRegex = """ (.*?): (.*?) """.toRegex()
 

@@ -34,9 +34,13 @@ enum class Drivers(val driver: () -> WebDriver){
  *   and so we can have a testing-oriented API
  *   @param port the port our server will run on, and thus the port our client should target
  */
-fun startupTestForUI(domain: String = "http://localhost", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModelLocal {
+fun startupTestForUI(
+    domain: String = "http://localhost",
+    port : Int, driver: () -> WebDriver = webDriver.driver,
+    directory : String? = null
+) : PageObjectModelLocal {
     // start the server
-    val fs = FullSystem.startSystem(SystemOptions(port = port, dbDirectory = null))
+    val fs = FullSystem.startSystem(SystemOptions(port = port, dbDirectory = directory))
 
     return PageObjectModelLocal.make(driver(), port, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }

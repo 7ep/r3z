@@ -30,7 +30,7 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         DELETE
     }
 
-    val modified = ConcurrentLinkedQueue<Pair<T, DataAction>>()
+    val modified = R3zConcurrentQueue<Pair<T, DataAction>>()
 
 
     /**
@@ -63,6 +63,24 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
     override fun remove(element: T) : Boolean {
         modified.add(Pair(element, DELETE))
         return super.remove(element)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as ChangeTrackingSet<*>
+
+        if (modified != other.modified) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + modified.hashCode()
+        return result
     }
 
 
