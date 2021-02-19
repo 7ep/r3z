@@ -6,6 +6,7 @@ import coverosR3z.authentication.types.maxUserNameSize
 import coverosR3z.authentication.types.minPasswordSize
 import coverosR3z.authentication.types.minUserNameSize
 import coverosR3z.logging.LogTypes
+import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
@@ -25,6 +26,9 @@ class UIServerTests {
     @Category(UITestCategory::class)
     @Test
     fun serverTests() {
+        `Go to an unknown page, expecting a not-found error`()
+        `Try logging in with invalid credentials, expecting to be forbidden`()
+        `Try posting garbage to the registration endpoint, expecting an error`()
         `general - should be able to see the homepage and the authenticated homepage`()
         `general - I should be able to change the logging settings`()
         `validation - Validation should stop me entering invalid input on the registration page`()
@@ -114,6 +118,23 @@ class UIServerTests {
     fun cleanup() {
         pom.fs.shutdown()
         pom.driver.quit()
+    }
+
+
+    private fun `Try posting garbage to the registration endpoint, expecting an error`() {
+        pom.rp.register("usera", "password12345", "Administrator")
+        pom.rp.register("usera", "password12345", "Administrator")
+        assertEquals("FAILURE", pom.driver.title)
+    }
+
+    private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
+        pom.lp.login("userabc", DEFAULT_PASSWORD.value)
+        assertEquals("401 error", pom.driver.title)
+    }
+
+    private fun `Go to an unknown page, expecting a not-found error`() {
+        pom.driver.get("${pom.domain}/does-not-exist")
+        assertEquals("404 error", pom.driver.title)
     }
 
     private fun logout() {
