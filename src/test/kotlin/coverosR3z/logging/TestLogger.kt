@@ -1,9 +1,7 @@
 package coverosR3z.logging
 
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.config.utility.SystemOptions
-import coverosR3z.misc.utility.ActionQueue
 
 fun getCurrentMillis() : Long {
     return System.currentTimeMillis()

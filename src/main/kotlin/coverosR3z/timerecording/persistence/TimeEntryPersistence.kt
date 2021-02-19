@@ -3,13 +3,12 @@ package coverosR3z.timerecording.persistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.persistence.exceptions.SubmissionNotFoundException
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
-import java.util.NoSuchElementException
+import java.util.*
 
 class TimeEntryPersistence(
     private val pmd : PureMemoryDatabase,

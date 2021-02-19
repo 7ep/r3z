@@ -22,7 +22,7 @@ const val CRLF = "\r\n"
 
 val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
-class ServerUtilities() {
+class ServerUtilities {
     companion object {
 
         /**
@@ -68,7 +68,7 @@ class ServerUtilities() {
          * sends data as the body of a response from server
          * Also adds necessary across-the-board headers
          */
-        fun returnData(server: ISocketWrapper, data: PreparedResponseData, logger: ILogger) {
+        private fun returnData(server: ISocketWrapper, data: PreparedResponseData, logger: ILogger) {
             logger.logTrace { "Assembling data just before shipping to client" }
             val status = "HTTP/1.1 ${data.statusCode.value}"
             logger.logTrace { "status: $status" }

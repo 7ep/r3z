@@ -3,7 +3,6 @@ package coverosR3z.timerecording.utility
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence

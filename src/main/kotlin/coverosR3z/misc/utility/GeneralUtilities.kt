@@ -2,10 +2,8 @@ package coverosR3z.misc.utility
 
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.server.types.Element
-import java.lang.IllegalArgumentException
 import java.net.URLDecoder
 import java.net.URLEncoder
-import java.nio.charset.Charset
 import kotlin.random.Random
 
 /**

@@ -18,7 +18,7 @@ object CreateEmployeeUserStory : UserStory(
 
                 "Given the company has hired a new employee, Andrea,",
                 "when I add her as an employee,",
-                "then the system indicates success."
+                "then the system persists the data."
         )
 
     }

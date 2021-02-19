@@ -9,8 +9,8 @@ import java.text.SimpleDateFormat
 
 const val dateNotNullMsg = "date must not be null"
 const val dateNotBlankMsg = "date must not be blank"
-val earliestAllowableDate = LocalDate.of(1980, 1, 1)
-val latestAllowableDate = LocalDate.of(2200, 1, 1)
+val earliestAllowableDate: LocalDate = LocalDate.of(1980, 1, 1)
+val latestAllowableDate: LocalDate = LocalDate.of(2200, 1, 1)
 
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
