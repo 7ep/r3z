@@ -9,7 +9,6 @@ import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.LogTypes
-import coverosR3z.logging.Logger
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.FileReader.Companion.read
@@ -31,7 +30,6 @@ import java.io.File
 import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 

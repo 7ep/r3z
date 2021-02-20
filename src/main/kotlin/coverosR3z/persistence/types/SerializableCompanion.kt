@@ -1,7 +1,5 @@
 package coverosR3z.persistence.types
 
-import coverosR3z.timerecording.types.Employee
-
 /**
  * Represents the kind of data that a particular [Serializable] type
  * would need within an companion object

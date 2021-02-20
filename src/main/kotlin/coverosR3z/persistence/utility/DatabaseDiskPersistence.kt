@@ -189,15 +189,10 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
          * @param T the type of thing we want to return, like a project, employee, favorite color, whatevs
-         * @param E the type of an enum - such a pain
-         * @param K a particular enum's whole type, we use this to restrict our possible keys for serialization
-         *        to being from a set of enums.  See [Employee.keys] for example.
-         * @param C a [SerializableCompanion], which is an abstract class that requires
-         *        instantiating with a set of enums of type [K]
          */
-        fun <T: Any, E : Any, K : Enum<E>,  C: SerializableCompanion<K>> deserialize(
+        fun <T: Any> deserialize(
             str: String,
-            instance: C,
+            instance: SerializableCompanion<*>,
             convert: (Map<SerializationKeys, String>) -> T
         ) : T {
             try {

@@ -15,7 +15,6 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
-import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

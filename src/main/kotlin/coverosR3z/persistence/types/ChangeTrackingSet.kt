@@ -2,7 +2,6 @@ package coverosR3z.persistence.types
 
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
 import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
-import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Similar to [ConcurrentSet] except that it tracks any changes
