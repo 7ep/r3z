@@ -76,27 +76,23 @@ data class Project(val id: ProjectId, val name: ProjectName) : IndexableSerializ
         }
     }
 
-    companion object : SerializableCompanion {
+    companion object : SerializableCompanion<Keys>(Keys.values()) {
 
         override val directoryName: String
             get() = "projects"
+    }
 
-        override fun convertToKey(s: String): SerializationKeys {
-            return Keys.values().single { it.getKey() == s }
-        }
+    enum class Keys(private val keyString: String) : SerializationKeys {
+        ID("id"),
+        NAME("name");
 
-        enum class Keys(private val keyString: String) : SerializationKeys {
-            ID("id"),
-            NAME("name");
-
-            /**
-             * This needs to be a method and not just a value of the class
-             * so that we can have it meet an interface specification, so
-             * that we can use it in generic code
-             */
-            override fun getKey() : String {
-                return keyString
-            }
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
         }
     }
 

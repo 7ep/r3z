@@ -2,6 +2,7 @@ package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
 import coverosR3z.logging.*
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.types.DateTime
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.ServerUtilities.Companion.processConnectedClient
@@ -25,7 +26,7 @@ class Server(
     val halfOpenServerSocket = ServerSocket(port)
 
     init {
-        Logger.logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+        logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
     }
 
     fun createServerThread(businessObjects : BusinessCode) : Thread {
@@ -38,7 +39,7 @@ class Server(
                 }
             } catch (ex: SocketException) {
                 if (ex.message == "Interrupted function call: accept failed") {
-                    Logger.logImperative("Server was shutdown while waiting on accept")
+                    logImperative("Server was shutdown while waiting on accept")
                 }
             }
         }

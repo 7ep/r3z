@@ -50,31 +50,28 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
         }
     }
 
-    companion object : SerializableCompanion {
+    companion object : SerializableCompanion<Keys>(Keys.values()) {
 
         override val directoryName: String
             get() = "sessions"
 
-        override fun convertToKey(s: String): SerializationKeys {
-            return Keys.values().single { it.getKey() == s }
-        }
-
-        enum class Keys(private val keyString: String) : SerializationKeys {
-            SIMPLE_ID("sid"),
-            SESSION_ID("s"),
-            USER_ID("id"),
-            EPOCH_SECOND("e");
-
-            /**
-             * This needs to be a method and not just a value of the class
-             * so that we can have it meet an interface specification, so
-             * that we can use it in generic code
-             */
-            override fun getKey() : String {
-                return keyString
-            }
-        }
-
     }
+
+    enum class Keys(private val keyString: String) : SerializationKeys {
+        SIMPLE_ID("sid"),
+        SESSION_ID("s"),
+        USER_ID("id"),
+        EPOCH_SECOND("e");
+
+        /**
+         * This needs to be a method and not just a value of the class
+         * so that we can have it meet an interface specification, so
+         * that we can use it in generic code
+         */
+        override fun getKey() : String {
+            return keyString
+        }
+    }
+
 
 }

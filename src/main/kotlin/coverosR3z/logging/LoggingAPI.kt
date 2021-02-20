@@ -1,5 +1,6 @@
 package coverosR3z.logging
 
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.successHTML
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
@@ -68,7 +69,7 @@ class LoggingAPI(private val sd: ServerData) {
             "false" -> sd.logger.logSettings[lt] = false
             else -> throw IllegalArgumentException(badInputLoggingDataMsg)
         }
-        Logger.logImperative("Configured logging for ${lt.name}: ${sd.logger.logSettings[lt]}")
+        logImperative("Configured logging for ${lt.name}: ${sd.logger.logSettings[lt]}")
     }
 
     fun handlePOST() : PreparedResponseData {

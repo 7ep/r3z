@@ -1,5 +1,6 @@
 package coverosR3z.misc.utility
 
+import java.io.InputStream
 import java.net.URL
 import java.util.*
 
@@ -22,6 +23,15 @@ class FileReader {
             val file = this::class.java.classLoader.getResource(filename)
                     ?: return null
             return file.readBytes()
+        }
+
+        /**
+         * Read a file as a stream
+         */
+        fun readAsStream(filename: String) : InputStream? {
+            val file = this::class.java.classLoader.getResource(filename)
+                    ?: return null
+            return file.openStream()
         }
 
         fun getResources(name: String): Enumeration<URL>? {

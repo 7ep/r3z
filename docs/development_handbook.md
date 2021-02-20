@@ -5,6 +5,7 @@ Table of contents
 -----------------
 
 - [New Developer Setup](#new-developer-setup)
+- [JDK](#jdk)  
 - [Guiding ideas](#guiding-ideas)
 - [Adding a completely new endpoint](#adding-a-completely-new-endpoint)  
 - [Version](#version)
@@ -57,6 +58,10 @@ Optional:
     * Share the link with your friends
     
 
+JDK
+---
+
+We need a minimum of Java 11 so we get the latest version of TLS, which is 1.3
 
 Guiding ideas
 -------------

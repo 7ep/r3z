@@ -4,7 +4,7 @@ import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
 import coverosR3z.config.CURRENT_DATABASE_VERSION
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.decode
@@ -107,23 +107,23 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         return if (restoredPMD != null) {
             restoredPMD
         } else {
-            Logger.logImperative("No existing database found, building new database")
+            logImperative("No existing database found, building new database")
             // if nothing is there, we build a new database
             // and add a clean set of directories
             val pmd = PureMemoryDatabase(dbDirectory = dbDirectoryWithVersion, diskPersistence = this)
-            Logger.logImperative("Created new PureMemoryDatabase")
+            logImperative("Created new PureMemoryDatabase")
 
             File(checkNotNull(dbDirectoryWithVersion)).mkdirs()
-            Logger.logImperative("Created the database directory at \"$dbDirectoryWithVersion\"")
+            logImperative("Created the database directory at \"$dbDirectoryWithVersion\"")
 
             val versionFilename = "currentVersion.txt"
             File(dbDirectory + versionFilename).writeText(CURRENT_DATABASE_VERSION.toString())
-            Logger.logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
+            logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
 
 
             val tep = TimeEntryPersistence(pmd, logger = logger)
             tep.persistNewEmployee(EmployeeName("Administrator"))
-            Logger.logImperative("Created an initial employee")
+            logImperative("Created an initial employee")
 
             pmd
         }
@@ -138,7 +138,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val topDirectory = File(checkNotNull(dbDirectoryWithVersion))
         val innerFiles = topDirectory.listFiles()
         if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
-            Logger.logImperative("directory $dbDirectoryWithVersion did not exist.  Returning null for the PureMemoryDatabase")
+            logImperative("directory $dbDirectoryWithVersion did not exist.  Returning null for the PureMemoryDatabase")
             return null
         }
 
@@ -188,8 +188,14 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
 
         /**
          * Used by the classes needing serialization to avoid a bit of boilerplate
+         * @param T the type of thing we want to return, like a project, employee, favorite color, whatevs
+         * @param E the type of an enum - such a pain
+         * @param K a particular enum's whole type, we use this to restrict our possible keys for serialization
+         *        to being from a set of enums.  See [Employee.keys] for example.
+         * @param C a [SerializableCompanion], which is an abstract class that requires
+         *        instantiating with a set of enums of type [K]
          */
-        fun <T: Any, C: SerializableCompanion> deserialize(
+        fun <T: Any, E : Any, K : Enum<E>,  C: SerializableCompanion<K>> deserialize(
             str: String,
             instance: C,
             convert: (Map<SerializationKeys, String>) -> T

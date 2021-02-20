@@ -3,7 +3,7 @@ package coverosR3z.persistence.utility
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
 import coverosR3z.logging.ILogger
-import coverosR3z.logging.Logger
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.persistence.types.AbstractDataAccess
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.toChangeTrackingSet
@@ -106,7 +106,7 @@ open class PureMemoryDatabase(
         fun startMemoryOnly(logger: ILogger): PureMemoryDatabase {
             val pmd = PureMemoryDatabase()
 
-            Logger.logImperative("creating an initial employee")
+            logImperative("creating an initial employee")
             val tep = TimeEntryPersistence(pmd, logger = logger)
             tep.persistNewEmployee(EmployeeName("Administrator"))
 

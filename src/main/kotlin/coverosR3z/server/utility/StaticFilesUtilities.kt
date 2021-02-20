@@ -1,7 +1,7 @@
 package coverosR3z.server.utility
 
 import coverosR3z.config.STATIC_FILES_DIRECTORY
-import coverosR3z.logging.Logger
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.FileReader
 import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.PreparedResponseData
@@ -20,7 +20,7 @@ class StaticFilesUtilities {
          * Maybe some opportunity for refactoring here.
          */
         fun loadStaticFilesToCache(cache: MutableMap<String, PreparedResponseData>) {
-            Logger.logImperative("Loading all static files into cache")
+            logImperative("Loading all static files into cache")
 
             val urls = checkNotNull(FileReader.getResources(STATIC_FILES_DIRECTORY))
             for (url in urls) {

@@ -132,7 +132,7 @@ fun safeAttr(input : String) : String {
  * Encodes UTF-8 text using URL-encoding
  */
 fun encode(str : String) : String {
-    return URLEncoder.encode(str, "UTF-8")
+    return URLEncoder.encode(str, Charsets.UTF_8)
 }
 
 /**
@@ -140,5 +140,5 @@ fun encode(str : String) : String {
  */
 fun decode(str : String?) : String {
     requireNotNull(str)
-    return URLDecoder.decode(str,  "UTF-8")
+    return URLDecoder.decode(str, Charsets.UTF_8)
 }

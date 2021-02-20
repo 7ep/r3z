@@ -91,13 +91,4 @@ class TestLogger : ILogger {
         // does nothing
     }
 
-    companion object {
-
-        /**
-         * Logging that must be shown, which you cannot turn off
-         */
-        fun logImperative(msg: String) {
-            println("${getCurrentMillis()} IMPERATIVE: $msg")
-        }
-    }
 }

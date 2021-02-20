@@ -7,6 +7,7 @@ import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.config.utility.SystemOptions
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.Logger
 import coverosR3z.misc.*
@@ -30,6 +31,7 @@ import java.io.File
 import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 
@@ -45,6 +47,12 @@ class ServerTests {
 
     @Before
     fun init() {
+        // following is only used for ssl tests
+        // note: the keystore is required by the ssl server.  See [SSLServer.init]
+        val props = System.getProperties()
+        props.setProperty("javax.net.ssl.trustStore", "src/test/resources/certs/truststore")
+        props.setProperty("javax.net.ssl.trustStorePassword", "passphrase")
+
         val clientSocket = Socket("localhost", port)
         client = SocketWrapper(clientSocket, "client")
     }
@@ -69,7 +77,7 @@ class ServerTests {
         @JvmStatic
         @AfterClass
         fun stopServer() {
-            Logger.logImperative("stopping server")
+            logImperative("stopping server")
             fs.shutdown()
         }
     }
