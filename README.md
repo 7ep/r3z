@@ -45,8 +45,8 @@ Check out the [development handbook](docs/development_handbook.md)
 
 #### Summary of relevant Gradle commands
 * `gradlew test` - run all the tests in this code
-* `gradlew test -Pnoui` - run all the non-ui tests
-* `gradlew test -Pjustui` - run only the ui tests
+* `gradlew fasttest` - run all the fast tests (unit, integration, API)
+* `gradlew uitest` - run only the ui tests
 * `gradlew jar` - build the jar, in build/libs/
 * `gradlew run` - run the application.  Stop with ctrl+c
 
