@@ -66,8 +66,10 @@ class SSLServer(
         val hasKeystoreAndPasswordOnSystemProperties = checkSystemPropertiesForKeystore()
 
         return if (hasKeystoreAndPasswordOnSystemProperties) {
+            logImperative("Using keystore and password provided in system properties")
             SSLServerSocketFactory.getDefault().createServerSocket(sslPort) as SSLServerSocket
         } else {
+            logImperative("Using the default (self-signed / testing-only) certificate")
             createSslSocketWithInternalKeystore(sslPort)
         }
     }
