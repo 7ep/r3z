@@ -46,10 +46,12 @@ class FullSystem private constructor(
 
     fun addRunningSocket(socket : Socket) {
         runningSockets.add(socket)
+        logger.logTrace { "added a socket (count: ${runningSockets.size})" }
     }
 
     fun removeRunningSocket(socket : Socket) {
         runningSockets.remove(socket)
+        logger.logTrace{"removed a socket (count: ${runningSockets.size})"}
     }
 
     /**

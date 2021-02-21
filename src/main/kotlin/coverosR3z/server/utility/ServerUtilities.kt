@@ -103,30 +103,29 @@ class ServerUtilities {
             val logger = serverObjects.logger
             logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
             var shouldKeepAlive : Boolean
-            do try {
-                val requestData = handleRequest(server, businessCode, serverObjects)
-                shouldKeepAlive =
-                    requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
-                if (shouldKeepAlive) {
-                    logger.logTrace { "This is a keep-alive connection" }
-                }
+            try {
+                do {
+                    val requestData = handleRequest(server, businessCode, serverObjects)
+                    shouldKeepAlive =
+                        requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                    if (shouldKeepAlive) {
+                        logger.logTrace { "This is a keep-alive connection" }
+                    }
+                } while (shouldKeepAlive)
             } catch (ex : SocketTimeoutException) {
                 // we get here if we wait too long on reading from the socket
                 // without getting anything.  See SocketWrapper and soTimeout
                 logger.logTrace { "read timed out" }
-                shouldKeepAlive = false
             } catch (ex : SocketException) {
                 if (ex.message?.contains("Connection reset") == true) {
                     logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
-                    shouldKeepAlive = false
                 } else {
                     throw ex
                 }
+            } finally {
+                logger.logTrace { "closing server socket" }
+                server.close()
             }
-            while (shouldKeepAlive)
-
-            logger.logTrace { "closing server socket" }
-            server.close()
         }
 
         private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
