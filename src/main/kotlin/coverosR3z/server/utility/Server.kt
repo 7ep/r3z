@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService
 class Server(
     val port: Int,
     private val executorService: ExecutorService,
+    private val businessObjects: BusinessCode,
     private val serverObjects: ServerObjects,
     private val fullSystem: FullSystem
 ) {
@@ -29,20 +30,8 @@ class Server(
         logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
     }
 
-    fun createServerThread(businessObjects : BusinessCode) : Thread {
-        return Thread {
-            try {
-                while (true) {
-                    fullSystem.logger.logTrace { "waiting for socket connection" }
-                    val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                    executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
-                }
-            } catch (ex: SocketException) {
-                if (ex.message == "Interrupted function call: accept failed") {
-                    logImperative("Server was shutdown while waiting on accept")
-                }
-            }
-        }
+    fun createServerThread() : Thread {
+        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
     }
 
 }

@@ -147,18 +147,13 @@ class FullSystem private constructor(
 
             // start the regular server
             val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-            val server = Server(systemOptions.port, esForThreadsInServer, serverObjects, fullSystem)
-            val serverFuture = serverExecutor.submit(server.createServerThread(businessCode))
+            val server = Server(systemOptions.port, esForThreadsInServer, businessCode, serverObjects, fullSystem)
+            val serverFuture = serverExecutor.submit(server.createServerThread())
 
-            // if the user requests it, start the ssl server
-            val (sslServerFuture, sslServer) = if (systemOptions.sslPort != null) {
-                val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, serverObjects, fullSystem)
-                val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-                val sslServerFuture = sslServerExecutor.submit(sslServer.createSecureServerThread(businessCode))
-                Pair(sslServerFuture, sslServer)
-            } else {
-                Pair(null, null)
-            }
+            // start the ssl server
+            val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
+            val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, businessCode, serverObjects, fullSystem)
+            val sslServerFuture = sslServerExecutor.submit(sslServer.createSecureServerThread())
 
             fullSystem.serverFuture = serverFuture
             fullSystem.sslServerFuture = sslServerFuture

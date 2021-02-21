@@ -1,13 +1,17 @@
 package coverosR3z.server.utility
 
+import coverosR3z.FullSystem
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger
+import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
+import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.util.concurrent.ExecutorService
 
 
 /**
@@ -24,6 +28,22 @@ val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
 class ServerUtilities {
     companion object {
+
+        fun createServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
+            return Thread {
+                try {
+                    while (true) {
+                        fullSystem.logger.logTrace { "waiting for socket connection" }
+                        val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
+                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
+                    }
+                } catch (ex: SocketException) {
+                    if (ex.message == "Interrupted function call: accept failed") {
+                        logImperative("Server was shutdown while waiting on accept")
+                    }
+                }
+            }
+        }
 
         /**
          * If you are responding with a success message and it is HTML

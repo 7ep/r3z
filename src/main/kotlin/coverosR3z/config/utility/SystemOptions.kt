@@ -13,7 +13,7 @@ data class SystemOptions(
         /**
          * The secure port
          */
-        val sslPort : Int? = defaultSSLPort,
+        val sslPort : Int = defaultSSLPort,
 
 
         /**

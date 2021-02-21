@@ -20,6 +20,7 @@ import javax.net.ssl.*
 class SSLServer(
     sslPort: Int,
     private val executorService: ExecutorService,
+    private val businessObjects: BusinessCode,
     private val serverObjects: ServerObjects,
     private val fullSystem: FullSystem
 ) {
@@ -33,24 +34,8 @@ class SSLServer(
     }
 
 
-    fun createSecureServerThread(businessObjects : BusinessCode) : Thread {
-        return Thread {
-            try {
-                while (true) {
-                    fullSystem.logger.logTrace { "waiting for socket connection" }
-                    val server = SocketWrapper(sslHalfOpenServerSocket.accept(), "server", fullSystem)
-                    executorService.submit(Thread { processConnectedClient(
-                        server,
-                        businessObjects,
-                        serverObjects,
-                    ) })
-                }
-            } catch (ex: SocketException) {
-                if (ex.message == "Interrupted function call: accept failed") {
-                    logImperative("Server was shutdown while waiting on accept")
-                }
-            }
-        }
+    fun createSecureServerThread() : Thread {
+        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects)
     }
 
 
