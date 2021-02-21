@@ -35,6 +35,13 @@ data class SystemOptions(
          * all logging on
          */
         val allLoggingOn : Boolean = false,
+
+        /**
+         * With this configured on, any request to an insecure
+         * port will be automatically redirected to the secure
+         * port.
+         */
+        val forceRedirectToSsl : Boolean = false,
 ){
 
 
@@ -89,6 +96,10 @@ data class SystemOptions(
 
         fun setLoggingOn(allLoggingOn: String): SystemOptions {
                 return this.copy(allLoggingOn = allLoggingOn == "true")
+        }
+
+        fun setForceSslOn(forceRedirectToSsl: String): SystemOptions {
+                return this.copy(forceRedirectToSsl = forceRedirectToSsl == "true")
         }
 
         companion object{
@@ -147,6 +158,7 @@ data class SystemOptions(
                         val diskPersistenceOption = Option(false, "", isFlag = true)
                         val loggingOffOption = Option(false, "", isFlag = true)
                         val loggingOnOption = Option(false, "", isFlag = true)
+                        val forceSslOption = Option(false, "", isFlag = true)
 
                         val possibleOptions = listOf(
                                 OptionGroup("-d", directoryOption),
@@ -158,6 +170,7 @@ data class SystemOptions(
                                 OptionGroup("--no-disk-persistence", diskPersistenceOption),
                                 OptionGroup("--no-logging", loggingOffOption),
                                 OptionGroup("--full-logging", loggingOnOption),
+                                OptionGroup("--force-ssl", forceSslOption),
                         )
 
                         val fullInput = args.joinToString(" ")
@@ -188,6 +201,7 @@ data class SystemOptions(
                                         .setDirectory(directoryOption.value, diskPersistenceOption.value)
                                         .setLoggingOff(loggingOffOption.value)
                                         .setLoggingOn(loggingOnOption.value)
+                                        .setForceSslOn(forceSslOption.value)
                         }
                 }
 
@@ -230,6 +244,8 @@ Server Ports
 
 -p PORT_NUMBER         set the port number for the server (default 12345)
 -s PORT_NUMBER         set the ssl port number for the server (default 12443)
+--force-ssl            with this set, all requests sent to an insecure
+                       port will be redirected to the secure port
 
 Database
 --------

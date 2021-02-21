@@ -8,4 +8,6 @@ import coverosR3z.logging.ILogger
 class ServerObjects(
     val staticFileCache: Map<String, PreparedResponseData>,
     val logger: ILogger,
+    val port: Int,
+    val sslPort: Int,
     )

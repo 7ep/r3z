@@ -32,4 +32,12 @@ class Server(
         return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
     }
 
+    /**
+     * This will cause the server to always redirect all
+     * requests to the SSL server
+     */
+    fun createRedirectingServerThread() : Thread {
+        return ServerUtilities.createInsecureServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
+    }
+
 }

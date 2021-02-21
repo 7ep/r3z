@@ -137,7 +137,7 @@ class FullSystem private constructor(
 
             // create a package of data that is needed by the servers,
             // such as the static file cache
-            val serverObjects = ServerObjects(staticFileCache, logger)
+            val serverObjects = ServerObjects(staticFileCache, logger, systemOptions.port, systemOptions.sslPort)
 
             // start an executor service which will handle the threads inside the server
             val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
@@ -148,7 +148,11 @@ class FullSystem private constructor(
             // start the regular server
             val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
             val server = Server(systemOptions.port, esForThreadsInServer, businessCode, serverObjects, fullSystem)
-            val serverFuture = serverExecutor.submit(server.createServerThread())
+            val serverFuture = if (systemOptions.forceRedirectToSsl) {
+                serverExecutor.submit(server.createRedirectingServerThread())
+            } else {
+                serverExecutor.submit(server.createServerThread())
+            }
 
             // start the ssl server
             val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())

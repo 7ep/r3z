@@ -21,7 +21,8 @@ import org.openqa.selenium.firefox.FirefoxDriver
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX(
-        { FirefoxDriver() }
+        { FirefoxDriver(
+            org.openqa.selenium.firefox.FirefoxOptions().setAcceptInsecureCerts(true)) }
     ),
 
     CHROME(

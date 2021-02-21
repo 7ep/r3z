@@ -6,8 +6,8 @@ import coverosR3z.server.types.ContentType
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.StatusCode
 
-fun handleBadRequest(): PreparedResponseData {
-    return PreparedResponseData(badRequestHTML, StatusCode.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
+fun handleBadRequest(msg: String? = null): PreparedResponseData {
+    return PreparedResponseData(badRequestHTML(msg), StatusCode.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleNotFound(): PreparedResponseData {
@@ -25,7 +25,9 @@ fun handleInternalServerError(shortMessage : String, fullStackTrace : String, lo
         ContentType.TEXT_HTML.value))
 }
 
-const val badRequestHTML = """
+fun badRequestHTML(msg: String?) : String {
+    val errorMessageLine = if (msg != null) "<p>Error message:  ${safeHtml(msg)}</p>" else ""
+    return  """
 <!DOCTYPE html>    
 <html lang="en">
     <head>
@@ -34,10 +36,11 @@ const val badRequestHTML = """
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta apifile="ErrorsAPI" >
     <body>
-       <p>400 error - BAD REQUEST</p>
+       <p>400 error - BAD REQUEST</p>$errorMessageLine
     </body>
 </html>
 """
+}
 
 const val notFoundHTML = """
 <!DOCTYPE html>    

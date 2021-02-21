@@ -6,10 +6,7 @@ import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.utility.decode
 import coverosR3z.server.exceptions.DuplicateInputsException
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.StatusCode
-import coverosR3z.server.types.Verb
+import coverosR3z.server.types.*
 
 
 /**
@@ -45,6 +42,15 @@ private val cookieRegex = """[cC]ookie: (.*)$""".toRegex()
  * this regular expression will find
  */
 private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
+
+/**
+ * In a host header, the client will send us the hostname and the port.
+ * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host
+ *
+ * We can use this to easily redirect to the secure port if the client
+ * comes in on the insecure port
+ */
+val hostHeaderRegex = """[hH]ost: (.*):(.*)$""".toRegex()
 
 
 /**
@@ -90,14 +96,22 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
  * If we are reviewing an HTTP message as a server
  */
 private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities, logger: ILogger): AnalyzedHttpData {
-    val (verb, path, queryString) = parseStatusLineAsServer(statusLineMatches, logger)
+    val statusLine = parseStatusLineAsServer(statusLineMatches, logger)
     val headers = getHeaders(socketWrapper)
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
     val user = extractUserFromAuthToken(token, au)
     val postBodyData = extractData(socketWrapper, headers)
 
-    return AnalyzedHttpData(verb, path, queryString, postBodyData, user, token, headers)
+    return AnalyzedHttpData(
+        statusLine.verb,
+        statusLine.path,
+        statusLine.queryString,
+        statusLine.rawQueryString,
+        postBodyData,
+        user,
+        token,
+        headers)
 }
 
 /**
@@ -147,7 +161,7 @@ fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities):
 /**
  * The first line tells us a lot. See [serverStatusLineRegex]
  */
-fun parseStatusLineAsServer(matchResult: MatchResult, logger: ILogger): Triple<Verb, String, Map<String,String>> {
+fun parseStatusLineAsServer(matchResult: MatchResult, logger: ILogger): StatusLine {
     val verb: Verb = Verb.valueOf(checkNotNull(matchResult.groups[1]){"The HTTP verb must not be missing"}.value)
     logger.logTrace { "verb from client was: $verb" }
     val pathAndQuery = checkNotNull(matchResult.groups[2]){"The requested path must not be missing"}.value
@@ -155,11 +169,12 @@ fun parseStatusLineAsServer(matchResult: MatchResult, logger: ILogger): Triple<V
     val split = pathAndQuery.split("?")
     check(split.size in 1..2)
     val path = split[0]
-    val queryString = if (split.size == 2)  {
-        check(split[1].length < maxQueryStringLength) { "query string exceeded maximum allowed length" }
-        parseUrlEncodedForm(split[1])
-    } else mapOf()
-    return Triple(verb, path, queryString)
+    val (rawQueryString, queryString) = if (split.size == 2)  {
+        val rawQueryString = split[1]
+        check(rawQueryString.length < maxQueryStringLength) { "query string exceeded maximum allowed length" }
+        Pair(rawQueryString, parseUrlEncodedForm(rawQueryString))
+    } else Pair("", mapOf())
+    return StatusLine(verb, path, queryString, rawQueryString)
 }
 
 /**

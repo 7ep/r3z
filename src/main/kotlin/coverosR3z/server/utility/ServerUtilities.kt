@@ -8,6 +8,7 @@ import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
+import java.lang.IllegalStateException
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
@@ -36,6 +37,22 @@ class ServerUtilities {
                         fullSystem.logger.logTrace { "waiting for socket connection" }
                         val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
                         executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
+                    }
+                } catch (ex: SocketException) {
+                    if (ex.message == "Interrupted function call: accept failed") {
+                        logImperative("Server was shutdown while waiting on accept")
+                    }
+                }
+            }
+        }
+
+        fun createInsecureServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
+            return Thread {
+                try {
+                    while (true) {
+                        fullSystem.logger.logTrace { "waiting for socket connection" }
+                        val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
+                        executorService.submit(Thread { processInsecureClient(server, businessObjects, serverObjects) })
                     }
                 } catch (ex: SocketException) {
                     if (ex.message == "Interrupted function call: accept failed") {
@@ -148,6 +165,35 @@ class ServerUtilities {
             }
         }
 
+        /**
+         * If the client is coming in on the insecure port,
+         * redirect them to the secure port
+         */
+        fun processInsecureClient(
+            server: SocketWrapper,
+            businessCode: BusinessCode,
+            serverObjects: ServerObjects,
+        ) {
+            val logger = serverObjects.logger
+            logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
+            try {
+                handleInsecureRequest(server, businessCode, serverObjects)
+            } catch (ex : SocketTimeoutException) {
+                // we get here if we wait too long on reading from the socket
+                // without getting anything.  See SocketWrapper and soTimeout
+                logger.logTrace { "read timed out" }
+            } catch (ex : SocketException) {
+                if (ex.message?.contains("Connection reset") == true) {
+                    logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
+                } else {
+                    throw ex
+                }
+            } finally {
+                logger.logTrace { "closing server socket" }
+                server.close()
+            }
+        }
+
         private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
             var analyzedHttpData = AnalyzedHttpData()
             val responseData: PreparedResponseData = try {
@@ -191,6 +237,54 @@ class ServerUtilities {
 
             returnData(server, responseData, serverObjects.logger)
             return analyzedHttpData
+        }
+
+        /**
+         * if the user is coming in on the insecure connection (http), do some
+         * checking like ordinary but then immediately redirect them to
+         * the secure server
+         */
+        private fun handleInsecureRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
+            var analyzedHttpData = AnalyzedHttpData()
+            val responseData: PreparedResponseData = try {
+                analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
+
+                serverObjects.logger.logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
+                if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
+                    return analyzedHttpData
+                }
+
+                if (analyzedHttpData.verb == Verb.INVALID) {
+                    handleBadRequest()
+                } else {
+                    try {
+                        val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
+                        val extractedHost = extractHostFromHostHeader(hostHeader)
+                        val rawQueryString = analyzedHttpData.rawQueryString
+                        val queryString = if (rawQueryString.isNotBlank()) { "?" + rawQueryString } else ""
+                        redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
+                    } catch (ex: Exception) {
+                        handleBadRequest()
+                    }
+                }
+            } catch (ex : SocketTimeoutException) {
+                throw ex
+            } catch (ex : SocketException) {
+                throw ex
+            } catch (ex: Exception) {
+                // If there ane any complaints whatsoever, we return them here
+                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
+            }
+
+            returnData(server, responseData, serverObjects.logger)
+            return analyzedHttpData
+        }
+
+        private fun extractHostFromHostHeader(hostHeader: String): String {
+            val notMatchingMessage = "The host header we received did not match the expected pattern. It was: $hostHeader"
+            check (hostHeaderRegex.matches(hostHeader)) { notMatchingMessage }
+
+            return hostHeaderRegex.matchEntire(hostHeader)?.groupValues?.get(1) ?: throw IllegalStateException(notMatchingMessage)
         }
 
 

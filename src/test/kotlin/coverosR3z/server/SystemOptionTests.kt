@@ -208,4 +208,10 @@ class SystemOptionTests {
         assertEquals(SystemOptions(sslPort = 54321), serverOptions)
     }
 
+    @Test
+    fun testShouldRedirectToSsl() {
+        val serverOptions = extractOptions(arrayOf("--force-ssl"))
+        assertEquals(SystemOptions(forceRedirectToSsl = true), serverOptions)
+    }
+
 }

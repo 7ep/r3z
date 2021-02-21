@@ -8,6 +8,7 @@ import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.misc.utility.getTime
+import coverosR3z.server.types.StatusLine
 import coverosR3z.server.types.Verb
 import coverosR3z.server.utility.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -149,7 +150,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_POST() {
         val input = serverStatusLineRegex.matchEntire("POST /${EnterTimeAPI.path} HTTP/1.1")
-        val expected = Triple(Verb.POST, EnterTimeAPI.path, mapOf<String,String>())
+        val expected = StatusLine(Verb.POST, EnterTimeAPI.path)
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -162,7 +163,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_GET() {
         val input = serverStatusLineRegex.matchEntire("GET /test HTTP/1.1")
-        val expected = Triple(Verb.GET, "test", mapOf<String,String>())
+        val expected = StatusLine(Verb.GET, "test")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -175,7 +176,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_TemplateGET() {
         val input = serverStatusLineRegex.matchEntire("GET /test.utl HTTP/1.1")
-        val expected = Triple(Verb.GET, "test.utl", mapOf<String,String>())
+        val expected = StatusLine(Verb.GET, "test.utl")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -188,7 +189,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_CSS() {
         val input = serverStatusLineRegex.matchEntire("GET /test.css HTTP/1.1")
-        val expected = Triple(Verb.GET, "test.css", mapOf<String,String>())
+        val expected = StatusLine(Verb.GET, "test.css")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -201,7 +202,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseMultipleClientRequestTypes_JS() {
         val input = serverStatusLineRegex.matchEntire("GET /test.js HTTP/1.1")
-        val expected = Triple(Verb.GET, "test.js", mapOf<String,String>())
+        val expected = StatusLine(Verb.GET, "test.js")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -215,7 +216,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseQueryString() {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc=123 HTTP/1.1")
-        val expected = Triple(Verb.GET, "test", mapOf("abc" to "123"))
+        val expected = StatusLine(Verb.GET, "test", mapOf("abc" to "123"), "abc=123")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
@@ -229,7 +230,7 @@ class ServerUtilitiesTests {
     @Test
     fun testShouldParseQueryString_Multiple() {
         val input = serverStatusLineRegex.matchEntire("GET /test?abc=123&def=456 HTTP/1.1")
-        val expected = Triple(Verb.GET, "test", mapOf("abc" to "123", "def" to "456"))
+        val expected = StatusLine(Verb.GET, "test", mapOf("abc" to "123", "def" to "456"), "abc=123&def=456")
 
         val result = parseStatusLineAsServer(input!!, testLogger)
 
