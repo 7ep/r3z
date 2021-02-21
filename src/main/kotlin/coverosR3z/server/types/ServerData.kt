@@ -12,5 +12,5 @@ data class ServerData(
     val tru: ITimeRecordingUtilities,
     val ahd: AnalyzedHttpData,
     val authStatus: AuthStatus,
-    val logger: ILogger
+    val logger: ILogger,
 )

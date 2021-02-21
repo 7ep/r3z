@@ -175,7 +175,7 @@ class ServerUtilities {
                                 truWithUser,
                                 analyzedHttpData,
                                 AuthUtilities.isAuthenticated(analyzedHttpData.user),
-                                serverObjects.logger
+                                serverObjects.logger,
                             )
                         )
                     }

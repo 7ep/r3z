@@ -224,15 +224,27 @@ Sample:
 The options available are:
 
 -h                     prints this help message
+
+Server Ports
+------------
+
 -p PORT_NUMBER         set the port number for the server (default 12345)
 -s PORT_NUMBER         set the ssl port number for the server (default 12443)
+
+Database
+--------
+
 -d DIRECTORY           the directory to store data (default /db)
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing
+
+Logging
+-------
+                       
 --no-logging           start the server with all logging turned
                        off, except for "IMPERATIVE"
---full-logging         start with all logging on (default: trace is off, all others on)       
-    """.trimIndent()
+--full-logging         start with all logging on (default: trace is off, all others on)  
+     """.trimIndent()
 
         }
 }

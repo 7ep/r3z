@@ -20,9 +20,23 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 
 enum class Drivers(val driver: () -> WebDriver){
-    FIREFOX({ FirefoxDriver() }),
-    CHROME({ ChromeDriver(ChromeOptions().setHeadless(false)) }),
-    CHROME_HEADLESS({ ChromeDriver(ChromeOptions().setHeadless(true)) }),
+    FIREFOX(
+        { FirefoxDriver() }
+    ),
+
+    CHROME(
+        { ChromeDriver(
+            ChromeOptions()
+                .setHeadless(false)
+                .setAcceptInsecureCerts(true)) }
+    ),
+
+    CHROME_HEADLESS(
+        { ChromeDriver(
+            ChromeOptions()
+                .setHeadless(true)
+                .setAcceptInsecureCerts(true)) }
+    ),
 }
 
 /**
@@ -35,18 +49,15 @@ enum class Drivers(val driver: () -> WebDriver){
  *   @param port the port our server will run on, and thus the port our client should target
  */
 fun startupTestForUI(
-    domain: String = "http://localhost",
-    port : Int, driver: () -> WebDriver = webDriver.driver,
+    domain: String = "https://localhost",
+    port : Int,
+    driver: () -> WebDriver = webDriver.driver,
     directory : String? = null
 ) : PageObjectModelLocal {
     // start the server
     val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
 
-    return PageObjectModelLocal.make(driver(), port, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
-}
-
-fun startupTestForUIWithoutServer(domain: String = "", port : Int, driver: () -> WebDriver = webDriver.driver) : PageObjectModel {
-    return PageObjectModel.make(driver(), port, domain)
+    return PageObjectModelLocal.make(driver(), port + 443, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {
