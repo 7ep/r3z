@@ -306,7 +306,7 @@ class UITimeEntryTests {
         // Verify the entry
         val id = pom.pmd.TimeEntryDataAccess()
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
-        pom.driver.get("${pom.domain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
+        pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
         assertEquals("your time entries", pom.driver.title)
         assertEquals("2020-06-12", pom.vtp.getDateForEntry(id))
         assertEquals("1.00", pom.vtp.getTimeForEntry(id))

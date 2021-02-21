@@ -1,5 +1,6 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.maxPasswordSize
 import coverosR3z.authentication.types.maxUserNameSize
@@ -31,19 +32,27 @@ class UIServerTests {
     @Test
     fun serverTests() {
         `Go to an unknown page, expecting a not-found error`()
+        `Go to an unknown page on an insecure port, expecting a not-found error`()
         `Try logging in with invalid credentials, expecting to be forbidden`()
+        `Try hitting the insecure login page, expecting to be redirected to the secure one`()
         `Try posting garbage to the registration endpoint, expecting an error`()
+        `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`()
         `general - should be able to see the homepage and the authenticated homepage`()
         `general - I should be able to change the logging settings`()
         `validation - Validation should stop me entering invalid input on the registration page`()
     }
 
+    private fun `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`() {
+        pom.driver.get("${pom.insecureDomain}/${HomepageAPI.path}")
+        assertEquals("Homepage", pom.driver.title)
+    }
+
     private fun `general - should be able to see the homepage and the authenticated homepage`() {
-        pom.driver.get("${pom.domain}/${HomepageAPI.path}")
+        pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
         assertEquals("Homepage", pom.driver.title)
         pom.rp.register("employeemaker", "password12345", "Administrator")
         pom.lp.login("employeemaker", "password12345")
-        pom.driver.get("${pom.domain}/${HomepageAPI.path}")
+        pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
         assertEquals("Authenticated Homepage", pom.driver.title)
         logout()
     }
@@ -142,8 +151,18 @@ class UIServerTests {
         assertEquals("401 error", pom.driver.title)
     }
 
+    private fun `Try hitting the insecure login page, expecting to be redirected to the secure one`() {
+        pom.driver.get("${pom.insecureDomain}/${LoginAPI.path}")
+        assertEquals("login page", pom.driver.title)
+    }
+
     private fun `Go to an unknown page, expecting a not-found error`() {
-        pom.driver.get("${pom.domain}/does-not-exist")
+        pom.driver.get("${pom.sslDomain}/does-not-exist")
+        assertEquals("404 error", pom.driver.title)
+    }
+
+    private fun `Go to an unknown page on an insecure port, expecting a not-found error`() {
+        pom.driver.get("${pom.insecureDomain}/does-not-exist")
         assertEquals("404 error", pom.driver.title)
     }
 
@@ -175,7 +194,7 @@ class UIServerTests {
     }
 
     private fun disallowBecauseMissingEmployee() {
-        pom.driver.get("${pom.domain}/${RegisterAPI.path}")
+        pom.driver.get("${pom.sslDomain}/${RegisterAPI.path}")
         pom.driver.findElement(By.id("username")).sendKeys("alice")
         pom.driver.findElement(By.id("password")).sendKeys("password12345")
         pom.driver.findElement(By.id("register_button")).click()

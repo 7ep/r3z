@@ -8,6 +8,8 @@ import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
+import coverosR3z.server.types.CacheControl.*
+import coverosR3z.server.types.Pragma.*
 import java.lang.IllegalStateException
 import java.net.ServerSocket
 import java.net.SocketException
@@ -24,8 +26,6 @@ import java.util.concurrent.ExecutorService
  *  See https://tools.ietf.org/html/rfc2616
  */
 const val CRLF = "\r\n"
-
-val caching = CacheControl.AGGRESSIVE_WEB_CACHE.details
 
 class ServerUtilities {
     companion object {
@@ -46,13 +46,17 @@ class ServerUtilities {
             }
         }
 
-        fun createInsecureServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
+        /**
+         * This is here just to provide a behavior to redirect whatever
+         * we receive to the SSL equivalent
+         */
+        fun createRedirectingServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
             return Thread {
                 try {
                     while (true) {
                         fullSystem.logger.logTrace { "waiting for socket connection" }
                         val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                        executorService.submit(Thread { processInsecureClient(server, businessObjects, serverObjects) })
+                        executorService.submit(Thread { redirectClientToSSLEndpoint(server, businessObjects, serverObjects) })
                     }
                 } catch (ex: SocketException) {
                     if (ex.message == "Interrupted function call: accept failed") {
@@ -78,21 +82,24 @@ class ServerUtilities {
          * If you are responding with a success message and it is CSS
          */
         fun okCSS(contents : ByteArray) =
-                ok(contents, listOf(ContentType.TEXT_CSS.value, caching))
+                ok(contents, listOf(ContentType.TEXT_CSS.value, AGGRESSIVE_WEB_CACHE.details))
         /**
          * If you are responding with a success message and it is JavaScript
          */
         fun okJS (contents : ByteArray) =
-                ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, caching))
+                ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, AGGRESSIVE_WEB_CACHE.details))
 
         fun okJPG (contents : ByteArray) =
-            ok(contents, listOf(ContentType.IMAGE_JPEG.value, caching))
+            ok(contents, listOf(ContentType.IMAGE_JPEG.value, AGGRESSIVE_WEB_CACHE.details))
 
         fun okWEBP (contents : ByteArray) =
-                ok(contents, listOf(ContentType.IMAGE_WEBP.value, caching))
+                ok(contents, listOf(ContentType.IMAGE_WEBP.value, AGGRESSIVE_WEB_CACHE.details))
 
-        private fun ok (contents: ByteArray, ct : List<String>) =
-                PreparedResponseData(contents, StatusCode.OK, ct)
+        /**
+         * @param extraHeaders any extra headers to send
+         */
+        private fun ok (contents: ByteArray, extraHeaders : List<String>) =
+                PreparedResponseData(contents, StatusCode.OK, extraHeaders)
 
         /**
          * Use this to redirect to any particular page
@@ -125,14 +132,20 @@ class ServerUtilities {
             return listOf(
                 "$CONTENT_LENGTH: ${data.fileContents.size}",
 
-                // security-oriented headers
+                // this disallows rendering the page in a frame
+                // helps avoid click-jack attacks.
+                // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
                 "X-Frame-Options: DENY",
+
+                // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
                 "X-Content-Type-Options: nosniff",
+
+                // The name we advertise for our server
                 "server: R3z",
             )
         }
 
-        fun processConnectedClient(
+        private fun processConnectedClient(
             server: SocketWrapper,
             businessCode: BusinessCode,
             serverObjects: ServerObjects,
@@ -169,7 +182,7 @@ class ServerUtilities {
          * If the client is coming in on the insecure port,
          * redirect them to the secure port
          */
-        fun processInsecureClient(
+        private fun redirectClientToSSLEndpoint(
             server: SocketWrapper,
             businessCode: BusinessCode,
             serverObjects: ServerObjects,
@@ -177,7 +190,7 @@ class ServerUtilities {
             val logger = serverObjects.logger
             logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
             try {
-                handleInsecureRequest(server, businessCode, serverObjects)
+                handleRedirectionToSslEndpoint(server, businessCode, serverObjects)
             } catch (ex : SocketTimeoutException) {
                 // we get here if we wait too long on reading from the socket
                 // without getting anything.  See SocketWrapper and soTimeout
@@ -215,7 +228,7 @@ class ServerUtilities {
                         // otherwise review the routing
                         // now that we know who the user is (if they authenticated) we can update the current user
                         val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
-                        RoutingUtilities.routeToEndpoint(
+                        val dynamicResponse = RoutingUtilities.routeToEndpoint(
                             ServerData(
                                 businessCode.au,
                                 truWithUser,
@@ -224,6 +237,20 @@ class ServerUtilities {
                                 serverObjects.logger,
                             )
                         )
+
+                        // we'll add some headers that apply to dynamic content
+                        val newHeaders = mutableListOf(
+                            // This is dynamically generated content, so we'll
+                            // be explicit about not caching it
+                            DISALLOW_CACHING.details,
+                            PRAGMA_DISALLOW_CACHING.details
+                        )
+                        newHeaders.addAll(dynamicResponse.headers)
+
+                        val responseWithHeaders = dynamicResponse.copy(
+                            headers = newHeaders
+                        )
+                        responseWithHeaders
                     }
                 }
             } catch (ex : SocketTimeoutException) {
@@ -244,7 +271,7 @@ class ServerUtilities {
          * checking like ordinary but then immediately redirect them to
          * the secure server
          */
-        private fun handleInsecureRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
+        private fun handleRedirectionToSslEndpoint(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
             var analyzedHttpData = AnalyzedHttpData()
             val responseData: PreparedResponseData = try {
                 analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)

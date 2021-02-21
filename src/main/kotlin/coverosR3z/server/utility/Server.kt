@@ -37,7 +37,7 @@ class Server(
      * requests to the SSL server
      */
     fun createRedirectingServerThread() : Thread {
-        return ServerUtilities.createInsecureServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
+        return ServerUtilities.createRedirectingServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
     }
 
 }

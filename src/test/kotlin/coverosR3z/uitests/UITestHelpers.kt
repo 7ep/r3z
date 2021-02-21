@@ -50,15 +50,15 @@ enum class Drivers(val driver: () -> WebDriver){
  *   @param port the port our server will run on, and thus the port our client should target
  */
 fun startupTestForUI(
-    domain: String = "https://localhost",
+    domain: String = "localhost",
     port : Int,
     driver: () -> WebDriver = webDriver.driver,
     directory : String? = null
 ) : PageObjectModelLocal {
     // start the server
-    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
+    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory, forceRedirectToSsl = true))
 
-    return PageObjectModelLocal.make(driver(), port + 443, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
+    return PageObjectModelLocal.make(driver(), port, port + 443, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {

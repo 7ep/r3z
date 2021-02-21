@@ -19,6 +19,7 @@ class PageObjectModelLocal : PageObjectModel() {
         fun make(
             driver: WebDriver,
             port: Int,
+            sslPort: Int,
             businessCode: BusinessCode,
             fs: FullSystem,
             pmd : PureMemoryDatabase,
@@ -27,18 +28,19 @@ class PageObjectModelLocal : PageObjectModel() {
             val pom = PageObjectModelLocal()
 
             pom.pmd = pmd
-            pom.domain = "$domain:$port"
+            pom.sslDomain = "https://$domain:$sslPort"
+            pom.insecureDomain = "http://$domain:$port"
             pom.fs = fs
             pom.businessCode = businessCode
             pom.driver = driver
 
-            pom.rp = RegisterPage(driver, pom.domain)
-            pom.lp = LoginPage(driver, pom.domain)
-            pom.eep = EnterEmployeePage(driver, pom.domain)
-            pom.epp = EnterProjectPage(driver, pom.domain)
-            pom.llp = LoggingPage(driver, pom.domain)
-            pom.lop = LogoutPage(driver, pom.domain)
-            pom.vtp = ViewTimePage(driver, pom.domain)
+            pom.rp = RegisterPage(driver, pom.sslDomain)
+            pom.lp = LoginPage(driver, pom.sslDomain)
+            pom.eep = EnterEmployeePage(driver, pom.sslDomain)
+            pom.epp = EnterProjectPage(driver, pom.sslDomain)
+            pom.llp = LoggingPage(driver, pom.sslDomain)
+            pom.lop = LogoutPage(driver, pom.sslDomain)
+            pom.vtp = ViewTimePage(driver, pom.sslDomain)
             return pom
         }
     }
