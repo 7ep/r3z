@@ -61,7 +61,7 @@ class ServerTests {
         val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
 
         const val port = 2000
-        const val sslTestPort = 12443
+        const val sslTestPort = port + 443
         private lateinit var fs : FullSystem
         private val au = FakeAuthenticationUtilities()
         private val tru = FakeTimeRecordingUtilities()

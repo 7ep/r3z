@@ -43,7 +43,7 @@ class ServerPerformanceTests {
         val pmd = PureMemoryDatabase()
         tep = TimeEntryPersistence(pmd, logger = testLogger)
         ap = AuthenticationPersistence(pmd, logger = testLogger)
-        fs = FullSystem.startSystem(SystemOptions(port = port), logger = testLogger, pmd)
+        fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443), logger = testLogger, pmd)
     }
 
     @After

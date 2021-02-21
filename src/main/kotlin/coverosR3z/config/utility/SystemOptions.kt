@@ -13,7 +13,7 @@ data class SystemOptions(
         /**
          * The secure port
          */
-        val sslPort : Int? = null,
+        val sslPort : Int? = defaultSSLPort,
 
 
         /**
@@ -59,7 +59,7 @@ data class SystemOptions(
                                 parsedPort
                         }
                 } else {
-                        null
+                        defaultSSLPort
                 }
 
                 return this.copy(sslPort = makePort)
@@ -94,6 +94,7 @@ data class SystemOptions(
         companion object{
 
                 const val defaultPort = 12345
+                const val defaultSSLPort = 12443
 
                 /**
                  * Given the command-line arguments, returns the first value
@@ -223,14 +224,14 @@ Sample:
 The options available are:
 
 -h                     prints this help message
--p PORT_NUMBER         set the port number for the server
--s PORT_NUMBER         set the ssl port number for the server
--d DIRECTORY           the directory to store data
+-p PORT_NUMBER         set the port number for the server (default 12345)
+-s PORT_NUMBER         set the ssl port number for the server (default 12443)
+-d DIRECTORY           the directory to store data (default /db)
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing
 --no-logging           start the server with all logging turned
                        off, except for "IMPERATIVE"
---full-logging         start with all logging on                       
+--full-logging         start with all logging on (default: trace is off, all others on)       
     """.trimIndent()
 
         }

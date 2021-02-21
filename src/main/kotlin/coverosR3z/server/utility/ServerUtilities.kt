@@ -91,7 +91,7 @@ class ServerUtilities {
                 // security-oriented headers
                 "X-Frame-Options: DENY",
                 "X-Content-Type-Options: nosniff",
-                "server: cerver",
+                "server: R3z",
             )
         }
 

@@ -212,3 +212,5 @@
 2021-02-20	numberOfThreads: 10	numberOfRequests: 300	time: 325
 2021-02-20	numberOfThreads: 10	numberOfRequests: 300	time: 415
 2021-02-20	numberOfThreads: 10	numberOfRequests: 300	time: 528
+2021-02-21	numberOfThreads: 10	numberOfRequests: 300	time: 269
+2021-02-21	numberOfThreads: 10	numberOfRequests: 300	time: 249

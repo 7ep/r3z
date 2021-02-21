@@ -208,14 +208,4 @@ class SystemOptionTests {
         assertEquals(SystemOptions(sslPort = 54321), serverOptions)
     }
 
-    /**
-     * if no ssl port is set, it should be null, and the ssl server
-     * should not start (the regular unencrypted server should start)
-     */
-    @Test
-    fun testShouldSetSslPort_NothingSet() {
-        val serverOptions = extractOptions(arrayOf("-p", "54321"))
-        assertEquals(SystemOptions(port = 54321, sslPort = null), serverOptions)
-    }
-
 }
