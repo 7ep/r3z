@@ -30,33 +30,13 @@ const val CRLF = "\r\n"
 class ServerUtilities {
     companion object {
 
-        fun createServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
+        fun createServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects, forceRedirectToSsl: Boolean) : Thread {
             return Thread {
                 try {
                     while (true) {
                         fullSystem.logger.logTrace { "waiting for socket connection" }
                         val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
-                    }
-                } catch (ex: SocketException) {
-                    if (ex.message == "Interrupted function call: accept failed") {
-                        logImperative("Server was shutdown while waiting on accept")
-                    }
-                }
-            }
-        }
-
-        /**
-         * This is here just to provide a behavior to redirect whatever
-         * we receive to the SSL equivalent
-         */
-        fun createRedirectingServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects) : Thread {
-            return Thread {
-                try {
-                    while (true) {
-                        fullSystem.logger.logTrace { "waiting for socket connection" }
-                        val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                        executorService.submit(Thread { redirectClientToSSLEndpoint(server, businessObjects, serverObjects) })
+                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects, forceRedirectToSsl) })
                     }
                 } catch (ex: SocketException) {
                     if (ex.message == "Interrupted function call: accept failed") {
@@ -149,19 +129,24 @@ class ServerUtilities {
             server: SocketWrapper,
             businessCode: BusinessCode,
             serverObjects: ServerObjects,
+            forceRedirectToSsl: Boolean,
         ) {
             val logger = serverObjects.logger
             logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
             var shouldKeepAlive : Boolean
             try {
-                do {
-                    val requestData = handleRequest(server, businessCode, serverObjects)
-                    shouldKeepAlive =
-                        requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
-                    if (shouldKeepAlive) {
-                        logger.logTrace { "This is a keep-alive connection" }
-                    }
-                } while (shouldKeepAlive)
+                if (forceRedirectToSsl) {
+                    handleRequest(server, businessCode, serverObjects, forceRedirectToSsl)
+                } else {
+                    do {
+                        val requestData = handleRequest(server, businessCode, serverObjects, forceRedirectToSsl)
+                        shouldKeepAlive =
+                            requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                        if (shouldKeepAlive) {
+                            logger.logTrace { "This is a keep-alive connection" }
+                        }
+                    } while (shouldKeepAlive)
+                }
             } catch (ex : SocketTimeoutException) {
                 // we get here if we wait too long on reading from the socket
                 // without getting anything.  See SocketWrapper and soTimeout
@@ -178,36 +163,7 @@ class ServerUtilities {
             }
         }
 
-        /**
-         * If the client is coming in on the insecure port,
-         * redirect them to the secure port
-         */
-        private fun redirectClientToSSLEndpoint(
-            server: SocketWrapper,
-            businessCode: BusinessCode,
-            serverObjects: ServerObjects,
-        ) {
-            val logger = serverObjects.logger
-            logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
-            try {
-                handleRedirectionToSslEndpoint(server, businessCode, serverObjects)
-            } catch (ex : SocketTimeoutException) {
-                // we get here if we wait too long on reading from the socket
-                // without getting anything.  See SocketWrapper and soTimeout
-                logger.logTrace { "read timed out" }
-            } catch (ex : SocketException) {
-                if (ex.message?.contains("Connection reset") == true) {
-                    logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
-                } else {
-                    throw ex
-                }
-            } finally {
-                logger.logTrace { "closing server socket" }
-                server.close()
-            }
-        }
-
-        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
+        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects, forceRedirectToSsl: Boolean) : AnalyzedHttpData {
             var analyzedHttpData = AnalyzedHttpData()
             val responseData: PreparedResponseData = try {
                 analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
@@ -220,37 +176,18 @@ class ServerUtilities {
                 if (analyzedHttpData.verb == Verb.INVALID) {
                     handleBadRequest()
                 } else {
-                    // if we can just return a static file now, do that...
-                    val staticResponse : PreparedResponseData? = serverObjects.staticFileCache[analyzedHttpData.path]
-                    if (staticResponse != null) {
-                        staticResponse
+                    if (forceRedirectToSsl) {
+                        try {
+                            val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
+                            val extractedHost = extractHostFromHostHeader(hostHeader)
+                            val rawQueryString = analyzedHttpData.rawQueryString
+                            val queryString = if (rawQueryString.isNotBlank()) { "?" + rawQueryString } else ""
+                            redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
+                        } catch (ex: Exception) {
+                            handleBadRequest()
+                        }
                     } else {
-                        // otherwise review the routing
-                        // now that we know who the user is (if they authenticated) we can update the current user
-                        val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
-                        val dynamicResponse = RoutingUtilities.routeToEndpoint(
-                            ServerData(
-                                businessCode.au,
-                                truWithUser,
-                                analyzedHttpData,
-                                AuthUtilities.isAuthenticated(analyzedHttpData.user),
-                                serverObjects.logger,
-                            )
-                        )
-
-                        // we'll add some headers that apply to dynamic content
-                        val newHeaders = mutableListOf(
-                            // This is dynamically generated content, so we'll
-                            // be explicit about not caching it
-                            DISALLOW_CACHING.details,
-                            PRAGMA_DISALLOW_CACHING.details
-                        )
-                        newHeaders.addAll(dynamicResponse.headers)
-
-                        val responseWithHeaders = dynamicResponse.copy(
-                            headers = newHeaders
-                        )
-                        responseWithHeaders
+                        obtainStaticAndDynamicContent(serverObjects, analyzedHttpData, businessCode)
                     }
                 }
             } catch (ex : SocketTimeoutException) {
@@ -266,45 +203,43 @@ class ServerUtilities {
             return analyzedHttpData
         }
 
-        /**
-         * if the user is coming in on the insecure connection (http), do some
-         * checking like ordinary but then immediately redirect them to
-         * the secure server
-         */
-        private fun handleRedirectionToSslEndpoint(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
-            var analyzedHttpData = AnalyzedHttpData()
-            val responseData: PreparedResponseData = try {
-                analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
+        private fun obtainStaticAndDynamicContent(
+            serverObjects: ServerObjects,
+            analyzedHttpData: AnalyzedHttpData,
+            businessCode: BusinessCode
+        ): PreparedResponseData {
+            // if we can just return a static file now, do that...
+            val staticResponse: PreparedResponseData? = serverObjects.staticFileCache[analyzedHttpData.path]
+            return if (staticResponse != null) {
+                staticResponse
+            } else {
+                // otherwise review the routing
+                // now that we know who the user is (if they authenticated) we can update the current user
+                val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
+                val dynamicResponse = RoutingUtilities.routeToEndpoint(
+                    ServerData(
+                        businessCode.au,
+                        truWithUser,
+                        analyzedHttpData,
+                        AuthUtilities.isAuthenticated(analyzedHttpData.user),
+                        serverObjects.logger,
+                    )
+                )
 
-                serverObjects.logger.logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
-                if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
-                    return analyzedHttpData
-                }
+                // we'll add some headers that apply to dynamic content
+                val newHeaders = mutableListOf(
+                    // This is dynamically generated content, so we'll
+                    // be explicit about not caching it
+                    DISALLOW_CACHING.details,
+                    PRAGMA_DISALLOW_CACHING.details
+                )
+                newHeaders.addAll(dynamicResponse.headers)
 
-                if (analyzedHttpData.verb == Verb.INVALID) {
-                    handleBadRequest()
-                } else {
-                    try {
-                        val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
-                        val extractedHost = extractHostFromHostHeader(hostHeader)
-                        val rawQueryString = analyzedHttpData.rawQueryString
-                        val queryString = if (rawQueryString.isNotBlank()) { "?" + rawQueryString } else ""
-                        redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
-                    } catch (ex: Exception) {
-                        handleBadRequest()
-                    }
-                }
-            } catch (ex : SocketTimeoutException) {
-                throw ex
-            } catch (ex : SocketException) {
-                throw ex
-            } catch (ex: Exception) {
-                // If there ane any complaints whatsoever, we return them here
-                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
+                val responseWithHeaders = dynamicResponse.copy(
+                    headers = newHeaders
+                )
+                responseWithHeaders
             }
-
-            returnData(server, responseData, serverObjects.logger)
-            return analyzedHttpData
         }
 
         private fun extractHostFromHostHeader(hostHeader: String): String {

@@ -33,7 +33,7 @@ class SSLServer(
 
 
     fun createSecureServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects)
+        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects, false)
     }
 
 
