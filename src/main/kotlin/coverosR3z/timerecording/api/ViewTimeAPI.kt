@@ -22,6 +22,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         DETAIL_INPUT(elemName = "detail_entry"),
         EDIT_BUTTON(elemClass = "editbutton"),
         SAVE_BUTTON(elemClass = "savebutton"),
+        CREATE_BUTTON(id = "createbutton"),
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
         TIME_PERIOD(elemName = "date"),
@@ -139,7 +140,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </form>
                 </nav>
                 <div class="timerows-container">
-                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
+                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
                 </div>
         """
         return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
@@ -149,20 +150,35 @@ class ViewTimeAPI(private val sd: ServerData) {
         te: Set<TimeEntry>,
         idBeingEdited: Int?,
         projects: List<Project>,
-        currentPeriod: TimePeriod
+        currentPeriod: TimePeriod,
+        inASubmittedPeriod: Boolean
     ): String {
-        return renderCreateTimeRow(projects) +
-        te.sortedBy { it.id.value }.joinToString("") {
-            if (it.id.value == idBeingEdited) {
-                renderEditRow(it, projects, currentPeriod)
-            } else {
-                renderReadOnlyRow(it, currentPeriod)
+        return if (inASubmittedPeriod) {
+            te.sortedBy { it.id.value }.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
+        } else {
+            renderCreateTimeRow(projects)  +
+            te.sortedBy { it.id.value }.joinToString("") {
+                if (it.id.value == idBeingEdited) {
+                    renderEditRow(it, projects, currentPeriod)
+                } else {
+                    renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
+                }
             }
         }
+
     }
 
-    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod): String {
-        val abridgedDetails = if (10 < it.details.value.length) "${it.details.value.take(10)}..." else it.details.value
+    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod, inASubmittedPeriod: Boolean): String {
+
+        val editButton = if (inASubmittedPeriod) "" else """
+        <div class="action">
+            <form action="$path">
+                <input type="hidden" name="editid" value="${it.id.value}" /> 
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
+                <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
+            </form>
+        </div>"""
+
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project">
@@ -175,16 +191,9 @@ class ViewTimeAPI(private val sd: ServerData) {
             <div class="readonly-data" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
         <div class="details">
-            <div class="readonly-data" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(abridgedDetails)}</div>
+            <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(it.details.value)}</div>
         </div>
-        
-        <div class="action">
-            <form action="$path">
-                <input type="hidden" name="editid" value="${it.id.value}" /> 
-                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
-                <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
-            </form>
-        </div>
+            $editButton
     </div>
     """
     }
@@ -241,7 +250,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
                 <div class="action createrow-data">
-                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
+                    <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
                 </div>
             </form>
         </div>

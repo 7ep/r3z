@@ -12,6 +12,11 @@ a:hover
      cursor:pointer;
 }
 
+.time input {
+    height: 1.6em;
+    width: 3.6em;
+}
+
 input:focus {
   background-color: inherit;
 }
@@ -24,8 +29,11 @@ input:focus {
 .project select {
   width: inherit;
   /* select requires a custom height, yuck */
-  height: 1.5em;
+  height: 2.1em;
+}
 
+.createrow-data button {
+    height: 1.8em;
 }
 
 .createrow-data {
@@ -33,14 +41,15 @@ input:focus {
 }
 
 .date {
-  width: 8em;
+  width: 8.3em;
   position: relative;
-  
 }
 
 .date input {
   height: inherit;
   width: 100%;
+  line-height: 1.9em;
+  font-size: 1.1em;
 }
 
 .time {
@@ -48,16 +57,23 @@ input:focus {
  position: relative;
 }
 
-.time input {
-  width: 100%;
-}
-
 .details {
   position: relative;
 }
 
 .details div {
-  width: 11em;
+  width: 16.1em;
+}
+
+.details input {
+  width: 15.8em;
+  height: 1.6em;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 button {
@@ -101,7 +117,7 @@ button:focus {
   max-width: 700px;
   margin: auto;
   border-radius: .4em;
-  padding: .5em
+  padding: .5em;
 }
 
 @media only screen and (max-width: 700px) {
@@ -120,18 +136,18 @@ input {
 .readonly-data {
   background-color: #e3dddc;
   border: 1px white solid;
-  height: 1.2em;
+  line-height: 1.4em;
 }
 
 .create-time-entry-row,
 .readonly-time-entry-row,
 .editable-time-entry-row {
   display: flex;
-  flex-direction: row;
-/*   justify-content: center; */
-/*   flex-wrap: wrap; */
-/*   border: 2px white solid; */
-  padding: 0px 0px 0px 0px;
+  /* flex-direction: row; */
+  /* justify-content: center; */
+  /*   flex-wrap: wrap; */
+  /*   border: 2px white solid; */
+  /* padding: 0px 0px 0px 0px; */
   border-bottom: 1.5px #a8a1a0 solid;
   margin: auto;
 }
