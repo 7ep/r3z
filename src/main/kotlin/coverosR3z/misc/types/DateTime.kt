@@ -14,7 +14,7 @@ class DateTime(val epochSecond : Long) : Comparable<DateTime>{
     constructor(year: Int, month: Month, day: Int, hour: Int, minute: Int, second: Int)
             : this(LocalDateTime.of(year, month.ord, day, hour, minute, second).toEpochSecond(ZoneOffset.UTC))
 
-    private val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
+    val stringValue = LocalDateTime.ofEpochSecond(epochSecond, 0, ZoneOffset.UTC).toString()
 
     init {
         val beginTime = LocalDateTime.of(1980, java.time.Month.JANUARY, 1, 0, 0).toEpochSecond(ZoneOffset.UTC)

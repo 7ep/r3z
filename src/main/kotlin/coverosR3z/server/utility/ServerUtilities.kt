@@ -4,6 +4,7 @@ import coverosR3z.FullSystem
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
+import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
@@ -121,7 +122,10 @@ class ServerUtilities {
                 "X-Content-Type-Options: nosniff",
 
                 // The name we advertise for our server
-                "server: R3z",
+                "Server: R3z",
+
+                // today's date and time
+                "Date: ${DateTime.now().stringValue}",
             )
         }
 
