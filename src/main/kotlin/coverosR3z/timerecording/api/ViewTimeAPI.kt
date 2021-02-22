@@ -26,6 +26,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         ID_INPUT(elemName = "entry_id"),
         TIME_PERIOD(elemName = "date"),
         PREVIOUS_PERIOD(id="previous_period"),
+        CURRENT_PERIOD(id="current_period"),
         NEXT_PERIOD(id="next_period"),
         READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
         EDITABLE_ROW(elemClass = "editable-time-entry-row"),
@@ -117,12 +118,16 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <form action="$submitButtonAction" method="post">
-                    <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
-                    <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
-                    <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
-                </form>
+                
                 <nav class="time_period_selector">
+                    <form action="$submitButtonAction" method="post">
+                        <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
+                        <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
+                        <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
+                    </form>
+                    <form action="$path">
+                        <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
+                    </form>
                      <form action="$path">
                         <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
                         <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
