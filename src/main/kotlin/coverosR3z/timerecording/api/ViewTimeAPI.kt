@@ -133,7 +133,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <label for="next_period_link">prev</label>
                     <a id="${Elements.NEXT_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
                 </nav>
-                <div class="flex-container">
+                <div class="timerows-container">
                 ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
                 </div>
         """
@@ -161,16 +161,16 @@ class ViewTimeAPI(private val sd: ServerData) {
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project">
-            <div name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
+            <div class="readonly-data" name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
         </div>
         <div class="date">
-            <div name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
+            <div class="readonly-data" name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
         </div>
         <div class="time">
-            <div name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
+            <div class="readonly-data" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
         <div class="details">
-            <div name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(abridgedDetails)}</div>
+            <div class="readonly-data" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(abridgedDetails)}</div>
         </div>
         
         <div class="action">
@@ -222,20 +222,20 @@ class ViewTimeAPI(private val sd: ServerData) {
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
-                <div class="date" >
+                <div class="date createrow-data" >
                     <label>Date</label>
                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
-                <div class="time">
+                <div class="time createrow-data">
                     <label>Time (hrs)</label>
                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
-                <div class="details">
+                <div class="details createrow-data">
                     <label>Details</label>
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
-                <div class="action">
+                <div class="action createrow-data">
                     <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
                 </div>
             </form>

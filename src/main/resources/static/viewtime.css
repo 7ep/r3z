@@ -27,10 +27,7 @@ input:focus {
   height: 1.5em;
 }
 
-.create-time-entry-row .date,
-.create-time-entry-row .project,
-.create-time-entry-row .time,
-.create-time-entry-row .details {
+.createrow-data {
   padding: .5em 0 0 0;
 }
 
@@ -63,6 +60,7 @@ input:focus {
 .details div {
   width: 11em;
 }
+
 button {
     cursor: pointer;
     text-align : center;
@@ -85,8 +83,7 @@ button:focus {
     border: 1.8px solid blue;
 }
 
-
-.flex-container {
+.timerows-container {
   flex-direction: column;
   display: flex;
   background-color: white;
@@ -98,7 +95,7 @@ button:focus {
 }
 
 @media only screen and (max-width: 500px) {
-.flex-container {
+.timerows-container {
     padding: 4px;
   }
  }
@@ -110,16 +107,15 @@ input {
   display: flex;
 }
 
-.readonly-time-entry-row .project > div,
-.readonly-time-entry-row .date > div,
-.readonly-time-entry-row .time > div,
-.readonly-time-entry-row .details > div {
+.readonly-data {
   background-color: #e3dddc;
   border: 1px white solid;
   height: 1.2em;
 }
 
-.create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+.create-time-entry-row,
+.readonly-time-entry-row,
+.editable-time-entry-row {
   display: flex;
   flex-direction: row;
 /*   justify-content: center; */
@@ -131,7 +127,9 @@ input {
 }
 
 @media only screen and (max-width: 500px) {
-create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row, form{
+create-time-entry-row,
+.readonly-time-entry-row,
+.editable-time-entry-row, form{
   display: flex;
 /*   flex-direction: column; */
   flex-wrap: wrap;
