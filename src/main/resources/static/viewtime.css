@@ -25,6 +25,7 @@ input:focus {
   width: inherit;
   /* select requires a custom height, yuck */
   height: 1.5em;
+
 }
 
 .createrow-data {
@@ -66,10 +67,10 @@ button {
     text-align : center;
     font-size: 1em;
     height: inherit;
-    border: 0px solid #e2e2e2;
+    border: 1.8px solid #c35061;
     background-color: #c35061;
     border-radius: .5em;
-    min-width: 5em;
+    min-width: 5em; 
 }
 
 button:hover {
@@ -79,8 +80,19 @@ button:hover {
 
 button:focus {
     outline: none;
-    border-radius: .3em;
+    border-radius: .5em;
     border: 1.8px solid blue;
+}
+
+.time_period_selector {
+  background-color: white;
+  opacity: 82%;
+  padding: .5em;
+  max-width: 700px;
+  margin: 0 0 4px 0;
+  border-radius: .4em;
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .timerows-container {
@@ -94,7 +106,7 @@ button:focus {
   padding: .5em
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 700px) {
 .timerows-container {
     padding: 4px;
   }
@@ -126,12 +138,11 @@ input {
   margin: auto;
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 700px) {
 create-time-entry-row,
 .readonly-time-entry-row,
 .editable-time-entry-row, form{
   display: flex;
-/*   flex-direction: column; */
   flex-wrap: wrap;
   }
 }

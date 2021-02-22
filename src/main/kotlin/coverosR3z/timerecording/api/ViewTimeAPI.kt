@@ -215,7 +215,7 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderCreateTimeRow(projects: List<Project>) = """
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
-                <div class="project">
+                <div class="project createrow-data">
                     <label>Project</label>
                     <select name="project_entry" id="project_entry" required  />
                         <option selected disabled hidden value="">Choose a project</option>
