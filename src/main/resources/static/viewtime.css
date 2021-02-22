@@ -12,14 +12,13 @@ a:hover
      cursor:pointer;
 }
 
-input {
-  background-color: #dfffdf;
-  border: 1px white solid;
-  font-size: 1em;
+input:focus {
+  background-color: inherit;
 }
 
 .project {
   width: 10em;
+  position: relative;
 }
 
 .project select {
@@ -28,9 +27,19 @@ input {
   height: 1.5em;
 }
 
+.create-time-entry-row .date,
+.create-time-entry-row .project,
+.create-time-entry-row .time,
+.create-time-entry-row .details {
+  padding: .5em 0 0 0;
+}
+
 .date {
   width: 100%;
   max-width: 8em;
+  min-width: 8em;
+  position: relative;
+  
 }
 
 .date input {
@@ -40,13 +49,20 @@ input {
 
 .time {
  width: 4em;
+ position: relative;
 }
 
 .time input {
   width: 100%;
 }
 
+.details {
+  position: relative;
+}
 
+.details div {
+  width: 11em;
+}
 button {
     cursor: pointer;
     text-align : center;
@@ -55,7 +71,6 @@ button {
     border: 0px solid #e2e2e2;
     background-color: #c35061;
     border-radius: .5em;
-    margin: auto;
     min-width: 5em;
 }
 
@@ -79,25 +94,44 @@ button:focus {
   max-width: 700px;
   margin: auto;
   border-radius: .4em;
+  padding: .5em
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 500px) {
 .flex-container {
     padding: 4px;
   }
  }
+
+input {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  font-size: 1em;
+  display: flex;
+}
+
+.readonly-time-entry-row .project > div,
+.readonly-time-entry-row .date > div,
+.readonly-time-entry-row .time > div,
+.readonly-time-entry-row .details > div {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  height: 1.2em;
+}
 
 .create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
   display: flex;
   flex-direction: row;
 /*   justify-content: center; */
 /*   flex-wrap: wrap; */
-  border: 2px white solid;
+/*   border: 2px white solid; */
+  padding: 0px 0px 0px 0px;
+  border-bottom: 1.5px #a8a1a0 solid;
   margin: auto;
 }
 
 @media only screen and (max-width: 500px) {
-create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row, form{
   display: flex;
 /*   flex-direction: column; */
   flex-wrap: wrap;
@@ -106,8 +140,20 @@ create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
 
 form {
     display: flex;
+    flex-direction: row;
+    margin: auto;
 }
 
+label {
+  font-size: .7em;
+  position: absolute;
+  top: -2px;
+}
+
+nav {
+  position: relative;
+  padding: 5px 0 0 0;
+}
 
 /* .project-date-and-time, .details-and-button {
   display: flex;

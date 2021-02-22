@@ -157,19 +157,20 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod): String {
+        val abridgedDetails = if (10 < it.details.value.length) "${it.details.value.take(10)}..." else it.details.value
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project">
-            <input readonly name="${Elements.PROJECT_INPUT.getElemName()}" type="text" value="${safeAttr(it.project.name.value)}" />
+            <div name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
         </div>
         <div class="date">
-            <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="text" value="${safeAttr(it.date.stringValue)}" />
+            <div name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
         </div>
         <div class="time">
-            <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" value="${it.time.getHoursAsString()}" />
+            <div name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
         <div class="details">
-            <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" value="${safeAttr(it.details.value)}"/>
+            <div name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(abridgedDetails)}</div>
         </div>
         
         <div class="action">
@@ -215,19 +216,23 @@ class ViewTimeAPI(private val sd: ServerData) {
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
                 <div class="project">
+                    <label>Project</label>
                     <select name="project_entry" id="project_entry" required  />
                         <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
                 <div class="date" >
+                    <label>Date</label>
                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
                 <div class="time">
+                    <label>Time (hrs)</label>
                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
                 <div class="details">
+                    <label>Details</label>
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
                 <div class="action">
