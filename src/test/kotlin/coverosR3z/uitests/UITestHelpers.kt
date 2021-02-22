@@ -153,11 +153,11 @@ class LogoutPage(private val driver: WebDriver, private val domain: String) {
 class ViewTimePage(private val driver: WebDriver, private val domain: String) {
 
     fun getTimeForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).getAttribute("value")
+        return driver.findElement(By.cssSelector("#time-entry-$id div[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).text
     }
 
     fun getDateForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).getAttribute("value")
+        return driver.findElement(By.cssSelector("#time-entry-$id div[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).text
     }
 
     fun submitTimeForPeriod() {
@@ -211,7 +211,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
-        createTimeEntryRow.findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+        createTimeEntryRow.findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId())).click()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
         assertEquals("your time entries", driver.title)
     }
@@ -236,7 +236,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickCreateNewTimeEntry() {
         driver
             .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-            .findElement(By.className(ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass())).click()
+            .findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId())).click()
     }
 
     /**

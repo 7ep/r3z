@@ -137,7 +137,7 @@ private fun extractData(server: ISocketWrapper, headers: List<String>) : PostBod
     return if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase())}) {
         val length = extractLengthOfPostBodyFromHeaders(headers)
         val body = server.read(length)
-        PostBodyData(parseUrlEncodedForm(body), body)
+        PostBodyData(parseUrlEncodedForm(body, false), body)
     } else {
         PostBodyData()
     }
@@ -172,7 +172,7 @@ fun parseStatusLineAsServer(matchResult: MatchResult, logger: ILogger): StatusLi
     val (rawQueryString, queryString) = if (split.size == 2)  {
         val rawQueryString = split[1]
         check(rawQueryString.length < maxQueryStringLength) { "query string exceeded maximum allowed length" }
-        Pair(rawQueryString, parseUrlEncodedForm(rawQueryString))
+        Pair(rawQueryString, parseUrlEncodedForm(rawQueryString, true))
     } else Pair("", mapOf())
     return StatusLine(verb, path, queryString, rawQueryString)
 }
@@ -233,8 +233,12 @@ fun extractSessionTokenFromHeaders(headers: List<String>): String? {
  *
  * for example, valuea=3&valueb=this+is+something
  */
-fun parseUrlEncodedForm(input: String): Map<String, String> {
-    require(input.isNotEmpty()) {"The URL-encoded content was empty"}
+fun parseUrlEncodedForm(input: String, isQueryString: Boolean): Map<String, String> {
+    if (isQueryString) {
+        if (input.isEmpty()) return emptyMap()
+    } else {
+        require(input.isNotEmpty()) {"The URL-encoded content was empty"}
+    }
     val postedPairs = mutableMapOf<String, String>()
     val splitByAmpersand = input.split("&")
     for(s : String in splitByAmpersand) {

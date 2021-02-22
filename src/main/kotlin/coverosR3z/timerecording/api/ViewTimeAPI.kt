@@ -22,10 +22,12 @@ class ViewTimeAPI(private val sd: ServerData) {
         DETAIL_INPUT(elemName = "detail_entry"),
         EDIT_BUTTON(elemClass = "editbutton"),
         SAVE_BUTTON(elemClass = "savebutton"),
+        CREATE_BUTTON(id = "createbutton"),
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
         TIME_PERIOD(elemName = "date"),
         PREVIOUS_PERIOD(id="previous_period"),
+        CURRENT_PERIOD(id="current_period"),
         NEXT_PERIOD(id="next_period"),
         READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
         EDITABLE_ROW(elemClass = "editable-time-entry-row"),
@@ -117,24 +119,28 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <h2>
                     Here are your entries, <span id="username">$username</span>
                 </h2>
-                <form action="$submitButtonAction" method="post">
-                    <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
-                    <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
-                    <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
-                </form>
+                
                 <nav class="time_period_selector">
-                    <label for="previous_period_link">prev</label>
-                    <a id="${Elements.PREVIOUS_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getPrevious().start.stringValue}">${currentPeriod.getPrevious().start.stringValue}</a>
-                    <select>
-                        <option value="UNSURE_WHAT_GOES_HERE">PREVIOUS_PERIOD</option>
-                        <option selected value="current">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</option>
-                        <option value="UNSURE_WHAT_GOES_HERE">SUBSEQUENT_PERIOD</option>
-                    </select> 
-                    <label for="next_period_link">prev</label>
-                    <a id="${Elements.NEXT_PERIOD.getId()}" href="?${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.getNext().start.stringValue}">${currentPeriod.getNext().start.stringValue}</a>
+                    <form action="$submitButtonAction" method="post">
+                        <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
+                        <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
+                        <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
+                    </form>
+                    <form action="$path">
+                        <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
+                    </form>
+                     <form action="$path">
+                        <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
+                        <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
+                    </form>
+                    <div>${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
+                    <form action="$path">
+                        <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
+                        <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
+                    </form>
                 </nav>
-                <div class="flex-container">
-                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod)}
+                <div class="timerows-container">
+                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
                 </div>
         """
         return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
@@ -144,41 +150,50 @@ class ViewTimeAPI(private val sd: ServerData) {
         te: Set<TimeEntry>,
         idBeingEdited: Int?,
         projects: List<Project>,
-        currentPeriod: TimePeriod
+        currentPeriod: TimePeriod,
+        inASubmittedPeriod: Boolean
     ): String {
-        return renderCreateTimeRow(projects) +
-        te.sortedBy { it.id.value }.joinToString("") {
-            if (it.id.value == idBeingEdited) {
-                renderEditRow(it, projects, currentPeriod)
-            } else {
-                renderReadOnlyRow(it, currentPeriod)
+        return if (inASubmittedPeriod) {
+            te.sortedBy { it.id.value }.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
+        } else {
+            renderCreateTimeRow(projects)  +
+            te.sortedBy { it.id.value }.joinToString("") {
+                if (it.id.value == idBeingEdited) {
+                    renderEditRow(it, projects, currentPeriod)
+                } else {
+                    renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
+                }
             }
         }
+
     }
 
-    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod): String {
-        return """
-     <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-        <div class="project">
-            <input readonly name="${Elements.PROJECT_INPUT.getElemName()}" type="text" value="${safeAttr(it.project.name.value)}" />
-        </div>
-        <div class="date">
-            <input readonly name="${Elements.DATE_INPUT.getElemName()}" type="text" value="${safeAttr(it.date.stringValue)}" />
-        </div>
-        <div class="time">
-            <input readonly name="${Elements.TIME_INPUT.getElemName()}" type="number" value="${it.time.getHoursAsString()}" />
-        </div>
-        <div class="details">
-            <input readonly name="${Elements.DETAIL_INPUT.getElemName()}" type="text" value="${safeAttr(it.details.value)}"/>
-        </div>
-        
+    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod, inASubmittedPeriod: Boolean): String {
+
+        val editButton = if (inASubmittedPeriod) "" else """
         <div class="action">
             <form action="$path">
                 <input type="hidden" name="editid" value="${it.id.value}" /> 
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
                 <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
             </form>
+        </div>"""
+
+        return """
+     <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
+        <div class="project">
+            <div class="readonly-data" name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
         </div>
+        <div class="date">
+            <div class="readonly-data" name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
+        </div>
+        <div class="time">
+            <div class="readonly-data" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
+        </div>
+        <div class="details">
+            <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(it.details.value)}</div>
+        </div>
+            $editButton
     </div>
     """
     }
@@ -214,24 +229,28 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderCreateTimeRow(projects: List<Project>) = """
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
-                <div class="project">
+                <div class="project createrow-data">
+                    <label>Project</label>
                     <select name="project_entry" id="project_entry" required  />
                         <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
-                <div class="date" >
+                <div class="date createrow-data" >
+                    <label>Date</label>
                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
-                <div class="time">
+                <div class="time createrow-data">
+                    <label>Time (hrs)</label>
                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
-                <div class="details">
+                <div class="details createrow-data">
+                    <label>Details</label>
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
-                <div class="action">
-                    <button class="${Elements.SAVE_BUTTON.getElemClass()}">create</button>
+                <div class="action createrow-data">
+                    <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
                 </div>
             </form>
         </div>

@@ -12,51 +12,79 @@ a:hover
      cursor:pointer;
 }
 
-input {
-  background-color: #dfffdf;
-  border: 1px white solid;
-  font-size: 1em;
+.time input {
+    height: 1.6em;
+    width: 3.6em;
+}
+
+input:focus {
+  background-color: inherit;
 }
 
 .project {
   width: 10em;
+  position: relative;
 }
 
 .project select {
   width: inherit;
   /* select requires a custom height, yuck */
-  height: 1.5em;
+  height: 2.1em;
+}
+
+.createrow-data button {
+    height: 1.8em;
+}
+
+.createrow-data {
+  padding: .5em 0 0 0;
 }
 
 .date {
-  width: 100%;
-  max-width: 8em;
+  width: 8.3em;
+  position: relative;
 }
 
 .date input {
   height: inherit;
   width: 100%;
+  line-height: 1.9em;
+  font-size: 1.1em;
 }
 
 .time {
  width: 4em;
+ position: relative;
 }
 
-.time input {
-  width: 100%;
+.details {
+  position: relative;
 }
 
+.details div {
+  width: 16.1em;
+}
+
+.details input {
+  width: 15.8em;
+  height: 1.6em;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 button {
     cursor: pointer;
     text-align : center;
     font-size: 1em;
     height: inherit;
-    border: 0px solid #e2e2e2;
+    border: 1.8px solid #c35061;
     background-color: #c35061;
     border-radius: .5em;
-    margin: auto;
-    min-width: 5em;
+    min-width: 5em; 
 }
 
 button:hover {
@@ -66,12 +94,22 @@ button:hover {
 
 button:focus {
     outline: none;
-    border-radius: .3em;
+    border-radius: .5em;
     border: 1.8px solid blue;
 }
 
+.time_period_selector {
+  background-color: white;
+  opacity: 82%;
+  padding: .5em;
+  max-width: 700px;
+  margin: auto auto 4px auto;
+  border-radius: .4em;
+  display: flex;
+  flex-wrap: nowrap;
+}
 
-.flex-container {
+.timerows-container {
   flex-direction: column;
   display: flex;
   background-color: white;
@@ -79,35 +117,66 @@ button:focus {
   max-width: 700px;
   margin: auto;
   border-radius: .4em;
+  padding: .5em;
 }
 
 @media only screen and (max-width: 700px) {
-.flex-container {
+.timerows-container {
     padding: 4px;
   }
  }
 
-.create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+input {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  font-size: 1em;
   display: flex;
-  flex-direction: row;
-/*   justify-content: center; */
-/*   flex-wrap: wrap; */
-  border: 2px white solid;
+}
+
+.readonly-data {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  line-height: 1.4em;
+}
+
+.create-time-entry-row,
+.readonly-time-entry-row,
+.editable-time-entry-row {
+  display: flex;
+  /* flex-direction: row; */
+  /* justify-content: center; */
+  /*   flex-wrap: wrap; */
+  /*   border: 2px white solid; */
+  /* padding: 0px 0px 0px 0px; */
+  border-bottom: 1.5px #a8a1a0 solid;
   margin: auto;
 }
 
-@media only screen and (max-width: 500px) {
-create-time-entry-row, .readonly-time-entry-row, .editable-time-entry-row{
+@media only screen and (max-width: 700px) {
+create-time-entry-row,
+.readonly-time-entry-row,
+.editable-time-entry-row, form{
   display: flex;
-/*   flex-direction: column; */
   flex-wrap: wrap;
   }
 }
 
 form {
     display: flex;
+    flex-direction: row;
+    margin: auto;
 }
 
+label {
+  font-size: .7em;
+  position: absolute;
+  top: -2px;
+}
+
+nav {
+  position: relative;
+  padding: 5px 0 0 0;
+}
 
 /* .project-date-and-time, .details-and-button {
   display: flex;
