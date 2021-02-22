@@ -33,9 +33,7 @@ input:focus {
 }
 
 .date {
-  width: 100%;
-  max-width: 8em;
-  min-width: 8em;
+  width: 8em;
   position: relative;
   
 }
