@@ -22,7 +22,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
 
     private fun existingEmployeesHTML() : String {
         val username = safeHtml(sd.ahd.user.name.value)
-        val employees = sd.tru.listAllEmployees()
+        val employees = sd.bc.tru.listAllEmployees()
 
         val body = """
                 <h2>

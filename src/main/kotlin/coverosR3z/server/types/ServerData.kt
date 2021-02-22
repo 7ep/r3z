@@ -8,8 +8,8 @@ import coverosR3z.timerecording.utility.ITimeRecordingUtilities
  * Data for use by the API endpoints
  */
 data class ServerData(
-    val au: IAuthenticationUtilities,
-    val tru: ITimeRecordingUtilities,
+    val bc: BusinessCode,
+    val so: ServerObjects,
     val ahd: AnalyzedHttpData,
     val authStatus: AuthStatus,
     val logger: ILogger,

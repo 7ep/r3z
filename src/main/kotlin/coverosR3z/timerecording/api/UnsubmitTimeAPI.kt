@@ -48,7 +48,7 @@ class UnsubmitTimeAPI(private val sd: ServerData){
     // internal handlePOST() to do the work.
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
-        val tru = sd.tru // time recording utilities
+        val tru = sd.bc.tru // time recording utilities
         val startDate = Date.make(data.mapping[Elements.START_DATE.getElemName()])
         val endDate = Date.make(data.mapping[Elements.END_DATE.getElemName()])
         val timePeriod = TimePeriod(startDate, endDate)

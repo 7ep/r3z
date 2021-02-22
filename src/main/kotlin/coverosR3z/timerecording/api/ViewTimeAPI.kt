@@ -102,9 +102,9 @@ class ViewTimeAPI(private val sd: ServerData) {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
         val username = safeHtml(sd.ahd.user.name.value)
-        val te = sd.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId, currentPeriod)
+        val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId, currentPeriod)
         val editidValue = sd.ahd.queryString["editid"]
-        val projects = sd.tru.listAllProjects()
+        val projects = sd.bc.tru.listAllProjects()
         // either get the id as an integer or get null,
         // the code will handle either properly
         val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
@@ -112,7 +112,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         // Figure out time period date from viewTimeAPITests
         val periodStartDate = currentPeriod.start
         val periodEndDate = currentPeriod.end
-        val inASubmittedPeriod = sd.tru.isInASubmittedPeriod(sd.ahd.user.employeeId, periodStartDate)
+        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employeeId, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """
@@ -258,7 +258,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
-        val tru = sd.tru
+        val tru = sd.bc.tru
         val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
         val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])

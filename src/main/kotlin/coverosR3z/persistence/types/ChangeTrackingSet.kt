@@ -1,15 +1,14 @@
 package coverosR3z.persistence.types
 
-import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
-import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.*
 
 /**
- * Similar to [ConcurrentSet] except that it tracks any changes
+ * Similar to [MutableConcurrentSet] except that it tracks any changes
  * made to the data.  Anything that uses the [add] command will
  * have an item added to [modified] with a tag of [CREATE], and
  * anything that uses [remove] will do similarly with a tag of [DELETE]
  */
-class ChangeTrackingSet<T> : ConcurrentSet<T>() {
+class ChangeTrackingSet<T: IndexableSerializable>() : MutableConcurrentSet<T>() {
 
     /**
      * This is used to tag what gets changed, so we
@@ -26,7 +25,12 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
         /**
          * Data is being deleted from the set
          */
-        DELETE
+        DELETE,
+
+        /**
+         * Update the data in place
+         */
+        UPDATE,
     }
 
     val modified = R3zConcurrentQueue<Pair<T, DataAction>>()
@@ -55,13 +59,32 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
     }
 
     override fun addAll(elements: Collection<T>) : Boolean {
-        modified.addAll(elements.map { Pair(it, CREATE) }.toSet() as Collection<Pair<T, DataAction>>)
         return super.addAll(elements)
     }
 
     override fun remove(element: T) : Boolean {
         modified.add(Pair(element, DELETE))
         return super.remove(element)
+    }
+
+    /**
+     * Updates a value
+     *
+     * We will find the old element by its id, since this must
+     * be of type [IndexableSerializable], it means we have
+     * access to the getIndex() command.  Then we will
+     * overwrite the value stored.
+     *
+     * There is some nuance to this method.
+     *
+     * In particular, this will put a DELETE followed
+     * by an ADD into the modified queue, for the files
+     * to be changed on disk.
+     *
+     */
+    override fun update(element: T) : Boolean {
+        modified.add(Pair(element, UPDATE))
+        return super.update(element)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -85,7 +108,7 @@ class ChangeTrackingSet<T> : ConcurrentSet<T>() {
 
 }
 
-fun <T> List<T>.toChangeTrackingSet() : ChangeTrackingSet<T> {
+fun <T: IndexableSerializable> List<T>.toChangeTrackingSet() : ChangeTrackingSet<T> {
     val newSet = ChangeTrackingSet<T>()
     this.forEach{newSet.add(it)}
     return newSet

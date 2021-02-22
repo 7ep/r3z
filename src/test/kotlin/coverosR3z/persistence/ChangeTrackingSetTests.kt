@@ -8,6 +8,7 @@ import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.ProjectId
 import coverosR3z.timerecording.types.ProjectName
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class ChangeTrackingSetTests {
@@ -74,45 +75,24 @@ class ChangeTrackingSetTests {
         assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
     }
 
-    // what happens if we use the addAll method
+    /**
+     * I think allowing this would be very non-thread-safe, so blocking
+     * it off for now.
+     */
     @Test
-    fun shouldRecordModifiedValues_AddAll() {
+    fun shouldThrowExceptionFor_AddAll() {
         val projects = ChangeTrackingSet<Project>()
-        projects.addAll(listOf(DEFAULT_PROJECT))
-
-        val data = projects.modified.toSet()
-
-        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
+        assertThrows(NotImplementedError::class.java) { projects.addAll(listOf(DEFAULT_PROJECT)) }
     }
 
     /**
-     * what happens if we use the addAll method
-     * This one has two identical items to add
+     * I think allowing this would be very non-thread-safe, so blocking
+     * it off for now.
      */
     @Test
-    fun shouldRecordModifiedValues_AddAllTwo() {
+    fun shouldThrowExceptionFor_RemoveAll() {
         val projects = ChangeTrackingSet<Project>()
-        projects.addAll(listOf(DEFAULT_PROJECT, DEFAULT_PROJECT))
-
-        val data = projects.modified.toSet()
-
-        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE)), data)
+        assertThrows(NotImplementedError::class.java) { projects.removeAll(listOf(DEFAULT_PROJECT)) }
     }
-
-    /**
-     * what happens if we use the addAll method
-     * This one has two different items to add
-     */
-    @Test
-    fun shouldRecordModifiedValues_AddAllTwoDifferentItems() {
-        val projects = ChangeTrackingSet<Project>()
-        projects.addAll(listOf(DEFAULT_PROJECT, newProject))
-
-        val data = projects.modified.toSet()
-
-        assertEquals(setOf(Pair(DEFAULT_PROJECT, CREATE), Pair(newProject, CREATE)), data)
-    }
-
-
 
 }

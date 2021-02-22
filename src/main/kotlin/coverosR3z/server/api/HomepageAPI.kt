@@ -6,12 +6,12 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETAuthAndUnauth
 import coverosR3z.server.utility.PageComponents
 
-class HomepageAPI(private val sd: ServerData)  {
+class HomepageAPI  {
 
     companion object : GetEndpoint {
 
         override fun handleGet(sd: ServerData) : PreparedResponseData {
-            val hp = HomepageAPI(sd)
+            val hp = HomepageAPI()
             return doGETAuthAndUnauth(sd.authStatus, { hp.authHomePageHTML() },
                 { PageComponents.makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
         }

@@ -126,7 +126,7 @@ class PureMemoryDatabaseTests {
      * would need to run it a time or two to see it fail.
      *
      * Now, however, we aren't using locking - we're using
-     * [coverosR3z.persistence.types.ConcurrentSet] which is based on [ConcurrentHashMap], and
+     * [coverosR3z.persistence.types.MutableConcurrentSet] which is based on [ConcurrentHashMap], and
      * also [AtomicInteger], which means we don't need to lock
      * at all.
      *

@@ -1,6 +1,8 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.fakeServerObjects
+import coverosR3z.fakeTechempower
 import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
@@ -36,7 +38,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
         val response = ViewTimeAPI.handlePost(sd).statusCode
         assertEquals(
             "We should have gotten redirected to the viewTime page",
@@ -53,7 +55,7 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -69,7 +71,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -85,7 +87,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -101,7 +103,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -117,11 +119,20 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger)
+        val sd = makeServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
+    }
+
+    private fun makeServerData(data: PostBodyData): ServerData {
+        val sd = ServerData(
+            BusinessCode(tru, au, fakeTechempower),
+            fakeServerObjects,
+            AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, logger = testLogger
+        )
+        return sd
     }
 
 

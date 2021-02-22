@@ -55,7 +55,7 @@ class RegisterAPI(private val sd: ServerData) {
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data.mapping
-        val au = sd.au
+        val au = sd.bc.au
         val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
         val password = Password.make(data[Elements.PASSWORD_INPUT.getElemName()])
         val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.getElemName()])
@@ -68,7 +68,7 @@ class RegisterAPI(private val sd: ServerData) {
     }
 
     private fun registerHTML() : String {
-        val employees = sd.tru.listAllEmployees()
+        val employees = sd.bc.tru.listAllEmployees()
 
         val body = """
         <h2>Register a User</h2>

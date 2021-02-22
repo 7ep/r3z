@@ -1,6 +1,6 @@
 package coverosR3z.persistence.types
 
-interface DataAccess<T> {
+interface DataAccess<T: IndexableSerializable> {
 
     /**
      * carry out some write action on the data.

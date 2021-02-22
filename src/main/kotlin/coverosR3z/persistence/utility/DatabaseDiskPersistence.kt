@@ -49,11 +49,6 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
      * @param name the name of the data
      */
     fun <T: IndexableSerializable> persistToDisk(item : T, name: String) {
-        if (dbDirectoryWithVersion == null) {
-            logger.logTrace { "database directory was null, skipping serialization for $name" }
-            return
-        }
-
         val parentDirectory = "$dbDirectoryWithVersion$name"
         actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
@@ -61,6 +56,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         // we save the next index each time.  This way we can be more consistent
         // since we allow deleting data, even to the point that all data can be deleted.
         val nextIndexPath = "$parentDirectory/$nextIndexFileName$databaseFileSuffix"
+
         actionQueue.enqueue {
             File(fullPath).writeText(item.serialize())
             File(nextIndexPath).writeText((item.getIndex() + 1).toString())
@@ -79,15 +75,19 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
      * @param subDirectory the name of the data, for finding the directory
      */
     fun <T: IndexableSerializable> deleteOnDisk(item: T, subDirectory: String) {
-        if (dbDirectoryWithVersion == null) {
-            logger.logTrace { "database directory was null, skipping delete for $subDirectory" }
-            return
-        }
-
-        val parentDirectory = "$dbDirectoryWithVersion$subDirectory"
-
-        val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
+        val fullPath = "$dbDirectoryWithVersion$subDirectory/${item.getIndex()}$databaseFileSuffix"
         actionQueue.enqueue { File(fullPath).delete() }
+    }
+
+    fun <T: IndexableSerializable> updateOnDisk(item: T, subDirectory: String) {
+        val fullPath = "$dbDirectoryWithVersion$subDirectory/${item.getIndex()}$databaseFileSuffix"
+        val file = File(fullPath)
+
+        actionQueue.enqueue {
+            // if the file isn't already there, throw an exception
+            check(file.exists()) { "we were asked to update $file but it doesn't exist" }
+            File(fullPath).writeText(item.serialize())
+        }
     }
 
     /**
@@ -149,10 +149,20 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val timeEntries = readAndDeserialize(TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
         val submittedPeriods = readAndDeserialize(SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
 
-        return PureMemoryDatabase(employees, users, projects, timeEntries, sessions, submittedPeriods, dbDirectoryWithVersion, this)
+        return PureMemoryDatabase(
+            dbDirectoryWithVersion,
+            this,
+            employees,
+            users,
+            projects,
+            timeEntries,
+            sessions,
+            submittedPeriods,
+            ChangeTrackingSet()
+        )
     }
 
-    private fun <T : Indexed> readAndDeserialize(dataName: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
+    private fun <T : IndexableSerializable> readAndDeserialize(dataName: String, deserializer: (String) -> T): ChangeTrackingSet<T> {
         val dataDirectory = File("$dbDirectoryWithVersion$dataName")
 
         if (! dataDirectory.exists()) {

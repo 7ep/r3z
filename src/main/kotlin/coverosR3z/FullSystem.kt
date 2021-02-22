@@ -8,7 +8,7 @@ import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.Logger
-import coverosR3z.persistence.types.ConcurrentSet
+import coverosR3z.persistence.types.SimpleConcurrentSet
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
@@ -17,32 +17,31 @@ import coverosR3z.server.types.ServerObjects
 import coverosR3z.server.utility.SSLServer
 import coverosR3z.server.utility.Server
 import coverosR3z.server.utility.StaticFilesUtilities
+import coverosR3z.techempower.persistence.TechempowerPersistence
+import coverosR3z.techempower.utility.TechempowerUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import java.io.File
 import java.net.Socket
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 /**
  * This serves as a central location for the code
  * needed to start the system, called by Main.
  */
 class FullSystem private constructor(
-    val pmd: PureMemoryDatabase?,
+    val pmd: PureMemoryDatabase,
     val businessCode: BusinessCode,
     val logger: ILogger,
 ) {
 
-    var serverFuture: Future<*>? = null
-    var sslServerFuture: Future<*>? = null
-    var esForThreadsInServer: ExecutorService? = null
-    var server: Server? = null
-    var sslServer: SSLServer? = null
+    lateinit var serverFuture: Future<*>
+    lateinit var sslServerFuture: Future<*>
+    lateinit var esForThreadsInServer: ExecutorService
+    lateinit var server: Server
+    lateinit var sslServer: SSLServer
 
-    private val runningSockets : ConcurrentSet<Socket> = ConcurrentSet()
+    private val runningSockets : SimpleConcurrentSet<Socket> = SimpleConcurrentSet()
 
     fun addRunningSocket(socket : Socket) {
         runningSockets.add(socket)
@@ -73,29 +72,27 @@ class FullSystem private constructor(
      */
     fun shutdown(
     ) {
-        checkNotNull(server)
         logImperative("Received shutdown command")
         logImperative("Looping through all sockets with a close command")
         this.runningSockets.forEach { it.close() }
 
         logImperative("Shutting down the database")
-        pmd?.stop()
+        pmd.stop()
 
         logImperative("Shutting down the non-ssl server thread")
-        server?.halfOpenServerSocket?.close()
-        serverFuture?.get()
+        server.halfOpenServerSocket.close()
+        serverFuture.get()
 
-        if (sslServerFuture != null && sslServer != null) {
-            logImperative("Waiting for the ssl server thread")
-            sslServer?.sslHalfOpenServerSocket?.close()
-            sslServerFuture?.get()
-        }
+        logImperative("Waiting for the ssl server thread")
+        sslServer.sslHalfOpenServerSocket.close()
+        sslServerFuture.get()
 
-        esForThreadsInServer?.shutdown()
-        esForThreadsInServer?.awaitTermination(10, TimeUnit.SECONDS)
+        esForThreadsInServer.shutdown()
+        esForThreadsInServer.awaitTermination(10, TimeUnit.SECONDS)
 
         logImperative("Shutting down logging")
         logger.stop()
+
         logImperative("Goodbye world!")
     }
 
@@ -122,7 +119,7 @@ class FullSystem private constructor(
             logger : ILogger = Logger(),
 
             // start the database
-            pmd : PureMemoryDatabase? = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger),
+            pmd : PureMemoryDatabase = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger),
 
             // create the utilities that the API's will use by instantiating
             // them with the database as a parameter
@@ -181,9 +178,12 @@ class FullSystem private constructor(
             val tep = TimeEntryPersistence(pmd, cu, logger)
             val tru = TimeRecordingUtilities(tep, cu, logger)
 
+            val tp = TechempowerPersistence(pmd)
+            val tu = TechempowerUtilities(tp)
+
             val ap = AuthenticationPersistence(pmd, logger)
             val au = AuthenticationUtilities(ap, logger)
-            return BusinessCode(tru, au)
+            return BusinessCode(tru, au, tu)
         }
 
         /**

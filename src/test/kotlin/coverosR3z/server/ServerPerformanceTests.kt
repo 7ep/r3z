@@ -1,11 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.FullSystem
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.persistence.IAuthPersistence
-import coverosR3z.authentication.types.Hash
 import coverosR3z.config.utility.SystemOptions
-import coverosR3z.logging.LogTypes
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
@@ -13,10 +9,9 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
+import coverosR3z.techempower.utility.ITechempowerUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.timerecording.persistence.ITimeEntryPersistence
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Project
 import org.junit.*
 import org.junit.experimental.categories.Category
@@ -36,14 +31,10 @@ import java.util.concurrent.atomic.AtomicInteger
 class ServerPerformanceTests {
 
     private lateinit var fs : FullSystem
-    private lateinit var tep : ITimeEntryPersistence
-    private lateinit var ap : IAuthPersistence
 
     private fun startServer(port : Int) {
-        val pmd = PureMemoryDatabase()
-        tep = TimeEntryPersistence(pmd, logger = testLogger)
-        ap = AuthenticationPersistence(pmd, logger = testLogger)
-        fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443), logger = testLogger, pmd)
+        val pmd = PureMemoryDatabase(worlds = ITechempowerUtilities.generateWorlds())
+        fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, allLoggingOff = true), pmd = pmd)
     }
 
     @After
@@ -70,17 +61,16 @@ class ServerPerformanceTests {
         val port = port.getAndIncrement()
         startServer(port)
 
-        // so we don't see spam
-        testLogger.logSettings[LogTypes.DEBUG] = false
-        testLogger.logSettings[LogTypes.AUDIT] = false
-        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        val newProject = fs.businessCode.tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
+        val sessionId = fs.businessCode.au.createNewSession(user)
 
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
         val (time, _) = getTime {
-            repeat(numberThreads) { es.submit(makeClientThreadRepeatedTimeEntries(numberRequests, newProject, port)) }
+            val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedTimeEntries(numberRequests, newProject, sessionId)) }
+            realThreads.forEach { it.get() }
             es.shutdown()
             es.awaitTermination(10, TimeUnit.SECONDS)
         }
@@ -89,9 +79,6 @@ class ServerPerformanceTests {
         File("${granularPerfArchiveDirectory}testEnterTimeReal_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
 
-        // turn logging back on for other tests
-        testLogger.logSettings[LogTypes.DEBUG] = true
-        testLogger.logSettings[LogTypes.AUDIT] = true
     }
 
     /**
@@ -110,21 +97,19 @@ class ServerPerformanceTests {
 
         val port = port.getAndIncrement()
         startServer(port)
-
-        // so we don't see spam
-        testLogger.logSettings[LogTypes.DEBUG] = false
-        testLogger.logSettings[LogTypes.AUDIT] = false
-        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        val newProject = fs.businessCode.tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
+        val sessionId = fs.businessCode.au.createNewSession(user)
 
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
-        val makeTimeEntriesThreads = (1..2).map { es.submit(makeClientThreadRepeatedTimeEntries(20, newProject, port)) }
+        val makeTimeEntriesThreads = (1..2).map { es.submit(makeClientThreadRepeatedTimeEntries(20, newProject, sessionId)) }
         makeTimeEntriesThreads.forEach { it.get() }
 
         val (time, _) = getTime {
-            repeat(numberThreads) { es.submit(makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests, port)) }
+            val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedRequestsViewTimeEntries(numberRequests, sessionId)) }
+            realThreads.forEach { it.get() }
             es.shutdown()
             es.awaitTermination(10, TimeUnit.SECONDS)
         }
@@ -132,10 +117,6 @@ class ServerPerformanceTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testViewTime_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
-
-        // turn logging back on for other tests
-        testLogger.logSettings[LogTypes.DEBUG] = true
-        testLogger.logSettings[LogTypes.AUDIT] = true
     }
 
     /**
@@ -155,16 +136,15 @@ class ServerPerformanceTests {
         val port = port.getAndIncrement()
         startServer(port)
 
-        // so we don't see spam
-        testLogger.logSettings[LogTypes.DEBUG] = false
-        testLogger.logSettings[LogTypes.AUDIT] = false
-        val newUser = ap.createUser(DEFAULT_USER.name, Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT), DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
-        ap.addNewSession("abc123", newUser, DEFAULT_DATETIME)
+        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
+        val sessionId = fs.businessCode.au.createNewSession(user)
 
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
         val (time, _) = getTime {
-            repeat(numberThreads) { es.submit(makeClientThreadRepeatedRequestsViewHomepage(numberRequests, port)) }
+            val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedRequestsViewHomepage(numberRequests, sessionId)) }
+            realThreads.forEach { it.get() }
             es.shutdown()
             es.awaitTermination(10, TimeUnit.SECONDS)
         }
@@ -172,10 +152,6 @@ class ServerPerformanceTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testViewStaticContentAuthenticated_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
-
-        // turn logging back on for other tests
-        testLogger.logSettings[LogTypes.DEBUG] = true
-        testLogger.logSettings[LogTypes.AUDIT] = true
     }
 
     /**
@@ -194,14 +170,11 @@ class ServerPerformanceTests {
         val port = port.getAndIncrement()
         startServer(port)
 
-        // so we don't see spam
-        testLogger.logSettings[LogTypes.DEBUG] = false
-        testLogger.logSettings[LogTypes.AUDIT] = false
-
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
         val (time, _) = getTime {
-            repeat(numberThreads) { es.submit(makeClientThreadRepeatedRequestsGetStaticFile(numberRequests, port)) }
+            val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedRequestsGetStaticFile(numberRequests)) }
+            realThreads.forEach { it.get() }
             es.shutdown()
             es.awaitTermination(10, TimeUnit.SECONDS)
         }
@@ -209,10 +182,31 @@ class ServerPerformanceTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testViewStaticContentUnauthenticated_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
+    }
 
-        // turn logging back on for other tests
-        testLogger.logSettings[LogTypes.DEBUG] = true
-        testLogger.logSettings[LogTypes.AUDIT] = true
+
+    @IntegrationTest(usesPort = true)
+    @Category(PerformanceTestCategory::class)
+    @Test
+    fun testTechempowerAPI_PERFORMANCE() {
+        val numberThreads = 5
+        val numberRequests = 2
+
+        val port = port.getAndIncrement()
+        startServer(port)
+
+        val worlds = ITechempowerUtilities.generateWorlds()
+        fs.businessCode.tu.addRows(worlds)
+        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+
+        val (time, _) = getTime {
+            val realThreads = (1..numberThreads).map { es.submit(makeClientForTechempower(numberRequests)) }
+            realThreads.forEach { it.get() }
+            es.shutdown()
+            es.awaitTermination(10, TimeUnit.SECONDS)
+        }
+
+        println("Time was $time")
     }
 
 
@@ -229,10 +223,15 @@ class ServerPerformanceTests {
     /**
      * Simply GETs a user's time entries page
      */
-    private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int, port : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsViewTimeEntries(numRequests : Int, sessionId: String): Thread {
         return Thread {
             val client =
-                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fs.businessCode.au, port = port)
+                Client.make(
+                    Verb.GET,
+                    ViewTimeAPI.path,
+                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
+                    authUtilities = fs.businessCode.au,
+                    port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -244,10 +243,15 @@ class ServerPerformanceTests {
     /**
      * Simply GETs the homepage
      */
-    private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int, port : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsViewHomepage(numRequests : Int, sessionId: String): Thread {
         return Thread {
             val client =
-                Client.make(Verb.GET, ViewTimeAPI.path, listOf("Connection: keep-alive", "Cookie: sessionId=abc123"), authUtilities = fs.businessCode.au, port = port)
+                Client.make(
+                    Verb.GET,
+                    ViewTimeAPI.path,
+                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
+                    authUtilities = fs.businessCode.au,
+                    port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -260,10 +264,15 @@ class ServerPerformanceTests {
     /**
      * Simply GETs the general.css file
      */
-    private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int, port : Int): Thread {
+    private fun makeClientThreadRepeatedRequestsGetStaticFile(numRequests : Int): Thread {
         return Thread {
             val client =
-                Client.make(Verb.GET, "sample.js", listOf("Connection: keep-alive"), authUtilities = fs.businessCode.au, port = port)
+                Client.make(
+                    Verb.GET,
+                    "sample.js",
+                    listOf("Connection: keep-alive"),
+                    authUtilities = fs.businessCode.au,
+                    port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -276,16 +285,16 @@ class ServerPerformanceTests {
      * Enters time for a user on many days
      * @param numRequests The number of requests this client will send to the server.
      */
-    private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project, port : Int): Thread {
+    private fun makeClientThreadRepeatedTimeEntries(numRequests: Int, project: Project, sessionId: String): Thread {
         return Thread {
 
             val client =
                 Client.make(
                     Verb.POST,
                     EnterTimeAPI.path,
-                    listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
+                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
                     authUtilities = fs.businessCode.au,
-                    port = port
+                    port = fs.server.port
                 )
             for (i in 1..numRequests) {
                 val data = PostBodyData(mapOf(
@@ -301,7 +310,30 @@ class ServerPerformanceTests {
             }
         }
     }
-    
+
+
+
+    /**
+     * Simply GETs the general.css file
+     */
+    private fun makeClientForTechempower(numRequests : Int): Thread {
+        return Thread {
+            val client =
+                Client.make(
+                    Verb.GET,
+                    "updates?queries=20",
+                    listOf("Connection: keep-alive"),
+                    authUtilities = fs.businessCode.au,
+                    port = fs.server.port)
+            for (i in 1..numRequests) {
+                client.send()
+                val result = client.read()
+                Assert.assertEquals(StatusCode.OK, result.statusCode)
+            }
+        }
+    }
+
+
     companion object {
         val port = AtomicInteger(3000)
     }

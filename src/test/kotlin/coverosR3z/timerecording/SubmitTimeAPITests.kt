@@ -4,6 +4,8 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.fakeServerObjects
+import coverosR3z.fakeTechempower
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
@@ -43,7 +45,7 @@ class SubmitTimeAPITests {
             SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
             SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
         ))
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
 
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode
@@ -59,5 +61,14 @@ class SubmitTimeAPITests {
             "We should have gotten redirected to the viewTime page",
             StatusCode.SEE_OTHER, response
         )
+    }
+
+    private fun makeServerData(data: PostBodyData): ServerData {
+        val sd = ServerData(
+            BusinessCode(tru, au, fakeTechempower),
+            fakeServerObjects,
+            AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger
+        )
+        return sd
     }
 }

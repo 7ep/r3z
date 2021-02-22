@@ -15,6 +15,8 @@ import java.lang.IllegalStateException
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.time.*
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
 
 
@@ -110,6 +112,8 @@ class ServerUtilities {
         }
 
         private fun generateBasicServerResponseHeaders(data: PreparedResponseData): List<String> {
+            val date = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME)
+
             return listOf(
                 "$CONTENT_LENGTH: ${data.fileContents.size}",
 
@@ -125,7 +129,7 @@ class ServerUtilities {
                 "Server: R3z",
 
                 // today's date and time
-                "Date: ${DateTime.now().stringValue}",
+                "Date: $date",
             )
         }
 
@@ -159,8 +163,12 @@ class ServerUtilities {
                 if (ex.message?.contains("Connection reset") == true) {
                     logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
                 } else {
+                    logger.logWarn { "${ex.message}" }
                     throw ex
                 }
+            } catch (ex : Throwable) {
+                logger.logWarn { "${ex.message}" }
+                throw ex
             } finally {
                 logger.logTrace { "closing server socket" }
                 server.close()
@@ -220,10 +228,11 @@ class ServerUtilities {
                 // otherwise review the routing
                 // now that we know who the user is (if they authenticated) we can update the current user
                 val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
+
                 val dynamicResponse = RoutingUtilities.routeToEndpoint(
                     ServerData(
-                        businessCode.au,
-                        truWithUser,
+                        businessCode.copy(tru = truWithUser),
+                        serverObjects,
                         analyzedHttpData,
                         AuthUtilities.isAuthenticated(analyzedHttpData.user),
                         serverObjects.logger,

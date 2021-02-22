@@ -21,7 +21,7 @@ class LogoutAPI(private val sd: ServerData) {
     }
 
     fun generateLogoutPage(): String {
-        sd.au.logout(sd.ahd.user)
+        sd.bc.au.logout(sd.ahd.user)
         return PageComponents.makeTemplate("You have logged out", "LogoutAPI", logoutHTML, extraHeaderContent="""<link rel="stylesheet" href="logoutpage.css" />""")
     }
 

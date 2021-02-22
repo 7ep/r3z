@@ -7,6 +7,8 @@ import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
+import coverosR3z.fakeServerObjects
+import coverosR3z.fakeTechempower
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.utility.toStr
@@ -42,12 +44,7 @@ class LoginAPITests {
                 LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = ServerData(
-            au,
-            tru,
-            AnalyzedHttpData(data = data, user = DEFAULT_USER),
-            authStatus = AuthStatus.UNAUTHENTICATED,
-            logger = testLogger)
+        val sd = makeServerData(data)
         val responseData = LoginAPI.handlePost(sd)
 
         assertEquals("The system should take you to the authenticated homepage",
@@ -64,7 +61,7 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
         val responseData = LoginAPI.handlePost(sd)
 
         Assert.assertTrue("The system should indicate failure.  File was ${toStr(responseData.fileContents)}",
@@ -82,7 +79,7 @@ class LoginAPITests {
         val data = PostBodyData(mapOf(
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [password]", ex.message)
@@ -98,7 +95,7 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to "",
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
@@ -113,7 +110,7 @@ class LoginAPITests {
         val data = PostBodyData(mapOf(
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value))
 
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [username]", ex.message)
@@ -129,11 +126,20 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to ""))
 
-        val sd = ServerData(au, tru, AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger)
+        val sd = makeServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
 
+    }
+
+    private fun makeServerData(data: PostBodyData): ServerData {
+        val sd = ServerData(
+            BusinessCode(tru, au, fakeTechempower),
+            fakeServerObjects,
+            AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger
+        )
+        return sd
     }
 
 }

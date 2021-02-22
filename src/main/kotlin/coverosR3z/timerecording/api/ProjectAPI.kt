@@ -50,7 +50,7 @@ class ProjectAPI(private val sd: ServerData) {
     }
 
     fun handlePOST() : PreparedResponseData {
-        sd.tru.createProject(ProjectName.make(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()]))
+        sd.bc.tru.createProject(ProjectName.make(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()]))
         return redirectTo(HomepageAPI.path)
     }
 

@@ -59,7 +59,7 @@ class EnterTimeAPI(private val sd: ServerData) {
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
-        val tru = sd.tru
+        val tru = sd.bc.tru
         val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
         val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
@@ -83,7 +83,7 @@ class EnterTimeAPI(private val sd: ServerData) {
 
     private fun entertimeHTML() : String {
         val username = safeHtml(sd.ahd.user.name.value)
-        val projects = sd.tru.listAllProjects()
+        val projects = sd.bc.tru.listAllProjects()
 
         val body =  """
             <form action="$path" method="post">

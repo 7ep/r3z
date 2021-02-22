@@ -7,6 +7,7 @@ import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.persistence.types.AbstractDataAccess
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.toChangeTrackingSet
+import coverosR3z.techempower.types.World
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
@@ -21,14 +22,15 @@ import coverosR3z.timerecording.types.*
  *                      File("db/") the database will use that directory for all persistence.
  */
 open class PureMemoryDatabase(
+    protected val dbDirectory: String? = null,
+    private val diskPersistence: DatabaseDiskPersistence? = null,
     protected val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
     protected val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
     protected val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
     protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
     protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
     protected val submittedPeriods: ChangeTrackingSet<SubmittedPeriod> = ChangeTrackingSet(),
-    protected val dbDirectory : String? = null,
-    private val diskPersistence : DatabaseDiskPersistence? = null
+    protected val worlds: ChangeTrackingSet<World> = ChangeTrackingSet()
 ) {
 
     fun stop() {
@@ -43,6 +45,7 @@ open class PureMemoryDatabase(
             timeEntries = this.timeEntries.toList().toChangeTrackingSet(),
             sessions = this.sessions.toList().toChangeTrackingSet(),
             submittedPeriods = this.submittedPeriods.toList().toChangeTrackingSet(),
+            worlds = this.worlds.toList().toChangeTrackingSet(),
         )
     }
 
@@ -56,6 +59,7 @@ open class PureMemoryDatabase(
     inner class SessionDataAccess : AbstractDataAccess<Session>(sessions, diskPersistence, Session.directoryName)
     inner class TimeEntryDataAccess : AbstractDataAccess<TimeEntry>(timeEntries, diskPersistence, TimeEntry.directoryName)
     inner class SubmittedPeriodsAccess : AbstractDataAccess<SubmittedPeriod>(submittedPeriods, diskPersistence, SubmittedPeriod.directoryName)
+    inner class WorldDataAccess : AbstractDataAccess<World>(worlds, diskPersistence, SubmittedPeriod.directoryName)
 
 
     ////////////////////////////////////
@@ -76,6 +80,7 @@ open class PureMemoryDatabase(
         if (timeEntries != other.timeEntries) return false
         if (sessions != other.sessions) return false
         if (submittedPeriods != other.submittedPeriods) return false
+        if (worlds != other.worlds) return false
 
         return true
     }
@@ -87,6 +92,7 @@ open class PureMemoryDatabase(
         result = 31 * result + timeEntries.hashCode()
         result = 31 * result + sessions.hashCode()
         result = 31 * result + submittedPeriods.hashCode()
+        result = 31 * result + worlds.hashCode()
         return result
     }
 

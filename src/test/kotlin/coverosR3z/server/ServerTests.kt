@@ -7,6 +7,7 @@ import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.config.utility.SystemOptions
+import coverosR3z.fakeTechempower
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.*
@@ -69,7 +70,11 @@ class ServerTests {
         @JvmStatic
         @BeforeClass
         fun initServer() {
-            fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = sslTestPort), businessCode = BusinessCode(tru, au))
+            fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = sslTestPort), businessCode = BusinessCode(
+                tru,
+                au,
+                fakeTechempower
+            ))
         }
 
         @JvmStatic

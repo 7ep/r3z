@@ -51,7 +51,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
     }
 
     fun createEmployee() : PreparedResponseData {
-        sd.tru.createEmployee(EmployeeName.make(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()]))
+        sd.bc.tru.createEmployee(EmployeeName.make(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()]))
         return okHTML(successHTML)
     }
 

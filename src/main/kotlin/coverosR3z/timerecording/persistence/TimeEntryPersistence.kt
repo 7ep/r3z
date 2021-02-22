@@ -50,10 +50,7 @@ class TimeEntryPersistence(
 
         check (oldEntry.employee == newEntry.employee) {"Employee field of a time entry may not be changed"}
 
-        pmd.TimeEntryDataAccess().actOn { entries ->
-            entries.remove(oldEntry)
-            entries.add(newEntry)
-        }
+        pmd.TimeEntryDataAccess().actOn { entries -> entries.update(newEntry)}
 
         logger.logDebug(cu) {"modified an existing timeEntry: $newEntry"}
         logger.logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $newEntry" }

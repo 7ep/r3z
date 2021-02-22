@@ -1,7 +1,6 @@
 package coverosR3z.persistence.types
 
-import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.CREATE
-import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.DELETE
+import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import java.util.*
 
@@ -16,31 +15,44 @@ import java.util.*
  * @param T is the domain-oriented type, such as Project or Employee.
  *        The database expects all data to be a set of [ChangeTrackingSet]
  */
-abstract class AbstractDataAccess<T> (
+abstract class AbstractDataAccess<T: IndexableSerializable> (
     private val data : ChangeTrackingSet<T>,
     private val dbp : DatabaseDiskPersistence? = null,
     private val name: String)
-    : DataAccess<T>
-        where T : IndexableSerializable {
+   {
 
-    override fun <R> actOn(action: (ChangeTrackingSet<T>) -> R): R {
+    /**
+     * carry out some write action on the data.
+     *
+     * This has to be synchronized because there's no other atomic way to
+     * make changes to both the database *and* the disk.
+     *
+     * @param action a lambda to receive the set of data and do whatever you want with it
+     */
+    @Synchronized
+    fun <R> actOn(action: (ChangeTrackingSet<T>) -> R): R {
         val result = action.invoke(data)
 
-        do {
-            val nextItem = data.modified.poll()
-            if (nextItem != null) {
-                when (nextItem.second) {
-                    CREATE -> dbp?.persistToDisk(nextItem.first, name)
-                    DELETE -> dbp?.deleteOnDisk(nextItem.first, name)
+        if (dbp != null) {
+            do {
+                val nextItem = data.modified.poll()
+                if (nextItem != null) {
+                    when (nextItem.second) {
+                        CREATE -> dbp.persistToDisk(nextItem.first, name)
+                        DELETE -> dbp.deleteOnDisk(nextItem.first, name)
+                        UPDATE -> dbp.updateOnDisk(nextItem.first, name)
+                    }
                 }
-            }
+            } while (nextItem != null)
         }
-        while (nextItem != null)
-
         return result
     }
 
-    override fun <R> read(action: (Set<T>) -> R): R {
+    /**
+     * carry out some readonly action on the data.
+     * @param action a lambda to receive the set of data and do whatever you want with it
+     */
+    fun <R> read(action: (Set<T>) -> R): R {
         return action.invoke(Collections.unmodifiableSet(data))
     }
 

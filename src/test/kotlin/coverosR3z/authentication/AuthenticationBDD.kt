@@ -5,12 +5,11 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.bddframework.BDD
+import coverosR3z.fakeServerObjects
+import coverosR3z.fakeTechempower
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.server.types.AnalyzedHttpData
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
@@ -140,8 +139,8 @@ class AuthenticationBDD {
         val data =
             PostBodyData(mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1"))
         val sd = ServerData(
-            au,
-            FakeTimeRecordingUtilities(),
+            BusinessCode(FakeTimeRecordingUtilities(), au, fakeTechempower),
+            fakeServerObjects,
             AnalyzedHttpData(data = data, user = DEFAULT_USER),
             authStatus = AuthStatus.UNAUTHENTICATED,
             testLogger
