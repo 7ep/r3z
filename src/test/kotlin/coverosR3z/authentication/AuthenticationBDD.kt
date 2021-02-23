@@ -153,7 +153,7 @@ class AuthenticationBDD {
 
     private fun doSuccessfulRegistration(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
         val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
         return au
@@ -169,14 +169,14 @@ class AuthenticationBDD {
 
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
         au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
         return au
     }
@@ -194,7 +194,7 @@ class AuthenticationBDD {
     private fun startWithEmptyDatabase(): Pair<PureMemoryDatabase, AuthenticationUtilities> {
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
         return Pair(pmd, au)
     }
 

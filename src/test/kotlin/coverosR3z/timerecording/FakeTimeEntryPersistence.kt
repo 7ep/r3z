@@ -16,6 +16,7 @@ class FakeTimeEntryPersistence(
     var minutesRecorded : Time = Time(0),
     var persistNewTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     var persistNewProjectBehavior : () -> Project = { DEFAULT_PROJECT },
+    var persistNewEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
@@ -42,7 +43,7 @@ class FakeTimeEntryPersistence(
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
-        return DEFAULT_EMPLOYEE
+        return persistNewEmployeeBehavior()
     }
 
 

@@ -18,6 +18,7 @@ class FakeAuthPersistence(
     var deleteSessionBehavior : () -> Unit = {},
     var getAllSessionBehavior : () -> Set<Session> = { setOf() },
     var getAllUsersBehavior : () -> Set<User> = { setOf() },
+    var addRoleToUserBehavior: () -> User = { NO_USER },
 ) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId) : User {
@@ -50,6 +51,10 @@ class FakeAuthPersistence(
 
     override fun getAllUsers(): Set<User> {
         return getAllUsersBehavior()
+    }
+
+    override fun addRoleToUser(userName: UserName, role: Roles): User {
+        return addRoleToUserBehavior()
     }
 
 }
