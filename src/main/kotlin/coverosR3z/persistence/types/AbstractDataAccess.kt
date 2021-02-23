@@ -33,6 +33,11 @@ abstract class AbstractDataAccess<T: IndexableSerializable> (
     fun <R> actOn(action: (ChangeTrackingSet<T>) -> R): R {
         val result = action.invoke(data)
 
+        // if the data set is now empty, reset the nextIndex to 1
+        if (data.isEmpty()) {
+            data.nextIndex.set(1)
+        }
+
         if (dbp != null) {
             do {
                 val nextItem = data.modified.poll()

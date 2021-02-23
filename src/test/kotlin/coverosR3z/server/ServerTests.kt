@@ -70,7 +70,7 @@ class ServerTests {
         @JvmStatic
         @BeforeClass
         fun initServer() {
-            fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = sslTestPort), businessCode = BusinessCode(
+            fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = sslTestPort, dbDirectory = "build/db/servertests"), businessCode = BusinessCode(
                 tru,
                 au,
                 fakeTechempower

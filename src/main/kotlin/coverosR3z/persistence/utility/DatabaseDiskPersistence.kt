@@ -53,13 +53,9 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         actionQueue.enqueue { File(parentDirectory).mkdirs() }
 
         val fullPath = "$parentDirectory/${item.getIndex()}$databaseFileSuffix"
-        // we save the next index each time.  This way we can be more consistent
-        // since we allow deleting data, even to the point that all data can be deleted.
-        val nextIndexPath = "$parentDirectory/$nextIndexFileName$databaseFileSuffix"
 
         actionQueue.enqueue {
             File(fullPath).writeText(item.serialize())
-            File(nextIndexPath).writeText((item.getIndex() + 1).toString())
         }
     }
 
@@ -173,7 +169,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val data = ChangeTrackingSet<T>()
         dataDirectory
             .walkTopDown()
-            .filter {it.isFile && it.nameWithoutExtension != nextIndexFileName}
+            .filter {it.isFile}
             .forEach {
                 val fileContents = it.readText()
                 if (fileContents.isBlank()) {
@@ -183,16 +179,12 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
                 }
             }
 
-
-        val nextIndexFile = File("$dbDirectoryWithVersion$dataName/$nextIndexFileName$databaseFileSuffix")
-        val nextIndex = if (! nextIndexFile.exists()) 1 else checkParseToInt(nextIndexFile.readText())
-        data.nextIndex.set(nextIndex)
+        if (data.isEmpty()) data.nextIndex.set(1) else data.nextIndex.set(data.maxOf { it.getIndex() } + 1)
         return data
     }
 
     companion object {
         const val databaseFileSuffix = ".db"
-        const val nextIndexFileName = "nextindex"
 
         private val serializedStringRegex = """ (.*?): (.*?) """.toRegex()
 

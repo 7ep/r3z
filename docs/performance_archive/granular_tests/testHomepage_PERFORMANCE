@@ -230,3 +230,6 @@
 2021-02-22	numberOfThreads: 10	numberOfRequests: 300	time: 1044
 2021-02-22	numberOfThreads: 10	numberOfRequests: 300	time: 495
 2021-02-22	numberOfThreads: 10	numberOfRequests: 300	time: 488
+2021-02-23	numberOfThreads: 10	numberOfRequests: 300	time: 555
+2021-02-23	numberOfThreads: 10	numberOfRequests: 300	time: 278
+2021-02-23	numberOfThreads: 10	numberOfRequests: 300	time: 601
