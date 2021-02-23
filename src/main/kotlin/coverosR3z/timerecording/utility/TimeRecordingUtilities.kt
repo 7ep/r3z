@@ -1,6 +1,8 @@
 package coverosR3z.timerecording.utility
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.Roles
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.Date
@@ -89,6 +91,9 @@ class TimeRecordingUtilities(
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
+        if(cu.user.role != Roles.ADMIN) {
+            throw UnpermittedOperationException("Only admins can create projects. You, however, are a ${cu.user.role}, you peon.")
+        }
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
         return persistence.persistNewProject(projectName)
@@ -104,7 +109,9 @@ class TimeRecordingUtilities(
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
-
+        if (cu.user.role != Roles.ADMIN) {
+            throw UnpermittedOperationException("Current user ${cu.user.name.value} must have role ADMIN to create an employee")
+        }
         val newEmployee = persistence.persistNewEmployee(employeename)
         logger.logAudit(cu) {"Creating a new employee, \"${newEmployee.name.value}\""}
         return newEmployee

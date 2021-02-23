@@ -39,6 +39,7 @@ interface IAuthenticationUtilities {
      * Wipes out the session entry for this user
      */
     fun logout(user: User)
+    fun addRoleToUser(user: User, role: Roles): User
 
 
 }

@@ -2,16 +2,27 @@ package coverosR3z.timerecording
 
 import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
 import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.Hash
+import coverosR3z.authentication.types.Password
+import coverosR3z.authentication.types.Salt
+import coverosR3z.authentication.types.UserName
+import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.fakeServerObjects
 import coverosR3z.fakeTechempower
+import coverosR3z.logging.Logger
 import coverosR3z.misc.DEFAULT_USER_SYSTEM_EMPLOYEE
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.testLogger
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.CreateEmployeeAPI.Elements
+import coverosR3z.timerecording.types.EmployeeId
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -22,8 +33,8 @@ import org.junit.experimental.categories.Category
 class CreateEmployeeAPITests {
 
 
-    lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
+    lateinit var au : FakeAuthenticationUtilities
+    lateinit var tru : FakeTimeRecordingUtilities
 
     @Before
     fun init() {
@@ -41,6 +52,35 @@ class CreateEmployeeAPITests {
         val sd = makeServerData(data)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+    }
+
+    /**
+     * Positive case
+     * Angela, an admin should be able to make new employees
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testHandlePOSTNewEmployeeAsAdmin() {
+        au.login(UserName("Angela"), Password("password12345"))
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
+        val sd = makeServerData(data)
+
+        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+    }
+
+    /**
+     * Negative test
+     * Max, an employee, can't make employees
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testHandlePOSTNewEmployeeAsEmployee() {
+        au.login(UserName("Max"), Password("password12345"))
+        tru.createEmployeeBehavior = { throw IllegalStateException("This is bad, you are bad") }
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
+        val sd = makeServerData(data)
+
+        assertThrows(java.lang.IllegalStateException::class.java) { CreateEmployeeAPI.handlePost(sd).statusCode }
     }
 
     /**

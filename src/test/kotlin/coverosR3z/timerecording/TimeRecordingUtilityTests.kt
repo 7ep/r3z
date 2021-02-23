@@ -1,5 +1,6 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -8,10 +9,22 @@ import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
 class TimeRecordingUtilityTests {
+
+    private lateinit var tru : TimeRecordingUtilities
+    private lateinit var tep : FakeTimeEntryPersistence
+    private lateinit var cu : CurrentUser
+
+    @Before
+    fun init() {
+        tep = FakeTimeEntryPersistence()
+        cu = CurrentUser(DEFAULT_ADMIN_USER)
+        tru = TimeRecordingUtilities(tep, cu, testLogger)
+    }
 
     /**
      * Happy path - record time successfully
@@ -95,6 +108,7 @@ class TimeRecordingUtilityTests {
      * any more time when we've already recorded the maximum for the day?
      * (It should throw an exception)
      */
+    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
         val twentyThreeHours = Time(23 * 60)
@@ -268,11 +282,12 @@ class TimeRecordingUtilityTests {
      * Given we have a time entry in the database, let's
      * edit its values
      */
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry() {
         // arrange
         testLogger.turnOnAllLogging()
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), CurrentUser(DEFAULT_USER), testLogger)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), cu, testLogger)
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val (_, newTimeEntry) = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -291,10 +306,11 @@ class TimeRecordingUtilityTests {
      * Nothing much different should take place if we're overwriting
      * with the exact same values, just want to make that explicit in a test
      */
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_Unchanged() {
         // arrange
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), CurrentUser(DEFAULT_USER), testLogger)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), cu, testLogger)
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val result = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -309,10 +325,11 @@ class TimeRecordingUtilityTests {
     /**
      * Someone who isn't this employee cannot change the time entry
      */
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_DisallowDifferentEmployeeToChange() {
         // arrange
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), CurrentUser(DEFAULT_USER), testLogger)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), cu, testLogger)
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val result: RecordTimeResult = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -330,10 +347,11 @@ class TimeRecordingUtilityTests {
         assertEquals(expected, actual)
     }
 
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_InvalidProject() {
         // arrange
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), CurrentUser(DEFAULT_USER), testLogger)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), cu, testLogger)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         tru.createProject(DEFAULT_PROJECT_NAME)
         val (_, newTimeEntry) = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -390,7 +408,7 @@ class TimeRecordingUtilityTests {
     fun testSubmitTime() {
         val pmd = PureMemoryDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
-        val tru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_USER), testLogger)
+        val tru = TimeRecordingUtilities(tep, cu, testLogger)
         val project = tru.createProject(DEFAULT_PROJECT_NAME)
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         tru.changeUser(CurrentUser(User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, employee.id)))
@@ -430,4 +448,87 @@ class TimeRecordingUtilityTests {
         assertTrue(allEntriesForPeriod.any())
     }
 
+
+//    /** Happy happy
+//     *
+//     */
+//    @Test
+//    fun testHandleRealCreateNewEmployee() {
+//        val pmd = PureMemoryDatabase()
+//        val logger = Logger()
+//        val ap = AuthenticationPersistence(pmd, logger)
+//        val rau = AuthenticationUtilities(ap, logger)
+//
+//        val cu = ap.createUser(UserName("angela"), Hash("password12345"), Salt("adfs"), EmployeeId(0))
+//        ap.addRoleToUser(UserName("angela"), Roles.ADMIN)
+//
+//        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, CurrentUser(cu), testLogger), CurrentUser(cu), testLogger)
+//
+//        val angelaRole = pmd.UserDataAccess().read{ users -> users.singleOrNull{u -> u.name == UserName("angela")}}!!.role
+//        assertEquals(Roles.ADMIN, angelaRole)
+//
+//        val emp = tru.createEmployee(EmployeeName("ryan \"Kenney\" mcgee"))
+//
+//        rau.register(UserName("ryan.kenney"), Password("skiddaddyskeedoo"), emp.id)
+//        assertTrue(rau.isUserRegistered(UserName("ryan.kenney")))
+//
+//    }
+
+    @Test
+    fun testHandleRealCreateNewEmployee() {
+        val expectedEmployee = Employee(EmployeeId(1), EmployeeName("ryan \"Kenney\" mcgee"))
+        tep.persistNewEmployeeBehavior = {expectedEmployee }
+        val newEmployee = tru.createEmployee(expectedEmployee.name)
+        assertEquals(expectedEmployee, newEmployee)
+    }
+
+    @Test
+    fun testCantHandleThePowerOfCreation() {
+        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_EMPLOYEE_USER), testLogger)
+        assertThrows(UnpermittedOperationException::class.java) {tru.createEmployee(EmployeeName("ryan \"Kenney\" mcgee"))}
+    }
+
+    @Test
+    fun testCantHandleThePowerOfProjectCreation() {
+        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_EMPLOYEE_USER), testLogger)
+        assertThrows(UnpermittedOperationException::class.java) {tru.createProject(ProjectName("Chungus amongus"))}
+    }
+
+    // employee can:
+    /*
+   createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult
+   changeEntry(entry: TimeEntry): RecordTimeResult
+   getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
+   getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
+   listAllProjects(): List<Project>
+   findProjectById(id: ProjectId): Project
+   findEmployeeById(id: EmployeeId): Employee
+   listAllEmployees(): List<Employee>
+   submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+   unsubmitTimePeriod(timePeriod: TimePeriod)
+   getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+   getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
+   isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
+
+   employee cannot:
+   createProject(projectName: ProjectName) : Project
+   createEmployee(employeename: EmployeeName) : Employee
+
+   // admin can do everything:
+      createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult
+   changeEntry(entry: TimeEntry): RecordTimeResult
+   createProject(projectName: ProjectName) : Project
+   createEmployee(employeename: EmployeeName) : Employee
+   getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
+   getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
+   listAllProjects(): List<Project>
+   findProjectById(id: ProjectId): Project
+   findEmployeeById(id: EmployeeId): Employee
+   listAllEmployees(): List<Employee>
+   submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+   unsubmitTimePeriod(timePeriod: TimePeriod)
+   getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
+   getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
+   isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
+    */
 }
