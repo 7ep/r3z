@@ -15,6 +15,7 @@ class FakeAuthenticationUtilities (
     var getUserForSessionBehavior: () -> User = { NO_USER },
     var createNewSessionBehavior: () -> String = {""},
     var logoutBehavior: () -> Unit = {},
+    var addRoleToUserBehavior: () -> User = { SYSTEM_USER }
     ) : IAuthenticationUtilities {
 
     override fun register(username: UserName, password: Password, employeeId: EmployeeId): RegistrationResult {
@@ -35,6 +36,10 @@ class FakeAuthenticationUtilities (
 
     override fun logout(user: User) {
         logoutBehavior()
+    }
+
+    override fun addRoleToUser(user: User, role: Roles): User {
+        return addRoleToUserBehavior()
     }
 
 

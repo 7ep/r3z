@@ -21,6 +21,7 @@ import coverosR3z.techempower.persistence.TechempowerPersistence
 import coverosR3z.techempower.utility.TechempowerUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
+
 import java.io.File
 import java.net.Socket
 import java.util.concurrent.*
@@ -182,7 +183,7 @@ class FullSystem private constructor(
             val tu = TechempowerUtilities(tp)
 
             val ap = AuthenticationPersistence(pmd, logger)
-            val au = AuthenticationUtilities(ap, logger)
+            val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
             return BusinessCode(tru, au, tu)
         }
 

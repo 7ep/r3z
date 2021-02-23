@@ -33,6 +33,8 @@ val DEFAULT_PASSWORD = Password("password1234")
 val DEFAULT_HASH = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
 const val DEFAULT_HASH_STRING = "4dc91e9a80320c901f51ccf7166d646c"
 val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1))
+val DEFAULT_EMPLOYEE_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.EMPLOYEE)
+val DEFAULT_ADMIN_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.ADMIN)
 val DEFAULT_USER_2 = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(2))
 val DEFAULT_USER_SYSTEM_EMPLOYEE = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(0))
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
@@ -75,7 +77,7 @@ fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilitie
 fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val pmd = PureMemoryDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
 
         val systemTru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(SYSTEM_USER), testLogger)
         val aliceEmployee = systemTru.createEmployee(EmployeeName("Alice"))
@@ -84,7 +86,7 @@ fun initializeAUserAndLogin() : Pair<TimeRecordingUtilities, Employee>{
         val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(aliceUser), testLogger)
-
+        authPersistence.addRoleToUser(aliceUser.name, Roles.ADMIN)
         // Perform some quick checks
         Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))
 

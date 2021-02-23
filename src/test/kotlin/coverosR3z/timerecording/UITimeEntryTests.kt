@@ -49,6 +49,15 @@ class UITimeEntryTests {
         logout()
     }
 
+    private fun `createEmployee - I, an admin, should be able to create an employee`() {
+
+    }
+
+    private fun `createEmployee - I, an employee, should not be able to create an employee`() {
+
+    }
+
+
     private fun `editTime - An employee should be able to edit the number of hours worked from a previous time entry`() {
         val s = EditTimeUserStory.getScenario("editTime - An employee should be able to edit the number of hours worked from a previous time entry")
 

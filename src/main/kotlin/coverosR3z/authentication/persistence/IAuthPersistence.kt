@@ -13,4 +13,5 @@ interface IAuthPersistence {
     fun deleteSession(user: User)
     fun getAllSessions(): Set<Session>
     fun getAllUsers(): Set<User>
+    fun addRoleToUser(userName: UserName, role: Roles): User
 }

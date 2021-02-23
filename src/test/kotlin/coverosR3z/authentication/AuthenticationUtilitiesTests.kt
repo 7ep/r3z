@@ -1,5 +1,6 @@
 package coverosR3z.authentication
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
@@ -13,8 +14,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 
 class AuthenticationUtilitiesTests {
     private lateinit var authUtils : AuthenticationUtilities
@@ -23,7 +22,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, testLogger)
+        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
     }
 
     @Test
@@ -296,7 +295,7 @@ class AuthenticationUtilitiesTests {
         File(dbDirectory).deleteRecursively()
         val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
 
         // we have to register users so reloading the data from disk works
         val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
@@ -325,13 +324,31 @@ class AuthenticationUtilitiesTests {
      * If somehow the user were to able to attempt to logout
      * while already logged out, an exception should be thrown
      */
+    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
         val pmd = PureMemoryDatabase()
-        val au = AuthenticationUtilities(AuthenticationPersistence(pmd, testLogger), testLogger)
+        val au = AuthenticationUtilities(
+            AuthenticationPersistence(pmd, testLogger),
+            testLogger,
+            CurrentUser(DEFAULT_EMPLOYEE_USER)
+        )
 
         val ex = assertThrows(IllegalStateException::class.java) { au.logout(DEFAULT_USER) }
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
+    }
+
+    @Test
+    fun testAdminShouldAddRoleToUser() {
+        ap.addRoleToUserBehavior = { DEFAULT_ADMIN_USER }
+        val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Roles.ADMIN)
+        assertEquals(DEFAULT_ADMIN_USER, elevatedUser)
+    }
+
+    @Test
+    fun testRegularUserCantAddRoleToUser() {
+        val au = AuthenticationUtilities(FakeAuthPersistence(), testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
+        assertThrows(UnpermittedOperationException::class.java) {authUtils.addRoleToUser(DEFAULT_USER, Roles.ADMIN)}
     }
 
 }

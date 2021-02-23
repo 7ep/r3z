@@ -39,7 +39,7 @@ val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Pas
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0))
+val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0), role = Roles.ADMIN)
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -76,7 +76,9 @@ data class Salt(val value: String) {
 
 }
 
-data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Salt, val employeeId: EmployeeId) :
+data class User(val id: UserId, val name: UserName,
+                val hash: Hash, val salt: Salt,
+                val employeeId: EmployeeId, var role: Roles = Roles.EMPLOYEE) :
     IndexableSerializable() {
 
     override fun getIndex(): Int {
@@ -89,7 +91,8 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
             Keys.NAME to name.value,
             Keys.HASH to hash.value,
             Keys.SALT to salt.value,
-            Keys.EMPLOYEE_ID to "${employeeId.value}"
+            Keys.EMPLOYEE_ID to "${employeeId.value}",
+            Keys.ROLE to role.toString()
         )
 
     class Deserializer : Deserializable<User> {
@@ -101,12 +104,15 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
 
                 val empId = EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID]))
 
+                val role = Roles.valueOf(entries[Keys.ROLE]!!)
+
                 User(
                     UserId(id),
                     UserName.make(entries[Keys.NAME]),
                     Hash.make(entries[Keys.HASH]),
                     Salt.make(entries[Keys.SALT]),
-                    empId)
+                    empId,
+                    role)
             }
         }
     }
@@ -123,7 +129,8 @@ data class User(val id: UserId, val name: UserName, val hash: Hash, val salt: Sa
         NAME("name"),
         HASH("hash"),
         SALT("salt"),
-        EMPLOYEE_ID("empId");
+        EMPLOYEE_ID("empId"),
+        ROLE("role");
 
         /**
          * This needs to be a method and not just a value of the class

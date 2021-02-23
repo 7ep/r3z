@@ -255,7 +255,11 @@ class EnterTimeAPITests {
         // set up real database
         val pmd = PureMemoryDatabase()
         val tep  = TimeEntryPersistence(pmd, logger = testLogger)
-        val au = AuthenticationUtilities(AuthenticationPersistence(pmd, logger = testLogger), testLogger)
+        val au = AuthenticationUtilities(
+            AuthenticationPersistence(pmd, logger = testLogger),
+            testLogger,
+            CurrentUser(DEFAULT_EMPLOYEE_USER)
+        )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val user = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id).user
         val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
