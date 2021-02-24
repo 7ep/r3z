@@ -1,10 +1,10 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.UserName
+import coverosR3z.authentication.types.*
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.types.EmployeeId
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -119,6 +119,15 @@ class AuthenticationPersistenceTests {
         // wait for all those threads
         listOfThreads.forEach{it.get()}
         assertEquals(numberNewUsersAdded, ap.getAllUsers().size)
+    }
+
+    @Test
+    fun testAddRoleToUser() {
+        val expected = DEFAULT_USER.copy(role = Roles.ADMIN)
+        val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
+        ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employeeId)
+        val result = ap.addRoleToUser(DEFAULT_USER.name, Roles.ADMIN)
+        assertEquals(expected, result)
     }
 
 }
