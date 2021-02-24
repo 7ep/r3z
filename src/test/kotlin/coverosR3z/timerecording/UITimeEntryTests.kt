@@ -1,5 +1,6 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.types.Roles
 import coverosR3z.bddframework.BDD
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
@@ -289,6 +290,8 @@ class UITimeEntryTests {
         logout()
         // register and login the Admin
         pom.rp.register(adminUsername, adminPassword, "Administrator")
+        val user = pom.pmd.UserDataAccess().read { users -> users.single{ it.name.value == adminUsername }}
+        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
         pom.lp.login(adminUsername, adminPassword)
 
         // Create a default project

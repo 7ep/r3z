@@ -1,5 +1,6 @@
 package coverosR3z.authentication.utility
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.ILogger
@@ -78,6 +79,10 @@ class AuthenticationUtilities(
     }
 
     override fun addRoleToUser(user: User, role: Roles) : User {
+        val currentUserRole = currentUser.role
+        if (currentUserRole != Roles.ADMIN){
+            throw UnpermittedOperationException("Must be an Admin to do this action, you are a $currentUserRole")
+        }
         return ap.addRoleToUser(user.name, role)
     }
 

@@ -39,7 +39,7 @@ class TimeRecordingUtilities(
     }
 
     private fun createOrModifyEntry(entry: TimeEntryPreDatabase, behavior: () -> TimeEntry): RecordTimeResult{
-        val user = cu.user
+        val user = cu
         // ensure time entry user is the logged in user, or
         // is the system
         if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
@@ -91,8 +91,8 @@ class TimeRecordingUtilities(
      */
     override fun createProject(projectName: ProjectName) : Project {
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        if(cu.user.role != Roles.ADMIN) {
-            throw UnpermittedOperationException("Only admins can create projects. You, however, are a ${cu.user.role}, you peon.")
+        if(cu.role != Roles.ADMIN) {
+            throw UnpermittedOperationException("Only admins can create projects. You, however, are a ${cu.role}, you peon.")
         }
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
@@ -109,8 +109,8 @@ class TimeRecordingUtilities(
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
-        if (cu.user.role != Roles.ADMIN) {
-            throw UnpermittedOperationException("Current user ${cu.user.name.value} must have role ADMIN to create an employee")
+        if (cu.role != Roles.ADMIN) {
+            throw UnpermittedOperationException("Current user ${cu.name.value} must have role ADMIN to create an employee")
         }
         val newEmployee = persistence.persistNewEmployee(employeename)
         logger.logAudit(cu) {"Creating a new employee, \"${newEmployee.name.value}\""}
@@ -144,16 +144,16 @@ class TimeRecordingUtilities(
     }
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
-        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
+        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
     }
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
-        val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
+        val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
         return persistence.unsubmitTimePeriod(submittedPeriod)
     }
 
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod) : SubmittedPeriod {
-        return persistence.getSubmittedTimePeriod(checkNotNull(cu.user.employeeId), timePeriod)
+        return persistence.getSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
     }
 
     override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {

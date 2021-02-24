@@ -22,7 +22,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
+        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_ADMIN_USER))
     }
 
     @Test
@@ -347,7 +347,8 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun testRegularUserCantAddRoleToUser() {
-        assertThrows(UnpermittedOperationException::class.java) {authUtils.addRoleToUser(DEFAULT_USER, Roles.ADMIN)}
+        val au = AuthenticationUtilities(FakeAuthPersistence(), testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
+        assertThrows(UnpermittedOperationException::class.java) {au.addRoleToUser(DEFAULT_USER, Roles.ADMIN)}
     }
 
 }

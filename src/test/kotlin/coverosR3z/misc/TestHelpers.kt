@@ -33,7 +33,7 @@ val DEFAULT_PASSWORD = Password("password1234")
 val DEFAULT_HASH = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
 const val DEFAULT_HASH_STRING = "4dc91e9a80320c901f51ccf7166d646c"
 val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1))
-val DEFAULT_EMPLOYEE_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.EMPLOYEE)
+val DEFAULT_EMPLOYEE_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.REGULAR)
 val DEFAULT_ADMIN_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.ADMIN)
 val DEFAULT_USER_2 = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(2))
 val DEFAULT_USER_SYSTEM_EMPLOYEE = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(0))
@@ -66,7 +66,7 @@ fun createTimeEntryPreDatabase(
  * A test helper method to generate a [TimeRecordingUtilities]
  * with a real database connected
  */
-fun createTimeRecordingUtility(user : User = SYSTEM_USER): TimeRecordingUtilities {
+fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingUtilities {
         val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger)
         return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)
 }
