@@ -42,7 +42,7 @@ class TestLogger : ILogger {
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
         if (logSettings[LogTypes.AUDIT] == true) {
-            println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: ${msg()}")
+            println("${getCurrentMillis()} AUDIT: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -51,7 +51,7 @@ class TestLogger : ILogger {
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.DEBUG] == true) {
-            println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: ${msg()}")
+            println("${getCurrentMillis()} DEBUG: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -60,7 +60,7 @@ class TestLogger : ILogger {
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.TRACE] == true) {
-            println("${getCurrentMillis()} TRACE: ${cu.user.name.value}: ${msg()}")
+            println("${getCurrentMillis()} TRACE: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -70,7 +70,7 @@ class TestLogger : ILogger {
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.WARN] == true) {
-            println("${getCurrentMillis()} ${cu.user.name.value}: WARN: ${msg()}")
+            println("${getCurrentMillis()} ${cu.name.value}: WARN: ${msg()}")
         }
     }
 
