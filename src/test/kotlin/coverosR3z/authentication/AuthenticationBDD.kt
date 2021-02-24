@@ -127,9 +127,7 @@ class AuthenticationBDD {
     companion object {
 
         private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
-            val (tru, _) = initializeAUserAndLogin()
-            val sarah = tru.createEmployee(EmployeeName("Sarah")) // Sarah will have id=2
-
+            val (tru, _, sarah) = initializeAUserAndLogin()
             return Pair(tru, sarah)
         }
 

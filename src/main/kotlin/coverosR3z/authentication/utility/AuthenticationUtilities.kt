@@ -6,9 +6,10 @@ import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.DateTime
 import coverosR3z.timerecording.types.EmployeeId
 
-
-class AuthenticationUtilities(private val ap: IAuthPersistence, val logger: ILogger, currentUser: CurrentUser=CurrentUser(
-    SYSTEM_USER)) : IAuthenticationUtilities {
+class AuthenticationUtilities(
+    private val ap: IAuthPersistence,
+    val logger: ILogger,
+    val currentUser: CurrentUser = CurrentUser(SYSTEM_USER)) : IAuthenticationUtilities {
 
     /**
      * Register a user through auth persistent, providing a username, password, and employeeId
