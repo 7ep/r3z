@@ -1,9 +1,9 @@
-package coverosR3z.authentication
+package coverosR3z.authentication.utility
 
+import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
@@ -22,7 +22,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_ADMIN_USER))
+        authUtils = AuthenticationUtilities(ap, testLogger)
     }
 
     @Test
@@ -295,7 +295,7 @@ class AuthenticationUtilitiesTests {
         File(dbDirectory).deleteRecursively()
         val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
+        val au = AuthenticationUtilities(authPersistence, testLogger)
 
         // we have to register users so reloading the data from disk works
         val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
@@ -331,7 +331,6 @@ class AuthenticationUtilitiesTests {
         val au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, testLogger),
             testLogger,
-            CurrentUser(DEFAULT_EMPLOYEE_USER)
         )
 
         val ex = assertThrows(IllegalStateException::class.java) { au.logout(DEFAULT_USER) }
@@ -347,7 +346,7 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun testRegularUserCantAddRoleToUser() {
-        val au = AuthenticationUtilities(FakeAuthPersistence(), testLogger, CurrentUser(DEFAULT_EMPLOYEE_USER))
+        val au = AuthenticationUtilities(FakeAuthPersistence(), testLogger, CurrentUser(DEFAULT_REGULAR_USER))
         assertThrows(UnpermittedOperationException::class.java) {au.addRoleToUser(DEFAULT_USER, Roles.ADMIN)}
     }
 

@@ -1,6 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
 import coverosR3z.fakeTechempower
 import coverosR3z.misc.DEFAULT_DATE_STRING
