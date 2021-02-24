@@ -76,13 +76,46 @@ data class Salt(val value: String) {
 
 }
 
-data class User(val id: UserId, val name: UserName,
+open class User(val id: UserId, val name: UserName,
                 val hash: Hash, val salt: Salt,
-                val employeeId: EmployeeId, var role: Roles = Roles.EMPLOYEE) :
+                val employeeId: EmployeeId, var role: Roles = Roles.REGULAR) :
     IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
+    }
+
+    fun copy(id: UserId=this.id, name: UserName=this.name,
+             hash: Hash=this.hash, salt: Salt=this.salt,
+             employeeId: EmployeeId=this.employeeId,
+             role: Roles = this.role): User {
+        return User(id, name, hash, salt, employeeId, role)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as User
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (hash != other.hash) return false
+        if (salt != other.salt) return false
+        if (employeeId != other.employeeId) return false
+        if (role != other.role) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + hash.hashCode()
+        result = 31 * result + salt.hashCode()
+        result = 31 * result + employeeId.hashCode()
+        result = 31 * result + role.hashCode()
+        return result
     }
 
     override val dataMappings: Map<SerializationKeys, String>

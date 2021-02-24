@@ -127,7 +127,7 @@ class AuthenticationPersistenceTests {
         val ap = AuthenticationPersistence(PureMemoryDatabase(), testLogger)
         ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employeeId)
         val result = ap.addRoleToUser(DEFAULT_USER.name, Roles.ADMIN)
-        assertEquals(expected, result)
+        assertEquals(expected.role, result.role)
     }
 
 }

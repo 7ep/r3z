@@ -43,7 +43,7 @@ class Logger : ILogger {
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
         if (logSettings[LogTypes.AUDIT] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.user.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -52,7 +52,7 @@ class Logger : ILogger {
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.DEBUG] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.user.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -61,7 +61,7 @@ class Logger : ILogger {
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.TRACE] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: ${cu.user.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -71,7 +71,7 @@ class Logger : ILogger {
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.WARN] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} ${cu.user.name.value}: WARN: ${msg()}") }
+            loggerPrinter.enqueue { println("${getCurrentMillis()} ${cu.name.value}: WARN: ${msg()}") }
         }
     }
 
