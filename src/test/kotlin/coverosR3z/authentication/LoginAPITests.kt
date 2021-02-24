@@ -7,6 +7,7 @@ import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
 import coverosR3z.fakeTechempower
 import coverosR3z.misc.exceptions.InexactInputsException

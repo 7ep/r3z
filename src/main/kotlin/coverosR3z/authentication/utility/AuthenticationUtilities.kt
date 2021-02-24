@@ -10,12 +10,15 @@ import coverosR3z.timerecording.types.EmployeeId
 class AuthenticationUtilities(
     private val ap: IAuthPersistence,
     val logger: ILogger,
-    val currentUser: CurrentUser = CurrentUser(SYSTEM_USER)) : IAuthenticationUtilities {
+    val currentUser: CurrentUser = CurrentUser(SYSTEM_USER),
+    private val ac : IRolesChecker = RolesChecker(currentUser)
+) : IAuthenticationUtilities {
 
     /**
      * Register a user through auth persistent, providing a username, password, and employeeId
      */
     override fun register(username: UserName, password: Password, employeeId: EmployeeId) : RegistrationResult {
+        ac.checkAllowed(Roles.SYSTEM)
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
@@ -37,6 +40,7 @@ class AuthenticationUtilities(
      * as well if the [LoginResult] was successful.
      */
     override fun login(username: UserName, password: Password): Pair<LoginResult, User> {
+        ac.checkAllowed(Roles.SYSTEM)
         val user = ap.getUser(username)
 
         if (user == NO_USER) {
@@ -55,6 +59,7 @@ class AuthenticationUtilities(
     }
 
     override fun getUserForSession(sessionToken: String): User {
+        ac.checkAllowed(Roles.SYSTEM)
         return ap.getUserForSession(sessionToken)
     }
 
@@ -68,6 +73,7 @@ class AuthenticationUtilities(
      * @param rand the generator for a random string (optional, has default)
      */
     override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
+        ac.checkAllowed(Roles.SYSTEM)
         val sessionId = rand()
         logger.logDebug { "New session ID ($sessionId) generated for user (${user.name.value})" }
         ap.addNewSession(sessionId, user, time)
@@ -75,14 +81,12 @@ class AuthenticationUtilities(
     }
 
     override fun logout(user: User) {
+        ac.checkAllowed(Roles.SYSTEM)
         ap.deleteSession(user)
     }
 
     override fun addRoleToUser(user: User, role: Roles) : User {
-        val currentUserRole = currentUser.role
-        if (currentUserRole != Roles.ADMIN){
-            throw UnpermittedOperationException("Must be an Admin to do this action, you are a $currentUserRole")
-        }
+        ac.checkAllowed(Roles.ADMIN, Roles.SYSTEM)
         return ap.addRoleToUser(user.name, role)
     }
 

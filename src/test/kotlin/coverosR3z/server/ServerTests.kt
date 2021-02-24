@@ -1,7 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.FullSystem
-import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.NO_USER

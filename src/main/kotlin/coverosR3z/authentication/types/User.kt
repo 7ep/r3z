@@ -39,7 +39,7 @@ val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Pas
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0), role = Roles.ADMIN)
+val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0), role = Roles.SYSTEM)
 
 /**
  * Holds a username before we have a whole object, like [User]
