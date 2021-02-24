@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.FullSystem
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
@@ -58,15 +59,7 @@ class ServerPerformanceTests {
         val numberThreads = 5
         val numberRequests = 200
 
-        val port = port.getAndIncrement()
-        startServer(port)
-
-        val newProject = fs.businessCode.tru.createProject(DEFAULT_PROJECT_NAME)
-        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
-        val sessionId = fs.businessCode.au.createNewSession(user)
-
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val (newProject, sessionId, es: ExecutorService) = setupForTest()
 
         val (time, _) = getTime {
             val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedTimeEntries(numberRequests, newProject, sessionId)) }
@@ -95,14 +88,7 @@ class ServerPerformanceTests {
         val numberThreads = 20
         val numberRequests = 100
 
-        val port = port.getAndIncrement()
-        startServer(port)
-        val newProject = fs.businessCode.tru.createProject(DEFAULT_PROJECT_NAME)
-        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
-        val sessionId = fs.businessCode.au.createNewSession(user)
-
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val (newProject, sessionId, es: ExecutorService) = setupForTest()
 
         val makeTimeEntriesThreads = (1..2).map { es.submit(makeClientThreadRepeatedTimeEntries(20, newProject, sessionId)) }
         makeTimeEntriesThreads.forEach { it.get() }
@@ -117,6 +103,19 @@ class ServerPerformanceTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testViewTime_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
+    }
+
+    private fun setupForTest(): Triple<Project, String, ExecutorService> {
+        val port = port.getAndIncrement()
+        startServer(port)
+        val tru = fs.businessCode.tru.changeUser(CurrentUser(DEFAULT_ADMIN_USER))
+        val newProject = tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
+        val sessionId = fs.businessCode.au.createNewSession(user)
+
+        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        return Triple(newProject, sessionId, es)
     }
 
     /**

@@ -1,7 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.misc.PerformanceTestCategory
 import coverosR3z.misc.granularPerfArchiveDirectory
 import coverosR3z.misc.testLogger

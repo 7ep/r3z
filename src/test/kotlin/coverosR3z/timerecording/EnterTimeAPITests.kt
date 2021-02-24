@@ -1,6 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.FakeAuthenticationUtilities
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.utility.AuthenticationUtilities
@@ -258,7 +258,6 @@ class EnterTimeAPITests {
         val au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, logger = testLogger),
             testLogger,
-            CurrentUser(DEFAULT_EMPLOYEE_USER)
         )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val user = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id).user

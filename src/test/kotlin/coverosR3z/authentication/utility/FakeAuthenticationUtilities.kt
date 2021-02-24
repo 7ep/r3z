@@ -1,4 +1,4 @@
-package coverosR3z.authentication
+package coverosR3z.authentication.utility
 
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.types.*

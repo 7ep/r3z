@@ -5,6 +5,10 @@ import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 
 interface ITimeRecordingUtilities {
+    /**
+     * This allows us to create a new [TimeRecordingUtilities]
+     * that is identical to the old except with a new [CurrentUser]
+     */
     fun changeUser(cu : CurrentUser) : ITimeRecordingUtilities
 
     fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult

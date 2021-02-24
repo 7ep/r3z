@@ -183,7 +183,7 @@ class FullSystem private constructor(
             val tu = TechempowerUtilities(tp)
 
             val ap = AuthenticationPersistence(pmd, logger)
-            val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
+            val au = AuthenticationUtilities(ap, logger)
             return BusinessCode(tru, au, tu)
         }
 
