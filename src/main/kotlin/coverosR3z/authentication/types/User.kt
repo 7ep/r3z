@@ -64,6 +64,17 @@ data class UserId(val value: Int) {
         require(value < maxUserCount) { maxUserMsg }
         require(value > 0) { minIdMsg }
     }
+
+    companion object {
+
+        /**
+         * You can pass the id as a string and we'll try to parse it
+         */
+        fun make(value: String?) : UserId {
+            return UserId(checkParseToInt(value))
+        }
+    }
+
 }
 
 data class Salt(val value: String) {
@@ -133,18 +144,14 @@ open class User(val id: UserId, val name: UserName,
         override fun deserialize(str: String) : User {
             return deserialize(str, Companion) { entries ->
 
-                val id = checkParseToInt(entries[Keys.ID])
-
-                val empId = EmployeeId(checkParseToInt(entries[Keys.EMPLOYEE_ID]))
-
-                val role = Roles.valueOf(entries[Keys.ROLE]!!)
+                val role = Roles.valueOf(checkNotNull(entries[Keys.ROLE]))
 
                 User(
-                    UserId(id),
+                    UserId.make(entries[Keys.ID]),
                     UserName.make(entries[Keys.NAME]),
                     Hash.make(entries[Keys.HASH]),
                     Salt.make(entries[Keys.SALT]),
-                    empId,
+                    EmployeeId.make(entries[Keys.EMPLOYEE_ID]),
                     role)
             }
         }

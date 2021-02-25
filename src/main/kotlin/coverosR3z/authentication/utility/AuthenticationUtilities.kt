@@ -86,7 +86,7 @@ class AuthenticationUtilities(
 
     override fun addRoleToUser(user: User, role: Roles) : User {
         ac.checkAllowed(Roles.ADMIN, Roles.SYSTEM)
-        return ap.addRoleToUser(user.name, role)
+        return ap.addRoleToUser(user, role)
     }
 
 }

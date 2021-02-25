@@ -47,8 +47,7 @@ class AuthenticationPersistence(private val pmd : PureMemoryDatabase, private va
         return pmd.UserDataAccess().read { users -> users.toSet() }
     }
 
-    override fun addRoleToUser(userName: UserName, role: Roles): User {
-        val user = getUser(userName)
+    override fun addRoleToUser(user: User, role: Roles): User {
         val changedUser = user.copy(role=role)
         pmd.UserDataAccess().actOn { users -> users.update(changedUser) }
         return changedUser

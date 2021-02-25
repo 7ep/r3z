@@ -53,7 +53,7 @@ class FakeAuthPersistence(
         return getAllUsersBehavior()
     }
 
-    override fun addRoleToUser(userName: UserName, role: Roles): User {
+    override fun addRoleToUser(user: User, role: Roles): User {
         return addRoleToUserBehavior()
     }
 
