@@ -28,6 +28,11 @@ class TimeRecordingUtilities(
 
     override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
         rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+
+        if(cu.role != Roles.ADMIN && entry.employee.id != cu.employeeId) {
+            throw UnpermittedOperationException("No")
+        }
+
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             logger.logDebug(cu) {"recorded time successfully"}

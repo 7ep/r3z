@@ -12,7 +12,7 @@ class FakeRolesChecker(
 
     override fun checkAllowed(vararg roles: Roles) {
         didAuthorize = try {
-            RolesChecker(cu).checkAllowed()
+            RolesChecker(cu).checkAllowed(roles = roles)
             true
         } catch (ex: UnpermittedOperationException) {
             false

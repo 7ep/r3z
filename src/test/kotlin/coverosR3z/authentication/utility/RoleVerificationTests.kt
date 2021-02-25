@@ -2,16 +2,16 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.authentication.types.User
+import coverosR3z.authentication.types.*
 import coverosR3z.misc.*
 import coverosR3z.timerecording.FakeTimeEntryPersistence
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.EmployeeId
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.ProjectName
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -40,6 +40,13 @@ class RoleVerificationTests {
     can't...
     * make/edit/delete entries for other users
     * make projects
+    * create session
+
+
+    Admin
+    can:
+
+    can't:
     */
 
     /*
@@ -67,17 +74,54 @@ class RoleVerificationTests {
 
     @Test
     fun oneRegularUserCannotEnterTimeForAnother() {
+        // be a user
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
+        val otherUser = User(UserId(2), UserName("DefaultOtherUser"), DEFAULT_HASH, DEFAULT_SALT, otherEmployee.id)
+        val entry = createTimeEntryPreDatabase(employee=otherEmployee)
 
+        assertThrows(UnpermittedOperationException::class.java) {tru.createTimeEntry(entry)}
+    }
+
+    @Test
+    fun regularUserCannotCreateEmployee() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        tru.createEmployee(EmployeeName("Doesn't matter, shouldn't work"))
+        assertFalse(frc.didAuthorize)
+    }
+
+    /*
+              _       _                _       _          _
+      __ _ __| |_ __ (_)_ _    _ _ ___| |___  | |_ ___ __| |_ ___
+     / _` / _` | '  \| | ' \  | '_/ _ \ / -_) |  _/ -_|_-<  _(_-<
+     \__,_\__,_|_|_|_|_|_||_| |_| \___/_\___|  \__\___/__/\__/__/
+    alt-text: admin role tests
+    font: small
+     */
+
+    @Test
+    fun adminRoleCanCreateProject() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.createProject(ProjectName("flim flam"))
+        print(frc.didAuthorize)
+        assertTrue(frc.didAuthorize)
+    }
+
+    @Test
+    fun systemRoleCanCreateEmployee() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        tru.createEmployee(EmployeeName("Doesn't matter, shouldn't work"))
+        assertFalse(frc.didAuthorize)
     }
 
 
+    /* TODO Byron explain yourself */
     @Test
     fun systemRoleCanCreateSession() {
         val rc = makeAuthUtils(CurrentUser(SYSTEM_USER))
         authUtils.createNewSession(DEFAULT_USER)
         assertFalse(rc.didAuthorize)
     }
-
 
     /*
      _ _       _                  __ __        _    _           _
