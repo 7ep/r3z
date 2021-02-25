@@ -3,6 +3,9 @@ package coverosR3z.logging
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.config.utility.SystemOptions
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 interface ILogger {
     val logSettings: MutableMap<LogTypes, Boolean>
@@ -44,7 +47,15 @@ interface ILogger {
          * Logging that must be shown, which you cannot turn off
          */
         fun logImperative(msg: String) {
-            println("${getCurrentMillis()} IMPERATIVE: $msg")
+            println("${getTimestamp()} IMPERATIVE: $msg")
+        }
+
+        fun getCurrentMillis() : Long {
+            return System.currentTimeMillis()
+        }
+
+        fun getTimestamp() : String {
+            return ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT)
         }
     }
 }

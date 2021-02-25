@@ -57,20 +57,11 @@ data class Session(val simpleId: Int, val sessionId: String, val user: User, val
 
     }
 
-    enum class Keys(private val keyString: String) : SerializationKeys {
+    enum class Keys(override val keyString: String) : SerializationKeys {
         SIMPLE_ID("sid"),
         SESSION_ID("s"),
         USER_ID("id"),
         EPOCH_SECOND("e");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
 

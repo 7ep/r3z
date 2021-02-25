@@ -222,12 +222,11 @@ class LoggingAPITests {
     }
 
     private fun makeServerData(data: PostBodyData): ServerData {
-        val sd = ServerData(
+        return ServerData(
             BusinessCode(tru, au, fakeTechempower),
             fakeServerObjects,
             AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.AUTHENTICATED, testLogger
         )
-        return sd
     }
 
     /*

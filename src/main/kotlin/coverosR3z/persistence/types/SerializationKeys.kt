@@ -10,6 +10,5 @@ package coverosR3z.persistence.types
  * just one simple word if possible.
  */
 interface SerializationKeys {
-
-    fun getKey() : String
+    val keyString: String
 }

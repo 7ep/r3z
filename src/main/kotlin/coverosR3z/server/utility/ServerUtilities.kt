@@ -4,18 +4,18 @@ import coverosR3z.FullSystem
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.utility.toBytes
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
-import coverosR3z.server.types.CacheControl.*
-import coverosR3z.server.types.Pragma.*
-import java.lang.IllegalStateException
+import coverosR3z.server.types.CacheControl.AGGRESSIVE_WEB_CACHE
+import coverosR3z.server.types.CacheControl.DISALLOW_CACHING
+import coverosR3z.server.types.Pragma.PRAGMA_DISALLOW_CACHING
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
-import java.time.*
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
 
@@ -33,13 +33,18 @@ const val CRLF = "\r\n"
 class ServerUtilities {
     companion object {
 
-        fun createServerThread(executorService: ExecutorService, fullSystem: FullSystem, halfOpenServerSocket: ServerSocket, businessObjects : BusinessCode, serverObjects: ServerObjects, forceRedirectToSsl: Boolean) : Thread {
+        fun createServerThread(
+            executorService: ExecutorService,
+            fullSystem: FullSystem,
+            halfOpenServerSocket: ServerSocket,
+            businessObjects : BusinessCode,
+            serverObjects: ServerObjects) : Thread {
             return Thread {
                 try {
                     while (true) {
                         fullSystem.logger.logTrace { "waiting for socket connection" }
                         val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects, forceRedirectToSsl) })
+                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
                     }
                 } catch (ex: SocketException) {
                     if (ex.message == "Interrupted function call: accept failed") {
@@ -137,24 +142,18 @@ class ServerUtilities {
             server: SocketWrapper,
             businessCode: BusinessCode,
             serverObjects: ServerObjects,
-            forceRedirectToSsl: Boolean,
         ) {
             val logger = serverObjects.logger
             logger.logTrace { "client from ${server.socket.inetAddress?.hostAddress} has connected" }
             var shouldKeepAlive : Boolean
             try {
-                if (forceRedirectToSsl) {
-                    handleRequest(server, businessCode, serverObjects, forceRedirectToSsl)
-                } else {
-                    do {
-                        val requestData = handleRequest(server, businessCode, serverObjects, forceRedirectToSsl)
-                        shouldKeepAlive =
-                            requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
-                        if (shouldKeepAlive) {
-                            logger.logTrace { "This is a keep-alive connection" }
-                        }
-                    } while (shouldKeepAlive)
-                }
+                do {
+                    val requestData = handleRequest(server, businessCode, serverObjects)
+                    shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
+                    if (shouldKeepAlive) {
+                        logger.logTrace { "This is a keep-alive connection" }
+                    }
+                } while (shouldKeepAlive)
             } catch (ex : SocketTimeoutException) {
                 // we get here if we wait too long on reading from the socket
                 // without getting anything.  See SocketWrapper and soTimeout
@@ -175,7 +174,7 @@ class ServerUtilities {
             }
         }
 
-        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects, forceRedirectToSsl: Boolean) : AnalyzedHttpData {
+        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
             var analyzedHttpData = AnalyzedHttpData()
             val responseData: PreparedResponseData = try {
                 analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
@@ -188,16 +187,10 @@ class ServerUtilities {
                 if (analyzedHttpData.verb == Verb.INVALID) {
                     handleBadRequest()
                 } else {
-                    if (forceRedirectToSsl) {
-                        try {
-                            val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
-                            val extractedHost = extractHostFromHostHeader(hostHeader)
-                            val rawQueryString = analyzedHttpData.rawQueryString
-                            val queryString = if (rawQueryString.isNotBlank()) { "?" + rawQueryString } else ""
-                            redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
-                        } catch (ex: Exception) {
-                            handleBadRequest()
-                        }
+                    val onInsecureEndpoint = server.socket.localPort == serverObjects.port
+                    if (!serverObjects.allowInsecureUsage && onInsecureEndpoint) {
+                        analyzedHttpData = analyzedHttpData.copy(headers = analyzedHttpData.headers.filterNot {it.toLowerCase().contains("connection: keep-alive")})
+                        redirectToSslEndpoint(analyzedHttpData, serverObjects)
                     } else {
                         obtainStaticAndDynamicContent(serverObjects, analyzedHttpData, businessCode)
                     }
@@ -213,6 +206,23 @@ class ServerUtilities {
 
             returnData(server, responseData, serverObjects.logger)
             return analyzedHttpData
+        }
+
+        private fun redirectToSslEndpoint(
+            analyzedHttpData: AnalyzedHttpData,
+            serverObjects: ServerObjects
+        ): PreparedResponseData {
+            return try {
+                val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
+                val extractedHost = extractHostFromHostHeader(hostHeader)
+                val rawQueryString = analyzedHttpData.rawQueryString
+                val queryString = if (rawQueryString.isNotBlank()) {
+                    "?$rawQueryString"
+                } else ""
+                redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
+            } catch (ex: Exception) {
+                handleBadRequest()
+            }
         }
 
         private fun obtainStaticAndDynamicContent(

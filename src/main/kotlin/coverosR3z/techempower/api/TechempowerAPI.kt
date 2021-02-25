@@ -1,9 +1,7 @@
 package coverosR3z.techempower.api
 
-import coverosR3z.logging.getCurrentMillis
 import coverosR3z.server.types.*
 import coverosR3z.techempower.types.World
-import kotlin.random.Random
 
 
 class TechempowerAPI {

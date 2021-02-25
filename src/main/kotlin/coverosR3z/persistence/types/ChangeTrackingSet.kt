@@ -8,7 +8,7 @@ import coverosR3z.persistence.types.ChangeTrackingSet.DataAction.*
  * have an item added to [modified] with a tag of [CREATE], and
  * anything that uses [remove] will do similarly with a tag of [DELETE]
  */
-class ChangeTrackingSet<T: IndexableSerializable>() : MutableConcurrentSet<T>() {
+class ChangeTrackingSet<T: IndexableSerializable> : MutableConcurrentSet<T>() {
 
     /**
      * This is used to tag what gets changed, so we
@@ -56,10 +56,6 @@ class ChangeTrackingSet<T: IndexableSerializable>() : MutableConcurrentSet<T>() 
      */
     fun addWithoutTracking(item : T) : Boolean {
         return super.add(item)
-    }
-
-    override fun addAll(elements: Collection<T>) : Boolean {
-        return super.addAll(elements)
     }
 
     override fun remove(element: T) : Boolean {

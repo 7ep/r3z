@@ -6,7 +6,6 @@ import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.fakeServerObjects
 import coverosR3z.fakeTechempower
-import coverosR3z.misc.DEFAULT_REGULAR_USER
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
@@ -68,11 +67,10 @@ class SubmitTimeAPITests {
     }
 
     private fun makeServerData(data: PostBodyData): ServerData {
-        val sd = ServerData(
+        return ServerData(
             BusinessCode(tru, au, fakeTechempower),
             fakeServerObjects,
             AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger
         )
-        return sd
     }
 }

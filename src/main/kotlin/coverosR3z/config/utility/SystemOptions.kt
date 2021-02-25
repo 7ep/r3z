@@ -37,11 +37,10 @@ data class SystemOptions(
         val allLoggingOn : Boolean = false,
 
         /**
-         * With this configured on, any request to an insecure
-         * port will be automatically redirected to the secure
-         * port.
+         * With this toggled on on, the server won't automatically
+         * redirect insecure requests to the ssl endpoint
          */
-        val forceRedirectToSsl : Boolean = false,
+        val allowInsecure : Boolean = false,
 ){
 
 
@@ -98,8 +97,8 @@ data class SystemOptions(
                 return this.copy(allLoggingOn = allLoggingOn == "true")
         }
 
-        fun setForceSslOn(forceRedirectToSsl: String): SystemOptions {
-                return this.copy(forceRedirectToSsl = forceRedirectToSsl == "true")
+        fun setAllowInsecureOn(allowInsecure: String): SystemOptions {
+                return this.copy(allowInsecure = allowInsecure == "true")
         }
 
         companion object{
@@ -158,7 +157,7 @@ data class SystemOptions(
                         val diskPersistenceOption = Option(false, "", isFlag = true)
                         val loggingOffOption = Option(false, "", isFlag = true)
                         val loggingOnOption = Option(false, "", isFlag = true)
-                        val forceSslOption = Option(false, "", isFlag = true)
+                        val allowInsecureOption = Option(false, "", isFlag = true)
 
                         val possibleOptions = listOf(
                                 OptionGroup("-d", directoryOption),
@@ -170,7 +169,7 @@ data class SystemOptions(
                                 OptionGroup("--no-disk-persistence", diskPersistenceOption),
                                 OptionGroup("--no-logging", loggingOffOption),
                                 OptionGroup("--full-logging", loggingOnOption),
-                                OptionGroup("--force-ssl", forceSslOption),
+                                OptionGroup("--allow-insecure", allowInsecureOption),
                         )
 
                         val fullInput = args.joinToString(" ")
@@ -201,7 +200,7 @@ data class SystemOptions(
                                         .setDirectory(directoryOption.value, diskPersistenceOption.value)
                                         .setLoggingOff(loggingOffOption.value)
                                         .setLoggingOn(loggingOnOption.value)
-                                        .setForceSslOn(forceSslOption.value)
+                                        .setAllowInsecureOn(allowInsecureOption.value)
                         }
                 }
 
@@ -237,6 +236,9 @@ Sample:
     
 The options available are:
 
+general help
+------------
+
 -h                     prints this help message
 
 Server Ports
@@ -244,8 +246,8 @@ Server Ports
 
 -p PORT_NUMBER         set the port number for the server (default 12345)
 -s PORT_NUMBER         set the ssl port number for the server (default 12443)
---force-ssl            with this set, all requests sent to an insecure
-                       port will be redirected to the secure port
+--allow-insecure       typically, insecure requests are redirected to https.
+                       with this flag, that doesn't automatically happen.
 
 Database
 --------

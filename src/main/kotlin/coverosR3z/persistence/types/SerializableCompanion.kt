@@ -15,7 +15,7 @@ abstract class SerializableCompanion<T : SerializationKeys>(val values : Array<T
      * Converts a string to a [SerializationKeys]
      */
     fun convertToKey(s: String): SerializationKeys {
-        return values.single { it.getKey() == s }
+        return values.single { it.keyString == s }
     }
 
 }

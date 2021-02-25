@@ -67,20 +67,11 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
     }
 
 
-    enum class Keys(private val keyString: String) : SerializationKeys {
+    enum class Keys(override val keyString: String) : SerializationKeys {
         ID("id"),
         EMPLOYEE_ID("eid"),
         START_BOUND("start"),
         END_BOUND("end");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
 }

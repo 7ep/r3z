@@ -1,10 +1,9 @@
 package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
-import coverosR3z.logging.*
 import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.misc.types.DateTime
-import coverosR3z.server.types.*
+import coverosR3z.server.types.BusinessCode
+import coverosR3z.server.types.ServerObjects
 import java.net.ServerSocket
 import java.util.concurrent.ExecutorService
 
@@ -25,19 +24,11 @@ class Server(
     val halfOpenServerSocket = ServerSocket(port)
 
     init {
-        logImperative("System is ready at http://localhost:$port.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+        logImperative("System is ready at http://localhost:$port")
     }
 
     fun createServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects, false)
-    }
-
-    /**
-     * This will cause the server to always redirect all
-     * requests to the SSL server
-     */
-    fun createRedirectingServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects, true)
+        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
     }
 
 }

@@ -9,11 +9,7 @@ import coverosR3z.config.utility.SystemOptions.Companion.extractCommandLineOptio
  */
 fun main(args: Array<String>) {
     createSystemRunningMarker()
-
-    val serverOptions = extractCommandLineOptions(args)
-
-    val fullSystem = startSystem(serverOptions)
-    fullSystem.addShutdownHook()
+    startSystem(extractCommandLineOptions(args)).addShutdownHook()
 }
 
 

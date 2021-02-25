@@ -1,10 +1,11 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.*
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.timerecording.types.EmployeeId
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

@@ -2,10 +2,7 @@ package coverosR3z.logging
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.config.utility.SystemOptions
-
-fun getCurrentMillis() : Long {
-    return System.currentTimeMillis()
-}
+import coverosR3z.logging.ILogger.Companion.getTimestamp
 
 class TestLogger : ILogger {
 
@@ -42,7 +39,7 @@ class TestLogger : ILogger {
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
         if (logSettings[LogTypes.AUDIT] == true) {
-            println("${getCurrentMillis()} AUDIT: ${cu.name.value}: ${msg()}")
+            println("${getTimestamp()} AUDIT: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -51,7 +48,7 @@ class TestLogger : ILogger {
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.DEBUG] == true) {
-            println("${getCurrentMillis()} DEBUG: ${cu.name.value}: ${msg()}")
+            println("${getTimestamp()} DEBUG: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -60,7 +57,7 @@ class TestLogger : ILogger {
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.TRACE] == true) {
-            println("${getCurrentMillis()} TRACE: ${cu.name.value}: ${msg()}")
+            println("${getTimestamp()} TRACE: ${cu.name.value}: ${msg()}")
         }
     }
 
@@ -70,7 +67,7 @@ class TestLogger : ILogger {
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.WARN] == true) {
-            println("${getCurrentMillis()} ${cu.name.value}: WARN: ${msg()}")
+            println("${getTimestamp()} ${cu.name.value}: WARN: ${msg()}")
         }
     }
 

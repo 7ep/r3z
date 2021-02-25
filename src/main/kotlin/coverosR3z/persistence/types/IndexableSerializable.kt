@@ -22,18 +22,8 @@ abstract class IndexableSerializable : Indexed, Serializable() {
      * stored in the database, you will require a set of keys
      * for the values you will store. 
      */
-    enum class Keys(private val keyString: String) : SerializationKeys {
+    enum class Keys(override val keyString: String) : SerializationKeys {
         EXAMPLE_ONE("eo"),
         EXAMPLE_TWO("et"),
-
-        ;
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            throw NotImplementedError("define the keys for each piece of data we will serialize and persist to disk")
-        }
     }
 }

@@ -35,7 +35,14 @@ class ServerPerformanceTests {
 
     private fun startServer(port : Int) {
         val pmd = PureMemoryDatabase(worlds = ITechempowerUtilities.generateWorlds())
-        fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, allLoggingOff = true), pmd = pmd)
+        fs = FullSystem.startSystem(
+            SystemOptions(
+                port = port,
+                sslPort = port + 443,
+                allLoggingOff = true,
+                // not really checking security here, this keeps it simpler
+                allowInsecure = true),
+            pmd = pmd)
     }
 
     @After

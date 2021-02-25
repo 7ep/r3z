@@ -1,12 +1,10 @@
 package coverosR3z.techempower.utility
 
-import coverosR3z.logging.getCurrentMillis
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.server.types.ServerData
 import coverosR3z.techempower.persistence.TechempowerPersistence
 import coverosR3z.techempower.types.World
 import coverosR3z.techempower.utility.ITechempowerUtilities.Companion.rand
-import kotlin.random.Random
 
 class TechempowerUtilities(val tp: TechempowerPersistence) : ITechempowerUtilities {
 

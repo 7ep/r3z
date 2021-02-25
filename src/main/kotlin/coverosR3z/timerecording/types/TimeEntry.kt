@@ -159,22 +159,13 @@ data class TimeEntry (
     }
 
 
-    enum class Keys(private val keyString: String) : SerializationKeys {
+    enum class Keys(override val keyString: String) : SerializationKeys {
         ID("i"),
         EMPLOYEE_ID("e"),
         PROJECT_ID("p"),
         TIME("t"),
         DATE("d"),
         DETAIL("dtl");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 }
 

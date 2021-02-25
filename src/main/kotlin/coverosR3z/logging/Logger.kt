@@ -2,11 +2,9 @@ package coverosR3z.logging
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.config.utility.SystemOptions
+import coverosR3z.logging.ILogger.Companion.getTimestamp
 import coverosR3z.misc.utility.ActionQueue
 
-fun getCurrentMillis() : Long {
-    return System.currentTimeMillis()
-}
 class Logger : ILogger {
     private val loggerPrinter = ActionQueue("loggerPrinter")
 
@@ -43,7 +41,7 @@ class Logger : ILogger {
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
         if (logSettings[LogTypes.AUDIT] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} AUDIT: ${cu.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getTimestamp()} AUDIT: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -52,7 +50,7 @@ class Logger : ILogger {
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.DEBUG] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} DEBUG: ${cu.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getTimestamp()} DEBUG: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -61,7 +59,7 @@ class Logger : ILogger {
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.TRACE] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} TRACE: ${cu.name.value}: ${msg()}") }
+            loggerPrinter.enqueue { println("${getTimestamp()} TRACE: ${cu.name.value}: ${msg()}") }
         }
     }
 
@@ -71,7 +69,7 @@ class Logger : ILogger {
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
         if (logSettings[LogTypes.WARN] == true) {
-            loggerPrinter.enqueue { println("${getCurrentMillis()} ${cu.name.value}: WARN: ${msg()}") }
+            loggerPrinter.enqueue { println("${getTimestamp()} ${cu.name.value}: WARN: ${msg()}") }
         }
     }
 

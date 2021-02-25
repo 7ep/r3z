@@ -56,7 +56,7 @@ fun startupTestForUI(
     directory : String? = null
 ) : PageObjectModelLocal {
     // start the server
-    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory, forceRedirectToSsl = true))
+    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
 
     return PageObjectModelLocal.make(driver(), port, port + 443, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
 }

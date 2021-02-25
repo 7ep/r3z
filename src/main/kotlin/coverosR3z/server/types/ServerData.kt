@@ -1,8 +1,6 @@
 package coverosR3z.server.types
 
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.ILogger
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
 /**
  * Data for use by the API endpoints

@@ -15,14 +15,9 @@ data class World(val id: Int, val randomNumber: Int) : IndexableSerializable() {
             Keys.RANDOM_NUMBER to "$randomNumber"
         )
 
-    enum class Keys(private val keyString: String) : SerializationKeys {
+    enum class Keys(override val keyString: String) : SerializationKeys {
         ID("id"),
         RANDOM_NUMBER("rn");
-
-        override fun getKey(): String {
-            return keyString
-        }
-
     }
 }
 

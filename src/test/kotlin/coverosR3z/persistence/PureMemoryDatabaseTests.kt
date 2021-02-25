@@ -559,17 +559,8 @@ class PureMemoryDatabaseTests {
         }
     }
 
-    enum class InvalidKeyHasSpace(private val keyString: String) : SerializationKeys {
+    enum class InvalidKeyHasSpace(override val keyString: String) : SerializationKeys {
         ID("id id");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
     /**
@@ -596,17 +587,8 @@ class PureMemoryDatabaseTests {
     }
 
 
-    enum class InvalidKeyTooLong(private val keyString: String) : SerializationKeys {
+    enum class InvalidKeyTooLong(override val keyString: String) : SerializationKeys {
         ID("bcdefghijkl");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
     /**
@@ -632,17 +614,8 @@ class PureMemoryDatabaseTests {
         assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: bcdefghijkl", ex.message)
     }
 
-    enum class InvalidKeyTooShort(private val keyString: String) : SerializationKeys {
+    enum class InvalidKeyTooShort(override val keyString: String) : SerializationKeys {
         ID("");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
     /**
@@ -668,17 +641,8 @@ class PureMemoryDatabaseTests {
         assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: (BLANK)", ex.message)
     }
 
-    enum class InvalidKeyNumbers(private val keyString: String) : SerializationKeys {
+    enum class InvalidKeyNumbers(override val keyString: String) : SerializationKeys {
         ID("abcd123");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
     /**
@@ -704,18 +668,9 @@ class PureMemoryDatabaseTests {
         assertEquals("Serialization keys must match this regex: [a-zA-Z]{1,10}.  Your key was: abcd123", ex.message)
     }
 
-    enum class InvalidKeysNonUnique(private val keyString: String) : SerializationKeys {
+    enum class InvalidKeysNonUnique(override val keyString: String) : SerializationKeys {
         ID("id"),
         OTHER_ID("id");
-
-        /**
-         * This needs to be a method and not just a value of the class
-         * so that we can have it meet an interface specification, so
-         * that we can use it in generic code
-         */
-        override fun getKey() : String {
-            return keyString
-        }
     }
 
     /**

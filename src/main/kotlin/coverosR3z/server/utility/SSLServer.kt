@@ -2,17 +2,16 @@ package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
 import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.logging.getCurrentMillis
-import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.utility.FileReader
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.ServerObjects
-import java.util.concurrent.ExecutorService
-
 import java.security.KeyStore
-
 import java.security.SecureRandom
-import javax.net.ssl.*
+import java.util.concurrent.ExecutorService
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLServerSocket
+import javax.net.ssl.SSLServerSocketFactory
 
 
 class SSLServer(
@@ -28,12 +27,12 @@ class SSLServer(
 
     init {
         sslHalfOpenServerSocket = createSslSocketFactory(sslPort)
-        logImperative("SSL server is ready at https://localhost:$sslPort.  DateTime is ${DateTime(getCurrentMillis() / 1000)} in UTC")
+        logImperative("SSL server is ready at https://localhost:$sslPort.")
     }
 
 
     fun createSecureServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects, false)
+        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects)
     }
 
 

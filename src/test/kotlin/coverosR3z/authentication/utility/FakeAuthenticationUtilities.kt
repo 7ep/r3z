@@ -1,8 +1,7 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.types.*
-import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.types.DateTime
 import coverosR3z.timerecording.types.EmployeeId
 

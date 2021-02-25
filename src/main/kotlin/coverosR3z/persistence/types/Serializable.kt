@@ -36,12 +36,12 @@ abstract class Serializable {
      * See [dataMappings] to see how we map a name to a value
      */
     fun serialize(): String {
-        val allKeys = dataMappings.keys.map { it.getKey() }
+        val allKeys = dataMappings.keys.map { it.keyString }
         check(allKeys.size == allKeys.toSet().size) {"Serialization keys must be unique.  Here are your keys: $allKeys"}
         dataMappings.keys.forEach {
-            check(it.getKey().isNotBlank()) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: (BLANK)"}
-            check(validKeyRegex.matches(it.getKey())) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: ${it.getKey()}"}
+            check(it.keyString.isNotBlank()) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: (BLANK)"}
+            check(validKeyRegex.matches(it.keyString)) {"Serialization keys must match this regex: ${validKeyRegex.pattern}.  Your key was: ${it.keyString}"}
         }
-        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.getKey()}: ${encode(it.value)}" }  +" }"
+        return "{ "+ dataMappings.entries.joinToString (" , ") { "${it.key.keyString}: ${encode(it.value)}" }  +" }"
     }
 }

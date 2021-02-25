@@ -8,4 +8,4 @@ import coverosR3z.uitests.Drivers
 val webDriver = Drivers.CHROME
 
 val fakeTechempower = FakeTechempowerUtilities()
-val fakeServerObjects = ServerObjects(emptyMap(), testLogger, 0, 0)
+val fakeServerObjects = ServerObjects(emptyMap(), testLogger, 0, 0, false)

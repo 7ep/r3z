@@ -539,11 +539,10 @@ class TimeRecordingUtilityTests {
 
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
-        val utils = TimeRecordingUtilities(
+        return TimeRecordingUtilities(
             TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger),
             CurrentUser(DEFAULT_ADMIN_USER),
             testLogger
         )
-        return utils
     }
 }

@@ -13,7 +13,6 @@ import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
-import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.RecordTimeResult
 import coverosR3z.timerecording.types.StatusEnum
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

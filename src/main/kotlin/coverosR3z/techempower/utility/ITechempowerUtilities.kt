@@ -1,6 +1,6 @@
 package coverosR3z.techempower.utility
 
-import coverosR3z.logging.getCurrentMillis
+import coverosR3z.logging.ILogger.Companion.getCurrentMillis
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.server.types.ServerData
 import coverosR3z.techempower.types.World

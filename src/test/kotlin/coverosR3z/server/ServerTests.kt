@@ -70,7 +70,15 @@ class ServerTests {
         @JvmStatic
         @BeforeClass
         fun initServer() {
-            fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = sslTestPort, dbDirectory = "build/db/servertests"), businessCode = BusinessCode(
+            fs = FullSystem.startSystem(
+                SystemOptions(
+                    port = port,
+                    sslPort = sslTestPort,
+                    dbDirectory = "build/db/servertests",
+
+                    // not really checking security here, this keeps it simpler
+                    allowInsecure = true),
+                businessCode = BusinessCode(
                 tru,
                 au,
                 fakeTechempower

@@ -1,6 +1,5 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.ILogger

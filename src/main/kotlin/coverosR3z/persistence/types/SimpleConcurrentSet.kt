@@ -2,7 +2,6 @@ package coverosR3z.persistence.types
 
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This uses a [ConcurrentHashMap] as its base.  We store

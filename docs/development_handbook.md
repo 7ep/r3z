@@ -51,6 +51,8 @@ Here's the general series of steps for a new developer:
 7. Read through some of this developer documentation to get a feel for some of its unique characteristics.
 8. Examine some of the tests in the system to get a feel for how the system works and how
    test automation is done.
+9. It may be necessary to configure your browser to allow unsigned certificates. On Chrome, that is 
+   easily done: just put chrome://flags/#allow-insecure-localhost as your URL and enable it.
 
 Optional:
 * Install "Code With Me" plugin for IntelliJ - Preferences > Plugins > Code WIth me
