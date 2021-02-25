@@ -98,9 +98,6 @@ class TimeRecordingUtilities(
     override fun createProject(projectName: ProjectName) : Project {
         rc.checkAllowed(Roles.ADMIN)
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        if(cu.role != Roles.ADMIN) {
-            throw UnpermittedOperationException("Only admins can create projects. You, however, are a ${cu.role}, you peon.")
-        }
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
         return persistence.persistNewProject(projectName)

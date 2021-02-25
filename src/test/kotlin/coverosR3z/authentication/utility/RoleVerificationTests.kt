@@ -61,7 +61,8 @@ class RoleVerificationTests {
     @Test
     fun regularRoleCannotCreateProject() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
-        assertThrows(UnpermittedOperationException::class.java) {tru.createProject(ProjectName("flim flam"))}
+        tru.createProject(ProjectName("flim flam"))
+        assertFalse(frc.didAuthorize)
     }
 
     @Test
