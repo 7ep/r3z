@@ -2,11 +2,13 @@ package coverosR3z.misc
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.authentication.utility.FakeRolesChecker
 import coverosR3z.logging.TestLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.types.Month
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.timerecording.FakeTimeEntryPersistence
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
