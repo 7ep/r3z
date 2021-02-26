@@ -9,29 +9,29 @@ import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
 
+/**
+ * Approver
+ * - everything a regular user can do
+ * - can unsubmit periods for others
+ * - can approve submitted periods
+ *
+ * System
+ * - change user
+ * - delete entries
+ * - delete users
+ * - delete projects
+ * - register users
+ * - login users
+ *
+ * Administrator
+ * - everything a regular user can do
+ * - hey what happens if you delete a project there are entries for?
+ * - can admins enter time for other people? (No atm)
+ */
 class RoleVerificationTests {
 
     /*
-    Approver
-    - everything a regular user can do
-    - can unsubmit periods for others
-    - can approve submitted periods
 
-    Administrator
-    - everything a regular user can do
-    - can unsubmit periods for others
-    - create employees
-    - create projects
-    - delete projects
-    - hey what happens if you delete a project their are entries for?
-
-    System
-    - change user
-    - delete entries
-    - delete users
-    - delete projects
-    - register users
-    - login users
 
     */
 
@@ -155,6 +155,11 @@ class RoleVerificationTests {
     }
 
     @Test
+    fun adminRoleCanDeleteProject() {
+        //TODO Implement deleting projects
+    }
+
+    @Test
     fun adminRoleCanCreateEmployee() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
         tru.createEmployee(EmployeeName("Doesn't matter, shouldn't work"))
@@ -173,11 +178,160 @@ class RoleVerificationTests {
         assertTrue(frc.roleCanDoAction)
     }
 
+    //need to further implement unsubmit powers to test if we can unsubmit other people's junk
+    @Test
+    fun adminRoleCanUnsubmitAPeriod() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    // - view all employees
+    @Test
+    fun adminRoleCanViewAllEmployees() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.listAllEmployees()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //    - view all projects
+    @Test
+    fun adminRoleCanViewAllProjects() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.listAllProjects()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    @Test
+    fun adminRoleCanViewAllTimeEntries() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.getAllEntriesForEmployee(DEFAULT_ADMIN_USER.employeeId)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //    - make entries
+    @Test
+    fun adminRoleCanMakeAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        val entry = createTimeEntryPreDatabase(employee=DEFAULT_EMPLOYEE)
+        tru.createTimeEntry(entry)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //   - edit entries
+    @Test
+    fun adminRoleCanEditAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        tru.changeEntry(DEFAULT_TIME_ENTRY)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    @Test
+    fun adminRoleCanDeleteAnEntry() {
+       //TODO
+    }
+
+    //TODO SYSTEM ROLE TESTS - Matt make this pretty!
+
     @Test
     fun systemRoleCanCreateSession() {
         val (au, rc) = makeAuthUtils(CurrentUser(SYSTEM_USER))
         au.createNewSession(DEFAULT_USER)
         assertTrue(rc.roleCanDoAction)
+    }
+
+    //TODO APPROVER ROLE TESTS - MAAAAAATTTTTTTTT
+
+    @Test
+    fun approverRoleCannotCreateSession() {
+        val (authUtils, rc) = makeAuthUtils(CurrentUser(DEFAULT_APPROVER))
+        authUtils.createNewSession(DEFAULT_APPROVER)
+        assertFalse(rc.roleCanDoAction)
+    }
+
+    @Test
+    fun approverRoleCannotCreateProject() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.createProject(ProjectName("flim flam floozy"))
+        assertFalse(frc.roleCanDoAction)
+    }
+
+    @Test
+    fun approverUserCannotEnterTimeForAnother() {
+        // be a user
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
+        val entry = createTimeEntryPreDatabase(employee=otherEmployee)
+        val result = tru.createTimeEntry(entry)
+        assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null), result)
+    }
+
+    @Test
+    fun approverUserCannotCreateEmployee() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.createEmployee(EmployeeName("Spartacus"))
+        assertFalse(frc.roleCanDoAction)
+    }
+
+    //     - view all time entries
+    @Test
+    fun approverRoleCanViewAllTimeEntries() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.getAllEntriesForEmployee(DEFAULT_APPROVER.employeeId)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    // - view all employees
+    @Test
+    fun approverRoleCanViewAllEmployees() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.listAllEmployees()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //    - view all projects
+    @Test
+    fun approverRoleCanViewAllProjects() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.listAllProjects()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //    - make entries
+    @Test
+    fun approverRoleCanMakeAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        val entry = createTimeEntryPreDatabase(employee=DEFAULT_EMPLOYEE)
+        tru.createTimeEntry(entry)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //   - edit entries
+    @Test
+    fun approverRoleCanEditAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        tru.changeEntry(DEFAULT_TIME_ENTRY)
+        assertTrue(frc.roleCanDoAction)
+    }
+    //    - delete entries
+    @Test
+    fun approverRoleCanDeleteAnEntry() {
+        //TODO
+    }
+    //    - submit/unsubmit periods
+    @Test
+    fun approverRoleCanSubmitAndUnsubmitAPeriod() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        val period = TimePeriod.getTimePeriodForDate(A_RANDOM_DAY_IN_JUNE_2020)
+        tru.submitTimePeriod(period)
+        assertTrue(frc.roleCanDoAction)
+        tru.unsubmitTimePeriod(period)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    @Test
+    fun approverCanApproveASubmittedTimePeriod() {
+        //TODO
     }
 
     /*
