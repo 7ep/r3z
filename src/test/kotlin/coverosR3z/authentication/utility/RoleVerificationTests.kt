@@ -1,52 +1,47 @@
 package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.FakeAuthPersistence
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.*
 import coverosR3z.timerecording.FakeTimeEntryPersistence
-import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.types.Employee
-import coverosR3z.timerecording.types.EmployeeId
-import coverosR3z.timerecording.types.EmployeeName
-import coverosR3z.timerecording.types.ProjectName
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
 
 class RoleVerificationTests {
 
-    private lateinit var authUtils : AuthenticationUtilities
-    private lateinit var ap : FakeAuthPersistence
-
-    @Before
-    fun init() {
-        ap = FakeAuthPersistence()
-    }
-
     /*
-    Thinking
-    Roles:
+    Regular:
+    - make entries
+    - edit entries
+    - delete entries
+    - submit/unsubmit periods
+    - view all projects
+    - view all employees
+    - view all time entries
 
-    Employee
-    can...
-    * make entries for self
-    * edit entries for self
-    * delete entries for self (jk)
-    * submit periods for self
-    * unsubmit periods for self
+    Approver
+    - everything a regular user can do
+    - can unsubmit periods for others
+    - can approve submitted periods
 
-    can't...
-    * make/edit/delete entries for other users
-    * make projects
-    * create session
+    Administrator
+    - everything a regular user can do
+    - can unsubmit periods for others
+    - create employees
+    - create projects
+    - delete projects
+    - hey what happens if you delete a project their are entries for?
 
+    System
+    - change user
+    - delete entries
+    - delete users
+    - delete projects
+    - register users
+    - login users
 
-    Admin
-    can:
-
-    can't:
     */
 
     /*
@@ -58,18 +53,20 @@ class RoleVerificationTests {
     alt-text: regular role tests
     font: small
     */
+
+
     @Test
     fun regularRoleCannotCreateSession() {
-        val rc = makeAuthUtils(CurrentUser(DEFAULT_USER))
+        val (authUtils, rc) = makeAuthUtils(CurrentUser(DEFAULT_USER))
         authUtils.createNewSession(DEFAULT_USER)
-        assertFalse(rc.didAuthorize)
+        assertFalse(rc.roleCanDoAction)
     }
 
     @Test
     fun regularRoleCannotCreateProject() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
         tru.createProject(ProjectName("flim flam"))
-        assertFalse(frc.didAuthorize)
+        assertFalse(frc.roleCanDoAction)
     }
 
     @Test
@@ -77,18 +74,54 @@ class RoleVerificationTests {
         // be a user
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
         val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
-        val otherUser = User(UserId(2), UserName("DefaultOtherUser"), DEFAULT_HASH, DEFAULT_SALT, otherEmployee.id)
         val entry = createTimeEntryPreDatabase(employee=otherEmployee)
-
-        assertThrows(UnpermittedOperationException::class.java) {tru.createTimeEntry(entry)}
+        val result = tru.createTimeEntry(entry)
+        assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null), result)
     }
 
     @Test
     fun regularUserCannotCreateEmployee() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
         tru.createEmployee(EmployeeName("Doesn't matter, shouldn't work"))
-        assertFalse(frc.didAuthorize)
+        assertFalse(frc.roleCanDoAction)
     }
+
+    //     - view all time entries
+    @Test
+    fun regularRoleCanViewAllTimeEntries() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        tru.getAllEntriesForEmployee(DEFAULT_USER.employeeId)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    // - view all employees
+    @Test
+    fun regularRoleCanViewAllEmployees() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        tru.listAllEmployees()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+    //    - view all projects
+    @Test
+    fun regularRoleCanViewAllProjects() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        tru.listAllProjects()
+        assertTrue(frc.roleCanDoAction)
+    }
+
+//    - make entries
+    @Test
+    fun regularRoleCanMakeAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        val entry = createTimeEntryPreDatabase(employee=DEFAULT_EMPLOYEE)
+        tru.createTimeEntry(entry)
+        assertTrue(frc.roleCanDoAction)
+    }
+
+//    - edit entries
+//    - delete entries
+//    - submit/unsubmit periods
 
     /*
               _       _                _       _          _
@@ -99,28 +132,39 @@ class RoleVerificationTests {
     font: small
      */
 
+
     @Test
     fun adminRoleCanCreateProject() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
         tru.createProject(ProjectName("flim flam"))
-        print(frc.didAuthorize)
-        assertTrue(frc.didAuthorize)
+        print(frc.roleCanDoAction)
+        assertTrue(frc.roleCanDoAction)
     }
 
     @Test
-    fun systemRoleCanCreateEmployee() {
-        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+    fun adminRoleCanCreateEmployee() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
         tru.createEmployee(EmployeeName("Doesn't matter, shouldn't work"))
-        assertFalse(frc.didAuthorize)
+        assertTrue(frc.roleCanDoAction)
     }
 
+    //I'm gonna take you on a journey byron
+    @Test
+    fun adminRoleCanEnterWhateverTimeForWhoeverTheyPlease() { // So maybe they are not supposed to be able to
+        // be an admin
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_ADMIN_USER)
+        val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
+        val entry = createTimeEntryPreDatabase(employee=otherEmployee)
 
-    /* TODO Byron explain yourself */
+        tru.createTimeEntry(entry)
+        assertTrue(frc.roleCanDoAction)
+    }
+
     @Test
     fun systemRoleCanCreateSession() {
-        val rc = makeAuthUtils(CurrentUser(SYSTEM_USER))
-        authUtils.createNewSession(DEFAULT_USER)
-        assertFalse(rc.didAuthorize)
+        val (au, rc) = makeAuthUtils(CurrentUser(SYSTEM_USER))
+        au.createNewSession(DEFAULT_USER)
+        assertTrue(rc.roleCanDoAction)
     }
 
     /*
@@ -132,10 +176,11 @@ class RoleVerificationTests {
      alt-text: Helper Methods
      */
 
-    private fun makeAuthUtils(cu: CurrentUser): FakeRolesChecker {
+    private fun makeAuthUtils(cu: CurrentUser): Pair<IAuthenticationUtilities, FakeRolesChecker> {
         val rc = FakeRolesChecker(cu)
-        authUtils = AuthenticationUtilities(ap, testLogger, cu, rc)
-        return rc
+        val ap = FakeAuthPersistence()
+        val authUtils = AuthenticationUtilities(ap, testLogger, cu, rc)
+        return Pair(authUtils, rc)
     }
 
     fun makeTRUWithABunchOfFakes(user: User = DEFAULT_ADMIN_USER): Pair<TimeRecordingUtilities, FakeRolesChecker>{

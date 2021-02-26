@@ -8,10 +8,10 @@ class FakeRolesChecker(
     private val cu: CurrentUser,
 ) : IRolesChecker {
 
-    var didAuthorize: Boolean = false
+    var roleCanDoAction: Boolean = false
 
     override fun checkAllowed(vararg roles: Roles) {
-        didAuthorize = try {
+        roleCanDoAction = try {
             RolesChecker(cu).checkAllowed(roles = roles)
             true
         } catch (ex: UnpermittedOperationException) {

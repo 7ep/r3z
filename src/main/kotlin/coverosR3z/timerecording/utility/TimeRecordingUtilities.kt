@@ -29,10 +29,6 @@ class TimeRecordingUtilities(
     override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
         rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
 
-        if(cu.role != Roles.ADMIN && entry.employee.id != cu.employeeId) {
-            throw UnpermittedOperationException("No")
-        }
-
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             logger.logDebug(cu) {"recorded time successfully"}
@@ -53,7 +49,7 @@ class TimeRecordingUtilities(
         val user = cu
         // ensure time entry user is the logged in user, or
         // is the system
-        if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
+        if (user.employeeId != entry.employee.id) {
             logger.logAudit(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
                     "to modify time for ${entry.employee.name.value}"}
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
