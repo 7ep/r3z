@@ -35,6 +35,7 @@ val DEFAULT_PASSWORD = Password("password1234")
 val DEFAULT_HASH = Hash.createHash(DEFAULT_PASSWORD, DEFAULT_SALT)
 const val DEFAULT_HASH_STRING = "4dc91e9a80320c901f51ccf7166d646c"
 val DEFAULT_EMPLOYEE_NAME = EmployeeName("DefaultEmployee")
+val DEFAULT_ADMINISTRATOR_NAME = EmployeeName("Administrator")
 val DEFAULT_EMPLOYEE = Employee(EmployeeId(1), DEFAULT_EMPLOYEE_NAME)
 val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
 val DEFAULT_REGULAR_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.REGULAR)

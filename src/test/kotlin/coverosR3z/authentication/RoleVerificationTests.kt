@@ -1,7 +1,9 @@
-package coverosR3z.authentication.utility
+package coverosR3z.authentication
 
-import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.authentication.utility.FakeRolesChecker
+import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.*
 import coverosR3z.timerecording.FakeTimeEntryPersistence
 import coverosR3z.timerecording.types.*
