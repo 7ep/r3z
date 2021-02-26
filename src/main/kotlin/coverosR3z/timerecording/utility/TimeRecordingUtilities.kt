@@ -5,6 +5,7 @@ import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Roles
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.utility.IRolesChecker
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
@@ -16,17 +17,18 @@ class TimeRecordingUtilities(
     private val persistence: ITimeEntryPersistence,
     val cu: CurrentUser,
     private val logger: ILogger,
-    private val ac : RolesChecker = RolesChecker(cu)
+    private val rc: IRolesChecker = RolesChecker(cu)
 ) :
     ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        ac.checkAllowed(Roles.SYSTEM)
+        rc.checkAllowed(Roles.SYSTEM)
         return TimeRecordingUtilities(persistence, cu, logger)
     }
 
     override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
             logger.logDebug(cu) {"recorded time successfully"}
@@ -35,7 +37,7 @@ class TimeRecordingUtilities(
     }
 
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return createOrModifyEntry(entry.toTimeEntryPreDatabase()) {
             val newTimeEntry = persistence.overwriteTimeEntry(entry)
             logger.logDebug(cu) {"modified time successfully"}
@@ -47,7 +49,7 @@ class TimeRecordingUtilities(
         val user = cu
         // ensure time entry user is the logged in user, or
         // is the system
-        if (user != SYSTEM_USER && user.employeeId != entry.employee.id) {
+        if (user.employeeId != entry.employee.id) {
             logger.logAudit(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
                     "to modify time for ${entry.employee.name.value}"}
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
@@ -95,11 +97,8 @@ class TimeRecordingUtilities(
      * system (persists it to the database)
      */
     override fun createProject(projectName: ProjectName) : Project {
-        ac.checkAllowed(Roles.ADMIN)
+        rc.checkAllowed(Roles.ADMIN)
         require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
-        if(cu.role != Roles.ADMIN) {
-            throw UnpermittedOperationException("Only admins can create projects. You, however, are a ${cu.role}, you peon.")
-        }
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
         return persistence.persistNewProject(projectName)
@@ -114,7 +113,7 @@ class TimeRecordingUtilities(
      * system (persists it to the database)
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
-        ac.checkAllowed(Roles.ADMIN, Roles.SYSTEM)
+        rc.checkAllowed(Roles.ADMIN, Roles.SYSTEM)
         require(employeename.value.isNotEmpty()) {"Employee name cannot be empty"}
         val newEmployee = persistence.persistNewEmployee(employeename)
         logger.logAudit(cu) {"Creating a new employee, \"${newEmployee.name.value}\""}
@@ -122,60 +121,60 @@ class TimeRecordingUtilities(
     }
 
     override fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry> {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         val employee = persistence.getEmployeeById(employeeId)
         return persistence.readTimeEntriesOnDate(employee, date)
     }
 
     override fun getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry> {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         val employee = persistence.getEmployeeById(employeeId)
         return persistence.readTimeEntries(employee)
     }
 
     override fun listAllProjects(): List<Project> {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getAllProjects()
     }
 
     override fun findProjectById(id: ProjectId): Project {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getProjectById(id)
     }
 
     override fun findEmployeeById(id: EmployeeId): Employee {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getEmployeeById(id)
     }
 
     override fun listAllEmployees(): List<Employee> {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getAllEmployees()
     }
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
     }
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
         return persistence.unsubmitTimePeriod(submittedPeriod)
     }
 
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod) : SubmittedPeriod {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getSubmittedTimePeriod(checkNotNull(cu.employeeId), timePeriod)
     }
 
     override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.getTimeEntriesForTimePeriod(employeeId, timePeriod)
     }
 
     override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
-        ac.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
+        rc.checkAllowed(Roles.REGULAR, Roles.APPROVER, Roles.ADMIN)
         return persistence.isInASubmittedPeriod(employeeId, date)
     }
 }
