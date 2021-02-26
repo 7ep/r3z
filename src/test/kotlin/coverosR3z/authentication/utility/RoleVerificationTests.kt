@@ -12,15 +12,6 @@ import org.junit.Test
 class RoleVerificationTests {
 
     /*
-    Regular:
-    - make entries
-    - edit entries
-    - delete entries
-    - submit/unsubmit periods
-    - view all projects
-    - view all employees
-    - view all time entries
-
     Approver
     - everything a regular user can do
     - can unsubmit periods for others
@@ -119,9 +110,31 @@ class RoleVerificationTests {
         assertTrue(frc.roleCanDoAction)
     }
 
-//    - edit entries
-//    - delete entries
-//    - submit/unsubmit periods
+    //   - edit entries
+    @Test
+    fun regularRoleCanEditAnEntry() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        val entry = createTimeEntryPreDatabase(employee=DEFAULT_EMPLOYEE)
+        val se = tru.createTimeEntry(entry).newTimeEntry
+        val entry2 = se?.let { TimeEntry(se.id, se.employee, se.project, se.time, it.date, se.details ) }
+        tru.changeEntry(entry2!!)
+        assertTrue(frc.roleCanDoAction)
+    }
+    //    - delete entries
+    @Test
+    fun regularRoleCanDeleteAnEntry() {
+        //TODO
+    }
+    //    - submit/unsubmit periods
+    @Test
+    fun regularRoleCanSubmitAndUnsubmitAPeriod() {
+        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        val period = TimePeriod.getTimePeriodForDate(A_RANDOM_DAY_IN_JUNE_2020)
+        tru.submitTimePeriod(period)
+        assertTrue(frc.roleCanDoAction)
+        tru.unsubmitTimePeriod(period)
+        assertTrue(frc.roleCanDoAction)
+    }
 
     /*
               _       _                _       _          _
