@@ -31,12 +31,6 @@ import org.junit.Test
 class RoleVerificationTests {
 
     /*
-
-
-    */
-
-    /*
-                        _                    _       _          _
       _ _ ___ __ _ _  _| |__ _ _ _   _ _ ___| |___  | |_ ___ __| |_ ___
      | '_/ -_) _` | || | / _` | '_| | '_/ _ \ / -_) |  _/ -_|_-<  _(_-<
      |_| \___\__, |\_,_|_\__,_|_|   |_| \___/_\___|  \__\___/__/\__/__/
@@ -63,7 +57,7 @@ class RoleVerificationTests {
     @Test
     fun oneRegularUserCannotEnterTimeForAnother() {
         // be a user
-        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
+        val (tru, _) = makeTRUWithABunchOfFakes(DEFAULT_USER)
         val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
         val entry = createTimeEntryPreDatabase(employee=otherEmployee)
         val result = tru.createTimeEntry(entry)
@@ -101,7 +95,7 @@ class RoleVerificationTests {
         assertTrue(frc.roleCanDoAction)
     }
 
-//    - make entries
+    //    - make entries
     @Test
     fun regularRoleCanMakeAnEntry() {
         val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_USER)
@@ -120,11 +114,7 @@ class RoleVerificationTests {
         tru.changeEntry(entry2!!)
         assertTrue(frc.roleCanDoAction)
     }
-    //    - delete entries
-    @Test
-    fun regularRoleCanDeleteAnEntry() {
-        //TODO
-    }
+
     //    - submit/unsubmit periods
     @Test
     fun regularRoleCanSubmitAndUnsubmitAPeriod() {
@@ -152,11 +142,6 @@ class RoleVerificationTests {
         tru.createProject(ProjectName("flim flam"))
         print(frc.roleCanDoAction)
         assertTrue(frc.roleCanDoAction)
-    }
-
-    @Test
-    fun adminRoleCanDeleteProject() {
-        //TODO Implement deleting projects
     }
 
     @Test
@@ -226,11 +211,6 @@ class RoleVerificationTests {
         assertTrue(frc.roleCanDoAction)
     }
 
-    @Test
-    fun adminRoleCanDeleteAnEntry() {
-       //TODO
-    }
-
     //TODO SYSTEM ROLE TESTS - Matt make this pretty!
 
     @Test
@@ -259,7 +239,7 @@ class RoleVerificationTests {
     @Test
     fun approverUserCannotEnterTimeForAnother() {
         // be a user
-        val (tru, frc) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
+        val (tru, _) = makeTRUWithABunchOfFakes(DEFAULT_APPROVER)
         val otherEmployee = Employee(EmployeeId(2), DEFAULT_EMPLOYEE_NAME)
         val entry = createTimeEntryPreDatabase(employee=otherEmployee)
         val result = tru.createTimeEntry(entry)
@@ -313,11 +293,7 @@ class RoleVerificationTests {
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
     }
-    //    - delete entries
-    @Test
-    fun approverRoleCanDeleteAnEntry() {
-        //TODO
-    }
+
     //    - submit/unsubmit periods
     @Test
     fun approverRoleCanSubmitAndUnsubmitAPeriod() {
@@ -327,11 +303,6 @@ class RoleVerificationTests {
         assertTrue(frc.roleCanDoAction)
         tru.unsubmitTimePeriod(period)
         assertTrue(frc.roleCanDoAction)
-    }
-
-    @Test
-    fun approverCanApproveASubmittedTimePeriod() {
-        //TODO
     }
 
     /*

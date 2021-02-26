@@ -50,15 +50,6 @@ class UITimeEntryTests {
         logout()
     }
 
-    private fun `createEmployee - I, an admin, should be able to create an employee`() {
-
-    }
-
-    private fun `createEmployee - I, an employee, should not be able to create an employee`() {
-
-    }
-
-
     private fun `editTime - An employee should be able to edit the number of hours worked from a previous time entry`() {
         val s = EditTimeUserStory.getScenario("editTime - An employee should be able to edit the number of hours worked from a previous time entry")
 
@@ -127,111 +118,6 @@ class UITimeEntryTests {
         assertTrue(pom.vtp.verifyPeriodIsSubmitted())
         s.markDone("Then the time period is ready to be approved")
     }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `date entry should default to today's date`() {
-
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `should group time entries by period`() {
-
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `should allow sorting time entries by any field`() {
-
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `should be able to edit make multiple entries at once`() {
-        // Given I spent half my day on training and half on client work
-        // There should be fields available to record both these things
-
-        // I put info in both
-
-        // my time has been recorded
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `a blind person should have equivalent accommodation for entering time`() {
-        // I am blind, so I use a screen reader
-        // I enter my time using the screen reader
-        // and my time is entered
-    }
-
-    @BDD
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("for now, projects allow future entry, this will require changes to the project data structure")
-    fun `timeentry - should be possible to disallow time entry on future days for certain projects`() {
-        val s =
-            TimeEntryUserStory.getScenario("timeentry - should be possible to disallow time entry on future days for certain projects")
-        s.markDone("Given I am working on a project for the government that disallows forward entry")
-        s.markDone("when I try to enter time tomorrow")
-        s.markDone("then the system disallows it.")
-    }
-
-    /**
-     * Just to confirm that I am allowed to enter all the time in the future I
-     * need for PTO
-     */
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("for now, projects allow future entry, this will require changes to the project data structure")
-    fun `I should be able to enter future time on PTO`() {
-
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `I should not need to enter details on a time entry`() {
-
-    }
-
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `all data entry should be automatically saved as I work`() {
-
-    }
-
-    /**
-     * Assuming that the user has previous submitted time periods,
-     * when they see the new current time period it has projects
-     * pre-populated to the last period's projects.
-     */
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `a new time period should typically populate default projects`() {
-
-    }
-
-    /**
-     * The idea here being, for example, maybe there is a checkbox
-     * where, if it's checked, tabbing moves from day to day on the same
-     * project.  If unchecked, tabbing moves from project to project in
-     * a single day
-     */
-    @Category(UITestCategory::class)
-    @Test
-    @Ignore("Not started yet")
-    fun `should be an option to quickly enter time per project or per day `() {
-
-    }
-
 
     /*
      _ _       _                  __ __        _    _           _
