@@ -327,7 +327,7 @@ class AuthenticationUtilitiesTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, testLogger),
             testLogger,

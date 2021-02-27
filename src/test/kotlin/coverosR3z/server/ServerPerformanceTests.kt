@@ -2,18 +2,23 @@ package coverosR3z.server
 
 import coverosR3z.FullSystem
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.Session
+import coverosR3z.authentication.types.User
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
-import coverosR3z.techempower.utility.ITechempowerUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
+import coverosR3z.timerecording.types.SubmittedPeriod
+import coverosR3z.timerecording.types.TimeEntry
 import org.junit.*
 import org.junit.experimental.categories.Category
 import java.io.File
@@ -34,7 +39,15 @@ class ServerPerformanceTests {
     private lateinit var fs : FullSystem
 
     private fun startServer(port : Int) {
-        val pmd = PureMemoryDatabase(worlds = ITechempowerUtilities.generateWorlds())
+        val datamap = mapOf(
+            Employee.directoryName to ChangeTrackingSet<Employee>(),
+            TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
+            Project.directoryName to ChangeTrackingSet<Project>(),
+            SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
+            Session.directoryName to ChangeTrackingSet<Session>(),
+            User.directoryName to ChangeTrackingSet<User>()
+        )
+        val pmd = PureMemoryDatabase(data = datamap)
         fs = FullSystem.startSystem(
             SystemOptions(
                 port = port,
@@ -189,32 +202,6 @@ class ServerPerformanceTests {
         File("${granularPerfArchiveDirectory}testViewStaticContentUnauthenticated_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
     }
-
-
-    @IntegrationTest(usesPort = true)
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun testTechempowerAPI_PERFORMANCE() {
-        val numberThreads = 5
-        val numberRequests = 2
-
-        val port = port.getAndIncrement()
-        startServer(port)
-
-        val worlds = ITechempowerUtilities.generateWorlds()
-        fs.businessCode.tu.addRows(worlds)
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-
-        val (time, _) = getTime {
-            val realThreads = (1..numberThreads).map { es.submit(makeClientForTechempower(numberRequests)) }
-            realThreads.forEach { it.get() }
-            es.shutdown()
-            es.awaitTermination(10, TimeUnit.SECONDS)
-        }
-
-        println("Time was $time")
-    }
-
 
     /*
      _ _       _                  __ __        _    _           _

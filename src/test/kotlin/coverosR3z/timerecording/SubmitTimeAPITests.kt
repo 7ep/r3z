@@ -5,11 +5,11 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.fakeServerObjects
-import coverosR3z.fakeTechempower
 import coverosR3z.misc.DEFAULT_USER
+import coverosR3z.misc.createEmptyDatabase
+import coverosR3z.misc.makeServerData
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
-import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.SubmitTimeAPI
@@ -29,7 +29,7 @@ class SubmitTimeAPITests {
 
     @Before
     fun init() {
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val cu = CurrentUser(DEFAULT_USER)
         au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, logger = testLogger),
@@ -48,7 +48,7 @@ class SubmitTimeAPITests {
             SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
             SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
         ))
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au)
 
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode
@@ -66,11 +66,4 @@ class SubmitTimeAPITests {
         )
     }
 
-    private fun makeServerData(data: PostBodyData): ServerData {
-        return ServerData(
-            BusinessCode(tru, au, fakeTechempower),
-            fakeServerObjects,
-            AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger
-        )
-    }
 }

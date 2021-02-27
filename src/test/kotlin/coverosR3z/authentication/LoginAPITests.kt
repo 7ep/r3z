@@ -9,8 +9,8 @@ import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
-import coverosR3z.fakeTechempower
 import coverosR3z.misc.exceptions.InexactInputsException
+import coverosR3z.misc.makeServerData
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.utility.toStr
 import coverosR3z.server.APITestCategory
@@ -45,7 +45,7 @@ class LoginAPITests {
                 LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val responseData = LoginAPI.handlePost(sd)
 
         assertEquals("The system should take you to the authenticated homepage",
@@ -62,7 +62,7 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val responseData = LoginAPI.handlePost(sd)
 
         Assert.assertTrue("The system should indicate failure.  File was ${toStr(responseData.fileContents)}",
@@ -80,7 +80,7 @@ class LoginAPITests {
         val data = PostBodyData(mapOf(
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [password]", ex.message)
@@ -96,7 +96,7 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to "",
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(usernameCannotBeEmptyMsg, ex.message)
@@ -111,7 +111,7 @@ class LoginAPITests {
         val data = PostBodyData(mapOf(
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(InexactInputsException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals("expected keys: [username, password]. received keys: [username]", ex.message)
@@ -127,19 +127,11 @@ class LoginAPITests {
             LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             LoginAPI.Elements.PASSWORD_INPUT.getElemName() to ""))
 
-        val sd = makeServerData(data)
+        val sd = makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED)
         val ex = assertThrows(IllegalArgumentException::class.java){ LoginAPI.handlePost(sd) }
 
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
 
-    }
-
-    private fun makeServerData(data: PostBodyData): ServerData {
-        return ServerData(
-            BusinessCode(tru, au, fakeTechempower),
-            fakeServerObjects,
-            AnalyzedHttpData(data = data, user = DEFAULT_USER), authStatus = AuthStatus.UNAUTHENTICATED, testLogger
-        )
     }
 
 }

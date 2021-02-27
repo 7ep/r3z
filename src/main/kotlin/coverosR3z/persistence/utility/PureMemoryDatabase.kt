@@ -1,37 +1,14 @@
 package coverosR3z.persistence.utility
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.*
-import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.logging.ILogger
-import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.persistence.types.AbstractDataAccess
-import coverosR3z.persistence.types.ChangeTrackingSet
-import coverosR3z.persistence.types.toChangeTrackingSet
-import coverosR3z.techempower.types.World
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.*
+import coverosR3z.persistence.types.*
 
 
 /**
- * Why use those heavy-handed database applications when you
- * can simply store your data in simple collections?
- *
- * Here, things are simple.  Anything you need, you make.
- *
- * @param dbDirectory if this is null, the database won't use the disk at all.  If you set it to a directory, like
- *                      File("db/") the database will use that directory for all persistence.
+ * An object-oriented strongly-typed database
  */
-open class PureMemoryDatabase(
-    protected val dbDirectory: String? = null,
+class PureMemoryDatabase(
     private val diskPersistence: DatabaseDiskPersistence? = null,
-    protected val employees: ChangeTrackingSet<Employee> = ChangeTrackingSet(),
-    protected val users: ChangeTrackingSet<User> = ChangeTrackingSet(),
-    protected val projects: ChangeTrackingSet<Project> = ChangeTrackingSet(),
-    protected val timeEntries: ChangeTrackingSet<TimeEntry> = ChangeTrackingSet(),
-    protected val sessions: ChangeTrackingSet<Session> = ChangeTrackingSet(),
-    protected val submittedPeriods: ChangeTrackingSet<SubmittedPeriod> = ChangeTrackingSet(),
-    protected val worlds: ChangeTrackingSet<World> = ChangeTrackingSet()
+    private val data: Map<String, ChangeTrackingSet<*>> = mapOf()
 ) {
 
     fun stop() {
@@ -40,34 +17,24 @@ open class PureMemoryDatabase(
 
     fun copy(): PureMemoryDatabase {
         return PureMemoryDatabase(
-            employees = this.employees.toList().toChangeTrackingSet(),
-            users = this.users.toList().toChangeTrackingSet(),
-            projects = this.projects.toList().toChangeTrackingSet(),
-            timeEntries = this.timeEntries.toList().toChangeTrackingSet(),
-            sessions = this.sessions.toList().toChangeTrackingSet(),
-            submittedPeriods = this.submittedPeriods.toList().toChangeTrackingSet(),
-            worlds = this.worlds.toList().toChangeTrackingSet(),
+            data = this.data.entries.map {it.key to it.value.toList().toChangeTrackingSet()}.toMap()
         )
     }
 
-    ////////////////////////////////////
-    //   DATA ACCESS
-    ////////////////////////////////////
+    /**
+     * This method is central to accessing the database.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T: IndexableSerializable> dataAccess(directoryName: String) : DataAccess<T> {
+        return DataAccess(checkNotNull(data[directoryName]), diskPersistence, directoryName) as DataAccess<T>
+    }
 
-    inner class EmployeeDataAccess : AbstractDataAccess<Employee>(employees, diskPersistence, Employee.directoryName)
-    inner class ProjectDataAccess : AbstractDataAccess<Project>(projects, diskPersistence, Project.directoryName)
-    inner class UserDataAccess : AbstractDataAccess<User>(users, diskPersistence, User.directoryName)
-    inner class SessionDataAccess : AbstractDataAccess<Session>(sessions, diskPersistence, Session.directoryName)
-    inner class TimeEntryDataAccess : AbstractDataAccess<TimeEntry>(timeEntries, diskPersistence, TimeEntry.directoryName)
-    inner class SubmittedPeriodsAccess : AbstractDataAccess<SubmittedPeriod>(submittedPeriods, diskPersistence, SubmittedPeriod.directoryName)
-    inner class WorldDataAccess : AbstractDataAccess<World>(worlds, diskPersistence, SubmittedPeriod.directoryName)
-
-
-    ////////////////////////////////////
-    //   BOILERPLATE
-    ////////////////////////////////////
-
-
+    /**
+     * returns true if all the sets of data are empty
+     */
+    fun isEmpty(): Boolean {
+        return data.entries.all { it.value.isEmpty() }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -75,54 +42,13 @@ open class PureMemoryDatabase(
 
         other as PureMemoryDatabase
 
-        if (employees != other.employees) return false
-        if (users != other.users) return false
-        if (projects != other.projects) return false
-        if (timeEntries != other.timeEntries) return false
-        if (sessions != other.sessions) return false
-        if (submittedPeriods != other.submittedPeriods) return false
-        if (worlds != other.worlds) return false
+        if (data != other.data) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = employees.hashCode()
-        result = 31 * result + users.hashCode()
-        result = 31 * result + projects.hashCode()
-        result = 31 * result + timeEntries.hashCode()
-        result = 31 * result + sessions.hashCode()
-        result = 31 * result + submittedPeriods.hashCode()
-        result = 31 * result + worlds.hashCode()
-        return result
+        return data.hashCode()
     }
 
-
-    ////////////////////////////////////
-    //   DATABASE CONTROL
-    ////////////////////////////////////
-
-    companion object {
-
-        /**
-         * This starts the database with memory-only, that is
-         * no disk persistence.  This is mainly
-         * used for testing purposes.  For production use,
-         * check out [DatabaseDiskPersistence.startWithDiskPersistence]
-         */
-        fun startMemoryOnly(logger: ILogger): PureMemoryDatabase {
-            val pmd = PureMemoryDatabase()
-
-            logImperative("creating an initial employee")
-            val tep = TimeEntryPersistence(pmd, logger = logger)
-            val mrAdmin = tep.persistNewEmployee(EmployeeName("Administrator"))
-
-            val ap = AuthenticationPersistence(pmd, logger=logger)
-            val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
-            au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
-            logImperative("Create an initial user")
-
-            return pmd
-        }
-    }
 }

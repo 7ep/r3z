@@ -4,8 +4,9 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.Date
-import coverosR3z.persistence.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.persistence.exceptions.SubmissionNotFoundException
+import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
+import coverosR3z.timerecording.exceptions.SubmissionNotFoundException
+import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
 import java.util.*
@@ -15,6 +16,11 @@ class TimeEntryPersistence(
     private val cu : CurrentUser = CurrentUser(SYSTEM_USER),
     private val logger: ILogger
 ) : ITimeEntryPersistence {
+    
+    private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
+    private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
+    private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
+    private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
         return TimeEntryPersistence(pmd, cu, logger)
@@ -22,7 +28,7 @@ class TimeEntryPersistence(
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         isEntryValid(entry)
-        return pmd.TimeEntryDataAccess().actOn { entries ->
+        return timeEntryDataAccess.actOn { entries ->
 
             // add the new data
             val newIndex = entries.nextIndex.getAndIncrement()
@@ -44,13 +50,13 @@ class TimeEntryPersistence(
 
     override fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry {
         isEntryValid(newEntry.toTimeEntryPreDatabase())
-        val oldEntry = pmd.TimeEntryDataAccess().read {entries ->
+        val oldEntry = timeEntryDataAccess.read {entries ->
             entries.single{it.id == newEntry.id}
         }
 
         check (oldEntry.employee == newEntry.employee) {"Employee field of a time entry may not be changed"}
 
-        pmd.TimeEntryDataAccess().actOn { entries -> entries.update(newEntry)}
+        timeEntryDataAccess.actOn { entries -> entries.update(newEntry)}
 
         logger.logDebug(cu) {"modified an existing timeEntry: $newEntry"}
         logger.logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $newEntry" }
@@ -65,12 +71,12 @@ class TimeEntryPersistence(
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
         check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidNoProject}
         check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidNoEmployee}
-        check(pmd.EmployeeDataAccess().read { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
-        check(pmd.ProjectDataAccess().read { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
+        check(employeeDataAccess.read { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
+        check(projectDataAccess.read { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
-        return pmd.ProjectDataAccess().actOn { projects ->
+        return projectDataAccess.actOn { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
             projects.add(newProject)
             logger.logDebug(cu) { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
@@ -79,7 +85,7 @@ class TimeEntryPersistence(
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
-        return pmd.EmployeeDataAccess().actOn { employees ->
+        return employeeDataAccess.actOn { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
             logger.logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
@@ -88,7 +94,7 @@ class TimeEntryPersistence(
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Time {
-        return pmd.TimeEntryDataAccess().read (
+        return timeEntryDataAccess.read (
             fun(timeEntries): Time {
 
                 // if the employee hasn't entered any time on this date, return 0 minutes
@@ -98,37 +104,37 @@ class TimeEntryPersistence(
     }
 
     override fun readTimeEntries(employee: Employee): Set<TimeEntry> {
-        return pmd.TimeEntryDataAccess().read { timeEntries -> timeEntries.filter { it.employee == employee } }.toSet()
+        return timeEntryDataAccess.read { timeEntries -> timeEntries.filter { it.employee == employee } }.toSet()
     }
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return pmd.TimeEntryDataAccess().read { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
+        return timeEntryDataAccess.read { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
     }
 
     override fun getProjectByName(name: ProjectName): Project {
-        return pmd.ProjectDataAccess().read { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
+        return projectDataAccess.read { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun getProjectById(id: ProjectId): Project {
-        return pmd.ProjectDataAccess().read { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
+        return projectDataAccess.read { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
     override fun getAllProjects(): List<Project> {
-        return pmd.ProjectDataAccess().read { it.toList() }
+        return projectDataAccess.read { it.toList() }
     }
 
     override fun getAllEmployees(): List<Employee> {
-        return pmd.EmployeeDataAccess().read { it.toList() }
+        return employeeDataAccess.read { it.toList() }
     }
 
     override fun getEmployeeById(id: EmployeeId): Employee {
-        return pmd.EmployeeDataAccess().read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
+        return employeeDataAccess.read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
     override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
         // The following closure returns a boolean depending on whether the provided date falls within
         // any of the submission date ranges for the provided employee
-        return pmd.SubmittedPeriodsAccess().read {
+        return submittedPeriodsDataAccess.read {
                 submissions -> submissions
                     .filter{it.employeeId == employeeId}
                     .any{it.bounds.contains(date)}
@@ -136,16 +142,18 @@ class TimeEntryPersistence(
     }
 
     override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
-        val alreadyExists = pmd.SubmittedPeriodsAccess().read { submissions -> submissions.any{ it.employeeId == employeeId && it.bounds == timePeriod} }
+        val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employeeId == employeeId && it.bounds == timePeriod} }
         if (alreadyExists) {
             throw MultipleSubmissionsInPeriodException("A submission already exists for $employeeId on $timePeriod")
         }
 
-        return pmd.SubmittedPeriodsAccess().actOn{ submissions ->
+        return submittedPeriodsDataAccess.actOn{ submissions ->
             val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employeeId,
                 timePeriod)
-            logger.logDebug(cu) { "Recorded a new time period submission, employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, to the database" }
+            logger.logDebug(cu) { "Recorded a new time period submission," +
+                    " employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
+                    "to the database" }
             submissions.add(newSubmission)
             newSubmission
         }
@@ -153,7 +161,7 @@ class TimeEntryPersistence(
 
     override fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
         try {
-            return pmd.SubmittedPeriodsAccess().read { submissions ->
+            return submittedPeriodsDataAccess.read { submissions ->
                 submissions.single { it.employeeId == employeeId && it.bounds == timePeriod }
             }
         } catch (ex: NoSuchElementException) {
@@ -162,14 +170,14 @@ class TimeEntryPersistence(
     }
 
     override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
-        return pmd.TimeEntryDataAccess().read {
+        return timeEntryDataAccess.read {
             timeEntries ->
                 timeEntries.filter { it.employee.id == employeeId && timePeriod.contains(it.date)}.toSet()
         }
     }
 
     override fun unsubmitTimePeriod(stp: SubmittedPeriod) {
-        pmd.SubmittedPeriodsAccess().actOn { submissions ->
+        submittedPeriodsDataAccess.actOn { submissions ->
             submissions.remove(stp)
             logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employeeId.value}\", id: ${stp.id.value}, from the database" }
         }

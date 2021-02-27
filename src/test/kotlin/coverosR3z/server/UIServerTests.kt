@@ -2,10 +2,7 @@ package coverosR3z.server
 
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.authentication.types.maxPasswordSize
-import coverosR3z.authentication.types.maxUserNameSize
-import coverosR3z.authentication.types.minPasswordSize
-import coverosR3z.authentication.types.minUserNameSize
+import coverosR3z.authentication.types.*
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.DEFAULT_DB_DIRECTORY
 import coverosR3z.misc.DEFAULT_PASSWORD
@@ -185,7 +182,7 @@ class UIServerTests {
     private fun tooLongerUsername() {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
         pom.rp.register(tooLongUsername, "password12345", "Administrator")
-        assertFalse(pom.pmd.UserDataAccess().read { users -> users.any { it.name.value == tooLongUsername } })
+        assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == tooLongUsername } })
     }
 
     private fun tooShortUsername() {

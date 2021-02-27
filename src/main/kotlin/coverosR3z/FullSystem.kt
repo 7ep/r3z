@@ -1,13 +1,13 @@
 package coverosR3z
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.Logger
+import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.SimpleConcurrentSet
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -17,9 +17,8 @@ import coverosR3z.server.types.ServerObjects
 import coverosR3z.server.utility.SSLServer
 import coverosR3z.server.utility.Server
 import coverosR3z.server.utility.StaticFilesUtilities
-import coverosR3z.techempower.persistence.TechempowerPersistence
-import coverosR3z.techempower.utility.TechempowerUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 
 import java.io.File
@@ -153,6 +152,21 @@ class FullSystem private constructor(
             val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, businessCode, serverObjects, fullSystem)
             val sslServerFuture = sslServerExecutor.submit(sslServer.createSecureServerThread())
 
+            // Add an Administrator employee and role if the database is empty
+            if (pmd.isEmpty()) {
+                businessCode.tru.createEmployee(EmployeeName("Administrator"))
+                logImperative("Created an initial employee")
+
+                val tep = TimeEntryPersistence(pmd, logger = logger)
+                val mrAdmin = tep.persistNewEmployee(EmployeeName("Administrator"))
+                logImperative("Created an initial employee")
+
+                val ap = AuthenticationPersistence(pmd, logger=logger)
+                val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
+                au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
+                logImperative("Create an initial user")
+            }
+
             fullSystem.serverFuture = serverFuture
             fullSystem.sslServerFuture = sslServerFuture
             fullSystem.esForThreadsInServer = esForThreadsInServer
@@ -175,12 +189,9 @@ class FullSystem private constructor(
             val tep = TimeEntryPersistence(pmd, cu, logger)
             val tru = TimeRecordingUtilities(tep, cu, logger)
 
-            val tp = TechempowerPersistence(pmd)
-            val tu = TechempowerUtilities(tp)
-
             val ap = AuthenticationPersistence(pmd, logger)
             val au = AuthenticationUtilities(ap, logger)
-            return BusinessCode(tru, au, tu)
+            return BusinessCode(tru, au)
         }
 
         /**
@@ -198,7 +209,15 @@ class FullSystem private constructor(
         ): PureMemoryDatabase {
             logImperative("database directory is $dbDirectory")
             return pmd ?: if (dbDirectory == null) {
-                PureMemoryDatabase.startMemoryOnly(logger)
+                val datamap = mapOf(
+                    Employee.directoryName to ChangeTrackingSet<Employee>(),
+                    TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
+                    Project.directoryName to ChangeTrackingSet<Project>(),
+                    SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
+                    Session.directoryName to ChangeTrackingSet<Session>(),
+                    User.directoryName to ChangeTrackingSet<User>()
+                )
+                PureMemoryDatabase(data = datamap)
             } else {
                 DatabaseDiskPersistence(dbDirectory, logger).startWithDiskPersistence()
             }

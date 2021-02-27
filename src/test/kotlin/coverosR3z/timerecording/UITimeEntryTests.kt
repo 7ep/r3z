@@ -1,11 +1,15 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.User
+import coverosR3z.bddframework.BDD
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.TimeEntry
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -43,7 +47,7 @@ class UITimeEntryTests {
         pom.eep.enter("Andrea")
         s.markDone("when I add her as an employee,")
 
-        pom.pmd.EmployeeDataAccess().read {employees -> employees.any {it.name.value == "Andrea" }}
+        pom.pmd.dataAccess<Employee>(Employee.directoryName).read { employees -> employees.any {it.name.value == "Andrea" }}
         s.markDone("then the system persists the data.")
 
         logout()
@@ -175,7 +179,7 @@ class UITimeEntryTests {
         logout()
         // register and login the Admin
         pom.rp.register(adminUsername, adminPassword, "Administrator")
-        val user = pom.pmd.UserDataAccess().read { users -> users.single{ it.name.value == adminUsername }}
+        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
         pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
         pom.lp.login(adminUsername, adminPassword)
 
@@ -184,7 +188,7 @@ class UITimeEntryTests {
     }
 
     private fun assertTwoHoursWerePersisted() {
-        val newEntry = pom.pmd.TimeEntryDataAccess()
+        val newEntry = pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName)
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }
         val changedTime = pom.vtp.getTimeForEntry(newEntry.id.value)
         assertEquals("2.00", changedTime)
@@ -201,7 +205,7 @@ class UITimeEntryTests {
 
     private fun verifyTheEntry() {
         // Verify the entry
-        val id = pom.pmd.TimeEntryDataAccess()
+        val id = pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName)
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
         pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
         assertEquals("your time entries", pom.driver.title)
@@ -215,7 +219,7 @@ class UITimeEntryTests {
 
         // get the id's of our time entries, in order
         val entries =
-            pom.pmd.TimeEntryDataAccess().read { entries -> entries.filter { it.employee.name.value == "Andrea" } }
+            pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName).read { entries -> entries.filter { it.employee.name.value == "Andrea" } }
         val ids = entries
                 .map { it.id.value }.sorted()
 

@@ -1,6 +1,7 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.User
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.uitests.PageObjectModelLocal
@@ -127,7 +128,7 @@ class UIRoleTests {
         logout()
         // register and login the Admin
         pom.rp.register(adminUsername, DEFAULT_PASSWORD.value, DEFAULT_ADMINISTRATOR_NAME.value)
-        val user = pom.pmd.UserDataAccess().read { users -> users.single{ it.name.value == adminUsername }}
+        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
         pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
         pom.lp.login(adminUsername, DEFAULT_PASSWORD.value)
 

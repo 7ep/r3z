@@ -1,6 +1,7 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.User
 import coverosR3z.misc.*
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
@@ -134,7 +135,7 @@ class UITimeEntryValidation {
         logout()
         // register and login the Admin
         pom.rp.register(adminUsername, adminPassword, "Administrator")
-        val user = pom.pmd.UserDataAccess().read { users -> users.single{ it.name.value == adminUsername }}
+        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
         pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
         pom.lp.login(adminUsername, adminPassword)
 
@@ -154,7 +155,7 @@ class UITimeEntryValidation {
     }
 
     private fun anyEntriesForBob(): Boolean {
-        return pom.pmd.TimeEntryDataAccess().read { entries -> entries.any { it.employee.name.value == "Bob" } }
+        return pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName).read { entries -> entries.any { it.employee.name.value == "Bob" } }
     }
 
     /**
@@ -320,7 +321,7 @@ class UITimeEntryValidation {
     }
 
     private fun bobSingleEntry(): TimeEntry {
-        return pom.pmd.TimeEntryDataAccess().read { entries -> entries.single { it.employee.name.value == "Bob" } }
+        return pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName).read { entries -> entries.single { it.employee.name.value == "Bob" } }
     }
 
     /**

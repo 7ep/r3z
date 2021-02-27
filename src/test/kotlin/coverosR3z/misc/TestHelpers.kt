@@ -3,15 +3,20 @@ import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeRolesChecker
+import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.fakeServerObjects
 import coverosR3z.logging.TestLogger
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.DateTime
 import coverosR3z.misc.types.Month
+import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeEntryPersistence
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert
 
@@ -71,7 +76,7 @@ fun createTimeEntryPreDatabase(
  * with a real database connected
  */
 fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger)
+        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(createEmptyDatabase(), logger = testLogger)
         return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)
 }
 
@@ -79,21 +84,54 @@ fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingU
  * Create an employee, "Alice", register a user for her, create a project
  */
 fun initializeAUserAndLogin() : Triple<TimeRecordingUtilities, Employee, Employee>{
-        val pmd = PureMemoryDatabase()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+    val pmd = createEmptyDatabase()
+    val authPersistence = AuthenticationPersistence(pmd, testLogger)
+    val au = AuthenticationUtilities(authPersistence, testLogger)
 
-        val adminTru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(DEFAULT_ADMIN_USER), testLogger)
-        val aliceEmployee = adminTru.createEmployee(EmployeeName("Alice"))
-        val sarahEmployee = adminTru.createEmployee(EmployeeName("Sarah"))
-        adminTru.createProject(DEFAULT_PROJECT_NAME)
+    val persistence = TimeEntryPersistence(pmd, logger = testLogger)
+    val adminTru = TimeRecordingUtilities(persistence, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
+    val aliceEmployee = adminTru.createEmployee(EmployeeName("Alice"))
+    val sarahEmployee = adminTru.createEmployee(EmployeeName("Sarah"))
+    adminTru.createProject(DEFAULT_PROJECT_NAME)
 
-        au.register(UserName("alice"), DEFAULT_PASSWORD, aliceEmployee.id)
-        val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
+    au.register(UserName("alice"), DEFAULT_PASSWORD, aliceEmployee.id)
+    val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
 
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), CurrentUser(aliceUser), testLogger)
-        // Perform some quick checks
-        Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))
+    val tru = TimeRecordingUtilities(persistence, CurrentUser(aliceUser), testLogger)
+    // Perform some quick checks
+    Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))
 
-        return Triple(tru, aliceEmployee, sarahEmployee)
+    return Triple(tru, aliceEmployee, sarahEmployee)
+}
+
+/**
+ * Creates a default empty database with our common data sets, empty
+ */
+fun createEmptyDatabase() : PureMemoryDatabase {
+    val datamap = mapOf(
+        Employee.directoryName to ChangeTrackingSet<Employee>(),
+        TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
+        Project.directoryName to ChangeTrackingSet<Project>(),
+        SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
+        Session.directoryName to ChangeTrackingSet<Session>(),
+        User.directoryName to ChangeTrackingSet<User>()
+    )
+    return PureMemoryDatabase(data = datamap)
+}
+
+/**
+ * Builds a standard [ServerData] object, commonly used in API testing
+ */
+fun makeServerData(
+    data: PostBodyData,
+    tru: ITimeRecordingUtilities,
+    au: IAuthenticationUtilities,
+    authStatus: AuthStatus = AuthStatus.AUTHENTICATED): ServerData {
+    return ServerData(
+        BusinessCode(tru, au),
+        fakeServerObjects,
+        AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE),
+        authStatus = authStatus,
+        testLogger
+    )
 }

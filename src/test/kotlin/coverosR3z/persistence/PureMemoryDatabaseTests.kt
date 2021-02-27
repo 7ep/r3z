@@ -7,6 +7,8 @@ import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
+import coverosR3z.persistence.types.ChangeTrackingSet
+import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
@@ -33,7 +35,7 @@ class PureMemoryDatabaseTests {
 
     @Before
     fun init() {
-        pmd = PureMemoryDatabase()
+        pmd = createEmptyDatabase()
     }
 
     /**
@@ -66,7 +68,7 @@ class PureMemoryDatabaseTests {
     @Test
     fun testShouldBePossibleToCopy_different() {
         val originalPmd = pmd.copy()
-        pmd.EmployeeDataAccess().actOn { it.add(DEFAULT_EMPLOYEE) }
+        pmd.dataAccess<Employee>(Employee.directoryName).actOn { it.add(DEFAULT_EMPLOYEE) }
         assertNotEquals("after adding a new employee, the databases should differ", originalPmd, pmd)
     }
 
@@ -451,7 +453,7 @@ class PureMemoryDatabaseTests {
         }
 
         // expect it to fail while reading time entries and attempting to associate with (now missing) employee
-        assertEquals("Unable to find an employee with the id of 2 while deserializing a time entry.  Employee set size: 0", ex.message)
+        assertEquals("Unable to find an employee with the id of 1 while deserializing a time entry.  Employee set size: 0", ex.message)
     }
     
     /**
@@ -493,7 +495,7 @@ class PureMemoryDatabaseTests {
                 "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
                 .startWithDiskPersistence()
         }
-        assertEquals("Unable to find a user with the id of 2.  User set size: 0", ex.message)
+        assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
     }
     
     /**
@@ -505,7 +507,7 @@ class PureMemoryDatabaseTests {
     fun testPersistence_Read_CorruptedData_Projects_BadData() {
         val databaseDirectorySuffix = "testPersistence_Read_CorruptedData_Projects_BadData"
         arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
-        val project = pmd.ProjectDataAccess().read { p -> p.single{ it.name == DEFAULT_PROJECT_NAME }}
+        val project = pmd.dataAccess<Project>(Project.directoryName).read { p -> p.single{ it.name == DEFAULT_PROJECT_NAME }}
 
         // corrupt the projects data file
         File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id.value}$databaseFileSuffix").writeText("BAD DATA HERE")
@@ -872,6 +874,17 @@ class PureMemoryDatabaseTests {
         val (before, after) = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = databaseDirectorySuffix)
 
         assertEquals(before, after)
+    }
+
+    @Test
+    fun testUsingMapOfData() {
+        val d = PureMemoryDatabase(data = mapOf(Employee.directoryName to ChangeTrackingSet<Employee>()))
+        val dataAccess = d.dataAccess<Employee>(Employee.directoryName)
+        val result = dataAccess.read { employees -> employees.filter { it.name == DEFAULT_EMPLOYEE.name} }
+        println(result)
+        dataAccess.actOn { employees -> employees.add(DEFAULT_EMPLOYEE) }
+        val result2 = dataAccess.read { employees -> employees.filter { it.name == DEFAULT_EMPLOYEE.name} }
+        println(result2)
     }
 
     /*

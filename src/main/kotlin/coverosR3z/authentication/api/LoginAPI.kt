@@ -62,7 +62,7 @@ class LoginAPI(val sd: ServerData) {
 
             PreparedResponseData("", StatusCode.SEE_OTHER, listOf(cookie, "Location: ${HomepageAPI.path}"))
         } else {
-            sd.logger.logDebug { "User ($username) failed to login" }
+            sd.logger.logDebug { "User (${username.value}) failed to login" }
             handleUnauthorized()
         }
     }

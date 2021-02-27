@@ -1,8 +1,7 @@
 package coverosR3z.persistence.utility
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.*
-import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.authentication.types.Session
+import coverosR3z.authentication.types.User
 import coverosR3z.config.CURRENT_DATABASE_VERSION
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
@@ -93,8 +92,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
      * This factory method handles the nitty-gritty about starting
      * the database with respect to the files on disk.  If you plan
      * to use the database with the disk, here's a great place to
-     * start.  If you are just going to use the database in memory-only,
-     * check out [PureMemoryDatabase.startMemoryOnly]
+     * start.
      */
     fun startWithDiskPersistence() : PureMemoryDatabase {
 
@@ -106,10 +104,18 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         return if (restoredPMD != null) {
             restoredPMD
         } else {
-            logImperative("No existing database found, building new database")
+            logImperative("Building new database at $dbDirectory")
             // if nothing is there, we build a new database
             // and add a clean set of directories
-            val pmd = PureMemoryDatabase(dbDirectory = dbDirectoryWithVersion, diskPersistence = this)
+            val datamap = mapOf(
+                Employee.directoryName to ChangeTrackingSet<Employee>(),
+                TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
+                Project.directoryName to ChangeTrackingSet<Project>(),
+                SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
+                Session.directoryName to ChangeTrackingSet<Session>(),
+                User.directoryName to ChangeTrackingSet<User>()
+            )
+            val pmd = PureMemoryDatabase(diskPersistence = this, data = datamap)
             logImperative("Created new PureMemoryDatabase")
 
             File(checkNotNull(dbDirectoryWithVersion)).mkdirs()
@@ -118,16 +124,6 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
             val versionFilename = "currentVersion.txt"
             File(dbDirectory + versionFilename).writeText(CURRENT_DATABASE_VERSION.toString())
             logImperative("Wrote the version of the database ($CURRENT_DATABASE_VERSION) to $versionFilename")
-
-
-            val tep = TimeEntryPersistence(pmd, logger = logger)
-            val mrAdmin = tep.persistNewEmployee(EmployeeName("Administrator"))
-            logImperative("Created an initial employee")
-
-            val ap = AuthenticationPersistence(pmd, logger=logger)
-            val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
-            au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
-            logImperative("Create an initial user")
 
             pmd
         }
@@ -142,7 +138,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val topDirectory = File(checkNotNull(dbDirectoryWithVersion))
         val innerFiles = topDirectory.listFiles()
         if ((!topDirectory.exists()) || innerFiles.isNullOrEmpty()) {
-            logImperative("directory $dbDirectoryWithVersion did not exist.  Returning null for the PureMemoryDatabase")
+            logImperative("directory $dbDirectoryWithVersion was not found")
             return null
         }
 
@@ -154,15 +150,17 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val submittedPeriods = readAndDeserialize(SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
 
         return PureMemoryDatabase(
-            dbDirectoryWithVersion,
             this,
-            employees,
-            users,
-            projects,
-            timeEntries,
-            sessions,
-            submittedPeriods,
-            ChangeTrackingSet()
+            // this is coming out soon - just an experiment - "worlds"
+            data = mapOf(
+                SubmittedPeriod.directoryName to submittedPeriods,
+                TimeEntry.directoryName to timeEntries,
+                Employee.directoryName to employees,
+                Session.directoryName to sessions,
+                Project.directoryName to projects,
+                User.directoryName to users,
+
+            ),
         )
     }
 
@@ -190,6 +188,25 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         if (data.isEmpty()) data.nextIndex.set(1) else data.nextIndex.set(data.maxOf { it.getIndex() } + 1)
         return data
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DatabaseDiskPersistence
+
+        if (dbDirectory != other.dbDirectory) return false
+        if (dbDirectoryWithVersion != other.dbDirectoryWithVersion) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = dbDirectory?.hashCode() ?: 0
+        result = 31 * result + (dbDirectoryWithVersion?.hashCode() ?: 0)
+        return result
+    }
+
 
     companion object {
         const val databaseFileSuffix = ".db"

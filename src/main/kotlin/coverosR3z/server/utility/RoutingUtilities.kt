@@ -9,7 +9,6 @@ import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.Verb
-import coverosR3z.techempower.api.TechempowerAPI
 import coverosR3z.timerecording.api.*
 
 
@@ -38,7 +37,6 @@ class RoutingUtilities {
                 Pair(Verb.GET, ProjectAPI.path) -> ProjectAPI.handleGet(sd)
                 Pair(Verb.GET, LogoutAPI.path) -> LogoutAPI.handleGet(sd)
                 Pair(Verb.GET, LoggingAPI.path) -> LoggingAPI.handleGet(sd)
-                Pair(Verb.GET, TechempowerAPI.path) -> TechempowerAPI.handleGet(sd)
 
                 // POST
 

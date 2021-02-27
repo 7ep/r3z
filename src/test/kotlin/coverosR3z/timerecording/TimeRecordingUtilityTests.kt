@@ -49,7 +49,7 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val utils = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val entry = createTimeEntryPreDatabase(project= Project(ProjectId(1), ProjectName("an invalid project")))
@@ -69,7 +69,7 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should fail to record time for non-existent employee`() {
         // it's an invalid project because the project doesn't exist
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val utils = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val project = utils.createProject(DEFAULT_PROJECT_NAME)
@@ -91,7 +91,7 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
         val twentyFourHours = Time(24 * 60)
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val utils = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val project = utils.createProject(DEFAULT_PROJECT_NAME)
@@ -112,7 +112,7 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
         val twentyThreeHours = Time(23 * 60)
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val utils = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val project = utils.createProject(DEFAULT_PROJECT_NAME)
@@ -291,7 +291,7 @@ class TimeRecordingUtilityTests {
     fun testCanEditTimeEntry() {
         // arrange
         testLogger.turnOnAllLogging()
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger), cu, testLogger)
+        val tru = TimeRecordingUtilities(TimeEntryPersistence(createEmptyDatabase(), logger = testLogger), cu, testLogger)
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val (_, newTimeEntry) = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -338,7 +338,7 @@ class TimeRecordingUtilityTests {
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val result: RecordTimeResult = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
         val truOtherUser = TimeRecordingUtilities(
-            TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger),
+            TimeEntryPersistence(createEmptyDatabase(), logger = testLogger),
             CurrentUser(DEFAULT_USER_2),
             testLogger
         )
@@ -410,7 +410,7 @@ class TimeRecordingUtilityTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmitTime() {
-        val pmd = PureMemoryDatabase()
+        val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val adminTru = TimeRecordingUtilities(tep, cu, testLogger)
         val project = adminTru.createProject(DEFAULT_PROJECT_NAME)
@@ -540,7 +540,7 @@ class TimeRecordingUtilityTests {
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         return TimeRecordingUtilities(
-            TimeEntryPersistence(PureMemoryDatabase(), logger = testLogger),
+            TimeEntryPersistence(createEmptyDatabase(), logger = testLogger),
             CurrentUser(DEFAULT_ADMIN_USER),
             testLogger
         )

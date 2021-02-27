@@ -43,8 +43,8 @@ class MainTests {
 
         val expectedResults = listOf(
             "IMPERATIVE: database directory is build/db/maintest/",
-            "IMPERATIVE: directory build/db/maintest/1/ did not exist.  Returning null for the PureMemoryDatabase",
-            "IMPERATIVE: No existing database found, building new database",
+            "IMPERATIVE: directory build/db/maintest/1/ was not found",
+            "IMPERATIVE: Building new database at build/db/maintest",
             "IMPERATIVE: Created new PureMemoryDatabase",
             "IMPERATIVE: Created the database directory at \"build/db/maintest/1/",
             "IMPERATIVE: Wrote the version of the database (1) to currentVersion.txt")
