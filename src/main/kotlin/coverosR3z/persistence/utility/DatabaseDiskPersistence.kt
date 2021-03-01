@@ -127,6 +127,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
             val ap = AuthenticationPersistence(pmd, logger=logger)
             val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
             au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
+            logImperative("Create an initial user")
 
             pmd
         }
