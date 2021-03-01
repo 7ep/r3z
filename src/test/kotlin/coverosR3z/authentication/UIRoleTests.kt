@@ -8,7 +8,9 @@ import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
+import org.junit.Assert.assertEquals
 import org.junit.experimental.categories.Category
+import org.openqa.selenium.By
 import java.io.File
 
 class UIRoleTests {
@@ -17,7 +19,48 @@ class UIRoleTests {
 
     @Category(UITestCategory::class)
     @Test
-    fun verifyRolesCanSeeWhatTheyShould() {
+    fun verifyAdminCanSeeWhatTheyShould() {
+        `setup some default projects and employees`()
+        loginAdmin()
+
+        val appUrl = pom.sslDomain
+
+        val createEmployeeLink = pom.driver.findElement(By.cssSelector("li:nth-child(1) > a")).getAttribute("href")
+        val showAllEmployeesLink = pom.driver.findElement(By.cssSelector("li:nth-child(2) > a")).getAttribute("href")
+        val createProjectLink = pom.driver.findElement(By.cssSelector("li:nth-child(3) > a")).getAttribute("href")
+        val enterTimeLink = pom.driver.findElement(By.cssSelector("li:nth-child(4) > a")).getAttribute("href")
+        val showAllEntriesLink = pom.driver.findElement(By.cssSelector("li:nth-child(5) > a")).getAttribute("href")
+        val logConfigLink = pom.driver.findElement(By.cssSelector("li:nth-child(6) > a")).getAttribute("href")
+        val logoutLink = pom.driver.findElement(By.cssSelector("li:nth-child(7) > a")).getAttribute("href")
+
+        assertEquals("$appUrl/createemployee", createEmployeeLink)
+        assertEquals("$appUrl/employees", showAllEmployeesLink)
+        assertEquals("$appUrl/createproject", createProjectLink)
+        assertEquals("$appUrl/entertime", enterTimeLink)
+        assertEquals("$appUrl/timeentries", showAllEntriesLink)
+        assertEquals("$appUrl/logging", logConfigLink)
+        assertEquals("$appUrl/logout", logoutLink)
+
+        //create employee
+        //login as employee
+        //verify the employee only sees what they should see
+    }
+
+    @Category(UITestCategory::class)
+    @Test
+    fun verifyApproverCanSeeWhatTheyShould() {
+        TODO("Implement")
+        `setup some default projects and employees`()
+        loginAdmin()
+        //verify admin sees EVERYTHING
+        //create employee
+        //login as employee
+        //verify the employee only sees what they should see
+    }
+
+    @Category(UITestCategory::class)
+    @Test
+    fun verifyEmployeeCanSeeWhatTheyShould() {
         TODO("Implement")
         `setup some default projects and employees`()
         loginAdmin()
