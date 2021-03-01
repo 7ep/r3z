@@ -493,7 +493,7 @@ class PureMemoryDatabaseTests {
                 "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/", testLogger)
                 .startWithDiskPersistence()
         }
-        assertEquals("Unable to find a user with the id of 1.  User set size: 0", ex.message)
+        assertEquals("Unable to find a user with the id of 2.  User set size: 0", ex.message)
     }
     
     /**
