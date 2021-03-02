@@ -154,16 +154,9 @@ class FullSystem private constructor(
 
             // Add an Administrator employee and role if the database is empty
             if (pmd.isEmpty()) {
-                businessCode.tru.createEmployee(EmployeeName("Administrator"))
+                val mrAdmin = businessCode.tru.createEmployee(EmployeeName("Administrator"))
                 logImperative("Created an initial employee")
-
-                val tep = TimeEntryPersistence(pmd, logger = logger)
-                val mrAdmin = tep.persistNewEmployee(EmployeeName("Administrator"))
-                logImperative("Created an initial employee")
-
-                val ap = AuthenticationPersistence(pmd, logger=logger)
-                val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
-                au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
+                businessCode.au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
                 logImperative("Create an initial user")
             }
 
