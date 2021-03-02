@@ -48,6 +48,7 @@ class UIRoleTests {
 
     @Category(UITestCategory::class)
     @Test
+    @Ignore("next to build")
     fun verifyApproverCanSeeWhatTheyShould() {
         TODO("Implement")
         `setup some default projects and employees`()
@@ -60,6 +61,7 @@ class UIRoleTests {
 
     @Category(UITestCategory::class)
     @Test
+    @Ignore("next to build")
     fun verifyEmployeeCanSeeWhatTheyShould() {
         TODO("Implement")
         `setup some default projects and employees`()
