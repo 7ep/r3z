@@ -89,7 +89,7 @@ class TimeRecordingUtilityTests {
     @IntegrationTest
     @Category(IntegrationTestCategory::class)
     @Test
-    fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 24 hours`() {
+    fun `Should throw ExceededDailyHoursException when asked to record more than 24 hours total in a day`() {
         val twentyFourHours = Time(24 * 60)
         val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
@@ -110,7 +110,7 @@ class TimeRecordingUtilityTests {
      */
     @Category(IntegrationTestCategory::class)
     @Test
-    fun `Should throw ExceededDailyHoursException when too asked to record more than 24 hours total in a day for 23 hours`() {
+    fun `Should throw ExceededDailyHoursException when asked to record more than 24 hours total with prior hours entered`() {
         val twentyThreeHours = Time(23 * 60)
         val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
