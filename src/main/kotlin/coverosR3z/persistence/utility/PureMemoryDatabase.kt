@@ -1,7 +1,8 @@
 package coverosR3z.persistence.utility
 
-import coverosR3z.authentication.types.Session
-import coverosR3z.authentication.types.User
+import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.persistence.types.AbstractDataAccess
@@ -114,7 +115,12 @@ open class PureMemoryDatabase(
 
             logImperative("creating an initial employee")
             val tep = TimeEntryPersistence(pmd, logger = logger)
-            tep.persistNewEmployee(EmployeeName("Administrator"))
+            val mrAdmin = tep.persistNewEmployee(EmployeeName("Administrator"))
+
+            val ap = AuthenticationPersistence(pmd, logger=logger)
+            val au = AuthenticationUtilities(ap, logger, CurrentUser(SYSTEM_USER))
+            au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
+            logImperative("Create an initial user")
 
             return pmd
         }
