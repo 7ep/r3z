@@ -1,14 +1,10 @@
 package coverosR3z.timerecording
 
-import coverosR3z.misc.DEFAULT_EMPLOYEE_NAME
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.authentication.types.Password
-import coverosR3z.authentication.types.UserName
-import coverosR3z.fakeServerObjects
-import coverosR3z.misc.DEFAULT_USER_SYSTEM_EMPLOYEE
+import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
-import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.CreateEmployeeAPI
@@ -41,35 +37,6 @@ class CreateEmployeeAPITests {
         val sd = makeServerData(data, tru, au)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
-    }
-
-    /**
-     * Positive case
-     * Angela, an admin should be able to make new employees
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testHandlePOSTNewEmployeeAsAdmin() {
-        au.login(UserName("Angela"), Password("password12345"))
-        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au)
-
-        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
-    }
-
-    /**
-     * Negative test
-     * Max, an employee, can't make employees
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testHandlePOSTNewEmployeeAsEmployee() {
-        au.login(UserName("Max"), Password("password12345"))
-        tru.createEmployeeBehavior = { throw IllegalStateException("This is bad, you are bad") }
-        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au)
-
-        assertThrows(java.lang.IllegalStateException::class.java) { CreateEmployeeAPI.handlePost(sd).statusCode }
     }
 
     /**
@@ -110,4 +77,93 @@ class CreateEmployeeAPITests {
         assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }
 
+    // region ROLE TESTS
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminForPost() {
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowSystemForPost() {
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
+        val sd = makeServerData(data, tru, au, user = SYSTEM_USER)
+
+        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+    }
+
+    /**
+     * if a user with an improper role tries something, the exception gets
+     * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserForPost() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handlePost(sd) }
+    }
+
+    /**
+     * if a user with an improper role tries something, the exception gets
+     * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverUserForPost() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+
+        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminToGetPageForPost() {
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        assertEquals(StatusCode.OK, CreateEmployeeAPI.handleGet(sd).statusCode)
+    }
+
+    /**
+     * Why would the system be GET'ing this page? disallow
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemToGetPage() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+    }
+
+    /**
+     * if a user with an improper role tries something, the exception gets
+     * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserToGetPage() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+    }
+
+    /**
+     * if a user with an improper role tries something, the exception gets
+     * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverUserToGetPage() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+
+        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+    }
+
+    // endregion
 }

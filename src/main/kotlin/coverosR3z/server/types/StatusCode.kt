@@ -5,6 +5,7 @@ enum class StatusCode(val value: String, val code: String) {
     NOT_FOUND("404 NOT FOUND", "404"),
     BAD_REQUEST("400 BAD REQUEST", "400"),
     UNAUTHORIZED("401 UNAUTHORIZED", "401"),
+    FORBIDDEN("403 FORBIDDEN", "403"),
     SEE_OTHER("303 SEE OTHER", "303"),
     INTERNAL_SERVER_ERROR("500 INTERNAL SERVER ERROR", "500"),
 

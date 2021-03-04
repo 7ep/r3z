@@ -1,6 +1,7 @@
 package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
@@ -199,7 +200,10 @@ class ServerUtilities {
                 throw ex
             } catch (ex : SocketException) {
                 throw ex
-            } catch (ex: Exception) {
+            } catch (ex: UnpermittedOperationException) {
+                PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
+            }
+            catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
                 handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
             }
