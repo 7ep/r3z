@@ -50,7 +50,7 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem("employees", "Show all employees"),
                     HomepageItem("createproject", "Create project"),
                     HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entriest"),
+                    HomepageItem("timeentries", "Show all time entries"),
                     HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
@@ -58,12 +58,19 @@ class HomepageAPI(private val sd: ServerData)  {
                 listOf(
                     HomepageItem("employees", "Show all employees"),
                     HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entriest"),
+                    HomepageItem("timeentries", "Show all time entries"),
                     HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
 
-            Roles.APPROVER -> listOf(HomepageItem("",""))
+            Roles.APPROVER ->
+                listOf(
+                    HomepageItem("employees", "Show all employees"),
+                    HomepageItem("entertime", "Enter time"),
+                    HomepageItem("timeentries", "Show all time entries"),
+                    HomepageItem("logging", "Log configuration"),
+                    HomepageItem("logout", "Logout")
+                )
             Roles.SYSTEM ->
                 listOf(
                     HomepageItem("employees", "Show all employees"),
@@ -75,6 +82,9 @@ class HomepageAPI(private val sd: ServerData)  {
         }
         val body =
 """
+<h2>
+    Hello, <span id="username">${safeHtml(user.name.value)}</span>
+</h2>
 <nav>
     <ul>
 """ +
