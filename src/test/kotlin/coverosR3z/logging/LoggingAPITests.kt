@@ -2,13 +2,10 @@ package coverosR3z.logging
 
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
-import coverosR3z.misc.DEFAULT_ADMIN_USER
+import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
-import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -239,6 +236,49 @@ class LoggingAPITests {
     fun testShouldDisallowSystemDoPost() {
         val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
         assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminDoGet() {
+        val sd = makeLoggingServerData(allTrue())
+        val result = LoggingAPI.handleGet(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
     }
 
     // endregion

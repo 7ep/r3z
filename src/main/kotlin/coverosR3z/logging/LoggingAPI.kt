@@ -48,6 +48,7 @@ class LoggingAPI(private val sd: ServerData) {
             get() = "logging"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val l = LoggingAPI(sd)
             return doGETRequireAuth(sd.authStatus) { l.loggingConfigHtml() }
         }
