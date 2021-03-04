@@ -1,8 +1,11 @@
 package coverosR3z.logging
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
+import coverosR3z.misc.DEFAULT_ADMIN_USER
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.makeServerData
 import coverosR3z.misc.testLogger
@@ -221,6 +224,24 @@ class LoggingAPITests {
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
+    // region ROLES TESTS
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_ADMIN_USER)
+        val result = LoggingAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    // endregion
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
