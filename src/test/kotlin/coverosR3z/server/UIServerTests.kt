@@ -56,8 +56,7 @@ class UIServerTests {
 
     private fun `general - I should be able to change the logging settings`() {
         // Given I am an admin
-        pom.rp.register("corey", "password12345", "Administrator")
-        pom.lp.login("corey", "password12345")
+        pom.lp.login("administrator", "password12345")
         pom.llp.go()
         // When I set Warn-level logging to not log
         pom.llp.setLoggingFalse(LogTypes.WARN)
