@@ -9,6 +9,9 @@ import coverosR3z.authentication.types.Roles
  */
 class RolesChecker(val cu: CurrentUser) : IRolesChecker {
 
+    /**
+     * This is handled by the server, search for usages of [UnpermittedOperationException]
+     */
     override fun checkAllowed(vararg roles: Roles) {
         if (cu.role !in roles) {
             throw UnpermittedOperationException("User lacked proper role for this action. Roles allowed: ${roles.joinToString(";")}. Your role: ${cu.role}")

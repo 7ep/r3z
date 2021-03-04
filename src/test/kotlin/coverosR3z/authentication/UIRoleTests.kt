@@ -9,14 +9,19 @@ import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.*
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
+import org.openqa.selenium.NoSuchElementException
 import java.io.File
 
 class UIRoleTests {
 
     private val adminUsername = "adrian"
+    private val testEmployeeName = "bob bobberton"
+    private val testUsername = "plain_ol_bob"
+    private val testApproverName = "billy the accountant"
+    private val testApproverUsername = "billy_approver12"
 
     @Category(UITestCategory::class)
     @Test
@@ -49,29 +54,79 @@ class UIRoleTests {
 
     @Category(UITestCategory::class)
     @Test
-    @Ignore("next to build")
     fun verifyApproverCanSeeWhatTheyShould() {
-        TODO("Implement")
         `setup some default projects and employees`()
         loginAdmin()
-        //verify admin sees EVERYTHING
         //create employee
+        createApprover()
+        logout()
         //login as employee
+        registerAndLoginTestApproverUser()
+
+        // validate we are actually the user we intend to be
+        val userGreeting = pom.driver.findElement(By.cssSelector("#username")).text
+        assertTrue(testApproverUsername in userGreeting)
+
         //verify the employee only sees what they should see
+        val appUrl = pom.sslDomain
+
+        var links = mutableListOf<String>()
+        // some of these SHOULDN'T be visible. How do we verify we CANT find them?
+
+        for (i in 1..7) {
+            try {
+                links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
+            } catch (e: NoSuchElementException) {}
+        }
+
+        // things that should be present
+        assertTrue("$appUrl/employees" in links)
+        assertTrue("$appUrl/entertime" in links)
+        assertTrue("$appUrl/timeentries" in links)
+        assertTrue("$appUrl/logging" in links)
+        assertTrue("$appUrl/logout" in links)
+
+        // things that should not be present
+        assertTrue("$appUrl/createemployee" !in links)
+        assertTrue("$appUrl/createproject" !in links)
     }
 
     @Category(UITestCategory::class)
     @Test
-    @Ignore("next to build")
     fun verifyEmployeeCanSeeWhatTheyShould() {
-        TODO("Implement")
+
         `setup some default projects and employees`()
         loginAdmin()
-        //verify admin sees EVERYTHING
         //create employee
+        createEmployee()
+        logout()
         //login as employee
+        registerAndLoginTestUser()
+
         //verify the employee only sees what they should see
+        val appUrl = pom.sslDomain
+
+        var links = mutableListOf<String>()
+        // some of these SHOULDN'T be visible. How do we verify we CANT find them?
+
+        for (i in 1..7) {
+            try {
+                links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
+            } catch (e: NoSuchElementException) {}
+        }
+
+        // things that should be present
+        assertTrue("$appUrl/employees" in links)
+        assertTrue("$appUrl/entertime" in links)
+        assertTrue("$appUrl/timeentries" in links)
+        assertTrue("$appUrl/logging" in links)
+        assertTrue("$appUrl/logout" in links)
+
+        // things that should not be present
+        assertTrue("$appUrl/createemployee" !in links)
+        assertTrue("$appUrl/createproject" !in links)
     }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -122,6 +177,24 @@ class UIRoleTests {
 
 //        pom.rp.register(adminUsername, DEFAULT_PASSWORD.value, adminEmployee)
         pom.lp.login(adminUsername, DEFAULT_PASSWORD.value)
+    }
+
+    private fun createEmployee() {
+        pom.eep.enter(testEmployeeName)
+    }
+
+    private fun createApprover() {
+        pom.eep.enter(testApproverName)
+    }
+
+    private fun registerAndLoginTestUser() {
+        pom.rp.register(testUsername, "password12345", testEmployeeName)
+        pom.lp.login(testUsername, "password12345")
+    }
+
+    private fun registerAndLoginTestApproverUser() {
+        pom.rp.register(testApproverUsername, "password12345", testApproverName)
+        pom.lp.login(testApproverUsername, "password12345")
     }
 
     private fun `setup some default projects and employees`() {

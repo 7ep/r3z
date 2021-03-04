@@ -52,15 +52,6 @@ class EnteringTimeBDD {
         s.markDone("then the system disallows it.")
     }
 
-    @BDD
-    @Test
-    fun `An employee has entered time for a period, and their approver wants to approve it`(){
-        val s = TimeEntryUserStory.getScenario("An employee has entered time for a period, and their approver wants to approve it")
-//        s.markDone("Given an employee has entered 8 hours for the entire time period")
-//        s.markDone("When the approver views the period")
-//        s.markDone("Then they are able to approve it")
-    }
-
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___

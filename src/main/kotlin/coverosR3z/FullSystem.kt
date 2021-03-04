@@ -156,7 +156,12 @@ class FullSystem private constructor(
             if (pmd.isEmpty()) {
                 val mrAdmin = businessCode.tru.createEmployee(EmployeeName("Administrator"))
                 logImperative("Created an initial employee")
-                businessCode.au.register(UserName("administrator"), Password("password12345"), mrAdmin.id)
+                val (_, user) = businessCode.au.register(
+                    UserName("administrator"),
+                    Password("password12345"),
+                    mrAdmin.id
+                )
+                businessCode.au.addRoleToUser(user, Roles.ADMIN)
                 logImperative("Create an initial user")
             }
 

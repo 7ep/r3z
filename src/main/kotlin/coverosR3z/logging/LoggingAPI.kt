@@ -1,5 +1,8 @@
 package coverosR3z.logging
 
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.successHTML
@@ -45,11 +48,13 @@ class LoggingAPI(private val sd: ServerData) {
             get() = "logging"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val l = LoggingAPI(sd)
             return doGETRequireAuth(sd.authStatus) { l.loggingConfigHtml() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val l = LoggingAPI(sd)
             return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { l.handlePOST() }
         }

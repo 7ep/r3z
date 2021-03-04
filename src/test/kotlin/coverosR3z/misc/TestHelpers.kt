@@ -46,7 +46,6 @@ val DEFAULT_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAUL
 val DEFAULT_REGULAR_USER = User(UserId(1), UserName("DefaultUser"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(1), role=Roles.REGULAR)
 val DEFAULT_ADMIN_USER = User(UserId(1), UserName("DefaultAdminUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id, role=Roles.ADMIN)
 val DEFAULT_USER_2 = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(2))
-val DEFAULT_USER_SYSTEM_EMPLOYEE = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEFAULT_SALT, EmployeeId(0))
 val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
@@ -126,11 +125,12 @@ fun makeServerData(
     data: PostBodyData,
     tru: ITimeRecordingUtilities,
     au: IAuthenticationUtilities,
-    authStatus: AuthStatus = AuthStatus.AUTHENTICATED): ServerData {
+    authStatus: AuthStatus = AuthStatus.AUTHENTICATED,
+    user: User = SYSTEM_USER): ServerData {
     return ServerData(
         BusinessCode(tru, au),
         fakeServerObjects,
-        AnalyzedHttpData(data = data, user = DEFAULT_USER_SYSTEM_EMPLOYEE),
+        AnalyzedHttpData(data = data, user = user),
         authStatus = authStatus,
         testLogger
     )

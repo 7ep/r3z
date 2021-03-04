@@ -1,5 +1,8 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
@@ -39,11 +42,13 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             get() = "createemployee"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val ce = CreateEmployeeAPI(sd)
             return doGETRequireAuth(sd.authStatus) { ce.createEmployeeHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.SYSTEM, Roles.ADMIN)
             val ce = CreateEmployeeAPI(sd)
             return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { ce.createEmployee() }
         }

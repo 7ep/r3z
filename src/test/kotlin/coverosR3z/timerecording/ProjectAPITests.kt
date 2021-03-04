@@ -1,13 +1,11 @@
 package coverosR3z.timerecording
 
-import coverosR3z.misc.DEFAULT_PROJECT_NAME
-import coverosR3z.misc.DEFAULT_USER
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
-import coverosR3z.fakeServerObjects
+import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
-import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ProjectAPI
@@ -38,7 +36,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalServerDataForProjectAPI(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
@@ -50,7 +48,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_HugeName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(31)))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalServerDataForProjectAPI(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ ProjectAPI.handlePost(sd)}
 
@@ -64,7 +62,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_BigName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(30)))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalServerDataForProjectAPI(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
@@ -76,8 +74,107 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_noBody() {
         val data = PostBodyData()
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalServerDataForProjectAPI(data)
         val ex = assertThrows(InexactInputsException::class.java){  ProjectAPI.handlePost(sd) }
         assertEquals("expected keys: [project_name]. received keys: []", ex.message)
+    }
+
+    // region ROLES TESTS
+
+    /**
+     * Should only allow the admin to post
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminForPost() {
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
+        val sd = makeTypicalServerDataForProjectAPI(data)
+
+        assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
+    }
+
+    /**
+     * There's no need for the system role to create projects
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemForPost() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+    }
+
+    /**
+     * Disallow approvers to create projects
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverForPost() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+    }
+
+    /**
+     * Disallow regular roles to create projects
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularRoleForPost() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+    }
+
+    /**
+     * Only the admin can view this page
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminForGet() {
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
+        val sd = makeTypicalServerDataForProjectAPI(data)
+
+        assertEquals(StatusCode.OK, ProjectAPI.handleGet(sd).statusCode)
+    }
+
+    /**
+     * Disallow the system role from viewing this page
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemForGet() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+    }
+
+    /**
+     * Disallow approvers seeing this page
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverForGet() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+    }
+
+    /**
+     * Disallow regular users viewing this page
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularRoleForGet() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+
+        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+    }
+
+    // endregion
+
+
+    private fun makeTypicalServerDataForProjectAPI(data: PostBodyData): ServerData {
+        return makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
     }
 }

@@ -1,11 +1,11 @@
 package coverosR3z.logging
 
-import coverosR3z.misc.DEFAULT_USER
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.fakeServerObjects
+import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
-import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
@@ -32,7 +32,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setAuditTrueOnly() {
         val data = allFalse(audit = "true")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -46,7 +46,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setWarnTrueOnly() {
         val data = allFalse(warn = "true")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -60,7 +60,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setDebugTrueOnly() {
         val data = allFalse(debug = "true")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -74,7 +74,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_setTraceTrueOnly() {
         val data = allFalse(trace = "true")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -88,7 +88,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_allOn() {
         val data = allTrue()
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -102,7 +102,7 @@ class LoggingAPITests {
     @Test
     fun testShouldChangeConfiguration_allOff() {
         val data = allFalse()
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         LoggingAPI.handlePost(sd)
 
@@ -122,7 +122,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "true",
                 LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -136,7 +136,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.getElemName() to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "true",
                 LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -151,7 +151,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
                 LoggingAPI.Elements.TRACE_INPUT.getElemName() to "false"))
 
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -165,7 +165,7 @@ class LoggingAPITests {
                 LoggingAPI.Elements.AUDIT_INPUT.getElemName() to "false",
                 LoggingAPI.Elements.WARN_INPUT.getElemName() to "false",
                 LoggingAPI.Elements.DEBUG_INPUT.getElemName() to "false"))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -181,7 +181,7 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_audit() {
         val data = allTrue(audit = "foo")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -192,7 +192,7 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_warn() {
         val data = allTrue(warn = "foo")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -203,7 +203,7 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_debug() {
         val data = allTrue(debug = "foo")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
 
@@ -214,13 +214,74 @@ class LoggingAPITests {
     @Test
     fun testShouldComplainAboutBadInput_trace() {
         val data = allTrue(trace = "foo")
-        val sd = makeServerData(data, tru, au)
+        val sd = makeLoggingServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
 
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
 
+    // region ROLES TESTS
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminDoPost() {
+        val sd = makeLoggingServerData(allTrue())
+        val result = LoggingAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserDoPost() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminDoGet() {
+        val sd = makeLoggingServerData(allTrue())
+        val result = LoggingAPI.handleGet(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowApproverDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowRegularUserDoGet() {
+        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+    }
+
+    // endregion
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -257,4 +318,7 @@ class LoggingAPITests {
         val au = FakeAuthenticationUtilities()
     }
 
+    private fun makeLoggingServerData(data: PostBodyData): ServerData {
+        return makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+    }
 }
