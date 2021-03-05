@@ -119,7 +119,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """
                 <h2>
-                    Here are your entries, <span id="username">$username</span>
+                    Here are your entries:</span>
                 </h2>
                 
                 <nav class="time_period_selector">
@@ -145,7 +145,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
                 </div>
         """
-        return PageComponents.makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+        return PageComponents(sd).makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
     }
 
     private fun renderTimeRows(

@@ -18,7 +18,7 @@ class HomepageAPI(private val sd: ServerData)  {
             return doGETAuthAndUnauth(sd.ahd.user,
                 Roles.REGULAR, Roles.APPROVER, Roles.ADMIN,
                 generatorAuthenticated = { hp.authHomePageHTML() },
-                generatorUnauth = { PageComponents.makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
+                generatorUnauth = { PageComponents(sd).makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
         }
 
         override val path: String
@@ -28,7 +28,7 @@ class HomepageAPI(private val sd: ServerData)  {
     private fun authHomePageHTML(): String {
         val body = renderHomepageBody()
 
-        return PageComponents.makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
+        return PageComponents(sd).makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
     }
 
     data class HomepageItem(val link: String, val descr: String)
@@ -48,36 +48,22 @@ class HomepageAPI(private val sd: ServerData)  {
                 )
             Roles.REGULAR ->
                 listOf(
-                    HomepageItem("employees", "Show all employees"),
                     HomepageItem("entertime", "Enter time"),
                     HomepageItem("timeentries", "Show all time entries"),
-                    HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
 
             Roles.APPROVER ->
                 listOf(
-                    HomepageItem("employees", "Show all employees"),
                     HomepageItem("entertime", "Enter time"),
                     HomepageItem("timeentries", "Show all time entries"),
-                    HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
-            Roles.SYSTEM ->
-                listOf(
-                    HomepageItem("employees", "Show all employees"),
-                    HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entriest"),
-                    HomepageItem("logging", "Log configuration"),
-                    HomepageItem("logout", "Logout")
-                )
+            Roles.SYSTEM -> emptyList()
             Roles.NONE -> emptyList()
 
         }
         return """
-        <h2>
-            Hello, <span id="username">${safeHtml(user.name.value)}</span>
-        </h2>
         <nav>
             <ul>
                 ${allowedToSee.joinToString("") { renderHomepageItem(it.link, it.descr) }}

@@ -163,6 +163,6 @@ class LoggingAPI(private val sd: ServerData) {
                 </form>
             </div>
     """
-        return PageComponents.makeTemplate("Logging configuration", "LoggingAPI", body, extraHeaderContent="""<link rel="stylesheet" href="loggingconfig.css" />""")
+        return PageComponents(sd).makeTemplate("Logging configuration", "LoggingAPI", body, extraHeaderContent="""<link rel="stylesheet" href="loggingconfig.css" />""")
     }
 }

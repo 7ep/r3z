@@ -43,6 +43,6 @@ class ViewEmployeesAPI(private val sd: ServerData) {
                 </table>
                 </div>
         """
-            return PageComponents.makeTemplate("view employees", "ViewEmployeesAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewemployees.css" />""")
+            return PageComponents(sd).makeTemplate("view employees", "ViewEmployeesAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewemployees.css" />""")
     }
 }

@@ -39,13 +39,14 @@ RESET SECTION FINISHES
 */
 
 header {
-  color: rgb(0, 134, 159);
   background-color: #370F22;
   font-size: 30px;
   margin: 0;
   top: 0;
   height: 40px;
   padding: 4px;
+  display: flex;
+  justify-content: space-between;
 }
 
 body {
@@ -57,11 +58,11 @@ body {
   background-size: 100vw 100vh;
 }
 
-.home-button {
+.header-button {
   color: #ffffff;
   text-decoration: none;
 }
-.home-button:visited {
+.header-button:visited {
   color: #ffffff
 }
 

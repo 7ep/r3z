@@ -80,20 +80,20 @@ class UIRoleTests {
         }
 
         // things that should be present
-        assertTrue("$appUrl/employees" in links)
         assertTrue("$appUrl/entertime" in links)
         assertTrue("$appUrl/timeentries" in links)
-        assertTrue("$appUrl/logging" in links)
         assertTrue("$appUrl/logout" in links)
 
         // things that should not be present
+        assertTrue("$appUrl/employees" !in links)
+        assertTrue("$appUrl/logging" !in links)
         assertTrue("$appUrl/createemployee" !in links)
         assertTrue("$appUrl/createproject" !in links)
     }
 
     @Category(UITestCategory::class)
     @Test
-    fun verifyEmployeeCanSeeWhatTheyShould() {
+    fun verifyRegularUserCanSeeWhatTheyShould() {
 
         `setup some default projects and employees`()
         loginAdmin()
@@ -116,13 +116,13 @@ class UIRoleTests {
         }
 
         // things that should be present
-        assertTrue("$appUrl/employees" in links)
         assertTrue("$appUrl/entertime" in links)
         assertTrue("$appUrl/timeentries" in links)
-        assertTrue("$appUrl/logging" in links)
         assertTrue("$appUrl/logout" in links)
 
         // things that should not be present
+        assertTrue("$appUrl/logging" !in links)
+        assertTrue("$appUrl/employees" !in links)
         assertTrue("$appUrl/createemployee" !in links)
         assertTrue("$appUrl/createproject" !in links)
     }
