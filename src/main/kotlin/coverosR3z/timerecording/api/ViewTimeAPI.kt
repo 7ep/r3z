@@ -1,5 +1,6 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.Roles
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
@@ -58,15 +59,16 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val vt = ViewTimeAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { vt.existingTimeEntriesHTML() }
+            return doGETRequireAuth(sd.ahd.user, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { vt.existingTimeEntriesHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val vt = ViewTimeAPI(sd)
             return AuthUtilities.doPOSTAuthenticated(
-                sd.authStatus,
+                sd.ahd.user,
                 requiredInputs,
-                sd.ahd.data
+                sd.ahd.data,
+                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN
             ) { vt.handlePOST() }
         }
 

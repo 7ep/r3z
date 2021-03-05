@@ -1,5 +1,8 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
@@ -44,12 +47,12 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { et.entertimeHTML() }
+            return doGETRequireAuth(sd.ahd.user, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { et.entertimeHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
-            return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { et.handlePOST() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { et.handlePOST() }
         }
     }
 

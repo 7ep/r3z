@@ -1,7 +1,10 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.Roles
 import coverosR3z.authentication.types.User
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.checkHasRequiredInputs
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
@@ -26,9 +29,12 @@ class AuthUtilities {
          * redirects to the homepage.
          * @param generator the code to run to generate a string to return for this GET
          */
-        fun doGETRequireAuth(authStatus: AuthStatus, generator: () -> String): PreparedResponseData {
-            return when (authStatus) {
-                AuthStatus.AUTHENTICATED -> okHTML(generator())
+        fun doGETRequireAuth(user: User, vararg roles: Roles, generator: () -> String): PreparedResponseData {
+            return when (isAuthenticated(user)) {
+                AuthStatus.AUTHENTICATED -> {
+                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                    okHTML(generator())
+                }
                 AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
             }
         }
@@ -39,12 +45,16 @@ class AuthUtilities {
          * example: the homepage
          */
         fun doGETAuthAndUnauth(
-            authStatus: AuthStatus,
+            user: User,
+            vararg roles: Roles,
             generatorAuthenticated: () -> String,
             generatorUnauth: () -> String
         ): PreparedResponseData {
-            return when (authStatus) {
-                AuthStatus.AUTHENTICATED -> okHTML(generatorAuthenticated())
+            return when (isAuthenticated(user)) {
+                AuthStatus.AUTHENTICATED -> {
+                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                    okHTML(generatorAuthenticated())
+                }
                 AuthStatus.UNAUTHENTICATED -> okHTML(generatorUnauth())
             }
         }
@@ -54,8 +64,8 @@ class AuthUtilities {
          * there if you *are* authenticated, like the login page or
          * register user page
          */
-        fun doGETRequireUnauthenticated(authStatus: AuthStatus, generator: () -> String): PreparedResponseData {
-            return when (authStatus) {
+        fun doGETRequireUnauthenticated(user: User, generator: () -> String): PreparedResponseData {
+            return when (isAuthenticated(user)) {
                 AuthStatus.UNAUTHENTICATED -> okHTML(generator())
                 AuthStatus.AUTHENTICATED -> redirectTo(HomepageAPI.path)
             }
@@ -67,13 +77,15 @@ class AuthUtilities {
          * @param handler the method run to handle the POST
          */
         fun doPOSTAuthenticated(
-            authStatus: AuthStatus,
+            user: User,
             requiredInputs: Set<Element>,
             data: PostBodyData,
+            vararg roles: Roles,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
-            return when (authStatus) {
+            return when (isAuthenticated(user)) {
                 AuthStatus.AUTHENTICATED -> {
+                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
                     checkHasRequiredInputs(data.mapping.keys, requiredInputs)
                     handler()
                 }
@@ -87,12 +99,12 @@ class AuthUtilities {
          * @param handler the method run to handle the POST
          */
         fun doPOSTRequireUnauthenticated(
-            authStatus: AuthStatus,
+            user: User,
             requiredInputs: Set<Element>,
             data: PostBodyData,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
-            return when (authStatus) {
+            return when (isAuthenticated(user)) {
                 AuthStatus.UNAUTHENTICATED -> {
                     checkHasRequiredInputs(data.mapping.keys, requiredInputs)
                     handler()

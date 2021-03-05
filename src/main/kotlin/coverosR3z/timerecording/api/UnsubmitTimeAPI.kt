@@ -1,5 +1,6 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.Roles
 import coverosR3z.misc.types.Date
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
@@ -38,9 +39,10 @@ class UnsubmitTimeAPI(private val sd: ServerData){
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val st = UnsubmitTimeAPI(sd)
             return AuthUtilities.doPOSTAuthenticated(
-                sd.authStatus,
+                sd.ahd.user,
                 requiredInputs,
-                sd.ahd.data
+                sd.ahd.data,
+                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN
             ) { st.handlePOST() }
         }
     }

@@ -48,15 +48,13 @@ class LoggingAPI(private val sd: ServerData) {
             get() = "logging"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val l = LoggingAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { l.loggingConfigHtml() }
+            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { l.loggingConfigHtml() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val l = LoggingAPI(sd)
-            return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { l.handlePOST() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.ADMIN) { l.handlePOST() }
         }
 
     }

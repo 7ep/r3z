@@ -1,5 +1,6 @@
 package coverosR3z.authentication.api
 
+import coverosR3z.authentication.types.Roles
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
@@ -12,7 +13,7 @@ class LogoutAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LogoutAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { l.generateLogoutPage() }
+            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN, Roles.APPROVER, Roles.REGULAR) { l.generateLogoutPage() }
         }
 
         override val path: String
