@@ -45,13 +45,12 @@ class RegisterAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val r = RegisterAPI(sd)
-            return doGETRequireUnauthenticated(sd.authStatus) { r.registerHTML() }
+            return doGETRequireUnauthenticated(sd.ahd.user) { r.registerHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.NONE)
             val r = RegisterAPI(sd)
-            return doPOSTRequireUnauthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { r.handlePOST() }
+            return doPOSTRequireUnauthenticated(sd.ahd.user, requiredInputs, sd.ahd.data) { r.handlePOST() }
         }
     }
 

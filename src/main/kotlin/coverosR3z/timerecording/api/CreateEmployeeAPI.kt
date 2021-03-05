@@ -42,15 +42,13 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             get() = "createemployee"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val ce = CreateEmployeeAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { ce.createEmployeeHTML() }
+            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { ce.createEmployeeHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.SYSTEM, Roles.ADMIN)
             val ce = CreateEmployeeAPI(sd)
-            return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { ce.createEmployee() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.SYSTEM, Roles.ADMIN) { ce.createEmployee() }
         }
 
     }

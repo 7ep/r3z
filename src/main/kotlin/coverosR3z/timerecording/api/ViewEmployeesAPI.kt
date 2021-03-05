@@ -1,5 +1,6 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.Roles
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
@@ -12,7 +13,7 @@ class ViewEmployeesAPI(private val sd: ServerData) {
     companion object : GetEndpoint {
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val ve = ViewEmployeesAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { ve.existingEmployeesHTML() }
+            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { ve.existingEmployeesHTML() }
         }
 
         override val path: String

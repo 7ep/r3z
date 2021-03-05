@@ -2,7 +2,6 @@ package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.IAuthenticationUtilities
-import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
@@ -41,14 +40,13 @@ class LoginAPI(val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)
-            return doGETRequireUnauthenticated(sd.authStatus)
+            return doGETRequireUnauthenticated(sd.ahd.user)
             { PageComponents.makeTemplate("login page", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="loginpage.css" />""")}
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.NONE)
             val l = LoginAPI(sd)
-            return doPOSTRequireUnauthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { l.handlePOST() }
+            return doPOSTRequireUnauthenticated(sd.ahd.user, requiredInputs, sd.ahd.data) { l.handlePOST() }
         }
     }
 

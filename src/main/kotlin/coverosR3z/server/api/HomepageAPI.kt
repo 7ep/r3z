@@ -15,8 +15,10 @@ class HomepageAPI(private val sd: ServerData)  {
 
         override fun handleGet(sd: ServerData) : PreparedResponseData {
             val hp = HomepageAPI(sd)
-            return doGETAuthAndUnauth(sd.authStatus, { hp.authHomePageHTML() },
-                { PageComponents.makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
+            return doGETAuthAndUnauth(sd.ahd.user,
+                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN,
+                generatorAuthenticated = { hp.authHomePageHTML() },
+                generatorUnauth = { PageComponents.makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
         }
 
         override val path: String

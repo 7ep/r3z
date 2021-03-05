@@ -40,15 +40,13 @@ class ProjectAPI(private val sd: ServerData) {
             get() = "createproject"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val p = ProjectAPI(sd)
-            return doGETRequireAuth(sd.authStatus) { p.createProjectHTML() }
+            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { p.createProjectHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.ADMIN)
             val p = ProjectAPI(sd)
-            return doPOSTAuthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { p.handlePOST() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.ADMIN) { p.handlePOST() }
         }
 
 

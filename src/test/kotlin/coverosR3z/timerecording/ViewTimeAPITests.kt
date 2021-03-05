@@ -1,11 +1,10 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.fakeServerObjects
 import coverosR3z.misc.DEFAULT_DATE_STRING
+import coverosR3z.misc.DEFAULT_REGULAR_USER
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.makeServerData
-import coverosR3z.misc.testLogger
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.api.ViewTimeAPI
@@ -38,7 +37,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
         val response = ViewTimeAPI.handlePost(sd).statusCode
         assertEquals(
             "We should have gotten redirected to the viewTime page",
@@ -55,7 +54,7 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -71,7 +70,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -87,7 +86,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -103,7 +102,7 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
@@ -119,11 +118,18 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeVTServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
+    }
+
+    /**
+     * Helper method to make a [ServerData] for the View time API tests
+     */
+    private fun makeVTServerData(data: PostBodyData): ServerData {
+        return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
     }
 
 }

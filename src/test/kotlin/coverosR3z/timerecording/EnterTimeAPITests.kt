@@ -1,8 +1,11 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.fakeServerObjects
 import coverosR3z.misc.*
@@ -45,7 +48,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val result = EnterTimeAPI.handlePost(sd)
 
         assertSuccessfulTimeEntry(result)
@@ -63,7 +66,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [time_entry, detail_entry, date_entry]", ex.message)
     }
@@ -79,7 +82,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, detail_entry, date_entry]", ex.message)
     }
@@ -95,7 +98,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [project_entry, time_entry, detail_entry, date_entry]. received keys: [project_entry, time_entry, date_entry]", ex.message)
     }
@@ -107,7 +110,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_nonNumericProject() {
         val data = PostBodyData(mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60", EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
     }
@@ -123,7 +126,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
@@ -139,7 +142,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
     }
@@ -155,7 +158,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
     }
@@ -172,7 +175,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.TIME_INPUT.getElemName() to ((24 * 60) + 0.01).toString(),
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
     }
@@ -188,7 +191,7 @@ class EnterTimeAPITests {
             EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
             EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("$noNegativeTimeMsg-60", ex.message)
     }
@@ -205,7 +208,7 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val result = EnterTimeAPI.handlePost(sd)
 
         assertSuccessfulTimeEntry(result)
@@ -223,10 +226,11 @@ class EnterTimeAPITests {
                 EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                 EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeETServerData(data)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Must be able to parse aaa as double", ex.message)
     }
+
 
     /**
      * Just how quickly does it go, from this level?
@@ -267,7 +271,7 @@ class EnterTimeAPITests {
                 val sd = ServerData(
                     BusinessCode(tru, au),
                     fakeServerObjects,
-                    AnalyzedHttpData(data = data), authStatus = AuthStatus.AUTHENTICATED, testLogger)
+                    AnalyzedHttpData(data = data, user = user), authStatus = AuthStatus.AUTHENTICATED, testLogger)
                 val result = EnterTimeAPI.handlePost(sd)
 
                 assertSuccessfulTimeEntry(result)
@@ -279,6 +283,91 @@ class EnterTimeAPITests {
         File("${granularPerfArchiveDirectory}testEnterTimeAPI_PERFORMANCE")
             .appendText("${Date.now().stringValue}\trequests: $numberOfRequests\ttime: $time milliseconds\n")
     }
+
+    // region ROLE TESTS
+
+    // GET Tests
+    
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminToEnterTimeGET() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_ADMIN_USER)
+        val result = EnterTimeAPI.handleGet(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowApproverToEnterTimeGET() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val result = EnterTimeAPI.handleGet(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowRegularToEnterTimeGET() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val result = EnterTimeAPI.handleGet(sd).statusCode
+        assertEquals(StatusCode.OK, result)
+    }
+    
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemToEnterTimeGET() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { EnterTimeAPI.handleGet(sd).statusCode }
+    }
+    
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowNoUserToEnterTimeGET() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = NO_USER)
+        assertEquals(StatusCode.SEE_OTHER, EnterTimeAPI.handleGet(sd).statusCode)
+    }
+    
+    // POST tests
+
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowAdminToEnterTimePOST() {
+        val sd = makeServerData(happyPathData, tru, au, user = DEFAULT_ADMIN_USER)
+        val result = EnterTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowApproverToEnterTimePOST() {
+        val sd = makeServerData(happyPathData, tru, au, user = DEFAULT_APPROVER)
+        val result = EnterTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldAllowRegularToEnterTimePOST() {
+        val sd = makeServerData(happyPathData, tru, au, user = DEFAULT_REGULAR_USER)
+        val result = EnterTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, result)
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowSystemToEnterTimePOST() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        assertThrows(UnpermittedOperationException::class.java) { EnterTimeAPI.handlePost(sd).statusCode }
+    }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testShouldDisallowNoUserToEnterTimePOST() {
+        val sd = makeServerData(PostBodyData(), tru, au, user = NO_USER)
+        assertEquals(StatusCode.UNAUTHORIZED, EnterTimeAPI.handlePost(sd).statusCode)
+    }
+    
+    // endregion
 
     /*
      _ _       _                  __ __        _    _           _
@@ -300,6 +389,21 @@ class EnterTimeAPITests {
 
     companion object {
         val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
+
+        val happyPathData = PostBodyData(mapOf(
+            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+        ))
+    }
+
+    /**
+     * Helper method for the kinds of [ServerData] we will
+     * ordinarily see in entering time.
+     */
+    private fun makeETServerData(data: PostBodyData): ServerData {
+        return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
     }
 
 }
