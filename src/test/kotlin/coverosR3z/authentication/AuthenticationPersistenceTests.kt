@@ -30,7 +30,7 @@ class AuthenticationPersistenceTests {
     @Test
     fun `Should be able to create a new user`() {
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+        ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id, DEFAULT_USER.role)
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
     }
@@ -123,7 +123,7 @@ class AuthenticationPersistenceTests {
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewUsersAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
-                ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id)
+                ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id, DEFAULT_USER.role)
             }))
         }
         // wait for all those threads
@@ -136,7 +136,7 @@ class AuthenticationPersistenceTests {
     fun testAddRoleToUser() {
         val expected = DEFAULT_USER.copy(role = Roles.ADMIN)
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employeeId)
+        ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employeeId, DEFAULT_USER.role)
         val result = ap.addRoleToUser(DEFAULT_USER, Roles.ADMIN)
         assertEquals(expected.role, result.role)
     }

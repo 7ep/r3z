@@ -229,7 +229,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        ap.getUserBehavior= { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id) }
+        ap.getUserBehavior= { DEFAULT_USER }
         val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -239,7 +239,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-        ap.getUserBehavior = { User(UserId(1), DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id) }
+        ap.getUserBehavior = { DEFAULT_USER }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }

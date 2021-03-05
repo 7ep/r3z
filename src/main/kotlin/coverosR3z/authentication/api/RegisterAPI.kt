@@ -1,6 +1,7 @@
 package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.*
@@ -48,6 +49,7 @@ class RegisterAPI(private val sd: ServerData) {
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
+            RolesChecker(CurrentUser(sd.ahd.user)).checkAllowed(Roles.NONE)
             val r = RegisterAPI(sd)
             return doPOSTRequireUnauthenticated(sd.authStatus, requiredInputs, sd.ahd.data) { r.handlePOST() }
         }

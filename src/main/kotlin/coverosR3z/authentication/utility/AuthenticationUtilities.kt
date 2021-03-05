@@ -21,7 +21,7 @@ class AuthenticationUtilities(
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
-            val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId)
+            val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId, Roles.REGULAR)
             logger.logDebug { "User registration successful for \"${username.value}\"" }
             RegistrationResult(RegistrationResultStatus.SUCCESS, newUser)
         } else {

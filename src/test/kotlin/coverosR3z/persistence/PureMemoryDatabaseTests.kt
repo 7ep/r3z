@@ -702,22 +702,20 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_User() {
-        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("mysalt"), EmployeeId(1))
+        val result = DEFAULT_USER.serialize()
 
-        val result = user.serialize()
-
-        assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt , empId: 1 , role: REGULAR }""", result)
+        assertEquals("""{ id: 1 , name: DefaultUser , hash: 4dc91e9a80320c901f51ccf7166d646c , salt: 12345 , empId: 1 , role: REGULAR }""", result)
 
         val deserialized = User.Deserializer().deserialize(result)
 
-        assertEquals(user, deserialized)
+        assertEquals(DEFAULT_USER, deserialized)
     }
 
     @Test
     fun testSerialization_UserWithMultilineText() {
         val user = User(
             UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
-            |thisisalsotext""".trimMargin()), EmployeeId(1)
+            |thisisalsotext""".trimMargin()), EmployeeId(1), Roles.REGULAR
         )
 
         val result = user.serialize()
@@ -731,7 +729,7 @@ class PureMemoryDatabaseTests {
 
     @Test
     fun testSerialization_UserWithUnicodeText() {
-        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË"), EmployeeId(1))
+        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË"), EmployeeId(1), Roles.REGULAR)
 
         val result = user.serialize()
 
@@ -932,7 +930,7 @@ class PureMemoryDatabaseTests {
             NO_PROJECT
         }
         if (! skipCreatingUser) {
-            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id)
+            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id, DEFAULT_USER.role)
             if (! skipCreatingSession) {
                 ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
             }

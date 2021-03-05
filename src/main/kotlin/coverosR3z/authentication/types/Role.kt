@@ -9,5 +9,10 @@ enum class Roles {
      * No human can be the system.  This is a role that only exists
      * for the machine.
      */
-    SYSTEM
+    SYSTEM,
+
+    /**
+     * This is solely used by the [NO_USER]
+     */
+    NONE
 }

@@ -31,7 +31,7 @@ const val hashNotNullMsg = "Hash must not be null"
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Password("NO_USER_PASSWORD"), Salt("THIS REPRESENTS NO USER")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id)
+val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Password("NO_USER_PASSWORD"), Salt("THIS REPRESENTS NO USER")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id, Roles.NONE)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -89,7 +89,7 @@ data class Salt(val value: String) {
 
 open class User(val id: UserId, val name: UserName,
                 val hash: Hash, val salt: Salt,
-                val employeeId: EmployeeId, var role: Roles = Roles.REGULAR) :
+                val employeeId: EmployeeId, var role: Roles) :
     IndexableSerializable() {
 
     override fun getIndex(): Int {

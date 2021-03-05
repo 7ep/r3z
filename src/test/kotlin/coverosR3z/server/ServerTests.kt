@@ -303,8 +303,7 @@ class ServerTests {
     /**
      * On some pages, like register and login, you are *supposed* to be
      * unauthenticated to post to them.  If you *are* authenticated and
-     * post to those pages, you should get redirected to the authenticated
-     * homepage
+     * post to those pages, you will receive a "forbidden" message
      */
     @IntegrationTest(usesPort = true)
     @Category(IntegrationTestCategory::class)
@@ -319,7 +318,7 @@ class ServerTests {
 
         val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertEquals(StatusCode.FORBIDDEN, result.statusCode)
     }
 
     /**

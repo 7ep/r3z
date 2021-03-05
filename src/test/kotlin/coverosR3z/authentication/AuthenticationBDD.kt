@@ -4,6 +4,7 @@ import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.bddframework.BDD
 import coverosR3z.fakeServerObjects
 import coverosR3z.misc.*
@@ -123,6 +124,9 @@ class AuthenticationBDD {
 
     companion object {
 
+        val au : FakeAuthenticationUtilities = FakeAuthenticationUtilities()
+        val tru : FakeTimeRecordingUtilities = FakeTimeRecordingUtilities()
+
         private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
             val (tru, _, sarah) = initializeAUserAndLogin()
             return Pair(tru, sarah)
@@ -134,9 +138,9 @@ class AuthenticationBDD {
         val data =
             PostBodyData(mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1"))
         val sd = ServerData(
-            BusinessCode(FakeTimeRecordingUtilities(), au),
+            BusinessCode(tru, au),
             fakeServerObjects,
-            AnalyzedHttpData(data = data, user = DEFAULT_USER),
+            AnalyzedHttpData(data = data, user = NO_USER),
             authStatus = AuthStatus.UNAUTHENTICATED,
             testLogger
         )

@@ -12,10 +12,10 @@ class AuthenticationPersistence(pmd : PureMemoryDatabase, private val logger: IL
     private val userDataAccess: DataAccess<User> = pmd.dataAccess(User.directoryName)
     private val sessionDataAccess: DataAccess<Session> = pmd.dataAccess(Session.directoryName)
     
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId) : User {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId, role: Roles) : User {
         return userDataAccess.actOn { users ->
             logger.logTrace { "PMD: adding new user, \"${name.value}\"" }
-            val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId)
+            val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId, role)
             users.add(newUser)
             newUser
         }

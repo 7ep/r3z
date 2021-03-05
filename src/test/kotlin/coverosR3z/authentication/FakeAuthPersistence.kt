@@ -21,7 +21,7 @@ class FakeAuthPersistence(
     var addRoleToUserBehavior: () -> User = { NO_USER },
 ) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId) : User {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId, role: Roles) : User {
         return createUserBehavior()
     }
 

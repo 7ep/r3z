@@ -34,7 +34,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalCEServerData(data)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
@@ -46,7 +46,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalCEServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ CreateEmployeeAPI.handlePost(sd)}
 
@@ -60,7 +60,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(30)))
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalCEServerData(data)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
@@ -72,7 +72,7 @@ class CreateEmployeeAPITests {
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = PostBodyData()
-        val sd = makeServerData(data, tru, au)
+        val sd = makeTypicalCEServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ CreateEmployeeAPI.handlePost(sd) }
         assertEquals("expected keys: [employee_name]. received keys: []", ex.message)
     }
@@ -166,4 +166,12 @@ class CreateEmployeeAPITests {
     }
 
     // endregion
+
+
+    /**
+     * Simpler helper to make the server data commonly used for CreateEmployee
+     */
+    private fun makeTypicalCEServerData(data: PostBodyData): ServerData {
+        return makeServerData(data, tru, au)
+    }
 }

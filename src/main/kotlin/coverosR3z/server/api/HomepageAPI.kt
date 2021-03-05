@@ -69,6 +69,8 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
+            Roles.NONE -> emptyList()
+
         }
         return """
         <h2>
