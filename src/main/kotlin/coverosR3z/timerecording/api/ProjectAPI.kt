@@ -80,7 +80,7 @@ class ProjectAPI(private val sd: ServerData) {
             </form>
         </div>
 """
-        return PageComponents.makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
+        return PageComponents(sd).makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
     }
 }
 

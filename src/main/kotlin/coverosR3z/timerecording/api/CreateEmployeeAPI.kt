@@ -79,6 +79,6 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         
         </form>
     """
-        return PageComponents.makeTemplate("create employee", "CreateEmployeeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createemployee.css" />""")
+        return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createemployee.css" />""")
     }
 }

@@ -108,7 +108,7 @@ class RegisterAPI(private val sd: ServerData) {
           </table>
         </form>
     """
-        return PageComponents.makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="register.css" />""")
+        return PageComponents(sd).makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="register.css" />""")
     }
 
 }

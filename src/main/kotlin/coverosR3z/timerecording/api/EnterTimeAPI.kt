@@ -125,7 +125,7 @@ class EnterTimeAPI(private val sd: ServerData) {
     
             </form>
     """
-        return PageComponents.makeTemplate("enter time", "EnterTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="entertime.css" />""")
+        return PageComponents(sd).makeTemplate("enter time", "EnterTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="entertime.css" />""")
     }
 
 }
