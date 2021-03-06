@@ -275,11 +275,19 @@ Database
 --------
 
 The database is where we store all the shared state for the users.  It is quite
-simple - just several sets of data, typically of type [ConcurrentSet], which is a
+simple - just several sets of data, typically of type [ChangeTrackingSet], which is a
 thread-safe data structure.
 
-The Database mainly consists of the data, some code to provide access to that data,
-and code to enable persistence to disk.
+The Database mainly consists of the data and some utilities for access and persistence.
+
+Note that in typical usage (where we are persisting data to disk as it is written),
+the persistence takes place asynchronously.  That is, you might tell the database to
+create a new user, and it might reply "done", but writing that to the disk may happen
+milliseconds later.  This is because all writes to disk are put into a queue on its
+own thread. It means we can just pop that request in, and trust it will be done later 
+and in the right order.
+
+See actOn() in the DataAccess class for specifics.  The queue is ActionQueue.
 
 Authentication
 --------------
