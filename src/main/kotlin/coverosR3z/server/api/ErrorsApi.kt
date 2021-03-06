@@ -14,7 +14,7 @@ fun handleNotFound(): PreparedResponseData {
     return PreparedResponseData(notFoundHTML, StatusCode.NOT_FOUND, listOf(ContentType.TEXT_HTML.value))
 }
 
-fun handleUnauthorized() : PreparedResponseData {
+fun handleUnauthenticated() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, StatusCode.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 

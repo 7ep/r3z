@@ -101,7 +101,9 @@ class ProjectAPITests {
     fun testShouldDisallowSystemForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+        val result = ProjectAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -112,7 +114,9 @@ class ProjectAPITests {
     fun testShouldDisallowApproverForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+        val result = ProjectAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -123,7 +127,9 @@ class ProjectAPITests {
     fun testShouldDisallowRegularRoleForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handlePost(sd) }
+        val result = ProjectAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -146,7 +152,9 @@ class ProjectAPITests {
     fun testShouldDisallowSystemForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+        val result = ProjectAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -157,7 +165,9 @@ class ProjectAPITests {
     fun testShouldDisallowApproverForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+        val result = ProjectAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -168,7 +178,9 @@ class ProjectAPITests {
     fun testShouldDisallowRegularRoleForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { ProjectAPI.handleGet(sd) }
+        val result = ProjectAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     // endregion

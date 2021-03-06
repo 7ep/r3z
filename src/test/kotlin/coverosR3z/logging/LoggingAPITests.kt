@@ -235,21 +235,30 @@ class LoggingAPITests {
     @Test
     fun testShouldDisallowSystemDoPost() {
         val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+
+        val result = LoggingAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoPost() {
         val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+
+        val result = LoggingAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserDoPost() {
         val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handlePost(sd) }
+
+        val result = LoggingAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
@@ -264,21 +273,30 @@ class LoggingAPITests {
     @Test
     fun testShouldDisallowSystemDoGet() {
         val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+
+        val result = LoggingAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoGet() {
         val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+
+        val result = LoggingAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserDoGet() {
         val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
-        assertThrows(UnpermittedOperationException::class.java) { LoggingAPI.handleGet(sd) }
+
+        val result = LoggingAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     // endregion

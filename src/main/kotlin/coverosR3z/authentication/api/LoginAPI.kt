@@ -3,7 +3,7 @@ package coverosR3z.authentication.api
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.api.handleUnauthorized
+import coverosR3z.server.api.handleUnauthenticated
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
@@ -63,7 +63,7 @@ class LoginAPI(val sd: ServerData) {
             PreparedResponseData("", StatusCode.SEE_OTHER, listOf(cookie, "Location: ${HomepageAPI.path}"))
         } else {
             sd.logger.logDebug { "User (${username.value}) failed to login" }
-            handleUnauthorized()
+            handleUnauthenticated()
         }
     }
 

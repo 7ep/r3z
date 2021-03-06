@@ -1,5 +1,6 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Roles
@@ -7,11 +8,8 @@ import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.checkHasRequiredInputs
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.api.handleUnauthorized
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.Element
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.api.handleUnauthenticated
+import coverosR3z.server.types.*
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 
@@ -30,12 +28,16 @@ class AuthUtilities {
          * @param generator the code to run to generate a string to return for this GET
          */
         fun doGETRequireAuth(user: User, vararg roles: Roles, generator: () -> String): PreparedResponseData {
-            return when (isAuthenticated(user)) {
-                AuthStatus.AUTHENTICATED -> {
-                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
-                    okHTML(generator())
+            return try {
+                when (isAuthenticated(user)) {
+                    AuthStatus.AUTHENTICATED -> {
+                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                        okHTML(generator())
+                    }
+                    AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
                 }
-                AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
+            } catch (ex: UnpermittedOperationException) {
+                handleUnauthorized()
             }
         }
 
@@ -50,12 +52,16 @@ class AuthUtilities {
             generatorAuthenticated: () -> String,
             generatorUnauth: () -> String
         ): PreparedResponseData {
-            return when (isAuthenticated(user)) {
-                AuthStatus.AUTHENTICATED -> {
-                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
-                    okHTML(generatorAuthenticated())
+            return try {
+                when (isAuthenticated(user)) {
+                    AuthStatus.AUTHENTICATED -> {
+                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                        okHTML(generatorAuthenticated())
+                    }
+                    AuthStatus.UNAUTHENTICATED -> okHTML(generatorUnauth())
                 }
-                AuthStatus.UNAUTHENTICATED -> okHTML(generatorUnauth())
+            } catch (ex: UnpermittedOperationException) {
+                handleUnauthorized()
             }
         }
 
@@ -83,15 +89,28 @@ class AuthUtilities {
             vararg roles: Roles,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
-            return when (isAuthenticated(user)) {
-                AuthStatus.AUTHENTICATED -> {
-                    RolesChecker(CurrentUser(user)).checkAllowed(*roles)
-                    checkHasRequiredInputs(data.mapping.keys, requiredInputs)
-                    handler()
+            return try {
+                when (isAuthenticated(user)) {
+                    AuthStatus.AUTHENTICATED -> {
+                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                        checkHasRequiredInputs(data.mapping.keys, requiredInputs)
+                        handler()
+                    }
+                    AuthStatus.UNAUTHENTICATED -> handleUnauthenticated()
                 }
-                AuthStatus.UNAUTHENTICATED -> handleUnauthorized()
+            } catch (ex: UnpermittedOperationException) {
+                handleUnauthorized()
             }
         }
+
+        /**
+         * If the user tries doing something they shouldn't be allowed
+         * to do, return this.  For example, if they collect the URL for
+         * creating a new employee and POST to that, as a regular user,
+         * this will be returned.
+         */
+        private fun handleUnauthorized() =
+            PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
 
         /**
          * Handle the (rare) situation where a user POSTS data to us

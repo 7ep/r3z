@@ -188,7 +188,10 @@ class ServerUtilities {
                 if (analyzedHttpData.verb == Verb.INVALID) {
                     handleBadRequest()
                 } else {
+                    // check if we are currently running on the insecure (http) endpoint
                     val onInsecureEndpoint = server.socket.localPort == serverObjects.port
+                    // if the user sets the option to allow insecure use, we won't redirect to the secure endpoint
+                    // but if not, redirect
                     if (!serverObjects.allowInsecureUsage && onInsecureEndpoint) {
                         analyzedHttpData = analyzedHttpData.copy(headers = analyzedHttpData.headers.filterNot {it.toLowerCase().contains("connection: keep-alive")})
                         redirectToSslEndpoint(analyzedHttpData, serverObjects)
@@ -200,8 +203,6 @@ class ServerUtilities {
                 throw ex
             } catch (ex : SocketException) {
                 throw ex
-            } catch (ex: UnpermittedOperationException) {
-                PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
             }
             catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here

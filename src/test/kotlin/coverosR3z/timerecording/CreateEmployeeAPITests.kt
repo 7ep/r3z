@@ -106,7 +106,9 @@ class CreateEmployeeAPITests {
     fun testShouldDisallowRegularUserForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handlePost(sd) }
+        val result = CreateEmployeeAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -118,7 +120,9 @@ class CreateEmployeeAPITests {
     fun testShouldDisallowApproverUserForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
 
-        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handlePost(sd) }
+        val result = CreateEmployeeAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
@@ -138,7 +142,9 @@ class CreateEmployeeAPITests {
     fun testShouldDisallowSystemToGetPage() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+        val result = CreateEmployeeAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -150,7 +156,9 @@ class CreateEmployeeAPITests {
     fun testShouldDisallowRegularUserToGetPage() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
 
-        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+        val result = CreateEmployeeAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     /**
@@ -162,7 +170,9 @@ class CreateEmployeeAPITests {
     fun testShouldDisallowApproverUserToGetPage() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
 
-        assertThrows(UnpermittedOperationException::class.java) { CreateEmployeeAPI.handleGet(sd) }
+        val result = CreateEmployeeAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     // endregion

@@ -316,7 +316,10 @@ class EnterTimeAPITests {
     @Test
     fun testShouldDisallowSystemToEnterTimeGET() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
-        assertThrows(UnpermittedOperationException::class.java) { EnterTimeAPI.handleGet(sd).statusCode }
+
+        val result = EnterTimeAPI.handleGet(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
     
     @Category(APITestCategory::class)
@@ -357,7 +360,10 @@ class EnterTimeAPITests {
     @Test
     fun testShouldDisallowSystemToEnterTimePOST() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
-        assertThrows(UnpermittedOperationException::class.java) { EnterTimeAPI.handlePost(sd).statusCode }
+
+        val result = EnterTimeAPI.handlePost(sd).statusCode
+
+        assertEquals(StatusCode.FORBIDDEN, result)
     }
 
     @Category(APITestCategory::class)
