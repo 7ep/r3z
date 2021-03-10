@@ -40,8 +40,8 @@ class AuthenticationUtilitiesTests {
      * At a certain point, a password can be too long.
      */
     @Test
-    fun `It should not be possible to create a password longer than 255 characters`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){Password("a".repeat(256))}
+    fun `It should not be possible to create a password longer than maxPasswordSize characters`() {
+        val ex = assertThrows(IllegalArgumentException::class.java){Password("a".repeat(maxPasswordSize+1))}
         assertEquals(passwordMustNotBeTooLargeMsg, ex.message)
     }
 
@@ -49,31 +49,31 @@ class AuthenticationUtilitiesTests {
      * At a certain point, a username can be too long.
      */
     @Test
-    fun `It should not be possible to create a username longer than 50 characters`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("a".repeat(51)) }
+    fun `It should not be possible to create a username longer than maxUserNameSize characters`() {
+        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("a".repeat(maxUserNameSize+1)) }
         assertEquals(tooLargeUsernameMsg, ex.message)
     }
 
     @Test
-    fun `A 255-character password should succeed`() {
-        val password = Password("a".repeat(255))
-        assertEquals(password.value, "a".repeat(255))
+    fun `A maxPasswordSize-character password should succeed`() {
+        val password = Password("a".repeat(maxPasswordSize))
+        assertEquals(password.value, "a".repeat(maxPasswordSize))
     }
 
 
     @Test
-    fun `A 50-character username should succeed`() {
-        val username = UserName("a".repeat(50))
+    fun `A maxUserNameSize-character username should succeed`() {
+        val username = UserName("a".repeat(maxUserNameSize))
 
-        assertEquals(username.value, "a".repeat(50))
+        assertEquals(username.value, "a".repeat(maxUserNameSize))
     }
 
     /**
      * At a certain point, a password can be too short. Under 12 is probably abysmal.
      */
     @Test
-    fun `A 11 character password should fail`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){Password("a".repeat(11))}
+    fun `A less-than-minPasswordSize character password should fail`() {
+        val ex = assertThrows(IllegalArgumentException::class.java){Password("a".repeat(minPasswordSize-1))}
         assertEquals(passwordMustBeLargeEnoughMsg, ex.message)
     }
 
@@ -81,8 +81,8 @@ class AuthenticationUtilitiesTests {
      * For sanity's sake, let's say that 2 characters is too short for a username
      */
     @Test
-    fun `A 2-character username should be considered too short`() {
-        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("aa") }
+    fun `A less-than-minUserNameSize username should be considered too short`() {
+        val ex = assertThrows(IllegalArgumentException::class.java){ UserName("a".repeat(minUserNameSize-1)) }
         assertEquals(tooSmallUsernameMsg, ex.message)
     }
 
@@ -96,24 +96,25 @@ class AuthenticationUtilitiesTests {
      * Three-character usernames would be ok - maybe initials
      */
     @Test
-    fun `A 3-character username should be considered ok`() {
-        val username = UserName("aaa")
+    fun `A minUserNameSize-character username should be considered ok`() {
+        val minSizedUsername = "a".repeat(minUserNameSize)
+        val username = UserName(minSizedUsername)
 
-        assertEquals(username.value, "aaa")
+        assertEquals(username.value, minSizedUsername)
     }
 
     @Test
-    fun `An 12 character password is a-ok`() {
-        val password = Password("a".repeat(12))
+    fun `A minPasswordSize character password is a-ok`() {
+        val password = Password("a".repeat(minPasswordSize))
 
-        assertEquals(password.value, "a".repeat(12))
+        assertEquals(password.value, "a".repeat(minPasswordSize))
     }
 
     @Test
-    fun `A password greater than 12 chars should pass`() {
-        val password = Password("a".repeat(13))
+    fun `A password greater than minPasswordSize chars should pass`() {
+        val password = Password("a".repeat(minPasswordSize+1))
 
-        assertEquals(password.value, "a".repeat(13))
+        assertEquals(password.value, "a".repeat(minPasswordSize+1))
     }
 
     @Test
