@@ -274,9 +274,8 @@ considerations must be maintained.
 Database
 --------
 
-The database is where we store all the shared state for the users.  It is quite
-simple - just several sets of data, typically of type [ChangeTrackingSet], which is a
-thread-safe data structure.
+The database is where we store all the shared state for the users.  It is 
+simple. Data is of type [ChangeTrackingSet], which is a thread-safe data structure.
 
 The Database mainly consists of the data and some utilities for access and persistence.
 

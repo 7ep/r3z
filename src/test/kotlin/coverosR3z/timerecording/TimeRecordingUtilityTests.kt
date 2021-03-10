@@ -453,32 +453,6 @@ class TimeRecordingUtilityTests {
         assertTrue(allEntriesForPeriod.any())
     }
 
-
-//    /** Happy happy
-//     *
-//     */
-//    @Test
-//    fun testHandleRealCreateNewEmployee() {
-//        val pmd = PureMemoryDatabase()
-//        val logger = Logger()
-//        val ap = AuthenticationPersistence(pmd, logger)
-//        val rau = AuthenticationUtilities(ap, logger)
-//
-//        val cu = ap.createUser(UserName("angela"), Hash("password12345"), Salt("adfs"), EmployeeId(0))
-//        ap.addRoleToUser(UserName("angela"), Roles.ADMIN)
-//
-//        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, CurrentUser(cu), testLogger), CurrentUser(cu), testLogger)
-//
-//        val angelaRole = pmd.UserDataAccess().read{ users -> users.singleOrNull{u -> u.name == UserName("angela")}}!!.role
-//        assertEquals(Roles.ADMIN, angelaRole)
-//
-//        val emp = tru.createEmployee(EmployeeName("ryan \"Kenney\" mcgee"))
-//
-//        rau.register(UserName("ryan.kenney"), Password("skiddaddyskeedoo"), emp.id)
-//        assertTrue(rau.isUserRegistered(UserName("ryan.kenney")))
-//
-//    }
-
     @Test
     fun testHandleRealCreateNewEmployee() {
         val expectedEmployee = Employee(EmployeeId(1), EmployeeName("ryan \"Kenney\" mcgee"))
@@ -498,45 +472,6 @@ class TimeRecordingUtilityTests {
         val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_REGULAR_USER), testLogger)
         assertThrows(UnpermittedOperationException::class.java) {tru.createProject(ProjectName("Chungus amongus"))}
     }
-
-    // employee can:
-    /*
-   createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult
-   changeEntry(entry: TimeEntry): RecordTimeResult
-   getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
-   getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
-   listAllProjects(): List<Project>
-   findProjectById(id: ProjectId): Project
-   findEmployeeById(id: EmployeeId): Employee
-   listAllEmployees(): List<Employee>
-   submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-   unsubmitTimePeriod(timePeriod: TimePeriod)
-   getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-   getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
-   isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
-
-   employee cannot:
-   createProject(projectName: ProjectName) : Project
-   createEmployee(employeename: EmployeeName) : Employee
-
-   // admin can do everything:
-      createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult
-   changeEntry(entry: TimeEntry): RecordTimeResult
-   createProject(projectName: ProjectName) : Project
-   createEmployee(employeename: EmployeeName) : Employee
-   getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
-   getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
-   listAllProjects(): List<Project>
-   findProjectById(id: ProjectId): Project
-   findEmployeeById(id: EmployeeId): Employee
-   listAllEmployees(): List<Employee>
-   submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-   unsubmitTimePeriod(timePeriod: TimePeriod)
-   getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-   getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
-   isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
-    */
-
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         return TimeRecordingUtilities(

@@ -15,18 +15,31 @@ import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
 import java.io.File
 
+/**
+ * This suite of tests is to ensure that the user's role allows
+ * them to see what they ought.  Note: role has nothing to do with employee,
+ * only user.  A single employee could potentially have a user that is an
+ * admin and a user that is a regular role.  For that reason, we will
+ * just use the [DEFAULT_EMPLOYEE] as the employee for all these tests.
+ */
 class UIRoleTests {
 
-    private val adminUsername = "adrian"
-    private val testEmployeeName = "bob bobberton"
-    private val testUsername = "plain_ol_bob"
-    private val testApproverName = "billy the accountant"
-    private val testApproverUsername = "billy_approver12"
+    private val adminUserName = "adrian"
+    private val regularUserName = "bob bobberton"
+    private val approverUserName = "billy the accountant"
 
     @Category(UITestCategory::class)
     @Test
-    fun verifyAdminCanSeeWhatTheyShould() {
-        `setup some default projects and employees`()
+    fun uiRoleTests() {
+        `setup some projects users and employees`()
+        verifyAdminCanSeeWhatTheyShould()
+        logout()
+        verifyRegularUserCanSeeWhatTheyShould()
+        logout()
+        verifyApproverCanSeeWhatTheyShould()
+    }
+
+    private fun verifyAdminCanSeeWhatTheyShould() {
         loginAdmin()
 
         val appUrl = pom.sslDomain
@@ -46,31 +59,19 @@ class UIRoleTests {
         assertEquals("$appUrl/timeentries", showAllEntriesLink)
         assertEquals("$appUrl/logging", logConfigLink)
         assertEquals("$appUrl/logout", logoutLink)
-
-        //create employee
-        //login as employee
-        //verify the employee only sees what they should see
     }
 
-    @Category(UITestCategory::class)
-    @Test
-    fun verifyApproverCanSeeWhatTheyShould() {
-        `setup some default projects and employees`()
-        loginAdmin()
-        //create employee
-        createApprover()
-        logout()
-        //login as employee
-        registerAndLoginTestApproverUser()
+    private fun verifyApproverCanSeeWhatTheyShould() {
+        pom.lp.login(approverUserName, DEFAULT_PASSWORD.value)
 
         // validate we are actually the user we intend to be
         val userGreeting = pom.driver.findElement(By.cssSelector("#username")).text
-        assertTrue(testApproverUsername in userGreeting)
+        assertTrue(approverUserName in userGreeting)
 
         //verify the employee only sees what they should see
         val appUrl = pom.sslDomain
 
-        var links = mutableListOf<String>()
+        val links = mutableListOf<String>()
         // some of these SHOULDN'T be visible. How do we verify we CANT find them?
 
         for (i in 1..7) {
@@ -91,22 +92,13 @@ class UIRoleTests {
         assertTrue("$appUrl/createproject" !in links)
     }
 
-    @Category(UITestCategory::class)
-    @Test
-    fun verifyRegularUserCanSeeWhatTheyShould() {
-
-        `setup some default projects and employees`()
-        loginAdmin()
-        //create employee
-        createEmployee()
-        logout()
-        //login as employee
-        registerAndLoginTestUser()
+    private fun verifyRegularUserCanSeeWhatTheyShould() {
+        pom.lp.login(regularUserName, DEFAULT_PASSWORD.value)
 
         //verify the employee only sees what they should see
         val appUrl = pom.sslDomain
 
-        var links = mutableListOf<String>()
+        val links = mutableListOf<String>()
         // some of these SHOULDN'T be visible. How do we verify we CANT find them?
 
         for (i in 1..7) {
@@ -163,7 +155,7 @@ class UIRoleTests {
     fun finish() {
         pom.fs.shutdown()
         val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
-        Assert.assertEquals(pom.pmd, pmd)
+        assertEquals(pom.pmd, pmd)
         pom.driver.quit()
     }
 
@@ -171,41 +163,41 @@ class UIRoleTests {
         pom.lop.go()
     }
 
-
     private fun loginAdmin() {
-        logout()
-
-//        pom.rp.register(adminUsername, DEFAULT_PASSWORD.value, adminEmployee)
-        pom.lp.login(adminUsername, DEFAULT_PASSWORD.value)
+        pom.lp.login(adminUserName, DEFAULT_PASSWORD.value)
     }
 
-    private fun createEmployee() {
-        pom.eep.enter(testEmployeeName)
+    private fun createApproverUser() {
+        pom.rp.register(approverUserName, DEFAULT_PASSWORD.value, DEFAULT_EMPLOYEE_NAME.value)
+        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == approverUserName} }
+        pom.businessCode.au.addRoleToUser(user, Roles.APPROVER)
     }
 
-    private fun createApprover() {
-        pom.eep.enter(testApproverName)
-    }
-
-    private fun registerAndLoginTestUser() {
-        pom.rp.register(testUsername, "password12345", testEmployeeName)
-        pom.lp.login(testUsername, "password12345")
-    }
-
-    private fun registerAndLoginTestApproverUser() {
-        pom.rp.register(testApproverUsername, "password12345", testApproverName)
-        pom.lp.login(testApproverUsername, "password12345")
-    }
-
-    private fun `setup some default projects and employees`() {
-        logout()
-        // register and login the Admin
-        pom.rp.register(adminUsername, DEFAULT_PASSWORD.value, DEFAULT_ADMINISTRATOR_NAME.value)
-        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
-        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
-        pom.lp.login(adminUsername, DEFAULT_PASSWORD.value)
+    private fun `setup some projects users and employees`() {
+        createAdminUser()
+        pom.lp.login(adminUserName, DEFAULT_PASSWORD.value)
 
         // Create a default project
-        pom.epp.enter(DEFAULT_PROJECT.toString())
+        pom.epp.enter(DEFAULT_PROJECT.name.value)
+
+        // To make things more explicit, create a default employee that doesn't sound like "administrator", so
+        // we don't get confused.
+        pom.eep.enter(DEFAULT_EMPLOYEE_NAME.value)
+
+        logout()
+
+        // register our regular user
+        // nothing special to do here, everyone starts as a regular user
+        pom.rp.register(regularUserName, DEFAULT_PASSWORD.value, DEFAULT_EMPLOYEE_NAME.value)
+
+        // register our approver user
+        createApproverUser()
+    }
+
+    private fun createAdminUser() {
+        pom.rp.register(adminUserName, DEFAULT_PASSWORD.value, DEFAULT_ADMINISTRATOR_NAME.value)
+        val user = pom.pmd.dataAccess<User>(User.directoryName)
+            .read { users -> users.single { it.name.value == adminUserName } }
+        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
     }
 }

@@ -103,7 +103,6 @@ class ViewTimeAPI(private val sd: ServerData) {
         } else {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
-        val username = safeHtml(sd.ahd.user.name.value)
         val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId, currentPeriod)
         val editidValue = sd.ahd.queryString["editid"]
         val projects = sd.bc.tru.listAllProjects()

@@ -304,7 +304,7 @@ class ServerUtilitiesTests {
     }
 
     /**
-     * check lowercase works also
+     * check that "cookie" - lowercase - works also
      */
     @Test
     fun testShouldExtractAuthCodeFromCookie_lowercase() {
