@@ -3,7 +3,11 @@ package coverosR3z.authentication
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.misc.DEFAULT_EMPLOYEE
+import coverosR3z.misc.DEFAULT_INVITATION
+import coverosR3z.misc.DEFAULT_INVITATION_CODE
 import coverosR3z.misc.types.DateTime
+import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeId
 
 /**
@@ -19,9 +23,13 @@ class FakeAuthPersistence(
     var getAllSessionBehavior : () -> Set<Session> = { setOf() },
     var getAllUsersBehavior : () -> Set<User> = { setOf() },
     var addRoleToUserBehavior: () -> User = { NO_USER },
+    var createInvitationBehavior: () -> Invitation = { DEFAULT_INVITATION },
+    var getEmployeeFromInvitationCodeBehavior: () -> Employee = { DEFAULT_EMPLOYEE },
+    var removeInvitationBehavior: () -> Boolean = { true },
+    var listAllInvitationsBehavior: () -> Set<Invitation> = { setOf() }
 ) : IAuthPersistence {
 
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId, role: Roles) : User {
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employee: Employee, role: Role): User {
         return createUserBehavior()
     }
 
@@ -53,8 +61,24 @@ class FakeAuthPersistence(
         return getAllUsersBehavior()
     }
 
-    override fun addRoleToUser(user: User, role: Roles): User {
+    override fun addRoleToUser(user: User, role: Role): User {
         return addRoleToUserBehavior()
+    }
+
+    override fun createInvitation(employee: Employee, datetime: DateTime, invitationCode: InvitationCode): Invitation {
+        return createInvitationBehavior()
+    }
+
+    override fun getEmployeeFromInvitationCode(invitationCode: InvitationCode): Employee {
+        return getEmployeeFromInvitationCodeBehavior()
+    }
+
+    override fun removeInvitation(employee: Employee): Boolean {
+        return removeInvitationBehavior()
+    }
+
+    override fun listAllInvitations(): Set<Invitation> {
+        return listAllInvitationsBehavior()
     }
 
 }

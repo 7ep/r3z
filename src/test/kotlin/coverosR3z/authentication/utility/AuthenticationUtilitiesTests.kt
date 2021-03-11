@@ -1,14 +1,13 @@
 package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.FakeAuthPersistence
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
-import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -121,7 +120,7 @@ class AuthenticationUtilitiesTests {
     fun `An account should not be created if the user already exists`() {
         ap.isUserRegisteredBehavior = {true}
 
-        val result = authUtils.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        val result = authUtils.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
 
         assertEquals(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, result.status)
     }
@@ -281,47 +280,6 @@ class AuthenticationUtilitiesTests {
     }
 
     /**
-     * If a user logs out, we should find all their sessions
-     * in the sessions table and wipe them out
-     *
-     * Also test this is getting persisted to disk.  To do that,
-     * we will check that we got what we expected, then reload
-     * the database and confirm we get the same results
-     */
-    @IntegrationTest(usesDirectory = true)
-    @Category(IntegrationTestCategory::class)
-    @Test
-    fun testShouldClearAllSessionsWhenLogout() {
-        val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"
-        File(dbDirectory).deleteRecursively()
-        val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
-
-        // we have to register users so reloading the data from disk works
-        val (_, user1) = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
-        val (_, user2) = au.register(DEFAULT_USER_2.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
-
-        au.createNewSession(user1, DEFAULT_DATETIME) { "abc" }
-        au.createNewSession(user1, DEFAULT_DATETIME) { "def" }
-        au.createNewSession(user2, DEFAULT_DATETIME) { "ghi" }
-
-        // wipe out all the sessions for this user
-        au.logout(user1)
-
-        // check that user1 lacks sessions and user2 still has theirs
-        assertTrue(authPersistence.getAllSessions().none{it.user == user1})
-        assertEquals(1, authPersistence.getAllSessions().filter {it.user == user2}.size)
-        pmd.stop()
-
-        // test out loading it from the disk
-        val pmd2 = DatabaseDiskPersistence(dbDirectory = dbDirectory, logger = testLogger).startWithDiskPersistence()
-        val authPersistence2 = AuthenticationPersistence(pmd2, testLogger)
-        assertTrue(authPersistence2.getAllSessions().none{it.user == user1})
-        assertEquals(1, authPersistence2.getAllSessions().filter {it.user == user2}.size)
-    }
-
-    /**
      * If somehow the user were to able to attempt to logout
      * while already logged out, an exception should be thrown
      */
@@ -341,14 +299,22 @@ class AuthenticationUtilitiesTests {
     @Test
     fun testAdminShouldAddRoleToUser() {
         ap.addRoleToUserBehavior = { DEFAULT_ADMIN_USER }
-        val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Roles.ADMIN)
+        val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Role.ADMIN)
         assertEquals(DEFAULT_ADMIN_USER, elevatedUser)
     }
 
+    /**
+     * See [Invitation]
+     */
     @Test
-    fun testRegularUserCantAddRoleToUser() {
-        val au = AuthenticationUtilities(FakeAuthPersistence(), testLogger, CurrentUser(DEFAULT_REGULAR_USER))
-        assertThrows(UnpermittedOperationException::class.java) {au.addRoleToUser(DEFAULT_USER, Roles.ADMIN)}
+    fun testCanCreateInvitation() {
+        val result = authUtils.createInvitation(DEFAULT_EMPLOYEE, DEFAULT_DATETIME) { "abc123" }
+        assertEquals(DEFAULT_INVITATION, result)
     }
 
+    @Test
+    fun testCanRemoveInvitation() {
+        val result = authUtils.removeInvitation(DEFAULT_EMPLOYEE)
+        assertTrue(result)
+    }
 }

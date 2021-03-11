@@ -1,6 +1,6 @@
 package coverosR3z.server.api
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.GetEndpoint
@@ -16,7 +16,7 @@ class HomepageAPI(private val sd: ServerData)  {
         override fun handleGet(sd: ServerData) : PreparedResponseData {
             val hp = HomepageAPI(sd)
             return doGETAuthAndUnauth(sd.ahd.user,
-                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN,
+                Role.REGULAR, Role.APPROVER, Role.ADMIN,
                 generatorAuthenticated = { hp.authHomePageHTML() },
                 generatorUnauth = { PageComponents(sd).makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
         }
@@ -36,7 +36,7 @@ class HomepageAPI(private val sd: ServerData)  {
     private fun renderHomepageBody(): String {
         val user = sd.ahd.user
         val allowedToSee: List<HomepageItem> = when (user.role) {
-            Roles.ADMIN ->
+            Role.ADMIN ->
                 listOf(
                     HomepageItem("createemployee", "Create employee"),
                     HomepageItem("employees", "Show all employees"),
@@ -46,21 +46,21 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
-            Roles.REGULAR ->
+            Role.REGULAR ->
                 listOf(
                     HomepageItem("entertime", "Enter time"),
                     HomepageItem("timeentries", "Show all time entries"),
                     HomepageItem("logout", "Logout")
                 )
 
-            Roles.APPROVER ->
+            Role.APPROVER ->
                 listOf(
                     HomepageItem("entertime", "Enter time"),
                     HomepageItem("timeentries", "Show all time entries"),
                     HomepageItem("logout", "Logout")
                 )
-            Roles.SYSTEM -> emptyList()
-            Roles.NONE -> emptyList()
+            Role.SYSTEM -> emptyList()
+            Role.NONE -> emptyList()
 
         }
         return """

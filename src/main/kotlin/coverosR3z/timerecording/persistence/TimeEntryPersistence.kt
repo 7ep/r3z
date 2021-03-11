@@ -131,55 +131,56 @@ class TimeEntryPersistence(
         return employeeDataAccess.read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
-    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+    override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         // The following closure returns a boolean depending on whether the provided date falls within
         // any of the submission date ranges for the provided employee
         return submittedPeriodsDataAccess.read {
                 submissions -> submissions
-                    .filter{it.employeeId == employeeId}
+                    .filter{it.employee == employee}
                     .any{it.bounds.contains(date)}
         }
     }
 
-    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
-        val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employeeId == employeeId && it.bounds == timePeriod} }
+    override fun persistNewSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
+        val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employee == employee && it.bounds == timePeriod} }
         if (alreadyExists) {
-            throw MultipleSubmissionsInPeriodException("A submission already exists for $employeeId on $timePeriod")
+            throw MultipleSubmissionsInPeriodException("A submission already exists for ${employee.name.value} on $timePeriod")
         }
 
         return submittedPeriodsDataAccess.actOn{ submissions ->
-            val newSubmission = SubmittedPeriod(SubmissionId(submissions.nextIndex.getAndIncrement()),
-                employeeId,
+            val newSubmission = SubmittedPeriod(
+                SubmissionId(submissions.nextIndex.getAndIncrement()),
+                employee,
                 timePeriod)
             logger.logDebug(cu) { "Recorded a new time period submission," +
-                    " employee id \"${employeeId.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
+                    " employee id \"${employee.id.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
                     "to the database" }
             submissions.add(newSubmission)
             newSubmission
         }
     }
 
-    override fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
+    override fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
         try {
             return submittedPeriodsDataAccess.read { submissions ->
-                submissions.single { it.employeeId == employeeId && it.bounds == timePeriod }
+                submissions.single { it.employee == employee && it.bounds == timePeriod }
             }
         } catch (ex: NoSuchElementException) {
-            throw SubmissionNotFoundException("no submission was found with $employeeId on $timePeriod")
+            throw SubmissionNotFoundException("no submission was found for ${employee.name.value} on $timePeriod")
         }
     }
 
-    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
         return timeEntryDataAccess.read {
             timeEntries ->
-                timeEntries.filter { it.employee.id == employeeId && timePeriod.contains(it.date)}.toSet()
+                timeEntries.filter { it.employee == employee && timePeriod.contains(it.date)}.toSet()
         }
     }
 
     override fun unsubmitTimePeriod(stp: SubmittedPeriod) {
         submittedPeriodsDataAccess.actOn { submissions ->
             submissions.remove(stp)
-            logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employeeId.value}\", id: ${stp.id.value}, from the database" }
+            logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${stp.employee.id.value}\", id: ${stp.id.value}, from the database" }
         }
     }
 

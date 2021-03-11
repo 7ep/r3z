@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.timerecording.exceptions.SubmissionNotFoundException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
@@ -256,10 +257,9 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmittedTimePeriods_addingNew() {
-        val employeeId = EmployeeId(1)
-        tep.persistNewSubmittedTimePeriod(employeeId, DEFAULT_TIME_PERIOD)
+        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
 
-        val result = tep.isInASubmittedPeriod(employeeId, Date.make("2021-02-03"))
+        val result = tep.isInASubmittedPeriod(DEFAULT_EMPLOYEE, Date.make("2021-02-03"))
         val expected = true
         assertEquals(expected, result)
     }
@@ -267,15 +267,15 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmittedTimePeriods_noneFound() {
-        val result = tep.isInASubmittedPeriod(EmployeeId(1), Date.make("2021-02-03"))
+        val result = tep.isInASubmittedPeriod(DEFAULT_EMPLOYEE, Date.make("2021-02-03"))
         assertFalse("nothing has been submitted, shouldn't be true", result)
     }
 
     @Category(IntegrationTestCategory::class)
     @Test
     fun testGetSubmittedPeriod() {
-        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
-        val submittedTimePeriod = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+        val submittedTimePeriod = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
 
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
     }
@@ -283,16 +283,16 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testFailToGetNonexistentSubmission() {
-        val ex = assertThrows(SubmissionNotFoundException::class.java) { tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)}
-        assertEquals("no submission was found with EmployeeId(value=1) on TimePeriod(start=Date(epochDay=18659, 2021-02-01), end=Date(epochDay=18673, 2021-02-15))", ex.message)
+        val ex = assertThrows(SubmissionNotFoundException::class.java) { tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)}
+        assertEquals("no submission was found for DefaultEmployee on TimePeriod(start=Date(epochDay=18659, 2021-02-01), end=Date(epochDay=18673, 2021-02-15))", ex.message)
     }
 
     @Category(IntegrationTestCategory::class)
     @Test
     fun testCannotPersistTheSameSubmissionTwice() {
-        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
-        val ex = assertThrows(MultipleSubmissionsInPeriodException::class.java) { tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD) }
-        assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.id} on $DEFAULT_TIME_PERIOD", ex.message)
+        tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+        val ex = assertThrows(MultipleSubmissionsInPeriodException::class.java) { tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD) }
+        assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.name.value} on $DEFAULT_TIME_PERIOD", ex.message)
     }
 
     @Category(IntegrationTestCategory::class)
@@ -306,7 +306,7 @@ class TimeEntryPersistenceTests {
                 employee = employee,
                 date = DEFAULT_PERIOD_START_DATE))
 
-        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee.id, DEFAULT_TIME_PERIOD)
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
 
         assertEquals(inputTimeEntry, result.first())
     }
@@ -326,7 +326,7 @@ class TimeEntryPersistenceTests {
                 employee = employee,
                 date = A_RANDOM_DAY_IN_JUNE_2020))
 
-        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee.id, DEFAULT_TIME_PERIOD)
+        val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
 
         assertFalse("There should be no time entries found because they exist outside our time period", result.any())
     }

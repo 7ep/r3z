@@ -1,10 +1,12 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.utility.decode
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.server.types.*
 
@@ -72,7 +74,28 @@ const val maxQueryStringLength = 1024
  * Analyze the data following HTTP protocol and create a
  * [AnalyzedHttpData] to store the vital information
  */
-fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities, logger: ILogger): AnalyzedHttpData {
+fun parseHttpMessage(socketWrapper: ISocketWrapper, logger: ILogger): AnalyzedHttpData {
+    // read the first line for the fundamental request
+    val statusLine = socketWrapper.readLine()
+    logger.logTrace { "statusLine: $statusLine" }
+    if (statusLine.isNullOrBlank()) {
+        return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION)
+    }
+
+    return when {
+        serverStatusLineRegex.containsMatchIn(statusLine) ->
+            analyzeAsServer(checkNotNull(serverStatusLineRegex.matchEntire(statusLine)), socketWrapper, logger)
+        else -> AnalyzedHttpData(Verb.INVALID)
+    }
+
+}
+
+/**
+ * Analyze a message as a client (not as a server)
+ * Analyze the data following HTTP protocol and create a
+ * [AnalyzedHttpData] to store the vital information
+ */
+fun parseHttpMessageAsClient(socketWrapper: ISocketWrapper, logger: ILogger): AnalyzedHttpData {
     // read the first line for the fundamental request
     val statusLine = socketWrapper.readLine()
     logger.logTrace { "statusLine: $statusLine" }
@@ -83,8 +106,6 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
     return when {
         clientStatusLineRegex.containsMatchIn(statusLine) ->
             analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper, logger)
-        serverStatusLineRegex.containsMatchIn(statusLine) ->
-            analyzeAsServer(checkNotNull(serverStatusLineRegex.matchEntire(statusLine)), socketWrapper, au, logger)
         else -> AnalyzedHttpData(Verb.INVALID)
     }
 
@@ -95,12 +116,15 @@ fun parseHttpMessage(socketWrapper: ISocketWrapper, au: IAuthenticationUtilities
 /**
  * If we are reviewing an HTTP message as a server
  */
-private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, au: IAuthenticationUtilities, logger: ILogger): AnalyzedHttpData {
+private fun analyzeAsServer(
+    statusLineMatches: MatchResult,
+    socketWrapper: ISocketWrapper,
+    logger: ILogger): AnalyzedHttpData {
+
     val statusLine = parseStatusLineAsServer(statusLineMatches, logger)
     val headers = getHeaders(socketWrapper)
 
     val token = extractSessionTokenFromHeaders(headers) ?: ""
-    val user = extractUserFromAuthToken(token, au)
     val postBodyData = extractData(socketWrapper, headers)
 
     return AnalyzedHttpData(
@@ -109,9 +133,8 @@ private fun analyzeAsServer(statusLineMatches: MatchResult, socketWrapper: ISock
         statusLine.queryString,
         statusLine.rawQueryString,
         postBodyData,
-        user,
-        token,
-        headers)
+        sessionToken = token,
+        headers = headers)
 }
 
 /**
@@ -140,21 +163,6 @@ private fun extractData(server: ISocketWrapper, headers: List<String>) : PostBod
         PostBodyData(parseUrlEncodedForm(body, false), body)
     } else {
         PostBodyData()
-    }
-}
-
-/**
- * Given the auth token extracted from a cookie,
- * return the user it represents, but only if it
- * represents a current valid session.
- *
- * returns [NO_USER] otherwise
- */
-fun extractUserFromAuthToken(authCookie: String?, au: IAuthenticationUtilities): User {
-    return if (authCookie.isNullOrBlank()) {
-        NO_USER
-    } else {
-        au.getUserForSession(authCookie)
     }
 }
 

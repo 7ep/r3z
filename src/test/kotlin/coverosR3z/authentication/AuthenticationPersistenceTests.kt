@@ -1,11 +1,12 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
-import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -30,7 +31,7 @@ class AuthenticationPersistenceTests {
     @Test
     fun `Should be able to create a new user`() {
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id, DEFAULT_USER.role)
+        ap.createUser(UserName("jenna"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, DEFAULT_USER.role)
 
         assertTrue(ap.isUserRegistered(UserName("jenna")))
     }
@@ -123,7 +124,7 @@ class AuthenticationPersistenceTests {
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewUsersAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
-                ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE.id, DEFAULT_USER.role)
+                ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, DEFAULT_USER.role)
             }))
         }
         // wait for all those threads
@@ -134,11 +135,52 @@ class AuthenticationPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testAddRoleToUser() {
-        val expected = DEFAULT_USER.copy(role = Roles.ADMIN)
+        val expected = DEFAULT_USER.copy(role = Role.ADMIN)
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employeeId, DEFAULT_USER.role)
-        val result = ap.addRoleToUser(DEFAULT_USER, Roles.ADMIN)
+        ap.createUser(DEFAULT_USER.name, DEFAULT_USER.hash, DEFAULT_USER.salt, DEFAULT_USER.employee, DEFAULT_USER.role)
+        val result = ap.addRoleToUser(DEFAULT_USER, Role.ADMIN)
         assertEquals(expected.role, result.role)
     }
+
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testCanAddInvitation() {
+        val pmd = createEmptyDatabase()
+        val ap = AuthenticationPersistence(pmd, testLogger)
+
+        val result = ap.createInvitation(DEFAULT_EMPLOYEE, DEFAULT_DATETIME, DEFAULT_INVITATION_CODE)
+
+        assertTrue(pmd.dataAccess<Invitation>(Invitation.directoryName).read {
+            invitations -> invitations.all { it == result }
+        })
+    }
+
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testCanRemoveInvitation() {
+        val pmd = createEmptyDatabase()
+        val ap = AuthenticationPersistence(pmd, testLogger)
+
+        ap.createInvitation(DEFAULT_EMPLOYEE, DEFAULT_DATETIME, DEFAULT_INVITATION_CODE)
+        ap.removeInvitation(DEFAULT_EMPLOYEE)
+
+        assertTrue(pmd.dataAccess<Invitation>(Invitation.directoryName).read {
+                invitations -> invitations.count() == 0
+        })
+    }
+
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testCanGetInvitationByEmployee() {
+        val pmd = createEmptyDatabase()
+        val ap = AuthenticationPersistence(pmd, testLogger)
+
+        val result = ap.createInvitation(DEFAULT_EMPLOYEE, DEFAULT_DATETIME, DEFAULT_INVITATION_CODE)
+        val employee = ap.getEmployeeFromInvitationCode(result.code)
+
+        assertEquals(DEFAULT_EMPLOYEE, employee)
+    }
+
+
 
 }

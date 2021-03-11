@@ -1,8 +1,6 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.Roles
-import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
@@ -47,12 +45,12 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { et.entertimeHTML() }
+            return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { et.entertimeHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { et.handlePOST() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.REGULAR, Role.APPROVER, Role.ADMIN) { et.handlePOST() }
         }
     }
 
@@ -69,7 +67,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 
         val project = tru.findProjectById(projectId)
-        val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
+        val employee = checkNotNull(sd.ahd.user.employee){ employeeIdNotNullMsg }
 
         val timeEntry = TimeEntryPreDatabase(
                 employee,

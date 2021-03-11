@@ -1,6 +1,6 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.types.Date
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
@@ -42,7 +42,7 @@ class SubmitTimeAPI(private val sd: ServerData){
                 sd.ahd.user,
                 requiredInputs,
                 sd.ahd.data,
-                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN
+                Role.REGULAR, Role.APPROVER, Role.ADMIN
             ) { st.handlePOST() }
         }
     }

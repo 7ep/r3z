@@ -3,6 +3,7 @@ package coverosR3z.server.utility
 import coverosR3z.FullSystem
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.FileReader
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.ServerObjects
 import java.security.KeyStore
@@ -17,7 +18,6 @@ import javax.net.ssl.SSLServerSocketFactory
 class SSLServer(
     sslPort: Int,
     private val executorService: ExecutorService,
-    private val businessObjects: BusinessCode,
     private val serverObjects: ServerObjects,
     private val fullSystem: FullSystem
 ) {
@@ -32,7 +32,7 @@ class SSLServer(
 
 
     fun createSecureServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, businessObjects, serverObjects)
+        return ServerUtilities.createServerThread(executorService, fullSystem, sslHalfOpenServerSocket, serverObjects)
     }
 
 

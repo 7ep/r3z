@@ -6,7 +6,7 @@ import coverosR3z.authentication.types.UserName
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.bddframework.BDD
 import coverosR3z.misc.*
-import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -73,7 +73,7 @@ class EnteringTimeBDD {
         val alice = adminTru.createEmployee(EmployeeName("Alice"))
         val userName = UserName("alice_1")
 
-        au.register(userName, DEFAULT_PASSWORD, alice.id)
+        au.registerWithEmployee(userName, DEFAULT_PASSWORD,alice)
         val (_, user) = au.login(userName, DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(
@@ -107,7 +107,7 @@ class EnteringTimeBDD {
             AuthenticationPersistence(pmd, testLogger),
             testLogger
         )
-        au.register(newUsername, DEFAULT_PASSWORD, newEmployee.id)
+        au.registerWithEmployee(newUsername, DEFAULT_PASSWORD, newEmployee)
         val (_, user) = au.login(newUsername, DEFAULT_PASSWORD)
 
         val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)

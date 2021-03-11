@@ -10,6 +10,7 @@ import coverosR3z.fakeServerObjects
 import coverosR3z.misc.*
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -59,7 +60,7 @@ class AuthenticationBDD {
         val au = setupPreviousRegisteredUser()
         s.markDone("Given I have previously been registered,")
 
-        val result = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        val result = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         s.markDone("when I try to register again,")
 
         assertEquals("The user shouldn't be allowed to register again",
@@ -136,7 +137,10 @@ class AuthenticationBDD {
 
     private fun enterTooShortPassword(au: AuthenticationUtilities): IllegalArgumentException {
         val data =
-            PostBodyData(mapOf("username" to DEFAULT_USER.name.value, "password" to "too short", "employee" to "1"))
+            PostBodyData(mapOf(
+                RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+                RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to "too short",
+                RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_INVITATION_CODE.value))
         val sd = ServerData(
             BusinessCode(tru, au),
             fakeServerObjects,
@@ -153,7 +157,7 @@ class AuthenticationBDD {
     private fun doSuccessfulRegistration(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        val regStatus = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        val regStatus = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
         return au
     }
@@ -169,14 +173,14 @@ class AuthenticationBDD {
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
         val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE.id)
+        au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return au
     }
 
@@ -188,19 +192,11 @@ class AuthenticationBDD {
             cu = CurrentUser(DEFAULT_ADMIN_USER), logger = testLogger)
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
-        au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
+        au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
     }
 
     private fun startWithEmptyDatabase(): Pair<PureMemoryDatabase, AuthenticationUtilities> {
-        val datamap = mapOf(
-            Employee.directoryName to ChangeTrackingSet<Employee>(),
-            TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
-            Project.directoryName to ChangeTrackingSet<Project>(),
-            SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
-            Session.directoryName to ChangeTrackingSet<Session>(),
-            User.directoryName to ChangeTrackingSet<User>()
-        )
-        val pmd = PureMemoryDatabase(data = datamap)
+        val pmd = createEmptyDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
         return Pair(pmd, au)

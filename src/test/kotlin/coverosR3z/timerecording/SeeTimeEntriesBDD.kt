@@ -19,7 +19,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = recordSomeEntriesInDatabase()
         s.markDone("Given I have recorded some time entries")
 
-        val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
+        val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
         s.markDone("When I request my time entries on a specific date")
 
         assertTrue(allEntriesArePresentOnDate(entries, dbEntries, A_RANDOM_DAY_IN_JUNE_2020))
@@ -34,7 +34,7 @@ class SeeTimeEntriesBDD {
         val (tru, entries) = recordSomeEntriesInDatabase()
         s.markDone("Given I have recorded some time entries")
 
-        val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        val dbEntries = tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         s.markDone("When I request my time entries")
 
         assertTrue(allEntriesArePresent(entries, dbEntries))
@@ -49,7 +49,7 @@ class SeeTimeEntriesBDD {
         val (tru, _) = generateSomeEntriesPreDatabase()
         s.markDone("Given no time entries were made on a day")
 
-        val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, A_RANDOM_DAY_IN_JUNE_2020)
+        val dbEntries = tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
         s.markDone("When I ask for the time entries of that day")
 
         assertEquals(emptySet<TimeEntry>(), dbEntries)

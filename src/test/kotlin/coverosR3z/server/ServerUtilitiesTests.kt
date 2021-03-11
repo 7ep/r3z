@@ -463,17 +463,4 @@ class ServerUtilitiesTests {
         assertEquals("Exception occurred for these headers: Content-Length: -1;Content-Type: Blah.  Inner exception message: Content-length cannot be negative", exception.message)
     }
 
-    /**
-     * We keep a mapping between users and sessions in the database. It should
-     * be easily possible to pass in the session id and get the user.
-     */
-    @Test
-    fun testShouldExtractUserFromAuthToken() {
-        val authCookie = "abc123"
-        val expectedUser = DEFAULT_USER
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        val user = extractUserFromAuthToken(authCookie, au)
-        assertEquals("we should find a particular user mapped to this session id", expectedUser, user)
-    }
-
 }

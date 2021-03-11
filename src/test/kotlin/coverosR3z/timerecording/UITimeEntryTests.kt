@@ -1,14 +1,15 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.types.Roles
-import coverosR3z.authentication.types.User
-import coverosR3z.bddframework.BDD
+import coverosR3z.authentication.types.Password
+import coverosR3z.authentication.types.Role
+import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.TimeEntry
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
@@ -136,6 +137,9 @@ class UITimeEntryTests {
         private const val port = 4000
         private lateinit var pom: PageObjectModelLocal
         private lateinit var databaseDirectory : String
+        private val regularUsername = "andrea"
+        private val regularEmployeeName = "Andrea"
+
 
         @BeforeClass
         @JvmStatic
@@ -169,18 +173,20 @@ class UITimeEntryTests {
 
 
     private fun loginAndrea() {
-        val aliceUsername = "andrea"
-        val aliceEmployee = "Andrea"
-        pom.rp.register(aliceUsername, DEFAULT_PASSWORD.value, aliceEmployee)
-        pom.lp.login(aliceUsername, DEFAULT_PASSWORD.value)
+        pom.lp.login(regularUsername, DEFAULT_PASSWORD.value)
     }
 
     private fun `setup some default projects and employees`() {
         logout()
         // register and login the Admin
-        pom.rp.register(adminUsername, adminPassword, "Administrator")
-        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
-        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
+        val adminEmployee = pom.businessCode.tru.createEmployee(EmployeeName("Administrator"))
+        val (_, user) = pom.businessCode.au.registerWithEmployee(UserName(adminUsername), Password(adminPassword), adminEmployee)
+        pom.businessCode.au.addRoleToUser(user, Role.ADMIN)
+
+        // create a regular employee / user
+        val regularEmployee = pom.businessCode.tru.createEmployee(EmployeeName(regularEmployeeName))
+        pom.businessCode.au.registerWithEmployee(UserName(regularUsername), DEFAULT_PASSWORD, regularEmployee)
+
         pom.lp.login(adminUsername, adminPassword)
 
         // Create a default project

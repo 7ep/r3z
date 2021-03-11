@@ -18,6 +18,16 @@ fun handleUnauthenticated() : PreparedResponseData {
     return PreparedResponseData(unauthorizedHTML, StatusCode.UNAUTHORIZED, listOf(ContentType.TEXT_HTML.value))
 }
 
+/**
+ * If the user tries doing something they shouldn't be allowed
+ * to do, return this.  For example, if they collect the URL for
+ * creating a new employee and POST to that, as a regular user,
+ * this will be returned.
+ */
+fun handleUnauthorized(): PreparedResponseData {
+    return PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
+}
+
 fun handleInternalServerError(shortMessage : String, fullStackTrace : String, logger: ILogger) : PreparedResponseData {
     logger.logTrace { "handling internal server error: $fullStackTrace" }
     return PreparedResponseData(

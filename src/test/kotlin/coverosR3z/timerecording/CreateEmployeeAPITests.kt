@@ -36,7 +36,7 @@ class CreateEmployeeAPITests {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
         val sd = makeTypicalCEServerData(data)
 
-        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
 
     /**
@@ -62,7 +62,7 @@ class CreateEmployeeAPITests {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(30)))
         val sd = makeTypicalCEServerData(data)
 
-        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
 
     /**
@@ -85,7 +85,7 @@ class CreateEmployeeAPITests {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
         val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
 
-        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
 
     @Category(APITestCategory::class)
@@ -94,7 +94,7 @@ class CreateEmployeeAPITests {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
         val sd = makeServerData(data, tru, au, user = SYSTEM_USER)
 
-        assertEquals(StatusCode.OK, CreateEmployeeAPI.handlePost(sd).statusCode)
+        assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
 
     /**

@@ -2,14 +2,14 @@ package coverosR3z.server
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
-import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
+import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
+import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 import coverosR3z.timerecording.types.employeeIdCannotBeBlank
 import coverosR3z.timerecording.types.minEmployeeIdMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -24,7 +24,7 @@ import org.junit.experimental.categories.Category
  */
 class RegisterAPITests {
 
-    lateinit var au : IAuthenticationUtilities
+    lateinit var au : FakeAuthenticationUtilities
     lateinit var tru : ITimeRecordingUtilities
 
     @Before
@@ -44,7 +44,7 @@ class RegisterAPITests {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
         val response = RegisterAPI.handlePost(sd)
@@ -63,7 +63,7 @@ class RegisterAPITests {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to "",
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
@@ -77,7 +77,7 @@ class RegisterAPITests {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to "",
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
@@ -85,50 +85,22 @@ class RegisterAPITests {
         assertEquals(passwordMustNotBeBlankMsg, ex.message)
     }
 
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldHandleInvalidInputs_blankEmployee() {
-        val data = PostBodyData(mapOf(
-            RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-            RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to ""))
-        val sd = makeDefaultRegisterServerData(data)
-
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
-
-        assertEquals(employeeIdCannotBeBlank, ex.message)
-    }
-
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldHandleInvalidInputs_nonNumericEmployee() {
-        val employee = "abc"
-        val data = PostBodyData(mapOf(
-            RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-            RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to employee))
-        val sd = makeDefaultRegisterServerData(data)
-
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
-
-        assertEquals("Must be able to parse $employee as integer", ex.message)
-    }
-
     /**
-     * If the employee id is below zero
+     * If the invitation provided doesn't get us an employee
      */
     @Category(APITestCategory::class)
     @Test
-    fun testShouldHandleInvalidInputs_NegativeEmployee() {
+    fun testShouldHandleInvalidInputs_EmployeeNotFoundFromInvitation() {
+        au.registerBehavior ={ RegistrationResult(RegistrationResultStatus.NO_INVITATION_FOUND, NO_USER) }
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to "-10"))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to "does not matter, employee won't be found"))
         val sd = makeDefaultRegisterServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+        val result = RegisterAPI.handlePost(sd)
 
-        assertEquals(minEmployeeIdMsg, ex.message)
+        assertEquals(handleUnauthorized(), result)
     }
 
     /**
@@ -139,12 +111,12 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingUsername() {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
 
-        assertEquals("expected keys: [username, password, employee]. received keys: [password, employee]", ex.message)
+        assertEquals("expected keys: [username, password, invitation]. received keys: [password, invitation]", ex.message)
     }
 
     /**
@@ -155,12 +127,12 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_missingPassword() {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-            RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
         val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
 
-        assertEquals("expected keys: [username, password, employee]. received keys: [username, employee]", ex.message)
+        assertEquals("expected keys: [username, password, invitation]. received keys: [username, invitation]", ex.message)
     }
 
     /**
@@ -168,7 +140,7 @@ class RegisterAPITests {
      */
     @Category(APITestCategory::class)
     @Test
-    fun testShouldHandleInvalidInputs_missingEmployee() {
+    fun testShouldHandleInvalidInputs_missingInvitation() {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
             RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value))
@@ -176,7 +148,7 @@ class RegisterAPITests {
 
         val ex = assertThrows(InexactInputsException::class.java){ RegisterAPI.handlePost(sd) }
 
-        assertEquals("expected keys: [username, password, employee]. received keys: [username, password]", ex.message)
+        assertEquals("expected keys: [username, password, invitation]. received keys: [username, password]", ex.message)
     }
 
     /**

@@ -4,24 +4,30 @@ import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.DateTime
-import coverosR3z.timerecording.types.EmployeeId
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class AuthenticationUtilities(
     private val ap: IAuthPersistence,
     val logger: ILogger,
-    val currentUser: CurrentUser = CurrentUser(SYSTEM_USER),
-    private val ac : IRolesChecker = RolesChecker(currentUser)
-) : IAuthenticationUtilities {
+    ) : IAuthenticationUtilities {
 
     /**
      * Register a user through auth persistent, providing a username, password, and employeeId
      */
-    override fun register(username: UserName, password: Password, employeeId: EmployeeId) : RegistrationResult {
-        ac.checkAllowed(Roles.SYSTEM)
+    override fun register(username: UserName, password: Password, invitationCode: InvitationCode) : RegistrationResult {
+        val employee = getEmployeeFromInvitationCode(invitationCode)
+        if (employee == NO_EMPLOYEE) {
+            return RegistrationResult(RegistrationResultStatus.NO_INVITATION_FOUND, NO_USER)
+        }
+        return registerWithEmployee(username, password, employee)
+    }
+
+    override fun registerWithEmployee(username: UserName, password: Password, employee: Employee): RegistrationResult {
         return if (! ap.isUserRegistered(username)) {
             //Registration success -> add the user to the database
             val salt = Hash.getSalt()
-            val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employeeId, Roles.REGULAR)
+            val newUser = ap.createUser(username, Hash.createHash(password, salt), salt, employee, Role.REGULAR)
             logger.logDebug { "User registration successful for \"${username.value}\"" }
             RegistrationResult(RegistrationResultStatus.SUCCESS, newUser)
         } else {
@@ -39,11 +45,10 @@ class AuthenticationUtilities(
      * as well if the [LoginResult] was successful.
      */
     override fun login(username: UserName, password: Password): Pair<LoginResult, User> {
-        ac.checkAllowed(Roles.SYSTEM)
         val user = ap.getUser(username)
 
         if (user == NO_USER) {
-            logger.logDebug { "Login failed: user ${user.name.value} is not registered." }
+            logger.logDebug { "Login failed: user ${username.value} is not registered." }
             return Pair(LoginResult.NOT_REGISTERED, NO_USER)
         }
 
@@ -58,7 +63,6 @@ class AuthenticationUtilities(
     }
 
     override fun getUserForSession(sessionToken: String): User {
-        ac.checkAllowed(Roles.SYSTEM)
         return ap.getUserForSession(sessionToken)
     }
 
@@ -72,7 +76,6 @@ class AuthenticationUtilities(
      * @param rand the generator for a random string (optional, has default)
      */
     override fun createNewSession(user: User, time : DateTime, rand : () -> String): String {
-        ac.checkAllowed(Roles.SYSTEM)
         val sessionId = rand()
         logger.logDebug { "New session ID ($sessionId) generated for user (${user.name.value})" }
         ap.addNewSession(sessionId, user, time)
@@ -80,13 +83,29 @@ class AuthenticationUtilities(
     }
 
     override fun logout(user: User) {
-        ac.checkAllowed(Roles.SYSTEM)
         ap.deleteSession(user)
     }
 
-    override fun addRoleToUser(user: User, role: Roles) : User {
-        ac.checkAllowed(Roles.ADMIN, Roles.SYSTEM)
+    override fun addRoleToUser(user: User, role: Role) : User {
         return ap.addRoleToUser(user, role)
+    }
+
+    override fun createInvitation(employee: Employee,
+                         datetime : DateTime,
+                         randomCode : () -> String) : Invitation {
+        return ap.createInvitation(employee, datetime, InvitationCode(randomCode()))
+    }
+
+    override fun getEmployeeFromInvitationCode(invitationCode: InvitationCode): Employee {
+        return ap.getEmployeeFromInvitationCode(invitationCode)
+    }
+
+    override fun removeInvitation(employee: Employee): Boolean {
+        return ap.removeInvitation(employee)
+    }
+
+    override fun listAllInvitations() : Set<Invitation> {
+        return ap.listAllInvitations()
     }
 
 }

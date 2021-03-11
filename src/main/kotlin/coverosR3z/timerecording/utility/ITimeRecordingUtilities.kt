@@ -8,6 +8,7 @@ interface ITimeRecordingUtilities {
     /**
      * This allows us to create a new [TimeRecordingUtilities]
      * that is identical to the old except with a new [CurrentUser]
+     * Only allowed by the System user
      */
     fun changeUser(cu : CurrentUser) : ITimeRecordingUtilities
 
@@ -30,8 +31,8 @@ interface ITimeRecordingUtilities {
      * system (persists it to the database)
      */
     fun createEmployee(employeename: EmployeeName) : Employee
-    fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry>
-    fun getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry>
+    fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry>
+    fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry>
     fun listAllProjects(): List<Project>
     fun findProjectById(id: ProjectId): Project
     fun findEmployeeById(id: EmployeeId): Employee
@@ -39,6 +40,6 @@ interface ITimeRecordingUtilities {
     fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
     fun unsubmitTimePeriod(timePeriod: TimePeriod)
     fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
-    fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry>
-    fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean
+    fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry>
+    fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean
 }

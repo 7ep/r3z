@@ -214,4 +214,36 @@ class SystemOptionTests {
         assertEquals(SystemOptions(allowInsecure = true), serverOptions)
     }
 
+    /**
+     * if the user sets a host, we'll use that for things like
+     * suggesting our own URL to users for some purposes.
+     *
+     * Like for example, if we recommend a link to use on this
+     * application, and we set the host to renomad.com, then
+     * the suggested URL might be https://renomad.com:12443/whatever
+     */
+    @Test
+    fun testShouldSetHost() {
+        val serverOptions = extractOptions(arrayOf("--host renomad.com"))
+        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+    }
+
+    @Test
+    fun testShouldSetHostShortForm() {
+        val serverOptions = extractOptions(arrayOf("-h renomad.com"))
+        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+    }
+
+    @Test
+    fun testShouldSetHostNoSpace() {
+        val serverOptions = extractOptions(arrayOf("--hostrenomad.com"))
+        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+    }
+
+    @Test
+    fun testShouldSetHostShortFormNoSpace() {
+        val serverOptions = extractOptions(arrayOf("-hrenomad.com"))
+        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+    }
+
 }

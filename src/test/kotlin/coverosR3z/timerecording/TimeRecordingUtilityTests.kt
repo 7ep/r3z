@@ -4,6 +4,7 @@ import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -448,7 +449,7 @@ class TimeRecordingUtilityTests {
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER), testLogger)
         ftep.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
 
-        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
 
         assertTrue(allEntriesForPeriod.any())
     }

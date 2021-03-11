@@ -1,6 +1,6 @@
 package coverosR3z.authentication.types
 
-enum class Roles {
+enum class Role {
     REGULAR,
     APPROVER,
     ADMIN,

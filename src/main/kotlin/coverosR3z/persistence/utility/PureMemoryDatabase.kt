@@ -1,6 +1,13 @@
 package coverosR3z.persistence.utility
 
+import coverosR3z.authentication.types.Invitation
+import coverosR3z.authentication.types.Session
+import coverosR3z.authentication.types.User
 import coverosR3z.persistence.types.*
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.Project
+import coverosR3z.timerecording.types.SubmittedPeriod
+import coverosR3z.timerecording.types.TimeEntry
 
 
 /**
@@ -49,6 +56,25 @@ class PureMemoryDatabase(
 
     override fun hashCode(): Int {
         return data.hashCode()
+    }
+
+    companion object {
+
+        /**
+         * Creates a default empty database with our common data sets, empty
+         */
+        fun createEmptyDatabase(diskPersistence: DatabaseDiskPersistence? = null) : PureMemoryDatabase {
+            val datamap = mapOf(
+                Employee.directoryName to ChangeTrackingSet<Employee>(),
+                TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
+                Project.directoryName to ChangeTrackingSet<Project>(),
+                SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
+                Session.directoryName to ChangeTrackingSet<Session>(),
+                User.directoryName to ChangeTrackingSet<User>(),
+                Invitation.directoryName to ChangeTrackingSet<Invitation>(),
+            )
+            return PureMemoryDatabase(diskPersistence, data = datamap)
+        }
     }
 
 }

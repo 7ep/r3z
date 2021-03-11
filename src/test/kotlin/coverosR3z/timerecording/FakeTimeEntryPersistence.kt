@@ -33,7 +33,6 @@ class FakeTimeEntryPersistence(
         return setCurrentUserBehavior()
     }
 
-
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         return persistNewTimeEntryBehavior()
     }
@@ -83,19 +82,19 @@ class FakeTimeEntryPersistence(
         return overwriteTimeEntryBehavior()
     }
 
-    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+    override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         return setLockedEmployeeDateBehavior()
     }
 
-    override fun persistNewSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod) : SubmittedPeriod{
+    override fun persistNewSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod) : SubmittedPeriod{
         return persistNewSubmittedTimePeriodBehavior()
     }
 
-    override fun getSubmittedTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): SubmittedPeriod {
+    override fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
         return getSubmittedTimePeriodBehavior()
     }
 
-    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
         return getTimeEntriesForTimePeriodBehavior()
     }
 

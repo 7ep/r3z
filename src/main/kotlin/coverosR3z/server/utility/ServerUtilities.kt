@@ -1,17 +1,23 @@
 package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
+import coverosR3z.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.NO_USER
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.toBytes
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.api.handleBadRequest
 import coverosR3z.server.api.handleInternalServerError
 import coverosR3z.server.types.*
 import coverosR3z.server.types.CacheControl.AGGRESSIVE_WEB_CACHE
 import coverosR3z.server.types.CacheControl.DISALLOW_CACHING
 import coverosR3z.server.types.Pragma.PRAGMA_DISALLOW_CACHING
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
@@ -38,14 +44,13 @@ class ServerUtilities {
             executorService: ExecutorService,
             fullSystem: FullSystem,
             halfOpenServerSocket: ServerSocket,
-            businessObjects : BusinessCode,
             serverObjects: ServerObjects) : Thread {
             return Thread {
                 try {
                     while (true) {
                         fullSystem.logger.logTrace { "waiting for socket connection" }
                         val server = SocketWrapper(halfOpenServerSocket.accept(), "server", fullSystem)
-                        executorService.submit(Thread { processConnectedClient(server, businessObjects, serverObjects) })
+                        executorService.submit(Thread { processConnectedClient(server, fullSystem.pmd, serverObjects) })
                     }
                 } catch (ex: SocketException) {
                     if (ex.message == "Interrupted function call: accept failed") {
@@ -141,7 +146,7 @@ class ServerUtilities {
 
         private fun processConnectedClient(
             server: SocketWrapper,
-            businessCode: BusinessCode,
+            pmd: PureMemoryDatabase,
             serverObjects: ServerObjects,
         ) {
             val logger = serverObjects.logger
@@ -149,7 +154,7 @@ class ServerUtilities {
             var shouldKeepAlive : Boolean
             try {
                 do {
-                    val requestData = handleRequest(server, businessCode, serverObjects)
+                    val requestData = handleRequest(server, pmd, serverObjects)
                     shouldKeepAlive = requestData.headers.any { it.toLowerCase().contains("connection: keep-alive") }
                     if (shouldKeepAlive) {
                         logger.logTrace { "This is a keep-alive connection" }
@@ -175,12 +180,13 @@ class ServerUtilities {
             }
         }
 
-        private fun handleRequest(server: ISocketWrapper, businessCode: BusinessCode, serverObjects: ServerObjects) : AnalyzedHttpData {
+        private fun handleRequest(server: ISocketWrapper, pmd: PureMemoryDatabase, serverObjects: ServerObjects) : AnalyzedHttpData {
             var analyzedHttpData = AnalyzedHttpData()
+            val logger = serverObjects.logger
             val responseData: PreparedResponseData = try {
-                analyzedHttpData = parseHttpMessage(server, businessCode.au, serverObjects.logger)
+                analyzedHttpData = parseHttpMessage(server, logger)
 
-                serverObjects.logger.logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
+                logger.logDebug{ "client requested ${analyzedHttpData.verb} /${analyzedHttpData.path}" }
                 if (analyzedHttpData.verb == Verb.CLIENT_CLOSED_CONNECTION) {
                     return analyzedHttpData
                 }
@@ -196,7 +202,7 @@ class ServerUtilities {
                         analyzedHttpData = analyzedHttpData.copy(headers = analyzedHttpData.headers.filterNot {it.toLowerCase().contains("connection: keep-alive")})
                         redirectToSslEndpoint(analyzedHttpData, serverObjects)
                     } else {
-                        obtainStaticAndDynamicContent(serverObjects, analyzedHttpData, businessCode)
+                        obtainStaticAndDynamicContent(serverObjects, analyzedHttpData, pmd)
                     }
                 }
             } catch (ex : SocketTimeoutException) {
@@ -206,10 +212,10 @@ class ServerUtilities {
             }
             catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
-                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), serverObjects.logger)
+                handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), logger)
             }
 
-            returnData(server, responseData, serverObjects.logger)
+            returnData(server, responseData, logger)
             return analyzedHttpData
         }
 
@@ -218,13 +224,11 @@ class ServerUtilities {
             serverObjects: ServerObjects
         ): PreparedResponseData {
             return try {
-                val hostHeader = analyzedHttpData.headers.single { it.toLowerCase().startsWith("host") }
-                val extractedHost = extractHostFromHostHeader(hostHeader)
                 val rawQueryString = analyzedHttpData.rawQueryString
                 val queryString = if (rawQueryString.isNotBlank()) {
                     "?$rawQueryString"
                 } else ""
-                redirectTo("https://" + extractedHost + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
+                redirectTo("https://" + serverObjects.host + ":" + serverObjects.sslPort + "/" + analyzedHttpData.path + queryString)
             } catch (ex: Exception) {
                 handleBadRequest()
             }
@@ -233,7 +237,7 @@ class ServerUtilities {
         private fun obtainStaticAndDynamicContent(
             serverObjects: ServerObjects,
             analyzedHttpData: AnalyzedHttpData,
-            businessCode: BusinessCode
+            pmd: PureMemoryDatabase
         ): PreparedResponseData {
             // if we can just return a static file now, do that...
             val staticResponse: PreparedResponseData? = serverObjects.staticFileCache[analyzedHttpData.path]
@@ -242,13 +246,16 @@ class ServerUtilities {
             } else {
                 // otherwise review the routing
                 // now that we know who the user is (if they authenticated) we can update the current user
-                val truWithUser = businessCode.tru.changeUser(CurrentUser(analyzedHttpData.user))
+                val ap = AuthenticationPersistence(pmd, serverObjects.logger)
+                val user = ap.getUserForSession(analyzedHttpData.sessionToken)
+                val bc = initializeBusinessCode(pmd, serverObjects.logger, CurrentUser(user))
+                val ahdWithUser = analyzedHttpData.copy(user = user)
 
                 val dynamicResponse = RoutingUtilities.routeToEndpoint(
                     ServerData(
-                        businessCode.copy(tru = truWithUser),
+                        bc,
                         serverObjects,
-                        analyzedHttpData,
+                        ahdWithUser,
                         AuthUtilities.isAuthenticated(analyzedHttpData.user),
                         serverObjects.logger,
                     )
@@ -270,11 +277,15 @@ class ServerUtilities {
             }
         }
 
-        private fun extractHostFromHostHeader(hostHeader: String): String {
-            val notMatchingMessage = "The host header we received did not match the expected pattern. It was: $hostHeader"
-            check (hostHeaderRegex.matches(hostHeader)) { notMatchingMessage }
+        private fun extractHostFromHostHeader(hostHeader: String, logger: ILogger): String {
+            return if (!hostHeaderRegex.matches(hostHeader)) {
+                logger.logDebug { "The host header we received did not match the expected pattern. It was: $hostHeader" }
+                ""
+            } else {
+                hostHeaderRegex.matchEntire(hostHeader)?.groupValues?.get(1) ?: ""
+            }
 
-            return hostHeaderRegex.matchEntire(hostHeader)?.groupValues?.get(1) ?: throw IllegalStateException(notMatchingMessage)
+
         }
 
 

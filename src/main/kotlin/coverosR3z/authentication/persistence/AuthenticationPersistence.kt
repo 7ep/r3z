@@ -5,17 +5,19 @@ import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.DateTime
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
-import coverosR3z.timerecording.types.EmployeeId
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class AuthenticationPersistence(pmd : PureMemoryDatabase, private val logger: ILogger) : IAuthPersistence {
 
     private val userDataAccess: DataAccess<User> = pmd.dataAccess(User.directoryName)
     private val sessionDataAccess: DataAccess<Session> = pmd.dataAccess(Session.directoryName)
-    
-    override fun createUser(name: UserName, hash: Hash, salt: Salt, employeeId: EmployeeId, role: Roles) : User {
+    private val invitationDataAccess: DataAccess<Invitation> = pmd.dataAccess(Invitation.directoryName)
+
+    override fun createUser(name: UserName, hash: Hash, salt: Salt, employee: Employee, role: Role) : User {
         return userDataAccess.actOn { users ->
             logger.logTrace { "PMD: adding new user, \"${name.value}\"" }
-            val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employeeId, role)
+            val newUser = User(UserId(users.nextIndex.getAndIncrement()), name, hash, salt, employee, role)
             users.add(newUser)
             newUser
         }
@@ -51,10 +53,33 @@ class AuthenticationPersistence(pmd : PureMemoryDatabase, private val logger: IL
         return userDataAccess.read { users -> users.toSet() }
     }
 
-    override fun addRoleToUser(user: User, role: Roles): User {
+    override fun addRoleToUser(user: User, role: Role): User {
         val changedUser = user.copy(role=role)
         userDataAccess.actOn { users -> users.update(changedUser) }
         return changedUser
+    }
+
+    override fun createInvitation(employee: Employee, datetime: DateTime, invitationCode: InvitationCode) : Invitation {
+        return invitationDataAccess.actOn { invitations ->
+            val newInvitation = Invitation(InvitationId(invitations.nextIndex.getAndIncrement()), invitationCode, employee, datetime)
+            invitations.add(newInvitation)
+            newInvitation
+        }
+    }
+
+    override fun getEmployeeFromInvitationCode(invitationCode: InvitationCode): Employee {
+        return invitationDataAccess.read { invitations ->
+            invitations.singleOrNull { it.code == invitationCode }?.employee ?: NO_EMPLOYEE
+        }
+    }
+
+    override fun removeInvitation(employee: Employee): Boolean {
+        val invitation = invitationDataAccess.read { i -> i.single{ it.employee == employee} }
+        return invitationDataAccess.actOn { i -> i.remove(invitation) }
+    }
+
+    override fun listAllInvitations() : Set<Invitation> {
+        return invitationDataAccess.read { it }
     }
 
 }

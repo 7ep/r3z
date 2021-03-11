@@ -1,22 +1,22 @@
 package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
-import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.timerecording.types.EmployeeId
 
 class RegisterAPI(private val sd: ServerData) {
 
     enum class Elements(private val elemName: String, private val id: String) : Element {
         USERNAME_INPUT("username", "username"),
         PASSWORD_INPUT("password", "password"),
-        EMPLOYEE_INPUT("employee", "employee"),
+        INVITATION_INPUT("invitation", "invitation"),
         REGISTER_BUTTON("", "register_button"),;
 
         override fun getId(): String {
@@ -37,7 +37,7 @@ class RegisterAPI(private val sd: ServerData) {
         override val requiredInputs = setOf(
             Elements.USERNAME_INPUT,
             Elements.PASSWORD_INPUT,
-            Elements.EMPLOYEE_INPUT,
+            Elements.INVITATION_INPUT,
             Elements.USERNAME_INPUT,
         )
         override val path: String
@@ -59,22 +59,30 @@ class RegisterAPI(private val sd: ServerData) {
         val au = sd.bc.au
         val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
         val password = Password.make(data[Elements.PASSWORD_INPUT.getElemName()])
-        val employeeId = EmployeeId.make(data[Elements.EMPLOYEE_INPUT.getElemName()])
-        val result = au.register(username, password, employeeId)
-        return if (result.status == RegistrationResultStatus.SUCCESS) {
-            redirectTo(LoginAPI.path)
-        } else {
-            okHTML(failureHTML)
+        val invitationCode = InvitationCode.make(data[Elements.INVITATION_INPUT.getElemName()])
+        val result = au.register(username, password, invitationCode)
+        return when (result.status) {
+            RegistrationResultStatus.SUCCESS -> {
+                au.removeInvitation(result.user.employee)
+                redirectTo(LoginAPI.path)
+            }
+            RegistrationResultStatus.NO_INVITATION_FOUND -> {
+                handleUnauthorized()
+            }
+            else -> {
+                okHTML(failureHTML)
+            }
         }
     }
 
     private fun registerHTML() : String {
-        val employees = sd.bc.tru.listAllEmployees()
+        val invitationCode = sd.ahd.queryString["code"]
 
         val body = """
         <h2>Register a User</h2>
         
         <form method="post" action="$path">
+        <input type="hidden" name="${Elements.INVITATION_INPUT.getElemName()}" value="${safeAttr(invitationCode)}"
           <table role="presentation"> 
               <tbody>
                 <tr>
@@ -88,16 +96,6 @@ class RegisterAPI(private val sd: ServerData) {
                         <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label><br>
                         <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
                     </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Employee</label><br>
-                        <select id="${Elements.EMPLOYEE_INPUT.getId()}" name="${Elements.EMPLOYEE_INPUT.getElemName()}" required="required">
-                            <option selected disabled hidden value="">Choose here</option>
-                           """+employees.joinToString("") { "<option value =\"${it.id.value}\">${safeHtml(it.name.value)}</option>\n" } +"""
-                           
-                      </td>
-                    </select>
                 </tr>
                 <tr>
                     <td>

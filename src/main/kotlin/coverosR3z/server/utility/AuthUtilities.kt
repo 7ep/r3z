@@ -3,12 +3,13 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.checkHasRequiredInputs
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthenticated
+import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
@@ -27,7 +28,7 @@ class AuthUtilities {
          * redirects to the homepage.
          * @param generator the code to run to generate a string to return for this GET
          */
-        fun doGETRequireAuth(user: User, vararg roles: Roles, generator: () -> String): PreparedResponseData {
+        fun doGETRequireAuth(user: User, vararg roles: Role, generator: () -> String): PreparedResponseData {
             return try {
                 when (isAuthenticated(user)) {
                     AuthStatus.AUTHENTICATED -> {
@@ -48,7 +49,7 @@ class AuthUtilities {
          */
         fun doGETAuthAndUnauth(
             user: User,
-            vararg roles: Roles,
+            vararg roles: Role,
             generatorAuthenticated: () -> String,
             generatorUnauth: () -> String
         ): PreparedResponseData {
@@ -86,7 +87,7 @@ class AuthUtilities {
             user: User,
             requiredInputs: Set<Element>,
             data: PostBodyData,
-            vararg roles: Roles,
+            vararg roles: Role,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
             return try {
@@ -102,15 +103,6 @@ class AuthUtilities {
                 handleUnauthorized()
             }
         }
-
-        /**
-         * If the user tries doing something they shouldn't be allowed
-         * to do, return this.  For example, if they collect the URL for
-         * creating a new employee and POST to that, as a regular user,
-         * this will be returned.
-         */
-        private fun handleUnauthorized() =
-            PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
 
         /**
          * Handle the (rare) situation where a user POSTS data to us

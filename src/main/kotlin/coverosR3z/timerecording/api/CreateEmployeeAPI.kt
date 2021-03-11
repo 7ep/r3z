@@ -1,14 +1,14 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.Roles
-import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.authentication.api.RegisterAPI
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.EmployeeName
 
@@ -43,19 +43,21 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val ce = CreateEmployeeAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { ce.createEmployeeHTML() }
+            return doGETRequireAuth(sd.ahd.user, Role.ADMIN) { ce.createEmployeeHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val ce = CreateEmployeeAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.SYSTEM, Roles.ADMIN) { ce.createEmployee() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.SYSTEM, Role.ADMIN) { ce.createEmployee() }
         }
 
     }
 
     fun createEmployee() : PreparedResponseData {
-        sd.bc.tru.createEmployee(EmployeeName.make(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()]))
-        return okHTML(successHTML)
+        val employeename = EmployeeName.make(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()])
+        val employee = sd.bc.tru.createEmployee(employeename)
+        sd.bc.au.createInvitation(employee)
+        return redirectTo(ViewEmployeesAPI.path)
     }
 
     private fun createEmployeeHTML() : String {

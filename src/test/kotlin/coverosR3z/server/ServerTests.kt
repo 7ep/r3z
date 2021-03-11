@@ -20,6 +20,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.CRLF
 import coverosR3z.server.utility.SocketWrapper
 import coverosR3z.server.utility.parseHttpMessage
+import coverosR3z.server.utility.parseHttpMessageAsClient
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.*
@@ -63,8 +64,6 @@ class ServerTests {
         const val port = 2000
         const val sslTestPort = port + 443
         private lateinit var fs : FullSystem
-        private val au = FakeAuthenticationUtilities()
-        private val tru = FakeTimeRecordingUtilities()
 
         @JvmStatic
         @BeforeClass
@@ -76,11 +75,7 @@ class ServerTests {
                     dbDirectory = "build/db/servertests",
 
                     // not really checking security here, this keeps it simpler
-                    allowInsecure = true),
-                businessCode = BusinessCode(
-                tru,
-                au,
-            ))
+                    allowInsecure = true))
         }
 
         @JvmStatic
@@ -132,7 +127,7 @@ class ServerTests {
     fun testShouldGetFileResponse() {
         client.write("GET /sample.html HTTP/1.1$CRLF$CRLF")
 
-        val result = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.OK, result.statusCode)
         assertEquals(toStr(read("static/sample.html")!!), result.data.rawData)
@@ -148,7 +143,7 @@ class ServerTests {
     fun testShouldGetFileResponse_CSS() {
         client.write("GET /sample.css HTTP/1.1$CRLF$CRLF")
 
-        val result = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.OK, result.statusCode)
         assertEquals(toStr(read("static/sample.css")!!), result.data.rawData)
@@ -164,7 +159,7 @@ class ServerTests {
     fun testShouldGetFileResponse_JS() {
         client.write("GET /sample.js HTTP/1.1$CRLF$CRLF")
 
-        val result = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.OK, result.statusCode)
         assertEquals(toStr(read("static/sample.js")!!), result.data.rawData)
@@ -179,7 +174,7 @@ class ServerTests {
     fun testShouldParseMultipleClientRequestTypes_BadRequest() {
         client.write("FOO /test.utl HTTP/1.1$CRLF$CRLF")
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.BAD_REQUEST, result.statusCode)
     }
@@ -194,7 +189,7 @@ class ServerTests {
     fun testShouldGetHtmlFileResponseFromServer_unfound() {
         client.write("GET /doesnotexist.html HTTP/1.1$CRLF$CRLF")
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.NOT_FOUND, result.statusCode)
     }
@@ -210,7 +205,7 @@ class ServerTests {
     fun testShouldGetHtmlFileResponseFromServer_unfoundUnknownSuffix() {
         client.write("GET /sample_template.utl HTTP/1.1$CRLF$CRLF")
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.NOT_FOUND, result.statusCode)
     }
@@ -225,45 +220,9 @@ class ServerTests {
     fun testShouldGetUnauthorizedResponseAfterPost() {
         client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF$CRLF")
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.UNAUTHORIZED, result.statusCode)
-    }
-
-    /**
-     * When we POST some data, we should receive a success message back
-     */
-    @IntegrationTest(usesPort = true)
-    @Category(IntegrationTestCategory::class)
-    @Test
-    fun testShouldGetSuccessResponseAfterPost() {
-        au.getUserForSessionBehavior = { NO_USER }
-        client.write("POST /${RegisterAPI.path} HTTP/1.1$CRLF")
-        client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "${RegisterAPI.Elements.EMPLOYEE_INPUT.getElemName()}=1&${RegisterAPI.Elements.USERNAME_INPUT.getElemName()}=abcdef&${RegisterAPI.Elements.PASSWORD_INPUT.getElemName()}=password12345"
-        client.write("Content-Length: ${body.length}$CRLF$CRLF")
-        client.write(body)
-        val result: AnalyzedHttpData = parseHttpMessage(client, au, testLogger)
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-    }
-
-    /**
-     * When we POST some data that lacks all the types needed, get a 500 error
-     */
-    @IntegrationTest(usesPort = true)
-    @Category(IntegrationTestCategory::class)
-    @Test
-    fun testShouldGetInternalServerError() {
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${EnterTimeAPI.path} HTTP/1.1$CRLF")
-        client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "project_entry=1&time_entry=2"
-        client.write("Content-Length: ${body.length}$CRLF$CRLF")
-        client.write(body)
-
-        val result: AnalyzedHttpData = parseHttpMessage(client, au, testLogger)
-
-        assertEquals(StatusCode.INTERNAL_SERVER_ERROR, result.statusCode)
     }
 
     /**
@@ -280,7 +239,7 @@ class ServerTests {
         client.write("Content-Length: ${body.length}$CRLF$CRLF")
         client.write(body)
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(StatusCode.INTERNAL_SERVER_ERROR, result.statusCode)
     }
@@ -295,63 +254,9 @@ class ServerTests {
     fun testShouldIndicateClientClosedConnection() {
         client.socket.shutdownOutput()
 
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
+        val result: AnalyzedHttpData = parseHttpMessageAsClient(client, testLogger)
 
         assertEquals(Verb.CLIENT_CLOSED_CONNECTION, result.verb)
-    }
-
-    /**
-     * On some pages, like register and login, you are *supposed* to be
-     * unauthenticated to post to them.
-     */
-    @IntegrationTest(usesPort = true)
-    @Category(IntegrationTestCategory::class)
-    @Test
-    fun testShouldGetRedirectedWhenPostingAuthAndRequireUnAuth() {
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        client.write("POST /${LoginAPI.path} HTTP/1.1$CRLF")
-        client.write("Cookie: sessionId=abc123$CRLF")
-        val body = "${LoginAPI.Elements.USERNAME_INPUT.getElemName()}=alice&${LoginAPI.Elements.PASSWORD_INPUT.getElemName()}=password12345"
-        client.write("Content-Length: ${body.length}$CRLF$CRLF")
-        client.write(body)
-
-        val result: AnalyzedHttpData = parseHttpMessage(client, FakeAuthenticationUtilities(), testLogger)
-
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-    }
-
-    /**
-     * This is to try out a new client factory, so we send requests
-     * with valid content and valid protocol more easily.
-     */
-    @IntegrationTest(usesPort = true)
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun testWithValidClient_LoginPage_PERFORMANCE() {
-        val numberOfRequests = 100
-
-        // so we don't see spam
-        fs.logger.logSettings[LogTypes.DEBUG] = false
-        val headers = listOf("Connection: keep-alive")
-        val body = mapOf(
-                LoginAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-                LoginAPI.Elements.PASSWORD_INPUT.getElemName() to DEFAULT_PASSWORD.value)
-        val myClient = Client.make(Verb.POST, LoginAPI.path, headers, body, au, port)
-
-        val (time, _) = getTime {
-            for (i in 1..numberOfRequests) {
-                myClient.send()
-                val result = myClient.read()
-
-                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-            }
-        }
-        println("Time was $time")
-        File("${granularPerfArchiveDirectory}testWithValidClient_LoginPage_PERFORMANCE")
-            .appendText("${Date.now().stringValue}\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
-
-        // turn logging back on for other tests
-        fs.logger.logSettings[LogTypes.DEBUG] = true
     }
 
     /**
@@ -376,34 +281,6 @@ class ServerTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testHomepage_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberOfThreads: $numberOfThreads\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
-
-        // turn logging back on for other tests
-        fs.logger.logSettings[LogTypes.DEBUG] = true
-    }
-
-    /**
-     * I used this to see just how fast the server ran.  Able to get
-     * 25,000 requests per second on 12/26/2020
-     */
-    @IntegrationTest(usesPort = true)
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun testEnterTime_PERFORMANCE() {
-        val threadCount = 10
-        val requestCount = 100
-
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-
-        // so we don't see spam
-        fs.logger.logSettings[LogTypes.DEBUG] = false
-        au.getUserForSessionBehavior = { DEFAULT_USER }
-        val (time, _) = getTime {
-            val threadList = (1..threadCount).map {  cachedThreadPool.submit(makeClientThreadRepeatedTimeEntries(requestCount, port)) }
-            threadList.forEach { it.get() }
-        }
-        println("Time was $time")
-        File("${granularPerfArchiveDirectory}testEnterTime_PERFORMANCE")
-            .appendText("${Date.now().stringValue}\tthreadCount: $threadCount\trequestCount: $requestCount\ttime:$time\n")
 
         // turn logging back on for other tests
         fs.logger.logSettings[LogTypes.DEBUG] = true
@@ -441,7 +318,7 @@ class ServerTests {
     private fun makeClientThreadRepeatedRequestsHomepage(numRequests : Int, port : Int): Thread {
         return Thread {
             val client =
-                Client.make(Verb.GET, HomepageAPI.path, listOf("Connection: keep-alive"), authUtilities = au, port = port)
+                Client.make(Verb.GET, HomepageAPI.path, listOf("Connection: keep-alive"), port = port)
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
@@ -461,7 +338,6 @@ class ServerTests {
                     Verb.POST,
                     EnterTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
-                    authUtilities = au,
                     port = port)
             for (i in 1..numRequests) {
                 val data = PostBodyData(mapOf(
@@ -483,20 +359,20 @@ class ServerTests {
 
 }
 
-class Client(private val socketWrapper: SocketWrapper, val data : String, val au: IAuthenticationUtilities, val path: String = "", private val headers: String = "") {
+class Client(private val socketWrapper: SocketWrapper, val data : String, val path: String = "", private val headers: String = "") {
 
     fun send() {
         socketWrapper.write(data)
     }
 
     fun read() : AnalyzedHttpData {
-        return parseHttpMessage(socketWrapper, au, testLogger)
+        return parseHttpMessageAsClient(socketWrapper, testLogger)
     }
 
     fun addPostData(body: PostBodyData) : Client {
         val bodyString = body.mapping.map{ it.key + "=" + encode(it.value) }.joinToString("&")
         val data =  "${Verb.POST} /$path HTTP/1.1$CRLF" + "Content-Length: ${bodyString.length}$CRLF" + headers + CRLF + CRLF + bodyString
-        return Client(this.socketWrapper, data = data, au)
+        return Client(this.socketWrapper, data = data)
     }
 
     companion object {
@@ -506,7 +382,6 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
             path : String,
             headers : List<String>? = null,
             body : Map<String,String>? = null,
-            authUtilities: IAuthenticationUtilities = FakeAuthenticationUtilities(),
             port : Int
         ) : Client {
             val clientSocket = Socket("localhost", port)
@@ -519,7 +394,7 @@ class Client(private val socketWrapper: SocketWrapper, val data : String, val au
                 else -> throw IllegalArgumentException("unexpected Verb")
             }
 
-            return Client(SocketWrapper(clientSocket, "client"), data, authUtilities, path, headersString)
+            return Client(SocketWrapper(clientSocket, "client"), data, path, headersString)
         }
 
     }

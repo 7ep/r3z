@@ -13,7 +13,15 @@ const val CURRENT_DATABASE_VERSION = 1
  * Per the OWASP cheat sheet, this should be more than 16
  * https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
  */
-const val LENGTH_OF_BYTES_OF_SESSION_STRING = 40
+const val LENGTH_OF_BYTES_OF_SESSION_STRING = 20
+
+/**
+ * The length of the invitation code we will create for when
+ * we are inviting a new employee to register a user.
+ * See [coverosR3z.authentication.types.Invitation] and
+ * [coverosR3z.authentication.types.InvitationCode]
+ */
+const val LENGTH_OF_BYTES_OF_INVITATION_CODE = 10
 
 /**
  * in the resources, where we store our static files

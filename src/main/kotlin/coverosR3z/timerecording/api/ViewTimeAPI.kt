@@ -1,6 +1,6 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
@@ -59,7 +59,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val vt = ViewTimeAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Roles.REGULAR, Roles.APPROVER, Roles.ADMIN) { vt.existingTimeEntriesHTML() }
+            return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { vt.existingTimeEntriesHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
@@ -68,7 +68,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 sd.ahd.user,
                 requiredInputs,
                 sd.ahd.data,
-                Roles.REGULAR, Roles.APPROVER, Roles.ADMIN
+                Role.REGULAR, Role.APPROVER, Role.ADMIN
             ) { vt.handlePOST() }
         }
 
@@ -103,7 +103,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         } else {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
-        val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employeeId, currentPeriod)
+        val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employee, currentPeriod)
         val editidValue = sd.ahd.queryString["editid"]
         val projects = sd.bc.tru.listAllProjects()
         // either get the id as an integer or get null,
@@ -113,7 +113,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         // Figure out time period date from viewTimeAPITests
         val periodStartDate = currentPeriod.start
         val periodEndDate = currentPeriod.end
-        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employeeId, periodStartDate)
+        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employee, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """
@@ -267,7 +267,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val entryId = TimeEntryId.make(data.mapping[Elements.ID_INPUT.getElemName()])
 
         val project = tru.findProjectById(projectId)
-        val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employeeId){ employeeIdNotNullMsg })
+        val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employee.id){ employeeIdNotNullMsg })
 
         val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
         tru.changeEntry(timeEntry)

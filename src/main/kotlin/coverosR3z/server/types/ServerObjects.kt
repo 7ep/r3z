@@ -5,7 +5,7 @@ import coverosR3z.logging.ILogger
 /**
  * Data needed by a server that isn't business-related
  */
-class ServerObjects(
+data class ServerObjects(
     val staticFileCache: Map<String, PreparedResponseData>,
     val logger: ILogger,
     /**
@@ -19,5 +19,11 @@ class ServerObjects(
      * non-secure http endpoint without redirecting them
      * to the https secure port
      */
-    val allowInsecureUsage: Boolean
+    val allowInsecureUsage: Boolean,
+
+    /**
+     * This is extracted from the Host header we receive from the browser.
+     * Call us whatever you want, as long as you don't call us late for supper.
+     */
+    val host: String = "",
     )

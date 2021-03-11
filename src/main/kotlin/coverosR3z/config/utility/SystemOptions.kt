@@ -41,6 +41,22 @@ data class SystemOptions(
          * redirect insecure requests to the ssl endpoint
          */
         val allowInsecure : Boolean = false,
+
+        /**
+         * The value set here will be used in such cases
+         * as when the application needs to create a URL
+         * that links back, properly.  For example,
+         *
+         * If we set the host to renomad.com, and we set
+         * the port to 443, then when we
+         * provide a link for registering a new user,
+         * it will look a bit like this:
+         *
+         * https://renomad.com/register?code=abc123
+         *
+         * This defaults to "localhost"
+         */
+        val host : String = "localhost",
 ){
 
 
@@ -54,7 +70,6 @@ data class SystemOptions(
                 }
                 return this.copy(port = makePort)
         }
-
 
         private fun setSslPort(port: String): SystemOptions {
                 val makePort = if (port.isNotBlank()) {
@@ -101,8 +116,19 @@ data class SystemOptions(
                 return this.copy(allowInsecure = allowInsecure == "true")
         }
 
+        /**
+         * Sets the domain name / host name for the application
+         */
+        fun setHost(host: String) : SystemOptions {
+                val myHost = if (host.isNotBlank()) host.trim() else defaultHost
+                return this.copy(host = myHost)
+        }
+
+
+
         companion object{
 
+                const val defaultHost = "localhost"
                 const val defaultPort = 12345
                 const val defaultSSLPort = 12443
 
@@ -158,6 +184,7 @@ data class SystemOptions(
                         val loggingOffOption = Option(false, "", isFlag = true)
                         val loggingOnOption = Option(false, "", isFlag = true)
                         val allowInsecureOption = Option(false, "", isFlag = true)
+                        val hostOption = Option(false, "")
 
                         val possibleOptions = listOf(
                                 OptionGroup("-d", directoryOption),
@@ -170,6 +197,8 @@ data class SystemOptions(
                                 OptionGroup("--no-logging", loggingOffOption),
                                 OptionGroup("--full-logging", loggingOnOption),
                                 OptionGroup("--allow-insecure", allowInsecureOption),
+                                OptionGroup("--host", hostOption),
+                                OptionGroup("-h", hostOption),
                         )
 
                         val fullInput = args.joinToString(" ")
@@ -201,6 +230,7 @@ data class SystemOptions(
                                         .setLoggingOff(loggingOffOption.value)
                                         .setLoggingOn(loggingOnOption.value)
                                         .setAllowInsecureOn(allowInsecureOption.value)
+                                        .setHost(hostOption.value)
                         }
                 }
 
@@ -239,20 +269,33 @@ The options available are:
 general help
 ------------
 
--h                     prints this help message
+-?                     prints this help message
 
 Server Ports
 ------------
 
+--port PORT_NUMBER
 -p PORT_NUMBER         set the port number for the server (default 12345)
+
+--sslport PORT_NUMBER
 -s PORT_NUMBER         set the ssl port number for the server (default 12443)
+
 --allow-insecure       typically, insecure requests are redirected to https.
                        with this flag, that doesn't automatically happen.
+                       
+
+Host name
+---------
+
+-h HOSTNAME             
+--host HOSTNAME         sets the hostname to this application
 
 Database
 --------
 
+--dbdirectory DIRECTORY
 -d DIRECTORY           the directory to store data (default /db)
+
 --no-disk-persistence  do not write data to the disk.  Note
                        that this is primarily (exclusively?) for testing
 

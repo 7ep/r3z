@@ -1,7 +1,7 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Role
 
 interface IRolesChecker {
-    fun checkAllowed(vararg roles: Roles)
+    fun checkAllowed(vararg roles: Role)
 }

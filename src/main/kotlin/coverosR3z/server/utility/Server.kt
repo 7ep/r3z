@@ -2,6 +2,7 @@ package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
 import coverosR3z.logging.ILogger.Companion.logImperative
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.ServerObjects
 import java.net.ServerSocket
@@ -15,7 +16,6 @@ import java.util.concurrent.ExecutorService
 class Server(
     val port: Int,
     private val executorService: ExecutorService,
-    private val businessObjects: BusinessCode,
     private val serverObjects: ServerObjects,
     private val fullSystem: FullSystem
 ) {
@@ -28,7 +28,7 @@ class Server(
     }
 
     fun createServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, businessObjects, serverObjects)
+        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, serverObjects)
     }
 
 }

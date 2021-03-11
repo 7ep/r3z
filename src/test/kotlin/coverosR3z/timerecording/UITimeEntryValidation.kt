@@ -1,11 +1,14 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.Password
+import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.User
+import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.MAX_DETAILS_LENGTH
 import coverosR3z.timerecording.types.TimeEntry
 import coverosR3z.uitests.PageObjectModelLocal
@@ -52,12 +55,9 @@ class UITimeEntryValidation {
     @Test
     fun `all inputs should restrict to valid values`() {
         `setup some default projects and employees`()
-        pom.epp.enter("projectb")
-        pom.eep.enter("Bob")
-        logout()
+
         val dateString = pom.calcDateString(DEFAULT_DATE)
 
-        pom.rp.register("bob", DEFAULT_PASSWORD.value, "Bob")
         pom.lp.login("bob", DEFAULT_PASSWORD.value)
 
         noProjectOrTime()
@@ -133,14 +133,30 @@ class UITimeEntryValidation {
 
     private fun `setup some default projects and employees`() {
         logout()
+        val employee = pom.businessCode.tru.createEmployee(DEFAULT_ADMINISTRATOR_NAME)
+
+        val (_, adminUser) = pom.businessCode.au.registerWithEmployee(
+            UserName(adminUsername),
+            Password(adminPassword),
+            employee
+        )
         // register and login the Admin
-        pom.rp.register(adminUsername, adminPassword, "Administrator")
-        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == adminUsername }}
-        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
+        pom.businessCode.au.addRoleToUser(adminUser, Role.ADMIN)
         pom.lp.login(adminUsername, adminPassword)
+
+        // register bob the employee
+        val bobEmployee = pom.businessCode.tru.createEmployee(EmployeeName("Bob"))
+        pom.businessCode.au.registerWithEmployee(
+            UserName("bob"),
+            DEFAULT_PASSWORD,
+            bobEmployee
+        )
 
         // Create a default project
         pom.epp.enter(defaultProject)
+        pom.epp.enter("projectb")
+        pom.eep.enter("Bob")
+        logout()
     }
 
     /**

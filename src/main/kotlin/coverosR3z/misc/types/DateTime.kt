@@ -1,5 +1,6 @@
 package coverosR3z.misc.types
 
+import coverosR3z.misc.utility.checkParseToLong
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -54,6 +55,15 @@ class DateTime(val epochSecond : Long) : Comparable<DateTime>{
         // get the date right now
         fun now(): DateTime {
             return DateTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+        }
+
+        fun make(epochSecond: Long?): DateTime {
+            checkNotNull(epochSecond)
+            return DateTime(epochSecond)
+        }
+
+        fun make(epochSecond: String?): DateTime {
+            return make(checkParseToLong(epochSecond))
         }
     }
 

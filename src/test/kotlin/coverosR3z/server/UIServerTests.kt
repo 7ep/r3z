@@ -32,7 +32,6 @@ class UIServerTests {
         `Go to an unknown page on an insecure port, expecting a not-found error`()
         `Try logging in with invalid credentials, expecting to be forbidden`()
         `Try hitting the insecure login page, expecting to be redirected to the secure one`()
-        `Try posting garbage to the registration endpoint, expecting an error`()
         `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`()
         `general - should be able to see the homepage and the authenticated homepage`()
         `general - I should be able to change the logging settings`()
@@ -47,7 +46,9 @@ class UIServerTests {
     private fun `general - should be able to see the homepage and the authenticated homepage`() {
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
         assertEquals("Homepage", pom.driver.title)
-        pom.rp.register("employeemaker", "password12345", "Administrator")
+        val adminEmployee = pom.businessCode.tru.listAllEmployees().single{it.name.value == "Administrator"}
+        val (_, user) = pom.businessCode.au.registerWithEmployee(UserName("employeemaker"), Password("password12345"), adminEmployee)
+        pom.businessCode.au.addRoleToUser(user, Role.ADMIN)
         pom.lp.login("employeemaker", "password12345")
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
         assertEquals("Authenticated Homepage", pom.driver.title)
@@ -56,7 +57,7 @@ class UIServerTests {
 
     private fun `general - I should be able to change the logging settings`() {
         // Given I am an admin
-        pom.lp.login("administrator", "password12345")
+        pom.lp.login("employeemaker", "password12345")
         pom.llp.go()
         // When I set Warn-level logging to not log
         pom.llp.setLoggingFalse(LogTypes.WARN)
@@ -74,9 +75,6 @@ class UIServerTests {
         // validation won't allow it through - missing password
         disallowBecauseMissingPassword()
 
-        // validation won't allow it through - missing employee
-        disallowBecauseMissingEmployee()
-
         // validation won't allow it through - username too short
         tooShortUsername()
 
@@ -86,12 +84,6 @@ class UIServerTests {
 
         // validation won't allow it through - password too short
         tooShortPassword()
-
-        // Text entry will stop taking characters at the maximum size, so
-        // what gets entered will just be truncated to [maxPasswordSize]
-        // therefore, if we use a password too long, the system will
-        // only record the password that was exactly at max size
-        tooLongPassword()
     }
 
     /*
@@ -166,44 +158,29 @@ class UIServerTests {
         pom.lop.go()
     }
 
-    private fun tooLongPassword() {
-        val maxPassword = "a".repeat(maxPasswordSize)
-        pom.rp.register("cool", maxPassword + "z", "Administrator")
-        pom.lp.login("cool", maxPassword)
-        assertEquals("Authenticated Homepage", pom.driver.title)
-    }
-
     private fun tooShortPassword() {
-        pom.rp.register("alice", "a".repeat(minPasswordSize - 1), "Administrator")
+        pom.rp.register("alice", "a".repeat(minPasswordSize - 1), "code")
         assertEquals("register", pom.driver.title)
     }
 
     private fun tooLongerUsername() {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
-        pom.rp.register(tooLongUsername, "password12345", "Administrator")
+        pom.rp.register(tooLongUsername, "password12345", "code")
         assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == tooLongUsername } })
     }
 
     private fun tooShortUsername() {
-        pom.rp.register("a".repeat(minUserNameSize - 1), "password12345", "Administrator")
-        assertEquals("register", pom.driver.title)
-    }
-
-    private fun disallowBecauseMissingEmployee() {
-        pom.driver.get("${pom.sslDomain}/${RegisterAPI.path}")
-        pom.driver.findElement(By.id("username")).sendKeys("alice")
-        pom.driver.findElement(By.id("password")).sendKeys("password12345")
-        pom.driver.findElement(By.id("register_button")).click()
+        pom.rp.register("a".repeat(minUserNameSize - 1), "password12345", "code")
         assertEquals("register", pom.driver.title)
     }
 
     private fun disallowBecauseMissingPassword() {
-        pom.rp.register("alice", "", "Administrator")
+        pom.rp.register("alice", "", "code")
         assertEquals("register", pom.driver.title)
     }
 
     private fun disallowBecauseMissingUsername() {
-        pom.rp.register("", "password12345", "Administrator")
+        pom.rp.register("", "password12345", "code")
         assertEquals("register", pom.driver.title)
     }
 

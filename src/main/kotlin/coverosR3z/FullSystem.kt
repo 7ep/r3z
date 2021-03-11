@@ -3,10 +3,12 @@ package coverosR3z
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.Logger
+import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.SimpleConcurrentSet
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
@@ -31,7 +33,6 @@ import java.util.concurrent.*
  */
 class FullSystem private constructor(
     val pmd: PureMemoryDatabase,
-    val businessCode: BusinessCode,
     val logger: ILogger,
 ) {
 
@@ -108,8 +109,8 @@ class FullSystem private constructor(
          * can be run without any of the default params
          *
          * @param systemOptions mandatory - sets options for the system
+         * @param logger the [ILogger] to be used throughout the system
          * @param pmd the [PureMemoryDatabase].  You only need to set this for testing.  Otherwise, ignore it
-         * @param businessCode The [BusinessCode] utilities that will be used by the server.  You only need to set this for testing
          */
         fun startSystem(
             // get the user's choices from the command line
@@ -120,10 +121,6 @@ class FullSystem private constructor(
 
             // start the database
             pmd : PureMemoryDatabase = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger),
-
-            // create the utilities that the API's will use by instantiating
-            // them with the database as a parameter
-            businessCode : BusinessCode = initializeBusinessCode(pmd, logger)
         ) : FullSystem {
 
             logger.configureLogging(systemOptions)
@@ -134,35 +131,33 @@ class FullSystem private constructor(
 
             // create a package of data that is needed by the servers,
             // such as the static file cache
-            val serverObjects = ServerObjects(staticFileCache, logger, systemOptions.port, systemOptions.sslPort, systemOptions.allowInsecure)
+            val serverObjects = ServerObjects(
+                staticFileCache,
+                logger,
+                systemOptions.port,
+                systemOptions.sslPort,
+                systemOptions.allowInsecure,
+                systemOptions.host)
 
             // start an executor service which will handle the threads inside the server
             val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
             // instantiate a system object, we'll need this when starting the servers
-            val fullSystem = FullSystem(pmd, businessCode, logger)
+            val fullSystem = FullSystem(pmd, logger)
 
             // start the regular server
             val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-            val server = Server(systemOptions.port, esForThreadsInServer, businessCode, serverObjects, fullSystem)
+            val server = Server(systemOptions.port, esForThreadsInServer, serverObjects, fullSystem)
             val serverFuture = serverExecutor.submit(server.createServerThread())
 
             // start the ssl server
             val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
-            val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, businessCode, serverObjects, fullSystem)
+            val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, serverObjects, fullSystem)
             val sslServerFuture = sslServerExecutor.submit(sslServer.createSecureServerThread())
 
             // Add an Administrator employee and role if the database is empty
             if (pmd.isEmpty()) {
-                val mrAdmin = businessCode.tru.createEmployee(EmployeeName("Administrator"))
-                logImperative("Created an initial employee")
-                val (_, user) = businessCode.au.register(
-                    UserName("administrator"),
-                    Password("password12345"),
-                    mrAdmin.id
-                )
-                businessCode.au.addRoleToUser(user, Roles.ADMIN)
-                logImperative("Create an initial user")
+                addAdminIfEmptyDatabase(pmd, logger)
             }
 
             fullSystem.serverFuture = serverFuture
@@ -173,22 +168,44 @@ class FullSystem private constructor(
             return fullSystem
         }
 
+        /**
+         * Add an Administrator employee and role if the database is empty
+         */
+        private fun addAdminIfEmptyDatabase(pmd: PureMemoryDatabase, logger: ILogger) {
+            val bc = initializeBusinessCode(pmd, logger)
+            val mrAdmin = bc.tru.createEmployee(EmployeeName("Administrator"))
+            logImperative("Created an initial employee")
+            val sufficientlyLargeSize = 15
+            val password = generateRandomString(sufficientlyLargeSize)
+            val username = "administrator"
+            val (_, user) = bc.au.registerWithEmployee(
+                UserName(username),
+                Password(password),
+                mrAdmin
+            )
+            bc.au.addRoleToUser(user, Role.ADMIN)
+            logImperative("Created an initial user, \"$username\", with password: $password")
+            val accountCredentialsFile = "admin_acct.txt"
+            File(accountCredentialsFile).writeText("username: $username\npassword: $password")
+            logImperative("Wrote account credentials to \"$accountCredentialsFile\"")
+        }
+
 
         /**
          * Set up the classes necessary for business-related actions, like
          * recording time, and so on
          */
-        private fun initializeBusinessCode(
-            pmd : PureMemoryDatabase?,
-            logger: ILogger
+        fun initializeBusinessCode(
+            pmd : PureMemoryDatabase,
+            logger: ILogger,
+            cu: CurrentUser = CurrentUser(SYSTEM_USER)
         ): BusinessCode {
-            checkNotNull(pmd)
-            val cu = CurrentUser(SYSTEM_USER)
             val tep = TimeEntryPersistence(pmd, cu, logger)
             val tru = TimeRecordingUtilities(tep, cu, logger)
 
             val ap = AuthenticationPersistence(pmd, logger)
             val au = AuthenticationUtilities(ap, logger)
+
             return BusinessCode(tru, au)
         }
 
@@ -207,15 +224,7 @@ class FullSystem private constructor(
         ): PureMemoryDatabase {
             logImperative("database directory is $dbDirectory")
             return pmd ?: if (dbDirectory == null) {
-                val datamap = mapOf(
-                    Employee.directoryName to ChangeTrackingSet<Employee>(),
-                    TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
-                    Project.directoryName to ChangeTrackingSet<Project>(),
-                    SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
-                    Session.directoryName to ChangeTrackingSet<Session>(),
-                    User.directoryName to ChangeTrackingSet<User>()
-                )
-                PureMemoryDatabase(data = datamap)
+                PureMemoryDatabase.createEmptyDatabase()
             } else {
                 DatabaseDiskPersistence(dbDirectory, logger).startWithDiskPersistence()
             }

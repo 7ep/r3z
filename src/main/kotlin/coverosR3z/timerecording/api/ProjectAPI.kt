@@ -1,8 +1,6 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.Roles
-import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
@@ -41,12 +39,12 @@ class ProjectAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val p = ProjectAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Roles.ADMIN) { p.createProjectHTML() }
+            return doGETRequireAuth(sd.ahd.user, Role.ADMIN) { p.createProjectHTML() }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val p = ProjectAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Roles.ADMIN) { p.handlePOST() }
+            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN) { p.handlePOST() }
         }
 
 

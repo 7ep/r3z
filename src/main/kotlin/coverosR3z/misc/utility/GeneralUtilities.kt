@@ -113,18 +113,24 @@ fun <T>getTime(function: () -> T): Pair<Long, T> {
  * If the text is going inside an attribute (e.g. <div class="TEXT_GOES_HERE"> )
  * Then you need to escape slightly differently. In that case see [safeAttr]
  */
-fun safeHtml(input : String) : String {
-    return input.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
+fun safeHtml(input : String?) : String {
+    return if (input == null) ""
+     else {
+        input.replace("&", "&amp;")
+             .replace("<", "&lt;")
+             .replace(">", "&gt;")
+     }
 }
 
 /**
  * Replace dangerous text that would go inside an HTML attribute.
  * See [safeHtml]
+ * If we get a null string, just return an empty string
  */
-fun safeAttr(input : String) : String {
-    return input.replace("\"", "&quot;")
+fun safeAttr(input : String?) : String {
+    return if (input == null) ""
+    else input
+        .replace("\"", "&quot;")
         .replace("'", "&apos;")
 }
 

@@ -5,11 +5,13 @@ import coverosR3z.timerecording.types.EmployeeId
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.generateRandomString
+import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryDeserialize
+import coverosR3z.timerecording.types.Employee
 import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -31,7 +33,7 @@ const val hashNotNullMsg = "Hash must not be null"
  * This is used to represent no user - just to avoid using null for a user
  * It's a typed null, essentially
  */
-val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Password("NO_USER_PASSWORD"), Salt("THIS REPRESENTS NO USER")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE.id, Roles.NONE)
+val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Password("NO_USER_PASSWORD"), Salt("THIS REPRESENTS NO USER")), Salt("THIS REPRESENTS NO USER"), NO_EMPLOYEE, Role.NONE)
 
 /**
  * This is the user who does things if no one is logged in actively doing it.
@@ -39,7 +41,7 @@ val NO_USER = User(UserId(maxUserCount - 1), UserName("NO_USER"), createHash(Pas
  * that is taking care of them.  Where on the other hand, if someone is recording
  * time, we would want to see that user indicated as the executor.
  */
-val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), EmployeeId(0), role = Roles.SYSTEM)
+val SYSTEM_USER = User(UserId(maxUserCount - 2), UserName("SYSTEM"), createHash(Password("SYSTEM_USER_PASSWORD"), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM")), Salt("THIS REPRESENTS ACTIONS BY THE SYSTEM"), NO_EMPLOYEE, role = Role.SYSTEM)
 
 /**
  * Holds a username before we have a whole object, like [User]
@@ -89,7 +91,7 @@ data class Salt(val value: String) {
 
 open class User(val id: UserId, val name: UserName,
                 val hash: Hash, val salt: Salt,
-                val employeeId: EmployeeId, var role: Roles) :
+                val employee: Employee, var role: Role) :
     IndexableSerializable() {
 
     override fun getIndex(): Int {
@@ -98,9 +100,9 @@ open class User(val id: UserId, val name: UserName,
 
     fun copy(id: UserId=this.id, name: UserName=this.name,
              hash: Hash=this.hash, salt: Salt=this.salt,
-             employeeId: EmployeeId=this.employeeId,
-             role: Roles = this.role): User {
-        return User(id, name, hash, salt, employeeId, role)
+             employee: Employee=this.employee,
+             role: Role = this.role): User {
+        return User(id, name, hash, salt, employee, role)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -113,7 +115,7 @@ open class User(val id: UserId, val name: UserName,
         if (name != other.name) return false
         if (hash != other.hash) return false
         if (salt != other.salt) return false
-        if (employeeId != other.employeeId) return false
+        if (employee != other.employee) return false
         if (role != other.role) return false
 
         return true
@@ -124,7 +126,7 @@ open class User(val id: UserId, val name: UserName,
         result = 31 * result + name.hashCode()
         result = 31 * result + hash.hashCode()
         result = 31 * result + salt.hashCode()
-        result = 31 * result + employeeId.hashCode()
+        result = 31 * result + employee.hashCode()
         result = 31 * result + role.hashCode()
         return result
     }
@@ -135,23 +137,30 @@ open class User(val id: UserId, val name: UserName,
             Keys.NAME to name.value,
             Keys.HASH to hash.value,
             Keys.SALT to salt.value,
-            Keys.EMPLOYEE_ID to "${employeeId.value}",
+            Keys.EMPLOYEE_ID to "${employee.id.value}",
             Keys.ROLE to role.toString()
         )
 
-    class Deserializer : Deserializable<User> {
+    class Deserializer(val employees: Set<Employee>) : Deserializable<User> {
 
         override fun deserialize(str: String) : User {
-            return deserialize(str, Companion) { entries ->
+            return dbentryDeserialize(str, Companion) { entries ->
 
-                val role = Roles.valueOf(checkNotNull(entries[Keys.ROLE]))
+                val role = Role.valueOf(checkNotNull(entries[Keys.ROLE]))
+
+                val empId = checkParseToInt(entries[Keys.EMPLOYEE_ID])
+                val employee = try {
+                    employees.single { it.id == EmployeeId(empId) }
+                } catch (ex: NoSuchElementException) {
+                    throw DatabaseCorruptedException("Unable to find an employee with the id of $empId while deserializing a user.  Employee set size: ${employees.size}")
+                }
 
                 User(
                     UserId.make(entries[Keys.ID]),
                     UserName.make(entries[Keys.NAME]),
                     Hash.make(entries[Keys.HASH]),
                     Salt.make(entries[Keys.SALT]),
-                    EmployeeId.make(entries[Keys.EMPLOYEE_ID]),
+                    employee,
                     role)
             }
         }

@@ -50,11 +50,11 @@ class FakeTimeRecordingUtilities(
         return createEmployeeBehavior()
     }
 
-    override fun getEntriesForEmployeeOnDate(employeeId: EmployeeId, date: Date): Set<TimeEntry> {
+    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
         return getEntriesForEmployeeOnDateBehavior()
     }
 
-    override fun getAllEntriesForEmployee(employeeId: EmployeeId): Set<TimeEntry> {
+    override fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry> {
         return getAllEntriesForEmployeeBehavior()
     }
 
@@ -85,11 +85,11 @@ class FakeTimeRecordingUtilities(
         return getSubmittedTimePeriodBehavior()
     }
 
-    override fun getTimeEntriesForTimePeriod(employeeId: EmployeeId, timePeriod: TimePeriod): Set<TimeEntry> {
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
         return getTimeEntriesForTimePeriodBehavior()
     }
 
-    override fun isInASubmittedPeriod(employeeId: EmployeeId, date: Date): Boolean {
+    override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         return isInASubmittedPeriodBehavior()
     }
 }

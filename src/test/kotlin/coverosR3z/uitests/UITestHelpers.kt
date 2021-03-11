@@ -1,16 +1,19 @@
 package coverosR3z.uitests
 
 import coverosR3z.FullSystem
+import coverosR3z.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
+import coverosR3z.misc.testLogger
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.SubmitTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
+import coverosR3z.timerecording.types.Employee
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
@@ -58,7 +61,8 @@ fun startupTestForUI(
     // start the server
     val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
 
-    return PageObjectModelLocal.make(driver(), port, port + 443, fs.businessCode, fs, checkNotNull(fs.pmd), domain)
+    val bc = initializeBusinessCode(fs.pmd, testLogger)
+    return PageObjectModelLocal.make(driver(), port, port + 443, bc, fs, checkNotNull(fs.pmd), domain)
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {
@@ -73,11 +77,10 @@ class LoginPage(private val driver: WebDriver, private val domain : String) {
 
 class RegisterPage(private val driver: WebDriver, private val domain : String) {
 
-    fun register(username: String, password: String, employee: String) {
-        driver.get("$domain/${RegisterAPI.path}")
+    fun register(username: String, password: String, invitationCode: String) {
+        driver.get("$domain/${RegisterAPI.path}?code=$invitationCode")
         driver.findElement(By.id("username")).sendKeys(username)
         driver.findElement(By.id("password")).sendKeys(password)
-        driver.findElement(By.id("employee")).findElement(By.xpath("//option[. = '$employee']")).click()
         driver.findElement(By.id("register_button")).click()
     }
 }

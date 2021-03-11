@@ -8,12 +8,12 @@ import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.ChangeTrackingSet
-import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -453,7 +453,7 @@ class PureMemoryDatabaseTests {
         }
 
         // expect it to fail while reading time entries and attempting to associate with (now missing) employee
-        assertEquals("Unable to find an employee with the id of 1 while deserializing a time entry.  Employee set size: 0", ex.message)
+        assertEquals("Unable to find an employee with the id of 1 while deserializing a user.  Employee set size: 0", ex.message)
     }
     
     /**
@@ -706,7 +706,7 @@ class PureMemoryDatabaseTests {
 
         assertEquals("""{ id: 1 , name: DefaultUser , hash: 4dc91e9a80320c901f51ccf7166d646c , salt: 12345 , empId: 1 , role: REGULAR }""", result)
 
-        val deserialized = User.Deserializer().deserialize(result)
+        val deserialized = User.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize(result)
 
         assertEquals(DEFAULT_USER, deserialized)
     }
@@ -715,27 +715,27 @@ class PureMemoryDatabaseTests {
     fun testSerialization_UserWithMultilineText() {
         val user = User(
             UserId(1), UserName("myname"), Hash("myhash"), Salt("""mysalt
-            |thisisalsotext""".trimMargin()), EmployeeId(1), Roles.REGULAR
+            |thisisalsotext""".trimMargin()), DEFAULT_EMPLOYEE, Role.REGULAR
         )
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: mysalt%0Athisisalsotext , empId: 1 , role: REGULAR }""".trimMargin(), result)
 
-        val deserialized = User.Deserializer().deserialize(result)
+        val deserialized = User.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize(result)
 
         assertEquals(user, deserialized)
     }
 
     @Test
     fun testSerialization_UserWithUnicodeText() {
-        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË"), EmployeeId(1), Roles.REGULAR)
+        val user = User(UserId(1), UserName("myname"), Hash("myhash"), Salt("L¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿LÀÁÂÃÄÅÆÇÈÉÊË"), DEFAULT_EMPLOYEE, Role.REGULAR)
 
         val result = user.serialize()
 
         assertEquals("""{ id: 1 , name: myname , hash: myhash , salt: L%C2%A1%C2%A2%C2%A3%C2%A4%C2%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BFL%C3%80%C3%81%C3%82%C3%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B , empId: 1 , role: REGULAR }""", result)
 
-        val deserialized = User.Deserializer().deserialize(result)
+        val deserialized = User.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize(result)
 
         assertEquals(user, deserialized)
     }
@@ -930,7 +930,7 @@ class PureMemoryDatabaseTests {
             NO_PROJECT
         }
         if (! skipCreatingUser) {
-            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee.id, DEFAULT_USER.role)
+            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee, DEFAULT_USER.role)
             if (! skipCreatingSession) {
                 ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
             }
@@ -939,7 +939,7 @@ class PureMemoryDatabaseTests {
             tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
         }
         if(! skipCreatingSubmissions) {
-            tep.persistNewSubmittedTimePeriod(newEmployee.id, TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
+            tep.persistNewSubmittedTimePeriod(newEmployee, TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
         }
         pmd.stop()
 

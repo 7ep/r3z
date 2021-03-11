@@ -3,7 +3,7 @@ package coverosR3z.timerecording.types
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
-import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.deserialize
+import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryDeserialize
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
@@ -26,7 +26,7 @@ data class SubmissionId(val value: Int) {
 /**
  * A submitted TimePeriod in the database
  */
-data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val bounds: TimePeriod): IndexableSerializable() {
+data class SubmittedPeriod(val id: SubmissionId, val employee: Employee, val bounds: TimePeriod): IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
@@ -35,7 +35,7 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
     override val dataMappings: Map<SerializationKeys, String>
         get() = mapOf(
             Keys.ID to "${id.value}",
-            Keys.EMPLOYEE_ID to employeeId.value.toString(),
+            Keys.EMPLOYEE_ID to employee.id.value.toString(),
             Keys.START_BOUND to bounds.start.stringValue,
             Keys.END_BOUND to bounds.end.stringValue
         )
@@ -43,12 +43,12 @@ data class SubmittedPeriod(val id: SubmissionId, val employeeId: EmployeeId, val
     class Deserializer(val employees: Set<Employee>) : Deserializable<SubmittedPeriod> {
 
         override fun deserialize(str: String): SubmittedPeriod {
-            return deserialize(str, Companion) { entries ->
+            return dbentryDeserialize(str, Companion) { entries ->
                 try {
                     val id = SubmissionId.make(entries[Keys.ID])
-                    val employeeId = EmployeeId.make(entries[Keys.EMPLOYEE_ID])
+                    val employee = employees.single{ it.id == EmployeeId.make(entries[Keys.EMPLOYEE_ID]) }
                     val bounds = TimePeriod(Date.make(entries[Keys.START_BOUND]), Date.make(entries[Keys.END_BOUND]))
-                    SubmittedPeriod(id, employeeId, bounds)
+                    SubmittedPeriod(id, employee, bounds)
                 } catch (ex : DatabaseCorruptedException) {
                     throw ex
                 } catch (ex : Throwable) {

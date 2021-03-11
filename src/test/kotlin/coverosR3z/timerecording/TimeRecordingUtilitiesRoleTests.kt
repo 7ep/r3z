@@ -47,19 +47,19 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -108,19 +108,19 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -157,7 +157,7 @@ class TimeRecordingUtilitiesRoleTests {
         assertTrue(frc.roleCanDoAction)
 
         tru.createProject(DEFAULT_PROJECT_NAME)
-        assertFalse(frc.roleCanDoAction)
+        assertTrue(frc.roleCanDoAction)
 
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertFalse(frc.roleCanDoAction)
@@ -168,23 +168,23 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.listAllEmployees()
-        assertFalse(frc.roleCanDoAction)
+        assertTrue(frc.roleCanDoAction)
 
         tru.listAllProjects()
         assertFalse(frc.roleCanDoAction)
@@ -228,19 +228,19 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -288,19 +288,19 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE.id)
+        tru.getAllEntriesForEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE.id, DEFAULT_TIME_PERIOD)
+        tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE.id, DEFAULT_DATE)
+        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.listAllEmployees()

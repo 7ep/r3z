@@ -1,6 +1,5 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
@@ -12,6 +11,7 @@ import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.getTime
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.ServerPerformanceTests
 import coverosR3z.server.types.*
@@ -253,7 +253,7 @@ class EnterTimeAPITests {
             testLogger,
         )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val user = au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id).user
+        val user = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD,employee).user
         val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
         val project : Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val projectId = project.id.value.toString()

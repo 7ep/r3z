@@ -1,6 +1,7 @@
 package coverosR3z.server
 
 import coverosR3z.FullSystem
+import coverosR3z.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
@@ -10,6 +11,8 @@ import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
+import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
@@ -37,17 +40,10 @@ import java.util.concurrent.atomic.AtomicInteger
 class ServerPerformanceTests {
 
     private lateinit var fs : FullSystem
+    private lateinit var bc : BusinessCode
 
     private fun startServer(port : Int) {
-        val datamap = mapOf(
-            Employee.directoryName to ChangeTrackingSet<Employee>(),
-            TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
-            Project.directoryName to ChangeTrackingSet<Project>(),
-            SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
-            Session.directoryName to ChangeTrackingSet<Session>(),
-            User.directoryName to ChangeTrackingSet<User>()
-        )
-        val pmd = PureMemoryDatabase(data = datamap)
+        val pmd = createEmptyDatabase()
         fs = FullSystem.startSystem(
             SystemOptions(
                 port = port,
@@ -56,6 +52,7 @@ class ServerPerformanceTests {
                 // not really checking security here, this keeps it simpler
                 allowInsecure = true),
             pmd = pmd)
+        bc = initializeBusinessCode(fs.pmd, testLogger, )
     }
 
     @After
@@ -128,11 +125,10 @@ class ServerPerformanceTests {
     private fun setupForTest(): Triple<Project, String, ExecutorService> {
         val port = port.getAndIncrement()
         startServer(port)
-        val tru = fs.businessCode.tru.changeUser(CurrentUser(DEFAULT_ADMIN_USER))
-        val newProject = tru.createProject(DEFAULT_PROJECT_NAME)
-        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name, DEFAULT_PASSWORD, employee.id)
-        val sessionId = fs.businessCode.au.createNewSession(user)
+        val newProject = bc.tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = bc.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = bc.au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
+        val sessionId = bc.au.createNewSession(user)
 
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         return Triple(newProject, sessionId, es)
@@ -155,9 +151,9 @@ class ServerPerformanceTests {
         val port = port.getAndIncrement()
         startServer(port)
 
-        val employee = fs.businessCode.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-        val (_, user) = fs.businessCode.au.register(DEFAULT_USER.name,DEFAULT_PASSWORD, employee.id)
-        val sessionId = fs.businessCode.au.createNewSession(user)
+        val employee = bc.tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val (_, user) = bc.au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
+        val sessionId = bc.au.createNewSession(user)
 
         val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
@@ -223,7 +219,6 @@ class ServerPerformanceTests {
                     Verb.GET,
                     ViewTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
-                    authUtilities = fs.businessCode.au,
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -243,7 +238,6 @@ class ServerPerformanceTests {
                     Verb.GET,
                     ViewTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
-                    authUtilities = fs.businessCode.au,
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -264,7 +258,6 @@ class ServerPerformanceTests {
                     Verb.GET,
                     "sample.js",
                     listOf("Connection: keep-alive"),
-                    authUtilities = fs.businessCode.au,
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -286,7 +279,6 @@ class ServerPerformanceTests {
                     Verb.POST,
                     EnterTimeAPI.path,
                     listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
-                    authUtilities = fs.businessCode.au,
                     port = fs.server.port
                 )
             for (i in 1..numRequests) {
@@ -303,29 +295,6 @@ class ServerPerformanceTests {
             }
         }
     }
-
-
-
-    /**
-     * Simply GETs the general.css file
-     */
-    private fun makeClientForTechempower(numRequests : Int): Thread {
-        return Thread {
-            val client =
-                Client.make(
-                    Verb.GET,
-                    "updates?queries=20",
-                    listOf("Connection: keep-alive"),
-                    authUtilities = fs.businessCode.au,
-                    port = fs.server.port)
-            for (i in 1..numRequests) {
-                client.send()
-                val result = client.read()
-                Assert.assertEquals(StatusCode.OK, result.statusCode)
-            }
-        }
-    }
-
 
     companion object {
         val port = AtomicInteger(3000)

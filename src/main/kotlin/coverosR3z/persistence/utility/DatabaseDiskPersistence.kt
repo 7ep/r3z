@@ -1,5 +1,6 @@
 package coverosR3z.persistence.utility
 
+import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
 import coverosR3z.config.CURRENT_DATABASE_VERSION
@@ -107,15 +108,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
             logImperative("Building new database at $dbDirectory")
             // if nothing is there, we build a new database
             // and add a clean set of directories
-            val datamap = mapOf(
-                Employee.directoryName to ChangeTrackingSet<Employee>(),
-                TimeEntry.directoryName to ChangeTrackingSet<TimeEntry>(),
-                Project.directoryName to ChangeTrackingSet<Project>(),
-                SubmittedPeriod.directoryName to ChangeTrackingSet<SubmittedPeriod>(),
-                Session.directoryName to ChangeTrackingSet<Session>(),
-                User.directoryName to ChangeTrackingSet<User>()
-            )
-            val pmd = PureMemoryDatabase(diskPersistence = this, data = datamap)
+            val pmd = PureMemoryDatabase.createEmptyDatabase(diskPersistence = this)
             logImperative("Created new PureMemoryDatabase")
 
             File(checkNotNull(dbDirectoryWithVersion)).mkdirs()
@@ -143,15 +136,15 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         }
 
         val projects = readAndDeserialize(Project.directoryName) { Project.Deserializer().deserialize(it) }
-        val users = readAndDeserialize(User.directoryName) { User.Deserializer().deserialize(it) }
-        val sessions = readAndDeserialize(Session.directoryName) { Session.Deserializer(users).deserialize(it) }
         val employees = readAndDeserialize(Employee.directoryName) { Employee.Deserializer().deserialize(it) }
+        val users = readAndDeserialize(User.directoryName) { User.Deserializer(employees).deserialize(it) }
+        val sessions = readAndDeserialize(Session.directoryName) { Session.Deserializer(users).deserialize(it) }
         val timeEntries = readAndDeserialize(TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
         val submittedPeriods = readAndDeserialize(SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
+        val invitations = readAndDeserialize(Invitation.directoryName) { Invitation.Deserializer(employees).deserialize(it) }
 
         return PureMemoryDatabase(
             this,
-            // this is coming out soon - just an experiment - "worlds"
             data = mapOf(
                 SubmittedPeriod.directoryName to submittedPeriods,
                 TimeEntry.directoryName to timeEntries,
@@ -159,7 +152,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
                 Session.directoryName to sessions,
                 Project.directoryName to projects,
                 User.directoryName to users,
-
+                Invitation.directoryName to invitations,
             ),
         )
     }
@@ -217,7 +210,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
          * Used by the classes needing serialization to avoid a bit of boilerplate
          * @param T the type of thing we want to return, like a project, employee, favorite color, whatevs
          */
-        fun <T: Any> deserialize(
+        fun <T: Any> dbentryDeserialize(
             str: String,
             instance: SerializableCompanion<*>,
             convert: (Map<SerializationKeys, String>) -> T

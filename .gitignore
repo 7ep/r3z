@@ -27,3 +27,7 @@ src/main/resources/static/commit.html
 
 # This indicates the system is running, no need to commit it
 SYSTEM_RUNNING
+
+# this is a file that gets written when the system first starts
+# which has the admin user credentials for a new system
+admin_acct.txt

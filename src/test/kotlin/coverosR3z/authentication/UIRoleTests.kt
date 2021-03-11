@@ -1,7 +1,9 @@
 package coverosR3z.authentication
 
-import coverosR3z.authentication.types.Roles
+import coverosR3z.authentication.types.RegistrationResult
+import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.User
+import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.uitests.PageObjectModelLocal
@@ -77,7 +79,8 @@ class UIRoleTests {
         for (i in 1..7) {
             try {
                 links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
-            } catch (e: NoSuchElementException) {}
+            } catch (e: NoSuchElementException) {
+            }
         }
 
         // things that should be present
@@ -104,7 +107,8 @@ class UIRoleTests {
         for (i in 1..7) {
             try {
                 links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
-            } catch (e: NoSuchElementException) {}
+            } catch (e: NoSuchElementException) {
+            }
         }
 
         // things that should be present
@@ -131,7 +135,7 @@ class UIRoleTests {
     companion object {
         private const val port = 4003
         private lateinit var pom: PageObjectModelLocal
-        private lateinit var databaseDirectory : String
+        private lateinit var databaseDirectory: String
 
         @BeforeClass
         @JvmStatic
@@ -167,37 +171,28 @@ class UIRoleTests {
         pom.lp.login(adminUserName, DEFAULT_PASSWORD.value)
     }
 
-    private fun createApproverUser() {
-        pom.rp.register(approverUserName, DEFAULT_PASSWORD.value, DEFAULT_EMPLOYEE_NAME.value)
-        val user = pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.single{ it.name.value == approverUserName} }
-        pom.businessCode.au.addRoleToUser(user, Roles.APPROVER)
-    }
-
     private fun `setup some projects users and employees`() {
-        createAdminUser()
+        val employee = pom.businessCode.tru.createEmployee(DEFAULT_ADMINISTRATOR_NAME)
+
+        val (_, adminUser) = pom.businessCode.au.registerWithEmployee(
+            UserName(adminUserName),
+            DEFAULT_PASSWORD,
+            employee
+        )
+        pom.businessCode.au.addRoleToUser(adminUser, Role.ADMIN)
         pom.lp.login(adminUserName, DEFAULT_PASSWORD.value)
 
         // Create a default project
         pom.epp.enter(DEFAULT_PROJECT.name.value)
 
-        // To make things more explicit, create a default employee that doesn't sound like "administrator", so
-        // we don't get confused.
-        pom.eep.enter(DEFAULT_EMPLOYEE_NAME.value)
-
         logout()
 
         // register our regular user
         // nothing special to do here, everyone starts as a regular user
-        pom.rp.register(regularUserName, DEFAULT_PASSWORD.value, DEFAULT_EMPLOYEE_NAME.value)
+        pom.businessCode.au.registerWithEmployee(UserName(regularUserName), DEFAULT_PASSWORD, employee)
 
-        // register our approver user
-        createApproverUser()
+        val (_, approverUser) = pom.businessCode.au.registerWithEmployee(UserName(approverUserName), DEFAULT_PASSWORD, employee)
+        pom.businessCode.au.addRoleToUser(approverUser, Role.APPROVER)
     }
 
-    private fun createAdminUser() {
-        pom.rp.register(adminUserName, DEFAULT_PASSWORD.value, DEFAULT_ADMINISTRATOR_NAME.value)
-        val user = pom.pmd.dataAccess<User>(User.directoryName)
-            .read { users -> users.single { it.name.value == adminUserName } }
-        pom.businessCode.au.addRoleToUser(user, Roles.ADMIN)
-    }
 }

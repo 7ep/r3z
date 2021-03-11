@@ -9,7 +9,7 @@ interface Deserializable<T> {
     /**
      * Takes a string form of a type and
      * converts it to its type.
-     * See [coverosR3z.persistence.utility.DatabaseDiskPersistence.deserialize]
+     * See [coverosR3z.persistence.utility.DatabaseDiskPersistence.dbentryDeserialize]
      */
     fun deserialize(str: String) : T
 
