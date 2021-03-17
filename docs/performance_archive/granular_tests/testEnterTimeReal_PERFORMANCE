@@ -301,3 +301,5 @@
 2021-03-15	numberThreads: 5	numberRequests: 200	time: 380
 2021-03-15	numberThreads: 5	numberRequests: 200	time: 343
 2021-03-15	numberThreads: 5	numberRequests: 200	time: 266
+2021-03-17	numberThreads: 5	numberRequests: 200	time: 472
+2021-03-17	numberThreads: 5	numberRequests: 200	time: 356

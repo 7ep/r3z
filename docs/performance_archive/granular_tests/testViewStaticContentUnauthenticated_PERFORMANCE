@@ -289,3 +289,5 @@
 2021-03-15	numberThreads: 10	numberRequests: 500	time: 303
 2021-03-15	numberThreads: 10	numberRequests: 500	time: 268
 2021-03-15	numberThreads: 10	numberRequests: 500	time: 370
+2021-03-17	numberThreads: 10	numberRequests: 500	time: 330
+2021-03-17	numberThreads: 10	numberRequests: 500	time: 362

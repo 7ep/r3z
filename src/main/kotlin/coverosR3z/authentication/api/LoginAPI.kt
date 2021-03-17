@@ -41,7 +41,7 @@ class LoginAPI(val sd: ServerData) {
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)
             return doGETRequireUnauthenticated(sd.ahd.user)
-            { PageComponents(sd).makeTemplate("login page", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="loginpage.css" />""")}
+            { PageComponents(sd).makeTemplate("login page", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")}
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
@@ -104,23 +104,22 @@ class LoginAPI(val sd: ServerData) {
     }
 
     private val loginHTML = """
-<h2>Login</h2>
-
 <form method="post" action="$path">
-  <table role="presentation"> 
+  <table> 
     <tbody>
         <tr>
             <td>
                 <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
-                <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required>
+                <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required />
             </td>
         </tr>
         <tr>
             <td>
                 <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
-                <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required>
+                <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required />
             </td>
-        </tr>    
+        </tr>   
+        <tr>
             <td>
                 <button id="${Elements.LOGIN_BUTTON.getId()}" class="submit">Login</button>
             </td>

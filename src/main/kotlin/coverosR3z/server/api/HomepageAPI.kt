@@ -18,7 +18,7 @@ class HomepageAPI(private val sd: ServerData)  {
             return doGETAuthAndUnauth(sd.ahd.user,
                 Role.REGULAR, Role.APPROVER, Role.ADMIN,
                 generatorAuthenticated = { hp.authHomePageHTML() },
-                generatorUnauth = { PageComponents(sd).makeTemplate("Homepage", "HomepageAPI", hp.homepageHTML, extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
+                generatorUnauth = { PageComponents(sd).makeTemplate("Homepage", "HomepageAPI", "", extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
         }
 
         override val path: String
@@ -46,6 +46,7 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem("logging", "Log configuration"),
                     HomepageItem("logout", "Logout")
                 )
+            Role.APPROVER,
             Role.REGULAR ->
                 listOf(
                     HomepageItem("entertime", "Enter time"),
@@ -53,13 +54,7 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem("logout", "Logout")
                 )
 
-            Role.APPROVER ->
-                listOf(
-                    HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entries"),
-                    HomepageItem("logout", "Logout")
-                )
-            Role.SYSTEM -> emptyList()
+            Role.SYSTEM,
             Role.NONE -> emptyList()
 
         }
@@ -78,14 +73,5 @@ class HomepageAPI(private val sd: ServerData)  {
         """
         return item
     }
-
-    private val homepageHTML = """
-<nav>
-    <ul>
-        <li><a href="login">Login</a></li>
-        <li><a href="register">Register</a></li>
-    </ul>
-</nav>
-"""
 
 }

@@ -79,22 +79,20 @@ class RegisterAPI(private val sd: ServerData) {
         val invitationCode = sd.ahd.queryString["code"]
 
         val body = """
-        <h2>Register a User</h2>
-        
         <form method="post" action="$path">
-        <input type="hidden" name="${Elements.INVITATION_INPUT.getElemName()}" value="${safeAttr(invitationCode)}"
-          <table role="presentation"> 
+        <input type="hidden" name="${Elements.INVITATION_INPUT.getElemName()}" value="${safeAttr(invitationCode)}" />
+          <table> 
               <tbody>
                 <tr>
                     <td>
-                        <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label><br>
-                        <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required">
+                        <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
+                        <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label><br>
-                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required">
+                        <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
+                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required" />
                     </td>
                 </tr>
                 <tr>
@@ -106,7 +104,7 @@ class RegisterAPI(private val sd: ServerData) {
           </table>
         </form>
     """
-        return PageComponents(sd).makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="register.css" />""")
+        return PageComponents(sd).makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")
     }
 
 }

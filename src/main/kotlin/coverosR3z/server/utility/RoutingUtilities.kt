@@ -31,7 +31,6 @@ class RoutingUtilities {
                 Pair(Verb.GET, EnterTimeAPI.path) -> EnterTimeAPI.handleGet(sd)
                 Pair(Verb.GET, ViewTimeAPI.path) -> ViewTimeAPI.handleGet(sd)
                 Pair(Verb.GET, CreateEmployeeAPI.path) -> CreateEmployeeAPI.handleGet(sd)
-                Pair(Verb.GET, ViewEmployeesAPI.path) -> ViewEmployeesAPI.handleGet(sd)
                 Pair(Verb.GET, LoginAPI.path) -> LoginAPI.handleGet(sd)
                 Pair(Verb.GET, RegisterAPI.path) -> RegisterAPI.handleGet(sd)
                 Pair(Verb.GET, ProjectAPI.path) -> ProjectAPI.handleGet(sd)

@@ -76,3 +76,27 @@ table {
     margin-left: auto;
     margin-right: auto;
 }
+
+
+.container {
+  border: 2px solid #e2e2e2;
+  margin: auto;
+  border-radius: .5em;
+  background-color: white;
+  opacity: 82%;
+  width: 350px;
+  padding: 10px;
+}
+
+table.employees tbody tr:nth-child(odd) {
+  background: #d9ced0;
+}
+
+table.employees tbody tr:nth-child(even) {
+  background: #fff;
+}
+
+table.employees {
+  color: black;
+  border-spacing: 1px solid black;
+}
