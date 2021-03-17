@@ -2,15 +2,10 @@ package coverosR3z.server
 
 import coverosR3z.FullSystem
 import coverosR3z.FullSystem.Companion.initializeBusinessCode
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.Session
-import coverosR3z.authentication.types.User
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.misc.*
-import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.types.Date
-import coverosR3z.persistence.types.ChangeTrackingSet
-import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.misc.utility.getTime
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.types.BusinessCode
 import coverosR3z.server.types.PostBodyData
@@ -18,14 +13,15 @@ import coverosR3z.server.types.StatusCode
 import coverosR3z.server.types.Verb
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
-import coverosR3z.timerecording.types.SubmittedPeriod
-import coverosR3z.timerecording.types.TimeEntry
-import org.junit.*
+import org.junit.After
+import org.junit.Assert
+import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
-import java.util.concurrent.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 /**

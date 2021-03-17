@@ -1,8 +1,6 @@
 package coverosR3z.authentication
 
-import coverosR3z.authentication.types.RegistrationResult
 import coverosR3z.authentication.types.Role
-import coverosR3z.authentication.types.User
 import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
@@ -10,8 +8,11 @@ import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
@@ -44,23 +45,12 @@ class UIRoleTests {
     private fun verifyAdminCanSeeWhatTheyShould() {
         loginAdmin()
 
-        val appUrl = pom.sslDomain
-
-        val createEmployeeLink = pom.driver.findElement(By.cssSelector("li:nth-child(1) > a")).getAttribute("href")
-        val showAllEmployeesLink = pom.driver.findElement(By.cssSelector("li:nth-child(2) > a")).getAttribute("href")
-        val createProjectLink = pom.driver.findElement(By.cssSelector("li:nth-child(3) > a")).getAttribute("href")
-        val enterTimeLink = pom.driver.findElement(By.cssSelector("li:nth-child(4) > a")).getAttribute("href")
-        val showAllEntriesLink = pom.driver.findElement(By.cssSelector("li:nth-child(5) > a")).getAttribute("href")
-        val logConfigLink = pom.driver.findElement(By.cssSelector("li:nth-child(6) > a")).getAttribute("href")
-        val logoutLink = pom.driver.findElement(By.cssSelector("li:nth-child(7) > a")).getAttribute("href")
-
-        assertEquals("$appUrl/createemployee", createEmployeeLink)
-        assertEquals("$appUrl/employees", showAllEmployeesLink)
-        assertEquals("$appUrl/createproject", createProjectLink)
-        assertEquals("$appUrl/entertime", enterTimeLink)
-        assertEquals("$appUrl/timeentries", showAllEntriesLink)
-        assertEquals("$appUrl/logging", logConfigLink)
-        assertEquals("$appUrl/logout", logoutLink)
+        pom.driver.findElement(By.linkText("Create employee"))
+        pom.driver.findElement(By.linkText("Create project"))
+        pom.driver.findElement(By.linkText("Enter time"))
+        pom.driver.findElement(By.linkText("Show all time entries"))
+        pom.driver.findElement(By.linkText("Log configuration"))
+        pom.driver.findElement(By.linkText("Logout"))
     }
 
     private fun verifyApproverCanSeeWhatTheyShould() {
@@ -89,10 +79,9 @@ class UIRoleTests {
         assertTrue("$appUrl/logout" in links)
 
         // things that should not be present
-        assertTrue("$appUrl/employees" !in links)
-        assertTrue("$appUrl/logging" !in links)
-        assertTrue("$appUrl/createemployee" !in links)
-        assertTrue("$appUrl/createproject" !in links)
+        assertFalse("$appUrl/logging" in links)
+        assertFalse("$appUrl/createemployee" in links)
+        assertFalse("$appUrl/createproject" in links)
     }
 
     private fun verifyRegularUserCanSeeWhatTheyShould() {

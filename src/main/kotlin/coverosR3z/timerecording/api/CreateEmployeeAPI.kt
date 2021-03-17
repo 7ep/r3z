@@ -9,9 +9,7 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.server.utility.successHTML
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
 
@@ -63,7 +61,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         return redirectTo(path)
     }
 
-    private fun existingEmployeesHTML() : String {
+    private fun existingEmployeesHTML(): String {
         // a map of employees to invitations
         val empsToInvs = mutableMapOf<Employee, Invitation?>()
         for (employee in sd.bc.tru.listAllEmployees()) {
@@ -71,7 +69,9 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             if (invitations.none()) {
                 empsToInvs[employee] = null
             } else {
-                for(invitation in invitations) {empsToInvs[employee] = invitation}
+                for (invitation in invitations) {
+                    empsToInvs[employee] = invitation
+                }
             }
         }
 
@@ -89,9 +89,9 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 """
             }
 
-        val body = """
+        return """
                 <div class="container">
-                <table class="employees">
+                <table>
                     <thead>
                         <tr>
                             <th>Identifier</th>
@@ -105,19 +105,11 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                 </table>
                 </div>
         """
-        return body
     }
 
     private fun createEmployeeHTML() : String {
-        val username = safeHtml(sd.ahd.user.name.value)
-
         val body = """
         <form action="$path" method="post">
-        
-            <p>
-                Hello there, <span id="username">$username</span>!
-            </p>
-        
             <p>
                 <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
                 <input name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text" />

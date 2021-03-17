@@ -2,7 +2,6 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
 import coverosR3z.misc.types.Date
-import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
@@ -83,16 +82,10 @@ class EnterTimeAPI(private val sd: ServerData) {
 
 
     private fun entertimeHTML() : String {
-        val username = safeHtml(sd.ahd.user.name.value)
         val projects = sd.bc.tru.listAllProjects()
 
         val body =  """
             <form action="$path" method="post">
-    
-                <p>
-                    Hello there, <span id="username">$username</span>!
-                </p>
-    
                 <p>
                     <label for="project_entry">Project:</label>
                     <select name="project_entry" id="project_entry" required="required" />

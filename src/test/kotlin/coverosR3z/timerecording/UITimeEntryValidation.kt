@@ -2,7 +2,6 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.Role
-import coverosR3z.authentication.types.User
 import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.misc.types.earliestAllowableDate

@@ -1,7 +1,6 @@
 package coverosR3z.server
 
 import coverosR3z.authentication.api.LoginAPI
-import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.DEFAULT_DB_DIRECTORY
@@ -20,7 +19,6 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import org.openqa.selenium.By
 import java.io.File
 
 class UIServerTests {
@@ -127,12 +125,6 @@ class UIServerTests {
         pom.driver.quit()
     }
 
-
-    private fun `Try posting garbage to the registration endpoint, expecting an error`() {
-        pom.rp.register("usera", "password12345", "Administrator")
-        pom.rp.register("usera", "password12345", "Administrator")
-        assertEquals("FAILURE", pom.driver.title)
-    }
 
     private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
         pom.lp.login("userabc", DEFAULT_PASSWORD.value)

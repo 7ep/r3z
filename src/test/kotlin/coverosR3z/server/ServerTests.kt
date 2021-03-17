@@ -327,35 +327,6 @@ class ServerTests {
         }
     }
 
-    /**
-     * Enters time for a user on many days
-     */
-    private fun makeClientThreadRepeatedTimeEntries(numRequests : Int, port : Int): Thread {
-        return Thread {
-
-            val client =
-                Client.make(
-                    Verb.POST,
-                    EnterTimeAPI.path,
-                    listOf("Connection: keep-alive", "Cookie: sessionId=abc123"),
-                    port = port)
-            for (i in 1..numRequests) {
-                val data = PostBodyData(mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i / 100).stringValue,
-                    EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
-                    EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                    EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                ))
-                val clientWithData = client.addPostData(data)
-                clientWithData.send()
-                val result = clientWithData.read()
-                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-                assertTrue("headers: ${result.headers}", result.headers.any {it.matches(redirectRegex)})
-            }
-        }
-    }
-
-
 
 }
 

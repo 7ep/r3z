@@ -4,7 +4,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.ServerData
 
-class PageComponents(private val sd: ServerData) {
+class PageComponents(sd: ServerData) {
 
         val user = sd.ahd.user
         private val standardHeader =

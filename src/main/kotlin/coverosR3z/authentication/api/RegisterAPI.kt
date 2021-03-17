@@ -2,14 +2,14 @@ package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
 import coverosR3z.misc.utility.safeAttr
-import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
-import coverosR3z.server.utility.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
+import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.server.utility.failureHTML
 
 class RegisterAPI(private val sd: ServerData) {
 

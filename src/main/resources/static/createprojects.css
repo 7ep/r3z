@@ -26,26 +26,6 @@ input {
   box-sizing: border-box;
 }
 
-select:focus,
-input:focus {
-    outline: none;
-    background-color: inherit;
-    border-radius: .3em;
-    border: 1.8px solid blue;
-}
-
-select {
-  margin-bottom: 1em;
-  font-size: 110%;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .3em;
-  width: 100%;
-  background-color: inherit;
-  padding: .8em 1em .8em 1em;
-  color: #333333;
-  box-sizing: border-box;
-}
-
 button {
   cursor: pointer;
   font-size: 120%;
@@ -75,4 +55,28 @@ table {
     width: 93%;
     margin-left: auto;
     margin-right: auto;
+}
+
+
+.container {
+  border: 2px solid #e2e2e2;
+  margin: auto;
+  border-radius: .5em;
+  background-color: white;
+  opacity: 82%;
+  width: 350px;
+  padding: 10px;
+}
+
+.container tbody tr:nth-child(odd) {
+  background: #d9ced0;
+}
+
+.container tbody tr:nth-child(even) {
+  background: #fff;
+}
+
+.container table {
+  color: black;
+  border-spacing: 1px solid black;
 }

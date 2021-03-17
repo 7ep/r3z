@@ -2,7 +2,6 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeHtml
-import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
@@ -52,20 +51,40 @@ class ProjectAPI(private val sd: ServerData) {
 
     fun handlePOST() : PreparedResponseData {
         sd.bc.tru.createProject(ProjectName.make(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()]))
-        return redirectTo(HomepageAPI.path)
+        return redirectTo(path)
+    }
+
+
+    private fun existingProjectsHtml(): String {
+        val projectRows = sd.bc.tru.listAllProjects().sortedBy { it.id.value }.joinToString("") {
+"""
+    <tr>
+        <td>${it.id.value}</td>
+        <td>${safeHtml(it.name.value)}</td>
+    </tr>
+"""
+            }
+
+        return """
+                <div class="container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Identifier</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $projectRows
+                    </tbody>
+                </table>
+                </div>
+        """
     }
 
     private fun createProjectHTML() : String {
-        val username = safeHtml(sd.ahd.user.name.value)
-
         val body = """
-        <div class="container">
             <form action="$path" method="post">
-            
-                <p>
-                    Hello there, <span id="username">$username</span>!
-                </p>
-            
                 <p>
                     <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
                     <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" />
@@ -76,7 +95,7 @@ class ProjectAPI(private val sd: ServerData) {
                 </p>
             
             </form>
-        </div>
+            ${existingProjectsHtml()}
 """
         return PageComponents(sd).makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
     }

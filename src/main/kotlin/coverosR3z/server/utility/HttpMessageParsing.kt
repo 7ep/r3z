@@ -1,12 +1,7 @@
 package coverosR3z.server.utility
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.User
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.utility.decode
-import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.server.types.*
 

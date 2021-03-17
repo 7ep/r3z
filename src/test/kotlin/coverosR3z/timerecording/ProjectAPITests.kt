@@ -1,13 +1,14 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.server.APITestCategory
-import coverosR3z.server.types.*
+import coverosR3z.server.types.PostBodyData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.types.maxProjectNameSizeMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities

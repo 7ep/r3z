@@ -137,8 +137,8 @@ class UITimeEntryTests {
         private const val port = 4000
         private lateinit var pom: PageObjectModelLocal
         private lateinit var databaseDirectory : String
-        private val regularUsername = "andrea"
-        private val regularEmployeeName = "Andrea"
+        private const val regularUsername = "andrea"
+        private const val regularEmployeeName = "Andrea"
 
 
         @BeforeClass

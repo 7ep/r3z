@@ -2,10 +2,8 @@ package coverosR3z.server.utility
 
 import coverosR3z.FullSystem
 import coverosR3z.FullSystem.Companion.initializeBusinessCode
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.types.NO_USER
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.toBytes
@@ -16,8 +14,6 @@ import coverosR3z.server.types.*
 import coverosR3z.server.types.CacheControl.AGGRESSIVE_WEB_CACHE
 import coverosR3z.server.types.CacheControl.DISALLOW_CACHING
 import coverosR3z.server.types.Pragma.PRAGMA_DISALLOW_CACHING
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
@@ -275,17 +271,6 @@ class ServerUtilities {
                 )
                 responseWithHeaders
             }
-        }
-
-        private fun extractHostFromHostHeader(hostHeader: String, logger: ILogger): String {
-            return if (!hostHeaderRegex.matches(hostHeader)) {
-                logger.logDebug { "The host header we received did not match the expected pattern. It was: $hostHeader" }
-                ""
-            } else {
-                hostHeaderRegex.matchEntire(hostHeader)?.groupValues?.get(1) ?: ""
-            }
-
-
         }
 
 

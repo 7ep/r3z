@@ -39,7 +39,6 @@ class HomepageAPI(private val sd: ServerData)  {
             Role.ADMIN ->
                 listOf(
                     HomepageItem("createemployee", "Create employee"),
-                    HomepageItem("employees", "Show all employees"),
                     HomepageItem("createproject", "Create project"),
                     HomepageItem("entertime", "Enter time"),
                     HomepageItem("timeentries", "Show all time entries"),
@@ -68,10 +67,9 @@ class HomepageAPI(private val sd: ServerData)  {
     }
     private fun renderHomepageItem(linkTarget: String, description: String): String {
 
-        val item = """
+        return """
         <li><a href="${safeAttr(linkTarget)}">${safeHtml(description)}</a></li>
         """
-        return item
     }
 
 }

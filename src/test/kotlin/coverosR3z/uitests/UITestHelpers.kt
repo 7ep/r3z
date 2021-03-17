@@ -13,7 +13,6 @@ import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.SubmitTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
-import coverosR3z.timerecording.types.Employee
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By

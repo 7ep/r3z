@@ -17,7 +17,7 @@ class FakeRolesChecker(
      * then we will throw an exception.  This alerts us when
      * the code being checked didn't actually even check roles.
      */
-    var diediedie = true
+    private var diediedie = true
 
     var roleCanDoAction: Boolean = false
         get() {

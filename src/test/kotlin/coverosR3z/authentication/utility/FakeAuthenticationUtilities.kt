@@ -6,7 +6,6 @@ import coverosR3z.misc.DEFAULT_INVITATION
 import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
-import coverosR3z.timerecording.types.EmployeeId
 
 /**
  * Used as a mock object for testing

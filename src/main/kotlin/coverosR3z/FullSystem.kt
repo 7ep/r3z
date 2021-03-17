@@ -3,13 +3,11 @@ package coverosR3z
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.Logger
 import coverosR3z.misc.utility.generateRandomString
-import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.SimpleConcurrentSet
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -20,12 +18,14 @@ import coverosR3z.server.utility.SSLServer
 import coverosR3z.server.utility.Server
 import coverosR3z.server.utility.StaticFilesUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-
 import java.io.File
 import java.net.Socket
-import java.util.concurrent.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 /**
  * This serves as a central location for the code

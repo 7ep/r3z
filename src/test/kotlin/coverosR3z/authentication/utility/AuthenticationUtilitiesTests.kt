@@ -6,13 +6,11 @@ import coverosR3z.authentication.types.*
 import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.misc.*
 import coverosR3z.misc.utility.getTime
-import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.io.File
 
 class AuthenticationUtilitiesTests {
     private lateinit var authUtils : AuthenticationUtilities
