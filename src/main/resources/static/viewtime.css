@@ -1,4 +1,4 @@
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 750px) {
 
     .time-entry-information input,
     .time-entry-information select,
@@ -39,7 +39,6 @@
       width: 107px;
     }
 
-    #savebutton,
     .editbutton {
         width: 41px;
         height: 25px;
@@ -62,8 +61,7 @@
       border: 1px white solid;
     }
 
-    .readonly-time-entry-row,
-    .editable-time-entry-row {
+    .readonly-time-entry-row {
       display: flex;
       border-bottom: 1.5px #a8a1a0 solid;
       margin: auto;
@@ -88,7 +86,9 @@
         flex-direction: column;
     }
     
-     .create-time-entry-row {
+     .create-time-entry-row,
+     .editable-time-entry-row
+      {
         display:none;
      }
 
@@ -141,7 +141,7 @@
       font-size: 120%;
     }
 
-    form#simpler_enter_time_panel {
+    .mobile-data-entry {
       border: 2px solid #e2e2e2;
       margin: auto;
       border-radius: .5em;
@@ -151,7 +151,7 @@
       padding: 10px;
     }
 
-    #simpler_enter_time_panel input {
+    .mobile-data-entry input {
       margin-bottom: 1em;
       padding: .8em 1em .8em 1em;
       font-size: 110%;
@@ -164,15 +164,15 @@
       box-sizing: border-box;
     }
 
-    #simpler_enter_time_panel select:focus,
-    #simpler_enter_time_panel input:focus {
+    .mobile-data-entry select:focus,
+    .mobile-data-entry input:focus {
         outline: none;
         background-color: inherit;
         border-radius: .3em;
         border: 1.8px solid blue;
     }
 
-    #simpler_enter_time_panel select {
+    .mobile-data-entry select {
       margin-bottom: 1em;
       font-size: 110%;
       border: 1.8px solid #3b3b3b;
@@ -184,7 +184,7 @@
       box-sizing: border-box;
     }
 
-    #simpler_enter_time_panel button {
+    .mobile-data-entry button {
       cursor: pointer;
       font-size: 120%;
       margin: 8px 0 1px 0;
@@ -197,20 +197,30 @@
       box-sizing: border-box;
     }
 
-    #simpler_enter_time_panel button:hover {
+    .mobile-data-entry button:hover {
       color: #5f5f5f;
       background-color: #DDDDE5;
     }
 
-    #simpler_enter_time_panel button:focus {
+    .mobile-data-entry button:focus {
         outline: none;
         border-radius: .5em;
         border: 1.8px solid blue;
     }
 
+    #edit-buttons-mobile {
+        display: flex;
+    }
+
+    #edit-buttons-mobile button {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+
 }
 
-@media only screen and (min-width: 601px) {
+@media only screen and (min-width: 751px) {
 
     h2 {
       text-align: center;
@@ -247,7 +257,7 @@
 
     #savebutton,
     #createbutton {
-        height: 1.8em;
+        height: 29px;
     }
 
     .createrow-data {
@@ -276,11 +286,11 @@
     }
 
     .details div {
-      width: 164px;
+      width: 303px;
     }
 
     .details input {
-      width: 160px;
+      width: 300px;
       height: 25px;
     }
 
@@ -293,7 +303,7 @@
     .timerows-container {
       background-color: white;
       opacity: 82%;
-      max-width: 600px;
+      width: 750px;
       margin: auto;
       border-radius: .4em;
       padding: .5em;
@@ -341,7 +351,7 @@
       padding: 5px 0 0 0;
     }
 
-    #simpler_enter_time_panel {
+    .mobile-data-entry {
         display: none;
     }
 
@@ -352,7 +362,7 @@
       margin: auto auto 4px auto;
       border-radius: .4em;
       display: flex;
-      width: 600px;
+      width: 750px;
       flex-direction: row;
       justify-content: space-evenly;
     }
@@ -366,7 +376,7 @@
         border: 1.8px solid #c35061;
         background-color: #c35061;
         border-radius: .5em;
-        min-width: 5em;
+        width: 80px;
     }
 
     button:hover {
@@ -378,5 +388,26 @@
         outline: none;
         border-radius: .5em;
         border: 1.8px solid blue;
+    }
+
+    .timerows-container button {
+        height: 24px;
+        width: 84px;
+        border-radius: 5px;
+        padding: 0;
+        margin: 0;
+    }
+
+    #edit-buttons-desktop {
+        display:flex;
+    }
+
+    #edit-buttons-desktop button {
+        display: flex;
+        justify-content: center;
+        width: 42px;
+        height: 29px;
+        font-size: .75em;
+        line-height: 2em;
     }
 }
