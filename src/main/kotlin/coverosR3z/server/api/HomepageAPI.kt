@@ -1,13 +1,21 @@
 package coverosR3z.server.api
 
+import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
+import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
-import coverosR3z.server.utility.AuthUtilities.Companion.doGETAuthAndUnauth
+import coverosR3z.server.utility.AuthUtilities.Companion.isAuthenticated
 import coverosR3z.server.utility.PageComponents
+import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.timerecording.api.ViewTimeAPI
 
 class HomepageAPI(private val sd: ServerData)  {
 
@@ -15,10 +23,27 @@ class HomepageAPI(private val sd: ServerData)  {
 
         override fun handleGet(sd: ServerData) : PreparedResponseData {
             val hp = HomepageAPI(sd)
-            return doGETAuthAndUnauth(sd.ahd.user,
-                Role.REGULAR, Role.APPROVER, Role.ADMIN,
-                generatorAuthenticated = { hp.authHomePageHTML() },
-                generatorUnauth = { PageComponents(sd).makeTemplate("Homepage", "HomepageAPI", "", extraHeaderContent="""<link rel="stylesheet" href="homepage.css" />""")  })
+            return try {
+                when (isAuthenticated(sd.ahd.user)) {
+                    AuthStatus.AUTHENTICATED -> {
+                        val cu = CurrentUser(sd.ahd.user)
+                        RolesChecker(cu).checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+                        if (cu.role in listOf(Role.REGULAR, Role.APPROVER)) {
+                            redirectTo(ViewTimeAPI.path)
+                        } else {
+                            okHTML(hp.authHomePageHTML())
+                        }
+                    }
+                    AuthStatus.UNAUTHENTICATED -> redirectTo(LoginAPI.path)
+                }
+            } catch (ex: UnpermittedOperationException) {
+                handleUnauthorized()
+            }
+            /**
+             * This is the method for when we want to go either one direction
+             * if authenticated or another if unauthenticated.  Most likely
+             * example: the homepage
+             */
         }
 
         override val path: String

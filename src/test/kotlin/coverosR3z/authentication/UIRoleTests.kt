@@ -36,10 +36,6 @@ class UIRoleTests {
     fun uiRoleTests() {
         `setup some projects users and employees`()
         verifyAdminCanSeeWhatTheyShould()
-        logout()
-        verifyRegularUserCanSeeWhatTheyShould()
-        logout()
-        verifyApproverCanSeeWhatTheyShould()
     }
 
     private fun verifyAdminCanSeeWhatTheyShould() {
@@ -49,61 +45,6 @@ class UIRoleTests {
         pom.driver.findElement(By.linkText("Create project"))
         pom.driver.findElement(By.linkText("Time entries"))
         pom.driver.findElement(By.linkText("Log configuration"))
-    }
-
-    private fun verifyApproverCanSeeWhatTheyShould() {
-        pom.lp.login(approverUserName, DEFAULT_PASSWORD.value)
-
-        // validate we are actually the user we intend to be
-        val userGreeting = pom.driver.findElement(By.cssSelector("#username")).text
-        assertTrue(approverUserName in userGreeting)
-
-        //verify the employee only sees what they should see
-        val appUrl = pom.sslDomain
-
-        val links = mutableListOf<String>()
-        // some of these SHOULDN'T be visible. How do we verify we CANT find them?
-
-        for (i in 1..7) {
-            try {
-                links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
-            } catch (e: NoSuchElementException) {
-            }
-        }
-
-        // things that should be present
-        assertTrue("$appUrl/timeentries" in links)
-
-        // things that should not be present
-        assertFalse("$appUrl/logging" in links)
-        assertFalse("$appUrl/createemployee" in links)
-        assertFalse("$appUrl/createproject" in links)
-    }
-
-    private fun verifyRegularUserCanSeeWhatTheyShould() {
-        pom.lp.login(regularUserName, DEFAULT_PASSWORD.value)
-
-        //verify the employee only sees what they should see
-        val appUrl = pom.sslDomain
-
-        val links = mutableListOf<String>()
-        // some of these SHOULDN'T be visible. How do we verify we CANT find them?
-
-        for (i in 1..7) {
-            try {
-                links.add(pom.driver.findElement(By.cssSelector("li:nth-child($i) > a")).getAttribute("href"))
-            } catch (e: NoSuchElementException) {
-            }
-        }
-
-        // things that should be present
-        assertTrue("$appUrl/timeentries" in links)
-
-        // things that should not be present
-        assertFalse("$appUrl/logging" in links)
-        assertFalse("$appUrl/employees" in links)
-        assertFalse("$appUrl/createemployee" in links)
-        assertFalse("$appUrl/createproject" in links)
     }
 
     /*

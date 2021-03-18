@@ -43,30 +43,6 @@ class AuthUtilities {
         }
 
         /**
-         * This is the method for when we want to go either one direction
-         * if authenticated or another if unauthenticated.  Most likely
-         * example: the homepage
-         */
-        fun doGETAuthAndUnauth(
-            user: User,
-            vararg roles: Role,
-            generatorAuthenticated: () -> String,
-            generatorUnauth: () -> String
-        ): PreparedResponseData {
-            return try {
-                when (isAuthenticated(user)) {
-                    AuthStatus.AUTHENTICATED -> {
-                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
-                        okHTML(generatorAuthenticated())
-                    }
-                    AuthStatus.UNAUTHENTICATED -> okHTML(generatorUnauth())
-                }
-            } catch (ex: UnpermittedOperationException) {
-                handleUnauthorized()
-            }
-        }
-
-        /**
          * This is for those odd cases where you aren't allowed to go
          * there if you *are* authenticated, like the login page or
          * register user page

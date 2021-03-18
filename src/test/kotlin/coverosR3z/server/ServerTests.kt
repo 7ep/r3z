@@ -115,7 +115,7 @@ class ServerTests {
 
         val statusline = client.readLine()
 
-        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
     }
 
     /**
@@ -299,7 +299,7 @@ class ServerTests {
 
         val statusline = client.readLine()
 
-        assertEquals("HTTP/1.1 200 OK", statusline)
+        assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
     }
 
     /*
@@ -322,7 +322,7 @@ class ServerTests {
             for (i in 1..numRequests) {
                 client.send()
                 val result = client.read()
-                assertEquals(StatusCode.OK, result.statusCode)
+                assertEquals(StatusCode.SEE_OTHER, result.statusCode)
             }
         }
     }

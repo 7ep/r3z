@@ -1,25 +1,23 @@
 package coverosR3z.server.utility
 
 import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.ServerData
 
 class PageComponents(sd: ServerData) {
 
         val user = sd.ahd.user
+        private val includeHomepageLinkIfAdmin =  if (user.role == Role.ADMIN) """<a class="header-button" href="homepage">homepage</a>""" else ""
         private val standardHeader =
 """
-<header><span><a class="header-button" href="homepage">homepage</a></span>${renderUserInfo()}</header>
+<header>
+        <span>$includeHomepageLinkIfAdmin</span>${renderUserInfo()}
+</header>
 """.trimIndent()
 
         private fun renderUserInfo(): String {
-                return when(user) {
-                        NO_USER ->
-                                """<span><a class="header-button" href="login">login</a></span>"""
-                        else ->
-                                """<span><span id="username">${safeHtml(user.name.value)}</span> <a class="header-button" href="logout">logout</a></span>"""
-                }
-
+                return if (user == NO_USER) "" else """<span><span id="username">${safeHtml(user.name.value)}</span> <a class="header-button" href="logout">logout</a></span>"""
         }
 
         fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """

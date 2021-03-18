@@ -38,12 +38,12 @@ class UIServerTests {
 
     private fun `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`() {
         pom.driver.get("${pom.insecureDomain}/${HomepageAPI.path}")
-        assertEquals("Homepage", pom.driver.title)
+        assertEquals("login page", pom.driver.title)
     }
 
     private fun `general - should be able to see the homepage and the authenticated homepage`() {
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
-        assertEquals("Homepage", pom.driver.title)
+        assertEquals("login page", pom.driver.title)
         val adminEmployee = pom.businessCode.tru.listAllEmployees().single{it.name.value == "Administrator"}
         val (_, user) = pom.businessCode.au.registerWithEmployee(UserName("employeemaker"), Password("password12345"), adminEmployee)
         pom.businessCode.au.addRoleToUser(user, Role.ADMIN)
@@ -124,7 +124,6 @@ class UIServerTests {
         assertEquals(pom.pmd, pmd)
         pom.driver.quit()
     }
-
 
     private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
         pom.lp.login("userabc", DEFAULT_PASSWORD.value)
