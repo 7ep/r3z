@@ -22,7 +22,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         TIME_INPUT(elemName = "time_entry"),
         DETAIL_INPUT(elemName = "detail_entry"),
         EDIT_BUTTON(elemClass = "editbutton"),
-        SAVE_BUTTON(elemClass = "savebutton"),
+        SAVE_BUTTON(id = "savebutton"),
         CREATE_BUTTON(id = "createbutton"),
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
@@ -117,10 +117,6 @@ class ViewTimeAPI(private val sd: ServerData) {
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val body = """
-                <h2>
-                    Here are your entries:</span>
-                </h2>
-                
                 <nav class="time_period_selector">
                     <form action="$submitButtonAction" method="post">
                         <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
@@ -140,6 +136,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
                     </form>
                 </nav>
+                ${entertimeHTML()}
                 <div class="timerows-container">
                 ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
                 </div>
@@ -172,7 +169,7 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod, inASubmittedPeriod: Boolean): String {
 
         val editButton = if (inASubmittedPeriod) "" else """
-        <div class="action">
+        <div class="action time-entry-information">
             <form action="$path">
                 <input type="hidden" name="editid" value="${it.id.value}" /> 
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
@@ -182,16 +179,16 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-        <div class="project">
+        <div class="project time-entry-information">
             <div class="readonly-data" name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
         </div>
-        <div class="date">
+        <div class="date time-entry-information">
             <div class="readonly-data" name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
         </div>
-        <div class="time">
+        <div class="time time-entry-information">
             <div class="readonly-data" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
-        <div class="details">
+        <div class="details time-entry-information">
             <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(it.details.value)}</div>
         </div>
             $editButton
@@ -205,22 +202,22 @@ class ViewTimeAPI(private val sd: ServerData) {
         <form action="$path" method="post">
             <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
-            <div class="project">
+            <div class="project time-entry-information">
                 <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
                     ${projectsToOptionsOneSelected(projects, it.project)}
                 </select>
             </div>
-            <div class="date">
+            <div class="date time-entry-information">
                 <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(it.date.stringValue)}" />
             </div>
-            <div class="time">
+            <div class="time time-entry-information">
                 <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
             </div>
-            <div class="details">
+            <div class="details time-entry-information">
                 <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
             </div>
-            <div class="action">
-                <button class="${Elements.SAVE_BUTTON.getElemClass()}">save</button>
+            <div class="action time-entry-information">
+                <button id="${Elements.SAVE_BUTTON.getId()}">save</button>
             </div>
         </form>
     </div>
@@ -230,32 +227,70 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderCreateTimeRow(projects: List<Project>) = """
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
-                <div class="project createrow-data">
+                <div class="project createrow-data time-entry-information">
                     <label>Project</label>
                     <select name="project_entry" id="project_entry" required  />
                         <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
-                <div class="date createrow-data" >
+                <div class="date createrow-data time-entry-information" >
                     <label>Date</label>
                     <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
-                <div class="time createrow-data">
+                <div class="time createrow-data time-entry-information">
                     <label>Time (hrs)</label>
                     <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
-                <div class="details createrow-data">
+                <div class="details createrow-data time-entry-information">
                     <label>Details</label>
                     <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
-                <div class="action createrow-data">
+                <div class="action createrow-data time-entry-information">
                     <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
                 </div>
             </form>
         </div>
           """
+
+
+    private fun entertimeHTML(): String {
+        val projects = sd.bc.tru.listAllProjects()
+
+        return """
+            <form id="simpler_enter_time_panel" action="${EnterTimeAPI.path}" method="post">
+                <p>
+                    <label for="project_entry">Project:</label>
+                    <select name="project_entry" id="project_entry" required="required" />
+                        <option selected disabled hidden value="">Choose here</option>
+                        ${projectsToOptions(projects)}
+                
+                </select>
+                </p>
+    
+                <p>
+                    <label for="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}">Time:</label>
+                    <input name="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.TIME_INPUT.getId()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
+                </p>
+    
+                <p>
+                    <label for="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}">Details:</label>
+                    <input name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
+                </p>
+                
+                <p>
+                    <label for="${EnterTimeAPI.Elements.DATE_INPUT.getElemName()}">Date:</label>
+                    <input name="${EnterTimeAPI.Elements.DATE_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DATE_INPUT.getId()}" type="date" value="${Date.now().stringValue}" />
+                </p>
+                
+                <p>
+                    <button id="${EnterTimeAPI.Elements.ENTER_TIME_BUTTON.getId()}">Enter time</button>
+                </p>
+    
+            </form>
+    """
+    }
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data

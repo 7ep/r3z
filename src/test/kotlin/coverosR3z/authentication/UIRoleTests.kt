@@ -47,10 +47,8 @@ class UIRoleTests {
 
         pom.driver.findElement(By.linkText("Create employee"))
         pom.driver.findElement(By.linkText("Create project"))
-        pom.driver.findElement(By.linkText("Enter time"))
-        pom.driver.findElement(By.linkText("Show all time entries"))
+        pom.driver.findElement(By.linkText("Time entries"))
         pom.driver.findElement(By.linkText("Log configuration"))
-        pom.driver.findElement(By.linkText("Logout"))
     }
 
     private fun verifyApproverCanSeeWhatTheyShould() {
@@ -74,9 +72,7 @@ class UIRoleTests {
         }
 
         // things that should be present
-        assertTrue("$appUrl/entertime" in links)
         assertTrue("$appUrl/timeentries" in links)
-        assertTrue("$appUrl/logout" in links)
 
         // things that should not be present
         assertFalse("$appUrl/logging" in links)
@@ -101,15 +97,13 @@ class UIRoleTests {
         }
 
         // things that should be present
-        assertTrue("$appUrl/entertime" in links)
         assertTrue("$appUrl/timeentries" in links)
-        assertTrue("$appUrl/logout" in links)
 
         // things that should not be present
-        assertTrue("$appUrl/logging" !in links)
-        assertTrue("$appUrl/employees" !in links)
-        assertTrue("$appUrl/createemployee" !in links)
-        assertTrue("$appUrl/createproject" !in links)
+        assertFalse("$appUrl/logging" in links)
+        assertFalse("$appUrl/employees" in links)
+        assertFalse("$appUrl/createemployee" in links)
+        assertFalse("$appUrl/createproject" in links)
     }
 
     /*

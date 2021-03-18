@@ -197,8 +197,9 @@ data class SystemOptions(
                                 OptionGroup("--no-logging", loggingOffOption),
                                 OptionGroup("--full-logging", loggingOnOption),
                                 OptionGroup("--allow-insecure", allowInsecureOption),
-                                OptionGroup("--host", hostOption),
                                 OptionGroup("-h", hostOption),
+                                OptionGroup("--host", hostOption),
+
                         )
 
                         val fullInput = args.joinToString(" ")
@@ -208,7 +209,7 @@ data class SystemOptions(
                                 var currentIndex = 0
 
                                 loop@ while (currentIndex < args.size) {
-                                        if (args[currentIndex] == "-h" || args[currentIndex] == "-?") throw SystemOptionsException("")
+                                        if (args[currentIndex] == "-?") throw SystemOptionsException("")
 
                                         for (option in possibleOptions) {
                                                 if (args[currentIndex].startsWith(option.textValue)) {

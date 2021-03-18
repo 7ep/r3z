@@ -190,12 +190,12 @@ class SystemOptionTests {
     }
 
     /**
-     * If the user asks for help with -h or -?, provide
+     * If the user asks for help with -?, provide
      * an explanation of the app options
      */
     @Test
     fun testShouldHelpUser() {
-        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-h"))}
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-?"))}
         assertEquals(fullHelpMessage, ex.message!!.trimIndent())
     }
 
@@ -224,13 +224,13 @@ class SystemOptionTests {
      */
     @Test
     fun testShouldSetHost() {
-        val serverOptions = extractOptions(arrayOf("--host renomad.com"))
+        val serverOptions = extractOptions(arrayOf("--host","renomad.com"))
         assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
     }
 
     @Test
     fun testShouldSetHostShortForm() {
-        val serverOptions = extractOptions(arrayOf("-h renomad.com"))
+        val serverOptions = extractOptions(arrayOf("-h", "renomad.com"))
         assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
     }
 

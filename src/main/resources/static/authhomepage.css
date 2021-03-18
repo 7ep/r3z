@@ -2,11 +2,10 @@ nav {
   border: 2px solid #e2e2e2;
   margin: auto;
   border-radius: .5em;
-  background-color: white;
   opacity: 82%;
   padding: .4em;
   display: flex;
-  flex-direction: column;
+  justify-content: space-evenly;
 }
 
 nav a {
@@ -19,6 +18,8 @@ nav a {
   border-radius: .3em;
   padding: 0.4em;
   text-decoration: none;
+  flex-grow: 1;
+  text-align: center;
 }
 
 nav a:hover {
@@ -32,6 +33,21 @@ nav a:focus {
     border: 1.8px solid blue;
 }
 
-li {
-    display: grid;
+nav ul {
+    display: flex;
+    flex-grow: 1;
+}
+
+li {display:  flex;flex-grow: 1;}
+
+@media only screen and (max-width: 600px) {
+    li {
+        flex-direction: column;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        flex-grow: 1;
+        flex-flow: column;
+    }
 }

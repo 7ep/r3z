@@ -31,7 +31,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         }
     }
 
-    companion object : GetEndpoint, PostEndpoint {
+    companion object : PostEndpoint {
 
         override val requiredInputs = setOf(
             Elements.PROJECT_INPUT,
@@ -42,20 +42,11 @@ class EnterTimeAPI(private val sd: ServerData) {
         override val path: String
             get() = "entertime"
 
-        override fun handleGet(sd: ServerData): PreparedResponseData {
-            val et = EnterTimeAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { et.entertimeHTML() }
-        }
-
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
             return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.REGULAR, Role.APPROVER, Role.ADMIN) { et.handlePOST() }
         }
     }
-
-
-
-
 
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
@@ -78,45 +69,6 @@ class EnterTimeAPI(private val sd: ServerData) {
         tru.createTimeEntry(timeEntry)
 
         return redirectTo(ViewTimeAPI.path + "?date=" + date.stringValue)
-    }
-
-
-    private fun entertimeHTML() : String {
-        val projects = sd.bc.tru.listAllProjects()
-
-        val body =  """
-            <form action="$path" method="post">
-                <p>
-                    <label for="project_entry">Project:</label>
-                    <select name="project_entry" id="project_entry" required="required" />
-                        <option selected disabled hidden value="">Choose here</option>
-                        ${ViewTimeAPI.projectsToOptions(projects)}
-                
-                </select>
-                </p>
-    
-                <p>
-                    <label for="${Elements.TIME_INPUT.getElemName()}">Time:</label>
-                    <input name="${Elements.TIME_INPUT.getElemName()}" id="${Elements.TIME_INPUT.getId()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
-                </p>
-    
-                <p>
-                    <label for="${Elements.DETAIL_INPUT.getElemName()}">Details:</label>
-                    <input name="${Elements.DETAIL_INPUT.getElemName()}" id="${Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
-                </p>
-                
-                <p>
-                    <label for="${Elements.DATE_INPUT.getElemName()}">Date:</label>
-                    <input name="${Elements.DATE_INPUT.getElemName()}" id="${Elements.DATE_INPUT.getId()}" type="date" value="${Date.now().stringValue}" />
-                </p>
-                
-                <p>
-                    <button id="${Elements.ENTER_TIME_BUTTON.getId()}">Enter time</button>
-                </p>
-    
-            </form>
-    """
-        return PageComponents(sd).makeTemplate("enter time", "EnterTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="entertime.css" />""")
     }
 
 }

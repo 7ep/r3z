@@ -286,49 +286,6 @@ class EnterTimeAPITests {
 
     // region ROLE TESTS
 
-    // GET Tests
-    
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldAllowAdminToEnterTimeGET() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_ADMIN_USER)
-        val result = EnterTimeAPI.handleGet(sd).statusCode
-        assertEquals(StatusCode.OK, result)
-    }
-
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldAllowApproverToEnterTimeGET() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
-        val result = EnterTimeAPI.handleGet(sd).statusCode
-        assertEquals(StatusCode.OK, result)
-    }
-
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldAllowRegularToEnterTimeGET() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
-        val result = EnterTimeAPI.handleGet(sd).statusCode
-        assertEquals(StatusCode.OK, result)
-    }
-    
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldDisallowSystemToEnterTimeGET() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
-
-        val result = EnterTimeAPI.handleGet(sd).statusCode
-
-        assertEquals(StatusCode.FORBIDDEN, result)
-    }
-    
-    @Category(APITestCategory::class)
-    @Test
-    fun testShouldDisallowNoUserToEnterTimeGET() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = NO_USER)
-        assertEquals(StatusCode.SEE_OTHER, EnterTimeAPI.handleGet(sd).statusCode)
-    }
-    
     // POST tests
 
 

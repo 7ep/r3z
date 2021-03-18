@@ -20,6 +20,7 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.support.ui.Select
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX(
@@ -30,6 +31,7 @@ enum class Drivers(val driver: () -> WebDriver){
     CHROME(
         { ChromeDriver(
             ChromeOptions()
+                .addArguments("--window-size=800,500")
                 .setHeadless(false)
                 .setAcceptInsecureCerts(true)) }
     ),
@@ -209,7 +211,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         driver.get("$domain/${ViewTimeAPI.path}")
         val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        Select(projectSelector).selectByVisibleText(project)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
@@ -221,7 +223,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun setProjectForNewEntry(project: String) {
         val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        Select(projectSelector).selectByVisibleText(project)
     }
 
     private fun setProjectForEditEntry(id: Int, project: String) {
@@ -229,7 +231,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
             .findElement(
                 By.cssSelector("#time-entry-$id [name=${ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()}]"))
 
-        projectSelector.findElement(By.xpath("//option[. = '$project']")).click()
+        Select(projectSelector).selectByVisibleText(project)
     }
 
     /**
@@ -247,7 +249,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickSaveTimeEntry(id : Int) {
         driver
             .findElement(
-                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.SAVE_BUTTON.getElemClass()}")).click()
+                By.cssSelector("#time-entry-$id #${ViewTimeAPI.Elements.SAVE_BUTTON.getId()}")).click()
     }
 
     /**

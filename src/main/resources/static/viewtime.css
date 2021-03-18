@@ -1,185 +1,382 @@
-h2 {
-  text-align: center;
-  font-size: 1.3em;
-  margin: 10px;
-  color: white;
+@media only screen and (max-width: 600px) {
+
+    .time-entry-information input,
+    .time-entry-information select,
+    .time-entry-information div {
+        height: 22px;
+        line-height: 26px;
+    }
+
+    .time input {
+        width: 36px;
+    }
+
+    .project {
+      width: 65px;
+      position: relative;
+    }
+
+    .project select {
+      width: inherit;
+    }
+
+    .date {
+      width: 92px;
+      position: relative;
+    }
+
+    .time {
+     width: 42px;
+     position: relative;
+    }
+
+    .details {
+      position: relative;
+      width: 112px;
+    }
+
+    .details input {
+      width: 107px;
+    }
+
+    #savebutton,
+    .editbutton {
+        width: 41px;
+        height: 25px;
+    }
+
+    .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    input {
+      background-color: #e3dddc;
+      border: 1px white solid;
+      display: flex;
+    }
+
+    .timerows-container .readonly-data {
+      background-color: #e3dddc;
+      border: 1px white solid;
+    }
+
+    .readonly-time-entry-row,
+    .editable-time-entry-row {
+      display: flex;
+      border-bottom: 1.5px #a8a1a0 solid;
+      margin: auto;
+      height: 24px;
+    }
+
+    .time_period_selector form,
+    .time_period_selector > div,
+    .timerows-container form {
+        display: flex;
+    }
+
+    .timerows-container {
+        border: 2px solid #e2e2e2;
+        margin: auto;
+        border-radius: .5em;
+        background-color: white;
+        opacity: 82%;
+        width: 350px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+     .create-time-entry-row {
+        display:none;
+     }
+
+     nav.time_period_selector {
+        border: 2px solid #e2e2e2;
+        margin: auto;
+        border-radius: .5em;
+        background-color: white;
+        opacity: 82%;
+        width: 350px;
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+     }
+
+     nav.time_period_selector form {
+        display: flex;
+     }
+
+     nav.time_period_selector > div {
+        color: black;
+        font-size: 0.9em;
+        display: flex;
+        width: 89px;
+        border: 1px solid black;
+     }
+
+    nav button {
+      cursor: pointer;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+    }
+
+    nav button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    nav button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    #simpler_enter_time_panel label {
+      font-style: bold;
+      font-size: 120%;
+    }
+
+    form#simpler_enter_time_panel {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
+
+    #simpler_enter_time_panel input {
+      margin-bottom: 1em;
+      padding: .8em 1em .8em 1em;
+      font-size: 110%;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      width: 100%;
+      background-color: #CFC1C1;
+      opacity: 82%;
+      color: #333333;
+      box-sizing: border-box;
+    }
+
+    #simpler_enter_time_panel select:focus,
+    #simpler_enter_time_panel input:focus {
+        outline: none;
+        background-color: inherit;
+        border-radius: .3em;
+        border: 1.8px solid blue;
+    }
+
+    #simpler_enter_time_panel select {
+      margin-bottom: 1em;
+      font-size: 110%;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      width: 100%;
+      background-color: inherit;
+      padding: .8em 1em .8em 1em;
+      color: #333333;
+      box-sizing: border-box;
+    }
+
+    #simpler_enter_time_panel button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    #simpler_enter_time_panel button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    #simpler_enter_time_panel button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
 }
 
-a:hover
-{
-     color:black;
-     text-decoration:none;
-     cursor:pointer;
-}
+@media only screen and (min-width: 601px) {
 
-.time input {
-    height: 1.6em;
-    width: 3.6em;
-}
+    h2 {
+      text-align: center;
+      font-size: 1.3em;
+      margin: 10px;
+      color: white;
+    }
 
-input:focus {
-  background-color: inherit;
-}
+    a:hover
+    {
+         color:black;
+         text-decoration:none;
+         cursor:pointer;
+    }
 
-.project {
-  width: 10em;
-  position: relative;
-}
+    .time input {
+        height: 1.6em;
+        width: 3.6em;
+    }
 
-.project select {
-  width: inherit;
-  /* select requires a custom height, yuck */
-  height: 2.1em;
-}
+    input:focus {
+      background-color: inherit;
+    }
 
-.createrow-data button {
-    height: 1.8em;
-}
+    .project {
+      width: 10em;
+      position: relative;
+    }
 
-.createrow-data {
-  padding: .5em 0 0 0;
-}
+    .project select {
+      width: inherit;
+      height: 2.1em;
+    }
 
-.date {
-  width: 8.3em;
-  position: relative;
-}
+    #savebutton,
+    #createbutton {
+        height: 1.8em;
+    }
 
-.date input {
-  height: inherit;
-  width: 100%;
-  line-height: 1.8em;
-  font-size: 1.1em;
-}
+    .createrow-data {
+      padding: .5em 0 0 0;
+    }
 
-.time {
- width: 4em;
- position: relative;
-}
+    .date {
+      width: 8.3em;
+      position: relative;
+    }
 
-.details {
-  position: relative;
-}
+    .date input {
+      height: inherit;
+      width: 100%;
+      line-height: 1.8em;
+      font-size: 1.1em;
+    }
 
-.details div {
-  width: 16.1em;
-}
+    .time {
+     width: 4em;
+     position: relative;
+    }
 
-.details input {
-  width: 15.8em;
-  height: 1.6em;
-}
+    .details {
+      position: relative;
+    }
 
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    .details div {
+      width: 164px;
+    }
 
-button {
-    cursor: pointer;
-    text-align : center;
-    font-size: 1em;
-    height: inherit;
-    border: 1.8px solid #c35061;
-    background-color: #c35061;
-    border-radius: .5em;
-    min-width: 5em; 
-}
+    .details input {
+      width: 160px;
+      height: 25px;
+    }
 
-button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
+    .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-button:focus {
-    outline: none;
-    border-radius: .5em;
-    border: 1.8px solid blue;
-}
+    .timerows-container {
+      background-color: white;
+      opacity: 82%;
+      max-width: 600px;
+      margin: auto;
+      border-radius: .4em;
+      padding: .5em;
+      display: flex;
+      flex-direction: column;
+    }
 
-.time_period_selector {
-  background-color: white;
-  opacity: 82%;
-  padding: .5em;
-  max-width: 700px;
-  margin: auto auto 4px auto;
-  border-radius: .4em;
-  display: flex;
-  flex-wrap: nowrap;
-}
+    input {
+      background-color: #e3dddc;
+      border: 1px white solid;
+      font-size: 1em;
+      display: flex;
+    }
 
-.timerows-container {
-  flex-direction: column;
-  display: flex;
-  background-color: white;
-  opacity: 82%;
-  max-width: 700px;
-  margin: auto;
-  border-radius: .4em;
-  padding: .5em;
-}
+    .readonly-data {
+      background-color: #e3dddc;
+      border: 1px white solid;
+      line-height: 1.4em;
+    }
 
-@media only screen and (max-width: 700px) {
-.timerows-container {
-    padding: 4px;
-  }
- }
+    .create-time-entry-row,
+    .readonly-time-entry-row,
+    .editable-time-entry-row {
+      display: flex;
+      border-bottom: 1.5px #a8a1a0 solid;
+      margin: auto;
+    }
 
-input {
-  background-color: #e3dddc;
-  border: 1px white solid;
-  font-size: 1em;
-  display: flex;
-}
+    .time_period_selector form,
+    .time_period_selector > div,
+    .timerows-container form {
+        display: flex;
+    }
 
-.readonly-data {
-  background-color: #e3dddc;
-  border: 1px white solid;
-  line-height: 1.4em;
-}
+    .time_period_selector label,
+    .timerows-container label
+     {
+      font-size: .7em;
+      position: absolute;
+      top: -2px;
+    }
 
-.create-time-entry-row,
-.readonly-time-entry-row,
-.editable-time-entry-row {
-  display: flex;
-  /* flex-direction: row; */
-  /* justify-content: center; */
-  /*   flex-wrap: wrap; */
-  /*   border: 2px white solid; */
-  /* padding: 0px 0px 0px 0px; */
-  border-bottom: 1.5px #a8a1a0 solid;
-  margin: auto;
-}
+    nav {
+      position: relative;
+      padding: 5px 0 0 0;
+    }
 
-@media only screen and (max-width: 700px) {
-create-time-entry-row,
-.readonly-time-entry-row,
-.editable-time-entry-row, form{
-  display: flex;
-  flex-wrap: wrap;
-  }
-}
+    #simpler_enter_time_panel {
+        display: none;
+    }
 
-form {
-    display: flex;
-    flex-direction: row;
-    margin: auto;
-}
+    .time_period_selector {
+      background-color: white;
+      opacity: 82%;
+      padding: .5em;
+      margin: auto auto 4px auto;
+      border-radius: .4em;
+      display: flex;
+      width: 600px;
+      flex-direction: row;
+      justify-content: space-evenly;
+    }
 
-label {
-  font-size: .7em;
-  position: absolute;
-  top: -2px;
-}
 
-nav {
-  position: relative;
-  padding: 5px 0 0 0;
-}
+    button {
+        cursor: pointer;
+        text-align : center;
+        font-size: 1em;
+        height: inherit;
+        border: 1.8px solid #c35061;
+        background-color: #c35061;
+        border-radius: .5em;
+        min-width: 5em;
+    }
 
-/* .project-date-and-time, .details-and-button {
-  display: flex;
-  flex-direction: row;
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
 }
-*/

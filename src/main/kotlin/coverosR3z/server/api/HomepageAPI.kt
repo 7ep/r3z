@@ -40,17 +40,13 @@ class HomepageAPI(private val sd: ServerData)  {
                 listOf(
                     HomepageItem("createemployee", "Create employee"),
                     HomepageItem("createproject", "Create project"),
-                    HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entries"),
+                    HomepageItem("timeentries", "Time entries"),
                     HomepageItem("logging", "Log configuration"),
-                    HomepageItem("logout", "Logout")
                 )
             Role.APPROVER,
             Role.REGULAR ->
                 listOf(
-                    HomepageItem("entertime", "Enter time"),
-                    HomepageItem("timeentries", "Show all time entries"),
-                    HomepageItem("logout", "Logout")
+                    HomepageItem("timeentries", "Time entries"),
                 )
 
             Role.SYSTEM,
