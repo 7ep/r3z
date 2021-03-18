@@ -1,53 +1,95 @@
-nav {
-  border: 2px solid #e2e2e2;
-  margin: auto;
-  border-radius: .5em;
-  opacity: 82%;
-  padding: .4em;
-  display: flex;
-  justify-content: space-evenly;
-}
+@media only screen and (min-width: 601px) {
+    nav {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      opacity: 82%;
+      padding: .4em;
+      display: flex;
+      justify-content: space-evenly;
+    }
 
-nav a {
-  cursor: pointer;
-  font-size: 1.5em;
-  margin: 8px 0 1px 0;
-  color: white;
-  background-color: #c35061;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .3em;
-  padding: 0.4em;
-  text-decoration: none;
-  flex-grow: 1;
-  text-align: center;
-}
+    nav a {
+      cursor: pointer;
+      font-size: 1.5em;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #c35061;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      padding: 0.4em;
+      text-decoration: none;
+      flex-grow: 1;
+      text-align: center;
+    }
 
-nav a:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
+    nav a:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
 
-nav a:focus {
-    outline: none;
-    border-radius: .3em;
-    border: 1.8px solid blue;
-}
-
-nav ul {
-    display: flex;
-    flex-grow: 1;
-}
-
-li {display:  flex;flex-grow: 1;}
-
-@media only screen and (max-width: 600px) {
-    li {
-        flex-direction: column;
+    nav a:focus {
+        outline: none;
+        border-radius: .3em;
+        border: 1.8px solid blue;
     }
 
     nav ul {
-        flex-wrap: wrap;
+        display: flex;
         flex-grow: 1;
-        flex-flow: column;
+    }
+
+    li {
+        display:  flex;
+        flex-grow: 1;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+
+ nav {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      opacity: 82%;
+      padding: .4em;
+      display: flex;
+      justify-content: space-evenly;
+    }
+
+    nav a {
+      cursor: pointer;
+      font-size: 1.5em;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #c35061;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      padding: 0.4em;
+      text-decoration: none;
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    nav a:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    nav a:focus {
+        outline: none;
+        border-radius: .3em;
+        border: 1.8px solid blue;
+    }
+
+    nav ul {
+        display: flex;
+        flex-grow: 1;
+    }
+
+    li {
+        display:  flex;
+        flex-grow: 1;
+        flex-direction: column;
     }
 }
