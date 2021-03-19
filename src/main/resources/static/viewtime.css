@@ -12,7 +12,7 @@
     }
 
     .timerows-container .project {
-      width: 65px;
+      width: 98px;
       position: relative;
     }
 
@@ -31,7 +31,7 @@
 
     .timerows-container .details {
       position: relative;
-      width: 204px;
+      width: 170px;
     }
 
     .timerows-container .details input {
