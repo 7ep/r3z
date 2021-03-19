@@ -44,7 +44,8 @@ class RoutingUtilities {
                 Pair(Verb.POST, RegisterAPI.path) -> RegisterAPI.handlePost(sd)
                 Pair(Verb.POST, ProjectAPI.path) -> ProjectAPI.handlePost(sd)
                 Pair(Verb.POST, LoggingAPI.path) -> LoggingAPI.handlePost(sd)
-                Pair(Verb.POST, ViewTimeAPI.path) -> ViewTimeAPI.handlePost(sd)
+                Pair(Verb.POST, EditTimeAPI.path) -> EditTimeAPI.handlePost(sd)
+                Pair(Verb.POST, DeleteTimeAPI.path) -> DeleteTimeAPI.handlePost(sd)
                 Pair(Verb.POST, SubmitTimeAPI.path) -> SubmitTimeAPI.handlePost(sd)
                 Pair(Verb.POST, UnsubmitTimeAPI.path) -> UnsubmitTimeAPI.handlePost(sd)
 

@@ -331,5 +331,53 @@ class TimeEntryPersistenceTests {
         assertFalse("There should be no time entries found because they exist outside our time period", result.any())
     }
 
+    /**
+     * Successfully find a time entry
+     */
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testFindTimeEntry() {
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
+        val result = tep.findTimeEntryById(newTimeEntry.id)
+        assertEquals(newTimeEntry, result)
+    }
+
+    /**
+     * no time entry found
+     */
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testFindTimeEntry_NothingFound() {
+        val result = tep.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
+        assertEquals(NO_TIMEENTRY, result)
+    }
+
+    /**
+     * Successfully delete a time entry
+     */
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testDeleteTimeEntry() {
+        val newProject = tep.persistNewProject(ProjectName("test project"))
+        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
+        val result = tep.deleteTimeEntry(newTimeEntry)
+        assertTrue(result)
+        val findResult = tep.findTimeEntryById(newTimeEntry.id)
+        assertEquals(NO_TIMEENTRY, findResult)
+    }
+
+    /**
+     * no time entry found
+     */
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testDeleteTimeEntry_NothingFound() {
+        val result = tep.deleteTimeEntry(DEFAULT_TIME_ENTRY)
+        assertFalse(result)
+    }
+
 
 }

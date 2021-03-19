@@ -33,4 +33,6 @@ interface ITimeEntryPersistence {
     fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod) : SubmittedPeriod
     fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry>
     fun unsubmitTimePeriod(stp: SubmittedPeriod)
+    fun deleteTimeEntry(timeEntry: TimeEntry): Boolean
+    fun findTimeEntryById(id: TimeEntryId): TimeEntry
 }

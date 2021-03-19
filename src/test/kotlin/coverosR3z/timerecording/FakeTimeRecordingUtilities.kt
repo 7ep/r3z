@@ -4,6 +4,7 @@ import coverosR3z.misc.DEFAULT_EMPLOYEE
 import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.misc.DEFAULT_SUBMITTED_PERIOD
+import coverosR3z.misc.DEFAULT_TIME_ENTRY
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -28,6 +29,8 @@ class FakeTimeRecordingUtilities(
     var unsubmitTimePeriodBehavior : () -> Unit = {},
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var isInASubmittedPeriodBehavior : () -> Boolean = { false },
+    var deleteTimeEntryBehavior : () -> Boolean = { true },
+    var findTimeEntryByIdBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -91,5 +94,13 @@ class FakeTimeRecordingUtilities(
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         return isInASubmittedPeriodBehavior()
+    }
+
+    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
+        return deleteTimeEntryBehavior()
+    }
+
+    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        return findTimeEntryByIdBehavior()
     }
 }

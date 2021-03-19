@@ -184,6 +184,14 @@ class TimeEntryPersistence(
         }
     }
 
+    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
+        return timeEntryDataAccess.actOn { timeentries -> timeentries.remove(timeEntry) }
+    }
+
+    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull{ it.id == id } ?: NO_TIMEENTRY }
+    }
+
     companion object {
         const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
         const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"

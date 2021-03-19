@@ -7,6 +7,7 @@ import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.makeServerData
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
+import coverosR3z.timerecording.api.EditTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
 import org.junit.Assert.assertEquals
@@ -15,7 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
-class ViewTimeAPITests {
+class EditTimeAPITests {
 
     lateinit var au : FakeAuthenticationUtilities
     lateinit var tru : FakeTimeRecordingUtilities
@@ -37,8 +38,8 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeVTServerData(data)
-        val response = ViewTimeAPI.handlePost(sd).statusCode
+        val sd = makeETServerData(data)
+        val response = EditTimeAPI.handlePost(sd).statusCode
         assertEquals(
             "We should have gotten redirected to the viewTime page",
             StatusCode.SEE_OTHER, response
@@ -54,9 +55,9 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
         ))
-        val sd = makeVTServerData(data)
+        val sd = makeETServerData(data)
 
-        val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
+        val ex = assertThrows(InexactInputsException::class.java){ EditTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}]", ex.message)
     }
@@ -70,9 +71,9 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeVTServerData(data)
+        val sd = makeETServerData(data)
 
-        val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
+        val ex = assertThrows(InexactInputsException::class.java){ EditTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
@@ -86,9 +87,9 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeVTServerData(data)
+        val sd = makeETServerData(data)
 
-        val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
+        val ex = assertThrows(InexactInputsException::class.java){ EditTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
@@ -102,9 +103,9 @@ class ViewTimeAPITests {
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeVTServerData(data)
+        val sd = makeETServerData(data)
 
-        val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
+        val ex = assertThrows(InexactInputsException::class.java){ EditTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
@@ -118,17 +119,17 @@ class ViewTimeAPITests {
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.ID_INPUT.getElemName() to "1"
         ))
-        val sd = makeVTServerData(data)
+        val sd = makeETServerData(data)
 
-        val ex = assertThrows(InexactInputsException::class.java){ ViewTimeAPI.handlePost(sd) }
+        val ex = assertThrows(InexactInputsException::class.java){ EditTimeAPI.handlePost(sd) }
         assertEquals("expected keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.DATE_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]. " +
                 "received keys: [${Elements.PROJECT_INPUT.getElemName()}, ${Elements.TIME_INPUT.getElemName()}, ${Elements.DETAIL_INPUT.getElemName()}, ${Elements.ID_INPUT.getElemName()}]", ex.message)
     }
 
     /**
-     * Helper method to make a [ServerData] for the View time API tests
+     * Helper method to make a [ServerData] for the Edit time API tests
      */
-    private fun makeVTServerData(data: PostBodyData): ServerData {
+    private fun makeETServerData(data: PostBodyData): ServerData {
         return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
     }
 

@@ -12,6 +12,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import java.lang.IllegalStateException
 
 class TimeRecordingUtilityTests {
 
@@ -471,6 +472,48 @@ class TimeRecordingUtilityTests {
     fun testCantHandleThePowerOfProjectCreation() {
         val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(DEFAULT_REGULAR_USER), testLogger)
         assertThrows(UnpermittedOperationException::class.java) {tru.createProject(ProjectName("Chungus amongus"))}
+    }
+
+    /**
+     * We succeed at deleting it, it's gone, return true
+     */
+    @Test
+    fun testCanDeleteTimeEntry() {
+        tep.deleteTimeEntryBehavior = { true }
+        val result = tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
+        assertTrue(result)
+    }
+
+    /**
+     * If the time entry isn't there, we get an exception.
+     * There isn't a reasonable situation where a user should
+     * be able to get into the situation they are deleting a non-existent
+     * time entry, that's an exceptional situation
+     */
+    @Test
+    fun testCannotDeleteMissingTimeEntry() {
+        tep.deleteTimeEntryBehavior = { false }
+        assertThrows(IllegalStateException::class.java) {tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)}
+    }
+
+    /**
+     * Happy path - find a time entry
+     */
+    @Test
+    fun testFindTimeEntryById() {
+        tep.findTimeEntryByIdBehavior = { DEFAULT_TIME_ENTRY }
+        val result = tru.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
+        assertEquals(DEFAULT_TIME_ENTRY, result)
+    }
+
+    /**
+     * Find nothing
+     */
+    @Test
+    fun testFindTimeEntryById_NothingFound() {
+        tep.findTimeEntryByIdBehavior = { NO_TIMEENTRY }
+        val result = tru.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
+        assertEquals(NO_TIMEENTRY, result)
     }
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {

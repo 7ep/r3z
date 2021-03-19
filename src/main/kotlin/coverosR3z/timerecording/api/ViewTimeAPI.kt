@@ -8,10 +8,8 @@ import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*
-import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.*
 
 class ViewTimeAPI(private val sd: ServerData) {
@@ -24,6 +22,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         EDIT_BUTTON(elemClass = "editbutton"),
         CANCEL_BUTTON(id = "cancelbutton"),
         SAVE_BUTTON(id = "savebutton"),
+        DELETE_BUTTON(id = "deletebutton"),
         CREATE_BUTTON(id = "createbutton"),
         DATE_INPUT(elemName = "date_entry"),
         ID_INPUT(elemName = "entry_id"),
@@ -48,29 +47,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         }
     }
 
-    companion object : GetEndpoint, PostEndpoint {
-
-        override val requiredInputs = setOf(
-            Elements.PROJECT_INPUT,
-            Elements.TIME_INPUT,
-            Elements.DETAIL_INPUT,
-            Elements.DATE_INPUT,
-            Elements.ID_INPUT,
-        )
+    companion object : GetEndpoint {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val vt = ViewTimeAPI(sd)
             return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { vt.existingTimeEntriesHTML() }
-        }
-
-        override fun handlePost(sd: ServerData): PreparedResponseData {
-            val vt = ViewTimeAPI(sd)
-            return AuthUtilities.doPOSTAuthenticated(
-                sd.ahd.user,
-                requiredInputs,
-                sd.ahd.data,
-                Role.REGULAR, Role.APPROVER, Role.ADMIN
-            ) { vt.handlePOST() }
         }
 
         override val path: String
@@ -153,9 +134,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         inASubmittedPeriod: Boolean): String {
         return if (! inASubmittedPeriod) {
             return if (idBeingEdited != null) {
-                editTimeHTML(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
+                editTimeHTMLMobile(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
-                entertimeHTML()
+                entertimeHTMLMobile()
             }
         } else {
             ""
@@ -173,14 +154,16 @@ class ViewTimeAPI(private val sd: ServerData) {
         return if (inASubmittedPeriod) {
             var resultString = ""
             for (date in timeentriesByDate.keys.sorted()) {
-                resultString += "<div>${date.stringValue}</div>"
+                val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
+                resultString += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
                 resultString += timeentriesByDate[date]?.sortedBy { it.project.name.value }?.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
             }
             resultString
         } else {
             var resultString = ""
             for (date in timeentriesByDate.keys.sorted()) {
-                resultString += "<div>${date.stringValue}</div>"
+                val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
+                resultString += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
                 resultString += timeentriesByDate[date]
                     ?.sortedBy { it.project.name.value }
                     ?.joinToString("") {
@@ -190,6 +173,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                             renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
                         }
                     }
+                resultString += "<div></div>"
             }
             renderCreateTimeRow(projects) + resultString
         }
@@ -207,6 +191,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             </form>
         </div>"""
 
+        val detailContent = if (it.details.value.isBlank()) "&nbsp;" else safeHtml(it.details.value)
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project time-entry-information">
@@ -219,39 +204,43 @@ class ViewTimeAPI(private val sd: ServerData) {
             <div class="readonly-data truncate" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
         <div class="details time-entry-information">
-            <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(it.details.value)}</div>
+            <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">$detailContent</div>
         </div>
             $editButton
     </div>
     """
     }
 
-    private fun renderEditRow(it: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
+    private fun renderEditRow(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
         return """
-    <div class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-        <form id="edit-desktop-form" action="$path" method="post">
-            <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${it.id.value}" />
+    <div class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${te.id.value}">
+        <form id="edit-desktop-form" action="${EditTimeAPI.path}" method="post">
+            <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
             <div class="project time-entry-information">
                 <select name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" />
-                    ${projectsToOptionsOneSelected(projects, it.project)}
+                    ${projectsToOptionsOneSelected(projects, te.project)}
                 </select>
             </div>
             <div class="date time-entry-information">
-                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(it.date.stringValue)}" />
+                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(te.date.stringValue)}" />
             </div>
             <div class="time time-entry-information">
-                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${it.time.getHoursAsString()}" />
+                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${te.time.getHoursAsString()}" />
             </div>
             <div class="details time-entry-information">
-                <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
+                <textarea name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(te.details.value)}</textarea>
             </div>
         </form>
         <form id="cancellation-form-desktop" action="$path" method="get">
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
         </form>
+        <form id="delete_form" action="${DeleteTimeAPI.path}" method="post">
+                <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
+        </form>
         <div id="edit-buttons-desktop" class="action time-entry-information">
             <button form="cancellation-form-desktop" id="${Elements.CANCEL_BUTTON.getId()}">Cancel</button>
+            <button form="delete_form" id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
             <button form="edit-desktop-form" id="${Elements.SAVE_BUTTON.getId()}">Save</button>
         </div>
     </div>
@@ -289,7 +278,10 @@ class ViewTimeAPI(private val sd: ServerData) {
           """
 
 
-    private fun entertimeHTML(): String {
+    /**
+     * For entering new time on a mobile device
+     */
+    private fun entertimeHTMLMobile(): String {
         val projects = sd.bc.tru.listAllProjects()
 
         return """
@@ -315,7 +307,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 
                 <div class="details">
                     <label for="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}">Details:</label>
-                    <input name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
+                    <textarea name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" ></textarea>
                 </div>
                 
                 <div class="action">
@@ -327,13 +319,13 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     /**
-     * Similar to [entertimeHTML] but for editing entries
+     * Similar to [entertimeHTMLMobile] but for editing entries
      */
-    private fun editTimeHTML(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
+    private fun editTimeHTMLMobile(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
 
         return """
             <div class="mobile-data-entry">
-                <form id="simpler_edit_time_panel" action="$path" method="post">
+                <form id="simpler_edit_time_panel" action="${EditTimeAPI.path}" method="post">
                     <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <div class="project">
@@ -362,10 +354,8 @@ class ViewTimeAPI(private val sd: ServerData) {
         
                     <div class="details">
                         <label for="${Elements.DETAIL_INPUT.getElemName()}">Details:</label>
-                        <input name="${Elements.DETAIL_INPUT.getElemName()}" 
-                            type="text" maxlength="$MAX_DETAILS_LENGTH"
-                            value="${safeAttr(te.details.value)}"
-                             />
+                        <textarea name="${Elements.DETAIL_INPUT.getElemName()}" 
+                            type="text" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(te.details.value)}</textarea>
                     </div>
                     
                     
@@ -373,33 +363,17 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <form id="cancellation_form" action="$path" method="get">
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                 </form>
+                <form id="delete_form" action="${DeleteTimeAPI.path}" method="post">
+                    <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
+                </form>
                 <div id="edit-buttons-mobile" class="action">
                     <button form="cancellation_form" id="${Elements.CANCEL_BUTTON.getId()}">Cancel</button>
+                    <button form="delete_form" id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
                     <button form="simpler_edit_time_panel" id="${Elements.SAVE_BUTTON.getId()}">Save</button>
                 </div>
                    
             </div>
     """
-    }
-
-    fun handlePOST() : PreparedResponseData {
-        val data = sd.ahd.data
-        val tru = sd.bc.tru
-        val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
-        val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
-        val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
-        val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
-        val entryId = TimeEntryId.make(data.mapping[Elements.ID_INPUT.getElemName()])
-
-        val project = tru.findProjectById(projectId)
-        val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employee.id){ employeeIdNotNullMsg })
-
-        val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
-        tru.changeEntry(timeEntry)
-
-        val currentPeriod = data.mapping[Elements.TIME_PERIOD.getElemName()]
-        val viewEntriesPage = path + if (currentPeriod.isNullOrBlank()) "" else "" + "?" + Elements.TIME_PERIOD.getElemName() + "=" + currentPeriod
-        return redirectTo(viewEntriesPage)
     }
 
 }

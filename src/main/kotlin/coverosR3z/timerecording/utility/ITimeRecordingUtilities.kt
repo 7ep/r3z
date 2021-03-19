@@ -42,4 +42,6 @@ interface ITimeRecordingUtilities {
     fun getSubmittedTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
     fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry>
     fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean
+    fun deleteTimeEntry(timeEntry: TimeEntry): Boolean
+    fun findTimeEntryById(id: TimeEntryId): TimeEntry
 }

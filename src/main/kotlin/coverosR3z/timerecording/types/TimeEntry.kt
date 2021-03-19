@@ -3,6 +3,8 @@ package coverosR3z.timerecording.types
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.types.NO_DATE
+import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.utility.checkParseToDouble
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
@@ -17,6 +19,11 @@ const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in
 const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
 private const val minIdMsg = "Valid identifier values are 1 or above"
 
+/**
+ * This is used to represent nothing - just to avoid using null
+ * It's a typed null, essentially
+ */
+val NO_TIMEENTRY = TimeEntry(TimeEntryId(Int.MAX_VALUE), NO_EMPLOYEE, NO_PROJECT, Time(0), NO_DATE, Details("THIS IS NO TIME ENTRY"))
 
 data class Details(val value : String = "") {
     init {

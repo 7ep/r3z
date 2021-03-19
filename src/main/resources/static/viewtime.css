@@ -143,6 +143,8 @@
 
     .mobile-data-entry label {
         position: absolute;
+        left: 6px;
+        top: 3px;
         font-size: 0.6em;
         color: black;
         z-index: 1;
@@ -153,6 +155,11 @@
 
     .mobile-data-entry .details {
         flex-grow: 2;
+    }
+
+    .mobile-data-entry .details textarea {
+       width: 100%;
+       margin-bottom: 15px;
     }
 
     #simpler_enter_time_panel .date {
@@ -169,6 +176,8 @@
 
     #simpler_edit_time_panel {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     .mobile-data-entry {
@@ -234,13 +243,16 @@
     }
 
     #edit-buttons-mobile {
+        width: 100%;
         display: flex;
+        justify-content: space-between;
     }
 
     #edit-buttons-mobile button {
         display: flex;
-        flex-direction: row;
-        justify-content: center;
+    }
+
+    #edit-buttons-mobile #deletebutton {
     }
 
 }
@@ -343,6 +355,11 @@
       display: flex;
     }
 
+    .editable-time-entry-row .details > textarea{
+        width: 260px;
+        height: 21px;
+    }
+
     .readonly-data {
       background-color: #e3dddc;
       border: 1px white solid;
@@ -401,7 +418,7 @@
         border: 1.8px solid #c35061;
         background-color: #c35061;
         border-radius: .5em;
-        width: 80px;
+        min-width: 80px;
     }
 
     button:hover {

@@ -297,7 +297,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     }
 
     private fun setDetailsForEditingTimeEntry(id: Int, details: String) {
-        val detailInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()}]"))
+        val detailInput = driver.findElement(By.cssSelector("#time-entry-$id textarea[name=${ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()}]"))
         detailInput.clear()
         detailInput.sendKeys(details)
     }

@@ -172,4 +172,18 @@ class TimeRecordingUtilities(
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         return persistence.isInASubmittedPeriod(employee, date)
     }
+
+    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
+        val result = persistence.deleteTimeEntry(timeEntry)
+        if (!result) {
+            throw IllegalStateException("Attempted to delete a non-existent time entry by id")
+        }
+        return true
+    }
+
+    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
+        return persistence.findTimeEntryById(id)
+    }
 }

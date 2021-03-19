@@ -27,6 +27,8 @@ class FakeTimeEntryPersistence(
     var unsubmitTimePeriodBehavior : () -> Unit = {},
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var getTimeEntriesForTimePeriodBehavior : () -> Set<TimeEntry> = { emptySet() },
+    var deleteTimeEntryBehavior: () -> Boolean = { true },
+    var findTimeEntryByIdBehavior: () -> TimeEntry = { DEFAULT_TIME_ENTRY },
 ) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
@@ -100,6 +102,14 @@ class FakeTimeEntryPersistence(
 
     override fun unsubmitTimePeriod(stp: SubmittedPeriod) {
         unsubmitTimePeriodBehavior()
+    }
+
+    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
+        return deleteTimeEntryBehavior()
+    }
+
+    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        return findTimeEntryByIdBehavior()
     }
 
 }

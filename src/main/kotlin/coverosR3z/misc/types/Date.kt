@@ -12,6 +12,12 @@ const val dateNotBlankMsg = "date must not be blank"
 val earliestAllowableDate: LocalDate = LocalDate.of(1980, 1, 1)
 val latestAllowableDate: LocalDate = LocalDate.of(2200, 1, 1)
 
+/**
+ * This is used to represent nothing - just to avoid using null
+ * It's a typed null, essentially
+ */
+val NO_DATE = Date(earliestAllowableDate.toEpochDay().toInt())
+
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);
@@ -45,15 +51,13 @@ class Date(val epochDay : Int) : Comparable<Date> {
      */
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
 
-    /**
-     * See here for the description of this formatting: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
-     */
-    private val sdf: SimpleDateFormat = SimpleDateFormat("MMddYYYY")
+    val viewTimeHeaderFormat: String = SimpleDateFormat("EEE, MMM d, ''yy").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
 
     /**
+     * See here for the description of this formatting: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
      * Chrome format "MMddYYYY"
      */
-    val chromeStringValue: String = sdf.format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
+    val chromeStringValue: String = SimpleDateFormat("MMddYYYY").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
 
     init {
         val beginDate = earliestAllowableDate
