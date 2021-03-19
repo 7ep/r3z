@@ -41,16 +41,6 @@ private val cookieRegex = """[cC]ookie: (.*)$""".toRegex()
 private val sessionIdCookieRegex = """sessionId=(.*)""".toRegex()
 
 /**
- * In a host header, the client will send us the hostname and the port.
- * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host
- *
- * We can use this to easily redirect to the secure port if the client
- * comes in on the insecure port
- */
-val hostHeaderRegex = """[hH]ost: (.*):(.*)$""".toRegex()
-
-
-/**
  * The content length is the size of the body of the HTTP request.
  * We want to put some cap on it, for now, since our current expected use
  * case doesn't account for just endlessly huge content.  Maybe when

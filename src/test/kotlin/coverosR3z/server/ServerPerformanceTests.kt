@@ -48,7 +48,7 @@ class ServerPerformanceTests {
                 // not really checking security here, this keeps it simpler
                 allowInsecure = true),
             pmd = pmd)
-        bc = initializeBusinessCode(fs.pmd, testLogger, )
+        bc = initializeBusinessCode(fs.pmd, testLogger)
     }
 
     @After

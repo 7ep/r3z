@@ -50,10 +50,6 @@ interface ILogger {
             println("${getTimestamp()} IMPERATIVE: $msg")
         }
 
-        fun getCurrentMillis() : Long {
-            return System.currentTimeMillis()
-        }
-
         fun getTimestamp() : String {
             return ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT)
         }

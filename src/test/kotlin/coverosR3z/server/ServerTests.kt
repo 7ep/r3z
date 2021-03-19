@@ -1,11 +1,6 @@
 package coverosR3z.server
 
 import coverosR3z.FullSystem
-import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.authentication.api.LoginAPI
-import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.logging.LogTypes
@@ -16,16 +11,19 @@ import coverosR3z.misc.utility.encode
 import coverosR3z.misc.utility.getTime
 import coverosR3z.misc.utility.toStr
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.types.*
+import coverosR3z.server.types.AnalyzedHttpData
+import coverosR3z.server.types.PostBodyData
+import coverosR3z.server.types.StatusCode
+import coverosR3z.server.types.Verb
 import coverosR3z.server.utility.CRLF
 import coverosR3z.server.utility.SocketWrapper
-import coverosR3z.server.utility.parseHttpMessage
 import coverosR3z.server.utility.parseHttpMessageAsClient
-import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.EnterTimeAPI
-import org.junit.*
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
 import java.net.Socket
@@ -58,8 +56,6 @@ class ServerTests {
 
 
     companion object {
-
-        val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
 
         const val port = 2000
         const val sslTestPort = port + 443

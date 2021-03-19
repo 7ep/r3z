@@ -1,7 +1,6 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.misc.DEFAULT_DATE_STRING
 import coverosR3z.misc.DEFAULT_REGULAR_USER
 import coverosR3z.misc.makeServerData
 import coverosR3z.server.APITestCategory
@@ -9,14 +8,12 @@ import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.api.DeleteTimeAPI
-import coverosR3z.timerecording.api.EditTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.lang.IllegalStateException
 
 class DeleteTimeAPITests {
     lateinit var au : FakeAuthenticationUtilities

@@ -9,13 +9,12 @@ import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
-import org.openqa.selenium.NoSuchElementException
 import java.io.File
 
 /**

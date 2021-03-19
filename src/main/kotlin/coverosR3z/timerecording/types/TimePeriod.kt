@@ -36,10 +36,10 @@ data class TimePeriod(val start: Date, val end: Date) {
             val month = Month.from(date.month())
             val year = date.year()
 
-            if (day <= 15) {
-                return TimePeriod(Date(year, month, 1), Date(year, month, 15))
+            return if (day <= 15) {
+                TimePeriod(Date(year, month, 1), Date(year, month, 15))
             } else {
-                return TimePeriod(Date(year, month, 16), Date(year, month, month.calculateLength(year)))
+                TimePeriod(Date(year, month, 16), Date(year, month, month.calculateLength(year)))
             }
         }
 
