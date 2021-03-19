@@ -169,17 +169,29 @@ class ViewTimeAPI(private val sd: ServerData) {
         currentPeriod: TimePeriod,
         inASubmittedPeriod: Boolean
     ): String {
+        val timeentriesByDate = te.groupBy { it.date }
         return if (inASubmittedPeriod) {
-            te.sortedBy { it.date }.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
-        } else {
-            renderCreateTimeRow(projects)  +
-            te.sortedBy { it.date }.joinToString("") {
-                if (it.id.value == idBeingEdited) {
-                    renderEditRow(it, projects, currentPeriod)
-                } else {
-                    renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
-                }
+            var resultString = ""
+            for (date in timeentriesByDate.keys.sorted()) {
+                resultString += "<div>${date.stringValue}</div>"
+                resultString += timeentriesByDate[date]?.sortedBy { it.project.name.value }?.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
             }
+            resultString
+        } else {
+            var resultString = ""
+            for (date in timeentriesByDate.keys.sorted()) {
+                resultString += "<div>${date.stringValue}</div>"
+                resultString += timeentriesByDate[date]
+                    ?.sortedBy { it.project.name.value }
+                    ?.joinToString("") {
+                        if (it.id.value == idBeingEdited) {
+                            renderEditRow(it, projects, currentPeriod)
+                        } else {
+                            renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
+                        }
+                    }
+            }
+            renderCreateTimeRow(projects) + resultString
         }
 
     }
@@ -235,7 +247,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH" value="${safeAttr(it.details.value)}"/>
             </div>
         </form>
-        <form id="cancellation_form" action="$path" method="get">
+        <form id="cancellation-form-desktop" action="$path" method="get">
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
         </form>
         <div id="edit-buttons-desktop" class="action time-entry-information">
