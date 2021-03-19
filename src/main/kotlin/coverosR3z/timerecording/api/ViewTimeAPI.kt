@@ -294,33 +294,33 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         return """
             <form id="simpler_enter_time_panel" class="mobile-data-entry" action="${EnterTimeAPI.path}" method="post">
-                <p>
+                <div class="project">
                     <label for="project_entry">Project:</label>
                     <select name="project_entry" id="project_entry" required="required" />
                         <option selected disabled hidden value="">Choose here</option>
                         ${projectsToOptions(projects)}
                 
-                </select>
-                </p>
+                    </select>
+                </div>
     
-                <p>
-                    <label for="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}">Time:</label>
-                    <input name="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.TIME_INPUT.getId()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
-                </p>
-    
-                <p>
-                    <label for="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}">Details:</label>
-                    <input name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
-                </p>
-                
-                <p>
+                <div class="date">
                     <label for="${EnterTimeAPI.Elements.DATE_INPUT.getElemName()}">Date:</label>
                     <input name="${EnterTimeAPI.Elements.DATE_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DATE_INPUT.getId()}" type="date" value="${Date.now().stringValue}" />
-                </p>
+                </div>
                 
-                <p>
+                <div class="time">
+                    <label for="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}">Time:</label>
+                    <input name="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.TIME_INPUT.getId()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
+                </div>
+                
+                <div class="details">
+                    <label for="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}">Details:</label>
+                    <input name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" type="text" maxlength="$MAX_DETAILS_LENGTH" />
+                </div>
+                
+                <div class="action">
                     <button id="${EnterTimeAPI.Elements.ENTER_TIME_BUTTON.getId()}">Enter time</button>
-                </p>
+                </div>
     
             </form>
     """
@@ -336,45 +336,47 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <form id="simpler_edit_time_panel" action="$path" method="post">
                     <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
-                    <p>
+                    <div class="project">
                         <label for="project_entry">Project:</label>
                         <select name="${Elements.PROJECT_INPUT.getElemName()}" id="project_entry" required="required" />
                             <option selected disabled hidden value="">Choose here</option>
                             ${projectsToOptionsOneSelected(projects, te.project)}
                     
                     </select>
-                    </p>
+                    </div>
+                    
+                    <div class="date">
+                        <label for="${Elements.DATE_INPUT.getElemName()}">Date:</label>
+                        <input name="${Elements.DATE_INPUT.getElemName()}" 
+                            type="date" value="${te.date.stringValue}" />
+                    </div>
         
-                    <p>
+                    <div class="time">
                         <label for="${Elements.TIME_INPUT.getElemName()}">Time:</label>
                         <input name="${Elements.TIME_INPUT.getElemName()}" 
                             type="number" inputmode="decimal" 
                             step="0.25" min="0" max="24" required="required"
                             value="${te.time.getHoursAsString()}" 
                              />
-                    </p>
+                    </div>
         
-                    <p>
+                    <div class="details">
                         <label for="${Elements.DETAIL_INPUT.getElemName()}">Details:</label>
                         <input name="${Elements.DETAIL_INPUT.getElemName()}" 
                             type="text" maxlength="$MAX_DETAILS_LENGTH"
                             value="${safeAttr(te.details.value)}"
                              />
-                    </p>
+                    </div>
                     
-                    <p>
-                        <label for="${Elements.DATE_INPUT.getElemName()}">Date:</label>
-                        <input name="${Elements.DATE_INPUT.getElemName()}" 
-                            type="date" value="${te.date.stringValue}" />
-                    </p>
+                    
                 </form>
                 <form id="cancellation_form" action="$path" method="get">
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                 </form>
-                <p id="edit-buttons-mobile">
+                <div id="edit-buttons-mobile" class="action">
                     <button form="cancellation_form" id="${Elements.CANCEL_BUTTON.getId()}">Cancel</button>
                     <button form="simpler_edit_time_panel" id="${Elements.SAVE_BUTTON.getId()}">Save</button>
-                </p>
+                </div>
                    
             </div>
     """

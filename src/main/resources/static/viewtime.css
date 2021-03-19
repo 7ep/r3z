@@ -7,49 +7,49 @@
         line-height: 26px;
     }
 
-    .time input {
+    .timerows-container .time input {
         width: 36px;
     }
 
-    .project {
+    .timerows-container .project {
       width: 65px;
       position: relative;
     }
 
-    .project select {
+    .timerows-container .project select {
       width: inherit;
     }
 
-    .date {
+    .readonly-time-entry-row .date {
       display: none;
     }
 
-    .time {
+    .timerows-container .time {
      width: 42px;
      position: relative;
     }
 
-    .details {
+    .timerows-container .details {
       position: relative;
       width: 204px;
     }
 
-    .details input {
+    .timerows-container .details input {
       width: 107px;
     }
 
-    .editbutton {
+    .timerows-container .editbutton {
         width: 41px;
         height: 25px;
     }
 
-    .truncate {
+    .timerows-container .truncate {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    input {
+    .timerows-container input {
       background-color: #e3dddc;
       border: 1px white solid;
       display: flex;
@@ -135,65 +135,91 @@
         border: 1.8px solid blue;
     }
 
-    #simpler_enter_time_panel label {
-      font-style: bold;
-      font-size: 120%;
+    .mobile-data-entry div {
+        position: relative;
+        display: flex;
+        padding: 2px;
+    }
+
+    .mobile-data-entry label {
+        position: absolute;
+        font-size: 0.6em;
+        color: black;
+        z-index: 1;
+    }
+
+    #simpler_enter_time_panel {
+    }
+
+    .mobile-data-entry .details {
+        flex-grow: 2;
+    }
+
+    #simpler_enter_time_panel .date {
+    }
+
+    #simpler_enter_time_panel .project {
+    }
+
+    #simpler_enter_time_panel .time {
+    }
+
+    #simpler_enter_time_panel .action {
+    }
+
+    #simpler_edit_time_panel {
+        display: flex;
     }
 
     .mobile-data-entry {
       border: 2px solid #e2e2e2;
       margin: auto;
-      border-radius: .5em;
+      border-radius: 6px;
       background-color: white;
       opacity: 82%;
       width: 350px;
       padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
     }
 
     .mobile-data-entry input {
-      margin-bottom: 1em;
-      padding: .8em 1em .8em 1em;
-      font-size: 110%;
       border: 1.8px solid #3b3b3b;
-      border-radius: .3em;
+      border-radius: 6px;
       width: 100%;
       background-color: #CFC1C1;
       opacity: 82%;
       color: #333333;
-      box-sizing: border-box;
+      padding: 3px;
+      height: 20px;
     }
 
     .mobile-data-entry select:focus,
     .mobile-data-entry input:focus {
         outline: none;
         background-color: inherit;
-        border-radius: .3em;
+        border-radius: 6px;
         border: 1.8px solid blue;
     }
 
     .mobile-data-entry select {
-      margin-bottom: 1em;
-      font-size: 110%;
       border: 1.8px solid #3b3b3b;
-      border-radius: .3em;
-      width: 100%;
+      border-radius: 6px;
       background-color: inherit;
-      padding: .8em 1em .8em 1em;
       color: #333333;
-      box-sizing: border-box;
+      padding: 3px;
+      height: 30px;
     }
 
     .mobile-data-entry button {
       cursor: pointer;
-      font-size: 120%;
-      margin: 8px 0 1px 0;
       color: white;
       background-color: #C65364;
       border: 1.8px solid #3b3b3b;
-      border-radius: .5em;
-      width: 100%;
-      padding: 1em;
-      box-sizing: border-box;
+      border-radius: 6px;
+      padding: 3px;
+      height: 30px;
     }
 
     .mobile-data-entry button:hover {
@@ -203,7 +229,7 @@
 
     .mobile-data-entry button:focus {
         outline: none;
-        border-radius: .5em;
+        border-radius: 6px;
         border: 1.8px solid blue;
     }
 
