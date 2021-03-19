@@ -210,13 +210,13 @@ class ViewTimeAPI(private val sd: ServerData) {
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project time-entry-information">
-            <div class="readonly-data" name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
+            <div class="readonly-data truncate" name="${Elements.PROJECT_INPUT.getElemName()}">${safeAttr(it.project.name.value)}</div>
         </div>
         <div class="date time-entry-information">
-            <div class="readonly-data" name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
+            <div class="readonly-data truncate" name="${Elements.DATE_INPUT.getElemName()}">${safeAttr(it.date.stringValue)}</div>
         </div>
         <div class="time time-entry-information">
-            <div class="readonly-data" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
+            <div class="readonly-data truncate" name="${Elements.TIME_INPUT.getElemName()}">${it.time.getHoursAsString()}</div>
         </div>
         <div class="details time-entry-information">
             <div class="readonly-data truncate" name="${Elements.DETAIL_INPUT.getElemName()}" title="${safeAttr(it.details.value)}">${safeHtml(it.details.value)}</div>
