@@ -3,7 +3,7 @@
     .time-entry-information input,
     .time-entry-information select,
     .time-entry-information div {
-        height: 22px;
+        /* height: 22px; */
         line-height: 26px;
     }
 
@@ -24,6 +24,9 @@
       display: none;
     }
 
+    .readonly-time-entry-row .details > div {
+    }
+
     .timerows-container .time {
      width: 42px;
      position: relative;
@@ -32,6 +35,10 @@
     .timerows-container .details {
       position: relative;
       width: 170px;
+    }
+
+    .timerows-container .details > div {
+        overflow-wrap: break-word;
     }
 
     .timerows-container .details input {
@@ -43,28 +50,27 @@
         height: 25px;
     }
 
-    .timerows-container .truncate {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
     .timerows-container input {
       background-color: #e3dddc;
       border: 1px white solid;
       display: flex;
     }
 
-    .timerows-container .readonly-data {
+    .timerows-container .time-entry-information {
       background-color: #e3dddc;
       border: 1px white solid;
+
+    }
+
+    .timerows-container .time-entry-information > div {
+        line-height: 1em;
+        font-size: 0.9em;
     }
 
     .readonly-time-entry-row {
       display: flex;
       border-bottom: 1.5px #a8a1a0 solid;
       margin: auto;
-      height: 24px;
     }
 
     .time_period_selector form,
@@ -137,8 +143,9 @@
 
     .mobile-data-entry div {
         position: relative;
-        display: flex;
         padding: 2px;
+        display: flex;
+        flex: 1;
     }
 
     .mobile-data-entry label {
@@ -150,34 +157,32 @@
         z-index: 1;
     }
 
-    #simpler_enter_time_panel {
+    .mobile-data-entry .details {
     }
 
-    .mobile-data-entry .details {
-        flex-grow: 2;
+    #simpler_enter_time_panel {
+    flex-direction: column;
+    }
+
+    #simpler_enter_time_panel .row {
+        width: 100%;
+    }
+
+    #simpler_enter_time_panel .row .action {
+    flex: 0;
     }
 
     .mobile-data-entry .details textarea {
-       width: 100%;
-       margin-bottom: 15px;
-    }
-
-    #simpler_enter_time_panel .date {
-    }
-
-    #simpler_enter_time_panel .project {
-    }
-
-    #simpler_enter_time_panel .time {
-    }
-
-    #simpler_enter_time_panel .action {
+       height: 20px;
     }
 
     #simpler_edit_time_panel {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        flex-direction: column;
+    }
+
+    #simpler_edit_time_panel .details textarea {
+        height: 55px;
     }
 
     .mobile-data-entry {
@@ -190,18 +195,21 @@
       padding: 10px;
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-start;
+      justify-content: space-between;
     }
 
+    .mobile-data-entry select,
+    .mobile-data-entry textarea,
     .mobile-data-entry input {
       border: 1.8px solid #3b3b3b;
       border-radius: 6px;
-      width: 100%;
       background-color: #CFC1C1;
       opacity: 82%;
       color: #333333;
       padding: 3px;
       height: 20px;
+      flex: 1;
+      width: 100%;
     }
 
     .mobile-data-entry select:focus,
@@ -213,11 +221,6 @@
     }
 
     .mobile-data-entry select {
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      background-color: inherit;
-      color: #333333;
-      padding: 3px;
       height: 30px;
     }
 
@@ -229,6 +232,9 @@
       border-radius: 6px;
       padding: 3px;
       height: 30px;
+      width: 80px;
+      justify-content: center;
+      line-height: 1.7em;
     }
 
     .mobile-data-entry button:hover {
@@ -242,6 +248,28 @@
         border: 1.8px solid blue;
     }
 
+
+    .timerows-container button {
+      cursor: pointer;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: 6px;
+      padding: 3px;
+      height: 30px;
+    }
+
+    .timerows-container button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    .timerows-container button:focus {
+        outline: none;
+        border-radius: 6px;
+        border: 1.8px solid blue;
+    }
+
     #edit-buttons-mobile {
         width: 100%;
         display: flex;
@@ -250,6 +278,8 @@
 
     #edit-buttons-mobile button {
         display: flex;
+        justify-content: center;
+        line-height: 2em;
     }
 
     #edit-buttons-mobile #deletebutton {
@@ -324,6 +354,7 @@
 
     .details div {
       width: 303px;
+      overflow-wrap: break-word;
     }
 
     .details input {
@@ -360,7 +391,7 @@
         height: 21px;
     }
 
-    .readonly-data {
+    .readonly-time-entry-row .time-entry-information {
       background-color: #e3dddc;
       border: 1px white solid;
       line-height: 1.4em;
@@ -417,8 +448,8 @@
         height: inherit;
         border: 1.8px solid #c35061;
         background-color: #c35061;
+        color: white;
         border-radius: .5em;
-        min-width: 80px;
     }
 
     button:hover {

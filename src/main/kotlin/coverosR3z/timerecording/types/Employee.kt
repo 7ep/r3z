@@ -8,7 +8,7 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryD
 import coverosR3z.persistence.types.SerializableCompanion as SerializableCompanion
 
 private const val maxEmployeeCount = 100_000_000
-private const val maxEmployeeNameSize = 30
+const val maxEmployeeNameSize = 30
 private const val maxEmployeeNameSizeMsg = "Max size of employee name is $maxEmployeeNameSize"
 private const val maxEmployeeMsg = "No way this company has more than 100 million employees"
 const val minEmployeeIdMsg = "Valid identifier values are 0 or above, with 0 reserved for the system user"

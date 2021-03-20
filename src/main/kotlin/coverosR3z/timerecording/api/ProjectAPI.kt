@@ -8,6 +8,8 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.ProjectName
+import coverosR3z.timerecording.types.maxEmployeeNameSize
+import coverosR3z.timerecording.types.maxProjectNameSize
 
 class ProjectAPI(private val sd: ServerData) {
 
@@ -87,7 +89,7 @@ class ProjectAPI(private val sd: ServerData) {
             <form action="$path" method="post">
                 <p>
                     <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" />
+                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" />
                 </p>
             
                 <p>

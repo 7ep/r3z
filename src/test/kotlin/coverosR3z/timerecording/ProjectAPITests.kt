@@ -10,6 +10,7 @@ import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.types.maxProjectNameSize
 import coverosR3z.timerecording.types.maxProjectNameSizeMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals
@@ -48,7 +49,7 @@ class ProjectAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_HugeName() {
-        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(31)))
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize + 1)))
         val sd = makeTypicalServerDataForProjectAPI(data)
 
         val ex = assertThrows(IllegalArgumentException::class.java){ ProjectAPI.handlePost(sd)}
@@ -62,7 +63,7 @@ class ProjectAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_BigName() {
-        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(30)))
+        val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize)))
         val sd = makeTypicalServerDataForProjectAPI(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)

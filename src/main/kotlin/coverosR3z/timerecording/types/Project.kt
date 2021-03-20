@@ -8,7 +8,7 @@ import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryDeserialize
 
 const val maximumProjectsCount = 100_000_000
-private const val maxProjectNameSize = 30
+const val maxProjectNameSize = 100
 const val maxProjectNameSizeMsg = "Max size of project name is $maxProjectNameSize"
 private const val maxProjectErrorMsg = "No project id allowed over $maximumProjectsCount"
 private const val emptyProjectNameMsg = "Makes no sense to have an empty project name"
