@@ -49,13 +49,16 @@ class PureMemoryDatabase(
 
         other as PureMemoryDatabase
 
+        if (diskPersistence != other.diskPersistence) return false
         if (data != other.data) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return data.hashCode()
+        var result = diskPersistence?.hashCode() ?: 0
+        result = 31 * result + data.hashCode()
+        return result
     }
 
     companion object {

@@ -150,7 +150,8 @@ task nouitest(type: Test) {
 
 task uitest(type: Test) {
     group = "Verification"
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
+//    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     description 'Runs the user interface (UI) tests. That is, uses the browser.'
     useJUnit {
         includeCategories 'coverosR3z.uitests.UITestCategory'
@@ -199,7 +200,8 @@ test {
 }
 
 tasks.withType(Test).configureEach {
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
+//    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }
 
 // Configure Jacoco, our code-coverage tool
