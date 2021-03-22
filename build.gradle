@@ -110,6 +110,10 @@ task performancetest(type: Test) {
     useJUnit {
         includeCategories 'coverosR3z.misc.PerformanceTestCategory'
     }
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/performancetest.exec")
+        classDumpDir = file("$buildDir/jacoco/performancetestclasspathdumps")
+    }
 }
 
 task apitest(type: Test) {
@@ -117,6 +121,10 @@ task apitest(type: Test) {
     description 'Runs the API tests.'
     useJUnit {
         includeCategories 'coverosR3z.server.APITestCategory'
+    }
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/apitest.exec")
+        classDumpDir = file("$buildDir/jacoco/apitestclasspathdumps")
     }
 }
 
@@ -128,6 +136,10 @@ task unittest(type: Test) {
                 'coverosR3z.uitests.UITestCategory',
                 'coverosR3z.misc.IntegrationTestCategory',
                 'coverosR3z.server.APITestCategory'
+    }
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/unittest.exec")
+        classDumpDir = file("$buildDir/jacoco/unittestclasspathdumps")
     }
 }
 
@@ -150,11 +162,13 @@ task nouitest(type: Test) {
 
 task uitest(type: Test) {
     group = "Verification"
-    // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
-//    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     description 'Runs the user interface (UI) tests. That is, uses the browser.'
     useJUnit {
         includeCategories 'coverosR3z.uitests.UITestCategory'
+    }
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/uitest.exec")
+        classDumpDir = file("$buildDir/jacoco/uitestclasspathdumps")
     }
 }
 
@@ -164,19 +178,29 @@ task integrationtest(type: Test) {
     useJUnit {
         includeCategories 'coverosR3z.misc.IntegrationTestCategory'
     }
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/integrationtest.exec")
+        classDumpDir = file("$buildDir/jacoco/integrationtestclasspathdumps")
+    }
 }
 
 task alltests(type: GradleBuild) {
     group = "Verification"
     description 'Runs all the tests, by kind, in order - unit tests, then integration, api, perf, ui'
     tasks = ['unittest', 'integrationtest', 'apitest', 'performancetest', 'uitest']
-    mustRunAfter test
 }
 
 // runs all the tests
 test {
+
+}
+
+tasks.withType(Test).configureEach {
+    // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
+    // maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
     jacoco {
-      includes = ['coverosR3z.*']
+        includes = ['coverosR3z.*']
     }
 
     testLogging {
@@ -206,14 +230,9 @@ test {
     finalizedBy jacocoTestReport
 }
 
-tasks.withType(Test).configureEach {
-    // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
-//    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-}
-
 // Configure Jacoco, our code-coverage tool
 jacocoTestReport {
-    executionData(fileTree(dir: "$buildDir/jacoco", include: '*.exec'))
+    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
         xml.enabled true
         csv.enabled false
