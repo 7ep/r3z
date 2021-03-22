@@ -312,3 +312,4 @@
 2021-03-21	numberOfThreads: 10	numberOfRequests: 300	time: 101
 2021-03-21	numberOfThreads: 10	numberOfRequests: 300	time: 130
 2021-03-21	numberOfThreads: 10	numberOfRequests: 300	time: 95
+2021-03-22	numberOfThreads: 10	numberOfRequests: 300	time: 89

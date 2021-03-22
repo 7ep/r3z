@@ -166,6 +166,13 @@ task integrationtest(type: Test) {
     }
 }
 
+task alltests(type: GradleBuild) {
+    group = "Verification"
+    description 'Runs all the tests, by kind, in order - unit tests, then integration, api, perf, ui'
+    tasks = ['unittest', 'integrationtest', 'apitest', 'performancetest', 'uitest']
+    mustRunAfter test
+}
+
 // runs all the tests
 test {
     jacoco {
