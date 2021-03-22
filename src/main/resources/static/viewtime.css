@@ -3,7 +3,6 @@
     .time-entry-information input,
     .time-entry-information select,
     .time-entry-information div {
-        /* height: 22px; */
         line-height: 26px;
     }
 
@@ -114,7 +113,7 @@
         display: flex;
      }
 
-     nav.time_period_selector > div {
+     #timeperiod_display {
         color: black;
         font-size: 0.9em;
         display: flex;
@@ -158,11 +157,16 @@
         background-color: white;
     }
 
-    .mobile-data-entry .details {
+    .mobile-data-entry .date {
+        flex: 2;
+    }
+
+    .mobile-data-entry .project {
+        flex: 2;
     }
 
     #simpler_enter_time_panel {
-    flex-direction: column;
+        flex-direction: column;
     }
 
     #simpler_enter_time_panel .row {
@@ -170,7 +174,7 @@
     }
 
     #simpler_enter_time_panel .row .action {
-    flex: 0;
+       flex: 0;
     }
 
     .mobile-data-entry .details textarea {
@@ -211,6 +215,7 @@
       height: 20px;
       flex: 1;
       width: 100%;
+      font-size: 16px;
     }
 
     .mobile-data-entry select:focus,
@@ -223,6 +228,7 @@
 
     .mobile-data-entry select {
       height: 30px;
+      font-size: 16px;
     }
 
     .mobile-data-entry button {
@@ -308,6 +314,17 @@
         height: 1.6em;
         width: 3.6em;
     }
+
+     #timeperiod_display {
+        color: black;
+        font-size: 0.9em;
+        display: flex;
+        width: 162px;
+        border: 1px solid black;
+        line-height: 21px;
+        padding-left: 10px;
+        padding-right: 10px;
+     }
 
     input:focus {
       background-color: inherit;

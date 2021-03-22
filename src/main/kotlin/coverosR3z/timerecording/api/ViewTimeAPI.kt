@@ -112,7 +112,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
                         <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
                     </form>
-                    <div>${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
+                    <div id="timeperiod_display">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
                     <form action="$path">
                         <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
                         <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
