@@ -28,3 +28,6 @@ const val LENGTH_OF_BYTES_OF_INVITATION_CODE = 10
  */
 const val STATIC_FILES_DIRECTORY = "static/"
 
+const val SIZE_OF_DECENT_PASSWORD = 20
+
+

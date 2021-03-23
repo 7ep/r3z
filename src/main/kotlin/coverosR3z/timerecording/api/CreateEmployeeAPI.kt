@@ -3,8 +3,6 @@ package coverosR3z.timerecording.api
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.Role
-import coverosR3z.authentication.types.maxUserNameSize
-import coverosR3z.authentication.types.minUserNameSize
 import coverosR3z.misc.utility.safeAttr
 import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.types.*

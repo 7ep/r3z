@@ -8,7 +8,6 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.ProjectName
-import coverosR3z.timerecording.types.maxEmployeeNameSize
 import coverosR3z.timerecording.types.maxProjectNameSize
 
 class ProjectAPI(private val sd: ServerData) {

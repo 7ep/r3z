@@ -2,18 +2,15 @@ package coverosR3z.misc.utility
 
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.server.types.Element
+import java.lang.IllegalStateException
 import java.net.URLDecoder
 import java.net.URLEncoder
-import kotlin.random.Random
 
-/**
- * Generate a secure random string
- *
- * @param size - number of random bytes to generate (*not* the size of the string - the string is double this size)
- */
-fun generateRandomString(size : Int): String {
-    val randomBytes: ByteArray = Random.nextBytes(size)
-    return randomBytes.joinToString("") { "%02x".format(it) }
+fun generateRandomString(length: Int) : String {
+    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+    return (1..length)
+        .map { allowedChars.random() }
+        .joinToString("")
 }
 
 /**

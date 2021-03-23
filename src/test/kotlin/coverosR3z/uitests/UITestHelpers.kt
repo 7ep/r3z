@@ -78,10 +78,9 @@ class LoginPage(private val driver: WebDriver, private val domain : String) {
 
 class RegisterPage(private val driver: WebDriver, private val domain : String) {
 
-    fun register(username: String, password: String, invitationCode: String) {
+    fun register(username: String, invitationCode: String) {
         driver.get("$domain/${RegisterAPI.path}?code=$invitationCode")
         driver.findElement(By.id("username")).sendKeys(username)
-        driver.findElement(By.id("password")).sendKeys(password)
         driver.findElement(By.id("register_button")).click()
     }
 }

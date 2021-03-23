@@ -68,4 +68,6 @@ interface IAuthenticationUtilities {
 
     fun listAllInvitations() : Set<Invitation>
 
+    fun changePassword(user: User, password: Password): ChangePasswordResult
+
 }

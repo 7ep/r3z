@@ -1,8 +1,7 @@
-package coverosR3z.authentication
+package coverosR3z.authentication.api
 
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg

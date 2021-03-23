@@ -71,12 +71,6 @@ class ChangeTrackingSet<T: IndexableSerializable> : MutableConcurrentSet<T>() {
      * access to the getIndex() command.  Then we will
      * overwrite the value stored.
      *
-     * There is some nuance to this method.
-     *
-     * In particular, this will put a DELETE followed
-     * by an ADD into the modified queue, for the files
-     * to be changed on disk.
-     *
      */
     override fun update(element: T) : Boolean {
         modified.add(Pair(element, UPDATE))

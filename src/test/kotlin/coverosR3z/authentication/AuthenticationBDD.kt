@@ -1,23 +1,19 @@
 package coverosR3z.authentication
 
-import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.*
+import coverosR3z.authentication.types.RegistrationResultStatus
+import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.bddframework.BDD
-import coverosR3z.fakeServerObjects
 import coverosR3z.misc.*
-import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
-import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.RecordTimeResult
 import coverosR3z.timerecording.types.StatusEnum
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AuthenticationBDD {
@@ -36,21 +32,6 @@ class AuthenticationBDD {
 
         assertEquals(RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null), result)
         s.markDone("then the system disallows it.")
-    }
-
-    @BDD
-    @Test
-    fun `I should be able to register a user with a valid password`() {
-        val s = AuthenticationUserStory.getScenario("I should be able to register a user with a valid password")
-
-        val (pmd, au) = startWithEmptyDatabase()
-        s.markDone("Given I am not currently registered,")
-
-        registerANewUser(pmd, au)
-        s.markDone("when I register a new user,")
-
-        assertTrue("The user should be registered", au.isUserRegistered(DEFAULT_USER.name))
-        s.markDone("then the system records that the registration succeeded.")
     }
 
     @BDD
@@ -84,37 +65,6 @@ class AuthenticationBDD {
         s.markDone("then the system knows who I am.")
     }
 
-    @BDD
-    @Test
-    fun `if I enter a bad password while logging in, I will be denied access`() {
-        val s = AuthenticationUserStory.getScenario("if I enter a bad password while logging in, I will be denied access")
-
-        val au = doSuccessfulRegistration()
-        s.markDone("Given I have registered,")
-
-        val (status, _) = enterInvalidCredentials(au)
-        s.markDone("when I login with the wrong credentials,")
-
-        assertEquals(LoginResult.FAILURE, status)
-        s.markDone("then the system denies me access.")
-    }
-
-    @BDD
-    @Test
-    fun `if I enter too short a password while registering, it will disallow it`() {
-        val s = AuthenticationUserStory.getScenario("if I enter too short a password while registering, it will disallow it")
-
-        val (_, au) = startWithEmptyDatabase()
-        s.markDone("Given I am not registered,")
-
-        val ex = enterTooShortPassword(au)
-        s.markDone("when I register with too short of a password,")
-
-        assertEquals(passwordMustBeLargeEnoughMsg, ex.message)
-        s.markDone("then the system denies the registration on the basis of a bad password.")
-    }
-
-
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -134,33 +84,6 @@ class AuthenticationBDD {
             return Pair(tru, sarah)
         }
 
-    }
-
-    private fun enterTooShortPassword(au: AuthenticationUtilities): IllegalArgumentException {
-        val data =
-            PostBodyData(mapOf(
-                RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
-                RegisterAPI.Elements.PASSWORD_INPUT.getElemName() to "too short",
-                RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_INVITATION_CODE.value))
-        val sd = ServerData(
-            BusinessCode(tru, au),
-            fakeServerObjects,
-            AnalyzedHttpData(data = data, user = NO_USER),
-            authStatus = AuthStatus.UNAUTHENTICATED,
-            testLogger
-        )
-        return assertThrows(IllegalArgumentException::class.java) { RegisterAPI.handlePost(sd) }
-    }
-
-    private fun enterInvalidCredentials(au: AuthenticationUtilities) =
-        au.login(DEFAULT_USER.name, Password("I'm not even trying to be a good password"))
-
-    private fun doSuccessfulRegistration(): AuthenticationUtilities {
-        val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
-        val regStatus = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
-        assertEquals(RegistrationResultStatus.SUCCESS, regStatus.status)
-        return au
     }
 
     private fun assertSystemRecognizesUser(
@@ -183,24 +106,6 @@ class AuthenticationBDD {
         val au = AuthenticationUtilities(authPersistence, testLogger)
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return au
-    }
-
-    private fun registerANewUser(
-        pmd: PureMemoryDatabase,
-        au: AuthenticationUtilities
-    ) {
-        val tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger),
-            cu = CurrentUser(DEFAULT_ADMIN_USER), logger = testLogger)
-        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
-
-        au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
-    }
-
-    private fun startWithEmptyDatabase(): Pair<PureMemoryDatabase, AuthenticationUtilities> {
-        val pmd = createEmptyDatabase()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
-        return Pair(pmd, au)
     }
 
 

@@ -274,7 +274,7 @@ class AuthenticationUtilitiesTests {
     @Test
     fun testShouldCreateNewSession() {
         val newSessionId = authUtils.createNewSession(DEFAULT_USER)
-        assertEquals(LENGTH_OF_BYTES_OF_SESSION_STRING * 2, newSessionId.length)
+        assertEquals(LENGTH_OF_BYTES_OF_SESSION_STRING, newSessionId.length)
     }
 
     /**
@@ -315,4 +315,11 @@ class AuthenticationUtilitiesTests {
         val result = authUtils.removeInvitation(DEFAULT_EMPLOYEE)
         assertTrue(result)
     }
+
+    @Test
+    fun testCanChangePassword() {
+        val result = authUtils.changePassword(DEFAULT_USER, Password("newPasswordHere"))
+        assertEquals(ChangePasswordResult.SUCCESSFULLY_CHANGED, result)
+    }
+
 }

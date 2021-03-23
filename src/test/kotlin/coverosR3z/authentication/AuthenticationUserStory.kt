@@ -14,22 +14,6 @@ object AuthenticationUserStory : UserStory(
     init {
 
         addScenario(
-            "if I enter a bad password while logging in, I will be denied access",
-
-                "Given I have registered,",
-                "when I login with the wrong credentials,",
-                "then the system denies me access."
-        )
-
-        addScenario(
-            "if I enter too short a password while registering, it will disallow it",
-
-                "Given I am not registered,",
-                "when I register with too short of a password,",
-                "then the system denies the registration on the basis of a bad password."
-        )
-
-        addScenario(
             "I should be able to log in once I'm a registered user",
 
                 "Given I have registered,",
@@ -43,14 +27,6 @@ object AuthenticationUserStory : UserStory(
                 "Given I have previously been registered,",
                 "when I try to register again,",
                 "then the system records that the registration failed."
-        )
-
-        addScenario(
-            "I should be able to register a user with a valid password",
-
-                "Given I am not currently registered,",
-                "when I register a new user,",
-                "then the system records that the registration succeeded."
         )
 
         addScenario(

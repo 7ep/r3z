@@ -108,4 +108,13 @@ class AuthenticationUtilities(
         return ap.listAllInvitations()
     }
 
+    override fun changePassword(user: User, password: Password): ChangePasswordResult {
+        val didChangePassword = ap.updateUser(user.copy(hash = Hash.createHash(password, user.salt)))
+        return if (didChangePassword) {
+            ChangePasswordResult.SUCCESSFULLY_CHANGED
+        } else {
+            ChangePasswordResult.FAILED_TO_CHANGE
+        }
+    }
+
 }

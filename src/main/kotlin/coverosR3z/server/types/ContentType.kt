@@ -11,7 +11,6 @@ enum class ContentType(val value: String) {
 
     // Application MIME types - see https://www.iana.org/assignments/media-types/media-types.xhtml#application
     APPLICATION_JAVASCRIPT("Content-Type: application/javascript"),
-    APPLICATION_JSON("Content-Type: application/json"),
     IMAGE_JPEG("Content-Type: image/jpeg"),
     IMAGE_WEBP("Content-Type: image/webp")
 

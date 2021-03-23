@@ -1,5 +1,6 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.misc.utility.safeHtml
@@ -17,7 +18,7 @@ class PageComponents(sd: ServerData) {
 """.trimIndent()
 
         private fun renderUserInfo(): String {
-                return if (user == NO_USER) "" else """<span><span id="username">${safeHtml(user.name.value)}</span> <a class="header-button" href="logout">logout</a></span>"""
+                return if (user == NO_USER) "" else """<span><span id="username"><a class="header-button" href="${ChangePasswordAPI.path}">${safeHtml(user.name.value)}</a></span> <a class="header-button" href="logout">logout</a></span>"""
         }
 
         fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """

@@ -1,7 +1,10 @@
 package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
+import coverosR3z.config.SIZE_OF_DECENT_PASSWORD
+import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.misc.utility.safeAttr
+import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
@@ -10,12 +13,13 @@ import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.server.utility.failureHTML
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class RegisterAPI(private val sd: ServerData) {
 
     enum class Elements(private val elemName: String, private val id: String) : Element {
         USERNAME_INPUT("username", "username"),
-        PASSWORD_INPUT("password", "password"),
+        NEW_PASSWORD("", "new_password"),
         INVITATION_INPUT("invitation", "invitation"),
         REGISTER_BUTTON("", "register_button"),;
 
@@ -36,7 +40,6 @@ class RegisterAPI(private val sd: ServerData) {
 
         override val requiredInputs = setOf(
             Elements.USERNAME_INPUT,
-            Elements.PASSWORD_INPUT,
             Elements.INVITATION_INPUT,
             Elements.USERNAME_INPUT,
         )
@@ -44,8 +47,13 @@ class RegisterAPI(private val sd: ServerData) {
             get() = "register"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
+            // we won't even allow the user to see the register page unless they walk
+            // in with a completely valid invitation code.  None of this half-cooked blarney.
+            val invitationCode = sd.ahd.queryString["code"] ?: return redirectTo(HomepageAPI.path)
+            if (sd.bc.au.getEmployeeFromInvitationCode(InvitationCode(invitationCode)) == NO_EMPLOYEE) return redirectTo(HomepageAPI.path)
+
             val r = RegisterAPI(sd)
-            return doGETRequireUnauthenticated(sd.ahd.user) { r.registerHTML() }
+            return doGETRequireUnauthenticated(sd.ahd.user) { r.registerHTML(invitationCode) }
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
@@ -58,13 +66,24 @@ class RegisterAPI(private val sd: ServerData) {
         val data = sd.ahd.data.mapping
         val au = sd.bc.au
         val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
-        val password = Password.make(data[Elements.PASSWORD_INPUT.getElemName()])
+        val password = Password(generateRandomString(SIZE_OF_DECENT_PASSWORD))
         val invitationCode = InvitationCode.make(data[Elements.INVITATION_INPUT.getElemName()])
         val result = au.register(username, password, invitationCode)
         return when (result.status) {
             RegistrationResultStatus.SUCCESS -> {
                 au.removeInvitation(result.user.employee)
-                redirectTo(LoginAPI.path)
+                val newUserHtml = """
+                <div class="container">
+                    <p>
+                        Your new password is <span id="${Elements.NEW_PASSWORD.getId()}">${password.value}</span>
+                    </p>
+                    <p>
+                        <em>store this somewhere, like a secure password manager.</em>
+                    </p>
+                    <p><a href="${HomepageAPI.path}">Homepage</a></p>
+                </div>
+                """
+                okHTML(PageComponents(sd).makeTemplate("New password generated", "RegisterAPI", newUserHtml, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />"""))
             }
             RegistrationResultStatus.NO_INVITATION_FOUND -> {
                 handleUnauthorized()
@@ -75,8 +94,7 @@ class RegisterAPI(private val sd: ServerData) {
         }
     }
 
-    private fun registerHTML() : String {
-        val invitationCode = sd.ahd.queryString["code"]
+    private fun registerHTML(invitationCode: String): String {
 
         val body = """
         <form method="post" action="$path">
@@ -87,12 +105,6 @@ class RegisterAPI(private val sd: ServerData) {
                     <td>
                         <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
                         <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="${Elements.PASSWORD_INPUT.getElemName()}">Password</label>
-                        <input type="password" name="${Elements.PASSWORD_INPUT.getElemName()}" id="${Elements.PASSWORD_INPUT.getId()}" minlength="$minPasswordSize" maxlength="$maxPasswordSize" required="required" />
                     </td>
                 </tr>
                 <tr>

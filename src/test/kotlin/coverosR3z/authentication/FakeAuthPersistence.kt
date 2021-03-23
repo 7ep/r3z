@@ -24,7 +24,8 @@ class FakeAuthPersistence(
     var createInvitationBehavior: () -> Invitation = { DEFAULT_INVITATION },
     var getEmployeeFromInvitationCodeBehavior: () -> Employee = { DEFAULT_EMPLOYEE },
     var removeInvitationBehavior: () -> Boolean = { true },
-    var listAllInvitationsBehavior: () -> Set<Invitation> = { setOf() }
+    var listAllInvitationsBehavior: () -> Set<Invitation> = { setOf() },
+    var updateUserBehavior: () -> Boolean = { true },
 ) : IAuthPersistence {
 
     override fun createUser(name: UserName, hash: Hash, salt: Salt, employee: Employee, role: Role): User {
@@ -77,6 +78,10 @@ class FakeAuthPersistence(
 
     override fun listAllInvitations(): Set<Invitation> {
         return listAllInvitationsBehavior()
+    }
+
+    override fun updateUser(user: User): Boolean {
+        return updateUserBehavior()
     }
 
 }

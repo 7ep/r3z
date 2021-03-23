@@ -3,6 +3,7 @@ package coverosR3z
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
+import coverosR3z.config.SIZE_OF_DECENT_PASSWORD
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger
 import coverosR3z.logging.ILogger.Companion.logImperative
@@ -175,8 +176,7 @@ class FullSystem private constructor(
             val bc = initializeBusinessCode(pmd, logger)
             val mrAdmin = bc.tru.createEmployee(EmployeeName("Administrator"))
             logImperative("Created an initial employee")
-            val sufficientlyLargeSize = 15
-            val password = generateRandomString(sufficientlyLargeSize)
+            val password = generateRandomString(SIZE_OF_DECENT_PASSWORD)
             val username = "administrator"
             val (_, user) = bc.au.registerWithEmployee(
                 UserName(username),

@@ -1,5 +1,6 @@
 package coverosR3z.server.utility
 
+import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
@@ -35,6 +36,7 @@ class RoutingUtilities {
                 Pair(Verb.GET, ProjectAPI.path) -> ProjectAPI.handleGet(sd)
                 Pair(Verb.GET, LogoutAPI.path) -> LogoutAPI.handleGet(sd)
                 Pair(Verb.GET, LoggingAPI.path) -> LoggingAPI.handleGet(sd)
+                Pair(Verb.GET, ChangePasswordAPI.path) -> ChangePasswordAPI.handleGet(sd)
 
                 // POST
 
@@ -48,6 +50,7 @@ class RoutingUtilities {
                 Pair(Verb.POST, DeleteTimeAPI.path) -> DeleteTimeAPI.handlePost(sd)
                 Pair(Verb.POST, SubmitTimeAPI.path) -> SubmitTimeAPI.handlePost(sd)
                 Pair(Verb.POST, UnsubmitTimeAPI.path) -> UnsubmitTimeAPI.handlePost(sd)
+                Pair(Verb.POST, ChangePasswordAPI.path) -> ChangePasswordAPI.handlePost(sd)
 
                 else -> {
                     handleNotFound()

@@ -1,6 +1,8 @@
 package coverosR3z.server
 
+import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.api.LoginAPI
+import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.LogTypes
 import coverosR3z.misc.DEFAULT_DB_DIRECTORY
@@ -19,6 +21,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.openqa.selenium.By
 import java.io.File
 
 class UIServerTests {
@@ -34,6 +37,51 @@ class UIServerTests {
         `general - should be able to see the homepage and the authenticated homepage`()
         `general - I should be able to change the logging settings`()
         `validation - Validation should stop me entering invalid input on the registration page`()
+        `change admin password, relogin, create new employee, use invitation and change their password and login`()
+    }
+
+    private fun `change admin password, relogin, create new employee, use invitation and change their password and login`() {
+        pom.lp.login("employeemaker", "password12345")
+        // go to the change password page
+        pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
+        // confirm the title
+        assertEquals("change password", pom.driver.title)
+        // disagree to change the password
+        pom.driver.findElement(By.id(ChangePasswordAPI.Elements.BRING_ME_BACK.getId())).click()
+        // confirm we are back on the homepage
+        assertEquals("Authenticated Homepage", pom.driver.title)
+        // go back to the change password page
+        pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
+        // agree this time to change the password
+        pom.driver.findElement(By.id(ChangePasswordAPI.Elements.YES_BUTTON.getId())).click()
+        // confirm the title
+        assertEquals("New password generated", pom.driver.title)
+        val newPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
+        logout()
+        // confirm the new password works
+        pom.lp.login("employeemaker", newPassword)
+        assertEquals("Authenticated Homepage", pom.driver.title)
+        // create a new employee
+        pom.eep.enter("hank")
+        val invitationUrl = pom.driver.findElement(By.xpath("//*[text() = 'hank']/..//a")).getAttribute("href")
+        logout()
+        pom.driver.get(invitationUrl)
+        pom.driver.findElement(By.id("username")).sendKeys("hank")
+        pom.driver.findElement(By.id("register_button")).click()
+        val hankRegistrationPassword = pom.driver.findElement(By.id(RegisterAPI.Elements.NEW_PASSWORD.getId())).text
+        pom.lp.login("hank", hankRegistrationPassword)
+        // go to the change password page
+        pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
+        // agree to change the password
+        pom.driver.findElement(By.id(ChangePasswordAPI.Elements.YES_BUTTON.getId())).click()
+        // confirm the title
+        assertEquals("New password generated", pom.driver.title)
+        val hankNewPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
+        logout()
+        // confirm the new password works
+        pom.lp.login("hank", hankNewPassword)
+        assertEquals("your time entries", pom.driver.title)
+        logout()
     }
 
     private fun `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`() {
@@ -67,21 +115,21 @@ class UIServerTests {
     }
 
     private fun `validation - Validation should stop me entering invalid input on the registration page`() {
-        // validation won't allow it through - missing username
-        disallowBecauseMissingUsername()
+        pom.lp.login("employeemaker", "password12345")
+        pom.eep.enter("alice")
+        val invitationCode = pom.businessCode.au.listAllInvitations().single {it.employee.name.value == "alice"}
 
-        // validation won't allow it through - missing password
-        disallowBecauseMissingPassword()
+        logout()
+
+        // validation won't allow it through - missing username
+        disallowBecauseMissingUsername(invitationCode)
 
         // validation won't allow it through - username too short
-        tooShortUsername()
+        tooShortUsername(invitationCode)
 
         // Text entry will stop taking characters at the maximum size, so
         // what gets entered will just be truncated to [maxUserNameSize]
-        tooLongerUsername()
-
-        // validation won't allow it through - password too short
-        tooShortPassword()
+        tooLongerUsername(invitationCode)
     }
 
     /*
@@ -149,29 +197,19 @@ class UIServerTests {
         pom.lop.go()
     }
 
-    private fun tooShortPassword() {
-        pom.rp.register("alice", "a".repeat(minPasswordSize - 1), "code")
-        assertEquals("register", pom.driver.title)
-    }
-
-    private fun tooLongerUsername() {
+    private fun tooLongerUsername(invitation: Invitation) {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
-        pom.rp.register(tooLongUsername, "password12345", "code")
+        pom.rp.register(tooLongUsername, invitation.code.value)
         assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == tooLongUsername } })
     }
 
-    private fun tooShortUsername() {
-        pom.rp.register("a".repeat(minUserNameSize - 1), "password12345", "code")
+    private fun tooShortUsername(invitation: Invitation) {
+        pom.rp.register("a".repeat(minUserNameSize - 1), invitation.code.value)
         assertEquals("register", pom.driver.title)
     }
 
-    private fun disallowBecauseMissingPassword() {
-        pom.rp.register("alice", "", "code")
-        assertEquals("register", pom.driver.title)
-    }
-
-    private fun disallowBecauseMissingUsername() {
-        pom.rp.register("", "password12345", "code")
+    private fun disallowBecauseMissingUsername(invitation: Invitation) {
+        pom.rp.register("", invitation.code.value)
         assertEquals("register", pom.driver.title)
     }
 
