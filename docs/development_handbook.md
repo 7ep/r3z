@@ -34,8 +34,7 @@ New Developer Setup
 
 Here's the general series of steps for a new developer:
 
-1. Install Java onto your machine if you don't already have it.  Any version of Java will suffice, but 
-   the best would be the version 11 SDK, and make sure to add the path to your JDK to your environment
+1. Install Java 13 onto your machine if you don't already have it. Make sure to add the path to your JDK to your environment
    as JAVA_HOME, and also add the path to the Java binaries to your PATH variable.
 2. Download and install IntelliJ Community Edition (which is free of charge) if you don't already have 
    it. This is definitely the best IDE for our purposes, since it is developed by the same company
@@ -63,7 +62,8 @@ Optional:
 JDK
 ---
 
-We need a minimum of Java 11 so we get the latest version of TLS, which is 1.3
+We need a minimum of Java 13 so we get the latest version of TLS, which is 1.3, and also
+there was a bug in TLS 1.3 that was fixed in Java 13.
 
 Guiding ideas
 -------------
