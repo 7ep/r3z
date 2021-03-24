@@ -41,6 +41,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertTrue(frc.roleCanDoAction)
 
+        tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
+        assertTrue(frc.roleCanDoAction)
+
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertTrue(frc.roleCanDoAction)
 
@@ -100,6 +103,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertTrue(frc.roleCanDoAction)
 
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
+        assertTrue(frc.roleCanDoAction)
+
+        tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
 
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
@@ -162,6 +168,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertFalse(frc.roleCanDoAction)
 
+        tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
+        assertFalse(frc.roleCanDoAction)
+
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertFalse(frc.roleCanDoAction)
 
@@ -222,6 +231,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertTrue(frc.roleCanDoAction)
 
+        tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
+        assertTrue(frc.roleCanDoAction)
+
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertTrue(frc.roleCanDoAction)
 
@@ -280,6 +292,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertFalse(frc.roleCanDoAction)
 
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
+        assertFalse(frc.roleCanDoAction)
+
+        tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(frc.roleCanDoAction)
 
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)

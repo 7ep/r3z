@@ -15,7 +15,6 @@ import kotlin.math.roundToInt
 const val MAX_DETAILS_LENGTH = 500
 const val detailsNotNullMsg = "details must not be null"
 const val noNegativeTimeMsg = "Doesn't make sense to have negative time. time in minutes: "
-const val lessThanTimeInDayMsg = "Entries do not span multiple days, thus must be <=24 hrs. time in minutes: "
 private const val minIdMsg = "Valid identifier values are 1 or above"
 
 /**
@@ -56,7 +55,6 @@ data class TimeEntryId(val value: Int) {
 data class Time(val numberOfMinutes : Int) {
     init {
         require(numberOfMinutes >= 0) { noNegativeTimeMsg + numberOfMinutes }
-        require(numberOfMinutes <= 60*24) { lessThanTimeInDayMsg + numberOfMinutes }
     }
 
     /**

@@ -174,7 +174,7 @@ class TimeRecordingUtilities(
     }
 
     override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val didDelete = persistence.deleteTimeEntry(timeEntry)
         if (!didDelete) {
             throw IllegalStateException("Attempted to delete a non-existent time entry by id")

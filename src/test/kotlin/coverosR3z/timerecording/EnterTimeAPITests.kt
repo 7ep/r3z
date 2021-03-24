@@ -163,23 +163,6 @@ class EnterTimeAPITests {
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
     }
 
-
-    /**
-     * If the time entered is more than a day's worth
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testEnterTimeAPI_aboveMaxTime() {
-        val data = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to ((24 * 60) + 0.01).toString(),
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeETServerData(data)
-        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("${lessThanTimeInDayMsg}86401", ex.message)
-    }
-
     /**
      * If the time entered is negative
      */

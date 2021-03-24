@@ -62,8 +62,8 @@
     }
 
     .timerows-container .time-entry-information > div {
-        line-height: 1em;
-        font-size: 0.9em;
+        /* line-height: 1em; */
+        /* font-size: 0.9em; */
     }
 
     .readonly-time-entry-row {
@@ -107,6 +107,7 @@
         display: flex;
         flex-direction: row;
         justify-content: space-evenly;
+        height: 28px;
      }
 
      nav.time_period_selector form {
@@ -115,18 +116,41 @@
 
      #timeperiod_display {
         color: black;
-        font-size: 0.9em;
+        font-size: 13px;
         display: flex;
         width: 89px;
         border: 1px solid black;
      }
+
+
+    #total_hours {
+        position: relative;
+        display: flex;
+        width: 37px;
+        margin-left: 6px;
+        margin-right: 6px;
+    }
+    #total_hours label {
+        font-size: 0.6em;
+        position: absolute;
+        display: block;
+        top: -7px;
+    }
+
+    #total_hours #total_hours_value {
+        top: 11px;
+        position: absolute;
+    }
 
     nav button {
       cursor: pointer;
       color: white;
       background-color: #C65364;
       border: 1.8px solid #3b3b3b;
-      border-radius: .5em;
+      border-radius: 3px;
+      font-size: 13px;
+      padding: 0px;
+      margin: 0.8px;
     }
 
     nav button:hover {
@@ -440,6 +464,22 @@
     nav {
       position: relative;
       padding: 5px 0 0 0;
+    }
+
+    #total_hours {
+        position: relative;
+        display: flex;
+        width: 60px;
+    }
+    #total_hours label {
+        font-size: .7em;
+        position: absolute;
+        display: block;
+        top: -2px;
+    }
+    #total_hours #total_hours_value {
+        position: absolute;
+        top: 9px;
     }
 
     .mobile-data-entry {

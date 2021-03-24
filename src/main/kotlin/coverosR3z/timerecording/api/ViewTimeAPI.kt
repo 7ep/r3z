@@ -86,6 +86,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
         val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employee, currentPeriod)
+        val totalHours = Time(te.sumBy {it.time.numberOfMinutes}).getHoursAsString()
         val editidValue = sd.ahd.queryString["editid"]
         val projects = sd.bc.tru.listAllProjects()
         // either get the id as an integer or get null,
@@ -113,6 +114,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
                     </form>
                     <div id="timeperiod_display">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
+                    <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
                     <form action="$path">
                         <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
                         <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
