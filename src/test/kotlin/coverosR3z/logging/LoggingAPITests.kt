@@ -228,7 +228,7 @@ class LoggingAPITests {
     fun testShouldAllowAdminDoPost() {
         val sd = makeLoggingServerData(allTrue())
         val result = LoggingAPI.handlePost(sd).statusCode
-        assertEquals(StatusCode.OK, result)
+        assertEquals(StatusCode.SEE_OTHER, result)
     }
 
     @Category(APITestCategory::class)

@@ -3,11 +3,10 @@ package coverosR3z.logging
 import coverosR3z.authentication.types.Role
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.*
-import coverosR3z.server.utility.successHTML
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
+import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 
 
 class LoggingAPI(private val sd: ServerData) {
@@ -77,7 +76,7 @@ class LoggingAPI(private val sd: ServerData) {
         for (lt in LogTypes.values()) {
             setLogging(lt, sd.ahd.data)
         }
-        return okHTML(successHTML)
+        return redirectTo(path)
     }
 
     class LogTypeState(private val logRunning : Boolean) {
@@ -111,7 +110,7 @@ class LoggingAPI(private val sd: ServerData) {
                 <form method="post" action="$path">
                     <fieldset>
                     
-                        <legend>Info logging:</legend>
+                        <legend>Audit logging:</legend>
                         
                           <input type="radio" id="${Elements.AUDIT_INPUT.getId()}true" name="${Elements.AUDIT_INPUT.getElemName()}" value="true" ${checkedIf(LogTypes.AUDIT).isOn()} >
                           <label for="${Elements.AUDIT_INPUT.getId()}true">True</label>

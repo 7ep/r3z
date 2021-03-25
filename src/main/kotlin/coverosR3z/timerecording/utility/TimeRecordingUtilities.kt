@@ -29,7 +29,7 @@ class TimeRecordingUtilities(
 
         return createOrModifyEntry(entry) {
             val newTimeEntry = persistence.persistNewTimeEntry(entry)
-            logger.logDebug(cu) {"recorded time successfully"}
+            logger.logAudit(cu) { "Creating new time entry: ${newTimeEntry.shortString()}" }
             newTimeEntry
         }
     }
@@ -37,8 +37,9 @@ class TimeRecordingUtilities(
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         return createOrModifyEntry(entry.toTimeEntryPreDatabase()) {
+            val oldEntry = persistence.findTimeEntryById(entry.id)
             val newTimeEntry = persistence.overwriteTimeEntry(entry)
-            logger.logDebug(cu) {"modified time successfully"}
+            logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${newTimeEntry.shortString()}"}
             newTimeEntry
         }
     }
@@ -48,11 +49,10 @@ class TimeRecordingUtilities(
         // ensure time entry user is the logged in user, or
         // is the system
         if (user.employee != entry.employee) {
-            logger.logAudit(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
+            logger.logWarn(cu) {"time was not recorded successfully: current user ${user.name.value} does not have access " +
                     "to modify time for ${entry.employee.name.value}"}
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
-        logger.logAudit(cu) {"Recording ${entry.time.numberOfMinutes} minutes on \"${entry.project.name.value}\""}
         confirmLessThan24Hours(entry.time, entry.employee, entry.date)
         if(persistence.isInASubmittedPeriod(entry.employee, entry.date)){
             return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
@@ -149,12 +149,14 @@ class TimeRecordingUtilities(
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        logger.logAudit { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
     }
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        logger.logAudit { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         return persistence.unsubmitTimePeriod(submittedPeriod)
     }
 

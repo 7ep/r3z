@@ -98,6 +98,14 @@ data class TimeEntry (
         return TimeEntryPreDatabase(employee, project, time, date, details)
     }
 
+    /**
+     * used to print details of this time entry in short form,
+     * for example: id: 1, empl: alice, proj: projecta, time: 300, details: foo
+     */
+    fun shortString() : String {
+        return "id: ${id.value}, empl: ${employee.name.value}, proj: ${project.name.value}, time: ${time.numberOfMinutes}, details: ${details.value}"
+    }
+
     override fun getIndex(): Int {
         return id.value
     }
