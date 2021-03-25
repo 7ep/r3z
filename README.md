@@ -12,8 +12,8 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
     * If you don't know what "clone" means here, just download it.
     * if you download, unzip the downloaded file to its own directory.
 * On the command line in the project directory:
-    * run `gradlew test` to run all the tests
-    * run `gradlew run` to run the server, then open http://localhost:12345/
+    * run `gradlew alltests` to run all the tests
+    * run `gradlew run` to run the server, then open https://localhost:12443/ (it uses a self-signed cert)
 
 #### Summary:
 
@@ -44,7 +44,7 @@ Check out the [development handbook](docs/development_handbook.md)
 *If we understand that our software is a reflection of our culture, should we not focus on improving that first?*
 
 #### Summary of relevant Gradle commands
-* `gradlew test` - run all the tests in this code
+* `gradlew alltests` - run all the tests in this code
 * `gradlew fasttest` - run all the fast tests (unit, integration, API)
 * `gradlew uitest` - run only the ui tests
 * `gradlew jar` - build the jar, in build/libs/
