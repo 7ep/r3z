@@ -7,6 +7,7 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.types.SystemConfiguration
 
 
 class LoggingAPI(private val sd: ServerData) {
@@ -56,27 +57,23 @@ class LoggingAPI(private val sd: ServerData) {
 
     }
 
-    private fun setLogging(lt : LogTypes, data: PostBodyData) {
-        /**
-         * The user has sent us a map with four keys - audit, warn, debug, trace,
-         * each of which can be "true" or "false".  This is that value.
-         */
-        val userInputLogConfig = checkNotNull(data.mapping[lt.toString().toLowerCase()], { missingLoggingDataInputMsg })
+    fun handlePOST() : PreparedResponseData {
 
-        // depending on what the user chose, we set the configuration for that logging type here
-        when (userInputLogConfig) {
-            "true" -> sd.logger.logSettings[lt] = true
-            "false" -> sd.logger.logSettings[lt] = false
-            else -> throw IllegalArgumentException(badInputLoggingDataMsg)
-        }
-        logImperative("Configured logging for ${lt.name}: ${sd.logger.logSettings[lt]}")
+        sd.logger.logSettings = SystemConfiguration.LogSettings(
+             checkIsTrueOrFalse(sd.ahd.data.mapping[Elements.AUDIT_INPUT.getElemName()]),
+            checkIsTrueOrFalse(sd.ahd.data.mapping[Elements.WARN_INPUT.getElemName()]),
+            checkIsTrueOrFalse(sd.ahd.data.mapping[Elements.DEBUG_INPUT.getElemName()]),
+            checkIsTrueOrFalse(sd.ahd.data.mapping[Elements.TRACE_INPUT.getElemName()]),
+        )
+        logImperative("Changing log configuration to: ${sd.logger.logSettings}")
+        sd.so.scp.setSystemConfig(SystemConfiguration(sd.logger.logSettings))
+        return redirectTo(path)
     }
 
-    fun handlePOST() : PreparedResponseData {
-        for (lt in LogTypes.values()) {
-            setLogging(lt, sd.ahd.data)
-        }
-        return redirectTo(path)
+    private fun checkIsTrueOrFalse(s: String?): Boolean {
+        checkNotNull(s) {missingLoggingDataInputMsg}
+        check(s == "true" || s == "false") {badInputLoggingDataMsg}
+        return s == "true"
     }
 
     class LogTypeState(private val logRunning : Boolean) {
@@ -99,7 +96,12 @@ class LoggingAPI(private val sd: ServerData) {
      *
      */
     private fun checkedIf(lt : LogTypes) : LogTypeState {
-        return LogTypeState(sd.logger.logSettings[lt] == true)
+        return when (lt) {
+            LogTypes.AUDIT -> LogTypeState(sd.logger.logSettings.audit)
+            LogTypes.WARN -> LogTypeState(sd.logger.logSettings.warn)
+            LogTypes.DEBUG -> LogTypeState(sd.logger.logSettings.debug)
+            LogTypes.TRACE -> LogTypeState(sd.logger.logSettings.trace)
+        }
     }
 
 

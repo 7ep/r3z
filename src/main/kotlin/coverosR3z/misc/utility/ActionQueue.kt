@@ -2,8 +2,9 @@ package coverosR3z.misc.utility
 
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.exceptions.AttemptToAddToStoppingQueueException
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.concurrent.thread
+
 
 /**
  * This provides a way to offload actions, like printing (for logs)
@@ -17,22 +18,27 @@ import kotlin.concurrent.thread
 class ActionQueue(val name : String) {
     private val queue = LinkedBlockingQueue<() -> Unit>()
     private var stop = false
+    private val queueExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
 
-    private val mainThread = thread {
-        try {
-            while (true) {
-                val action = queue.take()
-                action.invoke()
+    init {
+        queueExecutor.execute(Thread {
+            try {
+                while (true) {
+                    val action = queue.take()
+                    action.invoke()
+                }
+            } catch (ex: InterruptedException) {
+                /*
+                this is what we expect to happen.
+                once this happens, we just continue on.
+                this only gets called when we are trying to shut everything
+                down cleanly
+                 */
+                logImperative("ActionQueue for $name is stopped.")
+            } catch (ex: Throwable) {
+                logImperative("ERROR: ActionQueue for $name has stopped unexpectedly. error: $ex")
             }
-        } catch (ex: InterruptedException) {
-            /*
-            this is what we expect to happen.
-            once this happens, we just continue on.
-            this only gets called when we are trying to shut everything
-            down cleanly
-             */
-            logImperative("ActionQueue for $name is stopped.")
-        }
+        })
     }
 
     fun enqueue(action : () -> Unit) {
@@ -54,6 +60,5 @@ class ActionQueue(val name : String) {
         while(queue.size > 0) {
             Thread.sleep(50)
         }
-        mainThread.interrupt()
     }
 }

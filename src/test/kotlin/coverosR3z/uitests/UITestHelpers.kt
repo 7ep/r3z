@@ -1,7 +1,7 @@
 package coverosR3z.uitests
 
-import coverosR3z.FullSystem
-import coverosR3z.FullSystem.Companion.initializeBusinessCode
+import coverosR3z.system.utility.FullSystem
+import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI

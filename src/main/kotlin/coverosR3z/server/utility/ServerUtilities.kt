@@ -1,7 +1,7 @@
 package coverosR3z.server.utility
 
-import coverosR3z.FullSystem
-import coverosR3z.FullSystem.Companion.initializeBusinessCode
+import coverosR3z.system.utility.FullSystem
+import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.logging.ILogger

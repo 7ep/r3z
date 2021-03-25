@@ -1,4 +1,4 @@
-package coverosR3z
+package coverosR3z.system.utility
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
@@ -18,6 +18,7 @@ import coverosR3z.server.types.ServerObjects
 import coverosR3z.server.utility.SSLServer
 import coverosR3z.server.utility.Server
 import coverosR3z.server.utility.StaticFilesUtilities
+import coverosR3z.system.persistence.SystemConfigurationPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
@@ -25,7 +26,6 @@ import java.io.File
 import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 /**
@@ -37,8 +37,6 @@ class FullSystem private constructor(
     val logger: ILogger,
 ) {
 
-    lateinit var serverFuture: Future<*>
-    lateinit var sslServerFuture: Future<*>
     lateinit var esForThreadsInServer: ExecutorService
     lateinit var server: Server
     lateinit var sslServer: SSLServer
@@ -83,11 +81,9 @@ class FullSystem private constructor(
 
         logImperative("Shutting down the non-ssl server thread")
         server.halfOpenServerSocket.close()
-        serverFuture.get()
 
         logImperative("Waiting for the ssl server thread")
         sslServer.sslHalfOpenServerSocket.close()
-        sslServerFuture.get()
 
         esForThreadsInServer.shutdown()
         esForThreadsInServer.awaitTermination(10, TimeUnit.SECONDS)
@@ -123,7 +119,14 @@ class FullSystem private constructor(
             // start the database
             pmd : PureMemoryDatabase = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger),
         ) : FullSystem {
+            // initialize access to the system configuration data persistence,
+            val scp = SystemConfigurationPersistence(pmd)
 
+            // set the logging from stored configuration
+            scp.getSystemConfig()?.logSettings?.let { logger.logSettings = it }
+
+            // potentially override the logging settings from the command line,
+            // but this does not impact the written configuration in the database.
             logger.configureLogging(systemOptions)
 
             // get the static files like CSS, JS, etc loaded into a cache
@@ -138,7 +141,9 @@ class FullSystem private constructor(
                 systemOptions.port,
                 systemOptions.sslPort,
                 systemOptions.allowInsecure,
-                systemOptions.host)
+                systemOptions.host,
+                scp
+            )
 
             // start an executor service which will handle the threads inside the server
             val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
@@ -149,20 +154,18 @@ class FullSystem private constructor(
             // start the regular server
             val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
             val server = Server(systemOptions.port, esForThreadsInServer, serverObjects, fullSystem)
-            val serverFuture = serverExecutor.submit(server.createServerThread())
+            serverExecutor.execute(server.createServerThread())
 
             // start the ssl server
             val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
             val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, serverObjects, fullSystem)
-            val sslServerFuture = sslServerExecutor.submit(sslServer.createSecureServerThread())
+            sslServerExecutor.execute(sslServer.createSecureServerThread())
 
             // Add an Administrator employee and role if the database is empty
             if (pmd.isEmpty()) {
-                addAdminIfEmptyDatabase(pmd, logger)
+                initializeDataForEmptyDatabase(pmd, logger)
             }
 
-            fullSystem.serverFuture = serverFuture
-            fullSystem.sslServerFuture = sslServerFuture
             fullSystem.esForThreadsInServer = esForThreadsInServer
             fullSystem.server = server
             fullSystem.sslServer = sslServer
@@ -170,9 +173,15 @@ class FullSystem private constructor(
         }
 
         /**
-         * Add an Administrator employee and role if the database is empty
+         * There needs to be certain data added if we find out we're
+         * dealing with an entirely new, entirely empty database.
+         *
+         * For example, we need to add an Administrator employee and role.
          */
-        private fun addAdminIfEmptyDatabase(pmd: PureMemoryDatabase, logger: ILogger) {
+        private fun initializeDataForEmptyDatabase(
+            pmd: PureMemoryDatabase,
+            logger: ILogger,
+        ) {
             val bc = initializeBusinessCode(pmd, logger)
             val mrAdmin = bc.tru.createEmployee(EmployeeName("Administrator"))
             logImperative("Created an initial employee")

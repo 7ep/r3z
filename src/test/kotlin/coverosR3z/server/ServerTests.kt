@@ -1,9 +1,7 @@
 package coverosR3z.server
 
-import coverosR3z.FullSystem
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.logging.LogTypes
 import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.utility.FileReader.Companion.read
@@ -18,6 +16,7 @@ import coverosR3z.server.types.Verb
 import coverosR3z.server.utility.CRLF
 import coverosR3z.server.utility.SocketWrapper
 import coverosR3z.server.utility.parseHttpMessageAsClient
+import coverosR3z.system.utility.FullSystem
 import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -269,7 +268,7 @@ class ServerTests {
         val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
         // so we don't see spam
-        fs.logger.logSettings[LogTypes.DEBUG] = false
+        fs.logger.turnOffAllLogging()
         val (time, _) = getTime {
             val threadList = (1..numberOfThreads).map {  cachedThreadPool.submit(makeClientThreadRepeatedRequestsHomepage(numberOfRequests, port)) }
             threadList.forEach { it.get() }
@@ -279,7 +278,7 @@ class ServerTests {
             .appendText("${Date.now().stringValue}\tnumberOfThreads: $numberOfThreads\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
 
         // turn logging back on for other tests
-        fs.logger.logSettings[LogTypes.DEBUG] = true
+        fs.logger.resetLogSettingsToDefault()
     }
 
     /**

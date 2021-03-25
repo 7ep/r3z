@@ -36,10 +36,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(true,  testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(false, testLogger.logSettings[LogTypes.WARN])
-        assertEquals(false, testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(true,  testLogger.logSettings.audit)
+        assertEquals(false, testLogger.logSettings.warn)
+        assertEquals(false, testLogger.logSettings.debug)
+        assertEquals(false, testLogger.logSettings.trace)
     }
 
     @Category(APITestCategory::class)
@@ -50,10 +50,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(false, testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(true,  testLogger.logSettings[LogTypes.WARN])
-        assertEquals(false, testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(false, testLogger.logSettings.audit)
+        assertEquals(true,  testLogger.logSettings.warn)
+        assertEquals(false, testLogger.logSettings.debug)
+        assertEquals(false, testLogger.logSettings.trace)
     }
 
     @Category(APITestCategory::class)
@@ -64,10 +64,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(false, testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(false, testLogger.logSettings[LogTypes.WARN])
-        assertEquals(true,  testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(false, testLogger.logSettings.audit)
+        assertEquals(false, testLogger.logSettings.warn)
+        assertEquals(true,  testLogger.logSettings.debug)
+        assertEquals(false, testLogger.logSettings.trace)
     }
 
     @Category(APITestCategory::class)
@@ -78,10 +78,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(false, testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(false, testLogger.logSettings[LogTypes.WARN])
-        assertEquals(false, testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(true,  testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(false, testLogger.logSettings.audit)
+        assertEquals(false, testLogger.logSettings.warn)
+        assertEquals(false, testLogger.logSettings.debug)
+        assertEquals(true,  testLogger.logSettings.trace)
     }
 
     @Category(APITestCategory::class)
@@ -92,10 +92,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(true, testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(true, testLogger.logSettings[LogTypes.WARN])
-        assertEquals(true, testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(true, testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(true, testLogger.logSettings.audit)
+        assertEquals(true, testLogger.logSettings.warn)
+        assertEquals(true, testLogger.logSettings.debug)
+        assertEquals(true, testLogger.logSettings.trace)
     }
 
     @Category(APITestCategory::class)
@@ -106,10 +106,10 @@ class LoggingAPITests {
 
         LoggingAPI.handlePost(sd)
 
-        assertEquals(false, testLogger.logSettings[LogTypes.AUDIT])
-        assertEquals(false, testLogger.logSettings[LogTypes.WARN])
-        assertEquals(false, testLogger.logSettings[LogTypes.DEBUG])
-        assertEquals(false, testLogger.logSettings[LogTypes.TRACE])
+        assertEquals(false, testLogger.logSettings.audit)
+        assertEquals(false, testLogger.logSettings.warn)
+        assertEquals(false, testLogger.logSettings.debug)
+        assertEquals(false, testLogger.logSettings.trace)
     }
 
     /**
@@ -183,7 +183,7 @@ class LoggingAPITests {
         val data = allTrue(audit = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
 
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
@@ -194,7 +194,7 @@ class LoggingAPITests {
         val data = allTrue(warn = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
 
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
@@ -205,7 +205,7 @@ class LoggingAPITests {
         val data = allTrue(debug = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
 
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }
@@ -216,7 +216,7 @@ class LoggingAPITests {
         val data = allTrue(trace = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){  LoggingAPI.handlePost(sd) }
+        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
 
         assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
     }

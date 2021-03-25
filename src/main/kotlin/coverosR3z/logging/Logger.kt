@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger.Companion.getTimestamp
 import coverosR3z.misc.utility.ActionQueue
+import coverosR3z.system.types.SystemConfiguration
 
 class Logger : ILogger {
     private val loggerPrinter = ActionQueue("loggerPrinter")
@@ -13,52 +14,55 @@ class Logger : ILogger {
      * log entries will print
      */
     override fun resetLogSettingsToDefault() {
-        logSettings[LogTypes.AUDIT] = true
-        logSettings[LogTypes.DEBUG] = true
-        logSettings[LogTypes.WARN] = true
-        logSettings[LogTypes.TRACE] = false
+        logSettings = SystemConfiguration.LogSettings(
+            audit = true,
+            warn = true,
+            debug = true,
+            trace = false)
     }
 
     override fun turnOnAllLogging() {
-        logSettings[LogTypes.AUDIT] = true
-        logSettings[LogTypes.DEBUG] = true
-        logSettings[LogTypes.WARN] = true
-        logSettings[LogTypes.TRACE] = true
+        logSettings = SystemConfiguration.LogSettings(
+            audit = true,
+            warn = true,
+            debug = true,
+            trace = true)
     }
 
     override fun turnOffAllLogging() {
-        logSettings[LogTypes.AUDIT] = false
-        logSettings[LogTypes.DEBUG] = false
-        logSettings[LogTypes.WARN] = false
-        logSettings[LogTypes.TRACE] = false
+        logSettings = SystemConfiguration.LogSettings(
+            audit = false,
+            warn = false,
+            debug = false,
+            trace = false)
     }
 
-    override val logSettings = mutableMapOf(
-            LogTypes.AUDIT to true,
-            LogTypes.WARN to true,
-            LogTypes.DEBUG to true,
-            LogTypes.TRACE to false)
+    override var logSettings = SystemConfiguration.LogSettings(
+            audit = true,
+            warn = true,
+            debug = true,
+            trace = false)
 
     override fun logAudit(cu : CurrentUser, msg : () -> String) {
-        if (logSettings[LogTypes.AUDIT] == true) {
+        if (logSettings.audit) {
             loggerPrinter.enqueue { println("${getTimestamp()} AUDIT: ${cu.name.value}: ${msg()}") }
         }
     }
 
     /**
-     * Used to log finicky details of technical solutions
+     * Used to log finicky details of technical solutions, for basic debugging
      */
     override fun logDebug(cu : CurrentUser, msg: () -> String) {
-        if (logSettings[LogTypes.DEBUG] == true) {
+        if (logSettings.debug) {
             loggerPrinter.enqueue { println("${getTimestamp()} DEBUG: ${cu.name.value}: ${msg()}") }
         }
     }
 
     /**
-     * Logs nearly extraneous levels of detail.
+     * Logs nearly extraneous levels of detail, needed for deep debugging
      */
     override fun logTrace(cu : CurrentUser, msg: () -> String) {
-        if (logSettings[LogTypes.TRACE] == true) {
+        if (logSettings.trace) {
             loggerPrinter.enqueue { println("${getTimestamp()} TRACE: ${cu.name.value}: ${msg()}") }
         }
     }
@@ -68,7 +72,7 @@ class Logger : ILogger {
      * a missing database file.
      */
     override fun logWarn(cu : CurrentUser, msg: () -> String) {
-        if (logSettings[LogTypes.WARN] == true) {
+        if (logSettings.warn) {
             loggerPrinter.enqueue { println("${getTimestamp()} ${cu.name.value}: WARN: ${msg()}") }
         }
     }

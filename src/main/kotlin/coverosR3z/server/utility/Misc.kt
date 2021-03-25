@@ -1,20 +1,5 @@
 package coverosR3z.server.utility
 
-const val successHTML = """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    </head>
-        <title>SUCCESS</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta apifile="Misc" >
-    <body>
-       <p>SUCCESS</p>
-        <p><a href="homepage">Homepage</a></p>
-    </body>
-</html>
-"""
-
 const val failureHTML = """
 <!DOCTYPE html>    
 <html lang="en">

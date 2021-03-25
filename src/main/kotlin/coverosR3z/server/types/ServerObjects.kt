@@ -1,6 +1,7 @@
 package coverosR3z.server.types
 
 import coverosR3z.logging.ILogger
+import coverosR3z.system.persistence.ISystemConfigurationPersistence
 
 /**
  * Data needed by a server that isn't business-related
@@ -26,4 +27,11 @@ data class ServerObjects(
      * Call us whatever you want, as long as you don't call us late for supper.
      */
     val host: String = "",
+
+    /**
+     * This is used to store changes to the system's
+     * configuration that may take place during run-time,
+     * for example, the logging settings.
+     */
+    val scp: ISystemConfigurationPersistence,
     )

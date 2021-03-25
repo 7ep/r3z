@@ -1,6 +1,6 @@
 package coverosR3z.server.utility
 
-import coverosR3z.FullSystem
+import coverosR3z.system.utility.FullSystem
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.utility.FileReader
 import coverosR3z.server.types.ServerObjects
@@ -25,7 +25,7 @@ class SSLServer(
 
     init {
         sslHalfOpenServerSocket = createSslSocketFactory(sslPort)
-        logImperative("SSL server is ready at https://localhost:$sslPort.")
+        logImperative("SSL server is ready at https://${serverObjects.host}:$sslPort.")
     }
 
 

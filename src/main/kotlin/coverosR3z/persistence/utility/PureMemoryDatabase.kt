@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.Session
 import coverosR3z.authentication.types.User
 import coverosR3z.persistence.types.*
+import coverosR3z.system.types.SystemConfiguration
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.SubmittedPeriod
@@ -75,6 +76,7 @@ class PureMemoryDatabase(
                 Session.directoryName to ChangeTrackingSet<Session>(),
                 User.directoryName to ChangeTrackingSet<User>(),
                 Invitation.directoryName to ChangeTrackingSet<Invitation>(),
+                SystemConfiguration.directoryName to ChangeTrackingSet<SystemConfiguration>()
             )
             return PureMemoryDatabase(diskPersistence, data = datamap)
         }

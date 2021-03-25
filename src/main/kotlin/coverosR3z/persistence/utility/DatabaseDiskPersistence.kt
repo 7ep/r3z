@@ -13,6 +13,7 @@ import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
+import coverosR3z.system.types.SystemConfiguration
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.SubmittedPeriod
@@ -144,6 +145,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
         val timeEntries = readAndDeserialize(TimeEntry.directoryName) { TimeEntry.Deserializer(employees, projects).deserialize(it) }
         val submittedPeriods = readAndDeserialize(SubmittedPeriod.directoryName) { SubmittedPeriod.Deserializer(employees).deserialize(it) }
         val invitations = readAndDeserialize(Invitation.directoryName) { Invitation.Deserializer(employees).deserialize(it) }
+        val systemconfig = readAndDeserialize(SystemConfiguration.directoryName) { SystemConfiguration.Deserializer().deserialize(it) }
 
         return PureMemoryDatabase(
             this,
@@ -155,6 +157,7 @@ class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logg
                 Project.directoryName to projects,
                 User.directoryName to users,
                 Invitation.directoryName to invitations,
+                SystemConfiguration.directoryName to systemconfig,
             ),
         )
     }

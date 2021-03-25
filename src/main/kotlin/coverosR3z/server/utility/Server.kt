@@ -1,6 +1,6 @@
 package coverosR3z.server.utility
 
-import coverosR3z.FullSystem
+import coverosR3z.system.utility.FullSystem
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.ServerObjects
 import java.net.ServerSocket
@@ -22,7 +22,7 @@ class Server(
     val halfOpenServerSocket = ServerSocket(port)
 
     init {
-        logImperative("System is ready at http://localhost:$port")
+        logImperative("System is ready at http://${serverObjects.host}:$port")
     }
 
     fun createServerThread() : Thread {

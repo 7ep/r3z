@@ -3,12 +3,13 @@ package coverosR3z.logging
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.config.utility.SystemOptions
+import coverosR3z.system.types.SystemConfiguration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 interface ILogger {
-    val logSettings: MutableMap<LogTypes, Boolean>
+    var logSettings: SystemConfiguration.LogSettings
 
     /**
      * Set the system to standard configuration for which
