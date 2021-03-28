@@ -54,7 +54,10 @@ class SessionTests {
         pmd.stop()
 
         // test out loading it from the disk
-        val pmd2 = DatabaseDiskPersistence(dbDirectory = dbDirectory, logger = testLogger).startWithDiskPersistence()
+        val pmd2 = DatabaseDiskPersistence(
+            dbDirectory = dbDirectory,
+            logger = testLogger,
+        ).startWithDiskPersistence()
         val authPersistence2 = AuthenticationPersistence(pmd2, testLogger)
         Assert.assertTrue(authPersistence2.getAllSessions().none { it.user == user1 })
         Assert.assertEquals(1, authPersistence2.getAllSessions().filter { it.user == user2 }.size)

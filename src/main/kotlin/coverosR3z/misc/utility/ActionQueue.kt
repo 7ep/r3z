@@ -2,7 +2,7 @@ package coverosR3z.misc.utility
 
 import coverosR3z.logging.ILogger.Companion.logImperative
 import coverosR3z.misc.exceptions.AttemptToAddToStoppingQueueException
-import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 
 
@@ -15,10 +15,9 @@ import java.util.concurrent.LinkedBlockingQueue
  * @param name The name of the user of this queue, to aid debugging, for
  *             example: loggingQueue
  */
-class ActionQueue(val name : String) {
+class ActionQueue(val name: String, queueExecutor: ExecutorService) {
     private val queue = LinkedBlockingQueue<() -> Unit>()
     private var stop = false
-    private val queueExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
 
     init {
         queueExecutor.execute(Thread {

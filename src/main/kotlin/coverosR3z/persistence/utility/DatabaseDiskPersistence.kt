@@ -19,15 +19,21 @@ import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.SubmittedPeriod
 import coverosR3z.timerecording.types.TimeEntry
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Encapsulates the logic necessary for writing any data to disk.
  *
  * The pattern is to group it by index
  */
-class DatabaseDiskPersistence(private val dbDirectory : String? = null, val logger: ILogger) {
+class DatabaseDiskPersistence(
+    private val dbDirectory: String? = null,
+    val logger: ILogger,
+    executorService: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+) {
 
-    private val actionQueue = ActionQueue("DatabaseWriter")
+    private val actionQueue = ActionQueue("DatabaseWriter", executorService)
 
     /**
      * Includes the version

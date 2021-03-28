@@ -85,9 +85,6 @@ class FullSystem private constructor(
         logImperative("Waiting for the ssl server thread")
         sslServer.sslHalfOpenServerSocket.close()
 
-        esForThreadsInServer.shutdown()
-        esForThreadsInServer.awaitTermination(10, TimeUnit.SECONDS)
-
         logImperative("Shutting down logging")
         logger.stop()
 
@@ -113,11 +110,14 @@ class FullSystem private constructor(
             // get the user's choices from the command line
             systemOptions: SystemOptions = SystemOptions(),
 
+            // start an executor service which will handle the threads inside the server
+            esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()),
+
             // the logger has to be one of the first things to start in the system
-            logger : ILogger = Logger(),
+            logger : ILogger = Logger(esForThreadsInServer),
 
             // start the database
-            pmd : PureMemoryDatabase = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger),
+            pmd : PureMemoryDatabase = makeDatabase(dbDirectory = systemOptions.dbDirectory, logger = logger, executorService = esForThreadsInServer),
         ) : FullSystem {
             // initialize access to the system configuration data persistence,
             val scp = SystemConfigurationPersistence(pmd)
@@ -145,21 +145,16 @@ class FullSystem private constructor(
                 scp
             )
 
-            // start an executor service which will handle the threads inside the server
-            val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-
             // instantiate a system object, we'll need this when starting the servers
             val fullSystem = FullSystem(pmd, logger)
 
             // start the regular server
-            val serverExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
             val server = Server(systemOptions.port, esForThreadsInServer, serverObjects, fullSystem)
-            serverExecutor.execute(server.createServerThread())
+            esForThreadsInServer.execute(server.createServerThread())
 
             // start the ssl server
-            val sslServerExecutor = Executors.newSingleThreadExecutor(Executors.defaultThreadFactory())
             val sslServer = SSLServer(systemOptions.sslPort, esForThreadsInServer, serverObjects, fullSystem)
-            sslServerExecutor.execute(sslServer.createSecureServerThread())
+            esForThreadsInServer.execute(sslServer.createSecureServerThread())
 
             // Add an Administrator employee and role if the database is empty
             if (pmd.isEmpty()) {
@@ -169,6 +164,9 @@ class FullSystem private constructor(
             fullSystem.esForThreadsInServer = esForThreadsInServer
             fullSystem.server = server
             fullSystem.sslServer = sslServer
+
+            fullSystem.addShutdownHook()
+
             return fullSystem
         }
 
@@ -229,13 +227,14 @@ class FullSystem private constructor(
         private fun makeDatabase(
             pmd: PureMemoryDatabase? = null,
             dbDirectory: String? = null,
-            logger: ILogger
+            logger: ILogger,
+            executorService: ExecutorService
         ): PureMemoryDatabase {
             logImperative("database directory is $dbDirectory")
             return pmd ?: if (dbDirectory == null) {
                 PureMemoryDatabase.createEmptyDatabase()
             } else {
-                DatabaseDiskPersistence(dbDirectory, logger).startWithDiskPersistence()
+                DatabaseDiskPersistence(dbDirectory, logger, executorService).startWithDiskPersistence()
             }
         }
 

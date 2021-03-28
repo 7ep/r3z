@@ -5,9 +5,10 @@ import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.ILogger.Companion.getTimestamp
 import coverosR3z.misc.utility.ActionQueue
 import coverosR3z.system.types.SystemConfiguration
+import java.util.concurrent.ExecutorService
 
-class Logger : ILogger {
-    private val loggerPrinter = ActionQueue("loggerPrinter")
+class Logger(esForThreadsInServer: ExecutorService) : ILogger {
+    private val loggerPrinter = ActionQueue("loggerPrinter", esForThreadsInServer)
 
     /**
      * Set the system to standard configuration for which
