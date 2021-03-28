@@ -14,6 +14,7 @@ import coverosR3z.server.types.Verb
 import coverosR3z.timerecording.api.EnterTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.types.Project
+import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
@@ -45,7 +46,7 @@ class ServerPerformanceTests {
                 port = port,
                 sslPort = port + 443,
                 allLoggingOff = true,
-                // not really checking security here, this keeps it simpler
+                // not really using SSL here, keeps the client simpler
                 allowInsecure = true),
             pmd = pmd)
         bc = initializeBusinessCode(fs.pmd, testLogger)
@@ -59,8 +60,8 @@ class ServerPerformanceTests {
     /**
      * How fast to enter data, the user's time entries
      *
-     * Fastest I've seen is 11,876 time entries per second,
-     * for five threads and 1000 requests (5000 time entries), it took .421 seconds
+     * Fastest I've seen is 15,500 time entries per second,
+     * for four hundred threads and 200 requests (80k time entries), it took 5.153 seconds
      *
      * See EnterTimeAPITests.testEnterTimeAPI_PERFORMANCE for a lower-level version of this
      *
@@ -84,7 +85,6 @@ class ServerPerformanceTests {
         println("Time was $time")
         File("${granularPerfArchiveDirectory}testEnterTimeReal_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberThreads: $numberThreads\tnumberRequests: $numberRequests\ttime: $time\n")
-
     }
 
     /**
@@ -126,7 +126,7 @@ class ServerPerformanceTests {
         val (_, user) = bc.au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
         val sessionId = bc.au.createNewSession(user)
 
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
         return Triple(newProject, sessionId, es)
     }
 
@@ -151,7 +151,7 @@ class ServerPerformanceTests {
         val (_, user) = bc.au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, employee)
         val sessionId = bc.au.createNewSession(user)
 
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
 
         val (time, _) = getTime {
             val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedRequestsViewHomepage(numberRequests, sessionId)) }
@@ -181,7 +181,7 @@ class ServerPerformanceTests {
         val port = port.getAndIncrement()
         startServer(port)
 
-        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val es: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
 
         val (time, _) = getTime {
             val realThreads = (1..numberThreads).map { es.submit(makeClientThreadRepeatedRequestsGetStaticFile(numberRequests)) }

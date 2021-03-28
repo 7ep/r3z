@@ -22,11 +22,11 @@ import coverosR3z.system.persistence.SystemConfigurationPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
+import kotlinx.coroutines.asCoroutineDispatcher
 import java.io.File
 import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /**
  * This serves as a central location for the code
@@ -111,7 +111,7 @@ class FullSystem private constructor(
             systemOptions: SystemOptions = SystemOptions(),
 
             // start an executor service which will handle the threads inside the server
-            esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()),
+            esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService,
 
             // the logger has to be one of the first things to start in the system
             logger : ILogger = Logger(esForThreadsInServer),
