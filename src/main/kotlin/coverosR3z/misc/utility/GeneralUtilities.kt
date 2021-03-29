@@ -6,6 +6,8 @@ import java.lang.IllegalStateException
 import java.net.URLDecoder
 import java.net.URLEncoder
 
+private const val SPACE = "(SPACE)"
+
 fun generateRandomString(length: Int) : String {
     val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
     return (1..length)
@@ -20,7 +22,7 @@ fun generateRandomString(length: Int) : String {
 fun checkParseToInt(value: String?,
                     nullMsg: () -> String = {"Integer must not be a null value"},
                     blankMsg: () -> String = {"Integer must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as integer"}): Int {
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as integer"}): Int {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }
     return try {
@@ -37,7 +39,7 @@ fun checkParseToInt(value: String?,
 fun checkParseToDouble(value: String?,
                     nullMsg: () -> String = {"Double must not be a null value"},
                     blankMsg: () -> String = {"Double must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as double"}): Double {
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as double"}): Double {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }
     return try {
@@ -54,7 +56,7 @@ fun checkParseToDouble(value: String?,
 fun checkParseToLong(value: String?,
                     nullMsg: () -> String = {"Must not be a null value"},
                     blankMsg: () -> String = {"Must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", "(SPACE)")} as long"}): Long {
+                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as long"}): Long {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }
     return try {

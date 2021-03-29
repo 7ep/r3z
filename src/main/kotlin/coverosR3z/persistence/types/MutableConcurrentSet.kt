@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * so this seems similar to using a Set.
  */
 open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, MutableSet<T>{
-
     private val map : ConcurrentHashMap<Int, T> = ConcurrentHashMap()
 
     val nextIndex = AtomicInteger(1)
@@ -63,7 +62,7 @@ open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, Mutable
     }
 
     override fun containsAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError("we have no current use for this, so leaving unimplemented")
+        throw NotImplementedError(NOT_CURRENTLY_USED)
     }
 
     override fun isEmpty(): Boolean {
@@ -75,16 +74,20 @@ open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, Mutable
     }
 
     override fun removeAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError("we have no current use for this, so leaving unimplemented")
+        throw NotImplementedError(NOT_CURRENTLY_USED)
     }
 
     override fun retainAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError("we have no current use for this, so leaving unimplemented")
+        throw NotImplementedError(NOT_CURRENTLY_USED)
     }
 
     open fun update(element: T) : Boolean {
         val result = map.computeIfPresent(element.getIndex()) { _, _ ->  element }
         return result != null
+    }
+
+    companion object {
+        private const val NOT_CURRENTLY_USED = "we have no current use for this, so leaving unimplemented"
     }
 
 }

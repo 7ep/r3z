@@ -110,7 +110,7 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectory() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db"))
-        assertEquals(SystemOptions(dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
@@ -122,7 +122,7 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_DatabaseDirectoryNoSpace() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db"))
-        assertEquals(SystemOptions(dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
@@ -162,31 +162,31 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation1() {
         val serverOptions = extractOptions(arrayOf("-p54321", "-dbuild/db"))
-        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation2() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p54321"))
-        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation3() {
         val serverOptions = extractOptions(arrayOf("-dbuild/db", "-p", "54321"))
-        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_multipleValidOptions_permutation4() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321"))
-        assertEquals(SystemOptions(54321, dbDirectory = "build/db/"), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = TYPICAL_DB_DIRECTORY), serverOptions)
     }
 
     @Test
     fun testShouldParseOptions_setAllLoggingOff() {
         val serverOptions = extractOptions(arrayOf("-d", "build/db", "-p", "54321", "--no-logging"))
-        assertEquals(SystemOptions(54321, dbDirectory = "build/db/", allLoggingOff = true), serverOptions)
+        assertEquals(SystemOptions(54321, dbDirectory = TYPICAL_DB_DIRECTORY, allLoggingOff = true), serverOptions)
     }
 
     /**
@@ -224,26 +224,31 @@ class SystemOptionTests {
      */
     @Test
     fun testShouldSetHost() {
-        val serverOptions = extractOptions(arrayOf("--host","renomad.com"))
-        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+        val serverOptions = extractOptions(arrayOf("--host",TYPICAL_HOST_NAME))
+        assertEquals(SystemOptions(host = TYPICAL_HOST_NAME), serverOptions)
     }
 
     @Test
     fun testShouldSetHostShortForm() {
-        val serverOptions = extractOptions(arrayOf("-h", "renomad.com"))
-        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+        val serverOptions = extractOptions(arrayOf("-h", TYPICAL_HOST_NAME))
+        assertEquals(SystemOptions(host = TYPICAL_HOST_NAME), serverOptions)
     }
 
     @Test
     fun testShouldSetHostNoSpace() {
         val serverOptions = extractOptions(arrayOf("--hostrenomad.com"))
-        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+        assertEquals(SystemOptions(host = TYPICAL_HOST_NAME), serverOptions)
     }
 
     @Test
     fun testShouldSetHostShortFormNoSpace() {
         val serverOptions = extractOptions(arrayOf("-hrenomad.com"))
-        assertEquals(SystemOptions(host = "renomad.com"), serverOptions)
+        assertEquals(SystemOptions(host = TYPICAL_HOST_NAME), serverOptions)
+    }
+
+    companion object {
+        const val TYPICAL_DB_DIRECTORY = "build/db/"
+        const val TYPICAL_HOST_NAME = "renomad.com"
     }
 
 }

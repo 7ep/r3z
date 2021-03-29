@@ -318,7 +318,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractAuthCodeFromCookie_NotFound() {
-        val headers = listOf("Content-Type: Blah")
+        val headers = listOf(CONTENT_TYPE_UNIMPORTANT)
         val result = extractSessionTokenFromHeaders(headers)
         assertNull("If there were no cookie headers, return null", result)
     }
@@ -372,7 +372,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_MultipleHeaders() {
-        val headers = listOf("Content-Length: 20", "Content-Type: Blah")
+        val headers = listOf("Content-Length: 20", CONTENT_TYPE_UNIMPORTANT)
         val expectedLength = 20
 
         val result = extractLengthOfPostBodyFromHeaders(headers)
@@ -397,7 +397,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_NotFound() {
-        val headers = listOf("Content-Type: Blah")
+        val headers = listOf(CONTENT_TYPE_UNIMPORTANT)
         val exception = assertThrows(NoSuchElementException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
         assertEquals("Did not find a necessary Content-Length header in headers. Headers: Content-Type: Blah", exception.message)
     }
@@ -418,7 +418,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_Unparsable() {
-        val headers = listOf("Content-Length: aaaa", "Content-Type: Blah")
+        val headers = listOf("Content-Length: aaaa", CONTENT_TYPE_UNIMPORTANT)
         val exception = assertThrows(IllegalArgumentException::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
         assertEquals("The value for content-length was not parsable as an integer. Headers: Content-Length: aaaa;Content-Type: Blah", exception.message)
     }
@@ -432,7 +432,7 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_TooHigh() {
-        val headers = listOf("Content-Length: ${maxContentLength +1}", "Content-Type: Blah")
+        val headers = listOf("Content-Length: ${maxContentLength +1}", CONTENT_TYPE_UNIMPORTANT)
 
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
         assertEquals("Exception occurred for these headers: Content-Length: ${maxContentLength +1};Content-Type: Blah.  Inner exception message: The Content-length is not allowed to exceed $maxContentLength characters", exception.message)
@@ -445,10 +445,14 @@ class ServerUtilitiesTests {
      */
     @Test
     fun testShouldExtractLengthFromContentLength_Negative() {
-        val headers = listOf("Content-Length: -1", "Content-Type: Blah")
+        val headers = listOf("Content-Length: -1", CONTENT_TYPE_UNIMPORTANT)
 
         val exception = assertThrows(Exception::class.java) { extractLengthOfPostBodyFromHeaders(headers) }
         assertEquals("Exception occurred for these headers: Content-Length: -1;Content-Type: Blah.  Inner exception message: Content-length cannot be negative", exception.message)
+    }
+
+    companion object {
+        const val CONTENT_TYPE_UNIMPORTANT = "Content-Type: Blah"
     }
 
 }

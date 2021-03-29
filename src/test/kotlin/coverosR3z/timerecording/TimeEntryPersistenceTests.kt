@@ -23,8 +23,8 @@ class TimeEntryPersistenceTests {
 
     @Category(IntegrationTestCategory::class)
     @Test fun `can record a time entry to the database`() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
         val count = tep.readTimeEntries(newEmployee).size
         assertEquals("There should be exactly one entry in the database", 1, count)
@@ -33,7 +33,7 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test fun `can get all time entries by a employee`() {
         tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newProject: Project = tep.persistNewProject(ProjectName("test project"))
+        val newProject: Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val entry1 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE)
         val entry2 = createTimeEntryPreDatabase(employee = DEFAULT_EMPLOYEE, project = newProject, date = A_RANDOM_DAY_IN_JUNE_2020)
         tep.persistNewTimeEntry(entry1)
@@ -65,8 +65,8 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun `Can query hours worked by a employee on a given day`() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         tep.persistNewTimeEntry(
                 createTimeEntryPreDatabase(
                         employee = newEmployee,
@@ -92,8 +92,8 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun `If a employee worked 24 hours total in a day, we should get that from queryMinutesRecorded`() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         tep.persistNewTimeEntry(
                 createTimeEntryPreDatabase(
                         employee = newEmployee,
@@ -128,7 +128,7 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun `If a employee worked 8 hours a day for two days, we should get just 8 hours when checking one of those days`() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         tep.persistNewTimeEntry(
                 createTimeEntryPreDatabase(
@@ -337,8 +337,8 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testFindTimeEntry() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
         val result = tep.findTimeEntryById(newTimeEntry.id)
         assertEquals(newTimeEntry, result)
@@ -360,8 +360,8 @@ class TimeEntryPersistenceTests {
     @Category(IntegrationTestCategory::class)
     @Test
     fun testDeleteTimeEntry() {
-        val newProject = tep.persistNewProject(ProjectName("test project"))
-        val newEmployee = tep.persistNewEmployee(EmployeeName("test employee"))
+        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
         val result = tep.deleteTimeEntry(newTimeEntry)
         assertTrue(result)
@@ -378,6 +378,5 @@ class TimeEntryPersistenceTests {
         val result = tep.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(result)
     }
-
 
 }

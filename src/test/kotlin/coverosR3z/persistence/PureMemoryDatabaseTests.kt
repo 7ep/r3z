@@ -399,7 +399,9 @@ class PureMemoryDatabaseTests {
         arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // corrupt the time-entries data file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${TimeEntry.directoryName}/2$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${TimeEntry.directoryName}/2$databaseFileSuffix").writeText(
+            BAD_DATA_HERE
+        )
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {
             DatabaseDiskPersistence(
@@ -420,7 +422,7 @@ class PureMemoryDatabaseTests {
         arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // create a bogus corrupt employee id file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}/27$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Employee.directoryName}/27$databaseFileSuffix").writeText(BAD_DATA_HERE)
         
         val ex = assertThrows(DatabaseCorruptedException::class.java) {
             DatabaseDiskPersistence(
@@ -467,7 +469,7 @@ class PureMemoryDatabaseTests {
         arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // create a corrupt user data file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${User.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${User.directoryName}/99$databaseFileSuffix").writeText(BAD_DATA_HERE)
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {
             DatabaseDiskPersistence(
@@ -510,7 +512,7 @@ class PureMemoryDatabaseTests {
         val project = pmd.dataAccess<Project>(Project.directoryName).read { p -> p.single{ it.name == DEFAULT_PROJECT_NAME }}
 
         // corrupt the projects data file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id.value}$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Project.directoryName}/${project.id.value}$databaseFileSuffix").writeText(BAD_DATA_HERE)
 
         val ex = assertThrows(DatabaseCorruptedException::class.java) {
             DatabaseDiskPersistence(
@@ -552,7 +554,7 @@ class PureMemoryDatabaseTests {
         arrangeFullDatabaseWithDisk(skipRestarting = true, databaseDirectorySuffix = databaseDirectorySuffix)
 
         // create corrupt bogus time-entries data file
-        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Session.directoryName}/99$databaseFileSuffix").writeText("BAD DATA HERE")
+        File("$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/$CURRENT_DATABASE_VERSION/${Session.directoryName}/99$databaseFileSuffix").writeText(BAD_DATA_HERE)
 
         assertThrows(DatabaseCorruptedException::class.java) {
             DatabaseDiskPersistence(
@@ -1037,6 +1039,10 @@ class PureMemoryDatabaseTests {
         }
         testLogger.logAudit { "It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames" }
         return lotsOfEmployees
+    }
+
+    companion object {
+        const val BAD_DATA_HERE = "BAD DATA HERE"
     }
 
 }

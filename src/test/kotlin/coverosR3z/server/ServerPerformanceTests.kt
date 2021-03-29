@@ -214,7 +214,7 @@ class ServerPerformanceTests {
                 Client.make(
                     Verb.GET,
                     ViewTimeAPI.path,
-                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
+                    listOf(KEEP_ALIVE_HEADER, "Cookie: sessionId=$sessionId"),
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -233,7 +233,7 @@ class ServerPerformanceTests {
                 Client.make(
                     Verb.GET,
                     ViewTimeAPI.path,
-                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
+                    listOf(KEEP_ALIVE_HEADER, "Cookie: sessionId=$sessionId"),
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -253,7 +253,7 @@ class ServerPerformanceTests {
                 Client.make(
                     Verb.GET,
                     "sample.js",
-                    listOf("Connection: keep-alive"),
+                    listOf(KEEP_ALIVE_HEADER),
                     port = fs.server.port)
             for (i in 1..numRequests) {
                 client.send()
@@ -274,7 +274,7 @@ class ServerPerformanceTests {
                 Client.make(
                     Verb.POST,
                     EnterTimeAPI.path,
-                    listOf("Connection: keep-alive", "Cookie: sessionId=$sessionId"),
+                    listOf(KEEP_ALIVE_HEADER, "Cookie: sessionId=$sessionId"),
                     port = fs.server.port
                 )
             for (i in 1..numRequests) {
@@ -294,6 +294,7 @@ class ServerPerformanceTests {
 
     companion object {
         val port = AtomicInteger(3000)
+        const val KEEP_ALIVE_HEADER = "Connection: keep-alive"
     }
 
 }
