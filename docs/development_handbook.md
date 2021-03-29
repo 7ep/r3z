@@ -68,9 +68,73 @@ there was a bug in TLS 1.3 that was fixed in Java 13.
 Guiding ideas
 -------------
 
-1. Take care of the pennies and the pounds will take care of themselves
-2. A stitch in time saves nine
+_A time and expenses application, with_
 
+* our own authentication and authorization
+* our own localization and internationalization
+* our own templating
+* our own database
+* our own mocking framework
+* our own BDD framework
+* our own HTTP server
+* our own logging framework
+* carefully documented
+* test-driven at all levels
+* agile at its core
+
+_What’s the point?_
+
+What would software look like if it were built healthy from the beginning, with a 
+healthy team?  We often quote from books like _Accelerate_ about how much better the front-runners 
+are doing - wouldn’t it be nice to have some of that software ourselves to show them, 
+rather than tell them?  
+
+>Simple ain’t easy 
+> 
+> -- _Thelonious Monk_
+
+>Slow is smooth, smooth is fast 
+> 
+> -- _Navy Seals_
+
+>It occurred to him almost instantly, with the instinctive correctness that self-preservation 
+>instills in the mind, that he mustn’t try to think about it, that if he did, the law of gravity 
+>would suddenly glance sharply in his direction and demand to know what the hell he thought 
+>he was doing up there, and all would suddenly be lost.  
+> 
+> -- _Douglas Adams, Life, The Universe and Everything_
+
+>"I never knew words could be so confusing," Milo said to Tock as he bent down to scratch the 
+>dog's ear. "Only when you use a lot to say a little," answered Tock. Milo thought this was 
+>quite the wisest thing he'd heard all day. 
+> 
+> -- _Norton Juster, The Phantom Tollbooth_
+
+>If you’re going to repair a motorcycle, an adequate supply of gumption is the first 
+>and most important tool. If you haven’t got that you might as well gather up all 
+>the other tools and put them away, because they won’t do you any good.
+> 
+> -- _Robert Pirsig, Zen and the Art of Motorcycle Maintenance_
+
+>If you want to build a ship, don't drum up people to collect wood and don't assign 
+>them tasks and work, but rather teach them to long for the endless immensity of the sea.
+> 
+> -- _Antoine de Saint-Exupery_
+
+>I conclude that there are two ways of constructing a software design: One way is to 
+>make it so simple that there are obviously no deficiencies and the other way is to 
+>make it so complicated that there are no obvious deficiencies. The first method is 
+>far more difficult. It demands the same skill, devotion, insight, and even inspiration 
+>as the discovery of the simple physical laws which underlie the complex phenomena of 
+>nature. It also requires a willingness to accept objectives which are limited by 
+>physical, logical, and technological constraints, and to accept a compromise when 
+>conflicting objectives cannot be met.
+> 
+> -- _Tony Hoare, 1980 ACM Turing award lecture_
+
+>Keep it simple, stupid
+> 
+> -- _Kelly Johnson, Lockheed Skunk Works_
 
 Adding a completely new endpoint
 --------------------------------
