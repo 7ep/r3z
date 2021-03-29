@@ -40,6 +40,54 @@ class UITimeEntryTests {
         `timeentry - I should be able to view previous time periods when viewing entries`()
     }
 
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+
+    companion object {
+        private const val port = 4000
+        private lateinit var pom: PageObjectModelLocal
+        private lateinit var databaseDirectory : String
+        private const val regularUsername = "andrea"
+        private const val regularEmployeeName = "Andrea"
+
+
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            // install the most-recent chromedriver
+            WebDriverManager.chromedriver().setup()
+            WebDriverManager.firefoxdriver().setup()
+        }
+
+    }
+
+    @Before
+    fun init() {
+        val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
+        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
+        File(databaseDirectory).deleteRecursively()
+        pom = startupTestForUI(port = port, directory = databaseDirectory)
+    }
+
+    @After
+    fun finish() {
+        pom.fs.shutdown()
+        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+        assertEquals(pom.pmd, pmd)
+        pom.driver.quit()
+    }
+
+    private fun logout() {
+        pom.lop.go()
+    }
+
     private fun `createEmployee - I should be able to create an employee`() {
         val s = CreateEmployeeUserStory.getScenario("createEmployee - I should be able to create an employee")
 
@@ -122,55 +170,6 @@ class UITimeEntryTests {
         assertTrue(pom.vtp.verifyPeriodIsSubmitted())
         s.markDone("Then the time period is ready to be approved")
     }
-
-    /*
-     _ _       _                  __ __        _    _           _
-    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
-    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
-    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
-                 |_|
-     alt-text: Helper Methods
-     */
-
-
-    companion object {
-        private const val port = 4000
-        private lateinit var pom: PageObjectModelLocal
-        private lateinit var databaseDirectory : String
-        private const val regularUsername = "andrea"
-        private const val regularEmployeeName = "Andrea"
-
-
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            // install the most-recent chromedriver
-            WebDriverManager.chromedriver().setup()
-            WebDriverManager.firefoxdriver().setup()
-        }
-
-    }
-
-    @Before
-    fun init() {
-        val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
-        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
-        File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
-    }
-
-    @After
-    fun finish() {
-        pom.fs.shutdown()
-        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
-        assertEquals(pom.pmd, pmd)
-        pom.driver.quit()
-    }
-
-    private fun logout() {
-        pom.lop.go()
-    }
-
 
     private fun loginAndrea() {
         pom.lp.login(regularUsername, DEFAULT_PASSWORD.value)

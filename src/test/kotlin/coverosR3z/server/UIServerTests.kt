@@ -40,6 +40,47 @@ class UIServerTests {
         `change admin password, relogin, create new employee, use invitation and change their password and login`()
     }
 
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+
+    companion object {
+        private const val port = 4001
+        private lateinit var pom : PageObjectModelLocal
+        private lateinit var databaseDirectory : String
+
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            // install the most-recent chromedriver
+            WebDriverManager.chromedriver().setup()
+            WebDriverManager.firefoxdriver().setup()
+        }
+
+    }
+
+    @Before
+    fun init() {
+        val databaseDirectorySuffix = "uiservertests_on_port_$port"
+        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
+        File(databaseDirectory).deleteRecursively()
+        pom = startupTestForUI(port = port, directory = databaseDirectory)
+    }
+
+    @After
+    fun finish() {
+        pom.fs.shutdown()
+        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
+        assertEquals(pom.pmd, pmd)
+        pom.driver.quit()
+    }
+
     private fun `change admin password, relogin, create new employee, use invitation and change their password and login`() {
         pom.lp.login("employeemaker", "password12345")
         // go to the change password page
@@ -130,47 +171,6 @@ class UIServerTests {
         // Text entry will stop taking characters at the maximum size, so
         // what gets entered will just be truncated to [maxUserNameSize]
         tooLongerUsername(invitationCode)
-    }
-
-    /*
-     _ _       _                  __ __        _    _           _
-    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
-    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
-    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
-                 |_|
-     alt-text: Helper Methods
-     */
-
-
-    companion object {
-        private const val port = 4001
-        private lateinit var pom : PageObjectModelLocal
-        private lateinit var databaseDirectory : String
-
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            // install the most-recent chromedriver
-            WebDriverManager.chromedriver().setup()
-            WebDriverManager.firefoxdriver().setup()
-        }
-
-    }
-
-    @Before
-    fun init() {
-        val databaseDirectorySuffix = "uiservertests_on_port_$port"
-        databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
-        File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
-    }
-
-    @After
-    fun finish() {
-        pom.fs.shutdown()
-        val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
-        assertEquals(pom.pmd, pmd)
-        pom.driver.quit()
     }
 
     private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
