@@ -17,7 +17,6 @@ import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDa
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
-import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -146,7 +145,7 @@ class PureMemoryDatabaseTests {
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewEmployeesAdded = 20
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         testLogger.turnOffAllLogging()
         repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
@@ -169,7 +168,7 @@ class PureMemoryDatabaseTests {
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewProjectsAdded = 20
         testLogger.turnOffAllLogging()
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewProjectsAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
                 tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -191,7 +190,7 @@ class PureMemoryDatabaseTests {
         val numberTimeEntriesAdded = 20
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         testLogger.turnOffAllLogging()
         repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {

@@ -7,7 +7,6 @@ import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.UserName
 import coverosR3z.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
-import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -100,7 +99,7 @@ class AuthenticationPersistenceTests {
     fun testCorruptingSessionDataWithMultiThreading() {
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         val numberNewSessionsAdded = 20
         for(i in 1..numberNewSessionsAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
@@ -122,7 +121,7 @@ class AuthenticationPersistenceTests {
         val ap = AuthenticationPersistence(createEmptyDatabase(), testLogger)
         val listOfThreads = mutableListOf<Future<*>>()
         val numberNewUsersAdded = 20
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
         repeat(numberNewUsersAdded) { // each thread calls the add a single time
             listOfThreads.add(cachedThreadPool.submit(Thread {
                 ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, DEFAULT_USER.role)

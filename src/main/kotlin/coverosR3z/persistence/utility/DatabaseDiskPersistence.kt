@@ -18,7 +18,6 @@ import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
 import coverosR3z.timerecording.types.SubmittedPeriod
 import coverosR3z.timerecording.types.TimeEntry
-import kotlinx.coroutines.asCoroutineDispatcher
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -31,7 +30,7 @@ import java.util.concurrent.Executors
 class DatabaseDiskPersistence(
     private val dbDirectory: String? = null,
     val logger: ILogger,
-    executorService: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService,
+    executorService: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 ) {
 
     private val actionQueue = ActionQueue("DatabaseWriter", executorService)

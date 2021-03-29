@@ -18,7 +18,6 @@ import coverosR3z.server.utility.SocketWrapper
 import coverosR3z.server.utility.parseHttpMessageAsClient
 import coverosR3z.system.utility.FullSystem
 import coverosR3z.timerecording.api.EnterTimeAPI
-import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -266,7 +265,7 @@ class ServerTests {
         val numberOfThreads = 10
         val numberOfRequests = 300
 
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
 
         // so we don't see spam
         fs.logger.turnOffAllLogging()

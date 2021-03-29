@@ -3,7 +3,6 @@ package coverosR3z
 import coverosR3z.system.utility.FullSystem.Companion.createSystemRunningMarker
 import coverosR3z.system.utility.FullSystem.Companion.startSystem
 import coverosR3z.config.utility.SystemOptions.Companion.extractCommandLineOptions
-import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -20,7 +19,7 @@ fun main(args: Array<String>) {
     val systemOptions = extractCommandLineOptions(args)
 
     // create an executor service for all the threads in the system
-    val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory()).asCoroutineDispatcher().executor as ExecutorService
+    val esForThreadsInServer: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
     val systemFuture: Future<*> = esForThreadsInServer.submit {startSystem(systemOptions, esForThreadsInServer = esForThreadsInServer)}
 
     // block here for threads to complete
