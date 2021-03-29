@@ -4,6 +4,7 @@ Developer handbook
 Table of contents
 -----------------
 
+- [Description](#description)
 - [New Developer Setup](#new-developer-setup)
 - [JDK](#jdk)  
 - [Guiding ideas](#guiding-ideas)
@@ -28,6 +29,35 @@ Table of contents
 - [Regular expressions](#regular-expressions-regex)
 - [Directories](#directories)
 
+Description
+------------
+
+R3z is a multi-threaded web application with its own web server and its
+own eventually-consistent database.  It builds to a binary that is
+runnable on any jvm 13 or up using a commandline like java -jar r3z.jar
+
+It follows some unusual conventions that new developers should be aware of.
+
+For example, we don't have many dependencies in the system.
+Storytime: As we have developed, we would occasionally bring in a
+dependency to handle a need.  Since we operated with sufficient time
+to reflect on things, it often occurred to us that a particular
+dependecy was providing relatively little value.  We then could easily
+replace it with just a little custom code. As that continued, we
+generally found that the only outside code worth its salt happened to
+already exist in the standard library.  As of this writing, we have no
+dependencies outside the standard library (which is just incredible -
+thanks Java library developers / Kotlin library developers)
+
+Instead of using a mocking framework, we just create a
+"Fake" version of a class (e.g. FakeTimeEntryPersistence).  This is
+because mocking frameworks actually compile code _at runtime_ which
+slows down tests tremendously.  By using this practice, our unit tests
+often take less than even 1 millisecond.
+
+Another example: the data structures in the database are built on a
+thread-safe data structure (ConcurrentHashMap), so that we don't need
+to synchronize a great deal of the time.  
 
 New Developer Setup
 -------------------
