@@ -34,7 +34,9 @@ Description
 
 R3z is a multi-threaded web application with its own web server and its
 own eventually-consistent database.  It builds to a binary that is
-runnable on any jvm 13 or up using a commandline like java -jar r3z.jar
+runnable on any Java virtual machine version 13 or up, using a commandline like
+
+    java -jar r3z.jar
 
 It follows some unusual conventions that new developers should be aware of.
 
@@ -58,6 +60,37 @@ often take less than even 1 millisecond.
 Another example: the data structures in the database are built on a
 thread-safe data structure (ConcurrentHashMap), so that we don't need
 to synchronize a great deal of the time.  
+
+_Ways in which R3z is better_
+
+for users:
+* Session remains active all day - you can leave it up and it doesn't timeout
+* Extremely fast
+* Fewer clicks for actions
+* works fine on desktop and mobile
+* easily automatable
+* simplistic and undistracting, high usability
+
+for developers:
+* Since the database is simply a data structure in the 
+  system, it is easy to do integration testing, and easily possible to do 
+  many integration tests in parallel
+* High test coverage - fearless refactoring unlocked.  Furthermore, if a 
+  change is made and the tests pass, it gives confidence that nothing was broken.
+* No magic annotations - the system follows an entirely straightforward 
+  call tree from the `Main()` function down.  Stack traces highly contribute
+  to debugging, unlike many of the current frameworks.
+
+For operations:
+* The system shutdown and startup is extremely fast, and
+  it is possible to update the system safely at any time, even
+  in the middle of a work day
+
+for business:
+* BDD documentation of business requirements
+* System requires minimal (read: inexpensive) resources
+* happier users
+* high internal quality means easier, better, faster maintenance and improvements and better security
 
 New Developer Setup
 -------------------
