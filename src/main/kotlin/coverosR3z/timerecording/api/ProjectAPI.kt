@@ -88,7 +88,7 @@ class ProjectAPI(private val sd: ServerData) {
             <form action="$path" method="post">
                 <p>
                     <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" />
+                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" autofocus />
                 </p>
             
                 <p>

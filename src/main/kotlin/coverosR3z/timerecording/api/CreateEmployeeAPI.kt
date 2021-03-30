@@ -113,7 +113,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         <form action="$path" method="post">
             <p>
                 <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
-                <input name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" />
+                <input name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" autofocus />
             </p>
         
             <p>
