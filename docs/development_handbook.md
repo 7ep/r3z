@@ -44,7 +44,7 @@ For example, we don't have many dependencies in the system.
 Storytime: As we have developed, we would occasionally bring in a
 dependency to handle a need.  Since we operated with sufficient time
 to reflect on things, it often occurred to us that a particular
-dependecy was providing relatively little value.  We then could easily
+dependency was providing relatively little value.  We then could easily
 replace it with just a little custom code. As that continued, we
 generally found that the only outside code worth its salt happened to
 already exist in the standard library.  As of this writing, we have no
@@ -111,7 +111,7 @@ Here's the general series of steps for a new developer:
    takes a while.  To run them faster, find the gradle tool window and the test task within it,
    and run the tests there.
 7. Read through some of this developer documentation to get a feel for some of its unique characteristics.
-8. Examine some of the tests in the system to get a feel for how the system works and how
+8. Examine some tests in the system to get a feel for how the system works and how
    test automation is done.
 9. It may be necessary to configure your browser to allow unsigned certificates. On Chrome, that is 
    easily done: just put chrome://flags/#allow-insecure-localhost as your URL and enable it.
