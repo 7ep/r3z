@@ -5,6 +5,7 @@ import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.*
 import coverosR3z.logging.LogTypes
+import coverosR3z.misc.DEFAULT_DATE
 import coverosR3z.misc.DEFAULT_DB_DIRECTORY
 import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.testLogger
@@ -14,10 +15,8 @@ import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -29,6 +28,7 @@ class UIServerTests {
     @Category(UITestCategory::class)
     @Test
     fun serverTests() {
+        init()
         `Go to an unknown page, expecting a not-found error`()
         `Go to an unknown page on an insecure port, expecting a not-found error`()
         `Try logging in with invalid credentials, expecting to be forbidden`()
@@ -37,8 +37,26 @@ class UIServerTests {
         `general - should be able to see the homepage and the authenticated homepage`()
         `general - I should be able to change the logging settings`()
         `validation - Validation should stop me entering invalid input on the registration page`()
-        `change admin password, relogin, create new employee, use invitation and change their password and login`()
+        val (newPassword, hankNewPassword) =
+            `change admin password, relogin, create new employee, use invitation and change their password and login`()
+        shutdown()
+        restart()
+        `create a new project`(newPassword)
+        `hank enters time`(hankNewPassword)
+        shutdown()
     }
+
+    private fun `hank enters time`(hankNewPassword: String) {
+        pom.lp.login("hank", hankNewPassword)
+        pom.vtp.enterTime("great new project", "2", "these are some details", pom.calcDateString(DEFAULT_DATE))
+    }
+
+    private fun `create a new project`(newPassword: String) {
+        pom.lp.login("employeemaker", newPassword)
+        pom.epp.enter("great new project")
+        logout()
+    }
+
 
     /*
      _ _       _                  __ __        _    _           _
@@ -65,7 +83,6 @@ class UIServerTests {
 
     }
 
-    @Before
     fun init() {
         val databaseDirectorySuffix = "uiservertests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
@@ -73,15 +90,18 @@ class UIServerTests {
         pom = startupTestForUI(port = port, directory = databaseDirectory)
     }
 
-    @After
-    fun finish() {
+    private fun restart() {
+        pom = startupTestForUI(port = port, directory = databaseDirectory)
+    }
+
+    fun shutdown() {
         pom.fs.shutdown()
         val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         assertEquals(pom.pmd, pmd)
         pom.driver.quit()
     }
 
-    private fun `change admin password, relogin, create new employee, use invitation and change their password and login`() {
+    private fun `change admin password, relogin, create new employee, use invitation and change their password and login`(): Pair<String, String> {
         pom.lp.login("employeemaker", "password12345")
         // go to the change password page
         pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
@@ -97,10 +117,10 @@ class UIServerTests {
         pom.driver.findElement(By.id(ChangePasswordAPI.Elements.YES_BUTTON.getId())).click()
         // confirm the title
         assertEquals("New password generated", pom.driver.title)
-        val newPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
+        val newAdminPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
         logout()
         // confirm the new password works
-        pom.lp.login("employeemaker", newPassword)
+        pom.lp.login("employeemaker", newAdminPassword)
         assertEquals("Authenticated Homepage", pom.driver.title)
         // create a new employee
         pom.eep.enter("hank")
@@ -123,6 +143,7 @@ class UIServerTests {
         pom.lp.login("hank", hankNewPassword)
         assertEquals("your time entries", pom.driver.title)
         logout()
+        return Pair(newAdminPassword, hankNewPassword)
     }
 
     private fun `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`() {

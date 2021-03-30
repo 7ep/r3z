@@ -1,4 +1,4 @@
-package coverosR3z.timerecording
+package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
@@ -9,7 +9,7 @@ import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
-import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.maxProjectNameSize
 import coverosR3z.timerecording.types.maxProjectNameSizeMsg
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities

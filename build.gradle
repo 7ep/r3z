@@ -143,15 +143,6 @@ task unittest(type: Test) {
     }
 }
 
-task fasttest(type: Test) {
-    group = "Verification"
-    description 'Runs the fastest set of tests - Unit, integration, API'
-    useJUnit {
-        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
-                'coverosR3z.uitests.UITestCategory'
-    }
-}
-
 task nouitest(type: Test) {
     group = "Verification"
     description 'Runs all the tests but UI'
@@ -188,6 +179,12 @@ task alltests(type: GradleBuild) {
     group = "Verification"
     description 'Runs all the tests, by kind, in order - unit tests, then integration, api, perf, ui'
     tasks = ['unittest', 'integrationtest', 'apitest', 'performancetest', 'uitest']
+}
+
+task fasttests(type: GradleBuild) {
+    group = "Verification"
+    description 'Runs all the fast tests, by kind, in order - unit tests, then integration, api'
+    tasks = ['unittest', 'integrationtest', 'apitest']
 }
 
 // runs all the tests

@@ -1,4 +1,4 @@
-package coverosR3z.timerecording
+package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.persistence.AuthenticationPersistence
@@ -15,7 +15,7 @@ import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDa
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.ServerPerformanceTests
 import coverosR3z.server.types.*
-import coverosR3z.timerecording.api.EnterTimeAPI
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

@@ -1,4 +1,4 @@
-package coverosR3z.timerecording
+package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
@@ -9,7 +9,6 @@ import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
-import coverosR3z.timerecording.api.SubmitTimeAPI
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.TimePeriod
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
