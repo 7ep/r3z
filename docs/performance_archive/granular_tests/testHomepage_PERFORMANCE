@@ -346,3 +346,5 @@
 2021-03-28	numberOfThreads: 10	numberOfRequests: 300	time: 279
 2021-03-28	numberOfThreads: 10	numberOfRequests: 300	time: 92
 2021-03-29	numberOfThreads: 10	numberOfRequests: 300	time: 147
+2021-04-01	numberOfThreads: 10	numberOfRequests: 300	time: 215
+2021-04-01	numberOfThreads: 10	numberOfRequests: 300	time: 183

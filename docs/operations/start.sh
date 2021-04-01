@@ -10,8 +10,11 @@ cd $MYDIR
 # Check "convert_lets_encrypt_certs_to_keystore.txt" in docs/operations for a
 # bit more info on this
 
+# Using the Xss180k means that each thread uses 180 kb of memory.  This is just to
+# minimize memory use where we can
+
 # run the timekeeping application
-java -Djavax.net.ssl.keyStore=keystore -Djavax.net.ssl.keyStorePassword=passphrase -jar r3z.jar -p 12345 -s 12443 -d db &>>r3z.log &
+java -Djavax.net.ssl.keyStore=keystore -Djavax.net.ssl.keyStorePassword=passphrase -Xss180k -jar r3z.jar -h renomad.com  &>>r3z.log &
 
 # get the process id, pop it in a file (we'll use this to stop the process later)
 echo $! > pid

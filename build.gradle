@@ -189,7 +189,8 @@ task fasttests(type: GradleBuild) {
 
 // runs all the tests
 test {
-
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-Xss180k'
 }
 
 tasks.withType(Test).configureEach {
