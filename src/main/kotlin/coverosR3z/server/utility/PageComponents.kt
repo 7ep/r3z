@@ -29,7 +29,7 @@ class PageComponents(sd: ServerData) {
         $extraHeaderContent
         <title>$title</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta apifile="$apiFile" >
+        <meta name="file" content="$apiFile" >
     </head>
     <body>
         $standardHeader

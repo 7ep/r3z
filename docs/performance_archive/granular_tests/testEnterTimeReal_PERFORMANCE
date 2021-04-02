@@ -363,3 +363,5 @@
 2021-04-01	numberThreads: 5	numberRequests: 200	time: 477
 2021-04-01	numberThreads: 500	numberRequests: 200	time: 5239
 2021-04-01	numberThreads: 5	numberRequests: 200	time: 337
+2021-04-02	numberThreads: 5	numberRequests: 200	time: 179
+2021-04-02	numberThreads: 5	numberRequests: 200	time: 196

@@ -156,11 +156,11 @@ class LogoutPage(private val driver: WebDriver, private val domain: String) {
 class ViewTimePage(private val driver: WebDriver, private val domain: String) {
 
     fun getTimeForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id div[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]")).text
+        return driver.findElement(By.cssSelector("#time-entry-$id div.time div.readonly-data")).text
     }
 
     fun getDateForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id div[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).text
+        return driver.findElement(By.cssSelector("#time-entry-$id div.date div.readonly-data")).text
     }
 
     fun submitTimeForPeriod() {
@@ -248,7 +248,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickSaveTimeEntry(id : Int) {
         driver
             .findElement(
-                By.cssSelector("#time-entry-$id #${ViewTimeAPI.Elements.SAVE_BUTTON.getId()}")).click()
+                By.cssSelector("#time-entry-$id #${ViewTimeAPI.Elements.SAVE_BUTTON_DESKTOP.getId()}")).click()
     }
 
     /**

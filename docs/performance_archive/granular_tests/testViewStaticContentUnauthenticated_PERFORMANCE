@@ -351,3 +351,5 @@
 2021-04-01	numberThreads: 10	numberRequests: 500	time: 319
 2021-04-01	numberThreads: 10	numberRequests: 500	time: 341
 2021-04-01	numberThreads: 10	numberRequests: 500	time: 357
+2021-04-02	numberThreads: 10	numberRequests: 500	time: 238
+2021-04-02	numberThreads: 10	numberRequests: 500	time: 209
