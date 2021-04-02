@@ -262,24 +262,24 @@ class ViewTimeAPI(private val sd: ServerData) {
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
                 <div class="project createrow-data time-entry-information">
-                    <label>Project</label>
-                    <select name="project_entry" required  >
+                    <label for="${Elements.PROJECT_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Project</label>
+                    <select id="${Elements.PROJECT_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required >
                         <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
                 <div class="date createrow-data time-entry-information" >
-                    <label>Date</label>
-                    <input name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
+                    <label for="${Elements.DATE_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Date</label>
+                    <input id="${Elements.DATE_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
                 <div class="time createrow-data time-entry-information">
-                    <label>Time (hrs)</label>
-                    <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
+                    <label for="${Elements.TIME_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Time (hrs)</label>
+                    <input id="${Elements.TIME_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
                 <div class="details createrow-data time-entry-information">
-                    <label>Details</label>
-                    <input name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
+                    <label for="${Elements.DETAIL_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Details</label>
+                    <input id="${Elements.DETAIL_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
                 <div class="action createrow-data time-entry-information">
                     <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
