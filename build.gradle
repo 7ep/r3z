@@ -104,7 +104,7 @@ jar {
     }
 }
 
-task performancetest(type: Test) {
+task performancetests(type: Test) {
     group = "Verification"
     description 'Runs the performance tests.'
     useJUnit {
@@ -116,9 +116,10 @@ task performancetest(type: Test) {
     }
 }
 
-task apitest(type: Test) {
+task apitests(type: Test) {
     group = "Verification"
     description 'Runs the API tests.'
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
         includeCategories 'coverosR3z.server.APITestCategory'
     }
@@ -128,9 +129,10 @@ task apitest(type: Test) {
     }
 }
 
-task unittest(type: Test) {
+task unittests(type: Test) {
     group = "Verification"
     description 'Runs the fastest set of tests.'
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
         excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
                 'coverosR3z.uitests.UITestCategory',
@@ -151,9 +153,10 @@ task nouitest(type: Test) {
     }
 }
 
-task uitest(type: Test) {
+task uitests(type: Test) {
     group = "Verification"
     description 'Runs the user interface (UI) tests. That is, uses the browser.'
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
         includeCategories 'coverosR3z.uitests.UITestCategory'
     }
@@ -161,11 +164,14 @@ task uitest(type: Test) {
         destinationFile = file("$buildDir/jacoco/uitest.exec")
         classDumpDir = file("$buildDir/jacoco/uitestclasspathdumps")
     }
+    // Fail the 'test' task on the first test failure
+    failFast = false
 }
 
-task integrationtest(type: Test) {
+task integrationtests(type: Test) {
     group = "Verification"
     description 'Runs the integration tests.  These run a little slower than unit tests.'
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
         includeCategories 'coverosR3z.misc.IntegrationTestCategory'
     }
@@ -189,13 +195,15 @@ task fasttests(type: GradleBuild) {
 
 // runs all the tests
 test {
-    // set JVM arguments for the test JVM(s)
-    jvmArgs '-Xss180k'
+    // nothing special configured here
 }
 
 tasks.withType(Test).configureEach {
     // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
     // maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-Xss180k'
 
     jacoco {
         includes = ['coverosR3z.*']

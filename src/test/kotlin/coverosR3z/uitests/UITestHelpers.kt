@@ -16,6 +16,7 @@ import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
+import org.openqa.selenium.Point
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -25,7 +26,19 @@ import org.openqa.selenium.support.ui.Select
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX(
         { FirefoxDriver(
-            org.openqa.selenium.firefox.FirefoxOptions().setAcceptInsecureCerts(true)) }
+            org.openqa.selenium.firefox.FirefoxOptions()
+                .setAcceptInsecureCerts(true)
+                .addArguments("--width=800", "--height=500")
+        ) }
+    ),
+
+    // For testing mobile versions - narrower window
+    FIREFOX_MOBILE (
+        { FirefoxDriver(
+            org.openqa.selenium.firefox.FirefoxOptions()
+                .setAcceptInsecureCerts(true)
+                .addArguments("--width=500", "--height=500")
+        ) }
     ),
 
     CHROME(
@@ -36,12 +49,21 @@ enum class Drivers(val driver: () -> WebDriver){
                 .setAcceptInsecureCerts(true)) }
     ),
 
-    CHROME_HEADLESS(
+    // For testing mobile versions - narrower window
+    CHROME_MOBILE (
         { ChromeDriver(
             ChromeOptions()
-                .setHeadless(true)
+                .addArguments("--window-size=500,500")
+                .setHeadless(false)
                 .setAcceptInsecureCerts(true)) }
     ),
+
+//    CHROME_HEADLESS(
+//        { ChromeDriver(
+//            ChromeOptions()
+//                .setHeadless(true)
+//                .setAcceptInsecureCerts(true)) }
+//    ),
 }
 
 /**
@@ -63,7 +85,11 @@ fun startupTestForUI(
     val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
 
     val bc = initializeBusinessCode(fs.pmd, testLogger)
-    return PageObjectModelLocal.make(driver(), port, port + 443, bc, fs, checkNotNull(fs.pmd), domain)
+    val pom = PageObjectModelLocal.make(driver(), port, port + 443, bc, fs, checkNotNull(fs.pmd), domain)
+
+    // scatter the windows around the screen so we have a chance to see what all is going on
+    pom.driver.manage().window().position = Point(listOf(0, 800).random(), listOf(0, 400).random())
+    return pom
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {
@@ -155,12 +181,23 @@ class LogoutPage(private val driver: WebDriver, private val domain: String) {
 
 class ViewTimePage(private val driver: WebDriver, private val domain: String) {
 
+    /**
+     * Gets the number of hours for a readonly line.
+     */
     fun getTimeForEntry(id: Int) : String {
         return driver.findElement(By.cssSelector("#time-entry-$id div.time div.readonly-data")).text
     }
 
+    /**
+     * Gets the date for a readonly entry
+     * Note: This behaves differently based on whether the width is 750-and-below or not
+     */
     fun getDateForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id div.date div.readonly-data")).text
+        return if (isMobileWidth()) {
+            return "" // when in mobile mode, the dates are taken out of the rows
+        } else {
+            driver.findElement(By.cssSelector("#time-entry-$id div.date div.readonly-data")).text
+        }
     }
 
     fun submitTimeForPeriod() {
@@ -206,50 +243,83 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         return "$start - $end"
     }
 
+    /**
+     * Enters a new time entry.
+     * Note: behaves differently depending on window size.  width of 750 and below is considered mobile
+     */
     fun enterTime(project: String, time: String, details: String, date: String) {
         driver.get("$domain/${ViewTimeAPI.path}")
-        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        val createTimeEntryRow = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_FORM_MOBILE.getId()))
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
+        }
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
         Select(projectSelector).selectByVisibleText(project)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
-        createTimeEntryRow.findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId())).click()
+        clickCreateNewTimeEntry()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
         assertEquals("your time entries", driver.title)
     }
 
+    /**
+     * Note: responsive - see [isMobileWidth]
+     */
     fun setProjectForNewEntry(project: String) {
-        val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-        val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
+        val projectSelector = if(isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_CREATE_MOBILE.getId()))
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()))
+        }
         Select(projectSelector).selectByVisibleText(project)
     }
 
-    private fun setProjectForEditEntry(id: Int, project: String) {
-        val projectSelector = driver
-            .findElement(
-                By.cssSelector("#time-entry-$id [name=${ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()}]"))
+    /**
+     * Note: responsive - see [isMobileWidth]
+     */
+    private fun setProjectForEditEntry(project: String) {
+        val projectSelector = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_EDIT_MOBILE.getElemName()))
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_EDIT_DESKTOP.getElemName()))
+        }
 
         Select(projectSelector).selectByVisibleText(project)
     }
 
     /**
      * simply clicks the CREATE button on the page
+     * Note: Behaves differently based on width of screen, since
+     * this is a responsive page
      */
     fun clickCreateNewTimeEntry() {
-        driver
-            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-            .findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId())).click()
+        if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON_MOBILE.getId())).click()
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId())).click()
+        }
     }
 
     /**
      * simply clicks the SAVE button on a particular edit row
+     * Note: Behaves differently based on width of screen, since
+     * this is a responsive page
      */
-    fun clickSaveTimeEntry(id : Int) {
-        driver
-            .findElement(
-                By.cssSelector("#time-entry-$id #${ViewTimeAPI.Elements.SAVE_BUTTON_DESKTOP.getId()}")).click()
+    fun clickSaveTimeEntry() {
+        if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.SAVE_BUTTON_MOBILE.getId())).click()
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.SAVE_BUTTON_DESKTOP.getId())).click()
+        }
     }
+
+    /**
+     * Returns true if the width is narrow enough to cause Mobile-mode for the UI.
+     * The UI is responsive - it behaves differently depending on the width of the window
+     */
+    fun isMobileWidth() = driver.manage().window().size.width <= 750
 
     /**
      * simply clicks the EDIT button on a particular read-only row
@@ -263,11 +333,14 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Understand: this is for creating a *new* time entry, not for editing
      * existing time entries
+     * Note: responsive - see [isMobileWidth]
      */
     fun setTimeForNewEntry(time: String) {
-        val timeInput = driver
-            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+        val timeInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.TIME_INPUT_CREATE_MOBILE.getElemName()))
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.TIME_INPUT_CREATE_DESKTOP.getElemName()))
+        }
         timeInput.clear()
         timeInput.sendKeys(time)
     }
@@ -275,59 +348,96 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Understand: this is for creating a *new* time entry, not for editing
      * existing time entries
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
      */
     fun setDateForNewEntry(date: String) {
-        val dateInput = driver
-            .findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        val dateInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE_MOBILE.getElemName()))
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE_DESKTOP.getElemName()))
+        }
         dateInput.clear()
         dateInput.sendKeys(date)
     }
 
     /**
      * Understand: this is for editing an existing time entry
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
      * @param time the time in hours to enter
      * @param id the id of the time entry, that's how we select the right row on the page
      */
     fun setTimeForEditingTimeEntry(id: Int, time: String) {
-        val timeInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+        val timeInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.TIME_INPUT_EDIT_MOBILE.getId()))
+        } else {
+            driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.TIME_INPUT.getElemName()}]"))
+        }
         timeInput.clear()
         timeInput.sendKeys(time)
     }
 
+    /**
+     * Allows setting text into the details input field
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
+     */
     private fun setDetailsForEditingTimeEntry(id: Int, details: String) {
-        val detailInput = driver.findElement(By.cssSelector("#time-entry-$id textarea[name=${ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()}]"))
+        val detailInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DETAILS_INPUT_EDIT_MOBILE.getId()))
+        } else {
+            driver.findElement(By.cssSelector("#time-entry-$id textarea[name=${ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()}]"))
+        }
         detailInput.clear()
         detailInput.sendKeys(details)
     }
 
 
+    /**
+     * Resets the date entry when editing.
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
+     */
     fun clearTheDateEntryOnEdit(id: Int) {
-        val dateInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        val dateInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT_MOBILE.getId()))
+        } else {
+            driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        }
         dateInput.clear()
     }
 
+    /**
+     * Sets the date field when editing
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
+     */
     fun setTheDateEntryOnEdit(id: Int, dateString: String) {
-        val dateInput = driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        val dateInput = if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT_MOBILE.getId()))
+        } else {
+            driver.findElement(By.cssSelector("#time-entry-$id input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]"))
+        }
         dateInput.clear()
         dateInput.sendKeys(dateString)
     }
 
     fun clearTheNewEntryDateEntry() {
-        driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_ROW.getId()))
-            .findElement(By.cssSelector("input[name=${ViewTimeAPI.Elements.DATE_INPUT.getElemName()}]")).clear()
+        if (isMobileWidth()) {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE_MOBILE.getElemName())).clear()
+        } else {
+            driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE_DESKTOP.getElemName())).clear()
+        }
+
     }
 
     /**
      * @param id the id of the time entry we want to edit
+     * Note: This behaves differently depending on whether you are in mobile mode or not. see [isMobileWidth]
      */
     fun editTime(id: Int, project: String, time: String, details: String, dateString: String) {
         clickEditTimeEntry(id)
-        setProjectForEditEntry(id, project)
+        setProjectForEditEntry(project)
         setTimeForEditingTimeEntry(id, time)
         setDetailsForEditingTimeEntry(id, details)
         setTheDateEntryOnEdit(id, dateString)
-        clickSaveTimeEntry(id)
+        clickSaveTimeEntry()
     }
 
 

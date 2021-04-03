@@ -11,6 +11,7 @@ import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.TimeEntry
+import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -19,15 +20,18 @@ import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.File
 
-class UITimeEntryTests {
+@RunWith(Parameterized::class)
+@Category(UITestCategory::class)
+class UITimeEntryTests(private val myDriver: Drivers) {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"
     private val defaultProject = "projecta"
 
-    @Category(UITestCategory::class)
     @Test
     fun timeEntryTests() {
         `setup some default projects and employees`()
@@ -57,6 +61,11 @@ class UITimeEntryTests {
         private const val regularUsername = "andrea"
         private const val regularEmployeeName = "Andrea"
 
+        @Parameterized.Parameters
+        @JvmStatic
+        fun data(): Iterable<Any?> {
+            return Drivers.values().asList()
+        }
 
         @BeforeClass
         @JvmStatic
@@ -73,7 +82,7 @@ class UITimeEntryTests {
         val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
     }
 
     @After
@@ -214,7 +223,9 @@ class UITimeEntryTests {
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
         pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
         assertEquals("your time entries", pom.driver.title)
-        assertEquals("2020-06-12", pom.vtp.getDateForEntry(id))
+        if (! pom.vtp.isMobileWidth()) {
+            assertEquals("2020-06-12", pom.vtp.getDateForEntry(id))
+        }
         assertEquals("1.00", pom.vtp.getTimeForEntry(id))
     }
 
@@ -229,7 +240,9 @@ class UITimeEntryTests {
                 .map { it.id.value }.sorted()
 
         assertEquals("2.00", pom.vtp.getTimeForEntry(ids[0]))
-        assertEquals("2020-06-12", pom.vtp.getDateForEntry(ids[0]))
+        if (! pom.vtp.isMobileWidth()) {
+            assertEquals("2020-06-12", pom.vtp.getDateForEntry(ids[0]))
+        }
     }
 
     private fun verifySubmissionsAreThere() {

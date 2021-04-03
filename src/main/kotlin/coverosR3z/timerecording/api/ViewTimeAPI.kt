@@ -14,39 +14,69 @@ import coverosR3z.timerecording.types.*
 
 class ViewTimeAPI(private val sd: ServerData) {
 
-    enum class Elements (private val elemName: String = "", private val id: String = "", private val elemClass: String = "") : Element {
-        PROJECT_INPUT(elemName = "project_entry"),
-        CREATE_TIME_ENTRY_ROW(id="create_time_entry"),
-        TIME_INPUT(elemName = "time_entry"),
-        DETAIL_INPUT(elemName = "detail_entry"),
-        EDIT_BUTTON(elemClass = "editbutton"),
-        CANCEL_BUTTON_DESKTOP(id = "cancelbutton_desktop"),
-        SAVE_BUTTON_DESKTOP(id = "savebutton_desktop"),
-        DELETE_BUTTON_DESKTOP(id = "deletebutton_desktop"),
-        CANCEL_BUTTON_MOBILE(id = "cancelbutton_mobile"),
-        SAVE_BUTTON_MOBILE(id = "savebutton_mobile"),
-        DELETE_BUTTON_MOBILE(id = "deletebutton_mobile"),
-        CREATE_BUTTON(id = "createbutton"),
-        DATE_INPUT(elemName = "date_entry"),
-        ID_INPUT(elemName = "entry_id"),
-        TIME_PERIOD(elemName = "date"),
-        PREVIOUS_PERIOD(id="previous_period"),
-        CURRENT_PERIOD(id="current_period"),
-        NEXT_PERIOD(id="next_period"),
-        READ_ONLY_ROW(elemClass = "readonly-time-entry-row"),
-        EDITABLE_ROW(elemClass = "editable-time-entry-row"),
-        SUBMIT_BUTTON(id = "submitbutton"),
+    enum class Elements (private val value: String = "") : Element {
+        // edit fields for mobile
+        PROJECT_INPUT_EDIT_MOBILE("mobile-edit-project-entry"),
+        DATE_INPUT_EDIT_MOBILE("mobile-edit-date"),
+        TIME_INPUT_EDIT_MOBILE("mobile-edit-time"),
+        DETAILS_INPUT_EDIT_MOBILE("mobile-edit-details"),
+        
+        // edit fields for desktop
+        PROJECT_INPUT_EDIT_DESKTOP("desktop-edit-project-entry"),
+        DATE_INPUT_EDIT_DESKTOP("desktop-edit-date"),
+        TIME_INPUT_EDIT_DESKTOP("desktop-edit-time"),
+        DETAILS_INPUT_EDIT_DESKTOP("desktop-edit-details"),
+        
+        // create fields for mobile
+        PROJECT_INPUT_CREATE_MOBILE("mobile-create-project-entry"),
+        DATE_INPUT_CREATE_MOBILE("mobile-create-date"),
+        TIME_INPUT_CREATE_MOBILE("mobile-create-time"),
+        DETAILS_INPUT_CREATE_MOBILE("mobile-create-details"),
+
+        // create fields for desktop
+        PROJECT_INPUT_CREATE_DESKTOP("desktop-create-project-entry"),
+        DATE_INPUT_CREATE_DESKTOP("desktop-create-date"),
+        TIME_INPUT_CREATE_DESKTOP("desktop-create-time"),
+        DETAILS_INPUT_CREATE_DESKTOP("desktop-create-details"),
+
+        // used for the name field, sent in POSTs
+        PROJECT_INPUT("project_entry"),
+        TIME_INPUT("time_entry"),
+        DETAIL_INPUT("detail_entry"),
+        DATE_INPUT("date_entry"),
+        ID_INPUT("entry_id"),
+
+        CREATE_TIME_ENTRY_ROW("create_time_entry"),
+        CREATE_TIME_ENTRY_FORM_MOBILE("simpler_enter_time_panel"),
+
+        EDIT_BUTTON("editbutton"),
+        CANCEL_BUTTON_DESKTOP("cancelbutton_desktop"),
+        SAVE_BUTTON_DESKTOP("savebutton_desktop"),
+        DELETE_BUTTON_DESKTOP("deletebutton_desktop"),
+        CANCEL_BUTTON_MOBILE("cancelbutton_mobile"),
+        SAVE_BUTTON_MOBILE("savebutton_mobile"),
+        DELETE_BUTTON_MOBILE("deletebutton_mobile"),
+        CREATE_BUTTON("createbutton"),
+        CREATE_BUTTON_MOBILE("enter_time_button"),
+
+        TIME_PERIOD("date"),
+        PREVIOUS_PERIOD("previous_period"),
+        CURRENT_PERIOD("current_period"),
+        NEXT_PERIOD("next_period"),
+        READ_ONLY_ROW("readonly-time-entry-row"),
+        EDITABLE_ROW("editable-time-entry-row"),
+        SUBMIT_BUTTON("submitbutton"),
         ;
         override fun getId(): String {
-            return this.id
+            return this.value
         }
 
         override fun getElemName(): String {
-            return this.elemName
+            return this.value
         }
 
         override fun getElemClass(): String {
-            return this.elemClass
+            return this.value
         }
     }
 
@@ -140,9 +170,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         inASubmittedPeriod: Boolean): String {
         return if (! inASubmittedPeriod) {
             return if (idBeingEdited != null) {
-                editTimeHTMLMobile(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
+                renderEditRowMobile(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
-                entertimeHTMLMobile()
+                renderCreateTimeRowMobile()
             }
         } else {
             ""
@@ -217,6 +247,9 @@ class ViewTimeAPI(private val sd: ServerData) {
     """
     }
 
+    /**
+     * The visible edit row when in desktop mode
+     */
     private fun renderEditRow(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
         return """
     <div class="${Elements.EDITABLE_ROW.getElemClass()}" id="time-entry-${te.id.value}">
@@ -224,18 +257,18 @@ class ViewTimeAPI(private val sd: ServerData) {
             <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
             <div class="project time-entry-information">
-                <select name="${Elements.PROJECT_INPUT.getElemName()}" >
+                <select id="${Elements.PROJECT_INPUT_EDIT_DESKTOP.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" >
                     ${projectsToOptionsOneSelected(projects, te.project)}
                 </select>
             </div>
             <div class="date time-entry-information">
-                <input name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(te.date.stringValue)}" />
+                <input id="${Elements.DATE_INPUT_EDIT_DESKTOP.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" min="$earliestAllowableDate" max="$latestAllowableDate" value="${safeAttr(te.date.stringValue)}" />
             </div>
             <div class="time time-entry-information">
-                <input name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${te.time.getHoursAsString()}" />
+                <input id="${Elements.TIME_INPUT_EDIT_DESKTOP.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25"  min="0" max="24" value="${te.time.getHoursAsString()}" />
             </div>
             <div class="details time-entry-information">
-                <textarea name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(te.details.value)}</textarea>
+                <textarea id="${Elements.DETAILS_INPUT_EDIT_DESKTOP.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH">${safeHtml(te.details.value)}</textarea>
             </div>
         </form>
         <form id="cancellation-form-desktop" action="$path" method="get">
@@ -258,28 +291,31 @@ class ViewTimeAPI(private val sd: ServerData) {
       """
     }
 
+    /**
+     * The row for creating new time entries for desktop
+     */
     private fun renderCreateTimeRow(projects: List<Project>) = """
         <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
             <form action="${EnterTimeAPI.path}" method="post">
                 <div class="project createrow-data time-entry-information">
-                    <label for="${Elements.PROJECT_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Project</label>
-                    <select id="${Elements.PROJECT_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required >
+                    <label for="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}">Project</label>
+                    <select id="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required >
                         <option selected disabled hidden value="">Choose a project</option>
                         ${projectsToOptions(projects)}
                     </select>
                 </div>
                 <div class="date createrow-data time-entry-information" >
-                    <label for="${Elements.DATE_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Date</label>
-                    <input id="${Elements.DATE_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
+                    <label for="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}">Date</label>
+                    <input  id="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
                 </div>
                 <div class="time createrow-data time-entry-information">
-                    <label for="${Elements.TIME_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Time (hrs)</label>
-                    <input id="${Elements.TIME_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
+                    <label for="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}">Time (hrs)</label>
+                    <input  id="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
                 </div>
                 
                 <div class="details createrow-data time-entry-information">
-                    <label for="${Elements.DETAIL_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}">Details</label>
-                    <input id="${Elements.DETAIL_INPUT.getElemName() + Elements.CREATE_TIME_ENTRY_ROW.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
+                    <label for="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}">Details</label>
+                    <input  id="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
                 </div>
                 <div class="action createrow-data time-entry-information">
                     <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
@@ -292,40 +328,39 @@ class ViewTimeAPI(private val sd: ServerData) {
     /**
      * For entering new time on a mobile device
      */
-    private fun entertimeHTMLMobile(): String {
+    private fun renderCreateTimeRowMobile(): String {
         val projects = sd.bc.tru.listAllProjects()
 
         return """
-            <form id="simpler_enter_time_panel" class="mobile-data-entry" action="${EnterTimeAPI.path}" method="post">
+            <form id="${Elements.CREATE_TIME_ENTRY_FORM_MOBILE.getId()}" class="mobile-data-entry" action="${EnterTimeAPI.path}" method="post">
                 <div class="row">
                     <div class="project">
-                        <label for="simpler_project_entry">Project:</label>
-                        <select id="simpler_project_entry" name="project_entry" required="required" >
-                            <option disabled hidden value="">Choose here</option>
+                        <label for="${Elements.PROJECT_INPUT_CREATE_MOBILE.getId()}">Project:</label>
+                        <select id="${Elements.PROJECT_INPUT_CREATE_MOBILE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
+                            <option selected disabled hidden value="">Choose</option>
                             ${projectsToOptions(projects)}
-                    
                         </select>
                     </div>
         
                     <div class="date">
-                        <label for="${EnterTimeAPI.Elements.DATE_INPUT.getId()}">Date:</label>
-                        <input name="${EnterTimeAPI.Elements.DATE_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DATE_INPUT.getId()}" type="date" value="${Date.now().stringValue}" />
+                        <label for="${Elements.DATE_INPUT_CREATE_MOBILE.getId()}">Date:</label>
+                        <input  id="${Elements.DATE_INPUT_CREATE_MOBILE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" />
                     </div>
                     
                     <div class="time">
-                        <label for="${EnterTimeAPI.Elements.TIME_INPUT.getId()}">Time:</label>
-                        <input name="${EnterTimeAPI.Elements.TIME_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.TIME_INPUT.getId()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
+                        <label for="${Elements.TIME_INPUT_CREATE_MOBILE.getId()}">Time:</label>
+                        <input  id="${Elements.TIME_INPUT_CREATE_MOBILE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
                     </div>
                 </div>
                 
                 <div class="row">
                     <div class="details">
-                        <label for="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}">Details:</label>
-                        <textarea name="${EnterTimeAPI.Elements.DETAIL_INPUT.getElemName()}" id="${EnterTimeAPI.Elements.DETAIL_INPUT.getId()}" maxlength="$MAX_DETAILS_LENGTH" ></textarea>
+                        <label   for="${Elements.DETAILS_INPUT_CREATE_MOBILE.getId()}">Details:</label>
+                        <textarea id="${Elements.DETAILS_INPUT_CREATE_MOBILE.getId()}"name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" ></textarea>
                     </div>
                     
                     <div class="action">
-                        <button id="${EnterTimeAPI.Elements.ENTER_TIME_BUTTON.getId()}">Enter time</button>
+                        <button id="${Elements.CREATE_BUTTON_MOBILE.getId()}">Enter time</button>
                     </div>
                 </div>
             </form>
@@ -333,9 +368,9 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     /**
-     * Similar to [entertimeHTMLMobile] but for editing entries
+     * Similar to [renderCreateTimeRowMobile] but for editing entries
      */
-    private fun editTimeHTMLMobile(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
+    private fun renderEditRowMobile(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
 
         return """
             <div class="mobile-data-entry">
@@ -344,23 +379,22 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <div class="row">
                         <div class="project">
-                            <label for="mobile-data-entry-project-entry">Project:</label>
-                            <select id="mobile-data-entry-project-entry" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
-                                <option disabled hidden value="">Choose here</option>
+                            <label for="${Elements.PROJECT_INPUT_EDIT_MOBILE.getId()}">Project:</label>
+                            <select id="${Elements.PROJECT_INPUT_EDIT_MOBILE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
+                                <option disabled hidden value="">Choose</option>
                                 ${projectsToOptionsOneSelected(projects, te.project)}
-                        
                             </select>
                         </div>
                         
                         <div class="date">
-                            <label for="mobile-data-entry-date">Date:</label>
-                            <input id="mobile-data-entry-date" name="${Elements.DATE_INPUT.getElemName()}" 
+                            <label for="${Elements.DATE_INPUT_EDIT_MOBILE.getId()}">Date:</label>
+                            <input id="${Elements.DATE_INPUT_EDIT_MOBILE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" 
                                 type="date" value="${te.date.stringValue}" />
                         </div>
             
                         <div class="time">
-                            <label for="mobile-data-entry-time">Time:</label>
-                            <input id="mobile-data-entry-time" name="${Elements.TIME_INPUT.getElemName()}" 
+                            <label for="${Elements.TIME_INPUT_EDIT_MOBILE.getId()}">Time:</label>
+                            <input id="${Elements.TIME_INPUT_EDIT_MOBILE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" 
                                 type="number" inputmode="decimal" 
                                 step="0.25" min="0" max="24" required="required"
                                 value="${te.time.getHoursAsString()}" 
@@ -370,8 +404,8 @@ class ViewTimeAPI(private val sd: ServerData) {
                     
                     <div class="row">
                         <div class="details">
-                            <label for="mobile-data-entry-details">Details:</label>
-                            <textarea id="mobile-data-entry-details" name="${Elements.DETAIL_INPUT.getElemName()}" 
+                            <label for="${Elements.DETAILS_INPUT_EDIT_MOBILE.getId()}">Details:</label>
+                            <textarea id="${Elements.DETAILS_INPUT_EDIT_MOBILE.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" 
                                 maxlength="$MAX_DETAILS_LENGTH">${safeHtml(te.details.value)}</textarea>
                         </div>
                     </div>

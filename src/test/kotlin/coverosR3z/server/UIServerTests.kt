@@ -11,6 +11,7 @@ import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.testLogger
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -20,12 +21,15 @@ import org.junit.Assert.assertFalse
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import org.openqa.selenium.By
 import java.io.File
 
-class UIServerTests {
+@RunWith(Parameterized::class)
+@Category(UITestCategory::class)
+class UIServerTests(private val myDriver: Drivers) {
 
-    @Category(UITestCategory::class)
     @Test
     fun serverTests() {
         init()
@@ -46,18 +50,6 @@ class UIServerTests {
         shutdown()
     }
 
-    private fun `hank enters time`(hankNewPassword: String) {
-        pom.lp.login("hank", hankNewPassword)
-        pom.vtp.enterTime("great new project", "2", "these are some details", pom.calcDateString(DEFAULT_DATE))
-    }
-
-    private fun `create a new project`(newPassword: String) {
-        pom.lp.login("employeemaker", newPassword)
-        pom.epp.enter("great new project")
-        logout()
-    }
-
-
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -73,6 +65,12 @@ class UIServerTests {
         private lateinit var pom : PageObjectModelLocal
         private lateinit var databaseDirectory : String
 
+        @Parameterized.Parameters
+        @JvmStatic
+        fun data(): Iterable<Any?> {
+            return Drivers.values().asList()
+        }
+
         @BeforeClass
         @JvmStatic
         fun setup() {
@@ -87,11 +85,15 @@ class UIServerTests {
         val databaseDirectorySuffix = "uiservertests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
+        createPom()
+    }
+
+    private fun createPom() {
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
     }
 
     private fun restart() {
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
+        createPom()
     }
 
     fun shutdown() {
@@ -99,6 +101,17 @@ class UIServerTests {
         val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         assertEquals(pom.pmd, pmd)
         pom.driver.quit()
+    }
+
+    private fun `hank enters time`(hankNewPassword: String) {
+        pom.lp.login("hank", hankNewPassword)
+        pom.vtp.enterTime("great new project", "2", "these are some details", pom.calcDateString(DEFAULT_DATE))
+    }
+
+    private fun `create a new project`(newPassword: String) {
+        pom.lp.login("employeemaker", newPassword)
+        pom.epp.enter("great new project")
+        logout()
     }
 
     private fun `change admin password, relogin, create new employee, use invitation and change their password and login`(): Pair<String, String> {

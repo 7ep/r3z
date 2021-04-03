@@ -77,9 +77,9 @@ for developers:
   many integration tests in parallel
 * High test coverage - fearless refactoring unlocked.  Furthermore, if a 
   change is made and the tests pass, it gives confidence that nothing was broken.
-* No magic annotations - the system follows an entirely straightforward 
+* No magic - the system follows an entirely straightforward 
   call tree from the `Main()` function down.  Stack traces highly contribute
-  to debugging, unlike many of the current frameworks.
+  to debugging, unlike many of the current frameworks. This enables fast feature dev.
 
 For operations:
 * The system shutdown and startup is extremely fast, and
@@ -97,23 +97,25 @@ New Developer Setup
 
 Here's the general series of steps for a new developer:
 
-1. Install Java 13 onto your machine if you don't already have it. Make sure to add the path to your JDK to your environment
-   as JAVA_HOME, and also add the path to the Java binaries to your PATH variable.
+1. Install Java 13 onto your machine if you don't already have it. Make sure to add the path to your 
+   JDK to your environment as JAVA_HOME, and also add the path to the Java binaries to your PATH variable.
 2. Download and install IntelliJ Community Edition (which is free of charge) if you don't already have 
    it. This is definitely the best IDE for our purposes, since it is developed by the same company
-   that develops the Kotlin language, and also, it's awesome.  And it's the IDE all the other developers use. Find it here: https://www.jetbrains.com/idea/download/
-3. Obtain this source code from Github, at https://github.com/7ep/r3z.git
-4. Run the tests on your computer, using the command line: gradlew test 
+   that develops the Kotlin language, and also, it's awesome.  And it's the IDE all the other developers 
+   use. Find it here: https://www.jetbrains.com/idea/download/
+3. Make sure you have the Chrome browser _and_ the Firefox browser installed   
+4. Obtain this source code from Github, at https://github.com/7ep/r3z.git
+5. Run the tests on your computer, using the command line: gradlew test 
    (you might need to add dot-slash before that, if you are using macOS or Linux)
-5. Run the application to get a feel for the user experience: gradlew run
-6. Open the software with IntelliJ.  Try building and running tests with it.  Note that the
+6. Run the application to get a feel for the user experience: gradlew run
+7. Open the software with IntelliJ.  Try building and running tests with it.  Note that the
    default test runner in IntelliJ will run the tests serially (rather than in parallel) which
    takes a while.  To run them faster, find the gradle tool window and the test task within it,
    and run the tests there.
-7. Read through some of this developer documentation to get a feel for some of its unique characteristics.
-8. Examine some tests in the system to get a feel for how the system works and how
+8. Read through some of this developer documentation to get a feel for some of its unique characteristics.
+9. Examine some tests in the system to get a feel for how the system works and how
    test automation is done.
-9. It may be necessary to configure your browser to allow unsigned certificates. On Chrome, that is 
+10. It may be necessary to configure your browser to allow unsigned certificates. On Chrome, that is 
    easily done: just put chrome://flags/#allow-insecure-localhost as your URL and enable it.
 
 Optional:
@@ -125,7 +127,7 @@ Optional:
 JDK
 ---
 
-We need a minimum of Java 13 so we get the latest version of TLS, which is 1.3, and also
+We need a minimum of Java version 13 to get the latest version of TLS, which is 1.3, and also because
 there was a bug in TLS 1.3 that was fixed in Java 13.
 
 Guiding ideas

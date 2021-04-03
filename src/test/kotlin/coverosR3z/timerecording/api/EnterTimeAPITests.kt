@@ -43,10 +43,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
         val result = EnterTimeAPI.handlePost(sd)
@@ -62,9 +62,9 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_missingProject() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
@@ -78,9 +78,9 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_missingTimeEntry() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
@@ -94,9 +94,9 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_missingDetailEntry() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
         ))
         val sd = makeETServerData(data)
         val ex = assertThrows(InexactInputsException::class.java){ EnterTimeAPI.handlePost(sd) }
@@ -109,7 +109,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_nonNumericProject() {
-        val data = PostBodyData(mapOf(EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60", EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+        val data = PostBodyData(mapOf(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60", ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Must be able to parse aaaaa as integer", ex.message)
@@ -122,10 +122,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_negativeProject() {
         val data = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "-1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "-1",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
@@ -138,10 +138,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_zeroProject() {
         val data = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "0",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "0",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("Valid identifier values are 1 or above", ex.message)
@@ -154,10 +154,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_aboveMaxProject() {
         val data = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to (maximumProjectsCount +1).toString(),
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to (maximumProjectsCount +1).toString(),
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
@@ -170,10 +170,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_negativeTime() {
         val data = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("$noNegativeTimeMsg-60", ex.message)
@@ -186,10 +186,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_zeroTime() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "0",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "0",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
         val result = EnterTimeAPI.handlePost(sd)
@@ -204,10 +204,10 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_nonNumericTime() {
         val data = PostBodyData(mapOf(
-                EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-                EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "aaa",
-                EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "aaa",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
@@ -245,10 +245,10 @@ class EnterTimeAPITests {
             for (i in 1..numberOfRequests) {
 
                 val data = PostBodyData(mapOf(
-                    EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to projectId,
-                    EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                    EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + (i / 20)).stringValue
+                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to projectId,
+                    ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                    ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                    ViewTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + (i / 20)).stringValue
                 ))
 
                 val sd = ServerData(
@@ -337,10 +337,10 @@ class EnterTimeAPITests {
         val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
 
         val happyPathData = PostBodyData(mapOf(
-            EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            EnterTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
     }
 

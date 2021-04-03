@@ -8,29 +8,10 @@ import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.timerecording.api.ViewTimeAPI.Elements
 import coverosR3z.timerecording.types.*
 
 class EnterTimeAPI(private val sd: ServerData) {
-
-    enum class Elements (private val elemName: String, private val id: String) : Element {
-        PROJECT_INPUT("project_entry", "project_entry"),
-        TIME_INPUT("time_entry", "time_entry"),
-        DETAIL_INPUT("detail_entry", "detail_entry"),
-        ENTER_TIME_BUTTON("", "enter_time_button"),
-        DATE_INPUT("date_entry", "date_entry"),;
-
-        override fun getId(): String {
-            return this.id
-        }
-
-        override fun getElemName(): String {
-            return this.elemName
-        }
-
-        override fun getElemClass(): String {
-            throw NotImplementedError()
-        }
-    }
 
     companion object : PostEndpoint {
 

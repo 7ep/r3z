@@ -279,10 +279,10 @@ class ServerPerformanceTests {
                 )
             for (i in 1..numRequests) {
                 val data = PostBodyData(mapOf(
-                    EnterTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i).stringValue,
-                    EnterTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
-                    EnterTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.id.value.toString(),
-                    EnterTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                    ViewTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i).stringValue,
+                    ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
+                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.id.value.toString(),
+                    ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
                 ))
                 val clientWithData = client.addPostData(data)
                 clientWithData.send()

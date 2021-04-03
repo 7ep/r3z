@@ -10,6 +10,7 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.types.EmployeeName
 import coverosR3z.timerecording.types.MAX_DETAILS_LENGTH
 import coverosR3z.timerecording.types.TimeEntry
+import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
@@ -21,10 +22,14 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import org.openqa.selenium.chrome.ChromeDriver
 import java.io.File
 
-class UITimeEntryValidation {
+@RunWith(Parameterized::class)
+@Category(UITestCategory::class)
+class UITimeEntryValidation(private val myDriver: Drivers) {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"
@@ -50,7 +55,6 @@ class UITimeEntryValidation {
      * - in valid day range for month in given year
      * - between 1980 and 2200
      */
-    @Category(UITestCategory::class)
     @Test
     fun `all inputs should restrict to valid values`() {
         `setup some default projects and employees`()
@@ -100,6 +104,12 @@ class UITimeEntryValidation {
         private lateinit var pom: PageObjectModelLocal
         private lateinit var databaseDirectory : String
 
+        @Parameterized.Parameters
+        @JvmStatic
+        fun data(): Iterable<Any?> {
+            return Drivers.values().asList()
+        }
+
         @BeforeClass
         @JvmStatic
         fun setup() {
@@ -115,7 +125,7 @@ class UITimeEntryValidation {
         val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
     }
 
     @After
@@ -329,7 +339,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "")
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -347,7 +357,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.clearTheDateEntryOnEdit(expectedTimeEntry.id.value)
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -363,7 +373,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, pastDateString)
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -379,7 +389,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, futureDateString)
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -392,7 +402,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "-0.25")
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -406,7 +416,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "24.25")
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -420,7 +430,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "1.24")
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
@@ -434,7 +444,7 @@ class UITimeEntryValidation {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "a")
-        pom.vtp.clickSaveTimeEntry(expectedTimeEntry.id.value)
+        pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
         assertEquals(expectedTimeEntry, bobSingleEntry())
