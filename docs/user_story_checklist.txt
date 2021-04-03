@@ -3,6 +3,8 @@ User story checklist:
 The following is used during story development as a reminder to the development team
 what is needed for high-quality software.
 
+[ ] risks carefully considered
+
 functional development and considerations
     documented thoughtfully
         [ ] classes
@@ -20,13 +22,18 @@ functional development and considerations
         [ ] integration tests written
 
 non-functionals:
-    [ ] perf
-    [ ] security
+    [ ] perf (what parts might be slow? Is it possible to create a low-level test?)
+    [ ] security (might use a tool like Zap to walk through the system)
     [ ] accessibility
     [ ] logging
     [ ] graceful degradation
     [ ] mobile-first
 
-[ ] static analysis considered
-[ ] risks considered
-[ ] should it be refactored?
+white-box testing:
+    [ ] static analysis considered
+    [ ] should it be refactored?
+
+rendered text is highly correct:
+     [ ] rendered HTML is valid (through a tool like W3C's https://validator.w3.org/)
+     [ ] dynamic parts are cleaned, e.g. using code like safeAttr(), safeHTML()
+     [ ] CSS is valid (using a tool like W3C https://jigsaw.w3.org/css-validator/ )
