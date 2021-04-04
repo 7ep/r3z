@@ -1,47 +1,154 @@
-form {
-  border: 2px solid #e2e2e2;
-  margin: auto;
-  border-radius: .5em;
-  background-color: white;
-  opacity: 82%;
-  width: 350px;
-  padding: 10px;
+@media only screen and (max-width: 400px) {
+
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      padding: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    fieldset {
+        border: 1px solid black;
+        margin-bottom: 0.5em;
+        padding-bottom: 0.7em;
+        padding-top: 0.4em;
+        border-radius: 0.5em;
+        text-align: center;
+    }
+
+    input[type=radio] {
+        appearance: inherit;
+        -webkit-appearance: checkbox;
+    }
+
 }
 
-button {
-  cursor: pointer;
-  font-size: 120%;
-  margin: 8px 0 1px 0;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .5em;
-  width: 100%;
-  padding: 1em;
-  box-sizing: border-box;
+@media only screen and (min-width: 401px) and (max-width: 750px){
+
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    fieldset {
+        border: 1px solid black;
+        margin-bottom: 0.5em;
+        padding-bottom: 0.7em;
+        padding-top: 0.4em;
+        border-radius: 0.5em;
+        text-align: center;
+    }
+
+    input[type=radio] {
+        appearance: inherit;
+        -webkit-appearance: checkbox;
+    }
+
 }
 
-button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
+@media only screen and (min-width: 751px) {
 
-button:focus {
-    outline: none;
-    border-radius: .5em;
-    border: 1.8px solid blue;
-}
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
 
-fieldset {
-    border: 1px solid black;
-    margin-bottom: 0.5em;
-    padding-bottom: 0.7em;
-    padding-top: 0.4em;
-    border-radius: 0.5em;
-    text-align: center;
-}
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
 
-input[type=radio] {
-    appearance: inherit;
-    -webkit-appearance: checkbox;
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    fieldset {
+        border: 1px solid black;
+        margin-bottom: 0.5em;
+        padding-bottom: 0.7em;
+        padding-top: 0.4em;
+        border-radius: 0.5em;
+        text-align: center;
+    }
+
+    input[type=radio] {
+        appearance: inherit;
+        -webkit-appearance: checkbox;
+    }
+
 }

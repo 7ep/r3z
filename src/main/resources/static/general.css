@@ -38,38 +38,124 @@ table {
 RESET SECTION FINISHES
 */
 
-header {
-  background-color: #370F22;
-  font-size: 24px;
-  line-height: 35px;
-  margin: 0;
-  top: 0;
-  height: 40px;
-  padding: 4px;
-  display: flex;
-  justify-content: space-between;
+@media only screen and (min-width: 751px) {
+
+    header {
+      background-color: #370F22;
+      font-size: 24px;
+      line-height: 35px;
+      margin: 0;
+      top: 0;
+      height: 40px;
+      padding: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    body {
+      color: #885555;
+      background-color: rgb(75, 109, 154);
+      font-family: sans-serif;
+      margin: 0;
+      background-image: url("dawnsunrise.webp");
+      background-size: 100vw 100vh;
+    }
+
+    .header-button {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .header-button:visited {
+      color: #ffffff
+    }
+
+    /* This is necessary so Iphone doesn't override our styles */
+    textarea,
+    input,
+     select {
+    -webkit-appearance: none;
+    }
+
 }
 
-body {
-  color: #885555;
-  background-color: rgb(75, 109, 154);
-  font-family: sans-serif;
-  margin: 0;
-  background-image: url("dawnsunrise.webp");
-  background-size: 100vw 100vh;
+
+@media only screen and (min-width: 401px) and (max-width: 750px) {
+
+    header {
+      background-color: #370F22;
+      font-size: 24px;
+      line-height: 35px;
+      margin: 0;
+      top: 0;
+      height: 40px;
+      padding: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    body {
+      color: #885555;
+      background-color: rgb(75, 109, 154);
+      font-family: sans-serif;
+      margin: 0;
+      background-image: url("dawnsunrise.webp");
+      background-size: 100vw 100vh;
+    }
+
+    .header-button {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .header-button:visited {
+      color: #ffffff
+    }
+
+    /* This is necessary so Iphone doesn't override our styles */
+    textarea,
+    input,
+     select {
+    -webkit-appearance: none;
+    }
+
 }
 
-.header-button {
-  color: #ffffff;
-  text-decoration: none;
-}
-.header-button:visited {
-  color: #ffffff
-}
 
-/* This is necessary so Iphone doesn't override our styles */
-textarea,
-input,
- select {
--webkit-appearance: none;
+@media only screen and (max-width: 400px) {
+
+    header {
+      background-color: #370F22;
+      font-size: 22px;
+      line-height: 35px;
+      margin: 0;
+      top: 0;
+      height: 40px;
+      padding: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    body {
+      color: #885555;
+      background-color: rgb(75, 109, 154);
+      font-family: sans-serif;
+      margin: 0;
+      background-image: url("dawnsunrise.webp");
+      background-size: 100vw 100vh;
+    }
+
+    .header-button {
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .header-button:visited {
+      color: #ffffff
+    }
+
+    /* This is necessary so Iphone doesn't override our styles */
+    textarea,
+    input,
+     select {
+    -webkit-appearance: none;
+    }
+
 }

@@ -1,82 +1,258 @@
-label {
-  font-style: bold;
-  font-size: 120%;
+@media only screen and (max-width: 400px) {
+
+    label {
+      font-style: bold;
+      font-size: 120%;
+    }
+
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      padding: 10px;
+    }
+
+    input {
+      margin-bottom: 1em;
+      padding: .8em 1em .8em 1em;
+      font-size: 110%;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      width: 100%;
+      background-color: #CFC1C1;
+      opacity: 82%;
+      color: #333333;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    table {
+        table-layout: auto;
+        width: 93%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+    .container {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      padding: 10px;
+    }
+
+    .container tbody tr:nth-child(odd) {
+      background: #d9ced0;
+    }
+
+    .container tbody tr:nth-child(even) {
+      background: #fff;
+    }
+
+    .container table {
+      color: black;
+      border-spacing: 1px solid black;
+    }
+
 }
 
-form {
-  border: 2px solid #e2e2e2;
-  margin: auto;
-  border-radius: .5em;
-  background-color: white;
-  opacity: 82%;
-  width: 350px;
-  padding: 10px;
+@media only screen and (min-width: 401px) and (max-width: 750px) {
+
+    label {
+      font-style: bold;
+      font-size: 120%;
+    }
+
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
+
+    input {
+      margin-bottom: 1em;
+      padding: .8em 1em .8em 1em;
+      font-size: 110%;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      width: 100%;
+      background-color: #CFC1C1;
+      opacity: 82%;
+      color: #333333;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    table {
+        table-layout: auto;
+        width: 93%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+    .container {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
+
+    .container tbody tr:nth-child(odd) {
+      background: #d9ced0;
+    }
+
+    .container tbody tr:nth-child(even) {
+      background: #fff;
+    }
+
+    .container table {
+      color: black;
+      border-spacing: 1px solid black;
+    }
+
 }
 
-input {
-  margin-bottom: 1em;
-  padding: .8em 1em .8em 1em;
-  font-size: 110%;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .3em;
-  width: 100%;
-  background-color: #CFC1C1;
-  opacity: 82%;
-  color: #333333;
-  box-sizing: border-box;
-}
+@media only screen and (min-width: 751px) {
 
-button {
-  cursor: pointer;
-  font-size: 120%;
-  margin: 8px 0 1px 0;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  border-radius: .5em;
-  width: 100%;
-  padding: 1em;
-  box-sizing: border-box;
-}
+    label {
+      font-style: bold;
+      font-size: 120%;
+    }
 
-button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
+    form {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
 
-button:focus {
-    outline: none;
-    border-radius: .5em;
-    border: 1.8px solid blue;
-}
+    input {
+      margin-bottom: 1em;
+      padding: .8em 1em .8em 1em;
+      font-size: 110%;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .3em;
+      width: 100%;
+      background-color: #CFC1C1;
+      opacity: 82%;
+      color: #333333;
+      box-sizing: border-box;
+    }
 
-table {
-    table-layout: auto;
-    width: 93%;
-    margin-left: auto;
-    margin-right: auto;
-}
+    button {
+      cursor: pointer;
+      font-size: 120%;
+      margin: 8px 0 1px 0;
+      color: white;
+      background-color: #C65364;
+      border: 1.8px solid #3b3b3b;
+      border-radius: .5em;
+      width: 100%;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      color: #5f5f5f;
+      background-color: #DDDDE5;
+    }
+
+    button:focus {
+        outline: none;
+        border-radius: .5em;
+        border: 1.8px solid blue;
+    }
+
+    table {
+        table-layout: auto;
+        width: 93%;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
 
-.container {
-  border: 2px solid #e2e2e2;
-  margin: auto;
-  border-radius: .5em;
-  background-color: white;
-  opacity: 82%;
-  width: 350px;
-  padding: 10px;
-}
+    .container {
+      border: 2px solid #e2e2e2;
+      margin: auto;
+      border-radius: .5em;
+      background-color: white;
+      opacity: 82%;
+      width: 350px;
+      padding: 10px;
+    }
 
-.container tbody tr:nth-child(odd) {
-  background: #d9ced0;
-}
+    .container tbody tr:nth-child(odd) {
+      background: #d9ced0;
+    }
 
-.container tbody tr:nth-child(even) {
-  background: #fff;
-}
+    .container tbody tr:nth-child(even) {
+      background: #fff;
+    }
 
-.container table {
-  color: black;
-  border-spacing: 1px solid black;
+    .container table {
+      color: black;
+      border-spacing: 1px solid black;
+    }
+
 }
