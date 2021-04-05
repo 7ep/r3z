@@ -193,9 +193,13 @@ task fasttests(type: GradleBuild) {
     tasks = ['unittest', 'integrationtest', 'apitest']
 }
 
-// runs all the tests
+
 test {
-    // nothing special configured here
+    useJUnit {
+        // for the default test and check tasks, we'll exclude the potentially more fraught tests
+        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
+                'coverosR3z.uitests.UITestCategory'
+    }
 }
 
 tasks.withType(Test).configureEach {
