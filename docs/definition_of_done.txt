@@ -2,6 +2,7 @@
 2. code reviewed
 3. user story checklist considered
 4. automation runs successfully
+5. manual careful review
 
 
 done means the system is ready for review by the user
