@@ -5,7 +5,6 @@ import coverosR3z.misc.DEFAULT_ADMIN_USER
 import coverosR3z.misc.DEFAULT_APPROVER
 import coverosR3z.misc.DEFAULT_REGULAR_USER
 import coverosR3z.misc.makeServerData
-import coverosR3z.misc.utility.toStr
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.StatusCode

@@ -96,7 +96,7 @@ class UIServerTests(private val myDriver: Drivers) {
         createPom()
     }
 
-    fun shutdown() {
+    private fun shutdown() {
         pom.fs.shutdown()
         val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         assertEquals(pom.pmd, pmd)

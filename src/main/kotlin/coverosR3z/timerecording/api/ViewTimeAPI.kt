@@ -272,13 +272,12 @@ class ViewTimeAPI(private val sd: ServerData) {
         }
 
     private fun calculateCurrentTimePeriod(dateQueryString: String?): TimePeriod {
-        val currentPeriod = if (dateQueryString != null) {
+        return if (dateQueryString != null) {
             val date = Date.make(dateQueryString)
             TimePeriod.getTimePeriodForDate(date)
         } else {
             TimePeriod.getTimePeriodForDate(Date.now())
         }
-        return currentPeriod
     }
 
     private fun renderMobileDataEntry(

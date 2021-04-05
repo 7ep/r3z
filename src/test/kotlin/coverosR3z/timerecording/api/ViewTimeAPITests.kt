@@ -1,6 +1,5 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User

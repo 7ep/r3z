@@ -1,17 +1,19 @@
 package coverosR3z.authentication.api
 
-import coverosR3z.misc.DEFAULT_PASSWORD
-import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.authentication.types.LoginResult
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
+import coverosR3z.misc.DEFAULT_PASSWORD
+import coverosR3z.misc.DEFAULT_USER
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.makeServerData
-import coverosR3z.misc.utility.toStr
 import coverosR3z.server.APITestCategory
-import coverosR3z.server.types.*
+import coverosR3z.server.types.AuthStatus
+import coverosR3z.server.types.PostBodyData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert
