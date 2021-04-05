@@ -24,8 +24,8 @@ fun handleUnauthenticated() : PreparedResponseData {
  * creating a new employee and POST to that, as a regular user,
  * this will be returned.
  */
-fun handleUnauthorized(): PreparedResponseData {
-    return PreparedResponseData("This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
+fun handleUnauthorized(message: String? = null): PreparedResponseData {
+    return PreparedResponseData(message ?: "This is forbidden", StatusCode.FORBIDDEN, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun handleInternalServerError(shortMessage : String, fullStackTrace : String, logger: ILogger) : PreparedResponseData {

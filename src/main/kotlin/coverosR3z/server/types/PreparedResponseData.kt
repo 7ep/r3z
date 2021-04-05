@@ -1,6 +1,7 @@
 package coverosR3z.server.types
 
 import coverosR3z.misc.utility.toBytes
+import coverosR3z.misc.utility.toStr
 
 /**
  * Data for shipping to the client
@@ -16,6 +17,10 @@ data class PreparedResponseData(val fileContents: ByteArray,
 
     constructor(fileContents: String, statusCode: StatusCode, headers : List<String> = emptyList())
             : this(toBytes(fileContents), statusCode, headers)
+
+    fun fileContentsString() : String {
+        return toStr(fileContents)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

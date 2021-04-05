@@ -62,8 +62,8 @@ class LoginAPITests {
         val sd = makeLoginServerData(data)
         val responseData = LoginAPI.handlePost(sd)
 
-        Assert.assertTrue("The system should indicate failure.  File was ${toStr(responseData.fileContents)}",
-                toStr(responseData.fileContents).contains("401 error"))
+        Assert.assertTrue("The system should indicate failure.  File was ${responseData.fileContentsString()}",
+                responseData.fileContentsString().contains("401 error"))
         Assert.assertTrue("A cookie should be set if valid login",
                 responseData.headers.none { it.contains("Set-Cookie") })
     }

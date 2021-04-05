@@ -1,6 +1,9 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
@@ -59,7 +62,17 @@ class ViewTimeAPI(private val sd: ServerData) {
         CREATE_BUTTON("createbutton"),
         CREATE_BUTTON_MOBILE("enter_time_button"),
 
+        // query string items
+
+        // a date which allows us to determine which time period to show
         TIME_PERIOD("date"),
+
+        // an employee id to allow choosing whose timesheet to show
+        REQUESTED_EMPLOYEE("emp"),
+
+        // the id of a time entry we are editing
+        EDIT_ID("editid"),
+
         PREVIOUS_PERIOD("previous_period"),
         CURRENT_PERIOD("current_period"),
         NEXT_PERIOD("next_period"),
@@ -112,33 +125,27 @@ class ViewTimeAPI(private val sd: ServerData) {
         // if we receive a query string like ?date=2020-06-12 we'll get
         // the time period it fits in
         val dateQueryString: String? = sd.ahd.queryString[Elements.TIME_PERIOD.getElemName()]
-        val currentPeriod = if (dateQueryString != null) {
-            val date = Date.make(dateQueryString)
-            TimePeriod.getTimePeriodForDate(date)
-        } else {
-            TimePeriod.getTimePeriodForDate(Date.now())
-        }
-        val te = sd.bc.tru.getTimeEntriesForTimePeriod(sd.ahd.user.employee, currentPeriod)
+        val currentPeriod = calculateCurrentTimePeriod(dateQueryString)
+
+        // let's see if they are asking for a particular employee's information
+        val employeeQueryString: String? = sd.ahd.queryString[Elements.REQUESTED_EMPLOYEE.getElemName()]
+        val (employee, title, reviewingOtherTimesheet) = determineCriteriaForWhoseTimesheet(employeeQueryString)
+
+        val te = sd.bc.tru.getTimeEntriesForTimePeriod(employee, currentPeriod)
         val totalHours = Time(te.sumBy {it.time.numberOfMinutes}).getHoursAsString()
-        val editidValue = sd.ahd.queryString["editid"]
-        val projects = sd.bc.tru.listAllProjects()
+        val editidValue = sd.ahd.queryString[Elements.EDIT_ID.getElemName()]
+
         // either get the id as an integer or get null,
         // the code will handle either properly
-        val idBeingEdited = if (editidValue == null) null else checkParseToInt(editidValue)
+        val idBeingEdited = determineWhichTimeEntryIsBeingEdited(editidValue, reviewingOtherTimesheet)
 
-        // Figure out time period date from viewTimeAPITests
-        val periodStartDate = currentPeriod.start
-        val periodEndDate = currentPeriod.end
-        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employee, periodStartDate)
-        val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
-        val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
+        val projects = sd.bc.tru.listAllProjects()
+
+        val (inASubmittedPeriod, submitButton) = processSubmitButton(currentPeriod, reviewingOtherTimesheet)
         val body = """
+                <h2>Viewing ${safeHtml(employee.name.value)}'s timesheet</h2>
                 <nav class="time_period_selector">
-                    <form action="$submitButtonAction" method="post">
-                        <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
-                        <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
-                        <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
-                    </form>
+                    $submitButton
                     <form action="$path">
                         <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
                     </form>
@@ -153,13 +160,89 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
                     </form>
                 </nav>
-                ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
+                ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)}
                 
                 <div class="timerows-container">
-                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod)}
+                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)}
                 </div>
         """
-        return PageComponents(sd).makeTemplate("your time entries", "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+        return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+    }
+
+    /**
+     * A particular set of time entries may be submitted or non-submitted.
+     * This goes through some of the calculations for that.
+     */
+    private fun processSubmitButton(
+        currentPeriod: TimePeriod,
+        reviewingOtherTimesheet: Boolean
+    ): Pair<Boolean, String> {
+        // Figure out time period date from viewTimeAPITests
+        val periodStartDate = currentPeriod.start
+        val periodEndDate = currentPeriod.end
+        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employee, periodStartDate)
+        val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
+        val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
+        val submitButton = if (reviewingOtherTimesheet) "" else """"
+    <form action="$submitButtonAction" method="post">
+        <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
+        <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
+        <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
+    </form>
+    """.trimIndent()
+        return Pair(inASubmittedPeriod, submitButton)
+    }
+
+    /**
+     * We may receive an id of a time entry to edit.  This checks
+     * whether we can render that.
+     */
+    private fun determineWhichTimeEntryIsBeingEdited(
+        editidValue: String?,
+        reviewingOtherTimesheet: Boolean
+    ) = if (editidValue == null) {
+        null
+    } else {
+        if (reviewingOtherTimesheet) {
+            throw IllegalStateException(
+                "If you are viewing someone else's timesheet, " +
+                        "you aren't allowed to edit any fields.  " +
+                        "The ${Elements.EDIT_ID.getElemName()} key in the query string is not allowed."
+            )
+        }
+        checkParseToInt(editidValue)
+    }
+
+    /**
+     * We may have received a particular employee's id to determine which timesheet
+     * to show.  This checks that
+     */
+    private fun determineCriteriaForWhoseTimesheet(employeeQueryString: String?) =
+        if (employeeQueryString != null) {
+            if (sd.ahd.user.role == Role.REGULAR) {
+                throw UnpermittedOperationException("Your role does not allow viewing other employee's timesheets.  Your URL had a query string requesting to see a particular employee, using the key ${Elements.REQUESTED_EMPLOYEE.getElemName()}")
+            }
+            val id = EmployeeId.make(employeeQueryString)
+            if (sd.ahd.user.employee.id == id) {
+                throw IllegalStateException("Error: makes no sense to request your own timesheet (employee id in query string was your own)")
+            }
+            val employee = sd.bc.tru.findEmployeeById(id)
+            if (employee == NO_EMPLOYEE) {
+                throw java.lang.IllegalStateException("Error: employee id in query string (${id.value}) does not find any employee")
+            }
+            Triple(employee, "Viewing ${safeHtml(employee.name.value)}'s timesheet", true)
+        } else {
+            Triple(sd.ahd.user.employee, "your time entries", false)
+        }
+
+    private fun calculateCurrentTimePeriod(dateQueryString: String?): TimePeriod {
+        val currentPeriod = if (dateQueryString != null) {
+            val date = Date.make(dateQueryString)
+            TimePeriod.getTimePeriodForDate(date)
+        } else {
+            TimePeriod.getTimePeriodForDate(Date.now())
+        }
+        return currentPeriod
     }
 
     private fun renderMobileDataEntry(
@@ -167,8 +250,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         idBeingEdited: Int?,
         projects: List<Project>,
         currentPeriod: TimePeriod,
-        inASubmittedPeriod: Boolean): String {
-        return if (! inASubmittedPeriod) {
+        inASubmittedPeriod: Boolean,
+        reviewingOtherTimesheet: Boolean): String {
+        return if (! (inASubmittedPeriod || reviewingOtherTimesheet)) {
             return if (idBeingEdited != null) {
                 renderEditRowMobile(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
@@ -184,10 +268,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         idBeingEdited: Int?,
         projects: List<Project>,
         currentPeriod: TimePeriod,
-        inASubmittedPeriod: Boolean
+        inASubmittedPeriod: Boolean,
+        reviewingOtherTimesheet: Boolean
     ): String {
         val timeentriesByDate = te.groupBy { it.date }
-        return if (inASubmittedPeriod) {
+        return if (inASubmittedPeriod || reviewingOtherTimesheet) {
             var resultString = ""
             for (date in timeentriesByDate.keys.sorted()) {
                 val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
@@ -221,7 +306,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val editButton = if (inASubmittedPeriod) "" else """
         <div class="action time-entry-information">
             <form action="$path">
-                <input type="hidden" name="editid" value="${it.id.value}" /> 
+                <input type="hidden" name="${safeAttr(Elements.EDIT_ID.getElemName())}" value="${it.id.value}" /> 
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
                 <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
             </form>

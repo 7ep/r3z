@@ -35,7 +35,7 @@ class HomepageAPITests {
     fun testGetAsAdmin() {
         val sd = makeServerData(user = DEFAULT_ADMIN_USER, data = PostBodyData(), tru = tru, au = au)
 
-        val result = toStr(HomepageAPI.handleGet(sd).fileContents)
+        val result = HomepageAPI.handleGet(sd).fileContentsString()
 
         assertTrue(result.contains("Create employee"))
         assertTrue(result.contains("Create project"))

@@ -38,7 +38,7 @@ class AuthUtilities {
                     AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
                 }
             } catch (ex: UnpermittedOperationException) {
-                handleUnauthorized()
+                handleUnauthorized(ex.message)
             }
         }
 
@@ -76,7 +76,7 @@ class AuthUtilities {
                     AuthStatus.UNAUTHENTICATED -> handleUnauthenticated()
                 }
             } catch (ex: UnpermittedOperationException) {
-                handleUnauthorized()
+                handleUnauthorized(ex.message)
             }
         }
 

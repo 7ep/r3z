@@ -37,7 +37,7 @@ class HomepageAPI(private val sd: ServerData)  {
                     AuthStatus.UNAUTHENTICATED -> redirectTo(LoginAPI.path)
                 }
             } catch (ex: UnpermittedOperationException) {
-                handleUnauthorized()
+                handleUnauthorized(ex.message)
             }
             /**
              * This is the method for when we want to go either one direction
