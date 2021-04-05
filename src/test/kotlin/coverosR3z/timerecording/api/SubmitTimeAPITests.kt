@@ -1,18 +1,11 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.authentication.utility.AuthenticationUtilities
-import coverosR3z.authentication.utility.IAuthenticationUtilities
+import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.misc.*
-import coverosR3z.misc.types.Date
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
-import coverosR3z.timerecording.types.TimePeriod
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
-import coverosR3z.timerecording.utility.TimeRecordingUtilities
+import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -20,50 +13,89 @@ import org.junit.experimental.categories.Category
 
 class SubmitTimeAPITests {
 
-    lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
+    lateinit var au : FakeAuthenticationUtilities
+    lateinit var tru : FakeTimeRecordingUtilities
 
     @Before
     fun init() {
-        val pmd = createEmptyDatabase()
-        val cu = CurrentUser(DEFAULT_USER)
-        au = AuthenticationUtilities(
-            AuthenticationPersistence(pmd, logger = testLogger),
-            testLogger,
-        )
-        tru = TimeRecordingUtilities(TimeEntryPersistence(pmd, logger = testLogger), cu, testLogger)
+        au = FakeAuthenticationUtilities()
+        tru = FakeTimeRecordingUtilities()
     }
 
+    // region role tests
 
     @Category(APITestCategory::class)
     @Test
-    fun testSubmittingTime() {
+    fun testSubmittingTime_RegularUser() {
         val startDate = "2021-01-01"
         val endDate = "2021-01-15"
-        val data = PostBodyData(mapOf(
-            SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
-            SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
-        ))
-        val sd = makeSubmittingServerData(data)
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
+                SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
 
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, response)
+    }
 
-        val timePeriod = TimePeriod(Date.make(startDate), Date.make(endDate))
-
-        // get the state from the database so we can confirm the time period was persisted
-        val stp = tru.getSubmittedTimePeriod(timePeriod)
-        assertEquals(stp.bounds, timePeriod)
-
-        // confirm we return the user to the right place
-        assertEquals(
-            "We should have gotten redirected to the viewTime page",
-            StatusCode.SEE_OTHER, response
+    @Category(APITestCategory::class)
+    @Test
+    fun testSubmittingTime_ApproverUser() {
+        val startDate = "2021-01-01"
+        val endDate = "2021-01-15"
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
+                SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
+            )
         )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_APPROVER)
+
+        // the API processes the client input
+        val response = SubmitTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, response)
     }
 
-    private fun makeSubmittingServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
+    @Category(APITestCategory::class)
+    @Test
+    fun testSubmittingTime_AdminUser() {
+        val startDate = "2021-01-01"
+        val endDate = "2021-01-15"
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
+                SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        // the API processes the client input
+        val response = SubmitTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.SEE_OTHER, response)
     }
+
+    @Category(APITestCategory::class)
+    @Test
+    fun testSubmittingTime_SystemUser() {
+        val startDate = "2021-01-01"
+        val endDate = "2021-01-15"
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.START_DATE.getElemName() to startDate,
+                SubmitTimeAPI.Elements.END_DATE.getElemName() to endDate,
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = SYSTEM_USER)
+
+        // the API processes the client input
+        val response = SubmitTimeAPI.handlePost(sd).statusCode
+        assertEquals(StatusCode.FORBIDDEN, response)
+    }
+
+    // end region
 
 }

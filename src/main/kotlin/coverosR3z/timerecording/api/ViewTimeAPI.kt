@@ -1,9 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
-import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
-import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.earliestAllowableDate
 import coverosR3z.misc.types.latestAllowableDate
@@ -142,24 +140,19 @@ class ViewTimeAPI(private val sd: ServerData) {
         val projects = sd.bc.tru.listAllProjects()
 
         val (inASubmittedPeriod, submitButton) = processSubmitButton(currentPeriod, reviewingOtherTimesheet)
-        val body = """
-                <h2>Viewing ${safeHtml(employee.name.value)}'s timesheet</h2>
-                <nav class="time_period_selector">
+        val navMenu = """ <nav class="time_period_selector">
                     $submitButton
-                    <form action="$path">
-                        <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
-                    </form>
-                     <form action="$path">
-                        <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
-                        <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
-                    </form>
+                    ${currentPeriodButton(employee, reviewingOtherTimesheet)}
+                    ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                     <div id="timeperiod_display">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
                     <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
-                    <form action="$path">
-                        <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
-                        <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
-                    </form>
-                </nav>
+                    ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+                </nav>"""
+        // show this if we are viewing someone else's timesheet
+        val viewingHeader = if (! reviewingOtherTimesheet) "" else """"<h2>Viewing ${safeHtml(employee.name.value)}'s timesheet</h2>"""
+        val body = """
+                $viewingHeader
+               $navMenu
                 ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)}
                 
                 <div class="timerows-container">
@@ -167,6 +160,49 @@ class ViewTimeAPI(private val sd: ServerData) {
                 </div>
         """
         return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+    }
+
+    private fun nextPeriodButton(
+        currentPeriod: TimePeriod,
+        employee: Employee,
+        reviewingOtherTimesheet: Boolean
+    ): String {
+        val employeeField = if (! reviewingOtherTimesheet) "" else
+        """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
+        return """           
+            <form action="$path">
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
+                $employeeField
+                <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
+            </form>
+    """.trimIndent()
+    }
+
+    private fun previousPeriodButton(
+        currentPeriod: TimePeriod,
+        employee: Employee,
+        reviewingOtherTimesheet: Boolean
+    ): String {
+        val employeeField = if (! reviewingOtherTimesheet) "" else
+        """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
+        return """      
+            <form action="$path">
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
+                $employeeField
+                <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
+            </form>
+     """.trimIndent()
+    }
+
+    private fun currentPeriodButton(employee: Employee, reviewingOtherTimesheet: Boolean): String {
+        val employeeField = if (! reviewingOtherTimesheet) "" else
+            """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
+        return """       
+            <form action="$path">
+                <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
+                $employeeField
+            </form>
+     """.trimIndent()
     }
 
     /**
@@ -183,7 +219,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employee, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
-        val submitButton = if (reviewingOtherTimesheet) "" else """"
+        val submitButton = if (reviewingOtherTimesheet) "" else """
     <form action="$submitButtonAction" method="post">
         <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
         <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
@@ -277,7 +313,12 @@ class ViewTimeAPI(private val sd: ServerData) {
             for (date in timeentriesByDate.keys.sorted()) {
                 val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
                 resultString += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
-                resultString += timeentriesByDate[date]?.sortedBy { it.project.name.value }?.joinToString("") {renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)}
+                resultString += timeentriesByDate[date]?.sortedBy { it.project.name.value }?.joinToString("") {renderReadOnlyRow(
+                    it,
+                    currentPeriod,
+                    inASubmittedPeriod,
+                    reviewingOtherTimesheet
+                )}
             }
             resultString
         } else {
@@ -291,7 +332,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         if (it.id.value == idBeingEdited) {
                             renderEditRow(it, projects, currentPeriod)
                         } else {
-                            renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod)
+                            renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)
                         }
                     }
                 resultString += "<div></div>"
@@ -301,9 +342,14 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     }
 
-    private fun renderReadOnlyRow(it: TimeEntry, currentPeriod: TimePeriod, inASubmittedPeriod: Boolean): String {
+    private fun renderReadOnlyRow(
+        it: TimeEntry,
+        currentPeriod: TimePeriod,
+        inASubmittedPeriod: Boolean,
+        reviewingOtherTimesheet: Boolean
+    ): String {
 
-        val editButton = if (inASubmittedPeriod) "" else """
+        val editButton = if (inASubmittedPeriod || reviewingOtherTimesheet) "" else """
         <div class="action time-entry-information">
             <form action="$path">
                 <input type="hidden" name="${safeAttr(Elements.EDIT_ID.getElemName())}" value="${it.id.value}" /> 

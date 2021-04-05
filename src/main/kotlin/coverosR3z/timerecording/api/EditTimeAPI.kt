@@ -8,6 +8,7 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.*
+import java.lang.IllegalStateException
 
 class EditTimeAPI(private val sd: ServerData) {
 
@@ -46,8 +47,12 @@ class EditTimeAPI(private val sd: ServerData) {
 
         val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employee.id){ employeeIdNotNullMsg })
+        if (sd.ahd.user.employee != employee) {
+            throw IllegalStateException("It is not allowed for anyone other than the owning employee to edit this time entry")
+        }
 
         val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
+
         tru.changeEntry(timeEntry)
 
         val currentPeriod = data.mapping[ViewTimeAPI.Elements.TIME_PERIOD.getElemName()]

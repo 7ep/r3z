@@ -16,6 +16,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import java.lang.IllegalStateException
 
 class EditTimeAPITests {
 
@@ -32,6 +33,7 @@ class EditTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEditTime() {
+        tru.findEmployeeByIdBehavior = { DEFAULT_REGULAR_USER.employee }
         val data = PostBodyData(mapOf(
             Elements.PROJECT_INPUT.getElemName() to "1",
             Elements.TIME_INPUT.getElemName() to "1",
@@ -45,6 +47,25 @@ class EditTimeAPITests {
             "We should have gotten redirected to the viewTime page",
             StatusCode.SEE_OTHER, response
         )
+    }
+
+    /**
+     * Only the employee who owns the time may submit the time.
+     * If we detect it is some other employee doing so, throw an exception
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testEditTime_InvalidEmployee() {
+        val data = PostBodyData(mapOf(
+            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.TIME_INPUT.getElemName() to "1",
+            Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+            Elements.ID_INPUT.getElemName() to "1"
+        ))
+        val sd = makeETServerData(data)
+        val ex = assertThrows(IllegalStateException::class.java) { EditTimeAPI.handlePost(sd) }
+        assertEquals("It is not allowed for anyone other than the owning employee to edit this time entry", ex.message)
     }
 
     @Category(APITestCategory::class)

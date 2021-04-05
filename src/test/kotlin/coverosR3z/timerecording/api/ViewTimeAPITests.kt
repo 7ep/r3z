@@ -193,6 +193,7 @@ class ViewTimeAPITests {
     @Test
     fun testEmployeeRequested() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
+        tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
         val sd = makeServerDataForGetWithQueryString(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "2"))
