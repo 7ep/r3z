@@ -25,13 +25,21 @@ body {
 	line-height: 1;
 }
 
-ol, ul {
-	/* list-style: none; */
-}
-
 table {
 	border-collapse: collapse;
 	border-spacing: 0;
+}
+
+
+/* This is necessary so Iphone doesn't override our styles */
+textarea,
+input
+  {
+-webkit-appearance: none;
+}
+
+ select {
+-webkit-appearance: auto;
 }
 
 /*
@@ -68,14 +76,6 @@ RESET SECTION FINISHES
     .header-button:visited {
       color: #ffffff
     }
-
-    /* This is necessary so Iphone doesn't override our styles */
-    textarea,
-    input,
-     select {
-    -webkit-appearance: none;
-    }
-
 }
 
 
@@ -110,13 +110,6 @@ RESET SECTION FINISHES
       color: #ffffff
     }
 
-    /* This is necessary so Iphone doesn't override our styles */
-    textarea,
-    input,
-     select {
-    -webkit-appearance: none;
-    }
-
 }
 
 
@@ -124,11 +117,7 @@ RESET SECTION FINISHES
 
     header {
       background-color: #370F22;
-      font-size: 22px;
-      line-height: 35px;
-      margin: 0;
-      top: 0;
-      height: 40px;
+      height: 23px;
       padding: 4px;
       display: flex;
       justify-content: space-between;
@@ -151,11 +140,10 @@ RESET SECTION FINISHES
       color: #ffffff
     }
 
-    /* This is necessary so Iphone doesn't override our styles */
-    textarea,
-    input,
-     select {
-    -webkit-appearance: none;
+    #header-logout {
+    }
+
+    #right-side-header {
     }
 
 }

@@ -18,7 +18,13 @@ class PageComponents(sd: ServerData) {
 """.trimIndent()
 
         private fun renderUserInfo(): String {
-                return if (user == NO_USER) "" else """<span><span id="username"><a class="header-button" href="${ChangePasswordAPI.path}">${safeHtml(user.name.value)}</a></span> <a class="header-button" href="logout">logout</a></span>"""
+                return if (user == NO_USER) "" else
+"""<span id="right-side-header">
+        <span id="username">
+                <a class="header-button" href="${ChangePasswordAPI.path}">${safeHtml(user.name.value)}</a>
+        </span> 
+        <a id="header-logout" class="header-button" href="logout">logout</a>
+</span>""".trimMargin()
         }
 
         fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """

@@ -164,11 +164,11 @@ class ServerUtilities {
                 if (ex.message?.contains("Connection reset") == true) {
                     logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
                 } else {
-                    logger.logWarn { "${ex.message}" }
+                    logger.logDebug { "${ex.message}" }
                     throw ex
                 }
             } catch (ex : Throwable) {
-                logger.logWarn { "${ex.message}" }
+                logger.logDebug { "${ex.message}" }
                 throw ex
             } finally {
                 logger.logTrace { "closing server socket" }

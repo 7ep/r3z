@@ -1,4 +1,11 @@
-@media only screen and (max-width: 400px) {
+@media only screen and (max-width: 750px) {
+
+    h2 {
+      text-align: center;
+      font-size: 1.3em;
+      margin: 10px;
+      color: white;
+    }
 
     .time-entry-information input,
     .time-entry-information select,
@@ -79,6 +86,8 @@
     .time_period_selector > div,
     .timerows-container form {
         display: flex;
+        padding: 1px;
+        margin: 1px;
     }
 
     .timerows-container {
@@ -104,8 +113,10 @@
         background-color: white;
         opacity: 82%;
         display: flex;
-        height: 28px;
         justify-content: space-evenly;
+        flex-wrap: wrap;
+        padding: 1px;
+        margin: 1px;
      }
 
      nav.time_period_selector form {
@@ -120,6 +131,11 @@
         text-align: center;
      }
 
+     #timeperiod_display div {
+     }
+
+     #timeperiod_display span {
+     }
 
     #total_hours {
         position: relative;
@@ -149,10 +165,11 @@
       border: 1.8px solid #3b3b3b;
       border-radius: 3px;
       font-size: 10px;
-      padding: 0px;
-      margin: 0.8px;
+      /* padding: 0px; */
+      /* margin: 0.8px; */
       display: flex;
       line-height: 17px;
+      flex-wrap: wrap;
     }
 
     nav button:hover {
@@ -321,327 +338,12 @@
     #edit-buttons-mobile #deletebutton {
     }
 
-}
-
-@media only screen and (min-width: 401px) and (max-width: 750px) {
-
-    .time-entry-information input,
-    .time-entry-information select,
-    .time-entry-information div {
-        line-height: 26px;
-    }
-
-    .timerows-container .time input {
-        width: 36px;
-    }
-
-    .timerows-container .project {
-      width: 98px;
-      position: relative;
-    }
-
-    .timerows-container .project select {
-      width: inherit;
-    }
-
-    .readonly-time-entry-row .date {
-      display: none;
-    }
-
-    .readonly-time-entry-row .details > div {
-    }
-
-    .timerows-container .time {
-     width: 42px;
-     position: relative;
-    }
-
-    .timerows-container .details {
-      position: relative;
-      width: 170px;
-    }
-
-    .timerows-container .details > div {
-        overflow-wrap: break-word;
-    }
-
-    .timerows-container .details input {
-      width: 107px;
-    }
-
-    .timerows-container .editbutton {
-        width: 41px;
-        height: 25px;
-    }
-
-    .timerows-container input {
-      background-color: #e3dddc;
-      border: 1px white solid;
-      display: flex;
-    }
-
-    .timerows-container .time-entry-information {
-      background-color: #e3dddc;
-      border: 1px white solid;
-
-    }
-
-    .timerows-container .time-entry-information > div {
-    }
-
-    .readonly-time-entry-row {
-      display: flex;
-      border-bottom: 1.5px #a8a1a0 solid;
-      margin: auto;
-    }
-
-    .time_period_selector form,
-    .time_period_selector > div,
-    .timerows-container form {
-        display: flex;
-    }
-
-    .timerows-container {
-        border: 2px solid #e2e2e2;
-        margin: auto;
-        border-radius: .5em;
-        background-color: white;
-        opacity: 82%;
-        width: 350px;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-    }
-    
-     .create-time-entry-row,
-     .editable-time-entry-row
-      {
-        display:none;
-     }
-
-     nav.time_period_selector {
-        border: 2px solid #e2e2e2;
-        margin: auto;
-        border-radius: .5em;
-        background-color: white;
-        opacity: 82%;
-        width: 350px;
-        padding: 10px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-evenly;
-        height: 28px;
-     }
-
-     nav.time_period_selector form {
-        display: flex;
-     }
-
-     #timeperiod_display {
-        color: black;
-        font-size: 13px;
-        display: flex;
-        width: 89px;
-        border: 1px solid black;
-        text-align: center;
-     }
-
-
-    #total_hours {
-        position: relative;
-        display: flex;
-        width: 37px;
-        margin-left: 6px;
-        margin-right: 6px;
-    }
-    #total_hours label {
-        font-size: 0.6em;
-        position: absolute;
-        display: block;
-        top: -7px;
-    }
-
-    #total_hours #total_hours_value {
-        top: 14px;
-        position: absolute;
-        font-size: 14px;
-    }
-
-    nav button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      border-radius: 3px;
-      font-size: 13px;
-      padding: 0px;
-      margin: 0.8px;
-    }
-
-    nav button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
-
-    nav button:focus {
-        outline: none;
-        border-radius: .5em;
-        border: 1.8px solid blue;
-    }
-
-    .mobile-data-entry div {
-        position: relative;
-        padding: 2px;
-        display: flex;
-        flex: 1;
-    }
-
-    .mobile-data-entry label {
-        position: absolute;
-        left: 6px;
-        top: -2px;
-        font-size: 0.6em;
-        color: black;
-        z-index: 1;
-        background-color: white;
-    }
-
-    .mobile-data-entry .date {
-        flex: 2;
-    }
-
-    .mobile-data-entry .project {
-        flex: 2;
-    }
-
-    #simpler_enter_time_panel {
-        flex-direction: column;
-    }
-
-    #simpler_enter_time_panel .row {
-        width: 100%;
-    }
-
-    #simpler_enter_time_panel .row .action {
-       flex: 0;
-    }
-
-    .mobile-data-entry .details textarea {
-       height: 20px;
-    }
-
-    #simpler_edit_time_panel {
-        display: flex;
-        flex-direction: column;
-    }
-
-    #simpler_edit_time_panel .details textarea {
-        height: 55px;
-    }
-
-    .mobile-data-entry {
-      border: 2px solid #e2e2e2;
-      margin: auto;
-      border-radius: 6px;
-      background-color: white;
-      opacity: 82%;
-      width: 350px;
-      padding: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-
-    .mobile-data-entry select,
-    .mobile-data-entry textarea,
-    .mobile-data-entry input {
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      background-color: #CFC1C1;
-      opacity: 82%;
-      color: #333333;
-      padding: 3px;
-      height: 20px;
-      flex: 1;
-      width: 100%;
-      font-size: 16px;
-    }
-
-    .mobile-data-entry select:focus,
-    .mobile-data-entry input:focus {
-        outline: none;
-        background-color: inherit;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
-
-    .mobile-data-entry select {
-      height: 30px;
-      font-size: 16px;
-    }
-
-    .mobile-data-entry button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      padding: 3px;
-      height: 30px;
-      width: 80px;
-      justify-content: center;
-      line-height: 1.7em;
-    }
-
-    .mobile-data-entry button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
-
-    .mobile-data-entry button:focus {
-        outline: none;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
-
-
-    .timerows-container button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      padding: 3px;
-      height: 30px;
-    }
-
-    .timerows-container button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
-
-    .timerows-container button:focus {
-        outline: none;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
-
-    #edit-buttons-mobile {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    #edit-buttons-mobile button {
-        display: flex;
-        justify-content: center;
-        line-height: 2em;
-    }
-
-    #edit-buttons-mobile #deletebutton {
+    #employee-selector {
+    width: 80px;
     }
 
 }
+
 
 @media only screen and (min-width: 751px) {
 
@@ -673,6 +375,13 @@
         line-height: 21px;
         padding-left: 10px;
         padding-right: 10px;
+     }
+
+
+     #timeperiod_display div {
+     }
+
+     #timeperiod_display span {
      }
 
     input:focus {
@@ -865,5 +574,9 @@
         height: 29px;
         font-size: .75em;
         line-height: 2em;
+    }
+
+    #employee-selector {
+    width: 80px;
     }
 }

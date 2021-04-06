@@ -93,7 +93,11 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd)
 
-        assertTrue(result.fileContentsString().contains("""<div id="timeperiod_display">2021-03-16 - 2021-03-31</div>"""))
+        assertTrue(result.fileContentsString()
+            .contains("""<div id="timeperiod_display">
+                    <div>2021-03-16</div>
+                    <div>2021-03-31</div>
+                </div>"""))
     }
 
     /**
@@ -106,7 +110,11 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd)
 
-        assertTrue(result.fileContentsString().contains("""<div id="timeperiod_display">2021-03-16 - 2021-03-31</div>"""))
+        assertTrue(result.fileContentsString()
+            .contains("""<div id="timeperiod_display">
+                    <div>2021-03-16</div>
+                    <div>2021-03-31</div>
+                </div>"""))
     }
 
     /**
@@ -242,7 +250,10 @@ class ViewTimeAPITests {
         val result = ViewTimeAPI.handleGet(sd)
 
         assertTrue(result.fileContentsString()
-            .contains("""<div id="timeperiod_display">2021-01-01 - 2021-01-15</div>"""))
+            .contains("""<div id="timeperiod_display">
+                    <div>2021-01-01</div>
+                    <div>2021-01-15</div>
+                </div>"""))
         assertTrue("The page should announce we are viewing another's timesheet",
             result.fileContentsString().contains("Viewing DefaultEmployee's timesheet"))
     }

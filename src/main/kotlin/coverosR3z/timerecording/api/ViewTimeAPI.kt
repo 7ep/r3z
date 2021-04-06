@@ -140,14 +140,30 @@ class ViewTimeAPI(private val sd: ServerData) {
         val projects = sd.bc.tru.listAllProjects()
 
         val (inASubmittedPeriod, submitButton) = processSubmitButton(currentPeriod, reviewingOtherTimesheet)
-        val navMenu = """ <nav class="time_period_selector">
-                    $submitButton
-                    ${currentPeriodButton(employee, reviewingOtherTimesheet)}
-                    ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                    <div id="timeperiod_display">${currentPeriod.start.stringValue} - ${currentPeriod.end.stringValue}</div>
-                    <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
-                    ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                </nav>"""
+        val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
+            <form action="$path">
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
+                <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
+                    <option selected disabled hidden value="">Choose</option>
+                    ${allEmployeesOptions()}
+                </select>
+                <button>Switch</button>
+            </form>
+            """
+        val navMenu = """ 
+            <nav class="time_period_selector">
+                $submitButton
+                $switchEmployee
+                ${currentPeriodButton(employee, reviewingOtherTimesheet)}
+                ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+                <div id="timeperiod_display">
+                    <div>${currentPeriod.start.stringValue}</div>
+                    <div>${currentPeriod.end.stringValue}</div>
+                </div>
+                <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
+                ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+            </nav>
+            """.trimIndent()
         // show this if we are viewing someone else's timesheet
         val viewingHeader = if (! reviewingOtherTimesheet) "" else """"<h2>Viewing ${safeHtml(employee.name.value)}'s timesheet</h2>"""
         val body = """
@@ -160,6 +176,11 @@ class ViewTimeAPI(private val sd: ServerData) {
                 </div>
         """
         return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+    }
+
+    private fun allEmployeesOptions(): String {
+        val employees = sd.bc.tru.listAllEmployees()
+        return employees.filterNot { it == sd.ahd.user.employee }.joinToString{"""<option value="${it.id.value}">${it.name.value}</option>"""}
     }
 
     private fun nextPeriodButton(
