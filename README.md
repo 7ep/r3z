@@ -7,13 +7,12 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
 #### Quick Start:
 
 * Install [Java](https://www.java.com/en/download/) if you don't already have it.
-* Make sure you have [Chrome](https://www.google.com/chrome/) and [Firefox](https://www.mozilla.org/en-US/firefox/new/)
 * [Clone](https://git-scm.com/docs/git-clone) or [download](https://github.com/7ep/r3z/archive/master.zip) this repo. 
     * If you don't know what "clone" means here, just download it.
     * if you download, unzip the downloaded file to its own directory.
 * On the command line in the project directory:
-    * run `gradlew alltests` to run all the tests
-    * run `gradlew run` to run the server, then open https://localhost:12443/ (it uses a self-signed cert)
+    * optional: run `gradlew test` to run tests
+    * optional: run `gradlew run` to run the server, then open https://localhost:12443/ (it uses a self-signed cert)
 
 #### Summary:
 
@@ -44,13 +43,13 @@ Check out the [development handbook](docs/development_handbook.md)
 *If we understand that our software is a reflection of our culture, should we not focus on improving that first?*
 
 #### Summary of relevant Gradle commands
-* `gradlew alltests` - run all the tests in this code
+* `gradlew alltests` - run all the tests in this code, including UI and perf
 * `gradlew fasttest` - run all the fast tests (unit, integration, API)
 * `gradlew uitest` - run only the ui tests
 * `gradlew jar` - build the jar, in build/libs/
 * `gradlew run` - run the application.  Stop with ctrl+c
 
-> “A complex system that works is
+> A complex system that works is
 > invariably found to have evolved
 > from a simple system that
 > worked. The inverse proposition
@@ -61,10 +60,10 @@ Check out the [development handbook](docs/development_handbook.md)
 > start over, beginning with a
 > working simple system.”
 >
-> -- “Gall’s law” John Gall
+> -- _John Gall (Gall's law)_
 
 > If you want to build a ship, don't drum up people to collect wood 
 > and don't assign them tasks and work, but rather teach them to long 
 > for the endless immensity of the sea. 
 > 
-> -- Antoine de Saint-Exupery
+> -- _Antoine de Saint-Exupery_
