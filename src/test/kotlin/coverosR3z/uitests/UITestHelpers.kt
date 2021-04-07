@@ -16,7 +16,6 @@ import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
-import org.openqa.selenium.Point
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -77,19 +76,16 @@ enum class Drivers(val driver: () -> WebDriver){
  */
 fun startupTestForUI(
     domain: String = "localhost",
-    port : Int,
+    port: Int,
     driver: () -> WebDriver = webDriver.driver,
-    directory : String? = null
-) : PageObjectModelLocal {
+    directory: String? = null
+): PageObjectModelLocal {
     // start the server
     val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
 
     val bc = initializeBusinessCode(fs.pmd, testLogger)
-    val pom = PageObjectModelLocal.make(driver(), port, port + 443, bc, fs, checkNotNull(fs.pmd), domain)
 
-    // scatter the windows around the screen so we have a chance to see what all is going on
-    pom.driver.manage().window().position = Point(listOf(0, 800).random(), listOf(0, 400).random())
-    return pom
+    return PageObjectModelLocal.make(driver(), port, port + 443, bc, fs, checkNotNull(fs.pmd), domain)
 }
 
 class LoginPage(private val driver: WebDriver, private val domain : String) {

@@ -24,6 +24,7 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.openqa.selenium.By
+import org.openqa.selenium.Point
 import java.io.File
 
 @RunWith(Parameterized::class)
@@ -90,6 +91,10 @@ class UIServerTests(private val myDriver: Drivers) {
 
     private fun createPom() {
         pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
+
+        // Each UI test puts the window in a different place around the screen
+        // so we have a chance to see what all is going on
+        pom.driver.manage().window().position = Point(800, 400)
     }
 
     private fun restart() {

@@ -24,6 +24,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import org.openqa.selenium.Point
 import org.openqa.selenium.chrome.ChromeDriver
 import java.io.File
 
@@ -126,6 +127,10 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
         pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
+
+        // Each UI test puts the window in a different place around the screen
+        // so we have a chance to see what all is going on
+        pom.driver.manage().window().position = Point(800, 0)
     }
 
     @After
