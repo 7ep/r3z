@@ -32,6 +32,10 @@
     .readonly-time-entry-row .details > div {
     }
 
+    .readonly-time-entry-row .time-entry-information > div {
+        line-height: 16px;
+    }
+
     .timerows-container .time {
          position: relative;
     }
