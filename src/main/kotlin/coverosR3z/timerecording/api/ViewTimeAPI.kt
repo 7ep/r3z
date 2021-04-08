@@ -51,6 +51,12 @@ class ViewTimeAPI(private val sd: ServerData) {
         CREATE_TIME_ENTRY_FORM_MOBILE("simpler_enter_time_panel"),
 
         EDIT_BUTTON("editbutton"),
+
+        /**
+         * Used for creating a new time entry with a particular project
+         * already selected
+         */
+        DUP_BUTTON("duplicate"),
         CANCEL_BUTTON_DESKTOP("cancelbutton_desktop"),
         SAVE_BUTTON_DESKTOP("savebutton_desktop"),
         DELETE_BUTTON_DESKTOP("deletebutton_desktop"),
@@ -62,14 +68,23 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         // query string items
 
-        // a date which allows us to determine which time period to show
+        /**
+         * a date which allows us to determine which time period to show
+         */
         TIME_PERIOD("date"),
 
-        // an employee id to allow choosing whose timesheet to show
+        /**
+         * an employee id to allow choosing whose timesheet to show
+         */
         REQUESTED_EMPLOYEE("emp"),
 
-        // the id of a time entry we are editing
+        /**
+         * the id of a time entry we are editing
+         */
         EDIT_ID("editid"),
+
+        // the id of the project we want pre-filled in the project dropdown of create
+        PROJECT_ID("projectid"),
 
         PREVIOUS_PERIOD("previous_period"),
         CURRENT_PERIOD("current_period"),
@@ -101,10 +116,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         override val path: String
             get() = "timeentries"
 
-        fun projectsToOptions(projects: List<Project>) =
-            projects.sortedBy { it.name.value }.joinToString("") {
+        fun projectsToOptions(projects: List<Project>): String {
+            return projects.sortedBy { it.name.value }.joinToString("") {
                 "<option value =\"${it.id.value}\">${safeAttr(it.name.value)}</option>\n"
             }
+        }
 
         fun projectsToOptionsOneSelected(projects: List<Project>, selectedProject : Project): String {
             val sortedProjects = projects.sortedBy{it.name.value}
@@ -139,12 +155,16 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val projects = sd.bc.tru.listAllProjects()
 
+        // the query string may indicate a project to have already-selected in the create time entry row
+        val projectId = sd.ahd.queryString[Elements.PROJECT_ID.getElemName()]
+        val selectedProject = if (projectId.isNullOrBlank()) null else projects.singleOrNull{ it.id == ProjectId.make(projectId) }
+
         val (inASubmittedPeriod, submitButton) = processSubmitButton(currentPeriod, reviewingOtherTimesheet)
         val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
             <form action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                 <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
-                    <option selected disabled hidden value="">Choose</option>
+                    <option selected disabled hidden value="">Self</option>
                     ${allEmployeesOptions()}
                 </select>
                 <button>Switch</button>
@@ -169,10 +189,10 @@ class ViewTimeAPI(private val sd: ServerData) {
         val body = """
                 $viewingHeader
                $navMenu
-                ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)}
+                ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)}
                 
                 <div class="timerows-container">
-                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)}
+                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)}
                 </div>
         """
         return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
@@ -307,12 +327,14 @@ class ViewTimeAPI(private val sd: ServerData) {
         projects: List<Project>,
         currentPeriod: TimePeriod,
         inASubmittedPeriod: Boolean,
-        reviewingOtherTimesheet: Boolean): String {
+        reviewingOtherTimesheet: Boolean,
+        selectedProject: Project?
+    ): String {
         return if (! (inASubmittedPeriod || reviewingOtherTimesheet)) {
             return if (idBeingEdited != null) {
                 renderEditRowMobile(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
-                renderCreateTimeRowMobile()
+                renderCreateTimeRowMobile(selectedProject)
             }
         } else {
             ""
@@ -325,7 +347,8 @@ class ViewTimeAPI(private val sd: ServerData) {
         projects: List<Project>,
         currentPeriod: TimePeriod,
         inASubmittedPeriod: Boolean,
-        reviewingOtherTimesheet: Boolean
+        reviewingOtherTimesheet: Boolean,
+        selectedProject: Project?
     ): String {
         val timeentriesByDate = te.groupBy { it.date }
         return if (inASubmittedPeriod || reviewingOtherTimesheet) {
@@ -357,7 +380,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     }
                 resultString += "<div></div>"
             }
-            renderCreateTimeRow(projects) + resultString
+            renderCreateTimeRow(projects, selectedProject) + resultString
         }
 
     }
@@ -369,14 +392,23 @@ class ViewTimeAPI(private val sd: ServerData) {
         reviewingOtherTimesheet: Boolean
     ): String {
 
-        val editButton = if (inASubmittedPeriod || reviewingOtherTimesheet) "" else """
+        val actionButtons = if (inASubmittedPeriod || reviewingOtherTimesheet) "" else """
         <div class="action time-entry-information">
             <form action="$path">
                 <input type="hidden" name="${safeAttr(Elements.EDIT_ID.getElemName())}" value="${it.id.value}" /> 
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
                 <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
             </form>
-        </div>"""
+        </div>
+        <div class="action time-entry-information">
+            <form action="$path">
+                <input type="hidden" name="${safeAttr(Elements.PROJECT_ID.getElemName())}" value="${it.project.id.value}" /> 
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
+                <button class="${Elements.DUP_BUTTON.getElemClass()}">dup</button>
+            </form>
+        </div>
+        
+        """
 
         val detailContent = if (it.details.value.isBlank()) "&nbsp;" else safeHtml(it.details.value)
         return """
@@ -393,7 +425,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         <div class="details time-entry-information">
             <div class="readonly-data">$detailContent</div>
         </div>
-            $editButton
+        $actionButtons
     </div>
     """
     }
@@ -445,42 +477,61 @@ class ViewTimeAPI(private val sd: ServerData) {
     /**
      * The row for creating new time entries for desktop
      */
-    private fun renderCreateTimeRow(projects: List<Project>) = """
-        <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
-            <form action="${EnterTimeAPI.path}" method="post">
-                <div class="project createrow-data time-entry-information">
-                    <label for="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}">Project</label>
-                    <select id="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required >
-                        <option selected disabled hidden value="">Choose a project</option>
-                        ${projectsToOptions(projects)}
-                    </select>
-                </div>
-                <div class="date createrow-data time-entry-information" >
-                    <label for="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}">Date</label>
-                    <input  id="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
-                </div>
-                <div class="time createrow-data time-entry-information">
-                    <label for="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}">Time (hrs)</label>
-                    <input  id="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
-                </div>
-                
-                <div class="details createrow-data time-entry-information">
-                    <label for="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}">Details</label>
-                    <input  id="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
-                </div>
-                <div class="action createrow-data time-entry-information">
-                    <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
-                </div>
-            </form>
-        </div>
-          """
+    private fun renderCreateTimeRow(projects: List<Project>, selectedProject: Project?): String {
+        val chooseAProject = if (selectedProject != null) "" else {
+            """<option selected disabled hidden value="">Choose a project</option>"""
+        }
+        val projectOptions = if (selectedProject == null) {
+            projectsToOptions(projects)
+        } else {
+            projectsToOptionsOneSelected(projects, selectedProject)
+        }
+        return """
+            <div class="create-time-entry-row" id="${Elements.CREATE_TIME_ENTRY_ROW.getId()}">
+                <form action="${EnterTimeAPI.path}" method="post">
+                    <div class="project createrow-data time-entry-information">
+                        <label for="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}">Project</label>
+                        <select id="${Elements.PROJECT_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required >
+                            $chooseAProject
+                            $projectOptions
+                        </select>
+                    </div>
+                    <div class="date createrow-data time-entry-information" >
+                        <label for="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}">Date</label>
+                        <input  id="${Elements.DATE_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="$earliestAllowableDate" max="$latestAllowableDate" required />
+                    </div>
+                    <div class="time createrow-data time-entry-information">
+                        <label for="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}">Time (hrs)</label>
+                        <input  id="${Elements.TIME_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required />
+                    </div>
+                    
+                    <div class="details createrow-data time-entry-information">
+                        <label for="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}">Details</label>
+                        <input  id="${Elements.DETAILS_INPUT_CREATE_DESKTOP.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" type="text" maxlength="$MAX_DETAILS_LENGTH"/>
+                    </div>
+                    <div class="action createrow-data time-entry-information">
+                        <button id="${Elements.CREATE_BUTTON.getId()}">create</button>
+                    </div>
+                </form>
+            </div>
+              """
+    }
 
 
     /**
      * For entering new time on a mobile device
      */
-    private fun renderCreateTimeRowMobile(): String {
+    private fun renderCreateTimeRowMobile(selectedProject: Project?): String {
         val projects = sd.bc.tru.listAllProjects()
+
+        val chooseAProject = if (selectedProject != null) "" else {
+            """<option selected disabled hidden value="">Choose a project</option>"""
+        }
+        val projectOptions = if (selectedProject == null) {
+            projectsToOptions(projects)
+        } else {
+            projectsToOptionsOneSelected(projects, selectedProject)
+        }
 
         return """
             <form id="${Elements.CREATE_TIME_ENTRY_FORM_MOBILE.getId()}" class="mobile-data-entry" action="${EnterTimeAPI.path}" method="post">
@@ -488,8 +539,8 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <div class="project">
                         <label for="${Elements.PROJECT_INPUT_CREATE_MOBILE.getId()}">Project:</label>
                         <select id="${Elements.PROJECT_INPUT_CREATE_MOBILE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
-                            <option selected disabled hidden value="">Choose</option>
-                            ${projectsToOptions(projects)}
+                            $chooseAProject
+                            $projectOptions
                         </select>
                     </div>
         

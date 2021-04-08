@@ -381,3 +381,5 @@
 2021-04-05	numberThreads: 5	numberRequests: 200	time: 176
 2021-04-05	numberThreads: 5	numberRequests: 200	time: 196
 2021-04-05	numberThreads: 5	numberRequests: 200	time: 171
+2021-04-07	numberThreads: 5	numberRequests: 200	time: 210
+2021-04-07	numberThreads: 5	numberRequests: 200	time: 183

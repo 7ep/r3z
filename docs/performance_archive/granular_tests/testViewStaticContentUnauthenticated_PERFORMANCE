@@ -369,3 +369,5 @@
 2021-04-05	numberThreads: 10	numberRequests: 500	time: 245
 2021-04-05	numberThreads: 10	numberRequests: 500	time: 220
 2021-04-05	numberThreads: 10	numberRequests: 500	time: 210
+2021-04-07	numberThreads: 10	numberRequests: 500	time: 230
+2021-04-07	numberThreads: 10	numberRequests: 500	time: 208

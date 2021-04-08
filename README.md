@@ -11,8 +11,12 @@ documentation_ ... but that doesn't mean we can't have pretty good documentation
     * If you don't know what "clone" means here, just download it.
     * if you download, unzip the downloaded file to its own directory.
 * On the command line in the project directory:
-    * optional: run `gradlew test` to run tests
-    * optional: run `gradlew run` to run the server, then open https://localhost:12443/ (it uses a self-signed cert)
+    * run `gradlew run` to run the server, then open https://localhost:12443/ (it uses a self-signed cert)
+    * The first time the system is run, it will create an administrator account with
+      username "administrator", and a password will be generated and shown in the log
+      and stored in "admin_acct.txt" in the home directory.
+    * As admin, you can create new employee accounts.  Copy the link on the account page
+      and use it when logged out to register a new user as that employee.
 
 #### Summary:
 

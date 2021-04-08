@@ -110,7 +110,7 @@ class LoginAPI(val sd: ServerData) {
         <tr>
             <td>
                 <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
-                <input type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required />
+                <input autofocus type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required />
             </td>
         </tr>
         <tr>
