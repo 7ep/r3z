@@ -54,8 +54,8 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_nonInteger() {
-        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("2020-Jan-06")}
-        assertEquals("Must be able to parse Jan as integer", ex.message)
+        val ex = assertThrows(IllegalStateException::class.java) { Date.make("2020-Jan-06")}
+        assertEquals("""Must be able to parse "Jan" as an integer""", ex.message)
     }
 
     /**
@@ -72,8 +72,8 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespace() {
-        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("   2020-01-32   ")}
-        assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
+        val ex = assertThrows(IllegalStateException::class.java) { Date.make("   2020-01-32   ")}
+        assertEquals("""Must be able to parse "(SPACE)(SPACE)(SPACE)2020" as an integer""", ex.message)
     }
 
     /**
@@ -81,8 +81,8 @@ class DateTests {
      */
     @Test
     fun testDifferentDateConstructors_negativeCase_extraWhitespaceInside() {
-        val ex = assertThrows(IllegalArgumentException::class.java) { Date.make("   2020-    01-32   ")}
-        assertEquals("Must be able to parse (SPACE)(SPACE)(SPACE)2020 as integer", ex.message)
+        val ex = assertThrows(IllegalStateException::class.java) { Date.make("   2020-    01-32   ")}
+        assertEquals("""Must be able to parse "(SPACE)(SPACE)(SPACE)2020" as an integer""", ex.message)
     }
 
     /**

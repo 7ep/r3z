@@ -174,8 +174,6 @@
       border: 1.8px solid #3b3b3b;
       border-radius: 3px;
       font-size: 10px;
-      /* padding: 0px; */
-      /* margin: 0.8px; */
       display: flex;
       line-height: 17px;
       flex-wrap: wrap;
@@ -190,6 +188,12 @@
         outline: none;
         border-radius: .5em;
         border: 1.8px solid blue;
+    }
+
+    nav button:disabled {
+        cursor: inherit;
+        color: white;
+        background-color: lightgray;
     }
 
     .mobile-data-entry div {
@@ -568,6 +572,12 @@
         border: 1.8px solid blue;
     }
 
+    button:disabled {
+        cursor: inherit;
+        color: white;
+        background-color: lightgray;
+    }
+
     .timerows-container button {
         height: 24px;
         width: 84px;
@@ -592,4 +602,5 @@
     #employee-selector {
     width: 80px;
     }
+
 }

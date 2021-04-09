@@ -86,12 +86,22 @@ class ViewTimeAPI(private val sd: ServerData) {
         // the id of the project we want pre-filled in the project dropdown of create
         PROJECT_ID("projectid"),
 
+        // navigation
+
         PREVIOUS_PERIOD("previous_period"),
         CURRENT_PERIOD("current_period"),
         NEXT_PERIOD("next_period"),
+
+        // parts of the time entries
+
         READ_ONLY_ROW("readonly-time-entry-row"),
         EDITABLE_ROW("editable-time-entry-row"),
         SUBMIT_BUTTON("submitbutton"),
+
+        /**
+         * for approval of an employee's timesheet
+         */
+        EMPLOYEE_TO_APPROVE_INPUT("approval-employee"),
         ;
         override fun getId(): String {
             return this.value
@@ -110,7 +120,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val vt = ViewTimeAPI(sd)
-            return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { vt.existingTimeEntriesHTML() }
+            return doGETRequireAuth(sd.ahd.user, Role.REGULAR, Role.APPROVER, Role.ADMIN) { vt.renderTimeEntriesPage() }
         }
 
         override val path: String
@@ -135,15 +145,16 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     }
 
-    private fun existingTimeEntriesHTML() : String {
+    /**
+     * Top-level function for rendering everything needed for the time entries page
+     */
+    private fun renderTimeEntriesPage() : String {
         // if we receive a query string like ?date=2020-06-12 we'll get
         // the time period it fits in
-        val dateQueryString: String? = sd.ahd.queryString[Elements.TIME_PERIOD.getElemName()]
-        val currentPeriod = calculateCurrentTimePeriod(dateQueryString)
+        val currentPeriod = obtainCurrentTimePeriod()
 
         // let's see if they are asking for a particular employee's information
-        val employeeQueryString: String? = sd.ahd.queryString[Elements.REQUESTED_EMPLOYEE.getElemName()]
-        val (employee, title, reviewingOtherTimesheet) = determineCriteriaForWhoseTimesheet(employeeQueryString)
+        val (employee, reviewingOtherTimesheet) = determineCriteriaForWhoseTimesheet()
 
         val te = sd.bc.tru.getTimeEntriesForTimePeriod(employee, currentPeriod)
         val totalHours = Time(te.sumBy {it.time.numberOfMinutes}).getHoursAsString()
@@ -158,44 +169,111 @@ class ViewTimeAPI(private val sd: ServerData) {
         // the query string may indicate a project to have already-selected in the create time entry row
         val projectId = sd.ahd.queryString[Elements.PROJECT_ID.getElemName()]
         val selectedProject = if (projectId.isNullOrBlank()) null else projects.singleOrNull{ it.id == ProjectId.make(projectId) }
+        val approvalStatus = sd.bc.tru.isApproved(employee, currentPeriod.start)
+        val (inASubmittedPeriod, submitButton) = processSubmitButton(employee, currentPeriod, reviewingOtherTimesheet, approvalStatus)
+        val switchEmployeeUI = createEmployeeSwitch(currentPeriod)
 
-        val (inASubmittedPeriod, submitButton) = processSubmitButton(currentPeriod, reviewingOtherTimesheet)
-        val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
-            <form action="$path">
-                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
-                <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
-                    <option selected disabled hidden value="">Self</option>
-                    ${allEmployeesOptions()}
-                </select>
-                <button>Switch</button>
-            </form>
-            """
-        val navMenu = """ 
-            <nav class="time_period_selector">
-                $submitButton
-                $switchEmployee
-                ${currentPeriodButton(employee, reviewingOtherTimesheet)}
-                ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                <div id="timeperiod_display">
-                    <div>${currentPeriod.start.stringValue}</div>
-                    <div>${currentPeriod.end.stringValue}</div>
-                </div>
-                <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
-                ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-            </nav>
-            """.trimIndent()
+        val approveUI = createApproveUI(reviewingOtherTimesheet, isSubmitted = inASubmittedPeriod, approvalStatus, employee, currentPeriod)
+        val navMenu =
+            createNavMenu(submitButton, switchEmployeeUI, approveUI, employee, reviewingOtherTimesheet, currentPeriod, totalHours)
+
+        val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
         // show this if we are viewing someone else's timesheet
-        val viewingHeader = if (! reviewingOtherTimesheet) "" else """"<h2>Viewing ${safeHtml(employee.name.value)}'s timesheet</h2>"""
+        val viewingHeader = if (! reviewingOtherTimesheet) "" else """"<h2>Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
+        val mobileDataEntry = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)
+        val hideEditButtons = inASubmittedPeriod || reviewingOtherTimesheet || approvalStatus == ApprovalStatus.APPROVED
+
         val body = """
-                $viewingHeader
-               $navMenu
-                ${renderMobileDataEntry(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)}
-                
-                <div class="timerows-container">
-                    ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)}
-                </div>
+            $viewingHeader
+            $navMenu
+            $mobileDataEntry
+            
+            <div class="timerows-container">
+                ${renderTimeRows(te, idBeingEdited, projects, currentPeriod, selectedProject, hideEditButtons)}
+            </div>
         """
+
+        val viewingSelf = sd.ahd.user.employee == employee
+        val title = if (viewingSelf) "Your time entries" else "Viewing ${safeHtml(employee.name.value)}'s $submittedString timesheet "
         return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+    }
+
+    private fun createApproveUI(reviewingOtherTimesheet: Boolean, isSubmitted: Boolean, approvalStatus: ApprovalStatus, employee: Employee, timePeriod: TimePeriod): String {
+        if (! reviewingOtherTimesheet) return ""
+        val renderDisabled = if (! isSubmitted) "disabled" else ""
+        return if (approvalStatus == ApprovalStatus.UNAPPROVED) {
+            """
+            <form action="${ApproveApi.path}" method="post">
+                <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
+                <button $renderDisabled>Approve</button>
+            </form>
+        """.trimIndent()
+        } else {
+            """
+            <form action="${ApproveApi.path}" method="post">
+                <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
+                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
+                <input type="hidden" name="${ApproveApi.Elements.IS_UNAPPROVAL.getElemName()}" value="true" />
+                <button>Unapprove</button>
+            </form>
+        """.trimIndent()
+        }
+
+    }
+
+    private fun obtainCurrentTimePeriod(): TimePeriod {
+        val dateQueryString: String? = sd.ahd.queryString[Elements.TIME_PERIOD.getElemName()]
+        return calculateCurrentTimePeriod(dateQueryString)
+    }
+
+    /**
+     * Creates the navigation menu for the timesheet entries.
+     * There are several mechanisms at play here - what the admin
+     * can see versus the approver versus the regular user.
+     */
+    private fun createNavMenu(
+        submitButton: String,
+        switchEmployeeUI: String,
+        approveUI: String,
+        employee: Employee,
+        reviewingOtherTimesheet: Boolean,
+        currentPeriod: TimePeriod,
+        totalHours: String,
+    ): String {
+        return """ 
+                <nav class="time_period_selector">
+                    $submitButton
+                    $switchEmployeeUI
+                    $approveUI
+                    ${currentPeriodButton(employee, reviewingOtherTimesheet)}
+                    ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+                    <div id="timeperiod_display">
+                        <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
+                        <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
+                    </div>
+                    <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
+                    ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+                </nav>
+                """.trimIndent()
+    }
+
+    /**
+     * Creates the part of the UI that allows an admin or approver to switch
+     * to seeing another person's timesheet
+     */
+    private fun createEmployeeSwitch(currentPeriod: TimePeriod): String {
+        val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
+                <form action="$path">
+                    <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
+                    <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
+                        <option selected disabled hidden value="">Self</option>
+                        ${allEmployeesOptions()}
+                    </select>
+                    <button>Switch</button>
+                </form>
+                """
+        return switchEmployee
     }
 
     private fun allEmployeesOptions(): String {
@@ -251,20 +329,22 @@ class ViewTimeAPI(private val sd: ServerData) {
      * This goes through some of the calculations for that.
      */
     private fun processSubmitButton(
+        employee: Employee,
         currentPeriod: TimePeriod,
-        reviewingOtherTimesheet: Boolean
+        reviewingOtherTimesheet: Boolean,
+        approvalStatus: ApprovalStatus,
     ): Pair<Boolean, String> {
+        if (approvalStatus == ApprovalStatus.APPROVED) return Pair(true, "")
+
         // Figure out time period date from viewTimeAPITests
         val periodStartDate = currentPeriod.start
-        val periodEndDate = currentPeriod.end
-        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(sd.ahd.user.employee, periodStartDate)
+        val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(employee, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
-        val submitButtonAction = if (inASubmittedPeriod) UnsubmitTimeAPI.path else SubmitTimeAPI.path
         val submitButton = if (reviewingOtherTimesheet) "" else """
-    <form action="$submitButtonAction" method="post">
+    <form action="${SubmitTimeAPI.path}" method="post">
         <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
         <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
-        <input name="${SubmitTimeAPI.Elements.END_DATE.getElemName()}" type="hidden" value="${periodEndDate.stringValue}">
+        <input name="${SubmitTimeAPI.Elements.UNSUBMIT.getElemName()}" type="hidden" value="$inASubmittedPeriod">
     </form>
     """.trimIndent()
         return Pair(inASubmittedPeriod, submitButton)
@@ -294,8 +374,9 @@ class ViewTimeAPI(private val sd: ServerData) {
      * We may have received a particular employee's id to determine which timesheet
      * to show.  This checks that
      */
-    private fun determineCriteriaForWhoseTimesheet(employeeQueryString: String?) =
-        if (employeeQueryString != null) {
+    private fun determineCriteriaForWhoseTimesheet(): Pair<Employee, Boolean> {
+        val employeeQueryString: String? = sd.ahd.queryString[Elements.REQUESTED_EMPLOYEE.getElemName()]
+        return if (employeeQueryString != null) {
             if (sd.ahd.user.role == Role.REGULAR) {
                 throw UnpermittedOperationException("Your role does not allow viewing other employee's timesheets.  Your URL had a query string requesting to see a particular employee, using the key ${Elements.REQUESTED_EMPLOYEE.getElemName()}")
             }
@@ -307,10 +388,11 @@ class ViewTimeAPI(private val sd: ServerData) {
             if (employee == NO_EMPLOYEE) {
                 throw java.lang.IllegalStateException("Error: employee id in query string (${id.value}) does not find any employee")
             }
-            Triple(employee, "Viewing ${safeHtml(employee.name.value)}'s timesheet", true)
+            Pair(employee,true)
         } else {
-            Triple(sd.ahd.user.employee, "your time entries", false)
+            Pair(sd.ahd.user.employee, false)
         }
+    }
 
     private fun calculateCurrentTimePeriod(dateQueryString: String?): TimePeriod {
         return if (dateQueryString != null) {
@@ -346,53 +428,50 @@ class ViewTimeAPI(private val sd: ServerData) {
         idBeingEdited: Int?,
         projects: List<Project>,
         currentPeriod: TimePeriod,
-        inASubmittedPeriod: Boolean,
-        reviewingOtherTimesheet: Boolean,
-        selectedProject: Project?
+        selectedProject: Project?,
+        hideEditButtons: Boolean,
     ): String {
         val timeentriesByDate = te.groupBy { it.date }
-        return if (inASubmittedPeriod || reviewingOtherTimesheet) {
-            var resultString = ""
-            for (date in timeentriesByDate.keys.sorted()) {
-                val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
-                resultString += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
-                resultString += timeentriesByDate[date]?.sortedBy { it.project.name.value }?.joinToString("") {renderReadOnlyRow(
-                    it,
-                    currentPeriod,
-                    inASubmittedPeriod,
-                    reviewingOtherTimesheet
-                )}
-            }
-            resultString
-        } else {
-            var resultString = ""
-            for (date in timeentriesByDate.keys.sortedDescending()) {
-                val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
-                resultString += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
-                resultString += timeentriesByDate[date]
-                    ?.sortedBy { it.project.name.value }
-                    ?.joinToString("") {
-                        if (it.id.value == idBeingEdited) {
-                            renderEditRow(it, projects, currentPeriod)
-                        } else {
-                            renderReadOnlyRow(it, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet)
-                        }
+
+        var readOnlyRows = ""
+        for (date in timeentriesByDate.keys.sortedDescending()) {
+            readOnlyRows = renderDailyTimeEntryDivider(timeentriesByDate, date, readOnlyRows)
+            readOnlyRows += timeentriesByDate[date]
+                ?.sortedBy { it.project.name.value }
+                ?.joinToString("") {
+                    if (it.id.value == idBeingEdited && !hideEditButtons) {
+                        renderEditRow(it, projects, currentPeriod)
+                    } else {
+                        renderReadOnlyRow(it, currentPeriod, hideEditButtons)
                     }
-                resultString += "<div></div>"
-            }
-            renderCreateTimeRow(projects, selectedProject) + resultString
+                }
         }
 
+        return renderCreateTimeRow(projects, selectedProject, hideEditButtons) + readOnlyRows
+
+    }
+
+    /**
+     * Show the date and calculate / show the number of hours recorded for that date
+     */
+    private fun renderDailyTimeEntryDivider(
+        timeentriesByDate: Map<Date, List<TimeEntry>>,
+        date: Date,
+        readOnlyRows: String
+    ): String {
+        var readOnlyRows1 = readOnlyRows
+        val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
+        readOnlyRows1 += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
+        return readOnlyRows1
     }
 
     private fun renderReadOnlyRow(
         it: TimeEntry,
         currentPeriod: TimePeriod,
-        inASubmittedPeriod: Boolean,
-        reviewingOtherTimesheet: Boolean
+        hideEditButtons: Boolean,
     ): String {
 
-        val actionButtons = if (inASubmittedPeriod || reviewingOtherTimesheet) "" else """
+        val actionButtons = if (hideEditButtons) "" else """
         <div class="action time-entry-information">
             <form action="$path">
                 <input type="hidden" name="${safeAttr(Elements.EDIT_ID.getElemName())}" value="${it.id.value}" /> 
@@ -477,7 +556,8 @@ class ViewTimeAPI(private val sd: ServerData) {
     /**
      * The row for creating new time entries for desktop
      */
-    private fun renderCreateTimeRow(projects: List<Project>, selectedProject: Project?): String {
+    private fun renderCreateTimeRow(projects: List<Project>, selectedProject: Project?, hideEditButtons: Boolean): String {
+        if (hideEditButtons) return ""
         val chooseAProject = if (selectedProject != null) "" else {
             """<option selected disabled hidden value="">Choose a project</option>"""
         }

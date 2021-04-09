@@ -44,4 +44,7 @@ interface ITimeRecordingUtilities {
     fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean
     fun deleteTimeEntry(timeEntry: TimeEntry): Boolean
     fun findTimeEntryById(id: TimeEntryId): TimeEntry
+    fun approveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus
+    fun isApproved(employee: Employee, startDate: Date) : ApprovalStatus
+    fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus
 }

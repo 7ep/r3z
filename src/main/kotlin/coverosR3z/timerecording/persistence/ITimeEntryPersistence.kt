@@ -35,4 +35,6 @@ interface ITimeEntryPersistence {
     fun unsubmitTimePeriod(stp: SubmittedPeriod)
     fun deleteTimeEntry(timeEntry: TimeEntry): Boolean
     fun findTimeEntryById(id: TimeEntryId): TimeEntry
+    fun approveTimesheet(stp: SubmittedPeriod): Boolean
+    fun unapproveTimesheet(stp: SubmittedPeriod): Boolean
 }

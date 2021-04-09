@@ -5,11 +5,9 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.logging.ILogger
 import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.timerecording.exceptions.SubmissionNotFoundException
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
-import java.util.*
 
 class TimeEntryPersistence(
     private val pmd : PureMemoryDatabase,
@@ -43,7 +41,7 @@ class TimeEntryPersistence(
                 entry.details
             )
             entries.add(newTimeEntry)
-            logger.logDebug(cu) {"recorded a new timeEntry: $newTimeEntry"}
+            logger.logTrace(cu) {"recorded a new timeEntry: $newTimeEntry"}
             newTimeEntry
         }
     }
@@ -151,7 +149,8 @@ class TimeEntryPersistence(
             val newSubmission = SubmittedPeriod(
                 SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employee,
-                timePeriod)
+                timePeriod,
+                ApprovalStatus.UNAPPROVED)
             logger.logDebug(cu) { "Recorded a new time period submission," +
                     " employee id \"${employee.id.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
                     "to the database" }
@@ -161,13 +160,9 @@ class TimeEntryPersistence(
     }
 
     override fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
-        try {
-            return submittedPeriodsDataAccess.read { submissions ->
-                submissions.single { it.employee == employee && it.bounds == timePeriod }
-            }
-        } catch (ex: NoSuchElementException) {
-            throw SubmissionNotFoundException("no submission was found for ${employee.name.value} on $timePeriod")
-        }
+        return submittedPeriodsDataAccess.read { submissions ->
+            submissions.singleOrNull { it.employee == employee && it.bounds == timePeriod }
+        } ?: NullSubmittedPeriod
     }
 
     override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
@@ -190,6 +185,14 @@ class TimeEntryPersistence(
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
         return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull{ it.id == id } ?: NO_TIMEENTRY }
+    }
+
+    override fun approveTimesheet(stp: SubmittedPeriod): Boolean {
+        return submittedPeriodsDataAccess.actOn { submissions -> submissions.update(stp.copy(approvalStatus = ApprovalStatus.APPROVED)) }
+    }
+
+    override fun unapproveTimesheet(stp: SubmittedPeriod): Boolean {
+        return submittedPeriodsDataAccess.actOn { submissions -> submissions.update(stp.copy(approvalStatus = ApprovalStatus.UNAPPROVED)) }
     }
 
     companion object {

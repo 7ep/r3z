@@ -369,13 +369,13 @@ class TimeRecordingUtilityTests {
 
     /**
      * If we submit time on a period, and try to edit a time entry
-     * that in in that period, it won't be allowed - it will be locked
+     * that in in that period, it won't be allowed - it will be disabled
      */
     @Test
     fun testSubmitTime_expectLockedTimeEntries_editingTimeEntry() {
         val ftep = FakeTimeEntryPersistence()
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER), testLogger)
-        ftep.setLockedEmployeeDateBehavior = {true}
+        ftep.isInASubmittedPeriodBehavior = {true}
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         val result = tru.changeEntry(
@@ -398,7 +398,7 @@ class TimeRecordingUtilityTests {
     fun testSubmitTime_expectLockedTimeEntries_creatingTimeEntry() {
         val ftep = FakeTimeEntryPersistence()
         val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER), testLogger)
-        ftep.setLockedEmployeeDateBehavior = {true}
+        ftep.isInASubmittedPeriodBehavior = {true}
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         val result = tru.createTimeEntry(createTimeEntryPreDatabase(date = DEFAULT_PERIOD_START_DATE))
@@ -514,6 +514,59 @@ class TimeRecordingUtilityTests {
         tep.findTimeEntryByIdBehavior = { NO_TIMEENTRY }
         val result = tru.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
         assertEquals(NO_TIMEENTRY, result)
+    }
+
+    /**
+     * Basic happy path for approving time
+     */
+    @Test
+    fun testApproveTime_HappyPath() {
+        tep.isInASubmittedPeriodBehavior = { true }
+        val result = tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.SUCCESS, result)
+    }
+
+    /**
+     * If the employee is no employee, fail
+     */
+    @Test
+    fun testApproveTime_failure_NoEmployee() {
+        val result = tru.approveTimesheet(NO_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.FAILURE, result)
+    }
+
+    /**
+     * If the timesheet isn't submitted, fail
+     */
+    @Test
+    fun testApproveTime_failure_Unsubmitted() {
+        tep.isInASubmittedPeriodBehavior = { false }
+        val result = tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.FAILURE, result)
+    }
+
+    /**
+     * This assumes we already have an approved timesheet,
+     * and we want to unapprove it, maybe so that, for example,
+     * the user can modify their entries again (approving a
+     * timesheet locks it down)
+     */
+    @Test
+    fun testUnapproveTimesheet() {
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.APPROVED) }
+        tep.isInASubmittedPeriodBehavior = { true }
+        val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.SUCCESS, result)
+    }
+
+    /**
+     * If we try to unapprove something and it's already unapproved?
+     */
+    @Test
+    fun testUnapprove_NegativeCase_AlreadyUnapproved() {
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.UNAPPROVED) }
+        val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.FAILURE, result)
     }
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {

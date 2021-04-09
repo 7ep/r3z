@@ -226,7 +226,7 @@ tasks.withType(Test).configureEach {
     }
 
     // Fail the 'test' task on the first test failure
-    failFast = true
+    failFast = false
 
     debugOptions {
         // make the following true if you want to attach with a debugger while testing

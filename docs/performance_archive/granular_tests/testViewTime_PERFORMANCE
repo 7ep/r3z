@@ -372,3 +372,6 @@
 2021-04-05	numberThreads: 20	numberRequests: 100	time: 802
 2021-04-07	numberThreads: 20	numberRequests: 100	time: 758
 2021-04-07	numberThreads: 20	numberRequests: 100	time: 879
+2021-04-10	numberThreads: 20	numberRequests: 100	time: 848
+2021-04-11	numberThreads: 20	numberRequests: 100	time: 987
+2021-04-11	numberThreads: 20	numberRequests: 100	time: 952

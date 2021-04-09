@@ -111,8 +111,8 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI_nonNumericProject() {
         val data = PostBodyData(mapOf(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60", ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
-        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("Must be able to parse aaaaa as integer", ex.message)
+        val ex = assertThrows(java.lang.IllegalStateException::class.java){ EnterTimeAPI.handlePost(sd) }
+        assertEquals("""Must be able to parse "aaaaa" as an integer""", ex.message)
     }
 
     /**
@@ -211,7 +211,7 @@ class EnterTimeAPITests {
         ))
         val sd = makeETServerData(data)
         val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("Must be able to parse aaa as double", ex.message)
+        assertEquals("""Must be able to parse "aaa" as a double""", ex.message)
     }
 
 

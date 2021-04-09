@@ -836,7 +836,7 @@ class PureMemoryDatabaseTests {
     fun testSerialization_SubmittedPeriod() {
         val result = DEFAULT_SUBMITTED_PERIOD.serialize()
 
-        assertEquals("""{ id: 1 , eid: 1 , start: 2021-02-01 , end: 2021-02-15 }""", result)
+        assertEquals("""{ id: 1 , eid: 1 , start: 2021-02-01 , end: 2021-02-15 , appr: UNAPPROVED }""", result)
 
         val deserialized = SubmittedPeriod.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize(result)
 
@@ -849,19 +849,19 @@ class PureMemoryDatabaseTests {
     @Test
     fun testSerialization_SubmittedPeriod_CorruptedText_EmptyString() {
         val ex = assertThrows(DatabaseCorruptedException::class.java) { SubmittedPeriod.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize("") }
-        assertEquals("Unable to deserialize this text as time entry data: ", ex.message)
+        assertEquals("Unable to deserialize this text as submission data: ", ex.message)
     }
 
     @Test
     fun testSerialization_SubmittedPeriod_CorruptedText_MissingKey() {
         val ex = assertThrows(DatabaseCorruptedException::class.java) { SubmittedPeriod.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize("""{ eid: 1 , start: 2021-02-01 , end: 2021-02-15 }""") }
-        assertEquals("Unable to deserialize this text as time entry data: { eid: 1 , start: 2021-02-01 , end: 2021-02-15 }", ex.message)
+        assertEquals("Unable to deserialize this text as submission data: { eid: 1 , start: 2021-02-01 , end: 2021-02-15 }", ex.message)
     }
 
     @Test
     fun testSerialization_SubmittedPeriod_CorruptedText_BadType() {
         val ex = assertThrows(DatabaseCorruptedException::class.java) { SubmittedPeriod.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize("""{ id: aaaaaa , eid: 1 , start: 2021-02-01 , end: 2021-02-15 }""") }
-        assertEquals("Unable to deserialize this text as time entry data: { id: aaaaaa , eid: 1 , start: 2021-02-01 , end: 2021-02-15 }", ex.message)
+        assertEquals("Unable to deserialize this text as submission data: { id: aaaaaa , eid: 1 , start: 2021-02-01 , end: 2021-02-15 }", ex.message)
     }
 
     /**

@@ -6,12 +6,13 @@ import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.timerecording.types.*
+import java.lang.IllegalStateException
 
 class SubmitTimeAPI(private val sd: ServerData){
 
     enum class Elements (private val elemName: String = "", private val id: String = "", private val elemClass: String = "") : Element {
         START_DATE(elemName = "start_date"),
-        END_DATE(elemName = "end_date"),
+        UNSUBMIT(elemName = "unsubmit")
         ;
 
         override fun getId(): String {
@@ -31,7 +32,6 @@ class SubmitTimeAPI(private val sd: ServerData){
 
         override val requiredInputs = setOf(
             Elements.START_DATE,
-            Elements.END_DATE,
         )
         override val path: String
             get() = "submittime"
@@ -51,13 +51,22 @@ class SubmitTimeAPI(private val sd: ServerData){
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.bc.tru // time recording utilities
-        val startDate = Date.make(data.mapping[Elements.START_DATE.getElemName()])
-        val endDate = Date.make(data.mapping[Elements.END_DATE.getElemName()])
-        val timePeriod = TimePeriod(startDate, endDate)
+        val dateQueryString = data.mapping[Elements.START_DATE.getElemName()]
+        val startDate = try {
+            Date.make(dateQueryString)
+        } catch (ex: Throwable) {
+            throw IllegalStateException("""The date for submitting time was not interpreted as a date. You sent "$dateQueryString".  Format is YYYY-MM-DD""")
+        }
+        val timePeriod = TimePeriod.getTimePeriodForDate(startDate)
 
-        tru.submitTimePeriod(timePeriod)
+        if (data.mapping[Elements.UNSUBMIT.getElemName()] == "true") {
+            tru.unsubmitTimePeriod(timePeriod)
+        } else {
+            tru.submitTimePeriod(timePeriod)
+        }
 
-        return ServerUtilities.redirectTo(ViewTimeAPI.path + "?date=" + startDate.stringValue)
+
+        return ServerUtilities.redirectTo(ViewTimeAPI.path +  "?" + ViewTimeAPI.Elements.TIME_PERIOD.getElemName() + "=" + startDate.stringValue)
     }
 
 }

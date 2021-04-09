@@ -19,7 +19,7 @@ val serverStatusLineRegex = """(GET|POST) /(.*) HTTP/(?:1.1|1.0)""".toRegex()
 /**
  * This is the regex used to analyze a status line sent by the server and
  * read by the client.  Servers will send messages like: "HTTP/1.1 200 OK" or "HTTP/1.1 500 Internal Server Error"
- * See [StatusCode]
+ * See [coverosR3z.server.types.StatusCode]
  */
 private val clientStatusLineRegex = """HTTP/(?:1.1|1.0) (\d{3}) .*$""".toRegex()
 
@@ -88,12 +88,7 @@ fun parseHttpMessageAsClient(socketWrapper: ISocketWrapper, logger: ILogger): An
         return AnalyzedHttpData(Verb.CLIENT_CLOSED_CONNECTION)
     }
 
-    return when {
-        clientStatusLineRegex.containsMatchIn(statusLine) ->
-            analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper, logger)
-        else -> AnalyzedHttpData(Verb.INVALID)
-    }
-
+    return analyzeAsClient(checkNotNull(clientStatusLineRegex.matchEntire(statusLine)), socketWrapper, logger)
 }
 
 
@@ -128,12 +123,8 @@ private fun analyzeAsServer(
 private fun analyzeAsClient(statusLineMatches: MatchResult, socketWrapper: ISocketWrapper, logger: ILogger): AnalyzedHttpData {
     val statusCode = parseStatusLineAsClient(statusLineMatches, logger)
     val headers = getHeaders(socketWrapper)
-    val rawData = if (headers.any { it.toLowerCase().startsWith(CONTENT_LENGTH.toLowerCase())}) {
-        val length = extractLengthOfPostBodyFromHeaders(headers)
-        socketWrapper.read(length)
-    } else {
-        null
-    }
+    val length = extractLengthOfPostBodyFromHeaders(headers)
+    val rawData = socketWrapper.read(length)
 
     return AnalyzedHttpData(statusCode = statusCode, headers = headers, data = PostBodyData(rawData = rawData))
 }

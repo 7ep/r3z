@@ -31,6 +31,9 @@ class FakeTimeRecordingUtilities(
     var isInASubmittedPeriodBehavior : () -> Boolean = { false },
     var deleteTimeEntryBehavior : () -> Boolean = { true },
     var findTimeEntryByIdBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
+    var approveTimesheetBehavior: () -> ApprovalResultStatus = { ApprovalResultStatus.SUCCESS },
+    var unapproveTimesheetBehavior: () -> ApprovalResultStatus = { ApprovalResultStatus.SUCCESS },
+    var isApprovedBehavior: () -> ApprovalStatus = { ApprovalStatus.UNAPPROVED },
     ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -102,5 +105,17 @@ class FakeTimeRecordingUtilities(
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
         return findTimeEntryByIdBehavior()
+    }
+
+    override fun approveTimesheet(employee: Employee, startDate: Date) : ApprovalResultStatus {
+        return approveTimesheetBehavior()
+    }
+
+    override fun isApproved(employee: Employee, startDate: Date): ApprovalStatus {
+        return isApprovedBehavior()
+    }
+
+    override fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus {
+        return unapproveTimesheetBehavior()
     }
 }

@@ -76,6 +76,9 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
+
+        tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertFalse(frc.roleCanDoAction)
     }
 
     /*
@@ -140,6 +143,9 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
+
+        tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertTrue(frc.roleCanDoAction)
     }
 
     /*
@@ -203,6 +209,9 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
+
+        tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertFalse(frc.roleCanDoAction)
     }
 
     /*
@@ -214,7 +223,7 @@ class TimeRecordingUtilitiesRoleTests {
      */
     @Test
     fun testApproverRole() {
-        val (tru, frc) = makeTRU(DEFAULT_REGULAR_USER)
+        val (tru, frc) = makeTRU(DEFAULT_APPROVER)
 
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
@@ -265,6 +274,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertTrue(frc.roleCanDoAction)
 
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
+        assertTrue(frc.roleCanDoAction)
+
+        tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
     }
 
@@ -328,6 +340,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertFalse(frc.roleCanDoAction)
 
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
+        assertFalse(frc.roleCanDoAction)
+
+        tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
     }
 

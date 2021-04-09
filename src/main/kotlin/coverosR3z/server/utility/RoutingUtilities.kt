@@ -49,8 +49,8 @@ class RoutingUtilities {
                 Pair(Verb.POST, EditTimeAPI.path) -> EditTimeAPI.handlePost(sd)
                 Pair(Verb.POST, DeleteTimeAPI.path) -> DeleteTimeAPI.handlePost(sd)
                 Pair(Verb.POST, SubmitTimeAPI.path) -> SubmitTimeAPI.handlePost(sd)
-                Pair(Verb.POST, UnsubmitTimeAPI.path) -> UnsubmitTimeAPI.handlePost(sd)
                 Pair(Verb.POST, ChangePasswordAPI.path) -> ChangePasswordAPI.handlePost(sd)
+                Pair(Verb.POST, ApproveApi.path) -> ApproveApi.handlePost(sd)
 
                 else -> {
                     handleNotFound()

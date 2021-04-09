@@ -22,13 +22,15 @@ class FakeTimeEntryPersistence(
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() },
-    var setLockedEmployeeDateBehavior : () -> Boolean = { false },
+    var isInASubmittedPeriodBehavior : () -> Boolean = { false },
     var persistNewSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var unsubmitTimePeriodBehavior : () -> Unit = {},
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var getTimeEntriesForTimePeriodBehavior : () -> Set<TimeEntry> = { emptySet() },
     var deleteTimeEntryBehavior: () -> Boolean = { true },
     var findTimeEntryByIdBehavior: () -> TimeEntry = { DEFAULT_TIME_ENTRY },
+    var approveTimesheetBehavior: () -> Boolean = { true },
+    var unapproveTimesheetBehavior: () -> Boolean = { true },
 ) : ITimeEntryPersistence {
 
     override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
@@ -85,7 +87,7 @@ class FakeTimeEntryPersistence(
     }
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
-        return setLockedEmployeeDateBehavior()
+        return isInASubmittedPeriodBehavior()
     }
 
     override fun persistNewSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod) : SubmittedPeriod{
@@ -110,6 +112,14 @@ class FakeTimeEntryPersistence(
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
         return findTimeEntryByIdBehavior()
+    }
+
+    override fun approveTimesheet(stp: SubmittedPeriod): Boolean {
+        return approveTimesheetBehavior()
+    }
+
+    override fun unapproveTimesheet(stp: SubmittedPeriod): Boolean {
+        return unapproveTimesheetBehavior()
     }
 
 }

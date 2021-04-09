@@ -1,6 +1,9 @@
 package coverosR3z.timerecording.types
 
 import coverosR3z.misc.types.Date
+import coverosR3z.misc.types.NO_DATE
+import coverosR3z.misc.types.earliestAllowableDate
+import coverosR3z.misc.types.latestAllowableDate
 import coverosR3z.misc.utility.checkParseToInt
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryDeserialize
@@ -10,6 +13,12 @@ import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
 
 private const val minIdMsg = "Valid identifier values are 1 or above"
+
+/**
+ * This is used to represent nothing - just to avoid using null
+ * It's a typed null, essentially
+ */
+val NullSubmittedPeriod = SubmittedPeriod(SubmissionId(Int.MAX_VALUE), NO_EMPLOYEE, TimePeriod(NO_DATE, NO_DATE), ApprovalStatus.UNAPPROVED)
 
 data class SubmissionId(val value: Int) {
     init {
@@ -26,7 +35,10 @@ data class SubmissionId(val value: Int) {
 /**
  * A submitted TimePeriod in the database
  */
-data class SubmittedPeriod(val id: SubmissionId, val employee: Employee, val bounds: TimePeriod): IndexableSerializable() {
+data class SubmittedPeriod(val id: SubmissionId,
+                           val employee: Employee,
+                           val bounds: TimePeriod,
+                           val approvalStatus: ApprovalStatus): IndexableSerializable() {
 
     override fun getIndex(): Int {
         return id.value
@@ -37,7 +49,8 @@ data class SubmittedPeriod(val id: SubmissionId, val employee: Employee, val bou
             Keys.ID to "${id.value}",
             Keys.EMPLOYEE_ID to employee.id.value.toString(),
             Keys.START_BOUND to bounds.start.stringValue,
-            Keys.END_BOUND to bounds.end.stringValue
+            Keys.END_BOUND to bounds.end.stringValue,
+            Keys.IS_APPROVED to approvalStatus.toString()
         )
 
     class Deserializer(val employees: Set<Employee>) : Deserializable<SubmittedPeriod> {
@@ -48,11 +61,12 @@ data class SubmittedPeriod(val id: SubmissionId, val employee: Employee, val bou
                     val id = SubmissionId.make(entries[Keys.ID])
                     val employee = employees.single{ it.id == EmployeeId.make(entries[Keys.EMPLOYEE_ID]) }
                     val bounds = TimePeriod(Date.make(entries[Keys.START_BOUND]), Date.make(entries[Keys.END_BOUND]))
-                    SubmittedPeriod(id, employee, bounds)
+                    val approved = ApprovalStatus.valueOf(checkNotNull(entries[Keys.IS_APPROVED]))
+                    SubmittedPeriod(id, employee, bounds, approved)
                 } catch (ex : DatabaseCorruptedException) {
                     throw ex
                 } catch (ex : Throwable) {
-                    throw DatabaseCorruptedException("Unable to deserialize this text as time entry data: $str", ex)
+                    throw DatabaseCorruptedException("Unable to deserialize this text as submission data: $str", ex)
                 }
             }
         }
@@ -71,7 +85,9 @@ data class SubmittedPeriod(val id: SubmissionId, val employee: Employee, val bou
         ID("id"),
         EMPLOYEE_ID("eid"),
         START_BOUND("start"),
-        END_BOUND("end");
+        END_BOUND("end"),
+        IS_APPROVED("appr"),
+        ;
     }
 
 }

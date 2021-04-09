@@ -22,13 +22,13 @@ fun generateRandomString(length: Int) : String {
 fun checkParseToInt(value: String?,
                     nullMsg: () -> String = {"Integer must not be a null value"},
                     blankMsg: () -> String = {"Integer must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as integer"}): Int {
-    val notNullValue = requireNotNull(value){ nullMsg() }
-    require(notNullValue.isNotBlank()) { blankMsg() }
+                    parseMsg: () -> String = {"""Must be able to parse "${value?.replace(" ", SPACE)}" as an integer"""}): Int {
+    val notNullValue = checkNotNull(value){ nullMsg() }
+    check(notNullValue.isNotBlank()) { blankMsg() }
     return try {
         notNullValue.toInt()
     } catch (ex: java.lang.NumberFormatException) {
-        throw IllegalArgumentException(parseMsg())
+        throw IllegalStateException(parseMsg())
     }
 }
 
@@ -39,7 +39,7 @@ fun checkParseToInt(value: String?,
 fun checkParseToDouble(value: String?,
                     nullMsg: () -> String = {"Double must not be a null value"},
                     blankMsg: () -> String = {"Double must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as double"}): Double {
+                    parseMsg: () -> String = {"""Must be able to parse "${value?.replace(" ", SPACE)}" as a double"""}): Double {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }
     return try {

@@ -368,3 +368,6 @@
 2021-04-05	numberOfThreads: 10	numberOfRequests: 300	time: 79
 2021-04-07	numberOfThreads: 10	numberOfRequests: 300	time: 101
 2021-04-07	numberOfThreads: 10	numberOfRequests: 300	time: 104
+2021-04-10	numberOfThreads: 10	numberOfRequests: 300	time: 169
+2021-04-11	numberOfThreads: 10	numberOfRequests: 300	time: 99
+2021-04-11	numberOfThreads: 10	numberOfRequests: 300	time: 108

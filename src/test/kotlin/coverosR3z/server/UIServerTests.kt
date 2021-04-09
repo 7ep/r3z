@@ -168,7 +168,7 @@ class UIServerTests(private val myDriver: Drivers) {
         logout()
         // confirm the new password works
         pom.lp.login("hank", hankNewPassword)
-        assertEquals("your time entries", pom.driver.title)
+        assertEquals("Your time entries", pom.driver.title)
         logout()
         return Pair(newAdminPassword, hankNewPassword)
     }

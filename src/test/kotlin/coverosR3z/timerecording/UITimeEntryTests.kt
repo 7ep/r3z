@@ -227,7 +227,7 @@ class UITimeEntryTests(private val myDriver: Drivers) {
         val id = pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName)
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
         pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
-        assertEquals("your time entries", pom.driver.title)
+        assertEquals("Your time entries", pom.driver.title)
         if (! pom.vtp.isMobileWidth()) {
             assertEquals("2020-06-12", pom.vtp.getDateForEntry(id))
         }

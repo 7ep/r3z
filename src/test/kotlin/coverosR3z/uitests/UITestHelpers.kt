@@ -234,8 +234,8 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     }
 
     fun getCurrentPeriod() : String{
-        val start = driver.findElement(By.name(SubmitTimeAPI.Elements.START_DATE.getElemName())).getAttribute("value")
-        val end = driver.findElement(By.name(SubmitTimeAPI.Elements.END_DATE.getElemName())).getAttribute("value")
+        val start = driver.findElement(By.id("timeperiod_display_start")).text
+        val end = driver.findElement(By.id("timeperiod_display_end")).text
         return "$start - $end"
     }
 
@@ -257,7 +257,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
         clickCreateNewTimeEntry()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
-        assertEquals("your time entries", driver.title)
+        assertEquals("Your time entries", driver.title)
     }
 
     /**

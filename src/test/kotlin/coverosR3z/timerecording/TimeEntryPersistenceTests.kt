@@ -4,7 +4,6 @@ import coverosR3z.misc.*
 import coverosR3z.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.timerecording.exceptions.SubmissionNotFoundException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -13,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(IntegrationTestCategory::class)
 class TimeEntryPersistenceTests {
 
     private lateinit var tep : ITimeEntryPersistence
@@ -21,7 +21,6 @@ class TimeEntryPersistenceTests {
         tep = TimeEntryPersistence(createEmptyDatabase(), logger = testLogger)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test fun `can record a time entry to the database`() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
         val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -30,7 +29,6 @@ class TimeEntryPersistenceTests {
         assertEquals("There should be exactly one entry in the database", 1, count)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test fun `can get all time entries by a employee`() {
         tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val newProject: Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -52,7 +50,6 @@ class TimeEntryPersistenceTests {
      * If we try to add a time entry with a project id that doesn't exist in
      * the database, we should get an exception back from the database
      */
-    @Category(IntegrationTestCategory::class)
     @Test fun `Can't record a time entry that has a nonexistent project id`() {
         assertThrows(IllegalStateException::class.java) {
             tep.persistNewTimeEntry(createTimeEntryPreDatabase())
@@ -62,7 +59,6 @@ class TimeEntryPersistenceTests {
     /**
      * We need to be able to know how many hours a employee has worked for the purpose of validation
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `Can query hours worked by a employee on a given day`() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -80,7 +76,6 @@ class TimeEntryPersistenceTests {
         assertEquals(Time(60), query)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `if a employee has not worked on a given day, we return 0 as their minutes worked that day`() {
         val newEmployee: Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -89,7 +84,6 @@ class TimeEntryPersistenceTests {
         assertEquals("should be 0 since they didn't work that day", Time(0), minutesWorked)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `If a employee worked 24 hours total in a day, we should get that from queryMinutesRecorded`() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -125,7 +119,6 @@ class TimeEntryPersistenceTests {
     }
 
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `If a employee worked 8 hours a day for two days, we should get just 8 hours when checking one of those days`() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -152,7 +145,6 @@ class TimeEntryPersistenceTests {
         assertEquals("we should get 8 hours worked for this day", Time(60 * 8), query)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `should be able to add a new project`() {
         tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -162,7 +154,6 @@ class TimeEntryPersistenceTests {
         assertEquals(ProjectId(1), project.id)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `should be able to add a new employee`() {
         tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -172,7 +163,6 @@ class TimeEntryPersistenceTests {
         assertEquals(1, employee.id.value)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `should be able to add a new time entry`() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -193,14 +183,12 @@ class TimeEntryPersistenceTests {
      * If I ask the database for all the time entries for a particular employee on
      * a date and there aren't any, I should get back an empty list, not a null.
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldReturnEmptyListIfNoEntries() {
         val result = tep.readTimeEntriesOnDate(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
         assertEquals(emptySet<TimeEntry>() , result)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldEditTimeEntry() {
         // arrange an existing time entry and a modified time entry
@@ -217,7 +205,6 @@ class TimeEntryPersistenceTests {
         assertEquals(revisedTimeEntry, readTimeEntry)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldEditTimeEntry_NoChanges() {
         // arrange an existing time entry
@@ -237,7 +224,6 @@ class TimeEntryPersistenceTests {
     The employee a user logs time to should not be able to be changed, since their user is bound to a single
     employee.
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_DisallowChangeToOtherEmployee() {
         // arrange an existing time entry and a modified time entry
@@ -254,7 +240,6 @@ class TimeEntryPersistenceTests {
     }
 
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmittedTimePeriods_addingNew() {
         tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
@@ -264,14 +249,12 @@ class TimeEntryPersistenceTests {
         assertEquals(expected, result)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmittedTimePeriods_noneFound() {
         val result = tep.isInASubmittedPeriod(DEFAULT_EMPLOYEE, Date.make("2021-02-03"))
         assertFalse("nothing has been submitted, shouldn't be true", result)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testGetSubmittedPeriod() {
         tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
@@ -280,14 +263,12 @@ class TimeEntryPersistenceTests {
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testFailToGetNonexistentSubmission() {
-        val ex = assertThrows(SubmissionNotFoundException::class.java) { tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)}
-        assertEquals("no submission was found for DefaultEmployee on TimePeriod(start=Date(epochDay=18659, 2021-02-01), end=Date(epochDay=18673, 2021-02-15))", ex.message)
+        val result = tep.getSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+        assertEquals(NullSubmittedPeriod, result)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCannotPersistTheSameSubmissionTwice() {
         tep.persistNewSubmittedTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
@@ -295,7 +276,6 @@ class TimeEntryPersistenceTests {
         assertEquals("A submission already exists for ${DEFAULT_EMPLOYEE.name.value} on $DEFAULT_TIME_PERIOD", ex.message)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testGetTimeEntriesForPeriod() {
         val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -315,7 +295,6 @@ class TimeEntryPersistenceTests {
      * If I only have a time entry that is outside the time period,
      * we'll find nothing.
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testGetTimeEntriesForPeriod_outOfRange() {
         val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -334,7 +313,6 @@ class TimeEntryPersistenceTests {
     /**
      * Successfully find a time entry
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testFindTimeEntry() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -347,7 +325,6 @@ class TimeEntryPersistenceTests {
     /**
      * no time entry found
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testFindTimeEntry_NothingFound() {
         val result = tep.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
@@ -357,7 +334,6 @@ class TimeEntryPersistenceTests {
     /**
      * Successfully delete a time entry
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testDeleteTimeEntry() {
         val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
@@ -372,11 +348,20 @@ class TimeEntryPersistenceTests {
     /**
      * no time entry found
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testDeleteTimeEntry_NothingFound() {
         val result = tep.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(result)
+    }
+
+    @Test
+    fun testApproveTime() {
+        val employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val stp: SubmittedPeriod = tep.persistNewSubmittedTimePeriod(employee, DEFAULT_TIME_PERIOD)
+        assertEquals(ApprovalStatus.UNAPPROVED, stp.approvalStatus)
+        assertTrue(tep.approveTimesheet(stp))
+        val submittedPeriod = tep.getSubmittedTimePeriod(employee, DEFAULT_TIME_PERIOD)
+        assertEquals(ApprovalStatus.APPROVED, submittedPeriod.approvalStatus)
     }
 
 }

@@ -10,6 +10,7 @@ import coverosR3z.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.ApprovalStatus
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
@@ -91,13 +92,11 @@ class ViewTimeAPITests {
     fun testGettingDate() {
         val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
 
-        val result = ViewTimeAPI.handleGet(sd)
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.fileContentsString()
-            .contains("""<div id="timeperiod_display">
-                    <div>2021-03-16</div>
-                    <div>2021-03-31</div>
-                </div>"""))
+        assertTrue(result.contains("""<div id="timeperiod_display">""") &&
+                result.contains("""<div id="timeperiod_display_start">2021-03-16</div>""") &&
+                result.contains("""<div id="timeperiod_display_end">2021-03-31</div>"""))
     }
 
     /**
@@ -108,13 +107,11 @@ class ViewTimeAPITests {
     fun testGettingDateNextDay() {
         val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-17"))
 
-        val result = ViewTimeAPI.handleGet(sd)
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.fileContentsString()
-            .contains("""<div id="timeperiod_display">
-                    <div>2021-03-16</div>
-                    <div>2021-03-31</div>
-                </div>"""))
+        assertTrue(result.contains("""<div id="timeperiod_display">""") &&
+                result.contains("""<div id="timeperiod_display_start">2021-03-16</div>""") &&
+                result.contains("""<div id="timeperiod_display_end">2021-03-31</div>"""))
     }
 
     /**
@@ -124,9 +121,9 @@ class ViewTimeAPITests {
     fun testDateInvalid_letters() {
         val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-1a"))
 
-        val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
+        val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
-        assertEquals("Must be able to parse 1a as integer", ex.message)
+        assertEquals("""Must be able to parse "1a" as an integer""", ex.message)
     }
 
     /**
@@ -199,17 +196,17 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested() {
-        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
         val sd = makeServerDataForGetWithQueryString(
             queryStringMap = mapOf(
-                ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "2"))
+                ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
         assertTrue("The page should announce we are viewing another's timesheet",
-            result.contains("<h2>Viewing DefaultEmployee's timesheet</h2>"))
-        assertTrue(result.contains("<title>Viewing DefaultEmployee's timesheet</title>"))
+            result.contains("<h2>Viewing DefaultEmployee's"))
+        assertTrue(result.contains("<title>Viewing DefaultEmployee's"))
         assertFalse(result.contains(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON_MOBILE.getId()))
@@ -241,21 +238,19 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested_DifferentDate() {
-        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeServerDataForGetWithQueryString(
             queryStringMap = mapOf(
-                ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "2",
+                ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString(),
                 ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-01-11"))
 
-        val result = ViewTimeAPI.handleGet(sd)
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.fileContentsString()
-            .contains("""<div id="timeperiod_display">
-                    <div>2021-01-01</div>
-                    <div>2021-01-15</div>
-                </div>"""))
+        assertTrue(result.contains("""<div id="timeperiod_display">""") &&
+                    result.contains("""<div id="timeperiod_display_start">2021-01-01</div>""") &&
+                    result.contains("""<div id="timeperiod_display_end">2021-01-15</div>"""))
         assertTrue("The page should announce we are viewing another's timesheet",
-            result.fileContentsString().contains("Viewing DefaultEmployee's timesheet"))
+            result.contains("Viewing DefaultEmployee's unsubmitted timesheet"))
     }
 
     /**
@@ -299,9 +294,9 @@ class ViewTimeAPITests {
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "abc"))
 
-        val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
+        val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
-        assertEquals("Must be able to parse abc as integer", ex.message)
+        assertEquals("""The employee id was not interpretable as an integer.  You sent "abc".""", ex.message)
     }
 
     /**
@@ -313,7 +308,7 @@ class ViewTimeAPITests {
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to ""))
 
-        val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
+        val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
         assertEquals("The employee id must not be blank", ex.message)
     }
@@ -370,6 +365,77 @@ class ViewTimeAPITests {
         assertEquals("The project dropdown under create should have the proper project already selected, in exactly two places",
             2,
             """<option selected value="${DEFAULT_PROJECT.id.value}">${DEFAULT_PROJECT.name.value}</option>""".toRegex().findAll(result).count())
+    }
+
+    /**
+     * If you are an admin and viewing another person's time, and if
+     * they have submitted their time, you will see a clickable approve button
+     */
+    @Test
+    fun testApproveButtonAvailable() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeServerDataForGetWithQueryString(
+            user = DEFAULT_ADMIN_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<button >Approve</button>"""))
+    }
+
+    /**
+     * Like [testApproveButtonAvailable] but in this case it's assumed
+     * that the employee hasn't submitted their time, so the approve
+     * button will be disabled (that is, unavailable to click)
+     */
+    @Test
+    fun testApproveButtonNotAvailable() {
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeServerDataForGetWithQueryString(
+            user = DEFAULT_ADMIN_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<button disabled>Approve</button>"""))
+    }
+
+    /**
+     * If you aren't an approver (like for example, you are a regular user)
+     * you won't see the approve button on the page
+     */
+    @Test
+    fun testApproveButtonInvisible() {
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
+        val sd = makeServerDataForGetWithQueryString(user = DEFAULT_REGULAR_USER)
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertFalse(result.contains(""">Approve<"""))
+    }
+
+    /**
+     * If a timesheet is approved, it locks the time so that it cannot
+     * be altered, unless it gets unapproved
+     */
+    @Test
+    fun testApprovedTimesheet() {
+        tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
+        tru.isApprovedBehavior = { ApprovalStatus.APPROVED }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeServerDataForGetWithQueryString(
+            user = DEFAULT_ADMIN_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString().toLowerCase()
+
+        assertFalse(result.contains(">submit<"))
+        assertFalse(result.contains(">enter time<"))
+        assertFalse(result.contains(">create<"))
+        assertFalse(result.contains(">edit<"))
+        assertFalse(result.contains(">dup<"))
+        assertTrue(result.contains(">unapprove<"))
     }
 
 

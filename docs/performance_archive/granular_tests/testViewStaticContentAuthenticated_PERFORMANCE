@@ -358,3 +358,6 @@
 2021-04-05	numberThreads: 20	numberRequests: 500	time: 2001
 2021-04-07	numberThreads: 20	numberRequests: 500	time: 1848
 2021-04-07	numberThreads: 20	numberRequests: 500	time: 2142
+2021-04-10	numberThreads: 20	numberRequests: 500	time: 1732
+2021-04-11	numberThreads: 20	numberRequests: 500	time: 1966
+2021-04-11	numberThreads: 20	numberRequests: 500	time: 1980

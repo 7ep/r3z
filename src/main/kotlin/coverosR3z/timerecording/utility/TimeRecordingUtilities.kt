@@ -188,4 +188,44 @@ class TimeRecordingUtilities(
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
         return persistence.findTimeEntryById(id)
     }
+
+    override fun approveTimesheet(employee: Employee, startDate: Date) : ApprovalResultStatus{
+        rc.checkAllowed(Role.APPROVER, Role.ADMIN)
+        if (employee == NO_EMPLOYEE) {
+            logger.logWarn(cu) { "Cannot approve timesheet for NO_EMPLOYEE" }
+            return ApprovalResultStatus.FAILURE
+        }
+        if (! persistence.isInASubmittedPeriod(employee, startDate)) {
+            logger.logWarn(cu) { "Cannot approve timesheet for unsubmitted period" }
+            return ApprovalResultStatus.FAILURE
+        }
+        val stp = persistence.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        persistence.approveTimesheet(stp)
+        return ApprovalResultStatus.SUCCESS
+    }
+
+    override fun isApproved(employee: Employee, startDate: Date): ApprovalStatus {
+        val stp = persistence.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        return stp.approvalStatus
+    }
+
+    override fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus {
+        rc.checkAllowed(Role.APPROVER, Role.ADMIN)
+        if (employee == NO_EMPLOYEE) {
+            logger.logWarn(cu) { "Cannot unapprove timesheet for NO_EMPLOYEE" }
+            return ApprovalResultStatus.FAILURE
+        }
+        if (! persistence.isInASubmittedPeriod(employee, startDate)) {
+            logger.logWarn(cu) { "Cannot unapprove timesheet for unsubmitted period" }
+            return ApprovalResultStatus.FAILURE
+        }
+        val timePeriod = TimePeriod.getTimePeriodForDate(startDate)
+        if (persistence.getSubmittedTimePeriod(employee, timePeriod).approvalStatus == ApprovalStatus.UNAPPROVED) {
+            logger.logWarn(cu) { "Cannot unapprove an already-unapproved timesheet" }
+            return ApprovalResultStatus.FAILURE
+        }
+        val stp = persistence.getSubmittedTimePeriod(employee, timePeriod)
+        persistence.unapproveTimesheet(stp)
+        return ApprovalResultStatus.SUCCESS
+    }
 }

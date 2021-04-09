@@ -57,6 +57,7 @@ class ServerTests {
     companion object {
 
         const val port = 2000
+        const val specialPort = 2001
         const val sslTestPort = port + 443
         private lateinit var fs : FullSystem
 
@@ -295,6 +296,36 @@ class ServerTests {
         val statusline = client.readLine()
 
         assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
+    }
+
+    /**
+     * If we ask for the homepage on a secure server,
+     * and we provide a keystore and password in the system properties,
+     * we'll get a 200 OK
+     */
+    @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testShouldGet200Response_Secure_SystemProperties() {
+        val props = System.getProperties()
+        props.setProperty("javax.net.ssl.keyStore", "src/main/resources/certs/keystore")
+        props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
+        val specialFS = FullSystem.startSystem(
+            SystemOptions(
+                port = specialPort,
+                sslPort = specialPort+443,
+                dbDirectory = "build/db/servertests",
+
+                // not really checking security here, this keeps it simpler
+                allowInsecure = true))
+        val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
+        client = SocketWrapper(sslClientSocket, "client")
+        client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
+
+        val statusline = client.readLine()
+
+        assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
+        specialFS.shutdown()
     }
 
     /*

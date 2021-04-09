@@ -66,7 +66,7 @@ class SystemOptionTests {
     @Test
     fun testShouldParseOptions_badPort_nonInteger() {
         val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-pabc123"))}
-        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Must be able to parse abc123 as integer"))
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("""Must be able to parse "abc123" as an integer"""))
     }
 
     /**
