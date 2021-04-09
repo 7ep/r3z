@@ -11,6 +11,7 @@ import coverosR3z.misc.DEFAULT_PASSWORD
 import coverosR3z.misc.testLogger
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.timerecording.CreateEmployeeUserStory
 import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
@@ -141,12 +142,20 @@ class UIServerTests(private val myDriver: Drivers) {
         pom.lp.login("employeemaker", newAdminPassword)
         assertEquals("Authenticated Homepage", pom.driver.title)
         // create a new employee
+        val s = CreateEmployeeUserStory.getScenario("createEmployee - an invitation is created")
+        s.markDone("Given the company has hired a new employee, Hank,")
+        s.markDone("when I add him as an employee,")
         pom.eep.enter("hank")
         val invitationUrl = pom.driver.findElement(By.xpath("//*[text() = 'hank']/..//a")).getAttribute("href")
+        s.markDone("when I add him as an employee,")
         logout()
+        val i = CreateEmployeeUserStory.getScenario("createEmployee - using an invitation to register a user")
+        i.markDone("Given an invitation has been created for a new employee, Hank")
         pom.driver.get(invitationUrl)
+        i.markDone("When he uses that invitation")
         pom.driver.findElement(By.id("username")).sendKeys("hank")
         pom.driver.findElement(By.id("register_button")).click()
+        i.markDone("Then he is able to register")
         val hankRegistrationPassword = pom.driver.findElement(By.id(RegisterAPI.Elements.NEW_PASSWORD.getId())).text
         pom.lp.login("hank", hankRegistrationPassword)
         // go to the change password page

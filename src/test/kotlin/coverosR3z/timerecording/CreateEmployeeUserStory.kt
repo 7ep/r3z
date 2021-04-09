@@ -21,5 +21,21 @@ object CreateEmployeeUserStory : UserStory(
                 "then the system persists the data."
         )
 
+        addScenario(
+            "createEmployee - an invitation is created",
+
+                "Given the company has hired a new employee, Hank,",
+                "when I add him as an employee,",
+                "an invitation is created for him"
+        )
+
+        addScenario(
+            "createEmployee - using an invitation to register a user",
+
+                "Given an invitation has been created for a new employee, Hank",
+                "When he uses that invitation",
+                "Then he is able to register"
+        )
+
     }
 }
