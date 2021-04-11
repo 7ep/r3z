@@ -343,7 +343,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun setNoTimeOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "")
+        pom.vtp.setTimeForEditingTimeEntry("")
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -361,7 +361,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun badDateSyntaxOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.clearTheDateEntryOnEdit(expectedTimeEntry.id.value)
+        pom.vtp.clearTheDateEntryOnEdit()
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -377,7 +377,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
         val pastDateString = if (pom.driver is ChromeDriver) "1979-12-31" else "12311979"
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, pastDateString)
+        pom.vtp.setTheDateEntryOnEdit(pastDateString)
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -393,7 +393,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
         val futureDateString = if (pom.driver is ChromeDriver) "2200-01-01" else "01012200"
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTheDateEntryOnEdit(expectedTimeEntry.id.value, futureDateString)
+        pom.vtp.setTheDateEntryOnEdit(futureDateString)
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -406,7 +406,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun timeBelowZeroOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "-0.25")
+        pom.vtp.setTimeForEditingTimeEntry("-0.25")
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -420,7 +420,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun timeAboveTwentyFourOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "24.25")
+        pom.vtp.setTimeForEditingTimeEntry("24.25")
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -434,7 +434,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun timeNotOnValidDivisionOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "1.24")
+        pom.vtp.setTimeForEditingTimeEntry("1.24")
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry
@@ -448,7 +448,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
     private fun invalidSyntaxOnTimeInputOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE_STRING)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
-        pom.vtp.setTimeForEditingTimeEntry(expectedTimeEntry.id.value, "a")
+        pom.vtp.setTimeForEditingTimeEntry("a")
         pom.vtp.clickSaveTimeEntry()
 
         // Confirm we still have the unchanged time entry

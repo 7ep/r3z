@@ -209,7 +209,6 @@ class ViewTimeAPITests {
         assertTrue(result.contains("<title>Viewing DefaultEmployee's"))
         assertFalse(result.contains(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
-        assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON_MOBILE.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()))
     }
 
@@ -330,21 +329,6 @@ class ViewTimeAPITests {
     }
 
     /**
-     * If the user provides an id to edit through a key of "editid", we will
-     * render HTML to allow editing that time entry
-     */
-    @Test
-    fun testEditId() {
-        tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
-
-        val result = ViewTimeAPI.handleGet(sd)
-
-        assertTrue("The page should render HTML for editing a time entry",
-            result.fileContentsString().contains("""<div class="editable-time-entry-row" id="time-entry-1">"""))
-    }
-
-    /**
      * If the user provides an id of a project by "projectid" as a key to a query string,
      * then the project field should have that project selected when the page loads.
      *
@@ -362,8 +346,8 @@ class ViewTimeAPITests {
         assertFalse("The ordinary 'select a project' item should not be rendered in this case",
             result.contains("""<option selected disabled hidden value="">Choose a project</option>""")
         )
-        assertEquals("The project dropdown under create should have the proper project already selected, in exactly two places",
-            2,
+        assertEquals("The project dropdown under create should have the proper project already selected",
+            1,
             """<option selected value="${DEFAULT_PROJECT.id.value}">${DEFAULT_PROJECT.name.value}</option>""".toRegex().findAll(result).count())
     }
 

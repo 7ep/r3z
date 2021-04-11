@@ -228,9 +228,6 @@ class UITimeEntryTests(private val myDriver: Drivers) {
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
         pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
         assertEquals("Your time entries", pom.driver.title)
-        if (! pom.vtp.isMobileWidth()) {
-            assertEquals("2020-06-12", pom.vtp.getDateForEntry(id))
-        }
         assertEquals("1.00", pom.vtp.getTimeForEntry(id))
     }
 
@@ -245,9 +242,6 @@ class UITimeEntryTests(private val myDriver: Drivers) {
                 .map { it.id.value }.sorted()
 
         assertEquals("2.00", pom.vtp.getTimeForEntry(ids[0]))
-        if (! pom.vtp.isMobileWidth()) {
-            assertEquals("2020-06-12", pom.vtp.getDateForEntry(ids[0]))
-        }
     }
 
     private fun verifySubmissionsAreThere() {
