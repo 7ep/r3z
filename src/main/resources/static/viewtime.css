@@ -79,7 +79,7 @@
     .readonly-time-entry-row {
       display: flex;
       border-bottom: 1.5px #a8a1a0 solid;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .time_period_selector form,
@@ -107,7 +107,7 @@
         background-color: white;
         opacity: 82%;
         display: flex;
-        justify-content: space-evenly;
+        justify-content: space-between;
         flex-wrap: wrap;
         padding: 1px;
         margin: 1px;
@@ -118,11 +118,12 @@
 
      #timeperiod_display {
         color: black;
-        font-size: 10px;
+        font-size: 12px;
         display: flex;
-        width: 89px;
+        width: 69px;
         border: 1px solid black;
         text-align: center;
+        flex-direction: column;
      }
 
      #timeperiod_display div {
@@ -132,23 +133,19 @@
      }
 
     #total_hours {
-        position: relative;
         display: flex;
-        width: 37px;
-        margin-left: 6px;
-        margin-right: 6px;
+        border: 1px solid black;
+        flex-direction: column;
+        padding-left: 5px;
+        padding-right: 5px;
     }
     #total_hours label {
-        font-size: 0.6em;
-        position: absolute;
+        font-size: 13px;
         display: flex;
-        top: -2px;
     }
 
     #total_hours #total_hours_value {
-        top: 18px;
-        position: absolute;
-        font-size: 10px;
+        font-size: 13px;
         display: flex;
     }
 
@@ -160,7 +157,7 @@
       border-radius: 3px;
       font-size: 16px;
       display: flex;
-      line-height: 17px;
+      line-height: 18px;
       flex-wrap: wrap;
     }
 
@@ -341,5 +338,6 @@
 
     #employee-selector {
     width: 80px;
+    font-size: 16px;
     }
 

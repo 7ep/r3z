@@ -159,7 +159,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
         // show this if we are viewing someone else's timesheet
-        val viewingHeader = if (! reviewingOtherTimesheet) "" else """"<h2>Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
+        val viewingHeader = if (! reviewingOtherTimesheet) "" else """<h2>Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
         val timeEntryPanel = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderTimeEntryPanel(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)
         val hideEditButtons = inASubmittedPeriod || reviewingOtherTimesheet || approvalStatus == ApprovalStatus.APPROVED
 
@@ -225,15 +225,18 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <nav class="time_period_selector">
                     $submitButton
                     $switchEmployeeUI
+                    <div id="total_hours"><label>hours:</label><span id="total_hours_value">$totalHours</span></div>
                     $approveUI
-                    ${currentPeriodButton(employee, reviewingOtherTimesheet)}
-                    ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                    <div id="timeperiod_display">
-                        <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
-                        <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
+                    <div>
+                        ${currentPeriodButton(employee, reviewingOtherTimesheet)}
+                        ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
+                        <div id="timeperiod_display">
+                            <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
+                            <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
+                        </div>
+                        
+                        ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                     </div>
-                    <div id="total_hours"><label>Total hours: </label><span id="total_hours_value">$totalHours</span></div>
-                    ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                 </nav>
                 """.trimIndent()
     }
@@ -272,7 +275,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <form action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
                 $employeeField
-                <button id="${Elements.NEXT_PERIOD.getId()}">Next</button>
+                <button id="${Elements.NEXT_PERIOD.getId()}">❯</button>
             </form>
     """.trimIndent()
     }
@@ -288,7 +291,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <form action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
                 $employeeField
-                <button id="${Elements.PREVIOUS_PERIOD.getId()}">Previous</button>
+                <button id="${Elements.PREVIOUS_PERIOD.getId()}">❮</button>
             </form>
      """.trimIndent()
     }
