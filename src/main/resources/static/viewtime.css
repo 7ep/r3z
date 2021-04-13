@@ -86,8 +86,8 @@
     .time_period_selector > div,
     .timerows-container form {
         display: flex;
-        padding: 1px;
         margin: 1px;
+        align-items: center;
     }
 
     .timerows-container {
@@ -107,7 +107,8 @@
         background-color: white;
         opacity: 82%;
         display: flex;
-        justify-content: space-between;
+        justify-content: space-evenly;
+        align-items: center;
         flex-wrap: wrap;
         padding: 1px;
         margin: 1px;
@@ -124,6 +125,8 @@
         border: 1px solid black;
         text-align: center;
         flex-direction: column;
+        justify-content: center;
+        margin: -1px;
      }
 
      #timeperiod_display div {
@@ -133,20 +136,35 @@
      }
 
     #total_hours {
+        color: black;
+        font-size: 12px;
         display: flex;
+        width: 40px;
         border: 1px solid black;
+        text-align: center;
         flex-direction: column;
-        padding-left: 5px;
-        padding-right: 5px;
+        justify-content: center;
     }
+
     #total_hours label {
-        font-size: 13px;
-        display: flex;
     }
 
     #total_hours #total_hours_value {
-        font-size: 13px;
-        display: flex;
+    }
+
+    nav .navitem {
+        height: 26px;
+    }
+
+    nav div.navitem {
+        border-radius: 4px;
+    }
+
+    nav .navitem select,
+    nav .navitem button {
+        height: 28px;
+        align-items: center;
+        border-radius: 4px;
     }
 
     nav button {
@@ -154,11 +172,8 @@
       color: white;
       background-color: #C65364;
       border: 1.8px solid #3b3b3b;
-      border-radius: 3px;
       font-size: 16px;
       display: flex;
-      line-height: 18px;
-      flex-wrap: wrap;
     }
 
     nav button:hover {
@@ -168,7 +183,6 @@
 
     nav button:focus {
         outline: none;
-        border-radius: .5em;
         border: 1.8px solid blue;
     }
 

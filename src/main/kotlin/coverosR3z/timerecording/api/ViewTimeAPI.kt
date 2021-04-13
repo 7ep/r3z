@@ -183,7 +183,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val renderDisabled = if (! isSubmitted) "disabled" else ""
         return if (approvalStatus == ApprovalStatus.UNAPPROVED) {
             """
-            <form action="${ApproveApi.path}" method="post">
+            <form class="navitem" action="${ApproveApi.path}" method="post">
                 <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
                 <button $renderDisabled>Approve</button>
@@ -222,19 +222,22 @@ class ViewTimeAPI(private val sd: ServerData) {
         totalHours: String,
     ): String {
         return """ 
-                <nav class="time_period_selector">
+                <nav class="time_period_selector navitem">
                     $submitButton
                     $switchEmployeeUI
-                    <div id="total_hours"><label>hours:</label><span id="total_hours_value">$totalHours</span></div>
+                    
                     $approveUI
                     <div>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
                         ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                        <div id="timeperiod_display">
+                        <div class="navitem" id="timeperiod_display">
                             <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
                             <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
                         </div>
-                        
+                        <div class="navitem" id="total_hours">
+                            <label>hours:</label>
+                            <div id="total_hours_value">$totalHours</div>
+                        </div>
                         ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                     </div>
                 </nav>
@@ -247,7 +250,7 @@ class ViewTimeAPI(private val sd: ServerData) {
      */
     private fun createEmployeeSwitch(currentPeriod: TimePeriod): String {
         val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
-                <form action="$path">
+                <form class="navitem" action="$path">
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
                         <option selected disabled hidden value="">Self</option>
@@ -272,7 +275,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
         """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """           
-            <form action="$path">
+            <form class="navitem" action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
                 $employeeField
                 <button id="${Elements.NEXT_PERIOD.getId()}">❯</button>
@@ -288,7 +291,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
         """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """      
-            <form action="$path">
+            <form class="navitem" action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
                 $employeeField
                 <button id="${Elements.PREVIOUS_PERIOD.getId()}">❮</button>
@@ -300,7 +303,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
             """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """       
-            <form action="$path">
+            <form class="navitem" action="$path">
                 <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
                 $employeeField
             </form>
@@ -324,7 +327,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(employee, periodStartDate)
         val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
         val submitButton = if (reviewingOtherTimesheet) "" else """
-    <form action="${SubmitTimeAPI.path}" method="post">
+    <form class="navitem" action="${SubmitTimeAPI.path}" method="post">
         <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
         <input name="${SubmitTimeAPI.Elements.START_DATE.getElemName()}" type="hidden" value="${periodStartDate.stringValue}">
         <input name="${SubmitTimeAPI.Elements.UNSUBMIT.getElemName()}" type="hidden" value="$inASubmittedPeriod">
