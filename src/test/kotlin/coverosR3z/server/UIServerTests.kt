@@ -32,6 +32,13 @@ import java.io.File
 @Category(UITestCategory::class)
 class UIServerTests(private val myDriver: Drivers) {
 
+    /**
+     * A UI test for miscellaneous UI behaviors of the system, like
+     * going to not-found pages, invalid credentials, dealing with a
+     * restart of the system, viewing the homepage, and so on...
+     *
+     * Also checks that the registration page prevents bad input
+     */
     @Test
     fun serverTests() {
         init()

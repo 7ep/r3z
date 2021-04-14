@@ -33,6 +33,9 @@ class UITimeEntryTests(private val myDriver: Drivers) {
     private val adminPassword = "password12345"
     private val defaultProject = "projecta"
 
+    /**
+     * A UI test for one of the core ideas in the system - entering time
+     */
     @Test
     fun timeEntryTests() {
         `setup some default projects and employees`()

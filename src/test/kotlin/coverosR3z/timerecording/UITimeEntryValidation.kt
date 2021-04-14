@@ -38,6 +38,8 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
 
 
     /**
+     * Test that the time entry page prevents bad input
+     *
      * Fields are project, time, details, date
      * What are valid project values?
      * - only existing projects (which the user has access to)
