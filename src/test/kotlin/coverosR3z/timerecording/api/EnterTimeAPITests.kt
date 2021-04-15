@@ -24,6 +24,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
+import java.lang.IllegalStateException
 
 class EnterTimeAPITests {
 
@@ -214,6 +215,25 @@ class EnterTimeAPITests {
         assertEquals("""Must be able to parse "aaa" as a double""", ex.message)
     }
 
+    /**
+     * If a time period (future or past, doesn't matter) has been submitted, it isn't possible to
+     * create a new time entry for it.
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testDateInvalid_DateEntryDisallowedForSubmittedTime() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        val data = PostBodyData(mapOf(
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
+        ))
+        val sd = makeETServerData(data)
+        val ex = assertThrows(IllegalStateException::class.java) { EnterTimeAPI.handlePost(sd) }
+
+        assertEquals("A new time entry is not allowed in a submitted time period", ex.message)
+    }
 
     /**
      * Just how quickly does it go, from this level?

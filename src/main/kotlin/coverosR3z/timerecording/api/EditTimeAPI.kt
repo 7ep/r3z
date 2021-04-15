@@ -50,6 +50,7 @@ class EditTimeAPI(private val sd: ServerData) {
         if (sd.ahd.user.employee != employee) {
             throw IllegalStateException("It is not allowed for anyone other than the owning employee to edit this time entry")
         }
+        check(! tru.isInASubmittedPeriod(employee, date)) { "A time entry may not be edited in a submitted time period" }
 
         val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
 

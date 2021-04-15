@@ -249,7 +249,7 @@ class ViewTimeAPI(private val sd: ServerData) {
      * to seeing another person's timesheet
      */
     private fun createEmployeeSwitch(currentPeriod: TimePeriod): String {
-        val switchEmployee = if (sd.ahd.user.role != Role.ADMIN) "" else """                
+        return if (sd.ahd.user.role != Role.ADMIN) "" else """                
                 <form class="navitem" action="$path">
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
@@ -259,7 +259,6 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <button>Switch</button>
                 </form>
                 """
-        return switchEmployee
     }
 
     private fun allEmployeesOptions(): String {
@@ -405,7 +404,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             return if (idBeingEdited != null) {
                 renderEditRow(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
-                renderCreateTimeRow(selectedProject)
+                renderCreateTimeRow(selectedProject, currentPeriod)
             }
         } else {
             ""
@@ -491,7 +490,7 @@ class ViewTimeAPI(private val sd: ServerData) {
     /**
      * For entering new time
      */
-    private fun renderCreateTimeRow(selectedProject: Project?): String {
+    private fun renderCreateTimeRow(selectedProject: Project?, currentPeriod: TimePeriod): String {
         val projects = sd.bc.tru.listAllProjects()
 
         val chooseAProject = if (selectedProject != null) "" else {
@@ -516,7 +515,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         
                     <div class="date">
                         <label for="${Elements.DATE_INPUT_CREATE.getId()}">Date:</label>
-                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" />
+                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
                     </div>
                     
                     <div class="time">
@@ -561,7 +560,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <div class="date">
                             <label for="${Elements.DATE_INPUT_EDIT.getId()}">Date:</label>
                             <input id="${Elements.DATE_INPUT_EDIT.getId()}" name="${Elements.DATE_INPUT.getElemName()}" 
-                                type="date" value="${te.date.stringValue}" />
+                                type="date" value="${te.date.stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
                         </div>
             
                         <div class="time">

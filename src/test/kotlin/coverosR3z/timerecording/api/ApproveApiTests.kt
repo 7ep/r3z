@@ -22,7 +22,7 @@ class ApproveApiTests {
 
     lateinit var au : FakeAuthenticationUtilities
     lateinit var tru : FakeTimeRecordingUtilities
-    val defaultStartDate = "2021-01-01"
+    private val defaultStartDate = "2021-01-01"
 
     @Before
     fun init() {

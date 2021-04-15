@@ -9,12 +9,14 @@ import coverosR3z.config.utility.SystemOptions
 import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.misc.testLogger
+import coverosR3z.misc.types.Date
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.junit.Assert.assertEquals
 import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -184,8 +186,8 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Open the view time page for a particular time period.
      */
-    fun gotoDate(date: String) {
-        driver.get("$domain/${ViewTimeAPI.path}?date=$date")
+    fun gotoDate(date: Date) {
+        driver.get("$domain/${ViewTimeAPI.path}?date=${date.stringValue}")
     }
 
     fun goToPreviousPeriod() {
@@ -205,14 +207,15 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Enters a new time entry.
      */
-    fun enterTime(project: String, time: String, details: String, date: String) {
-        driver.get("$domain/${ViewTimeAPI.path}")
+    fun enterTime(project: String, time: String, details: String, date: Date) {
+        val msc = Misc(driver)
+        gotoDate(date)
         val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_FORM.getId()))
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
         Select(projectSelector).selectByVisibleText(project)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(date)
+        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(msc.calcDateString(date))
         clickCreateNewTimeEntry()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
         assertEquals("Your time entries", driver.title)
@@ -271,10 +274,21 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * Understand: this is for creating a *new* time entry, not for editing
      * existing time entries
      */
-    fun setDateForNewEntry(date: String) {
-        val dateInput = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()))
-        dateInput.clear()
-        dateInput.sendKeys(date)
+    fun setDateForNewEntry(date: Date) {
+        (driver as JavascriptExecutor)
+            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').setAttribute('value','${date.stringValue}');")
+    }
+
+    /**
+     * Understand: this is for creating a *new* time entry, not for editing
+     * existing time entries
+     * See [setDateForNewEntry] for the equivalent that uses a strongly-typed date
+     * object.  This one takes a string, which lets us use values the [Date] won't.
+     * Note: Format of the string should be YYYY-MM-DD
+     */
+    fun setDateForNewEntryString(date: String) {
+        (driver as JavascriptExecutor)
+            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').setAttribute('value','$date');")
     }
 
     /**
@@ -308,10 +322,19 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Sets the date field when editing
      */
-    fun setTheDateEntryOnEdit(dateString: String) {
-        val dateInput = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()))
-        dateInput.clear()
-        dateInput.sendKeys(dateString)
+    fun setTheDateEntryOnEdit(date: Date) {
+        (driver as JavascriptExecutor).executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()}').setAttribute('value','${date.stringValue}');")
+    }
+
+    /**
+     * Understand: this is for creating a *new* time entry, not for editing
+     * existing time entries
+     * See [setTheDateEntryOnEdit] for the equivalent that uses a strongly-typed date
+     * object.  This one takes a string, which lets us use values the [Date] won't.
+     * Note: Format of the string should be YYYY-MM-DD
+     */
+    fun setTheDateEntryOnEditString(date: String) {
+        (driver as JavascriptExecutor).executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()}').setAttribute('value','$date');")
     }
 
     fun clearTheNewEntryDateEntry() {
@@ -321,14 +344,33 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * @param id the id of the time entry we want to edit
      */
-    fun editTime(id: Int, project: String, time: String, details: String, dateString: String) {
+    fun editTime(id: Int, project: String, time: String, details: String, date: Date) {
         clickEditTimeEntry(id)
         setProjectForEditEntry(project)
         setTimeForEditingTimeEntry(time)
         setDetailsForEditingTimeEntry(details)
-        setTheDateEntryOnEdit(dateString)
+        setTheDateEntryOnEdit(date)
         clickSaveTimeEntry()
     }
 
 
+}
+
+/**
+ * Miscellaneous functions, useful in a variety of circumstances
+ */
+class Misc(private val driver: WebDriver) {
+
+    /**
+     * Chrome takes date input differently than other browsers.
+     * This helps us avoid a bit of boilerplate so we can use
+     * the proper
+     */
+    fun calcDateString(date : Date) : String {
+        return if (driver is ChromeDriver) {
+            date.chromeStringValue
+        } else {
+            date.stringValue
+        }
+    }
 }

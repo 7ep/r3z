@@ -118,7 +118,7 @@ class UIServerTests(private val myDriver: Drivers) {
 
     private fun `hank enters time`(hankNewPassword: String) {
         pom.lp.login("hank", hankNewPassword)
-        pom.vtp.enterTime("great new project", "2", "these are some details", pom.calcDateString(DEFAULT_DATE))
+        pom.vtp.enterTime("great new project", "2", "these are some details", DEFAULT_DATE)
     }
 
     private fun `create a new project`(newPassword: String) {

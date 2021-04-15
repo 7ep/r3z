@@ -4,7 +4,6 @@ import coverosR3z.misc.utility.checkParseToInt
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.lang.IllegalArgumentException
 
 class GeneralUtilitiesTests {
 

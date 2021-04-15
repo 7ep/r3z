@@ -124,7 +124,7 @@ class UITimeEntryTests(private val myDriver: Drivers) {
 
         s.markDone("Given Andrea has a previous time entry with 1 hour,")
 
-        pom.vtp.editTime(1, "projecta", "2", "", pom.calcDateString(DEFAULT_DATE))
+        pom.vtp.editTime(1, "projecta", "2", "", DEFAULT_DATE)
         s.markDone("when she changes the entry to two hours,")
 
         assertTwoHoursWerePersisted()
@@ -137,7 +137,7 @@ class UITimeEntryTests(private val myDriver: Drivers) {
         loginAndrea()
         s.markDone("Given the employee worked 8 hours yesterday,")
 
-        pom.vtp.enterTime("projecta", "1", "", pom.calcDateString(DEFAULT_DATE))
+        pom.vtp.enterTime("projecta", "1", "", DEFAULT_DATE)
         s.markDone("when the employee enters their time,")
 
         verifyTheEntry()
@@ -219,10 +219,10 @@ class UITimeEntryTests(private val myDriver: Drivers) {
     private fun enterSomeMoreTime() {
         val date = Date(2021, Month.JAN, 1)
         // Enter time
-        pom.vtp.enterTime("projecta", "1", "", pom.calcDateString(Date(date.epochDay + 17)))
-        pom.vtp.enterTime("projecta", "1", "", pom.calcDateString(Date(date.epochDay + 18)))
-        pom.vtp.enterTime("projecta", "1", "", pom.calcDateString(Date(date.epochDay + 19)))
-        pom.vtp.gotoDate("2021-01-16")
+        pom.vtp.enterTime("projecta", "1", "", Date(date.epochDay + 17))
+        pom.vtp.enterTime("projecta", "1", "", Date(date.epochDay + 18))
+        pom.vtp.enterTime("projecta", "1", "", Date(date.epochDay + 19))
+        pom.vtp.gotoDate(Date(2021, Month.JAN, 16))
     }
 
     private fun verifyTheEntry() {
@@ -236,7 +236,7 @@ class UITimeEntryTests(private val myDriver: Drivers) {
 
     private fun verifyTimeEntries() {
         // Verify the entries
-        pom.vtp.gotoDate("2020-06-01")
+        pom.vtp.gotoDate(Date(2020, Month.JUN, 1))
 
         // get the id's of our time entries, in order
         val entries =

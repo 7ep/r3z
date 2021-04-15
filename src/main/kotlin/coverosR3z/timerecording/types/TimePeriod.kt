@@ -5,6 +5,9 @@ import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import java.time.LocalDate
 
+/**
+ * Represents a period of time to contain a set of time entries
+ */
 data class TimePeriod(val start: Date, val end: Date) {
 
     /**

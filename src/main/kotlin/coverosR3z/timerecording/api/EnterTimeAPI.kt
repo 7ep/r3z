@@ -9,6 +9,7 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
 import coverosR3z.timerecording.types.*
+import java.lang.IllegalStateException
 
 class EnterTimeAPI(private val sd: ServerData) {
 
@@ -39,6 +40,10 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         val project = tru.findProjectById(projectId)
         val employee = checkNotNull(sd.ahd.user.employee){ employeeIdNotNullMsg }
+        if (sd.ahd.user.employee != employee) {
+            throw IllegalStateException("It is not allowed for other employees to enter this employee's time")
+        }
+        check(! tru.isInASubmittedPeriod(employee, date)) { "A new time entry is not allowed in a submitted time period" }
 
         val timeEntry = TimeEntryPreDatabase(
                 employee,

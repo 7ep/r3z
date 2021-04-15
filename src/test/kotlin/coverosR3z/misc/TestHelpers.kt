@@ -29,7 +29,20 @@ val A_RANDOM_DAY_IN_JUNE_2020_PLUS_ONE = Date(2020, Month.JUN, 26)
  * HTML5 sends dates in this format
  */
 const val DEFAULT_DATE_STRING = "2020-06-12"
+
+/**
+ * The start of the time period after [DEFAULT_DATE_STRING]
+ */
+const val DEFAULT_DATE_NEXT_PERIOD_STRING = "2020-06-16"
+
+/**
+ * The start of the time period before [DEFAULT_DATE_STRING]
+ */
+const val DEFAULT_DATE_PREVIOUS_PERIOD_STRING = "2020-05-16"
+
 val DEFAULT_DATE = Date.make(DEFAULT_DATE_STRING)
+val DEFAULT_DATE_NEXT_PERIOD = Date.make(DEFAULT_DATE_NEXT_PERIOD_STRING)
+val DEFAULT_DATE_PREVIOUS_PERIOD = Date.make(DEFAULT_DATE_PREVIOUS_PERIOD_STRING)
 val DEFAULT_DATETIME = DateTime(2020, Month.JAN, 1, 0, 0, 0)
 val THREE_HOURS_FIFTEEN = Time((3 * 60) + 15)
 val DEFAULT_SALT = Salt("12345")
