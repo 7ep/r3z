@@ -4,6 +4,7 @@ import coverosR3z.misc.types.Date
 import coverosR3z.misc.types.Month
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import java.time.LocalDate
+import kotlin.math.floor
 
 /**
  * Represents a period of time to contain a set of time entries
@@ -51,5 +52,14 @@ data class TimePeriod(val start: Date, val end: Date) {
             if(generatedTimePeriod != TimePeriod(beginDate,endDate)) throw InvalidTimePeriodException()
             return generatedTimePeriod
         }
+
+
+        /**
+         * Returns the number of weekdays (Mon,Tues,Weds,Thurs,Fri) within this time period
+         */
+        fun numberOfWeekdays(currentPeriod: TimePeriod): Int {
+            return (currentPeriod.start.epochDay .. currentPeriod.end.epochDay).count { floor((it + 4).toDouble()).rem(7).toInt() !in listOf(0,6) }
+        }
+
     }
 }

@@ -135,6 +135,7 @@
      #timeperiod_display span {
      }
 
+    #needed_hours,
     #total_hours {
         color: black;
         font-size: 12px;

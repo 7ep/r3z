@@ -138,6 +138,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val te = sd.bc.tru.getTimeEntriesForTimePeriod(employee, currentPeriod)
         val totalHours = Time(te.sumBy {it.time.numberOfMinutes}).getHoursAsString()
+        val neededHours = Time(8 * 60 * TimePeriod.numberOfWeekdays(currentPeriod)).getHoursAsString()
         val editidValue = sd.ahd.queryString[Elements.EDIT_ID.getElemName()]
 
         // either get the id as an integer or get null,
@@ -155,7 +156,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val approveUI = createApproveUI(reviewingOtherTimesheet, isSubmitted = inASubmittedPeriod, approvalStatus, employee, currentPeriod)
         val navMenu =
-            createNavMenu(submitButton, switchEmployeeUI, approveUI, employee, reviewingOtherTimesheet, currentPeriod, totalHours)
+            createNavMenu(submitButton, switchEmployeeUI, approveUI, employee, reviewingOtherTimesheet, currentPeriod, totalHours, neededHours)
 
         val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
         // show this if we are viewing someone else's timesheet
@@ -220,6 +221,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         reviewingOtherTimesheet: Boolean,
         currentPeriod: TimePeriod,
         totalHours: String,
+        neededHours: String,
     ): String {
         return """ 
                 <nav class="time_period_selector navitem">
@@ -237,6 +239,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <div class="navitem" id="total_hours">
                             <label>hours:</label>
                             <div id="total_hours_value">$totalHours</div>
+                        </div>
+                        <div class="navitem" id="needed_hours">
+                            <label>need:</label>
+                            <div id="needed_hours_value">$neededHours</div>
                         </div>
                         ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                     </div>

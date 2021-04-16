@@ -422,6 +422,17 @@ class ViewTimeAPITests {
         assertTrue(result.contains(">unapprove<"))
     }
 
+    /**
+     * The returned HTML should include the needed hours for a given time period
+     */
+    @Test
+    fun testViewingTimeEntries_TotalNeededHours() {
+        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<div id="needed_hours_value">96.00</div>"""))
+    }
 
     /**
      * Builds a prefabricated object for a GET query,
