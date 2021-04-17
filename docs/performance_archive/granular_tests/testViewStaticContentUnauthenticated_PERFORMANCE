@@ -382,3 +382,5 @@
 2021-04-16	numberThreads: 10	numberRequests: 500	time: 219
 2021-04-16	numberThreads: 10	numberRequests: 500	time: 217
 2021-04-16	numberThreads: 10	numberRequests: 500	time: 229
+2021-04-17	numberThreads: 10	numberRequests: 500	time: 220
+2021-04-17	numberThreads: 10	numberRequests: 500	time: 242

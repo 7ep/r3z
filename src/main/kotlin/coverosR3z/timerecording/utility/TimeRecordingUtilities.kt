@@ -149,6 +149,8 @@ class TimeRecordingUtilities(
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        val existingSubmission = persistence.getSubmittedTimePeriod(cu.employee, timePeriod)
+        check (existingSubmission == NullSubmittedPeriod) { "Cannot submit an already-submitted period" }
         logger.logAudit (cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
     }
@@ -156,6 +158,7 @@ class TimeRecordingUtilities(
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        check (submittedPeriod != NullSubmittedPeriod) { "Cannot unsubmit a non-submitted period" }
         logger.logAudit (cu) { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         return persistence.unsubmitTimePeriod(submittedPeriod)
     }

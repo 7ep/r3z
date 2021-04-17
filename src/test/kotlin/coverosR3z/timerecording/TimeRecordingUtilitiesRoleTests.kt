@@ -6,6 +6,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeRolesChecker
 import coverosR3z.misc.*
+import coverosR3z.timerecording.types.NullSubmittedPeriod
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -13,6 +14,7 @@ import org.junit.Test
 
 class TimeRecordingUtilitiesRoleTests {
 
+    val tep = FakeTimeEntryPersistence()
     /*
                         _                    _       _          _
       _ _ ___ __ _ _  _| |__ _ _ _   _ _ ___| |___  | |_ ___ __| |_ ___
@@ -74,8 +76,10 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -141,8 +145,10 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
@@ -207,8 +213,10 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -273,8 +281,10 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
@@ -339,8 +349,10 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -357,7 +369,7 @@ class TimeRecordingUtilitiesRoleTests {
 
     private fun makeTRU(user: User = DEFAULT_ADMIN_USER): Pair<ITimeRecordingUtilities, FakeRolesChecker>{
         val frc = FakeRolesChecker(CurrentUser(user))
-        val tru = TimeRecordingUtilities(FakeTimeEntryPersistence(), CurrentUser(user), testLogger, frc)
+        val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger, frc)
         return Pair(tru, frc)
     }
 }

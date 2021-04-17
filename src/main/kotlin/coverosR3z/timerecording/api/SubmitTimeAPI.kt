@@ -51,6 +51,10 @@ class SubmitTimeAPI(private val sd: ServerData){
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.bc.tru // time recording utilities
+        val unsubmitting = data.mapping[Elements.UNSUBMIT.getElemName()] == "true"
+        val submitting = ! unsubmitting
+        val employee = sd.ahd.user.employee
+
         val dateQueryString = data.mapping[Elements.START_DATE.getElemName()]
         val startDate = try {
             Date.make(dateQueryString)
@@ -59,7 +63,12 @@ class SubmitTimeAPI(private val sd: ServerData){
         }
         val timePeriod = TimePeriod.getTimePeriodForDate(startDate)
 
-        if (data.mapping[Elements.UNSUBMIT.getElemName()] == "true") {
+        check (tru.isApproved(employee, timePeriod.start) != ApprovalStatus.APPROVED) {"""This time period is approved.  Cannot operate on approved time periods."""}
+        if (tru.isInASubmittedPeriod(employee, timePeriod.start) && submitting) {
+            throw IllegalStateException("This time period is already submitted.  Cannot submit on this period again.")
+        }
+
+        if (unsubmitting) {
             tru.unsubmitTimePeriod(timePeriod)
         } else {
             tru.submitTimePeriod(timePeriod)

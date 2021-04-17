@@ -7,6 +7,7 @@ import coverosR3z.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.ApprovalStatus
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -89,6 +90,34 @@ class SubmitTimeAPITests {
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode
         assertEquals(StatusCode.SEE_OTHER, response)
+    }
+
+    /**
+     * If you try to unsubmit time that is already approved,
+     * it will fail
+     */
+    @Test
+    fun testUnsubmittingApprovedTime() {
+        tru.isApprovedBehavior = { ApprovalStatus.APPROVED }
+        val sd = makeSdForSubmit(unsubmit = true)
+
+        // the API processes the client input
+        val ex = assertThrows(IllegalStateException::class.java) { SubmitTimeAPI.handlePost(sd).statusCode }
+        assertEquals("This time period is approved.  Cannot operate on approved time periods.", ex.message)
+    }
+
+    /**
+     * If you try to submit time that is already submitted,
+     * it will fail
+     */
+    @Test
+    fun testSubmittingAlreadySubmitted() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        val sd = makeSdForSubmit()
+
+        // the API processes the client input
+        val ex = assertThrows(IllegalStateException::class.java) { SubmitTimeAPI.handlePost(sd).statusCode }
+        assertEquals("This time period is already submitted.  Cannot submit on this period again.", ex.message)
     }
 
     /**

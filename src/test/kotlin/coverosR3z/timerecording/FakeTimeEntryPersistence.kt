@@ -25,7 +25,7 @@ class FakeTimeEntryPersistence(
     var isInASubmittedPeriodBehavior : () -> Boolean = { false },
     var persistNewSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var unsubmitTimePeriodBehavior : () -> Unit = {},
-    var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
+    var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { NullSubmittedPeriod },
     var getTimeEntriesForTimePeriodBehavior : () -> Set<TimeEntry> = { emptySet() },
     var deleteTimeEntryBehavior: () -> Boolean = { true },
     var findTimeEntryByIdBehavior: () -> TimeEntry = { DEFAULT_TIME_ENTRY },

@@ -431,12 +431,34 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun testGetSubmittedPeriod() {
-        val ftep = FakeTimeEntryPersistence()
-        val tru = TimeRecordingUtilities(ftep, CurrentUser(DEFAULT_USER), testLogger)
-
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         val submittedTimePeriod = tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
 
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
+    }
+
+    /**
+     * If a time period is already submitted and you try submitting it, throw an exception
+     */
+    @Test
+    fun testSubmitPeriod_Invalid_AlreadySubmitted() {
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+
+        val ex = assertThrows(IllegalStateException::class.java) { tru.submitTimePeriod(DEFAULT_TIME_PERIOD) }
+
+        assertEquals("Cannot submit an already-submitted period", ex.message)
+    }
+
+    /**
+     * If a time period is not submitted and you try unsubmitting, throw exception
+     */
+    @Test
+    fun testUnsubmitPeriod_Invalid_NotSubmitted() {
+        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
+
+        val ex = assertThrows(IllegalStateException::class.java) { tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD) }
+
+        assertEquals("Cannot unsubmit a non-submitted period", ex.message)
     }
 
     /**
