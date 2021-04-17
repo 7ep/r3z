@@ -28,7 +28,7 @@ import org.openqa.selenium.WebDriver
 import java.io.File
 
 @Category(UITestCategory::class)
-class UIServerTests {
+class ServerUITests {
 
     @Test
     fun testWithChrome() {
@@ -103,7 +103,7 @@ class UIServerTests {
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(400, 200)
+        pom.driver.manage().window().position = Point(400, 400)
     }
 
     private fun restart(driver: () -> WebDriver) {

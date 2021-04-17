@@ -30,7 +30,7 @@ import java.io.File
  * A UI test for one of the core ideas in the system - entering time
  */
 @Category(UITestCategory::class)
-class UITimeEntryTests {
+class TimeEntryUITests {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"

@@ -33,7 +33,7 @@ import java.io.File
  * the time entry page should prevent bad input
  */
 @Category(UITestCategory::class)
-class UITimeEntryValidation {
+class TimeEntryUIValidationTests {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"
@@ -119,7 +119,7 @@ class UITimeEntryValidation {
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(500, 100)
+        pom.driver.manage().window().position = Point(700, 0)
     }
 
     @After
