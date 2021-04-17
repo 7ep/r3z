@@ -391,3 +391,6 @@
 2021-04-12	numberThreads: 5	numberRequests: 200	time: 211
 2021-04-12	numberThreads: 5	numberRequests: 200	time: 245
 2021-04-15	numberThreads: 5	numberRequests: 200	time: 195
+2021-04-16	numberThreads: 5	numberRequests: 200	time: 195
+2021-04-16	numberThreads: 5	numberRequests: 200	time: 223
+2021-04-16	numberThreads: 5	numberRequests: 200	time: 186

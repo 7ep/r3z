@@ -26,22 +26,32 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.openqa.selenium.Point
+import org.openqa.selenium.WebDriver
 import java.io.File
 
-@RunWith(Parameterized::class)
+/**
+ * the time entry page should prevent bad input
+ */
 @Category(UITestCategory::class)
-class UITimeEntryValidation(private val myDriver: Drivers) {
+class UITimeEntryValidation {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"
     private val defaultProject = "projecta"
 
-
-    /**
-     * the time entry page should prevent bad input
-     */
     @Test
-    fun `all inputs should restrict to valid values`() {
+    fun testWithChrome() {
+        init(Drivers.CHROME.driver)
+        `all inputs should restrict to valid values`()
+    }
+
+    @Test
+    fun testWithFirefox() {
+        init(Drivers.FIREFOX.driver)
+        `all inputs should restrict to valid values`()
+    }
+
+    private fun `all inputs should restrict to valid values`() {
         `setup some default projects and employees`()
 
         pom.lp.login("bob", DEFAULT_PASSWORD.value)
@@ -73,7 +83,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
         timeBelowZeroOnEdit(timeEntry)
         timeAboveTwentyFourOnEdit(timeEntry)
         timeNotOnValidDivisionOnEdit(timeEntry)
-        invalidSyntaxOnTimeInputOnEdit(timeEntry)
+        invalidTimeValueOnEdit(timeEntry)
     }
 
     /*
@@ -91,12 +101,6 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
         private lateinit var pom: PageObjectModelLocal
         private lateinit var databaseDirectory : String
 
-        @Parameterized.Parameters
-        @JvmStatic
-        fun data(): Iterable<Any?> {
-            return Drivers.values().asList()
-        }
-
         @BeforeClass
         @JvmStatic
         fun setup() {
@@ -107,16 +111,15 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
 
     }
 
-    @Before
-    fun init() {
-        val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
+    fun init(driver: () -> WebDriver) {
+        val databaseDirectorySuffix = "uittimeentryvalidationtests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver)
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(800, 0)
+        pom.driver.manage().window().position = Point(500, 100)
     }
 
     @After
@@ -482,7 +485,7 @@ class UITimeEntryValidation(private val myDriver: Drivers) {
      * Our time entry only allows 0 to 24 and quarter hours.  If we
      * enter a letter, it shouldn't work
      */
-    private fun invalidSyntaxOnTimeInputOnEdit(expectedTimeEntry: TimeEntry) {
+    private fun invalidTimeValueOnEdit(expectedTimeEntry: TimeEntry) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
         pom.vtp.setTimeForEditingTimeEntry("a")

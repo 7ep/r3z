@@ -379,3 +379,6 @@
 2021-04-12	numberThreads: 10	numberRequests: 500	time: 214
 2021-04-12	numberThreads: 10	numberRequests: 500	time: 260
 2021-04-15	numberThreads: 10	numberRequests: 500	time: 224
+2021-04-16	numberThreads: 10	numberRequests: 500	time: 219
+2021-04-16	numberThreads: 10	numberRequests: 500	time: 217
+2021-04-16	numberThreads: 10	numberRequests: 500	time: 229

@@ -64,14 +64,7 @@ class ServerTests {
         @JvmStatic
         @BeforeClass
         fun initServer() {
-            fs = FullSystem.startSystem(
-                SystemOptions(
-                    port = port,
-                    sslPort = sslTestPort,
-                    dbDirectory = "build/db/servertests",
-
-                    // not really checking security here, this keeps it simpler
-                    allowInsecure = true))
+            fs = startFullSystem()
         }
 
         @JvmStatic
@@ -80,6 +73,21 @@ class ServerTests {
             logImperative("stopping server")
             fs.shutdown()
         }
+
+        /**
+         * The typical server startup, used by most tests in this file
+         */
+        private fun startFullSystem() = FullSystem.startSystem(
+            SystemOptions(
+                port = port,
+                sslPort = sslTestPort,
+                dbDirectory = "build/db/servertests",
+
+                // not really checking security here, this keeps it simpler
+                allowInsecure = true
+            )
+        )
+
     }
 
     /**
@@ -283,12 +291,12 @@ class ServerTests {
     }
 
     /**
-     * If we ask for the homepage on a secure server, we'll get a 200 OK
+     * If we ask for the homepage on a secure server it will succeed
      */
     @IntegrationTest(usesPort = true)
     @Category(IntegrationTestCategory::class)
     @Test
-    fun testShouldGet200Response_Secure() {
+    fun testSecureEndpoint() {
         val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
         client = SocketWrapper(sslClientSocket, "client")
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
@@ -299,25 +307,38 @@ class ServerTests {
     }
 
     /**
-     * If we ask for the homepage on a secure server,
-     * and we provide a keystore and password in the system properties,
-     * we'll get a 200 OK
+     * If we come in on the insecure endpoint, we should get
+     * redirected to the secure endpoint
      */
     @IntegrationTest(usesPort = true)
     @Category(IntegrationTestCategory::class)
     @Test
-    fun testShouldGet200Response_Secure_SystemProperties() {
+    fun testSecureEndpoint_Redirect() {
+        val specialFS = startSpecialFullSystem(allowInsecure = false)
+        val specialClientSocket = Socket("localhost", specialPort)
+        val specialClient = SocketWrapper(specialClientSocket, "client")
+
+        specialClient.write("GET /homepage HTTP/1.1$CRLF$CRLF")
+
+        val statusline = specialClient.readLine()
+
+        assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
+        specialFS.shutdown()
+    }
+
+    /**
+     * If we ask for the homepage on a secure server,
+     * and we provide a keystore and password in the system properties,
+     * we'll succeed
+     */
+    @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testSecureEndpoint_CheckSystemProperties() {
         val props = System.getProperties()
         props.setProperty("javax.net.ssl.keyStore", "src/main/resources/certs/keystore")
         props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
-        val specialFS = FullSystem.startSystem(
-            SystemOptions(
-                port = specialPort,
-                sslPort = specialPort+443,
-                dbDirectory = "build/db/servertests",
-
-                // not really checking security here, this keeps it simpler
-                allowInsecure = true))
+        val specialFS = startSpecialFullSystem()
         val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
         client = SocketWrapper(sslClientSocket, "client")
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
@@ -353,6 +374,20 @@ class ServerTests {
         }
     }
 
+    /**
+     * Similar to [startFullSystem] but allows individual tests to start their
+     * own customized system for certain unusual configurations
+     */
+    private fun startSpecialFullSystem(allowInsecure: Boolean = true) = FullSystem.startSystem(
+        SystemOptions(
+            port = specialPort,
+            sslPort = specialPort + 443,
+            dbDirectory = null,
+
+            // not really checking security here, this keeps it simpler
+            allowInsecure = allowInsecure
+        )
+    )
 
 }
 

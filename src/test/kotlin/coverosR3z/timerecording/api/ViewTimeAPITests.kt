@@ -435,6 +435,65 @@ class ViewTimeAPITests {
     }
 
     /**
+     * If we send a query string of EDIT_ID, then we should
+     * see the edit controls rendered
+     */
+    @Test
+    fun testViewingTimeEntries_EditPanel() {
+        tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
+        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<form id="edit_time_panel""""))
+    }
+
+    /**
+     * If we view the time entries page as an admin, we'll see
+     * a dropdown for selecting someone else's
+     * timesheet to view
+     */
+    @Test
+    fun testViewingTimeEntries_AsAdmin() {
+        tru.listAllEmployeesBehavior = {listOf(DEFAULT_EMPLOYEE_2, DEFAULT_EMPLOYEE)}
+        tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
+        val sd = makeServerDataForGetWithQueryString()
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<option selected disabled hidden value="">Self</option>"""))
+        assertTrue(result.contains("""<option value="2">DefaultEmployee</option>"""))
+    }
+
+    /**
+     * a list of projects should be rendered for the create-time-entry panel
+     */
+    @Test
+    fun testViewingTimeEntries_ProjectsListed() {
+        tru.listAllProjectsBehavior = {listOf(DEFAULT_PROJECT)}
+        val sd = makeServerDataForGetWithQueryString()
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<option value="1">Default_Project</option>"""))
+    }
+
+    /**
+     * a list of projects should be rendered for the edit-time-entry panel
+     */
+    @Test
+    fun testViewingTimeEntries_ProjectsListedOnEdit() {
+        tru.listAllProjectsBehavior = {listOf(DEFAULT_PROJECT, DEFAULT_PROJECT_2)}
+        tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
+        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<option selected value="1">Default_Project</option>"""))
+        assertTrue(result.contains("""<option value="2">Another project</option>"""))
+    }
+
+    /**
      * Builds a prefabricated object for a GET query,
      * where the user must set the value of the query string
      */

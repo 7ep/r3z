@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.*
 import coverosR3z.config.SIZE_OF_DECENT_PASSWORD
 import coverosR3z.misc.utility.generateRandomString
 import coverosR3z.misc.utility.safeAttr
+import coverosR3z.misc.utility.safeHtml
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
@@ -12,7 +13,6 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenti
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.server.utility.failureHTML
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class RegisterAPI(private val sd: ServerData) {
@@ -88,11 +88,25 @@ class RegisterAPI(private val sd: ServerData) {
             RegistrationResultStatus.NO_INVITATION_FOUND -> {
                 handleUnauthorized()
             }
-            else -> {
-                okHTML(failureHTML)
+            RegistrationResultStatus.USERNAME_ALREADY_REGISTERED -> {
+                okHTML(duplicateUserHTML(username))
             }
         }
     }
+
+    private fun duplicateUserHTML(username: UserName) = """
+<!DOCTYPE html>    
+<html lang="en">
+    <head>
+    </head>
+        <title>Duplicate User</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apifile" value="RegisterAPI" >
+    <body>
+       <p>The username ${safeHtml(username.value)} is already taken</p>
+    </body>
+</html>        
+"""
 
     private fun registerHTML(invitationCode: String): String {
 

@@ -22,15 +22,23 @@ import org.junit.Assert.assertFalse
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import org.openqa.selenium.By
 import org.openqa.selenium.Point
+import org.openqa.selenium.WebDriver
 import java.io.File
 
-@RunWith(Parameterized::class)
 @Category(UITestCategory::class)
-class UIServerTests(private val myDriver: Drivers) {
+class UIServerTests {
+
+    @Test
+    fun testWithChrome() {
+        serverTests(Drivers.CHROME.driver)
+    }
+
+    @Test
+    fun testWithFirefox() {
+        serverTests(Drivers.FIREFOX.driver)
+    }
 
     /**
      * A UI test for miscellaneous UI behaviors of the system, like
@@ -39,9 +47,8 @@ class UIServerTests(private val myDriver: Drivers) {
      *
      * Also checks that the registration page prevents bad input
      */
-    @Test
-    fun serverTests() {
-        init()
+    private fun serverTests(driver: () -> WebDriver) {
+        init(driver)
         `Go to an unknown page, expecting a not-found error`()
         `Go to an unknown page on an insecure port, expecting a not-found error`()
         `Try logging in with invalid credentials, expecting to be forbidden`()
@@ -53,7 +60,7 @@ class UIServerTests(private val myDriver: Drivers) {
         val (newPassword, hankNewPassword) =
             `change admin password, relogin, create new employee, use invitation and change their password and login`()
         shutdown()
-        restart()
+        restart(driver)
         `create a new project`(newPassword)
         `hank enters time`(hankNewPassword)
         shutdown()
@@ -74,12 +81,6 @@ class UIServerTests(private val myDriver: Drivers) {
         private lateinit var pom : PageObjectModelLocal
         private lateinit var databaseDirectory : String
 
-        @Parameterized.Parameters
-        @JvmStatic
-        fun data(): Iterable<Any?> {
-            return Drivers.values().asList()
-        }
-
         @BeforeClass
         @JvmStatic
         fun setup() {
@@ -90,23 +91,23 @@ class UIServerTests(private val myDriver: Drivers) {
 
     }
 
-    fun init() {
+    fun init(driver: () -> WebDriver) {
         val databaseDirectorySuffix = "uiservertests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        createPom()
+        createPom(driver)
     }
 
-    private fun createPom() {
-        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
+    private fun createPom(driver: () -> WebDriver) {
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver)
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(800, 400)
+        pom.driver.manage().window().position = Point(400, 200)
     }
 
-    private fun restart() {
-        createPom()
+    private fun restart(driver: () -> WebDriver) {
+        createPom(driver)
     }
 
     private fun shutdown() {

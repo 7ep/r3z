@@ -1,6 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
@@ -10,12 +11,12 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.CreateEmployeeAPI.Elements
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(APITestCategory::class)
 class CreateEmployeeAPITests {
 
 
@@ -29,9 +30,8 @@ class CreateEmployeeAPITests {
     }
 
     /**
-     * A basic happy path
+     * A basic happy path for POST
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
@@ -41,9 +41,23 @@ class CreateEmployeeAPITests {
     }
 
     /**
+     * Basic happy path for GET
+     */
+    @Test
+    fun testHandleGetEmployees() {
+        tru.listAllEmployeesBehavior = {listOf(DEFAULT_EMPLOYEE, DEFAULT_EMPLOYEE_2)}
+        au.listAllInvitationsBehavior = {setOf(DEFAULT_INVITATION)}
+        val sd = makeTypicalCEServerData()
+
+        val result = CreateEmployeeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("DefaultEmployee"))
+        assertTrue(result.contains("register?code=abc123\">Invitation"))
+    }
+
+    /**
      * Huge name
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
@@ -57,7 +71,6 @@ class CreateEmployeeAPITests {
     /**
      * Big name, but acceptable
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_BigName() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(30)))
@@ -69,7 +82,6 @@ class CreateEmployeeAPITests {
     /**
      * Missing data
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewEmployee_noBody() {
         val data = PostBodyData()
@@ -80,20 +92,18 @@ class CreateEmployeeAPITests {
 
     // region ROLE TESTS
 
-    @Category(APITestCategory::class)
     @Test
     fun testShouldAllowAdminForPost() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeTypicalCEServerData(data=data, user = DEFAULT_ADMIN_USER)
 
         assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
 
-    @Category(APITestCategory::class)
     @Test
     fun testShouldAllowSystemForPost() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au, user = SYSTEM_USER)
+        val sd = makeTypicalCEServerData(data=data, user = SYSTEM_USER)
 
         assertEquals(StatusCode.SEE_OTHER, CreateEmployeeAPI.handlePost(sd).statusCode)
     }
@@ -102,10 +112,9 @@ class CreateEmployeeAPITests {
      * if a user with an improper role tries something, the exception gets
      * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserForPost() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_REGULAR_USER)
 
         val result = CreateEmployeeAPI.handlePost(sd).statusCode
 
@@ -116,21 +125,19 @@ class CreateEmployeeAPITests {
      * if a user with an improper role tries something, the exception gets
      * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverUserForPost() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER)
 
         val result = CreateEmployeeAPI.handlePost(sd).statusCode
 
         assertEquals(StatusCode.FORBIDDEN, result)
     }
 
-    @Category(APITestCategory::class)
     @Test
     fun testShouldAllowAdminToGetPageForPost() {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to DEFAULT_EMPLOYEE_NAME.value))
-        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeTypicalCEServerData(data=data, user = DEFAULT_ADMIN_USER)
 
         assertEquals(StatusCode.OK, CreateEmployeeAPI.handleGet(sd).statusCode)
     }
@@ -138,10 +145,9 @@ class CreateEmployeeAPITests {
     /**
      * Why would the system be GET'ing this page? disallow
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowSystemToGetPage() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        val sd = makeTypicalCEServerData(user = SYSTEM_USER)
 
         val result = CreateEmployeeAPI.handleGet(sd).statusCode
 
@@ -152,10 +158,9 @@ class CreateEmployeeAPITests {
      * if a user with an improper role tries something, the exception gets
      * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserToGetPage() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_REGULAR_USER)
 
         val result = CreateEmployeeAPI.handleGet(sd).statusCode
 
@@ -166,10 +171,9 @@ class CreateEmployeeAPITests {
      * if a user with an improper role tries something, the exception gets
      * bubbled up to [coverosR3z.server.utility.ServerUtilities.handleRequest]
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverUserToGetPage() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER)
 
         val result = CreateEmployeeAPI.handleGet(sd).statusCode
 
@@ -179,10 +183,19 @@ class CreateEmployeeAPITests {
     // endregion
 
 
+/*
+ _ _       _                  __ __        _    _           _
+| | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+|   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+|_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+             |_|
+ alt-text: Helper Methods
+ */
+
     /**
      * Simpler helper to make the server data commonly used for CreateEmployee
      */
-    private fun makeTypicalCEServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au)
+    private fun makeTypicalCEServerData(data: PostBodyData = PostBodyData(), user: User = DEFAULT_ADMIN_USER): ServerData {
+        return makeServerData(data, tru, au, user = user)
     }
 }

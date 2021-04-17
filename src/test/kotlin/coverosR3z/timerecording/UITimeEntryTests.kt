@@ -23,21 +23,32 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.openqa.selenium.Point
+import org.openqa.selenium.WebDriver
 import java.io.File
 
-@RunWith(Parameterized::class)
+/**
+ * A UI test for one of the core ideas in the system - entering time
+ */
 @Category(UITestCategory::class)
-class UITimeEntryTests(private val myDriver: Drivers) {
+class UITimeEntryTests {
 
     private val adminUsername = "admin"
     private val adminPassword = "password12345"
     private val defaultProject = "projecta"
 
-    /**
-     * A UI test for one of the core ideas in the system - entering time
-     */
     @Test
-    fun timeEntryTests() {
+    fun testWithChrome() {
+        init(Drivers.CHROME.driver)
+        timeEntryTests()
+    }
+
+    @Test
+    fun testWithFirefox() {
+        init(Drivers.FIREFOX.driver)
+        timeEntryTests()
+    }
+
+    private fun timeEntryTests() {
         `setup some default projects and employees`()
         `createEmployee - I should be able to create an employee`()
         `timeentry - An employee should be able to enter time for a specified date`()
@@ -65,12 +76,6 @@ class UITimeEntryTests(private val myDriver: Drivers) {
         private const val regularUsername = "andrea"
         private const val regularEmployeeName = "Andrea"
 
-        @Parameterized.Parameters
-        @JvmStatic
-        fun data(): Iterable<Any?> {
-            return Drivers.values().asList()
-        }
-
         @BeforeClass
         @JvmStatic
         fun setup() {
@@ -81,16 +86,15 @@ class UITimeEntryTests(private val myDriver: Drivers) {
 
     }
 
-    @Before
-    fun init() {
-        val databaseDirectorySuffix = "uittimeentryests_on_port_$port"
+    fun init(driver: () -> WebDriver) {
+        val databaseDirectorySuffix = "uittimeentrytests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = myDriver.driver)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver)
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(0, 400)
+        pom.driver.manage().window().position = Point(0, 0)
     }
 
     @After

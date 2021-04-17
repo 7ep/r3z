@@ -887,6 +887,17 @@ class PureMemoryDatabaseTests {
         println(result2)
     }
 
+    @Test
+    fun testSerialization_Invitation() {
+        val result = DEFAULT_INVITATION.serialize()
+
+        assertEquals("""{ id: 1 , c: abc123 , eid: 1 , d: 1577836800 }""", result)
+
+        val deserialized = Invitation.Deserializer(setOf(DEFAULT_EMPLOYEE)).deserialize(result)
+
+        assertEquals(DEFAULT_INVITATION, deserialized)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___

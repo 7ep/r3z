@@ -60,6 +60,7 @@ val DEFAULT_USER_2 = User(UserId(2), UserName("DefaultUser2"), DEFAULT_HASH, DEF
 val DEFAULT_TIME = Time(60)
 val DEFAULT_PROJECT_NAME = ProjectName("Default_Project")
 val DEFAULT_PROJECT = Project(ProjectId(1), DEFAULT_PROJECT_NAME)
+val DEFAULT_PROJECT_2 = Project(ProjectId(2), ProjectName("Another project"))
 val DEFAULT_TIME_ENTRY = TimeEntry(TimeEntryId(1), DEFAULT_EMPLOYEE, DEFAULT_PROJECT, DEFAULT_TIME, A_RANDOM_DAY_IN_JUNE_2020)
 val DEFAULT_PERIOD_START_DATE = Date.make( "2021-02-01")
 val DEFAULT_PERIOD_END_DATE = Date.make( "2021-02-15")

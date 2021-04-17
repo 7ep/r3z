@@ -108,7 +108,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         fun projectsToOptions(projects: List<Project>): String {
             return projects.sortedBy { it.name.value }.joinToString("") {
-                "<option value =\"${it.id.value}\">${safeAttr(it.name.value)}</option>\n"
+                "<option value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>\n"
             }
         }
 

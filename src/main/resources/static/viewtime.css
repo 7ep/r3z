@@ -41,7 +41,7 @@
     .timerows-container .details.time-entry-information {flex: 4;}
 
     .timerows-container .details > div {
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
     }
 
     .timerows-container .details input {

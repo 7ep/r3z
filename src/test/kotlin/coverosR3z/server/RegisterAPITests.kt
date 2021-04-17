@@ -1,24 +1,16 @@
 package coverosR3z.server
 
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.authentication.types.NO_USER
-import coverosR3z.authentication.types.RegistrationResult
-import coverosR3z.authentication.types.RegistrationResultStatus
-import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
+import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.misc.DEFAULT_EMPLOYEE
-import coverosR3z.misc.DEFAULT_USER
+import coverosR3z.fakeServerObjects
+import coverosR3z.misc.*
 import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
 import coverosR3z.server.api.handleUnauthorized
-import coverosR3z.server.types.AuthStatus
-import coverosR3z.server.types.PostBodyData
-import coverosR3z.server.types.ServerData
-import coverosR3z.server.types.StatusCode
+import coverosR3z.server.types.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -26,6 +18,7 @@ import org.junit.experimental.categories.Category
 /**
  * Tests related to registering a user through the API
  */
+@Category(APITestCategory::class)
 class RegisterAPITests {
 
     lateinit var au : FakeAuthenticationUtilities
@@ -42,7 +35,6 @@ class RegisterAPITests {
      * values properly, it shouldn't complain
      * Basically a happy path
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleValidInputs() {
         val data = PostBodyData(mapOf(
@@ -60,7 +52,6 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_blankName() {
         val data = PostBodyData(mapOf(
@@ -76,7 +67,6 @@ class RegisterAPITests {
     /**
      * If the invitation provided doesn't get us an employee
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_EmployeeNotFoundFromInvitation() {
         au.registerBehavior ={ RegistrationResult(RegistrationResultStatus.NO_INVITATION_FOUND, NO_USER) }
@@ -93,7 +83,6 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_missingUsername() {
         val data = PostBodyData(mapOf(
@@ -108,7 +97,6 @@ class RegisterAPITests {
     /**
      * If our API code is missing a required value
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldHandleInvalidInputs_missingInvitation() {
         val data = PostBodyData(mapOf(
@@ -121,11 +109,50 @@ class RegisterAPITests {
     }
 
     /**
-     * A helper to create the default [ServerData] that will exist during registration
+     * If someone enters a username that has already been used,
+     * return a message indicating so
      */
-    private fun makeDefaultRegisterServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED, user = NO_USER)
+    @Test
+    fun testRegisterDuplicateUsername() {
+        au.registerBehavior = { RegistrationResult(RegistrationResultStatus.USERNAME_ALREADY_REGISTERED, NO_USER) }
+        val data = PostBodyData(mapOf(
+            RegisterAPI.Elements.USERNAME_INPUT.getElemName() to DEFAULT_USER.name.value,
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString()))
+        val sd = makeDefaultRegisterServerData(data)
+
+        val result = RegisterAPI.handlePost(sd).fileContentsString()
+
+        assertTrue("The system should indicate that the username was already taken.",
+            result.contains("""<p>The username ${DEFAULT_USER.name.value} is already taken</p>"""))
     }
 
+    /**
+     * Happy path for GET of the registration page
+     */
+    @Test
+    fun testRegisterGet() {
+        au.getEmployeeFromInvitationCodeBehavior = { DEFAULT_EMPLOYEE }
+        val sd = makeDefaultRegisterServerData(queryStringMap = mapOf("code" to "abc123"))
+
+        val result = RegisterAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""name="invitation" value="abc123""""))
+    }
+
+    /**
+     * A helper to create the default [ServerData] that will exist during registration
+     */
+    private fun makeDefaultRegisterServerData(
+        data: PostBodyData = PostBodyData(),
+        queryStringMap: Map<String, String> = mapOf(),
+    ): ServerData {
+        return ServerData(
+            BusinessCode(tru, au),
+            fakeServerObjects,
+            AnalyzedHttpData(data = data, user = NO_USER, queryString = queryStringMap),
+            AuthStatus.UNAUTHENTICATED,
+            testLogger
+        )
+    }
 
 }
