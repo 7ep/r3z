@@ -60,7 +60,6 @@ class ProjectAPI(private val sd: ServerData) {
         val projectRows = sd.bc.tru.listAllProjects().sortedBy { it.id.value }.joinToString("") {
 """
     <tr>
-        <td>${it.id.value}</td>
         <td>${safeHtml(it.name.value)}</td>
     </tr>
 """
@@ -71,7 +70,6 @@ class ProjectAPI(private val sd: ServerData) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Identifier</th>
                             <th>Name</th>
                         </tr>
                     </thead>

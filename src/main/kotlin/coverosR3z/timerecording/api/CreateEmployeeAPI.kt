@@ -80,12 +80,11 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             empsToInvs.entries.sortedBy { it.key.id.value }.joinToString("") {
                 val invitationLink = if (it.value == null) "" else
                     """
-        <td><a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?code=${safeAttr(it.value?.code?.value ?: "")}">Invitation</a></td>""".trimIndent()
+        https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?code=${safeAttr(it.value?.code?.value ?: "")}""".trimIndent()
                 """
 <tr>
-    <td>${it.key.id.value}</td>
     <td>${safeHtml(it.key.name.value)}</td>
-    $invitationLink
+    <td>$invitationLink</td>
 </tr>
 """
             }
@@ -95,7 +94,6 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Identifier</th>
                             <th>Name</th>
                             <th>Invitation code</th>
                         </tr>

@@ -52,7 +52,7 @@ class CreateEmployeeAPITests {
         val result = CreateEmployeeAPI.handleGet(sd).fileContentsString()
 
         assertTrue(result.contains("DefaultEmployee"))
-        assertTrue(result.contains("register?code=abc123\">Invitation"))
+        assertTrue(result.contains("register?code=abc123"))
     }
 
     /**

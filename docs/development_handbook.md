@@ -467,12 +467,12 @@ Parsers and clean text
 
 Sometimes, text that users input will be run through a parser - that is, a program that analyzes
 the characters of the text and makes decisions based on it.  For example, when you send text to
-a browser, it parses it - if text has angle brackets around it, like <this>, it is considered an HTML
+a browser, it parses it - if text has angle brackets around it, like `<this>`, it is considered an HTML
 element and is treated differently.
 
 As it happens, the most prevalent security vulnerability is indeed this.  So whenever there is a
 possibility that user input can get parsed, we have to clean it.  That means stripping the special
-characters that designates special formations, e.g. <this> becomes &lt;this&gt; before shipping
+characters that designates special formations, e.g. `<this>` becomes `&lt;this&gt;` before shipping
 to the client browser, using our safeHtml() or safeAttr() code.
 
 As we deal with more parsers, we will need to include more cleaning utilities.
@@ -490,9 +490,8 @@ where we want, we copy the relevant portions into the real system.
 
 Inside the <head> element of our HTML, try to follow a pattern of setting the file location for
 the HTML, as we see for example in RegisterAPI at registerHTML, you will see this line:
+
     <meta apifile="RegisterAPI" >
-
-
 
 Logging
 -------
