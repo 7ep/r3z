@@ -42,7 +42,7 @@ echo "System has shutdown"
 # minimize memory use where we can
 
 echo "Starting system"
-java -Djavax.net.ssl.keyStore=keystore -Djavax.net.ssl.keyStorePassword=passphrase -Xss180k -jar r3z.jar -h renomad.com  &>>r3z.log &
+java -Djavax.net.ssl.keyStore=keystore -Djavax.net.ssl.keyStorePassword=passphrase -jar r3z.jar -h renomad.com  &>>r3z.log &
 
 # get the process id, pop it in a file
 # (we'll use this to stop the process later)

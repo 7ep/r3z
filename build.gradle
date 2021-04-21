@@ -206,9 +206,6 @@ tasks.withType(Test).configureEach {
     // it's possible to run in parallel, but so far the speed gains aren't obvious, turning off for now
     // maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 
-    // set JVM arguments for the test JVM(s)
-    jvmArgs '-Xss180k'
-
     jacoco {
         includes = ['coverosR3z.*']
     }
