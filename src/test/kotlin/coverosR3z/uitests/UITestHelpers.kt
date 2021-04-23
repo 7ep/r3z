@@ -1,7 +1,5 @@
 package coverosR3z.uitests
 
-import coverosR3z.system.utility.FullSystem
-import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
@@ -10,6 +8,8 @@ import coverosR3z.logging.LogTypes
 import coverosR3z.logging.LoggingAPI
 import coverosR3z.misc.testLogger
 import coverosR3z.misc.types.Date
+import coverosR3z.system.utility.FullSystem
+import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
@@ -21,7 +21,6 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.support.ui.Select
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX(
@@ -108,16 +107,6 @@ class LoggingPage(private val driver: WebDriver, private val domain: String) {
         driver.get("$domain/${LoggingAPI.path}")
     }
 
-    fun setLoggingTrue(lt : LogTypes) {
-        val id = when (lt) {
-            LogTypes.AUDIT -> (LoggingAPI.Elements.AUDIT_INPUT.getId() + "true")
-            LogTypes.WARN -> (LoggingAPI.Elements.WARN_INPUT.getId() + "true")
-            LogTypes.DEBUG -> (LoggingAPI.Elements.DEBUG_INPUT.getId() + "true")
-            LogTypes.TRACE -> (LoggingAPI.Elements.TRACE_INPUT.getId() + "true")
-        }
-        driver.findElement(By.id(id)).click()
-    }
-
     fun setLoggingFalse(lt : LogTypes) {
         val id = when (lt) {
             LogTypes.AUDIT -> (LoggingAPI.Elements.AUDIT_INPUT.getId() + "false")
@@ -194,10 +183,6 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         driver.findElement(By.id(ViewTimeAPI.Elements.PREVIOUS_PERIOD.getId())).click()
     }
 
-    fun goToNextPeriod() {
-        driver.findElement(By.id(ViewTimeAPI.Elements.NEXT_PERIOD.getId())).click()
-    }
-
     fun getCurrentPeriod() : String{
         val start = driver.findElement(By.id("timeperiod_display_start")).text
         val end = driver.findElement(By.id("timeperiod_display_end")).text
@@ -212,7 +197,8 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         gotoDate(date)
         val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_FORM.getId()))
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
-        Select(projectSelector).selectByVisibleText(project)
+        projectSelector.clear()
+        projectSelector.sendKeys(project)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(msc.calcDateString(date))
@@ -223,12 +209,14 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
 
     fun setProjectForNewEntry(project: String) {
         val projectSelector = driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_CREATE.getId()))
-        Select(projectSelector).selectByVisibleText(project)
+        projectSelector.clear()
+        projectSelector.sendKeys(project)
     }
 
     private fun setProjectForEditEntry(project: String) {
         val projectSelector = driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_EDIT.getElemName()))
-        Select(projectSelector).selectByVisibleText(project)
+        projectSelector.clear()
+        projectSelector.sendKeys(project)
     }
 
     /**
@@ -244,12 +232,6 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickSaveTimeEntry() {
         driver.findElement(By.id(ViewTimeAPI.Elements.SAVE_BUTTON.getId())).click()
     }
-
-    /**
-     * Returns true if the width is narrow enough to cause Mobile-mode for the UI.
-     * The UI is responsive - it behaves differently depending on the width of the window
-     */
-    fun isMobileWidth() = driver.manage().window().size.width <= 750
 
     /**
      * simply clicks the EDIT button on a particular read-only row

@@ -18,7 +18,7 @@ functional development and considerations
     correctness
         [ ] unit tests written
         [ ] Were the tests thorough, or only superficial?
-        [ ] invariants applied (e.g. assert val > 10)
+        [ ] invariants applied - e.g. check(val > 10)
         [ ] integration tests written
 
 non-functionals:

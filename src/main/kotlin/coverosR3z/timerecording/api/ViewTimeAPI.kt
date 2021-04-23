@@ -41,7 +41,6 @@ class ViewTimeAPI(private val sd: ServerData) {
          * Used for creating a new time entry with a particular project
          * already selected
          */
-        DUP_BUTTON("duplicate"),
         CANCEL_BUTTON("cancelbutton"),
         SAVE_BUTTON("savebutton"),
         DELETE_BUTTON("deletebutton"),
@@ -63,9 +62,6 @@ class ViewTimeAPI(private val sd: ServerData) {
          * the id of a time entry we are editing
          */
         EDIT_ID("editid"),
-
-        // the id of the project we want pre-filled in the project dropdown of create
-        PROJECT_ID("projectid"),
 
         // navigation
 
@@ -108,18 +104,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         fun projectsToOptions(projects: List<Project>): String {
             return projects.sortedBy { it.name.value }.joinToString("") {
-                "<option value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>\n"
-            }
-        }
-
-        fun projectsToOptionsOneSelected(projects: List<Project>, selectedProject : Project): String {
-            val sortedProjects = projects.sortedBy{it.name.value}
-            return sortedProjects.joinToString("\n") {
-                if (it == selectedProject) {
-                    "<option selected value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>"
-                } else {
-                    "<option value=\"${it.id.value}\">${safeAttr(it.name.value)}</option>"
-                }
+                """<option value="${safeAttr(it.name.value)}" />"""
             }
         }
 
@@ -147,9 +132,6 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val projects = sd.bc.tru.listAllProjects()
 
-        // the query string may indicate a project to have already-selected in the create time entry row
-        val projectId = sd.ahd.queryString[Elements.PROJECT_ID.getElemName()]
-        val selectedProject = if (projectId.isNullOrBlank()) null else projects.singleOrNull{ it.id == ProjectId.make(projectId) }
         val approvalStatus = sd.bc.tru.isApproved(employee, currentPeriod.start)
         val (inASubmittedPeriod, submitButton) = processSubmitButton(employee, currentPeriod, reviewingOtherTimesheet, approvalStatus)
         val switchEmployeeUI = createEmployeeSwitch(currentPeriod)
@@ -161,7 +143,14 @@ class ViewTimeAPI(private val sd: ServerData) {
         val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
         // show this if we are viewing someone else's timesheet
         val viewingHeader = if (! reviewingOtherTimesheet) "" else """<h2>Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
-        val timeEntryPanel = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderTimeEntryPanel(te, idBeingEdited, projects, currentPeriod, inASubmittedPeriod, reviewingOtherTimesheet, selectedProject)
+        val timeEntryPanel = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderTimeEntryPanel(
+            te,
+            idBeingEdited,
+            projects,
+            currentPeriod,
+            inASubmittedPeriod,
+            reviewingOtherTimesheet
+        )
         val hideEditButtons = inASubmittedPeriod || reviewingOtherTimesheet || approvalStatus == ApprovalStatus.APPROVED
 
         val body = """
@@ -172,6 +161,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <div class="timerows-container">
                 ${renderTimeRows(te, currentPeriod, hideEditButtons)}
             </div>
+            <script src="viewtime.js"></script>
         """
 
         val viewingSelf = sd.ahd.user.employee == employee
@@ -403,14 +393,13 @@ class ViewTimeAPI(private val sd: ServerData) {
         projects: List<Project>,
         currentPeriod: TimePeriod,
         inASubmittedPeriod: Boolean,
-        reviewingOtherTimesheet: Boolean,
-        selectedProject: Project?
+        reviewingOtherTimesheet: Boolean
     ): String {
         return if (! (inASubmittedPeriod || reviewingOtherTimesheet)) {
             return if (idBeingEdited != null) {
                 renderEditRow(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
-                renderCreateTimeRow(selectedProject, currentPeriod)
+                renderCreateTimeRow(currentPeriod)
             }
         } else {
             ""
@@ -466,21 +455,13 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
             </form>
         </div>
-        <div class="action time-entry-information">
-            <form action="$path">
-                <input type="hidden" name="${safeAttr(Elements.PROJECT_ID.getElemName())}" value="${it.project.id.value}" /> 
-                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
-                <button class="${Elements.DUP_BUTTON.getElemClass()}">dup</button>
-            </form>
-        </div>
-        
         """
 
         val detailContent = if (it.details.value.isBlank()) "&nbsp;" else safeHtml(it.details.value)
         return """
      <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
         <div class="project time-entry-information">
-            <div class="readonly-data">${safeAttr(it.project.name.value)}</div>
+            <div class="readonly-data">${safeHtml(it.project.name.value)}</div>
         </div>
         <div class="time time-entry-information">
             <div class="readonly-data">${it.time.getHoursAsString()}</div>
@@ -496,27 +477,18 @@ class ViewTimeAPI(private val sd: ServerData) {
     /**
      * For entering new time
      */
-    private fun renderCreateTimeRow(selectedProject: Project?, currentPeriod: TimePeriod): String {
+    private fun renderCreateTimeRow(currentPeriod: TimePeriod): String {
         val projects = sd.bc.tru.listAllProjects()
-
-        val chooseAProject = if (selectedProject != null) "" else {
-            """<option selected disabled hidden value="">Choose a project</option>"""
-        }
-        val projectOptions = if (selectedProject == null) {
-            projectsToOptions(projects)
-        } else {
-            projectsToOptionsOneSelected(projects, selectedProject)
-        }
 
         return """
             <form id="${Elements.CREATE_TIME_ENTRY_FORM.getId()}" class="data-entry" action="${EnterTimeAPI.path}" method="post">
                 <div class="row">
                     <div class="project">
                         <label for="${Elements.PROJECT_INPUT_CREATE.getId()}">Project:</label>
-                        <select id="${Elements.PROJECT_INPUT_CREATE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
-                            $chooseAProject
-                            $projectOptions
-                        </select>
+                        <input list="projects" type="text" placeholder="choose" id="${Elements.PROJECT_INPUT_CREATE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" />
+                        <datalist id="projects">
+                            ${projectsToOptions(projects)}
+                        </datalist>
                     </div>
         
                     <div class="date">
@@ -557,10 +529,10 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <div class="row">
                         <div class="project">
                             <label for="${Elements.PROJECT_INPUT_EDIT.getId()}">Project:</label>
-                            <select id="${Elements.PROJECT_INPUT_EDIT.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" >
-                                <option disabled hidden value="">Choose</option>
-                                ${projectsToOptionsOneSelected(projects, te.project)}
-                            </select>
+                            <input list="projects" type="text" id="${Elements.PROJECT_INPUT_EDIT.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" value="${safeHtml(te.project.name.value)}" />
+                            <datalist id="projects">
+                                ${projectsToOptions(projects)}
+                            </datalist>
                         </div>
                         
                         <div class="date">

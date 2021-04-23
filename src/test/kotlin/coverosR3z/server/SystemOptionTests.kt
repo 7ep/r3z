@@ -209,6 +209,67 @@ class SystemOptionTests {
     }
 
     @Test
+    fun testShouldParseOptions_SslPortNoSpace() {
+        val serverOptions = extractOptions(arrayOf("-s54321"))
+        assertEquals(SystemOptions(sslPort = 54321), serverOptions)
+    }
+
+    /**
+     * The port provided must be an integer between 0 and 65535
+     * It will probably complain though if you run this below 1024
+     * as non-root (below 1024, you need admin access on the machine, typically)
+     */
+    @Test
+    fun testShouldParseOptions_badSslPort_nonInteger() {
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-sabc123"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("""Must be able to parse "abc123" as an integer"""))
+    }
+
+    /**
+     * See [testShouldParseOptions_badPort_negativeInteger]
+     */
+    @Test
+    fun testShouldParseOptions_badSslPort_negativeInteger() {
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-s", "-1"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("The -s option was provided without a value: -s -1"))
+    }
+
+    /**
+     * See [testShouldParseOptions_badPort_negativeInteger]
+     */
+    @Test
+    fun testShouldParseOptions_badSslPort_zero() {
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-s", "0"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: 0"))
+    }
+
+    /**
+     * See [testShouldParseOptions_badPort_negativeInteger]
+     */
+    @Test
+    fun testShouldParseOptions_badSslPort_above65535() {
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-s", "65536"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("port number was out of range.  Range is 1-65535.  Your input was: 65536"))
+    }
+
+    /**
+     * If we provide no value to the port, complain
+     */
+    @Test
+    fun testShouldParseOptions_badSslPort_empty() {
+        val ex = assertThrows(SystemOptionsException::class.java) {
+            extractOptions(arrayOf("-s", "-d", "db"))
+        }
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("The -s option was provided without a value: -s -d db"))
+    }
+
+    @Test
+    fun testShouldParseOptions_BadSslPort_TooMany() {
+        val ex = assertThrows(SystemOptionsException::class.java) {extractOptions(arrayOf("-s", "22", "-s", "33"))}
+        assertTrue("Message needs to match expected; your message was:\n${ex.message}", ex.message!!.contains("Duplicate options were provided."))
+    }
+
+    @Test
     fun testShouldRedirectToSsl() {
         val serverOptions = extractOptions(arrayOf("--allow-insecure"))
         assertEquals(SystemOptions(allowInsecure = true), serverOptions)

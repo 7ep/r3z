@@ -14,7 +14,7 @@ import org.junit.Test
 
 class TimeRecordingUtilitiesRoleTests {
 
-    val tep = FakeTimeEntryPersistence()
+    private val tep = FakeTimeEntryPersistence()
     /*
                         _                    _       _          _
       _ _ ___ __ _ _  _| |__ _ _ _   _ _ ___| |___  | |_ ___ __| |_ ___

@@ -281,7 +281,7 @@ class ServerPerformanceTests {
                 val data = PostBodyData(mapOf(
                     ViewTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + i).stringValue,
                     ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "some details go here",
-                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.id.value.toString(),
+                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.name.value,
                     ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
                 ))
                 val clientWithData = client.addPostData(data)

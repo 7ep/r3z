@@ -231,4 +231,8 @@ class TimeRecordingUtilities(
         persistence.unapproveTimesheet(stp)
         return ApprovalResultStatus.SUCCESS
     }
+
+    override fun findProjectByName(name: ProjectName): Project {
+        return persistence.getProjectByName(name)
+    }
 }

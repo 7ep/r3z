@@ -23,6 +23,7 @@ class FakeTimeRecordingUtilities(
     var changeUserBehavior : () -> ITimeRecordingUtilities = { FakeTimeRecordingUtilities() },
     var listAllProjectsBehavior : () -> List<Project> = { emptyList() },
     var findProjectByIdBehavior : () -> Project = { NO_PROJECT },
+    var findProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
     var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
     var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
@@ -117,5 +118,9 @@ class FakeTimeRecordingUtilities(
 
     override fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus {
         return unapproveTimesheetBehavior()
+    }
+
+    override fun findProjectByName(name: ProjectName): Project {
+        return findProjectByNameBehavior()
     }
 }

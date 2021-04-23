@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.misc.DEFAULT_DATE_STRING
+import coverosR3z.misc.DEFAULT_PROJECT
 import coverosR3z.misc.DEFAULT_REGULAR_USER
 import coverosR3z.misc.exceptions.InexactInputsException
 import coverosR3z.misc.makeServerData
@@ -11,6 +12,7 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.api.EditTimeAPI
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
+import coverosR3z.timerecording.types.NO_PROJECT
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -28,6 +30,7 @@ class EditTimeAPITests {
     fun init() {
         au = FakeAuthenticationUtilities()
         tru = FakeTimeRecordingUtilities()
+        tru.findProjectByNameBehavior = { DEFAULT_PROJECT }
     }
 
     // test editing a time entry
@@ -35,7 +38,7 @@ class EditTimeAPITests {
     fun testEditTime() {
         tru.findEmployeeByIdBehavior = { DEFAULT_REGULAR_USER.employee }
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "1",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
@@ -56,7 +59,7 @@ class EditTimeAPITests {
     @Test
     fun testEditTime_InvalidEmployee() {
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "1",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
@@ -70,7 +73,7 @@ class EditTimeAPITests {
     @Test
     fun testEditTime_Negative_MissingId() {
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "60",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
@@ -100,7 +103,7 @@ class EditTimeAPITests {
     @Test
     fun testEditTime_Negative_MissingTime() {
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
@@ -115,7 +118,7 @@ class EditTimeAPITests {
     @Test
     fun testEditTime_Negative_MissingDetail() {
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "60",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
             Elements.ID_INPUT.getElemName() to "1"
@@ -130,7 +133,7 @@ class EditTimeAPITests {
     @Test
     fun testEditTime_Negative_MissingDate() {
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "60",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.ID_INPUT.getElemName() to "1"
@@ -151,7 +154,7 @@ class EditTimeAPITests {
         tru.findEmployeeByIdBehavior = { DEFAULT_REGULAR_USER.employee }
         tru.isInASubmittedPeriodBehavior = { true }
         val data = PostBodyData(mapOf(
-            Elements.PROJECT_INPUT.getElemName() to "1",
+            Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             Elements.TIME_INPUT.getElemName() to "1",
             Elements.DETAIL_INPUT.getElemName() to "not much to say",
             Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
@@ -160,6 +163,62 @@ class EditTimeAPITests {
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalStateException::class.java) { EditTimeAPI.handlePost(sd).statusCode }
         assertEquals("A time entry may not be edited in a submitted time period", ex.message)
+    }
+
+    
+    /**
+     * If we pass in an empty string for project
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testEditTimeAPI_emptyStringProject() {
+        val data = PostBodyData(mapOf(
+            Elements.PROJECT_INPUT.getElemName() to "",
+            Elements.TIME_INPUT.getElemName() to "60",
+            Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+            Elements.ID_INPUT.getElemName() to "1"
+        ))
+        val sd = makeETServerData(data)
+        val ex = assertThrows(IllegalArgumentException::class.java) { EditTimeAPI.handlePost(sd) }
+        assertEquals("Makes no sense to have an empty project name", ex.message)
+    }
+
+    /**
+     * If we pass in all spaces as the project
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testEditTimeAPI_allSpacesProject() {
+        val data = PostBodyData(mapOf(
+            Elements.PROJECT_INPUT.getElemName() to "   ",
+            Elements.TIME_INPUT.getElemName() to "60",
+            Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+            Elements.ID_INPUT.getElemName() to "1"
+        ))
+        val sd = makeETServerData(data)
+        val ex = assertThrows(IllegalArgumentException::class.java) { EditTimeAPI.handlePost(sd) }
+        assertEquals("Makes no sense to have an empty project name", ex.message)
+    }
+
+    /**
+     * If the project passed in isn't recognized
+     */
+    @Category(APITestCategory::class)
+    @Test
+    fun testEditTimeAPI_unrecognizedProject() {
+        tru.findProjectByNameBehavior = { NO_PROJECT }
+        val data = PostBodyData(mapOf(
+            Elements.PROJECT_INPUT.getElemName() to "UNRECOGNIZED",
+            Elements.TIME_INPUT.getElemName() to "60",
+            Elements.DETAIL_INPUT.getElemName() to "not much to say",
+            Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+            Elements.ID_INPUT.getElemName() to "1"
+        ))
+        val sd = makeETServerData(data)
+        val ex = assertThrows(IllegalStateException::class.java) { EditTimeAPI.handlePost(sd) }
+        assertEquals("Project with name of UNRECOGNIZED not found", ex.message)
     }
 
 

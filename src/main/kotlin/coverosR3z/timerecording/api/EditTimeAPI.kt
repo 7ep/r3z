@@ -39,13 +39,14 @@ class EditTimeAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.bc.tru
-        val projectId = ProjectId.make(data.mapping[ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()])
+        val projectName = ProjectName.make(data.mapping[ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()])
+        val project = tru.findProjectByName(projectName)
+        check (project != NO_PROJECT) { "Project with name of ${projectName.value} not found" }
         val time = Time.makeHoursToMinutes(data.mapping[ViewTimeAPI.Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[ViewTimeAPI.Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[ViewTimeAPI.Elements.DATE_INPUT.getElemName()])
         val entryId = TimeEntryId.make(data.mapping[ViewTimeAPI.Elements.ID_INPUT.getElemName()])
 
-        val project = tru.findProjectById(projectId)
         val employee = tru.findEmployeeById(checkNotNull(sd.ahd.user.employee.id){ employeeIdNotNullMsg })
         if (sd.ahd.user.employee != employee) {
             throw IllegalStateException("It is not allowed for anyone other than the owning employee to edit this time entry")

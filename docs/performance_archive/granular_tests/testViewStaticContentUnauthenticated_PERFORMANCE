@@ -385,3 +385,10 @@
 2021-04-17	numberThreads: 10	numberRequests: 500	time: 220
 2021-04-17	numberThreads: 10	numberRequests: 500	time: 242
 2021-04-21	numberThreads: 10	numberRequests: 500	time: 255
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 333
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 346
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 385
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 220
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 228
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 239
+2021-04-23	numberThreads: 10	numberRequests: 500	time: 192

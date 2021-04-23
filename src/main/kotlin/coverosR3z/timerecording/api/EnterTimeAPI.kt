@@ -33,12 +33,13 @@ class EnterTimeAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.bc.tru
-        val projectId = ProjectId.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
+        val projectName = ProjectName.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
+        val project = tru.findProjectByName(projectName)
+        check (project != NO_PROJECT) { "Project with name of ${projectName.value} not found" }
         val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 
-        val project = tru.findProjectById(projectId)
         val employee = checkNotNull(sd.ahd.user.employee){ employeeIdNotNullMsg }
         if (sd.ahd.user.employee != employee) {
             throw IllegalStateException("It is not allowed for other employees to enter this employee's time")

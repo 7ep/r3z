@@ -329,29 +329,6 @@ class ViewTimeAPITests {
     }
 
     /**
-     * If the user provides an id of a project by "projectid" as a key to a query string,
-     * then the project field should have that project selected when the page loads.
-     *
-     * This is to enable a speedier time entry process, since users may often choose
-     * to create a new time entry that has the same project as before.
-     */
-    @Test
-    fun testProjectId() {
-        tru.listAllProjectsBehavior = { listOf(DEFAULT_PROJECT) }
-        val sd = makeServerDataForGetWithQueryString(
-            queryStringMap = mapOf(ViewTimeAPI.Elements.PROJECT_ID.getElemName() to DEFAULT_PROJECT.id.value.toString()))
-
-        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
-
-        assertFalse("The ordinary 'select a project' item should not be rendered in this case",
-            result.contains("""<option selected disabled hidden value="">Choose a project</option>""")
-        )
-        assertEquals("The project dropdown under create should have the proper project already selected",
-            1,
-            """<option selected value="${DEFAULT_PROJECT.id.value}">${DEFAULT_PROJECT.name.value}</option>""".toRegex().findAll(result).count())
-    }
-
-    /**
      * If you are an admin and viewing another person's time, and if
      * they have submitted their time, you will see a clickable approve button
      */
@@ -475,7 +452,7 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<option value="1">Default_Project</option>"""))
+        assertTrue(result.contains("""option value="Default_Project"""))
     }
 
     /**
@@ -489,8 +466,8 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<option selected value="1">Default_Project</option>"""))
-        assertTrue(result.contains("""<option value="2">Another project</option>"""))
+        assertTrue(result.contains("""<option value="Default_Project"""))
+        assertTrue(result.contains("""<option value="Another project"""))
     }
 
     /**

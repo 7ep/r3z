@@ -5,7 +5,6 @@ import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
-import coverosR3z.server.utility.PageComponents
 
 class LogoutAPI(private val sd: ServerData) {
 
@@ -47,8 +46,4 @@ class LogoutAPI(private val sd: ServerData) {
 
     }
 
-    private val logoutHTML =
-"""
-
-"""
 }

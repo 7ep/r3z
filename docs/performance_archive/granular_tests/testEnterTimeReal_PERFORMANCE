@@ -397,3 +397,7 @@
 2021-04-17	numberThreads: 5	numberRequests: 200	time: 224
 2021-04-17	numberThreads: 5	numberRequests: 200	time: 182
 2021-04-21	numberThreads: 5	numberRequests: 200	time: 233
+2021-04-23	numberThreads: 5	numberRequests: 200	time: 222
+2021-04-23	numberThreads: 5	numberRequests: 200	time: 208
+2021-04-23	numberThreads: 5	numberRequests: 200	time: 198
+2021-04-23	numberThreads: 5	numberRequests: 200	time: 182

@@ -284,6 +284,24 @@ class TimeRecordingUtilityTests {
     }
 
     /**
+     * happy path
+     */
+    @Test fun testCanGetProjectByName() {
+        tep.getProjectByNameBehavior = { DEFAULT_PROJECT }
+        val foundProject = tru.findProjectByName(DEFAULT_PROJECT.name)
+        assertEquals(DEFAULT_PROJECT, foundProject)
+    }
+
+    /**
+     * what if the project doesn't exist? [NO_PROJECT]
+     */
+    @Test fun testCanGetProjectByName_NotFound() {
+        tep.getProjectByNameBehavior = { NO_PROJECT }
+        val foundProject = tru.findProjectByName(DEFAULT_PROJECT.name)
+        assertEquals(NO_PROJECT, foundProject)
+    }
+
+    /**
      * Given we have a time entry in the database, let's
      * edit its values
      */

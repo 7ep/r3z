@@ -35,6 +35,7 @@ class EnterTimeAPITests {
     fun init() {
         au = FakeAuthenticationUtilities()
         tru = FakeTimeRecordingUtilities()
+        tru.findProjectByNameBehavior = { DEFAULT_PROJECT }
     }
 
     /**
@@ -105,63 +106,52 @@ class EnterTimeAPITests {
     }
 
     /**
-     * If we pass in something that cannot be parsed as an integer as the project id
+     * If we pass in an empty string for project
      */
     @Category(APITestCategory::class)
     @Test
-    fun testEnterTimeAPI_nonNumericProject() {
-        val data = PostBodyData(mapOf(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "aaaaa", ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60", ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say", ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeETServerData(data)
-        val ex = assertThrows(java.lang.IllegalStateException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("""Must be able to parse "aaaaa" as an integer""", ex.message)
-    }
-
-    /**
-     * If we pass in a negative number as the project id
-     */
-    @Category(APITestCategory::class)
-    @Test
-    fun testEnterTimeAPI_negativeProject() {
+    fun testEnterTimeAPI_emptyStringProject() {
         val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "-1",
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "",
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
         val sd = makeETServerData(data)
-        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("Valid identifier values are 1 or above", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java) { EnterTimeAPI.handlePost(sd) }
+        assertEquals("Makes no sense to have an empty project name", ex.message)
     }
 
     /**
-     * If we pass in 0 as the project id
+     * If we pass in all spaces as the project
      */
     @Category(APITestCategory::class)
     @Test
-    fun testEnterTimeAPI_zeroProject() {
+    fun testEnterTimeAPI_allSpacesProject() {
         val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "0",
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "   ",
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
         val sd = makeETServerData(data)
-        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("Valid identifier values are 1 or above", ex.message)
+        val ex = assertThrows(IllegalArgumentException::class.java) { EnterTimeAPI.handlePost(sd) }
+        assertEquals("Makes no sense to have an empty project name", ex.message)
     }
 
     /**
-     * If the project id passed is above the maximum id
+     * If the project passed in isn't recognized
      */
     @Category(APITestCategory::class)
     @Test
-    fun testEnterTimeAPI_aboveMaxProject() {
+    fun testEnterTimeAPI_unrecognizedProject() {
+        tru.findProjectByNameBehavior = { NO_PROJECT }
         val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to (maximumProjectsCount +1).toString(),
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "UNRECOGNIZED",
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
         val sd = makeETServerData(data)
-        val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
-        assertEquals("No project id allowed over $maximumProjectsCount", ex.message)
+        val ex = assertThrows(IllegalStateException::class.java) { EnterTimeAPI.handlePost(sd) }
+        assertEquals("Project with name of UNRECOGNIZED not found", ex.message)
     }
 
     /**
@@ -174,7 +164,7 @@ class EnterTimeAPITests {
             ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
         val sd = makeETServerData(data)
         val ex = assertThrows(IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("$noNegativeTimeMsg-60", ex.message)
@@ -259,13 +249,12 @@ class EnterTimeAPITests {
         val user = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD,employee).user
         val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
         val project : Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val projectId = project.id.value.toString()
 
         val (time, _) = getTime {
             for (i in 1..numberOfRequests) {
 
                 val data = PostBodyData(mapOf(
-                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to projectId,
+                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.name.value,
                     ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
                     ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
                     ViewTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + (i / 20)).stringValue
@@ -357,7 +346,7 @@ class EnterTimeAPITests {
         val redirectRegex = """Location: timeentries\?date=....-..-..""".toRegex()
 
         val happyPathData = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING

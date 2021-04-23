@@ -26,7 +26,7 @@ val NO_PROJECT = Project(ProjectId(maximumProjectsCount -1), ProjectName("THIS R
  */
 data class ProjectName(val value: String) {
     init {
-        require(value.isNotEmpty()) { emptyProjectNameMsg }
+        require(value.isNotBlank()) { emptyProjectNameMsg }
         require(value.length <= maxProjectNameSize) { maxProjectNameSizeMsg }
     }
 
