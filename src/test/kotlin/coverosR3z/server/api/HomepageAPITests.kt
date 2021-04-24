@@ -36,8 +36,8 @@ class HomepageAPITests {
 
         val result = HomepageAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("Create employee"))
-        assertTrue(result.contains("Create project"))
+        assertTrue(result.contains("Employees"))
+        assertTrue(result.contains("Projects"))
         assertTrue(result.contains("Time entries"))
         assertTrue(result.contains("Log configuration"))
     }

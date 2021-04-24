@@ -63,8 +63,8 @@ class HomepageAPI(private val sd: ServerData)  {
         val allowedToSee: List<HomepageItem> = when (user.role) {
             Role.ADMIN ->
                 listOf(
-                    HomepageItem("createemployee", "Create employee"),
-                    HomepageItem("createproject", "Create project"),
+                    HomepageItem("createemployee", "Employees"),
+                    HomepageItem("createproject", "Projects"),
                     HomepageItem("timeentries", "Time entries"),
                     HomepageItem("logging", "Log configuration"),
                 )
