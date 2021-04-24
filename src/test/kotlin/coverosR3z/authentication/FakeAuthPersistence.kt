@@ -2,10 +2,10 @@ package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.misc.DEFAULT_EMPLOYEE
-import coverosR3z.misc.DEFAULT_INVITATION
-import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.misc.types.DateTime
+import coverosR3z.system.misc.DEFAULT_EMPLOYEE
+import coverosR3z.system.misc.DEFAULT_INVITATION
+import coverosR3z.system.misc.DEFAULT_USER
+import coverosR3z.system.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
 
 /**

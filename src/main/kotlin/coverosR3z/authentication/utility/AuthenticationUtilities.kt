@@ -2,8 +2,8 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
-import coverosR3z.logging.ILogger
-import coverosR3z.misc.types.DateTime
+import coverosR3z.system.logging.ILogger
+import coverosR3z.system.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 

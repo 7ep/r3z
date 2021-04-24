@@ -4,7 +4,7 @@ import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.logging.LoggingAPI
+import coverosR3z.system.logging.LoggingAPI
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.PreparedResponseData

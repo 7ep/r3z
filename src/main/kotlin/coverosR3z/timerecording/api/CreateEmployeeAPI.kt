@@ -3,8 +3,8 @@ package coverosR3z.timerecording.api
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.Role
-import coverosR3z.misc.utility.safeAttr
-import coverosR3z.misc.utility.safeHtml
+import coverosR3z.system.misc.utility.safeAttr
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated

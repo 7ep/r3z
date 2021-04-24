@@ -1,7 +1,7 @@
 package coverosR3z.authentication.persistence
 
 import coverosR3z.authentication.types.*
-import coverosR3z.misc.types.DateTime
+import coverosR3z.system.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
 
 interface IAuthPersistence {

@@ -1,7 +1,7 @@
 package coverosR3z.domainobjects
 
-import coverosR3z.misc.types.Date
-import coverosR3z.misc.types.Month
+import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.Month
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.IllegalArgumentException

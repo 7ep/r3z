@@ -1,8 +1,8 @@
 package coverosR3z.server.utility
 
-import coverosR3z.config.STATIC_FILES_DIRECTORY
-import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.misc.utility.FileReader
+import coverosR3z.system.config.STATIC_FILES_DIRECTORY
+import coverosR3z.system.logging.ILogger.Companion.logImperative
+import coverosR3z.system.misc.utility.FileReader
 import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.PreparedResponseData
 import java.nio.file.*

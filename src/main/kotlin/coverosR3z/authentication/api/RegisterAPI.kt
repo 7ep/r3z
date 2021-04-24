@@ -1,10 +1,10 @@
 package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.*
-import coverosR3z.config.SIZE_OF_DECENT_PASSWORD
-import coverosR3z.misc.utility.generateRandomString
-import coverosR3z.misc.utility.safeAttr
-import coverosR3z.misc.utility.safeHtml
+import coverosR3z.system.config.SIZE_OF_DECENT_PASSWORD
+import coverosR3z.system.misc.utility.generateRandomString
+import coverosR3z.system.misc.utility.safeAttr
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*

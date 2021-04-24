@@ -1,9 +1,9 @@
 package coverosR3z.server
 
-import coverosR3z.config.utility.SystemOptions
-import coverosR3z.config.utility.SystemOptions.Companion.extractOptions
-import coverosR3z.config.utility.SystemOptions.Companion.fullHelpMessage
-import coverosR3z.misc.exceptions.SystemOptionsException
+import coverosR3z.system.config.utility.SystemOptions
+import coverosR3z.system.config.utility.SystemOptions.Companion.extractOptions
+import coverosR3z.system.config.utility.SystemOptions.Companion.fullHelpMessage
+import coverosR3z.system.misc.exceptions.SystemOptionsException
 import org.junit.Assert.*
 import org.junit.Test
 

@@ -2,7 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.misc.*
+import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence

@@ -1,7 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
-import coverosR3z.misc.types.Date
+import coverosR3z.system.misc.types.Date
 import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData

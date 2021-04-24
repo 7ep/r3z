@@ -1,6 +1,6 @@
 package coverosR3z.server.types
 
-import coverosR3z.logging.ILogger
+import coverosR3z.system.logging.ILogger
 
 /**
  * Data for use by the API endpoints

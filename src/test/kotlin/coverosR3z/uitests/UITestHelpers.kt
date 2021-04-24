@@ -3,11 +3,11 @@ package coverosR3z.uitests
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.config.utility.SystemOptions
-import coverosR3z.logging.LogTypes
-import coverosR3z.logging.LoggingAPI
-import coverosR3z.misc.testLogger
-import coverosR3z.misc.types.Date
+import coverosR3z.system.config.utility.SystemOptions
+import coverosR3z.system.logging.LogTypes
+import coverosR3z.system.logging.LoggingAPI
+import coverosR3z.system.misc.testLogger
+import coverosR3z.system.misc.types.Date
 import coverosR3z.system.utility.FullSystem
 import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.timerecording.api.CreateEmployeeAPI

@@ -1,11 +1,11 @@
 package coverosR3z.timerecording
 
-import coverosR3z.misc.DEFAULT_EMPLOYEE
-import coverosR3z.misc.DEFAULT_PROJECT
+import coverosR3z.system.misc.DEFAULT_EMPLOYEE
+import coverosR3z.system.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.misc.DEFAULT_SUBMITTED_PERIOD
-import coverosR3z.misc.DEFAULT_TIME_ENTRY
-import coverosR3z.misc.types.Date
+import coverosR3z.system.misc.DEFAULT_SUBMITTED_PERIOD
+import coverosR3z.system.misc.DEFAULT_TIME_ENTRY
+import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 

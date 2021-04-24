@@ -1,7 +1,7 @@
 package coverosR3z.system
 
-import coverosR3z.system.persistence.ISystemConfigurationPersistence
-import coverosR3z.system.types.SystemConfiguration
+import coverosR3z.system.config.persistence.ISystemConfigurationPersistence
+import coverosR3z.system.config.types.SystemConfiguration
 
 class FakeSystemConfigurationPersistence(
     var setSystemConfigBehavior: () -> Unit = {},

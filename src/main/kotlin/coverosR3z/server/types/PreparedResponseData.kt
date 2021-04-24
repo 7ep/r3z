@@ -1,7 +1,7 @@
 package coverosR3z.server.types
 
-import coverosR3z.misc.utility.toBytes
-import coverosR3z.misc.utility.toStr
+import coverosR3z.system.misc.utility.toBytes
+import coverosR3z.system.misc.utility.toStr
 
 /**
  * Data for shipping to the client

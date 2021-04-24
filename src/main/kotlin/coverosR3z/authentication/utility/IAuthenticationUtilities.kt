@@ -1,10 +1,10 @@
 package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.types.*
-import coverosR3z.config.LENGTH_OF_BYTES_OF_INVITATION_CODE
-import coverosR3z.config.LENGTH_OF_BYTES_OF_SESSION_STRING
-import coverosR3z.misc.utility.generateRandomString
-import coverosR3z.misc.types.DateTime
+import coverosR3z.system.config.LENGTH_OF_BYTES_OF_INVITATION_CODE
+import coverosR3z.system.config.LENGTH_OF_BYTES_OF_SESSION_STRING
+import coverosR3z.system.misc.utility.generateRandomString
+import coverosR3z.system.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
 import java.time.LocalDateTime
 import java.time.ZoneOffset

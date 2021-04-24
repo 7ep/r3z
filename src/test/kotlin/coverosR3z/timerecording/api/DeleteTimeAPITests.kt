@@ -1,8 +1,8 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.misc.DEFAULT_REGULAR_USER
-import coverosR3z.misc.makeServerData
+import coverosR3z.system.misc.DEFAULT_REGULAR_USER
+import coverosR3z.system.misc.makeServerData
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData

@@ -1,7 +1,7 @@
 package coverosR3z.timerecording.types
 
-import coverosR3z.misc.types.Date
-import coverosR3z.misc.types.Month
+import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.Month
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

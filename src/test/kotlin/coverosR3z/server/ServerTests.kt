@@ -1,13 +1,13 @@
 package coverosR3z.server
 
-import coverosR3z.config.utility.SystemOptions
-import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.misc.*
-import coverosR3z.misc.types.Date
-import coverosR3z.misc.utility.FileReader.Companion.read
-import coverosR3z.misc.utility.encode
-import coverosR3z.misc.utility.getTime
-import coverosR3z.misc.utility.toStr
+import coverosR3z.system.config.utility.SystemOptions
+import coverosR3z.system.logging.ILogger.Companion.logImperative
+import coverosR3z.system.misc.*
+import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.utility.FileReader.Companion.read
+import coverosR3z.system.misc.utility.encode
+import coverosR3z.system.misc.utility.getTime
+import coverosR3z.system.misc.utility.toStr
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.PostBodyData

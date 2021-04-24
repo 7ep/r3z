@@ -5,10 +5,10 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.passwordMustNotBeBlankMsg
 import coverosR3z.authentication.types.usernameCannotBeEmptyMsg
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.misc.DEFAULT_PASSWORD
-import coverosR3z.misc.DEFAULT_USER
-import coverosR3z.misc.exceptions.InexactInputsException
-import coverosR3z.misc.makeServerData
+import coverosR3z.system.misc.DEFAULT_PASSWORD
+import coverosR3z.system.misc.DEFAULT_USER
+import coverosR3z.system.misc.exceptions.InexactInputsException
+import coverosR3z.system.misc.makeServerData
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.PostBodyData

@@ -3,7 +3,7 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
-import coverosR3z.misc.utility.safeHtml
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.ServerData
 
 class PageComponents(sd: ServerData) {

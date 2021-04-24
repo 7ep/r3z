@@ -3,7 +3,7 @@ package coverosR3z.authentication.utility
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.misc.*
+import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

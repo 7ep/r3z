@@ -2,8 +2,8 @@ package coverosR3z.timerecording.persistence
 
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
-import coverosR3z.logging.ILogger
-import coverosR3z.misc.types.Date
+import coverosR3z.system.logging.ILogger
+import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase

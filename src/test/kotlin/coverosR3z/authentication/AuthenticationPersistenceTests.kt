@@ -5,7 +5,7 @@ import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.UserName
-import coverosR3z.misc.*
+import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import org.junit.Assert
 import org.junit.Assert.assertEquals

@@ -1,8 +1,8 @@
 package coverosR3z.server.utility
 
 import coverosR3z.system.utility.FullSystem
-import coverosR3z.logging.ILogger.Companion.logImperative
-import coverosR3z.misc.utility.FileReader
+import coverosR3z.system.logging.ILogger.Companion.logImperative
+import coverosR3z.system.misc.utility.FileReader
 import coverosR3z.server.types.ServerObjects
 import java.security.KeyStore
 import java.security.SecureRandom

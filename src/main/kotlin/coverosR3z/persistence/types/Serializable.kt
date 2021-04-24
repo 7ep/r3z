@@ -1,6 +1,6 @@
 package coverosR3z.persistence.types
 
-import coverosR3z.misc.utility.encode
+import coverosR3z.system.misc.utility.encode
 
 /**
  * Serializable classes are able to [serialize] their content
@@ -16,7 +16,7 @@ abstract class Serializable {
      * be "name" to encode(ProjectName.value) and "id" to id.
      *
      * Note that encoding values before serialization is key -
-     * see the [coverosR3z.misc.utility.encode] method for details.
+     * see the [coverosR3z.system.misc.utility.encode] method for details.
      */
     abstract val dataMappings: Map<SerializationKeys, String>
 

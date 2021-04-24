@@ -108,7 +108,7 @@ task performancetests(type: Test) {
     group = "Verification"
     description 'Runs the performance tests.'
     useJUnit {
-        includeCategories 'coverosR3z.misc.PerformanceTestCategory'
+        includeCategories 'coverosR3z.system.misc.PerformanceTestCategory'
     }
     jacoco {
         destinationFile = file("$buildDir/jacoco/performancetest.exec")
@@ -134,9 +134,9 @@ task unittests(type: Test) {
     description 'Runs the fastest set of tests.'
     maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
-        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
+        excludeCategories 'coverosR3z.system.misc.PerformanceTestCategory',
                 'coverosR3z.uitests.UITestCategory',
-                'coverosR3z.misc.IntegrationTestCategory',
+                'coverosR3z.system.misc.IntegrationTestCategory',
                 'coverosR3z.server.APITestCategory'
     }
     jacoco {
@@ -173,7 +173,7 @@ task integrationtests(type: Test) {
     description 'Runs the integration tests.  These run a little slower than unit tests.'
     maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     useJUnit {
-        includeCategories 'coverosR3z.misc.IntegrationTestCategory'
+        includeCategories 'coverosR3z.system.misc.IntegrationTestCategory'
     }
     jacoco {
         destinationFile = file("$buildDir/jacoco/integrationtest.exec")
@@ -197,7 +197,7 @@ task fasttests(type: GradleBuild) {
 test {
     useJUnit {
         // for the default test and check tasks, we'll exclude the potentially more fraught tests
-        excludeCategories 'coverosR3z.misc.PerformanceTestCategory',
+        excludeCategories 'coverosR3z.system.misc.PerformanceTestCategory',
                 'coverosR3z.uitests.UITestCategory'
     }
 }

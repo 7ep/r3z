@@ -1,7 +1,7 @@
 package coverosR3z.timerecording
 
-import coverosR3z.misc.*
-import coverosR3z.misc.types.Date
+import coverosR3z.system.misc.*
+import coverosR3z.system.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence

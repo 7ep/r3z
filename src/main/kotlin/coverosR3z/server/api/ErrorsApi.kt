@@ -1,7 +1,7 @@
 package coverosR3z.server.api
 
-import coverosR3z.logging.ILogger
-import coverosR3z.misc.utility.safeHtml
+import coverosR3z.system.logging.ILogger
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.ContentType
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.StatusCode

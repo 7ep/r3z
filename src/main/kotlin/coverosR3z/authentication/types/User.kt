@@ -3,8 +3,8 @@ package coverosR3z.authentication.types
 import coverosR3z.authentication.types.Hash.Companion.createHash
 import coverosR3z.timerecording.types.EmployeeId
 import coverosR3z.timerecording.types.NO_EMPLOYEE
-import coverosR3z.misc.utility.checkParseToInt
-import coverosR3z.misc.utility.generateRandomString
+import coverosR3z.system.misc.utility.checkParseToInt
+import coverosR3z.system.misc.utility.generateRandomString
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable

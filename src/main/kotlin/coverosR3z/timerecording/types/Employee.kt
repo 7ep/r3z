@@ -1,6 +1,6 @@
 package coverosR3z.timerecording.types
 
-import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.system.misc.utility.checkParseToInt
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializationKeys

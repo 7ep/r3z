@@ -1,7 +1,7 @@
 package coverosR3z.server.utility
 
-import coverosR3z.logging.ILogger
-import coverosR3z.misc.utility.decode
+import coverosR3z.system.logging.ILogger
+import coverosR3z.system.misc.utility.decode
 import coverosR3z.server.exceptions.DuplicateInputsException
 import coverosR3z.server.types.*
 

@@ -1,9 +1,9 @@
 package coverosR3z.timerecording.types
 
-import coverosR3z.misc.types.Date
-import coverosR3z.misc.types.NO_DATE
-import coverosR3z.misc.utility.checkParseToDouble
-import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.NO_DATE
+import coverosR3z.system.misc.utility.checkParseToDouble
+import coverosR3z.system.misc.utility.checkParseToInt
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable

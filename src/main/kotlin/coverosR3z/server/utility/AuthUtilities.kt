@@ -6,7 +6,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.RolesChecker
-import coverosR3z.misc.utility.checkHasRequiredInputs
+import coverosR3z.system.misc.utility.checkHasRequiredInputs
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.api.handleUnauthenticated
 import coverosR3z.server.api.handleUnauthorized

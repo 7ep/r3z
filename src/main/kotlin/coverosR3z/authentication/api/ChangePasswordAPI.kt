@@ -2,8 +2,8 @@ package coverosR3z.authentication.api
 
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.Role
-import coverosR3z.config.SIZE_OF_DECENT_PASSWORD
-import coverosR3z.misc.utility.generateRandomString
+import coverosR3z.system.config.SIZE_OF_DECENT_PASSWORD
+import coverosR3z.system.misc.utility.generateRandomString
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth

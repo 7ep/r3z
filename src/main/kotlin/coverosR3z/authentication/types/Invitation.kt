@@ -1,7 +1,7 @@
 package coverosR3z.authentication.types
 
-import coverosR3z.misc.types.DateTime
-import coverosR3z.misc.utility.checkParseToInt
+import coverosR3z.system.misc.types.DateTime
+import coverosR3z.system.misc.utility.checkParseToInt
 import coverosR3z.persistence.types.Deserializable
 import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion

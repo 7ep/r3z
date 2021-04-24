@@ -1,8 +1,8 @@
 package coverosR3z.timerecording
 
 import coverosR3z.bddframework.BDD
-import coverosR3z.misc.*
-import coverosR3z.misc.types.Date
+import coverosR3z.system.misc.*
+import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
