@@ -2,28 +2,25 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.authentication.utility.IAuthenticationUtilities
-import coverosR3z.system.misc.*
-import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
+import coverosR3z.system.misc.*
+import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.types.maxProjectNameSize
-import coverosR3z.timerecording.types.maxProjectNameSizeMsg
-import coverosR3z.timerecording.utility.ITimeRecordingUtilities
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import coverosR3z.timerecording.types.*
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(APITestCategory::class)
 class ProjectAPITests {
 
 
-    lateinit var au : IAuthenticationUtilities
-    lateinit var tru : ITimeRecordingUtilities
+    lateinit var au : FakeAuthenticationUtilities
+    lateinit var tru : FakeTimeRecordingUtilities
 
     @Before
     fun init() {
@@ -34,7 +31,6 @@ class ProjectAPITests {
     /**
      * A basic happy path
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
@@ -46,7 +42,6 @@ class ProjectAPITests {
     /**
      * Huge name
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_HugeName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize + 1)))
@@ -60,7 +55,6 @@ class ProjectAPITests {
     /**
      * Big name, but acceptable
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_BigName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize)))
@@ -72,7 +66,6 @@ class ProjectAPITests {
     /**
      * Missing data
      */
-    @Category(APITestCategory::class)
     @Test
     fun testHandlePOSTNewProject_noBody() {
         val data = PostBodyData()
@@ -86,7 +79,6 @@ class ProjectAPITests {
     /**
      * Should only allow the admin to post
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldAllowAdminForPost() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
@@ -98,7 +90,6 @@ class ProjectAPITests {
     /**
      * There's no need for the system role to create projects
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowSystemForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
@@ -111,7 +102,6 @@ class ProjectAPITests {
     /**
      * Disallow approvers to create projects
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
@@ -124,7 +114,6 @@ class ProjectAPITests {
     /**
      * Disallow regular roles to create projects
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularRoleForPost() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
@@ -137,7 +126,6 @@ class ProjectAPITests {
     /**
      * Only the admin can view this page
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldAllowAdminForGet() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
@@ -149,7 +137,6 @@ class ProjectAPITests {
     /**
      * Disallow the system role from viewing this page
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowSystemForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
@@ -162,7 +149,6 @@ class ProjectAPITests {
     /**
      * Disallow approvers seeing this page
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
@@ -175,7 +161,6 @@ class ProjectAPITests {
     /**
      * Disallow regular users viewing this page
      */
-    @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularRoleForGet() {
         val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
@@ -186,6 +171,22 @@ class ProjectAPITests {
     }
 
     // endregion
+
+    /**
+     * We'll trim the input - chop off the whitespace before and
+     * after, and make sure to disallow duplicates from that.
+     */
+    @Test
+    fun testShouldDisallowDuplicateNamesAfterTrimming() {
+        tru.findProjectByNameBehavior = { Project(ProjectId(1), ProjectName("abc123")) }
+        val data = PostBodyData(mapOf(
+            ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "   abc123   "))
+        val sd = makeTypicalServerDataForProjectAPI(data)
+        val result = ProjectAPI.handlePost(sd)
+
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_PROJECT_DUPLICATE"))
+    }
 
 
     private fun makeTypicalServerDataForProjectAPI(data: PostBodyData): ServerData {

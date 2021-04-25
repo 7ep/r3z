@@ -110,10 +110,12 @@ class TimeEntryPersistence(
     }
 
     override fun getProjectByName(name: ProjectName): Project {
+        check(projectDataAccess.read { it.count { p -> p.name == name } in 0..1 }) {"There must be 0 or 1 project with name of ${name.value}"}
         return projectDataAccess.read { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun getProjectById(id: ProjectId): Project {
+        check(projectDataAccess.read { it.count { p -> p.id == id } in 0..1 }) {"There must be 0 or 1 project with id of $id"}
         return projectDataAccess.read { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
@@ -126,7 +128,13 @@ class TimeEntryPersistence(
     }
 
     override fun getEmployeeById(id: EmployeeId): Employee {
+        check(employeeDataAccess.read { employees -> employees.count {it.id == id} } in 0..1) {"There must be 0 or 1 employee with id of $id"}
         return employeeDataAccess.read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
+    }
+
+    override fun getEmployeeByName(employeeName: EmployeeName): Employee {
+        check(employeeDataAccess.read { employees -> employees.count {it.name == employeeName} } in 0..1) {"TThere must be 0 or 1 employee with name of ${employeeName.value}"}
+        return employeeDataAccess.read { employees -> employees.singleOrNull {it.name == employeeName} ?: NO_EMPLOYEE }
     }
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
@@ -160,6 +168,9 @@ class TimeEntryPersistence(
     }
 
     override fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
+        check(submittedPeriodsDataAccess.read { submissions ->
+            submissions.count { it.employee == employee && it.bounds == timePeriod } in 0..1
+        }) {"There must be either 0 or 1 submitted time periods with employee = $employee and timeperiod = $timePeriod"}
         return submittedPeriodsDataAccess.read { submissions ->
             submissions.singleOrNull { it.employee == employee && it.bounds == timePeriod }
         } ?: NullSubmittedPeriod
@@ -184,6 +195,7 @@ class TimeEntryPersistence(
     }
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        check(timeEntryDataAccess.read { timeentries -> timeentries.count { it.id == id } in 0..1}) {"There must be 0 or 1 time entry with id of $id"}
         return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull{ it.id == id } ?: NO_TIMEENTRY }
     }
 

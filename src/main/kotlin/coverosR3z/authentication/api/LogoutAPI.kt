@@ -38,7 +38,7 @@ class LogoutAPI(private val sd: ServerData) {
                 You are now logged out
             </p>
         
-            <p><a href="homepage">Homepage</a></p>
+            <a class="button" href="homepage">OK</a>
         </div>
     </body>
 </html>

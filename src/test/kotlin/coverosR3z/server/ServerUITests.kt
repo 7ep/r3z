@@ -12,13 +12,14 @@ import coverosR3z.system.misc.testLogger
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.timerecording.CreateEmployeeUserStory
+import coverosR3z.timerecording.types.Employee
+import coverosR3z.timerecording.types.Project
 import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
 import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -62,6 +63,8 @@ class ServerUITests {
         shutdown()
         restart(driver)
         `create a new project`(newPassword)
+        `validation - should be stopped from entering invalid input on the project creation page`()
+        `validation - should be stopped from entering invalid input on the employee creation page`()
         `hank enters time`(hankNewPassword)
         shutdown()
     }
@@ -118,14 +121,56 @@ class ServerUITests {
     }
 
     private fun `hank enters time`(hankNewPassword: String) {
+        logout()
         pom.lp.login("hank", hankNewPassword)
         pom.vtp.enterTime("great new project", "2", "these are some details", DEFAULT_DATE)
+    }
+
+    private fun `validation - should be stopped from entering invalid input on the employee creation page`() {
+        val dataAccess = pom.pmd.dataAccess<Employee>(Employee.directoryName)
+
+        // entering nothing
+        pom.eep.enter("")
+        assertFalse(dataAccess.read { employees -> employees.any { it.name.value == "" } })
+
+        // entering all whitespace
+        pom.eep.enter("   ")
+        assertFalse(dataAccess.read { employees -> employees.any { it.name.value == "   " } })
+
+        // entering a duplicate
+        pom.eep.enter("hank")
+        assertEquals("duplicate employee", pom.driver.title)
+        assertEquals(1, dataAccess.read { employees -> employees.count { it.name.value == "hank" } })
+
+        // entering a duplicate surrounded by whitespace
+        pom.eep.enter("hank")
+        assertEquals("duplicate employee", pom.driver.title)
+        assertEquals(1, dataAccess.read { employees -> employees.count { it.name.value == "hank" } })
+    }
+
+    private fun `validation - should be stopped from entering invalid input on the project creation page`() {
+        val dataAccess = pom.pmd.dataAccess<Project>(Project.directoryName)
+
+        // entering nothing
+        pom.epp.enter("")
+        assertFalse(dataAccess.read {projects -> projects.any{it.name.value == ""}})
+
+        // entering all whitespace
+        pom.epp.enter("   ")
+        assertFalse(dataAccess.read {projects -> projects.any{it.name.value == "   "}})
+
+        // entering a duplicate
+        pom.epp.enter("great new project")
+        assertEquals(1, dataAccess.read {projects -> projects.count{it.name.value == "great new project"}})
+
+        // entering a duplicate surrounded by whitespace
+        pom.epp.enter("   great new project   ")
+        assertEquals(1, dataAccess.read {projects -> projects.count{it.name.value == "great new project"}})
     }
 
     private fun `create a new project`(newPassword: String) {
         pom.lp.login("employeemaker", newPassword)
         pom.epp.enter("great new project")
-        logout()
     }
 
     private fun `change admin password, relogin, create new employee, use invitation and change their password and login`(): Pair<String, String> {
@@ -224,14 +269,25 @@ class ServerUITests {
         // validation won't allow it through - username too short
         tooShortUsername(invitationCode)
 
+        // It should disallow entering a bunch of space characters
+        disallowAllWhitespace(invitationCode)
+
+        // it should disallow entering an existing username ("employeemaker")
+        disallowDuplicateUsername(invitationCode)
+
+        // it should disallow entering an existing username, even if surrounded
+        // by whitespace
+        disallowDuplicateUsernameWithWhitespace(invitationCode)
+
         // Text entry will stop taking characters at the maximum size, so
         // what gets entered will just be truncated to [maxUserNameSize]
-        tooLongerUsername(invitationCode)
+        tooLongUsername(invitationCode)
+
     }
 
     private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
         pom.lp.login("userabc", DEFAULT_PASSWORD.value)
-        assertEquals("401 error", pom.driver.title)
+        assertEquals("authentication failed", pom.driver.title)
     }
 
     private fun `Try hitting the insecure login page, expecting to be redirected to the secure one`() {
@@ -253,7 +309,25 @@ class ServerUITests {
         pom.lop.go()
     }
 
-    private fun tooLongerUsername(invitation: Invitation) {
+    private fun disallowDuplicateUsernameWithWhitespace(invitation: Invitation) {
+        val existingUsername = "   employeemaker    "
+        pom.rp.register(existingUsername, invitation.code.value)
+        assertEquals("The chosen username has already been selected. Please choose another", pom.driver.findElement(By.id("error_message")).text)
+    }
+
+    private fun disallowDuplicateUsername(invitation: Invitation) {
+        val existingUsername = "employeemaker"
+        pom.rp.register(existingUsername, invitation.code.value)
+        assertEquals("The chosen username has already been selected. Please choose another", pom.driver.findElement(By.id("error_message")).text)
+    }
+
+    private fun disallowAllWhitespace(invitation: Invitation) {
+        val allWhitespace = "   "
+        pom.rp.register(allWhitespace, invitation.code.value)
+        assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == allWhitespace } })
+    }
+
+    private fun tooLongUsername(invitation: Invitation) {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
         pom.rp.register(tooLongUsername, invitation.code.value)
         assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == tooLongUsername } })

@@ -1,12 +1,13 @@
 package coverosR3z.system.logging
 
 import coverosR3z.authentication.types.Role
+import coverosR3z.server.api.MessageAPI
+import coverosR3z.server.api.MessageAPI.Companion.createMessageRedirect
 import coverosR3z.system.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.system.config.types.SystemConfiguration
 
 
@@ -28,7 +29,7 @@ class LoggingAPI(private val sd: ServerData) {
         }
 
         override fun getElemClass(): String {
-            throw NotImplementedError()
+            throw IllegalAccessError()
         }
     }
 
@@ -67,7 +68,7 @@ class LoggingAPI(private val sd: ServerData) {
         )
         logImperative("Changing log configuration to: ${sd.logger.logSettings}")
         sd.so.scp.setSystemConfig(SystemConfiguration(sd.logger.logSettings))
-        return redirectTo(path)
+        return createMessageRedirect(MessageAPI.Message.LOG_SETTINGS_SAVED)
     }
 
     private fun checkIsTrueOrFalse(s: String?): Boolean {

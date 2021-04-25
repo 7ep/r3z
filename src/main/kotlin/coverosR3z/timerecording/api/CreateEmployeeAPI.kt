@@ -3,6 +3,7 @@ package coverosR3z.timerecording.api
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.Invitation
 import coverosR3z.authentication.types.Role
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.system.misc.utility.safeAttr
 import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.*
@@ -12,6 +13,7 @@ import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 import coverosR3z.timerecording.types.maxEmployeeNameSize
 
 class CreateEmployeeAPI(private val sd: ServerData) {
@@ -29,7 +31,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         }
 
         override fun getElemClass(): String {
-            throw NotImplementedError()
+            throw IllegalAccessError()
         }
     }
 
@@ -56,10 +58,17 @@ class CreateEmployeeAPI(private val sd: ServerData) {
     }
 
     fun createEmployee() : PreparedResponseData {
-        val employeename = EmployeeName.make(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()])
-        val employee = sd.bc.tru.createEmployee(employeename)
-        sd.bc.au.createInvitation(employee)
-        return redirectTo(path)
+        val employeeNameString = checkNotNull(sd.ahd.data.mapping[Elements.EMPLOYEE_INPUT.getElemName()])
+        val employeeNameTrimmed = employeeNameString.trim()
+        val employeename = EmployeeName(employeeNameTrimmed)
+        return if (sd.bc.tru.findEmployeeByName(employeename) != NO_EMPLOYEE) {
+            MessageAPI.createMessageRedirect(MessageAPI.Message.FAILED_CREATE_EMPLOYEE_DUPLICATE)
+        } else {
+            val employee = sd.bc.tru.createEmployee(employeename)
+            sd.bc.au.createInvitation(employee)
+            redirectTo(path)
+        }
+
     }
 
     private fun existingEmployeesHTML(): String {
@@ -77,10 +86,10 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         }
 
         val employeeRows =
-            empsToInvs.entries.sortedBy { it.key.id.value }.joinToString("") {
+            empsToInvs.entries.sortedByDescending { it.key.id.value }.joinToString("") {
                 val invitationLink = if (it.value == null) "" else
                     """
-        https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?code=${safeAttr(it.value?.code?.value ?: "")}""".trimIndent()
+        https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}""".trimIndent()
                 """
 <tr>
     <td>${safeHtml(it.key.name.value)}</td>
@@ -111,7 +120,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         <form action="$path" method="post">
             <p>
                 <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
-                <input name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" autofocus />
+                <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
             </p>
         
             <p>

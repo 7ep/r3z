@@ -142,6 +142,11 @@ class TimeRecordingUtilities(
         return persistence.getEmployeeById(id)
     }
 
+    override fun findEmployeeByName(name: EmployeeName): Employee {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.getEmployeeByName(name)
+    }
+
     override fun listAllEmployees(): List<Employee> {
         rc.checkAllowed(Role.SYSTEM, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.NONE)
         return persistence.getAllEmployees()

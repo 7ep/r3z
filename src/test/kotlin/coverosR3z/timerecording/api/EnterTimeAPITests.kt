@@ -150,8 +150,9 @@ class EnterTimeAPITests {
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
         val sd = makeETServerData(data)
-        val ex = assertThrows(IllegalStateException::class.java) { EnterTimeAPI.handlePost(sd) }
-        assertEquals("Project with name of UNRECOGNIZED not found", ex.message)
+        val result = EnterTimeAPI.handlePost(sd)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=INVALID_PROJECT_DURING_ENTERING_TIME"))
     }
 
     /**

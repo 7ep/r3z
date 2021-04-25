@@ -364,4 +364,10 @@ class TimeEntryPersistenceTests {
         assertEquals(ApprovalStatus.APPROVED, submittedPeriod.approvalStatus)
     }
 
+    @Test
+    fun testGetEmployeeByName() {
+        tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        val result: Employee = tep.getEmployeeByName(DEFAULT_EMPLOYEE_NAME)
+        assertEquals(DEFAULT_EMPLOYEE, result)
+    }
 }

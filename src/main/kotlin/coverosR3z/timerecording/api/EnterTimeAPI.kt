@@ -1,6 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.system.misc.types.Date
 import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
@@ -35,7 +36,9 @@ class EnterTimeAPI(private val sd: ServerData) {
         val tru = sd.bc.tru
         val projectName = ProjectName.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
         val project = tru.findProjectByName(projectName)
-        check (project != NO_PROJECT) { "Project with name of ${projectName.value} not found" }
+        if (project == NO_PROJECT) {
+            return MessageAPI.createMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
+        }
         val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])

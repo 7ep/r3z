@@ -82,7 +82,7 @@ class ChangeTrackingSetTests {
     @Test
     fun shouldThrowExceptionFor_AddAll() {
         val projects = ChangeTrackingSet<Project>()
-        assertThrows(NotImplementedError::class.java) { projects.addAll(listOf(DEFAULT_PROJECT)) }
+        assertThrows(IllegalAccessError()::class.java) { projects.addAll(listOf(DEFAULT_PROJECT)) }
     }
 
     /**
@@ -92,7 +92,7 @@ class ChangeTrackingSetTests {
     @Test
     fun shouldThrowExceptionFor_RemoveAll() {
         val projects = ChangeTrackingSet<Project>()
-        assertThrows(NotImplementedError::class.java) { projects.removeAll(listOf(DEFAULT_PROJECT)) }
+        assertThrows(IllegalAccessError()::class.java) { projects.removeAll(listOf(DEFAULT_PROJECT)) }
     }
 
 }

@@ -120,10 +120,10 @@ class RegisterAPITests {
             RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString()))
         val sd = makeDefaultRegisterServerData(data)
 
-        val result = RegisterAPI.handlePost(sd).fileContentsString()
+        val result = RegisterAPI.handlePost(sd)
 
-        assertTrue("The system should indicate that the username was already taken.",
-            result.contains("""<p>The username ${DEFAULT_USER.name.value} is already taken</p>"""))
+        assertTrue("The system should indicate that the username was already taken: " +
+            result.headers.joinToString(";"), result.headers.contains("Location: register?invitation=1&msg=duplicate_user"))
     }
 
     /**
@@ -132,7 +132,7 @@ class RegisterAPITests {
     @Test
     fun testRegisterGet() {
         au.getEmployeeFromInvitationCodeBehavior = { DEFAULT_EMPLOYEE }
-        val sd = makeDefaultRegisterServerData(queryStringMap = mapOf("code" to "abc123"))
+        val sd = makeDefaultRegisterServerData(queryStringMap = mapOf(RegisterAPI.Elements.INVITATION_INPUT.getElemName() to "abc123"))
 
         val result = RegisterAPI.handleGet(sd).fileContentsString()
 

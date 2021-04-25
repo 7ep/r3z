@@ -27,7 +27,7 @@ class ChangePasswordAPI {
         }
 
         override fun getElemClass(): String {
-            throw NotImplementedError()
+            throw IllegalAccessError()
         }
     }
 

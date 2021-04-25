@@ -25,7 +25,7 @@ open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, Mutable
      * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
      */
     override fun addAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError("we have no current use for this, so leaving unimplemented")
+        throw IllegalAccessError("we have no current use for this, so leaving unimplemented")
     }
 
     override fun remove(element: T) : Boolean {
@@ -62,7 +62,7 @@ open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, Mutable
     }
 
     override fun containsAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError(NOT_CURRENTLY_USED)
+        throw IllegalAccessError(NOT_CURRENTLY_USED)
     }
 
     override fun isEmpty(): Boolean {
@@ -74,11 +74,11 @@ open class MutableConcurrentSet<T: IndexableSerializable> : Iterable<T>, Mutable
     }
 
     override fun removeAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError(NOT_CURRENTLY_USED)
+        throw IllegalAccessError(NOT_CURRENTLY_USED)
     }
 
     override fun retainAll(elements: Collection<T>): Boolean {
-        throw NotImplementedError(NOT_CURRENTLY_USED)
+        throw IllegalAccessError(NOT_CURRENTLY_USED)
     }
 
     open fun update(element: T) : Boolean {

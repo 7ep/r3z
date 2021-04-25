@@ -6,6 +6,7 @@ import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.system.logging.LoggingAPI
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.api.handleNotFound
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
@@ -37,6 +38,7 @@ class RoutingUtilities {
                 Pair(Verb.GET, LogoutAPI.path) -> LogoutAPI.handleGet(sd)
                 Pair(Verb.GET, LoggingAPI.path) -> LoggingAPI.handleGet(sd)
                 Pair(Verb.GET, ChangePasswordAPI.path) -> ChangePasswordAPI.handleGet(sd)
+                Pair(Verb.GET, MessageAPI.path) -> MessageAPI.handleGet(sd)
 
                 // POST
 

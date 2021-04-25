@@ -37,4 +37,5 @@ interface ITimeEntryPersistence {
     fun findTimeEntryById(id: TimeEntryId): TimeEntry
     fun approveTimesheet(stp: SubmittedPeriod): Boolean
     fun unapproveTimesheet(stp: SubmittedPeriod): Boolean
+    fun getEmployeeByName(employeeName: EmployeeName): Employee
 }

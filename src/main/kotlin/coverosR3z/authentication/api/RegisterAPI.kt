@@ -6,11 +6,14 @@ import coverosR3z.system.misc.utility.generateRandomString
 import coverosR3z.system.misc.utility.safeAttr
 import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.api.HomepageAPI
+import coverosR3z.server.api.MessageAPI
+import coverosR3z.server.api.MessageAPI.Companion.queryStringKey
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.PageComponents
+import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.NO_EMPLOYEE
@@ -20,8 +23,17 @@ class RegisterAPI(private val sd: ServerData) {
     enum class Elements(private val elemName: String, private val id: String) : Element {
         USERNAME_INPUT("username", "username"),
         NEW_PASSWORD("", "new_password"),
-        INVITATION_INPUT("invitation", "invitation"),
-        REGISTER_BUTTON("", "register_button"),;
+
+        REGISTER_BUTTON("", "register_button"),
+
+        // Query string keys
+
+        //the invitation code
+        INVITATION_INPUT("invitation", ""),
+
+        // the message to show if there was a problem with the username
+        ERROR_MESSAGE("msg", "")
+        ;
 
         override fun getId(): String {
             return this.id
@@ -32,7 +44,7 @@ class RegisterAPI(private val sd: ServerData) {
         }
 
         override fun getElemClass(): String {
-            throw NotImplementedError()
+            throw IllegalAccessError()
         }
     }
 
@@ -43,13 +55,14 @@ class RegisterAPI(private val sd: ServerData) {
             Elements.INVITATION_INPUT,
             Elements.USERNAME_INPUT,
         )
+
         override val path: String
             get() = "register"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             // we won't even allow the user to see the register page unless they walk
             // in with a completely valid invitation code.  None of this half-cooked blarney.
-            val invitationCode = sd.ahd.queryString["code"] ?: return redirectTo(HomepageAPI.path)
+            val invitationCode = sd.ahd.queryString[Elements.INVITATION_INPUT.getElemName()] ?: return redirectTo(HomepageAPI.path)
             if (sd.bc.au.getEmployeeFromInvitationCode(InvitationCode(invitationCode)) == NO_EMPLOYEE) return redirectTo(HomepageAPI.path)
 
             val r = RegisterAPI(sd)
@@ -65,7 +78,9 @@ class RegisterAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data.mapping
         val au = sd.bc.au
-        val username = UserName.make(data[Elements.USERNAME_INPUT.getElemName()])
+        val usernameString = checkNotNull(data[Elements.USERNAME_INPUT.getElemName()])
+        val usernameTrimmed = usernameString.trim()
+        val username = UserName(usernameTrimmed)
         val password = Password(generateRandomString(SIZE_OF_DECENT_PASSWORD))
         val invitationCode = InvitationCode.make(data[Elements.INVITATION_INPUT.getElemName()])
         val result = au.register(username, password, invitationCode)
@@ -89,28 +104,19 @@ class RegisterAPI(private val sd: ServerData) {
                 handleUnauthorized()
             }
             RegistrationResultStatus.USERNAME_ALREADY_REGISTERED -> {
-                okHTML(duplicateUserHTML(username))
+                redirectTo("$path?${Elements.INVITATION_INPUT.getElemName()}=${invitationCode.value}&${Elements.ERROR_MESSAGE.getElemName()}=duplicate_user")
             }
         }
     }
 
-    private fun duplicateUserHTML(username: UserName) = """
-<!DOCTYPE html>    
-<html lang="en">
-    <head>
-    </head>
-        <title>Duplicate User</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="apifile" value="RegisterAPI" >
-    <body>
-       <p>The username ${safeHtml(username.value)} is already taken</p>
-    </body>
-</html>        
-"""
-
     private fun registerHTML(invitationCode: String): String {
+        val errorMsg = sd.ahd.queryString[Elements.ERROR_MESSAGE.getElemName()]
+        val renderedError = if (errorMsg != "duplicate_user") "" else """
+            <div id="error_message">The chosen username has already been selected.  Please choose another</div>
+        """.trimIndent()
 
         val body = """
+        $renderedError
         <form method="post" action="$path">
         <input type="hidden" name="${Elements.INVITATION_INPUT.getElemName()}" value="${safeAttr(invitationCode)}" />
           <table> 
@@ -118,7 +124,7 @@ class RegisterAPI(private val sd: ServerData) {
                 <tr>
                     <td>
                         <label for="${Elements.USERNAME_INPUT.getElemName()}">Username</label>
-                        <input autofocus type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" required="required" />
+                        <input autocomplete="off" autofocus type="text" name="${Elements.USERNAME_INPUT.getElemName()}" id="${Elements.USERNAME_INPUT.getId()}" minlength="$minUserNameSize" maxlength="$maxUserNameSize" pattern="[\s\S]*\S[\s\S]*" required="required" oninvalid="this.setCustomValidity('Enter three or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
                     </td>
                 </tr>
                 <tr>

@@ -1,12 +1,14 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.ProjectName
 import coverosR3z.timerecording.types.maxProjectNameSize
 
@@ -25,7 +27,7 @@ class ProjectAPI(private val sd: ServerData) {
         }
 
         override fun getElemClass(): String {
-            throw NotImplementedError()
+            throw IllegalAccessError()
         }
     }
 
@@ -51,13 +53,20 @@ class ProjectAPI(private val sd: ServerData) {
     }
 
     fun handlePOST() : PreparedResponseData {
-        sd.bc.tru.createProject(ProjectName.make(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()]))
-        return redirectTo(path)
+        val projectNameString = checkNotNull(sd.ahd.data.mapping[Elements.PROJECT_INPUT.getElemName()])
+        val projectNameTrimmed = projectNameString.trim()
+        val projectName = ProjectName(projectNameTrimmed)
+        return if (sd.bc.tru.findProjectByName(projectName) != NO_PROJECT) {
+            MessageAPI.createMessageRedirect(MessageAPI.Message.FAILED_CREATE_PROJECT_DUPLICATE)
+        } else {
+            sd.bc.tru.createProject(projectName)
+            return redirectTo(path)
+        }
     }
 
 
     private fun existingProjectsHtml(): String {
-        val projectRows = sd.bc.tru.listAllProjects().sortedBy { it.id.value }.joinToString("") {
+        val projectRows = sd.bc.tru.listAllProjects().sortedByDescending { it.id.value }.joinToString("") {
 """
     <tr>
         <td>${safeHtml(it.name.value)}</td>
@@ -86,7 +95,7 @@ class ProjectAPI(private val sd: ServerData) {
             <form action="$path" method="post">
                 <p>
                     <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                    <input name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" autofocus />
+                    <input autocomplete="off" name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')"  autofocus />
                 </p>
             
                 <p>

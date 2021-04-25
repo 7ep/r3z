@@ -26,6 +26,7 @@ class FakeTimeRecordingUtilities(
     var findProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var listAllEmployeesBehavior : () -> List<Employee> = { emptyList() },
     var findEmployeeByIdBehavior : () -> Employee = { NO_EMPLOYEE },
+    var findEmployeeByNameBehavior : () -> Employee = { NO_EMPLOYEE },
     var submitTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var unsubmitTimePeriodBehavior : () -> Unit = {},
     var getSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
@@ -75,6 +76,10 @@ class FakeTimeRecordingUtilities(
 
     override fun findEmployeeById(id: EmployeeId): Employee {
         return findEmployeeByIdBehavior()
+    }
+
+    override fun findEmployeeByName(name: EmployeeName): Employee {
+        return findEmployeeByNameBehavior()
     }
 
     override fun listAllEmployees(): List<Employee> {

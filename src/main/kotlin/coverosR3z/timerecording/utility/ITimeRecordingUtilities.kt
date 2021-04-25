@@ -36,6 +36,7 @@ interface ITimeRecordingUtilities {
     fun listAllProjects(): List<Project>
     fun findProjectById(id: ProjectId): Project
     fun findEmployeeById(id: EmployeeId): Employee
+    fun findEmployeeByName(name: EmployeeName): Employee
     fun listAllEmployees(): List<Employee>
     fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod
     fun unsubmitTimePeriod(timePeriod: TimePeriod)

@@ -20,6 +20,7 @@ class FakeTimeEntryPersistence(
     var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
+    var getEmployeeByNameBehavior : () -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() },
     var isInASubmittedPeriodBehavior : () -> Boolean = { false },
@@ -120,6 +121,10 @@ class FakeTimeEntryPersistence(
 
     override fun unapproveTimesheet(stp: SubmittedPeriod): Boolean {
         return unapproveTimesheetBehavior()
+    }
+
+    override fun getEmployeeByName(employeeName: EmployeeName): Employee {
+        return getEmployeeByNameBehavior()
     }
 
 }

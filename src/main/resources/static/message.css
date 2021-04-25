@@ -35,3 +35,8 @@ a.button:focus {
     border-radius: 11px;
     border: 1.8px solid blue;
 }
+
+.failure {
+    background: red;
+    color: white;
+}

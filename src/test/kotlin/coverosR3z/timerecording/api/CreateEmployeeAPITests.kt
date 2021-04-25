@@ -11,6 +11,7 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.api.CreateEmployeeAPI.Elements
+import coverosR3z.timerecording.types.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -52,7 +53,7 @@ class CreateEmployeeAPITests {
         val result = CreateEmployeeAPI.handleGet(sd).fileContentsString()
 
         assertTrue(result.contains("DefaultEmployee"))
-        assertTrue(result.contains("register?code=abc123"))
+        assertTrue(result.contains("register?invitation=abc123"))
     }
 
     /**
@@ -182,6 +183,33 @@ class CreateEmployeeAPITests {
 
     // endregion
 
+    @Test
+    fun testShouldDisallowDuplicateEmployeeNames() {
+        tru.findEmployeeByNameBehavior = { Employee(EmployeeId(1), EmployeeName("abc123")) }
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "abc123"))
+        val sd = makeTypicalCEServerData(data)
+
+        val result = CreateEmployeeAPI.handlePost(sd)
+
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_EMPLOYEE_DUPLICATE"))
+    }
+
+    /**
+     * We will disallow duplicates, and disregard surrounding whitespace.
+     * That is, "abc" is equivalent to "   abc   "
+     */
+    @Test
+    fun testShouldDisallowDuplicateEmployeeNamesWithSurroundingWhitespace() {
+        tru.findEmployeeByNameBehavior = { Employee(EmployeeId(1), EmployeeName("abc123")) }
+        val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "   abc123   "))
+        val sd = makeTypicalCEServerData(data)
+
+        val result = CreateEmployeeAPI.handlePost(sd)
+
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_EMPLOYEE_DUPLICATE"))
+    }
 
 /*
  _ _       _                  __ __        _    _           _

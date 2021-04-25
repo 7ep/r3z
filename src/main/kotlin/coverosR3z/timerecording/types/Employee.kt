@@ -28,7 +28,7 @@ val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount -1), EmployeeName("THIS R
  */
 data class EmployeeName(val value: String) {
     init {
-        require(value.isNotEmpty()) { employeeNameCannotBeEmptyMsg }
+        require(value.isNotBlank()) { employeeNameCannotBeEmptyMsg }
         require(value.length <= maxEmployeeNameSize) { maxEmployeeNameSizeMsg }
     }
 
