@@ -21,6 +21,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
+import javax.net.ssl.SSLException
 
 
 /**
@@ -49,9 +50,7 @@ class ServerUtilities {
                         executorService.submit(Thread { processConnectedClient(server, fullSystem.pmd, serverObjects) })
                     }
                 } catch (ex: SocketException) {
-                    if (ex.message == "Interrupted function call: accept failed") {
-                        logImperative("Server was shutdown while waiting on accept")
-                    }
+                   logImperative("Server was shutdown while waiting on accept. ${ex.message}")
                 }
             }
         }
@@ -78,9 +77,6 @@ class ServerUtilities {
          */
         fun okJS (contents : ByteArray) =
                 ok(contents, listOf(ContentType.APPLICATION_JAVASCRIPT.value, AGGRESSIVE_WEB_CACHE.details))
-
-        fun okJPG (contents : ByteArray) =
-            ok(contents, listOf(ContentType.IMAGE_JPEG.value, AGGRESSIVE_WEB_CACHE.details))
 
         fun okWEBP (contents : ByteArray) =
                 ok(contents, listOf(ContentType.IMAGE_WEBP.value, AGGRESSIVE_WEB_CACHE.details))
@@ -161,15 +157,10 @@ class ServerUtilities {
                 // without getting anything.  See SocketWrapper and soTimeout
                 logger.logTrace { "read timed out" }
             } catch (ex : SocketException) {
-                if (ex.message?.contains("Connection reset") == true) {
-                    logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
-                } else {
-                    logger.logDebug { "${ex.message}" }
-                    throw ex
-                }
-            } catch (ex : Throwable) {
-                logger.logDebug { "${ex.message}" }
+                logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
                 throw ex
+            } catch (ex: SSLException) {
+                logger.logTrace { ex.message ?: ex.toString() }
             } finally {
                 logger.logTrace { "closing server socket" }
                 server.close()
@@ -202,11 +193,15 @@ class ServerUtilities {
                     }
                 }
             } catch (ex : SocketTimeoutException) {
+                // This passes exception handling for this specific exception to the caller
                 throw ex
             } catch (ex : SocketException) {
+                // This passes exception handling for this specific exception to the caller
                 throw ex
-            }
-            catch (ex: Exception) {
+            } catch (ex: SSLException) {
+                // This passes exception handling for this specific exception to the caller
+                throw ex
+            } catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
                 handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), logger)
             }

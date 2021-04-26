@@ -117,18 +117,20 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 
     private fun createEmployeeHTML() : String {
         val body = """
-        <form action="$path" method="post">
-            <p>
-                <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
-                <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
-            </p>
-        
-            <p>
-                <button id="${Elements.CREATE_BUTTON.getId()}">Create new employee</button>
-            </p>
-        
-        </form>
-        ${existingEmployeesHTML()}
+        <div id="outermost_container">    
+            <form action="$path" method="post">
+                <p>
+                    <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
+                    <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
+                </p>
+            
+                <p>
+                    <button id="${Elements.CREATE_BUTTON.getId()}">Create new employee</button>
+                </p>
+            
+            </form>
+            ${existingEmployeesHTML()}
+        </div>
     """
         return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createemployee.css" />""")
     }

@@ -34,4 +34,11 @@ data class ServerObjects(
      * for example, the logging settings.
      */
     val scp: ISystemConfigurationPersistence,
+
+    /**
+     * The length of time, in milliseconds, for the socket to wait
+     * before crash closing
+     * 10 seconds worth is pretty ordinary
+     */
+    val socketTimeout: Int
     )

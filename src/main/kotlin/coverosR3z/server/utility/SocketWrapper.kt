@@ -10,7 +10,12 @@ import java.net.Socket
  * Provides access to the reading and writing functions on a socket
  * in a standardized, tightly-controlled way
  */
-class SocketWrapper(override val socket: Socket, override val name: String? = null, private val fullSystem: FullSystem? = null) : ISocketWrapper {
+class SocketWrapper(
+    override val socket: Socket,
+    override val name: String? = null,
+    private val fullSystem: FullSystem? = null
+) : ISocketWrapper {
+
     private val writer: OutputStream = socket.getOutputStream()
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.inputStream))
 
@@ -19,8 +24,7 @@ class SocketWrapper(override val socket: Socket, override val name: String? = nu
         // necessary because without it, a client might make
         // a connection and keep us listening forever, without
         // continuing on.
-        val seconds = 10
-        socket.soTimeout = seconds * 1000
+        socket.soTimeout = fullSystem?.serverObjects?.socketTimeout ?: 10 * 1000
         fullSystem?.addRunningSocket(socket)
     }
 

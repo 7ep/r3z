@@ -57,6 +57,8 @@ data class SystemOptions(
          * This defaults to "localhost"
          */
         val host : String = "localhost",
+
+        val socketTimeout: Int = 10 * 1000
 ){
 
 

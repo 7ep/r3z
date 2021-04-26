@@ -11,7 +11,7 @@ class TestLogger : ILogger {
      * Set the system to standard configuration for which
      * log entries will print
      */
-    override fun resetLogSettingsToDefault() {
+    fun resetLogSettingsToDefault() {
         logSettings = SystemConfiguration.LogSettings(
             audit = true,
             warn = true,

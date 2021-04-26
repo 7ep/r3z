@@ -1,358 +1,360 @@
-    h2 {
-      text-align: center;
-      font-size: 1.3em;
-      margin: 10px;
-      color: white;
-    }
+#outermost_container {max-width: 900px;margin: auto;}
 
-    .time-entry-information input,
-    .time-entry-information select,
-    .time-entry-information div {
-        line-height: 26px;
-    }
+h2 {
+  text-align: center;
+  font-size: 1.3em;
+  margin: 10px;
+  color: white;
+}
 
-    .timerows-container .time input {
-        width: 36px;
-    }
+.time-entry-information input,
+.time-entry-information select,
+.time-entry-information div {
+    line-height: 26px;
+}
 
-    .timerows-container .project {
-      position: relative;
-    }
+.timerows-container .time input {
+    width: 36px;
+}
 
-    .timerows-container .project select {
-      width: inherit;
-    }
+.timerows-container .project {
+  position: relative;
+}
 
-    .readonly-time-entry-row .details > div {
-    }
+.timerows-container .project select {
+  width: inherit;
+}
 
-    .readonly-time-entry-row .time-entry-information > div {
-        line-height: 16px;
-    }
+.readonly-time-entry-row .details > div {
+}
 
-    .timerows-container .time {
-         position: relative;
-    }
+.readonly-time-entry-row .time-entry-information > div {
+    line-height: 16px;
+}
 
-    .timerows-container .details {
-         position: relative;
-    }
+.timerows-container .time {
+     position: relative;
+}
 
-    .timerows-container .details.time-entry-information {flex: 4;}
+.timerows-container .details {
+     position: relative;
+}
 
-    .timerows-container .details > div {
-        overflow-wrap: anywhere;
-    }
+.timerows-container .details.time-entry-information {flex: 4;}
 
-    .timerows-container .details input {
-      width: 107px;
-    }
+.timerows-container .details > div {
+    overflow-wrap: anywhere;
+}
 
-    .timerows-container .editbutton {
-    }
+.timerows-container .details input {
+  width: 107px;
+}
 
-    .timerows-container input {
-      background-color: #e3dddc;
-      border: 1px white solid;
-      display: flex;
-    }
+.timerows-container .editbutton {
+}
 
-    .timerows-container .time-entry-information {
-      background-color: #e3dddc;
-      border: 1px white solid;
-      flex: 1;
-    }
+.timerows-container input {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  display: flex;
+}
 
-    .readonly-time-entry-row .time-entry-information.action {
-        flex: 0.3;
-    }
+.timerows-container .time-entry-information {
+  background-color: #e3dddc;
+  border: 1px white solid;
+  flex: 1;
+}
 
-    .timerows-container .project.time-entry-information {
-        width: 0;
-        flex: 2;
-    }
+.readonly-time-entry-row .time-entry-information.action {
+    flex: 0.3;
+}
 
-    .timerows-container .time-entry-information > div {
-        display: flex;
-    }
+.timerows-container .project.time-entry-information {
+    width: 0;
+    flex: 2;
+}
 
-    .readonly-time-entry-row {
-      display: flex;
-      border-bottom: 1.5px #a8a1a0 solid;
-      font-size: 16px;
-    }
+.timerows-container .time-entry-information > div {
+    display: flex;
+}
 
-    .time_period_selector form,
-    .time_period_selector > div,
-    .timerows-container form {
-        display: flex;
-        margin: 1px;
-        align-items: center;
-    }
+.readonly-time-entry-row {
+  display: flex;
+  border-bottom: 1.5px #a8a1a0 solid;
+  font-size: 16px;
+}
 
-    .timerows-container {
-        border: 2px solid #e2e2e2;
-        margin: auto;
-        border-radius: .5em;
-        background-color: white;
-        opacity: 82%;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-    }
+.time_period_selector form,
+.time_period_selector > div,
+.timerows-container form {
+    display: flex;
+    margin: 1px;
+    align-items: center;
+}
 
-     nav.time_period_selector {
-        border: 2px solid #e2e2e2;
-        border-radius: .5em;
-        background-color: white;
-        opacity: 82%;
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        flex-wrap: wrap;
-        padding: 1px;
-        margin: 1px;
-     }
+.timerows-container {
+    border: 2px solid #e2e2e2;
+    margin: auto;
+    border-radius: .5em;
+    background-color: white;
+    opacity: 82%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
 
-     nav.time_period_selector form {
-     }
+ nav.time_period_selector {
+    border: 2px solid #e2e2e2;
+    border-radius: .5em;
+    background-color: white;
+    opacity: 82%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 1px;
+    margin: 1px;
+ }
 
-     #timeperiod_display {
-        color: black;
-        font-size: 12px;
-        display: flex;
-        width: 69px;
-        border: 1px solid black;
-        text-align: center;
-        flex-direction: column;
-        justify-content: center;
-        margin: -1px;
-     }
+ nav.time_period_selector form {
+ }
 
-     #timeperiod_display div {
-     }
+ #timeperiod_display {
+    color: black;
+    font-size: 12px;
+    display: flex;
+    width: 69px;
+    border: 1px solid black;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    margin: -1px;
+ }
 
-     #timeperiod_display span {
-     }
+ #timeperiod_display div {
+ }
 
-    #needed_hours,
-    #total_hours {
-        color: black;
-        font-size: 12px;
-        display: flex;
-        width: 40px;
-        border: 1px solid black;
-        text-align: center;
-        flex-direction: column;
-        justify-content: center;
-    }
+ #timeperiod_display span {
+ }
 
-    #total_hours label {
-    }
+#needed_hours,
+#total_hours {
+    color: black;
+    font-size: 12px;
+    display: flex;
+    width: 40px;
+    border: 1px solid black;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+}
 
-    #total_hours #total_hours_value {
-    }
+#total_hours label {
+}
 
-    nav .navitem {
-        height: 26px;
-    }
+#total_hours #total_hours_value {
+}
 
-    nav div.navitem {
-        border-radius: 4px;
-    }
+nav .navitem {
+    height: 26px;
+}
 
-    nav .navitem select,
-    nav .navitem button {
-        height: 28px;
-        align-items: center;
-        border-radius: 4px;
-    }
+nav div.navitem {
+    border-radius: 4px;
+}
 
-    nav button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      font-size: 16px;
-      display: flex;
-    }
+nav .navitem select,
+nav .navitem button {
+    height: 28px;
+    align-items: center;
+    border-radius: 4px;
+}
 
-    nav button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
+nav button {
+  cursor: pointer;
+  color: white;
+  background-color: #C65364;
+  border: 1.8px solid #3b3b3b;
+  font-size: 16px;
+  display: flex;
+}
 
-    nav button:focus {
-        outline: none;
-        border: 1.8px solid blue;
-    }
+nav button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
 
-    nav button:disabled {
-        cursor: inherit;
-        color: white;
-        background-color: lightgray;
-    }
+nav button:focus {
+    outline: none;
+    border: 1.8px solid blue;
+}
 
-    .data-entry div {
-        position: relative;
-        padding: 2px;
-        display: flex;
-        flex: 1;
-    }
+nav button:disabled {
+    cursor: inherit;
+    color: white;
+    background-color: lightgray;
+}
 
-    .data-entry label {
-        position: absolute;
-        left: 6px;
-        top: -2px;
-        font-size: 0.6em;
-        color: black;
-        z-index: 1;
-        background-color: white;
-    }
+.data-entry div {
+    position: relative;
+    padding: 2px;
+    display: flex;
+    flex: 1;
+}
 
-    .data-entry .date {
-        flex: 2;
-    }
+.data-entry label {
+    position: absolute;
+    left: 6px;
+    top: -2px;
+    font-size: 0.6em;
+    color: black;
+    z-index: 1;
+    background-color: white;
+}
 
-    .data-entry .project {
-        flex: 2;
-    }
+.data-entry .date {
+    flex: 2;
+}
 
-    #enter_time_panel {
-        flex-direction: column;
-    }
+.data-entry .project {
+    flex: 2;
+}
 
-    #enter_time_panel .row {
-        width: 100%;
-        flex-direction: row;
-    }
+#enter_time_panel {
+    flex-direction: column;
+}
 
-    #enter_time_panel .row .action {
-       flex: 0;
-    }
+#enter_time_panel .row {
+    width: 100%;
+    flex-direction: row;
+}
 
-    .data-entry .details textarea {
-       height: 20px;
-    }
+#enter_time_panel .row .action {
+   flex: 0;
+}
 
-    #edit_time_panel {
-        display: flex;
-        flex-direction: column;
-    }
+.data-entry .details textarea {
+   height: 20px;
+}
 
-    #edit_time_panel .details textarea {
-        height: 55px;
-    }
+#edit_time_panel {
+    display: flex;
+    flex-direction: column;
+}
 
-    .data-entry {
-      border: 2px solid #e2e2e2;
-      margin: auto;
-      border-radius: 6px;
-      background-color: white;
-      opacity: 82%;
-      padding: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      flex-direction: column;
-    }
+#edit_time_panel .details textarea {
+    height: 55px;
+}
 
-    #create-date {
-      width: 0;
-    }
+.data-entry {
+  border: 2px solid #e2e2e2;
+  margin: auto;
+  border-radius: 6px;
+  background-color: white;
+  opacity: 82%;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: column;
+}
 
-    .data-entry select,
-    .data-entry textarea,
-    .data-entry input {
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      background-color: #CFC1C1;
-      opacity: 82%;
-      color: #333333;
-      padding: 3px;
-      height: 20px;
-      flex: 1;
-      width: 100%;
-      font-size: 16px;
-    }
+#create-date {
+  width: 0;
+}
 
-    .data-entry select:focus,
-    .data-entry input:focus {
-        outline: none;
-        background-color: inherit;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
+.data-entry select,
+.data-entry textarea,
+.data-entry input {
+  border: 1.8px solid #3b3b3b;
+  border-radius: 6px;
+  background-color: #CFC1C1;
+  opacity: 82%;
+  color: #333333;
+  padding: 3px;
+  height: 20px;
+  flex: 1;
+  width: 100%;
+  font-size: 16px;
+}
 
-    .data-entry select {
-      height: 30px;
-      font-size: 16px;
-    }
+.data-entry select:focus,
+.data-entry input:focus {
+    outline: none;
+    background-color: inherit;
+    border-radius: 6px;
+    border: 1.8px solid blue;
+}
 
-    .data-entry button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      padding: 3px;
-      height: 30px;
-      width: 80px;
-      justify-content: center;
-      line-height: 1.7em;
-    }
+.data-entry select {
+  height: 30px;
+  font-size: 16px;
+}
 
-    .data-entry button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
+.data-entry button {
+  cursor: pointer;
+  color: white;
+  background-color: #C65364;
+  border: 1.8px solid #3b3b3b;
+  border-radius: 6px;
+  padding: 3px;
+  height: 30px;
+  width: 80px;
+  justify-content: center;
+  line-height: 1.7em;
+}
 
-    .data-entry button:focus {
-        outline: none;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
+.data-entry button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
+
+.data-entry button:focus {
+    outline: none;
+    border-radius: 6px;
+    border: 1.8px solid blue;
+}
 
 
-    .timerows-container button {
-      cursor: pointer;
-      color: white;
-      background-color: #C65364;
-      border: 1.8px solid #3b3b3b;
-      border-radius: 6px;
-      padding: 3px;
-      /* height: 30px; */
-      width: 100%;
-    }
+.timerows-container button {
+  cursor: pointer;
+  color: white;
+  background-color: #C65364;
+  border: 1.8px solid #3b3b3b;
+  border-radius: 6px;
+  padding: 3px;
+  /* height: 30px; */
+  width: 100%;
+}
 
-    .timerows-container button:hover {
-      color: #5f5f5f;
-      background-color: #DDDDE5;
-    }
+.timerows-container button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
 
-    .timerows-container button:focus {
-        outline: none;
-        border-radius: 6px;
-        border: 1.8px solid blue;
-    }
+.timerows-container button:focus {
+    outline: none;
+    border-radius: 6px;
+    border: 1.8px solid blue;
+}
 
-    #edit-buttons {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
+#edit-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
 
-    #edit-buttons button {
-        display: flex;
-        justify-content: center;
-        line-height: 2em;
-    }
+#edit-buttons button {
+    display: flex;
+    justify-content: center;
+    line-height: 2em;
+}
 
-    #edit-buttons #deletebutton {
-    }
+#edit-buttons #deletebutton {
+}
 
-    #employee-selector {
-    width: 80px;
-    font-size: 16px;
-    }
+#employee-selector {
+width: 80px;
+font-size: 16px;
+}
 

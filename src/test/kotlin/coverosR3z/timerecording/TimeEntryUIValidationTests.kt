@@ -112,7 +112,7 @@ class TimeEntryUIValidationTests {
         val databaseDirectorySuffix = "uittimeentryvalidationtests_on_port_$port"
         databaseDirectory = "$DEFAULT_DB_DIRECTORY$databaseDirectorySuffix/"
         File(databaseDirectory).deleteRecursively()
-        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver, allLoggingOff = true)
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on

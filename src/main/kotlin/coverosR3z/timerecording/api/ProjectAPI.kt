@@ -92,18 +92,20 @@ class ProjectAPI(private val sd: ServerData) {
 
     private fun createProjectHTML() : String {
         val body = """
-            <form action="$path" method="post">
-                <p>
-                    <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                    <input autocomplete="off" name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')"  autofocus />
-                </p>
-            
-                <p>
-                    <button id="${Elements.CREATE_BUTTON.getId()}">Create new project</button>
-                </p>
-            
-            </form>
-            ${existingProjectsHtml()}
+            <div id="outermost_container">
+                <form action="$path" method="post">
+                    <p>
+                        <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
+                        <input autocomplete="off" name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')"  autofocus />
+                    </p>
+                
+                    <p>
+                        <button id="${Elements.CREATE_BUTTON.getId()}">Create new project</button>
+                    </p>
+                
+                </form>
+                ${existingProjectsHtml()}
+            </div>
 """
         return PageComponents(sd).makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
     }

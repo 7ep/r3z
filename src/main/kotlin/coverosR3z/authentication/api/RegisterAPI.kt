@@ -4,16 +4,12 @@ import coverosR3z.authentication.types.*
 import coverosR3z.system.config.SIZE_OF_DECENT_PASSWORD
 import coverosR3z.system.misc.utility.generateRandomString
 import coverosR3z.system.misc.utility.safeAttr
-import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.api.MessageAPI
-import coverosR3z.server.api.MessageAPI.Companion.queryStringKey
 import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireUnauthenticated
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTRequireUnauthenticated
 import coverosR3z.server.utility.PageComponents
-import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.timerecording.types.NO_EMPLOYEE
@@ -59,8 +55,8 @@ class RegisterAPI(private val sd: ServerData) {
         override val path = "register"
 
         // potential errors
-        val duplicateUser = "duplicate_user"
-        val invalidUsername = "invalid_name"
+        const val duplicateUser = "duplicate_user"
+        const val invalidUsername = "invalid_name"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             // we won't even allow the user to see the register page unless they walk
@@ -120,8 +116,7 @@ class RegisterAPI(private val sd: ServerData) {
     private fun extractUsername(data: Map<String, String>): UserName {
         val usernameString = checkNotNull(data[Elements.USERNAME_INPUT.getElemName()])
         val usernameTrimmed = usernameString.trim()
-        val username = UserName(usernameTrimmed)
-        return username
+        return UserName(usernameTrimmed)
     }
 
     private fun registerHTML(invitationCode: String): String {

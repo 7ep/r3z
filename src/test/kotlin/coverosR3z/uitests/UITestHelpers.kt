@@ -54,10 +54,12 @@ fun startupTestForUI(
     domain: String = "localhost",
     port: Int,
     driver: () -> WebDriver = webDriver.driver,
-    directory: String? = null
+    directory: String? = null,
+    allLoggingOn: Boolean = false,
+    allLoggingOff: Boolean = false,
 ): PageObjectModelLocal {
     // start the server
-    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory))
+    val fs = FullSystem.startSystem(SystemOptions(port = port, sslPort = port + 443, dbDirectory = directory, allLoggingOn = allLoggingOn, allLoggingOff = allLoggingOff))
 
     val bc = initializeBusinessCode(fs.pmd, testLogger)
 

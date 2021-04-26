@@ -1,13 +1,5 @@
 package coverosR3z.server
 
-import coverosR3z.system.config.utility.SystemOptions
-import coverosR3z.system.logging.ILogger.Companion.logImperative
-import coverosR3z.system.misc.*
-import coverosR3z.system.misc.types.Date
-import coverosR3z.system.misc.utility.FileReader.Companion.read
-import coverosR3z.system.misc.utility.encode
-import coverosR3z.system.misc.utility.getTime
-import coverosR3z.system.misc.utility.toStr
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.server.types.AnalyzedHttpData
 import coverosR3z.server.types.PostBodyData
@@ -16,16 +8,25 @@ import coverosR3z.server.types.Verb
 import coverosR3z.server.utility.CRLF
 import coverosR3z.server.utility.SocketWrapper
 import coverosR3z.server.utility.parseHttpMessageAsClient
+import coverosR3z.system.config.utility.SystemOptions
+import coverosR3z.system.logging.ILogger.Companion.logImperative
+import coverosR3z.system.misc.*
+import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.utility.FileReader.Companion.read
+import coverosR3z.system.misc.utility.encode
+import coverosR3z.system.misc.utility.getTime
+import coverosR3z.system.misc.utility.toStr
 import coverosR3z.system.utility.FullSystem
 import coverosR3z.timerecording.api.EnterTimeAPI
 import org.junit.AfterClass
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
 import java.net.Socket
+import java.net.SocketException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.net.ssl.SSLSocket
@@ -59,6 +60,7 @@ class ServerTests {
         const val port = 2000
         const val specialPort = 2001
         const val sslTestPort = port + 443
+        const val specialSslTestPort = specialPort + 443
         private lateinit var fs : FullSystem
 
         @JvmStatic
@@ -84,8 +86,9 @@ class ServerTests {
                 dbDirectory = "build/db/servertests",
 
                 // not really checking security here, this keeps it simpler
-                allowInsecure = true
+                allowInsecure = true,
             )
+
         )
 
     }
@@ -109,17 +112,35 @@ class ServerTests {
     }
 
     /**
-     * If we ask for the homepage, we'll get a 200 OK
+     * Represents a successful request that includes a 303 SEE OTHER,
+     * includes every ordinary response by the server for an unauthenticated GET
      */
     @IntegrationTest(usesPort = true)
     @Category(IntegrationTestCategory::class)
     @Test
-    fun testShouldGet200Response() {
+    fun testShouldSucceedAtGettingHomepage() {
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
 
         val statusline = client.readLine()
-
-        assertEquals("HTTP/1.1 303 SEE OTHER", statusline)
+        assertEquals("The status code line is returned","HTTP/1.1 303 SEE OTHER", statusline)
+        val contentLength = client.readLine()
+        assertEquals("There is no body, so content length is zero","Content-Length: 0", contentLength)
+        val xframeOptions = client.readLine()
+        assertEquals("security boilerplate","X-Frame-Options: DENY", xframeOptions)
+        val noSniff = client.readLine()
+        assertEquals("security boilerplate","X-Content-Type-Options: nosniff", noSniff)
+        val serverName = client.readLine()
+        assertEquals("The name of our server","Server: R3z", serverName)
+        val date = client.readLine()
+        assertTrue("The date and time of the response", date?.startsWith("Date:") ?: false)
+        val cacheControl = client.readLine()
+        assertEquals("caching boilerplate","Cache-Control: no-cache, no-store, must-revalidate", cacheControl)
+        val pragmaNoCache = client.readLine()
+        assertEquals("caching boilerplate","Pragma: no-cache", pragmaNoCache)
+        val location = client.readLine()
+        assertEquals("The page we redirect the client to","Location: login", location)
+        val end = client.readLine()
+        assertEquals("The end","", end)
     }
 
     /**
@@ -264,6 +285,20 @@ class ServerTests {
     }
 
     /**
+     * A little test to get the server running with a keep-alive connection
+     */
+    @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testShouldUseKeepAliveConnection() {
+        client.write("GET /homepage HTTP/1.1$CRLF")
+        client.write("Connection: keep-alive$CRLF$CRLF")
+        client.socket.close()
+        assertTrue(client.socket.isClosed)
+    }
+
+
+    /**
      * I used this to see just how fast the server ran.  Able to get
      * 25,000 requests per second on 12/26/2020
      */
@@ -286,8 +321,6 @@ class ServerTests {
         File("${granularPerfArchiveDirectory}testHomepage_PERFORMANCE")
             .appendText("${Date.now().stringValue}\tnumberOfThreads: $numberOfThreads\tnumberOfRequests: $numberOfRequests\ttime: $time\n")
 
-        // turn logging back on for other tests
-        fs.logger.resetLogSettingsToDefault()
     }
 
     /**
@@ -327,6 +360,57 @@ class ServerTests {
     }
 
     /**
+     * If we come to the server on an insecure endpoint,
+     * when we get redirected to the SSL (i.e. secure) endpoint,
+     * it should pass the query string along as well.
+     */
+    @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testSecureEndpoint_RedirectWithQueryString() {
+        val specialFS = startSpecialFullSystem(allowInsecure = false)
+        val specialClientSocket = Socket("localhost", specialPort)
+        val specialClient = SocketWrapper(specialClientSocket, "client")
+        specialClient.write("GET /homepage?my_query_string=foo HTTP/1.1$CRLF$CRLF")
+
+        val statusline = specialClient.readLine()
+        assertEquals("The status code line is returned","HTTP/1.1 303 SEE OTHER", statusline)
+        val contentLength = specialClient.readLine()
+        assertEquals("There is no body, so content length is zero","Content-Length: 0", contentLength)
+        val xframeOptions = specialClient.readLine()
+        assertEquals("security boilerplate","X-Frame-Options: DENY", xframeOptions)
+        val noSniff = specialClient.readLine()
+        assertEquals("security boilerplate","X-Content-Type-Options: nosniff", noSniff)
+        val serverName = specialClient.readLine()
+        assertEquals("The name of our server","Server: R3z", serverName)
+        val date = specialClient.readLine()
+        assertTrue("The date and time of the response", date?.startsWith("Date:") ?: false)
+        val cacheControl = specialClient.readLine()
+        assertEquals("caching boilerplate","Location: https://localhost:2444/homepage?my_query_string=foo", cacheControl)
+        val end = specialClient.readLine()
+        assertEquals("The end","", end)
+        specialFS.shutdown()
+    }
+
+    /**
+     * If our socket is configured to timeout in very little time,
+     * we'll see our client connection get abruptly shut down by the host.
+     */
+    @IntegrationTest(usesPort = true)
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testServerSocketCrashShutdown() {
+        val specialFS = startSpecialFullSystem(socketTimeout = 1)
+        val specialClientSocket = Socket("localhost", specialPort)
+        val specialClient = SocketWrapper(specialClientSocket, "client")
+        Thread.sleep(50)
+        specialClient.write("GET /homepage HTTP/1.1$CRLF$CRLF")
+
+        assertThrows(SocketException::class.java) { specialClient.readLine() }
+        specialFS.shutdown()
+    }
+
+    /**
      * If we ask for the homepage on a secure server,
      * and we provide a keystore and password in the system properties,
      * we'll succeed
@@ -339,7 +423,7 @@ class ServerTests {
         props.setProperty("javax.net.ssl.keyStore", "src/main/resources/certs/keystore")
         props.setProperty("javax.net.ssl.keyStorePassword", "passphrase")
         val specialFS = startSpecialFullSystem()
-        val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", sslTestPort) as SSLSocket
+        val sslClientSocket = SSLSocketFactory.getDefault().createSocket("localhost", specialSslTestPort) as SSLSocket
         client = SocketWrapper(sslClientSocket, "client")
         client.write("GET /homepage HTTP/1.1$CRLF$CRLF")
 
@@ -378,16 +462,19 @@ class ServerTests {
      * Similar to [startFullSystem] but allows individual tests to start their
      * own customized system for certain unusual configurations
      */
-    private fun startSpecialFullSystem(allowInsecure: Boolean = true) = FullSystem.startSystem(
-        SystemOptions(
-            port = specialPort,
-            sslPort = specialPort + 443,
-            dbDirectory = null,
+    private fun startSpecialFullSystem(allowInsecure: Boolean = true, socketTimeout: Int = 10*1000): FullSystem {
+        return FullSystem.startSystem(
+            SystemOptions(
+                port = specialPort,
+                sslPort = specialSslTestPort,
+                dbDirectory = null,
 
-            // not really checking security here, this keeps it simpler
-            allowInsecure = allowInsecure
+                // not really checking security here, this keeps it simpler
+                allowInsecure = allowInsecure,
+                socketTimeout = socketTimeout
+            )
         )
-    )
+    }
 
 }
 

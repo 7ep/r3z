@@ -15,7 +15,6 @@ interface ILogger {
      * Set the system to standard configuration for which
      * log entries will print
      */
-    fun resetLogSettingsToDefault()
     fun turnOnAllLogging()
     fun turnOffAllLogging()
     fun logAudit(cu: CurrentUser = CurrentUser(SYSTEM_USER), msg: () -> String)

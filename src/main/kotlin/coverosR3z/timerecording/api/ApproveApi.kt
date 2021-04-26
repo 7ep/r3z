@@ -14,14 +14,14 @@ import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class ApproveApi {
 
-    enum class Elements (private val value: String = "") : Element {
+    enum class Elements (private val value: String) : Element {
         /**
          * If this is true, the user wants to unapprove
          */
         IS_UNAPPROVAL("unappr");
 
         override fun getId(): String {
-            return this.value
+            throw IllegalAccessError()
         }
 
         override fun getElemName(): String {
@@ -29,7 +29,7 @@ class ApproveApi {
         }
 
         override fun getElemClass(): String {
-            return this.value
+            throw IllegalAccessError()
         }
     }
 

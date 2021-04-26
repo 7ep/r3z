@@ -102,7 +102,7 @@ class ServerUITests {
     }
 
     private fun createPom(driver: () -> WebDriver) {
-        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver)
+        pom = startupTestForUI(port = port, directory = databaseDirectory, driver = driver, allLoggingOn = true)
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on

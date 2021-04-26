@@ -36,6 +36,7 @@ class FullSystem private constructor(
     val logger: ILogger,
 ) {
 
+    lateinit var serverObjects: ServerObjects
     lateinit var esForThreadsInServer: ExecutorService
     lateinit var server: Server
     lateinit var sslServer: SSLServer
@@ -141,7 +142,8 @@ class FullSystem private constructor(
                 systemOptions.sslPort,
                 systemOptions.allowInsecure,
                 systemOptions.host,
-                scp
+                scp,
+                systemOptions.socketTimeout
             )
 
             // instantiate a system object, we'll need this when starting the servers
@@ -163,6 +165,7 @@ class FullSystem private constructor(
             fullSystem.esForThreadsInServer = esForThreadsInServer
             fullSystem.server = server
             fullSystem.sslServer = sslServer
+            fullSystem.serverObjects = serverObjects
 
             fullSystem.addShutdownHook()
 

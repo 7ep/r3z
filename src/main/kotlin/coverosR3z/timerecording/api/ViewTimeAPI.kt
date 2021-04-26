@@ -154,12 +154,14 @@ class ViewTimeAPI(private val sd: ServerData) {
         val hideEditButtons = inASubmittedPeriod || reviewingOtherTimesheet || approvalStatus == ApprovalStatus.APPROVED
 
         val body = """
-            $viewingHeader
-            $navMenu
-            $timeEntryPanel
-            
-            <div class="timerows-container">
-                ${renderTimeRows(te, currentPeriod, hideEditButtons)}
+            <div id="outermost_container">
+                $viewingHeader
+                $navMenu
+                $timeEntryPanel
+                
+                <div class="timerows-container">
+                    ${renderTimeRows(te, currentPeriod, hideEditButtons)}
+                </div>
             </div>
             <script src="viewtime.js"></script>
         """

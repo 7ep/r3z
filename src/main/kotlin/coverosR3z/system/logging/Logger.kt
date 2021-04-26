@@ -10,18 +10,6 @@ import java.util.concurrent.ExecutorService
 class Logger(esForThreadsInServer: ExecutorService) : ILogger {
     private val loggerPrinter = ActionQueue("loggerPrinter", esForThreadsInServer)
 
-    /**
-     * Set the system to standard configuration for which
-     * log entries will print
-     */
-    override fun resetLogSettingsToDefault() {
-        logSettings = SystemConfiguration.LogSettings(
-            audit = true,
-            warn = true,
-            debug = true,
-            trace = false)
-    }
-
     override fun turnOnAllLogging() {
         logSettings = SystemConfiguration.LogSettings(
             audit = true,

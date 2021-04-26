@@ -7,4 +7,4 @@ import coverosR3z.uitests.Drivers
 
 val webDriver = Drivers.CHROME
 
-val fakeServerObjects = ServerObjects(emptyMap(), testLogger, 0, 0, false, scp = FakeSystemConfigurationPersistence())
+val fakeServerObjects = ServerObjects(emptyMap(), testLogger, 0, 0, false, scp = FakeSystemConfigurationPersistence(), socketTimeout = 10*1000)

@@ -40,7 +40,6 @@ class StaticFilesUtilities {
                         when {
                             filename.takeLast(4) == ".css" -> ServerUtilities.okCSS(fileContents)
                             filename.takeLast(3) == ".js" -> ServerUtilities.okJS(fileContents)
-                            filename.takeLast(4) == ".jpg" -> ServerUtilities.okJPG(fileContents)
                             filename.takeLast(5) == ".webp" -> ServerUtilities.okWEBP(fileContents)
                             filename.takeLast(5) == ".html" || filename.takeLast(4) == ".htm" -> ServerUtilities.okHTML(
                                 fileContents
