@@ -56,8 +56,11 @@ class RegisterAPI(private val sd: ServerData) {
             Elements.USERNAME_INPUT,
         )
 
-        override val path: String
-            get() = "register"
+        override val path = "register"
+
+        // potential errors
+        val duplicateUser = "duplicate_user"
+        val invalidUsername = "invalid_name"
 
         override fun handleGet(sd: ServerData): PreparedResponseData {
             // we won't even allow the user to see the register page unless they walk
@@ -78,17 +81,22 @@ class RegisterAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data.mapping
         val au = sd.bc.au
-        val usernameString = checkNotNull(data[Elements.USERNAME_INPUT.getElemName()])
-        val usernameTrimmed = usernameString.trim()
-        val username = UserName(usernameTrimmed)
-        val password = Password(generateRandomString(SIZE_OF_DECENT_PASSWORD))
         val invitationCode = InvitationCode.make(data[Elements.INVITATION_INPUT.getElemName()])
+        val username = try {
+            extractUsername(data)
+        } catch (ex: Throwable) {
+            return redirectTo("$path?${Elements.INVITATION_INPUT.getElemName()}=${invitationCode.value}&${Elements.ERROR_MESSAGE.getElemName()}=$invalidUsername")
+        }
+        val password = Password(generateRandomString(SIZE_OF_DECENT_PASSWORD))
         val result = au.register(username, password, invitationCode)
         return when (result.status) {
             RegistrationResultStatus.SUCCESS -> {
                 au.removeInvitation(result.user.employee)
                 val newUserHtml = """
                 <div class="container">
+                    <p>
+                        Hello ${username.value}!
+                    </p>
                     <p>
                         Your new password is <span id="${Elements.NEW_PASSWORD.getId()}">${password.value}</span>
                     </p>
@@ -104,17 +112,25 @@ class RegisterAPI(private val sd: ServerData) {
                 handleUnauthorized()
             }
             RegistrationResultStatus.USERNAME_ALREADY_REGISTERED -> {
-                redirectTo("$path?${Elements.INVITATION_INPUT.getElemName()}=${invitationCode.value}&${Elements.ERROR_MESSAGE.getElemName()}=duplicate_user")
+                redirectTo("$path?${Elements.INVITATION_INPUT.getElemName()}=${invitationCode.value}&${Elements.ERROR_MESSAGE.getElemName()}=$duplicateUser")
             }
         }
     }
 
+    private fun extractUsername(data: Map<String, String>): UserName {
+        val usernameString = checkNotNull(data[Elements.USERNAME_INPUT.getElemName()])
+        val usernameTrimmed = usernameString.trim()
+        val username = UserName(usernameTrimmed)
+        return username
+    }
+
     private fun registerHTML(invitationCode: String): String {
         val errorMsg = sd.ahd.queryString[Elements.ERROR_MESSAGE.getElemName()]
-        val renderedError = if (errorMsg != "duplicate_user") "" else """
-            <div id="error_message">The chosen username has already been selected.  Please choose another</div>
-        """.trimIndent()
-
+        val renderedError = when (errorMsg) {
+            duplicateUser -> """ <div id="error_message">The chosen username has already been selected.  Please choose another</div>"""
+            invalidUsername -> """ <div id="error_message">The name must be between $minUserNameSize and $maxUserNameSize chars</div>"""
+            else -> ""
+        }
         val body = """
         $renderedError
         <form method="post" action="$path">

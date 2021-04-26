@@ -56,12 +56,13 @@ class RegisterAPITests {
     fun testShouldHandleInvalidInputs_blankName() {
         val data = PostBodyData(mapOf(
             RegisterAPI.Elements.USERNAME_INPUT.getElemName() to "",
-            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.toString()))
+            RegisterAPI.Elements.INVITATION_INPUT.getElemName() to "abc123"))
         val sd = makeDefaultRegisterServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ RegisterAPI.handlePost(sd) }
+         val result = RegisterAPI.handlePost(sd)
 
-        assertEquals(usernameCannotBeEmptyMsg, ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: register?invitation=abc123&msg=invalid_name"))
     }
 
     /**

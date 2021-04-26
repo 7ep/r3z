@@ -269,6 +269,9 @@ class ServerUITests {
         // validation won't allow it through - username too short
         tooShortUsername(invitationCode)
 
+        // validation prevents a too-short username beginning with whitespace
+        tooShortUsernameWhitespace(invitationCode)
+
         // It should disallow entering a bunch of space characters
         disallowAllWhitespace(invitationCode)
 
@@ -336,6 +339,11 @@ class ServerUITests {
     private fun tooShortUsername(invitation: Invitation) {
         pom.rp.register("a".repeat(minUserNameSize - 1), invitation.code.value)
         assertEquals("register", pom.driver.title)
+    }
+
+    private fun tooShortUsernameWhitespace(invitation: Invitation) {
+        pom.rp.register("    " + "a".repeat(minUserNameSize - 1), invitation.code.value)
+        assertEquals("The name must be between 3 and 50 chars", pom.driver.findElement(By.id("error_message")).text)
     }
 
     private fun disallowBecauseMissingUsername(invitation: Invitation) {
