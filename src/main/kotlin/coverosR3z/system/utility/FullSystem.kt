@@ -82,7 +82,7 @@ class FullSystem private constructor(
         logImperative("Shutting down the non-ssl server thread")
         server.halfOpenServerSocket.close()
 
-        logImperative("Waiting for the ssl server thread")
+        logImperative("Shutting down the ssl server thread")
         sslServer.sslHalfOpenServerSocket.close()
 
         logImperative("Shutting down logging")

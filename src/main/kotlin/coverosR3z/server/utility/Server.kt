@@ -26,7 +26,7 @@ class Server(
     }
 
     fun createServerThread() : Thread {
-        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, serverObjects)
+        return ServerUtilities.createServerThread(executorService, fullSystem, halfOpenServerSocket, serverObjects, "regular server")
     }
 
 }

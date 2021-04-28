@@ -41,7 +41,9 @@ class ServerUtilities {
             executorService: ExecutorService,
             fullSystem: FullSystem,
             halfOpenServerSocket: ServerSocket,
-            serverObjects: ServerObjects) : Thread {
+            serverObjects: ServerObjects,
+            serverName: String
+        ) : Thread {
             return Thread {
                 try {
                     while (true) {
@@ -50,7 +52,7 @@ class ServerUtilities {
                         executorService.submit(Thread { processConnectedClient(server, fullSystem.pmd, serverObjects) })
                     }
                 } catch (ex: SocketException) {
-                   logImperative("Server was shutdown while waiting on accept. ${ex.message}")
+                   logImperative("$serverName was shutdown while waiting on accept. ${ex.message}")
                 }
             }
         }
@@ -152,15 +154,6 @@ class ServerUtilities {
                         logger.logTrace { "This is a keep-alive connection" }
                     }
                 } while (shouldKeepAlive)
-            } catch (ex : SocketTimeoutException) {
-                // we get here if we wait too long on reading from the socket
-                // without getting anything.  See SocketWrapper and soTimeout
-                logger.logTrace { "read timed out" }
-            } catch (ex : SocketException) {
-                logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
-                throw ex
-            } catch (ex: SSLException) {
-                logger.logTrace { ex.message ?: ex.toString() }
             } finally {
                 logger.logTrace { "closing server socket" }
                 server.close()
@@ -193,14 +186,16 @@ class ServerUtilities {
                     }
                 }
             } catch (ex : SocketTimeoutException) {
-                // This passes exception handling for this specific exception to the caller
-                throw ex
+                // we get here if we wait too long on reading from the socket
+                // without getting anything.  See SocketWrapper and soTimeout
+                logger.logTrace { "read timed out" }
+                return analyzedHttpData
             } catch (ex : SocketException) {
-                // This passes exception handling for this specific exception to the caller
+                logger.logTrace { "client closed their connection while we were waiting to read from the socket" }
                 throw ex
             } catch (ex: SSLException) {
-                // This passes exception handling for this specific exception to the caller
-                throw ex
+                logger.logTrace { ex.message ?: ex.toString() }
+                return analyzedHttpData
             } catch (ex: Exception) {
                 // If there ane any complaints whatsoever, we return them here
                 handleInternalServerError(ex.message ?: ex.stackTraceToString(), ex.stackTraceToString(), logger)
