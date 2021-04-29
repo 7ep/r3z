@@ -94,9 +94,9 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<div class="navitem" id="timeperiod_display">""") &&
-                result.contains("""<div id="timeperiod_display_start">2021-03-16</div>""") &&
-                result.contains("""<div id="timeperiod_display_end">2021-03-31</div>"""))
+        assertTrue(result.contains("""id="timeperiod_display"""") &&
+                result.contains("""id="timeperiod_display_start">2021-03-16""") &&
+                result.contains("""id="timeperiod_display_end">2021-03-31"""))
     }
 
     /**
@@ -109,9 +109,9 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<div class="navitem" id="timeperiod_display">""") &&
-                result.contains("""<div id="timeperiod_display_start">2021-03-16</div>""") &&
-                result.contains("""<div id="timeperiod_display_end">2021-03-31</div>"""))
+        assertTrue(result.contains("""id="timeperiod_display"""") &&
+                result.contains("""id="timeperiod_display_start">2021-03-16""") &&
+                result.contains("""id="timeperiod_display_end">2021-03-31"""))
     }
 
     /**
@@ -245,9 +245,9 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<div class="navitem" id="timeperiod_display">""") &&
-                    result.contains("""<div id="timeperiod_display_start">2021-01-01</div>""") &&
-                    result.contains("""<div id="timeperiod_display_end">2021-01-15</div>"""))
+        assertTrue(result.contains("""id="timeperiod_display"""") &&
+                result.contains("""id="timeperiod_display_start">2021-01-01""") &&
+                result.contains("""id="timeperiod_display_end">2021-01-15"""))
         assertTrue("The page should announce we are viewing another's timesheet",
             result.contains("Viewing DefaultEmployee's unsubmitted timesheet"))
     }

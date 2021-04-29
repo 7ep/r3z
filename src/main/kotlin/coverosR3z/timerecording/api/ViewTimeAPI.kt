@@ -216,23 +216,24 @@ class ViewTimeAPI(private val sd: ServerData) {
         neededHours: String,
     ): String {
         return """ 
-                <nav class="time_period_selector navitem">
+                <nav id="control_panel">
                     $submitButton
                     $switchEmployeeUI
                     
                     $approveUI
-                    <div>
+                    <div id="current_period_selector">
+                        <label id="current_period_selector_label">Current period selector</label>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
                         ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                        <div class="navitem" id="timeperiod_display">
+                        <div class="period_selector_item" id="timeperiod_display">
                             <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
                             <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
                         </div>
-                        <div class="navitem" id="total_hours">
+                        <div class="period_selector_item" id="total_hours">
                             <label>hours:</label>
                             <div id="total_hours_value">$totalHours</div>
                         </div>
-                        <div class="navitem" id="needed_hours">
+                        <div class="period_selector_item" id="needed_hours">
                             <label>need:</label>
                             <div id="needed_hours_value">$neededHours</div>
                         </div>
@@ -248,7 +249,8 @@ class ViewTimeAPI(private val sd: ServerData) {
      */
     private fun createEmployeeSwitch(currentPeriod: TimePeriod): String {
         return if (sd.ahd.user.role != Role.ADMIN) "" else """                
-                <form class="navitem" action="$path">
+                <form id="employee_switch_form" class="navitem" action="$path">
+                    <label id="view_other_timesheet_label">View other timesheet</label>
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
                         <option selected disabled hidden value="">Self</option>
@@ -272,7 +274,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
         """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """           
-            <form class="navitem" action="$path">
+            <form class="period_selector_item" action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getNext().start.stringValue}" /> 
                 $employeeField
                 <button id="${Elements.NEXT_PERIOD.getId()}">❯</button>
@@ -288,7 +290,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
         """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """      
-            <form class="navitem" action="$path">
+            <form class="period_selector_item" action="$path">
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.getPrevious().start.stringValue}" /> 
                 $employeeField
                 <button id="${Elements.PREVIOUS_PERIOD.getId()}">❮</button>
@@ -300,7 +302,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val employeeField = if (! reviewingOtherTimesheet) "" else
             """<input type="hidden" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}" value="${employee.id.value}" />"""
         return """       
-            <form class="navitem" action="$path">
+            <form class="period_selector_item" action="$path">
                 <button id="${Elements.CURRENT_PERIOD.getId()}">Current</button>
                 $employeeField
             </form>
@@ -487,7 +489,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <div class="row">
                     <div class="project">
                         <label for="${Elements.PROJECT_INPUT_CREATE.getId()}">Project:</label>
-                        <input list="projects" type="text" placeholder="choose" id="${Elements.PROJECT_INPUT_CREATE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" />
+                        <input autofocus list="projects" type="text" placeholder="choose" id="${Elements.PROJECT_INPUT_CREATE.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" />
                         <datalist id="projects">
                             ${projectsToOptions(projects)}
                         </datalist>
@@ -531,7 +533,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     <div class="row">
                         <div class="project">
                             <label for="${Elements.PROJECT_INPUT_EDIT.getId()}">Project:</label>
-                            <input list="projects" type="text" id="${Elements.PROJECT_INPUT_EDIT.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" value="${safeHtml(te.project.name.value)}" />
+                            <input autofocus list="projects" type="text" id="${Elements.PROJECT_INPUT_EDIT.getId()}" name="${Elements.PROJECT_INPUT.getElemName()}" required="required" value="${safeHtml(te.project.name.value)}" />
                             <datalist id="projects">
                                 ${projectsToOptions(projects)}
                             </datalist>

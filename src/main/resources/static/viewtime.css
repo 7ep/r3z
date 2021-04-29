@@ -103,21 +103,67 @@ h2 {
     flex-direction: column;
 }
 
- nav.time_period_selector {
+ nav#control_panel {
     border: 2px solid #e2e2e2;
     border-radius: .5em;
     background-color: white;
     opacity: 82%;
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
+    justify-content: space-between;
+    align-content: center;
     flex-wrap: wrap;
-    padding: 1px;
     margin: 1px;
  }
 
- nav.time_period_selector form {
+nav#control_panel .navitem {display: flex;border: 1px solid grey;margin-left: 10px;margin-right: 10px;margin-top: 13px;}
+
+nav#control_panel div.navitem {
+    border-radius: 4px;
+}
+
+nav#control_panel select,
+nav#control_panel button {
+    height: 28px;
+    align-items: center;
+    border-radius: 4px;
+}
+
+nav#control_panel button {
+  cursor: pointer;
+  color: white;
+  background-color: #C65364;
+  border: 1.8px solid #3b3b3b;
+  font-size: 16px;
+  display: flex;
+}
+
+nav#control_panel button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
+
+nav#control_panel button:focus {
+    outline: none;
+    border: 1.8px solid blue;
+}
+
+nav#control_panel button:disabled {
+    cursor: inherit;
+    color: white;
+    background-color: lightgray;
+}
+
+nav#control_panel div#current_period_selector {
+ flex-direction: row;
+ display: flex;
+ height: 28px;
+ margin-top: 13px;
+ position: relative;
  }
+
+form.period_selector_item,
+ div.period_selector_item {
+}
 
  #timeperiod_display {
     color: black;
@@ -128,7 +174,6 @@ h2 {
     text-align: center;
     flex-direction: column;
     justify-content: center;
-    margin: -1px;
  }
 
  #timeperiod_display div {
@@ -155,45 +200,7 @@ h2 {
 #total_hours #total_hours_value {
 }
 
-nav .navitem {
-    height: 26px;
-}
-
-nav div.navitem {
-    border-radius: 4px;
-}
-
-nav .navitem select,
-nav .navitem button {
-    height: 28px;
-    align-items: center;
-    border-radius: 4px;
-}
-
-nav button {
-  cursor: pointer;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  font-size: 16px;
-  display: flex;
-}
-
-nav button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
-
-nav button:focus {
-    outline: none;
-    border: 1.8px solid blue;
-}
-
-nav button:disabled {
-    cursor: inherit;
-    color: white;
-    background-color: lightgray;
-}
+#current_period_selector_label {position: absolute;top: -13px;left: 67px;font-size: 13px;}
 
 .data-entry div {
     position: relative;
@@ -358,3 +365,13 @@ width: 80px;
 font-size: 16px;
 }
 
+#employee_switch_form {
+    position: relative;
+}
+
+#view_other_timesheet_label {
+    position: absolute;
+    top: -13px;
+    left: 12px;
+    font-size: 13px;
+}
