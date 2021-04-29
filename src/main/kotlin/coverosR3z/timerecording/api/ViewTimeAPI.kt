@@ -174,25 +174,18 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun createApproveUI(reviewingOtherTimesheet: Boolean, isSubmitted: Boolean, approvalStatus: ApprovalStatus, employee: Employee, timePeriod: TimePeriod): String {
         if (! reviewingOtherTimesheet) return ""
         val renderDisabled = if (! isSubmitted) "disabled" else ""
-        return if (approvalStatus == ApprovalStatus.UNAPPROVED) {
-            """
+        val buttonHtml = if (approvalStatus == ApprovalStatus.UNAPPROVED) {
+            """<button $renderDisabled>Approve</button>"""
+        } else {
+            """<button>Unapprove</button>"""
+        }
+        return """
             <form class="navitem" action="${ApproveApi.path}" method="post">
                 <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
-                <button $renderDisabled>Approve</button>
+                $buttonHtml
             </form>
         """.trimIndent()
-        } else {
-            """
-            <form action="${ApproveApi.path}" method="post">
-                <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
-                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
-                <input type="hidden" name="${ApproveApi.Elements.IS_UNAPPROVAL.getElemName()}" value="true" />
-                <button>Unapprove</button>
-            </form>
-        """.trimIndent()
-        }
-
     }
 
     private fun obtainCurrentTimePeriod(): TimePeriod {
@@ -218,9 +211,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         return """ 
                 <nav id="control_panel">
                     $submitButton
+                    $approveUI
                     $switchEmployeeUI
                     
-                    $approveUI
                     <div id="current_period_selector">
                         <label id="current_period_selector_label">Current period selector</label>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
