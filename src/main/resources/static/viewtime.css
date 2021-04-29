@@ -286,7 +286,8 @@ form.period_selector_item,
 }
 
 .data-entry select:focus,
-.data-entry input:focus {
+.data-entry input:focus,
+.data-entry textarea:focus {
     outline: none;
     background-color: inherit;
     border-radius: 6px;
