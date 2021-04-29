@@ -104,7 +104,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         fun projectsToOptions(projects: List<Project>): String {
             return projects.sortedBy { it.name.value }.joinToString("") {
-                """<option value="${safeAttr(it.name.value)}" />"""
+                """<option value="${safeAttr(it.name.value)}" >"""
             }
         }
 
@@ -502,7 +502,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 <div class="row">
                     <div class="details">
                         <label   for="${Elements.DETAILS_INPUT_CREATE.getId()}">Details:</label>
-                        <textarea id="${Elements.DETAILS_INPUT_CREATE.getId()}"name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" ></textarea>
+                        <textarea id="${Elements.DETAILS_INPUT_CREATE.getId()}" name="${Elements.DETAIL_INPUT.getElemName()}" maxlength="$MAX_DETAILS_LENGTH" ></textarea>
                     </div>
                     
                     <div class="action">
