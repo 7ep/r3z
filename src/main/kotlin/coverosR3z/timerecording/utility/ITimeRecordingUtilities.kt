@@ -49,4 +49,5 @@ interface ITimeRecordingUtilities {
     fun isApproved(employee: Employee, startDate: Date) : ApprovalStatus
     fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus
     fun findProjectByName(name: ProjectName): Project
+    fun deleteProject(project: Project): DeleteProjectResult
 }

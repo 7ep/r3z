@@ -240,4 +240,16 @@ class TimeRecordingUtilities(
     override fun findProjectByName(name: ProjectName): Project {
         return persistence.getProjectByName(name)
     }
+
+    override fun deleteProject(project: Project): DeleteProjectResult {
+        require(persistence.getProjectById(project.id) != NO_PROJECT)
+
+        return if (persistence.isProjectUsedForTimeEntry(project)) {
+            DeleteProjectResult.USED
+        } else {
+            persistence.deleteProject(project)
+            DeleteProjectResult.SUCCESS
+        }
+    }
+
 }

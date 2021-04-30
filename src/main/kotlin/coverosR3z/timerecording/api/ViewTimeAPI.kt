@@ -155,11 +155,12 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val body = """
             <div id="outermost_container">
-                $viewingHeader
-                $navMenu
-                $timeEntryPanel
-                
-                <div class="timerows-container">
+                <div id="control_surface">
+                    $viewingHeader
+                    $navMenu
+                    $timeEntryPanel
+                </div>
+                <div id="timerows-container">
                     ${renderTimeRows(te, currentPeriod, hideEditButtons)}
                 </div>
             </div>
@@ -214,27 +215,35 @@ class ViewTimeAPI(private val sd: ServerData) {
                     $approveUI
                     $switchEmployeeUI
                     
-                    <div id="current_period_selector">
-                        <label id="current_period_selector_label">Current period selector</label>
+                    <div id="time_period_selector">
+                        <label id="time_period_selector_label">Time period selector</label>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
                         ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
-                        <div class="period_selector_item" id="timeperiod_display">
-                            <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
-                            <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
-                        </div>
-                        <div class="period_selector_item" id="total_hours">
-                            <label>hours:</label>
-                            <div id="total_hours_value">$totalHours</div>
-                        </div>
-                        <div class="period_selector_item" id="needed_hours">
-                            <label>need:</label>
-                            <div id="needed_hours_value">$neededHours</div>
-                        </div>
+                        ${timeperiodDisplay(currentPeriod)}
+                        ${totalHoursDisplay(totalHours)}
+                        ${neededHoursDisplay(neededHours)}
                         ${nextPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                     </div>
                 </nav>
                 """.trimIndent()
     }
+
+    private fun neededHoursDisplay(neededHours: String) =
+        """       <div class="period_selector_item" id="needed_hours">
+                                <label>need:</label>
+                                <div id="needed_hours_value">$neededHours</div>
+                            </div>"""
+
+    private fun totalHoursDisplay(totalHours: String) = """ <div class="period_selector_item" id="total_hours">
+                                <label>hours:</label>
+                                <div id="total_hours_value">$totalHours</div>
+                            </div>"""
+
+    private fun timeperiodDisplay(currentPeriod: TimePeriod) =
+        """     <div class="period_selector_item" id="timeperiod_display">
+                                <div id="timeperiod_display_start">${currentPeriod.start.stringValue}</div>
+                                <div id="timeperiod_display_end">${currentPeriod.end.stringValue}</div>
+                            </div>"""
 
     /**
      * Creates the part of the UI that allows an admin or approver to switch
@@ -256,7 +265,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
     private fun allEmployeesOptions(): String {
         val employees = sd.bc.tru.listAllEmployees()
-        return employees.filterNot { it == sd.ahd.user.employee }.joinToString{"""<option value="${it.id.value}">${it.name.value}</option>"""}
+        return employees.filterNot { it == sd.ahd.user.employee }.joinToString(""){"""<option value="${it.id.value}">${it.name.value}</option>"""}
     }
 
     private fun nextPeriodButton(
@@ -393,11 +402,16 @@ class ViewTimeAPI(private val sd: ServerData) {
         reviewingOtherTimesheet: Boolean
     ): String {
         return if (! (inASubmittedPeriod || reviewingOtherTimesheet)) {
-            return if (idBeingEdited != null) {
+            val dataEntryHtml = if (idBeingEdited != null) {
                 renderEditRow(te.single{it.id.value == idBeingEdited}, projects, currentPeriod)
             } else {
                 renderCreateTimeRow(currentPeriod)
             }
+            return """
+                <div id="data-entry-container">
+                    $dataEntryHtml
+                </div>
+            """.trimIndent()
         } else {
             ""
         }
@@ -412,30 +426,44 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         var readOnlyRows = ""
         for (date in timeentriesByDate.keys.sortedDescending()) {
-            readOnlyRows = renderDailyTimeEntryDivider(timeentriesByDate, date, readOnlyRows)
-            readOnlyRows += timeentriesByDate[date]
-                ?.sortedBy { it.project.name.value }
-                ?.joinToString("") {
-                        renderReadOnlyRow(it, currentPeriod, hideEditButtons)
-                }
+            readOnlyRows += renderTimeEntriesForDate(timeentriesByDate, date, currentPeriod, hideEditButtons)
         }
 
         return readOnlyRows
-
     }
 
-    /**
-     * Show the date and calculate / show the number of hours recorded for that date
-     */
-    private fun renderDailyTimeEntryDivider(
+    private fun renderTimeEntriesForDate(
         timeentriesByDate: Map<Date, List<TimeEntry>>,
         date: Date,
-        readOnlyRows: String
+        currentPeriod: TimePeriod,
+        hideEditButtons: Boolean
     ): String {
-        var readOnlyRows1 = readOnlyRows
         val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
-        readOnlyRows1 += "<div>${date.viewTimeHeaderFormat}, Daily hours: $dailyHours</div>"
-        return readOnlyRows1
+        val dateHeaderString = "${date.viewTimeHeaderFormat}, Daily hours: $dailyHours"
+
+        val tableRows = timeentriesByDate[date]
+            ?.sortedBy { it.project.name.value }
+            ?.joinToString("") {
+                renderReadOnlyRow(it, currentPeriod, hideEditButtons)
+            }
+
+        val actionColumnHeader = if (hideEditButtons) "" else """<th class="act">Act</th>"""
+
+        return """
+            
+            <table>
+                <caption>$dateHeaderString</caption>
+                <thead>
+                    <th class="prj">Project</th>
+                    <th class="time">Time</th>
+                    <th class="dtl">Details</th>
+                    $actionColumnHeader
+                </thead>
+                <tbody>
+                    $tableRows
+                </tbody>
+            </table>
+        """.trimIndent()
     }
 
     private fun renderReadOnlyRow(
@@ -445,29 +473,25 @@ class ViewTimeAPI(private val sd: ServerData) {
     ): String {
 
         val actionButtons = if (hideEditButtons) "" else """
-        <div class="action time-entry-information">
-            <form action="$path">
-                <input type="hidden" name="${safeAttr(Elements.EDIT_ID.getElemName())}" value="${it.id.value}" /> 
-                <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" /> 
-                <button class="${Elements.EDIT_BUTTON.getElemClass()}">edit</button>
-            </form>
-        </div>
+        <td>
+            <a href="$path?${Elements.EDIT_ID.getElemName()}=${it.id.value}&${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.start.stringValue}">edit</a>
+        </td>
         """
 
         val detailContent = if (it.details.value.isBlank()) "&nbsp;" else safeHtml(it.details.value)
         return """
-     <div class="${Elements.READ_ONLY_ROW.getElemClass()}" id="time-entry-${it.id.value}">
-        <div class="project time-entry-information">
-            <div class="readonly-data">${safeHtml(it.project.name.value)}</div>
-        </div>
-        <div class="time time-entry-information">
-            <div class="readonly-data">${it.time.getHoursAsString()}</div>
-        </div>
-        <div class="details time-entry-information">
-            <div class="readonly-data">$detailContent</div>
-        </div>
-        $actionButtons
-    </div>
+        <tr id="time-entry-${it.id.value}">
+            <td>
+                ${safeHtml(it.project.name.value)}
+            </td>
+            <td>
+                ${it.time.getHoursAsString()}
+            </td>
+            <td>
+                $detailContent
+            </td>
+            $actionButtons
+        </tr>
     """
     }
 
@@ -476,9 +500,13 @@ class ViewTimeAPI(private val sd: ServerData) {
      */
     private fun renderCreateTimeRow(currentPeriod: TimePeriod): String {
         val projects = sd.bc.tru.listAllProjects()
-
+        val defaultDateValue = if (currentPeriod == TimePeriod.getTimePeriodForDate(Date.now())) {
+            Date.now().stringValue
+        } else {
+            currentPeriod.start.stringValue
+        }
         return """
-            <form id="${Elements.CREATE_TIME_ENTRY_FORM.getId()}" class="data-entry" action="${EnterTimeAPI.path}" method="post">
+            <form id="${Elements.CREATE_TIME_ENTRY_FORM.getId()}" action="${EnterTimeAPI.path}" method="post">
                 <div class="row">
                     <div class="project">
                         <label for="${Elements.PROJECT_INPUT_CREATE.getId()}">Project:</label>
@@ -490,7 +518,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         
                     <div class="date">
                         <label for="${Elements.DATE_INPUT_CREATE.getId()}">Date:</label>
-                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="${Date.now().stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
+                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="$defaultDateValue" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
                     </div>
                     
                     <div class="time">
@@ -506,7 +534,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </div>
                     
                     <div class="action">
-                        <button id="${Elements.CREATE_BUTTON.getId()}">Enter time</button>
+                        <button id="${Elements.CREATE_BUTTON.getId()}">Enter</button>
                     </div>
                 </div>
             </form>
@@ -519,7 +547,6 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderEditRow(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
 
         return """
-            <div class="data-entry">
                 <form id="edit_time_panel" action="${EditTimeAPI.path}" method="post">
                     <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
@@ -569,7 +596,6 @@ class ViewTimeAPI(private val sd: ServerData) {
                             <button form="delete_form" id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
                             <button form="edit_time_panel" id="${Elements.SAVE_BUTTON.getId()}">Save</button>
                         </div>
-            </div>
     """
     }
 

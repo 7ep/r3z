@@ -19,6 +19,8 @@ class FakeTimeEntryPersistence(
     var persistNewEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getProjectByNameBehavior : () -> Project = { NO_PROJECT },
     var getProjectByIdBehavior : (id : ProjectId) -> Project = { NO_PROJECT },
+    var isProjectUsedForTimeEntryBehavior : () -> Boolean = { false },
+    var deleteProjectBehavior : () -> Boolean = { true },
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var getEmployeeByNameBehavior : () -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
@@ -125,6 +127,14 @@ class FakeTimeEntryPersistence(
 
     override fun getEmployeeByName(employeeName: EmployeeName): Employee {
         return getEmployeeByNameBehavior()
+    }
+
+    override fun isProjectUsedForTimeEntry(project: Project): Boolean {
+        return isProjectUsedForTimeEntryBehavior()
+    }
+
+    override fun deleteProject(project: Project): Boolean {
+        return deleteProjectBehavior()
     }
 
 }

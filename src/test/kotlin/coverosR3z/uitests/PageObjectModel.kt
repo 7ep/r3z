@@ -14,7 +14,6 @@ open class PageObjectModel {
     lateinit var epp : EnterProjectPage
     lateinit var lop : LogoutPage
     lateinit var vtp : ViewTimePage
-    lateinit var msc : Misc
     lateinit var insecureDomain: String
     lateinit var sslDomain : String
     lateinit var driver: WebDriver

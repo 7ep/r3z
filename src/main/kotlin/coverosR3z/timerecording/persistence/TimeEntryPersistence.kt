@@ -82,6 +82,14 @@ class TimeEntryPersistence(
         }
     }
 
+    override fun isProjectUsedForTimeEntry(project: Project): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteProject(project: Project): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
         return employeeDataAccess.actOn { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))

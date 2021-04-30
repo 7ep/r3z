@@ -16,6 +16,7 @@ class FakeTimeRecordingUtilities(
     var createTimeEntryBehavior : () -> RecordTimeResult = { RecordTimeResult() },
     var changeEntryBehavior : () -> RecordTimeResult = { RecordTimeResult() },
     var createProjectBehavior : () -> Project = { DEFAULT_PROJECT },
+    var deleteProjectBehavior : () -> DeleteProjectResult = { DeleteProjectResult.SUCCESS },
     var createEmployeeBehavior : () -> Employee = { DEFAULT_EMPLOYEE },
     var getEntriesForEmployeeOnDateBehavior : () -> Set<TimeEntry> = { emptySet() },
     var getAllEntriesForEmployeeBehavior : () -> Set<TimeEntry> = { emptySet() },
@@ -127,5 +128,9 @@ class FakeTimeRecordingUtilities(
 
     override fun findProjectByName(name: ProjectName): Project {
         return findProjectByNameBehavior()
+    }
+
+    override fun deleteProject(project: Project): DeleteProjectResult {
+        return deleteProjectBehavior()
     }
 }

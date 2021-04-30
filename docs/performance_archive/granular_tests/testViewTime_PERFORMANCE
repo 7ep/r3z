@@ -426,3 +426,8 @@
 2021-04-29	numberThreads: 20	numberRequests: 100	time: 1225
 2021-04-29	numberThreads: 20	numberRequests: 100	time: 1156
 2021-04-29	numberThreads: 20	numberRequests: 100	time: 852
+2021-04-30	numberThreads: 20	numberRequests: 100	time: 847
+2021-04-30	numberThreads: 20	numberRequests: 100	time: 859
+2021-04-30	numberThreads: 20	numberRequests: 100	time: 883
+2021-05-01	numberThreads: 20	numberRequests: 100	time: 858
+2021-05-01	numberThreads: 20	numberRequests: 100	time: 830

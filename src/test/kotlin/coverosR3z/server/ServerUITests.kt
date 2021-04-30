@@ -228,7 +228,7 @@ class ServerUITests {
 
     private fun `head to the homepage on an insecure endpoint and find ourselves redirected to the SSL endpoint`() {
         pom.driver.get("${pom.insecureDomain}/${HomepageAPI.path}")
-        assertEquals("login page", pom.driver.title)
+        assertEquals("${pom.sslDomain}/login", pom.driver.currentUrl)
     }
 
     private fun `general - should be able to see the homepage and the authenticated homepage`() {

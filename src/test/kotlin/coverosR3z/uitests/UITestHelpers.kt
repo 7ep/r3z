@@ -149,7 +149,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * Gets the number of hours for a readonly line.
      */
     fun getTimeForEntry(id: Int) : String {
-        return driver.findElement(By.cssSelector("#time-entry-$id div.time div.readonly-data")).text
+        return driver.findElement(By.cssSelector("#time-entry-$id > :nth-child(2)")).text
     }
 
     fun submitTimeForPeriod() {
@@ -195,7 +195,6 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * Enters a new time entry.
      */
     fun enterTime(project: String, time: String, details: String, date: Date) {
-        val msc = Misc(driver)
         gotoDate(date)
         val createTimeEntryRow = driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_TIME_ENTRY_FORM.getId()))
         val projectSelector = createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.PROJECT_INPUT.getElemName()))
@@ -203,7 +202,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         projectSelector.sendKeys(project)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.TIME_INPUT.getElemName())).sendKeys(time)
         createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DETAIL_INPUT.getElemName())).sendKeys(details)
-        createTimeEntryRow.findElement(By.name(ViewTimeAPI.Elements.DATE_INPUT.getElemName())).sendKeys(msc.calcDateString(date))
+        setDateForNewEntry(date)
         clickCreateNewTimeEntry()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
         assertEquals("Your time entries", driver.title)
@@ -241,7 +240,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickEditTimeEntry(id : Int) {
         driver
             .findElement(
-                By.cssSelector("#time-entry-$id .${ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()}")).click()
+                By.cssSelector("#time-entry-$id > :nth-child(4)")).click()
     }
 
     /**
@@ -338,23 +337,4 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     }
 
 
-}
-
-/**
- * Miscellaneous functions, useful in a variety of circumstances
- */
-class Misc(private val driver: WebDriver) {
-
-    /**
-     * Chrome takes date input differently than other browsers.
-     * This helps us avoid a bit of boilerplate so we can use
-     * the proper
-     */
-    fun calcDateString(date : Date) : String {
-        return if (driver is ChromeDriver) {
-            date.chromeStringValue
-        } else {
-            date.stringValue
-        }
-    }
 }

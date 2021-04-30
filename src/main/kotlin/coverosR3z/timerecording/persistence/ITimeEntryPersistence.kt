@@ -38,4 +38,6 @@ interface ITimeEntryPersistence {
     fun approveTimesheet(stp: SubmittedPeriod): Boolean
     fun unapproveTimesheet(stp: SubmittedPeriod): Boolean
     fun getEmployeeByName(employeeName: EmployeeName): Employee
+    fun isProjectUsedForTimeEntry(project: Project): Boolean
+    fun deleteProject(project: Project): Boolean
 }

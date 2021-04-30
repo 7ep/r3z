@@ -609,6 +609,52 @@ class TimeRecordingUtilityTests {
         assertEquals(ApprovalResultStatus.FAILURE, result)
     }
 
+    /**
+     * After creating a project, you can delete it, as long as it hasn't
+     * been used for any time entries.  If it has been used, you should get
+     * up to three example time entries where it was used.
+     */
+    @Test
+    fun `I should be able to delete a project that hasn't been used yet`() {
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+
+        val result = tru.deleteProject(DEFAULT_PROJECT)
+
+        assertEquals(DeleteProjectResult.SUCCESS, result)
+    }
+
+    /**
+     * See [I should be able to delete a project that hasn't been used yet]
+     */
+    @Test
+    fun `I should not be able to delete a project that has been used for a time entry`() {
+        tep.isProjectUsedForTimeEntryBehavior = { true }
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+
+        val result = tru.deleteProject(DEFAULT_PROJECT)
+
+        assertEquals(DeleteProjectResult.USED, result)
+    }
+
+    /**
+     * If somehow I pass in a project that isn't in the database,
+     * it should throw an exception.  This might happen, for example, if
+     * somehow the same request to delete a project happened twice.
+     */
+    @Test
+    fun `I should not be able to delete a project that does not exist in the database`() {
+        assertThrows(java.lang.IllegalArgumentException::class.java) { tru.deleteProject(DEFAULT_PROJECT) }
+    }
+
+    /**
+     * This is really just a subset of [I should not be able to delete a project that does not exist in the database]
+     */
+    @Test
+    fun testDeleteProject_NoProject() {
+        assertThrows(java.lang.IllegalArgumentException::class.java) { tru.deleteProject(NO_PROJECT) }
+    }
+
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         return TimeRecordingUtilities(
             TimeEntryPersistence(createEmptyDatabase(), logger = testLogger),

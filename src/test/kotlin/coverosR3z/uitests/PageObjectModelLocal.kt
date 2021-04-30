@@ -41,7 +41,6 @@ class PageObjectModelLocal : PageObjectModel() {
             pom.llp = LoggingPage(driver, pom.sslDomain)
             pom.lop = LogoutPage(driver, pom.sslDomain)
             pom.vtp = ViewTimePage(driver, pom.sslDomain)
-            pom.msc = Misc(driver)
             return pom
         }
     }

@@ -1,169 +1,43 @@
-#outermost_container {max-width: 900px;margin: auto;}
+#outermost_container {
+    max-width: 900px;margin: auto;
+}
 
+#control_surface {
+    position: sticky;
+    top: 47px;
+    z-index: 1;
+    background-color: white;
+}
+
+/*
+header is used to indicate to approvers whether this is a submitted
+timesheet or not
+*/
 h2 {
   text-align: center;
-  font-size: 1.3em;
-  margin: 10px;
-  color: white;
+  font-size: 18px;
+  color: black;
 }
 
-.time-entry-information input,
-.time-entry-information select,
-.time-entry-information div {
-    line-height: 26px;
-}
-
-.timerows-container .time input {
-    width: 36px;
-}
-
-.timerows-container .project {
-  position: relative;
-}
-
-.timerows-container .project select {
-  width: inherit;
-}
-
-.readonly-time-entry-row .details > div {
-}
-
-.readonly-time-entry-row .time-entry-information > div {
-    line-height: 16px;
-}
-
-.timerows-container .time {
-     position: relative;
-}
-
-.timerows-container .details {
-     position: relative;
-}
-
-.timerows-container .details.time-entry-information {flex: 4;}
-
-.timerows-container .details > div {
-    overflow-wrap: anywhere;
-}
-
-.timerows-container .details input {
-  width: 107px;
-}
-
-.timerows-container .editbutton {
-}
-
-.timerows-container input {
-  background-color: #e3dddc;
-  border: 1px white solid;
-  display: flex;
-}
-
-.timerows-container .time-entry-information {
-  background-color: #e3dddc;
-  border: 1px white solid;
-  flex: 1;
-}
-
-.readonly-time-entry-row .time-entry-information.action {
-    flex: 0.3;
-}
-
-.timerows-container .project.time-entry-information {
-    width: 0;
-    flex: 2;
-}
-
-.timerows-container .time-entry-information > div {
-    display: flex;
-}
-
-.readonly-time-entry-row {
-  display: flex;
-  border-bottom: 1.5px #a8a1a0 solid;
-  font-size: 16px;
-}
-
+/*
+For the widget on the page to select the time period,
+and also to show some stats for the current time period
+*/
 .time_period_selector form,
-.time_period_selector > div,
-.timerows-container form {
+.time_period_selector > div {
     display: flex;
     margin: 1px;
     align-items: center;
 }
 
-.timerows-container {
-    border: 2px solid #e2e2e2;
-    margin: auto;
-    border-radius: .5em;
-    background-color: white;
-    opacity: 82%;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-}
 
- nav#control_panel {
-    border: 2px solid #e2e2e2;
-    border-radius: .5em;
-    background-color: white;
-    opacity: 82%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    flex-wrap: wrap;
-    margin: 1px;
- }
-
-nav#control_panel .navitem {display: flex;margin-left: 10px;margin-right: 10px;margin-top: 13px;}
-
-nav#control_panel div.navitem {
-    border-radius: 4px;
-}
-
-nav#control_panel select,
-nav#control_panel button {
-    height: 28px;
-    align-items: center;
-    border-radius: 4px;
-}
-
-nav#control_panel button {
-  cursor: pointer;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  font-size: 16px;
-  display: flex;
-}
-
-nav#control_panel button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
-
-nav#control_panel button:focus {
-    outline: none;
-    border: 1.8px solid blue;
-}
-
-nav#control_panel button:disabled {
-    cursor: inherit;
-    color: white;
-    background-color: lightgray;
-}
-
-nav#control_panel div#current_period_selector {
+nav#control_panel div#time_period_selector {
  flex-direction: row;
  display: flex;
  height: 28px;
  margin-top: 13px;
  position: relative;
  }
-
-form.period_selector_item,
- div.period_selector_item {
-}
 
  #timeperiod_display {
     color: black;
@@ -200,166 +74,11 @@ form.period_selector_item,
 #total_hours #total_hours_value {
 }
 
-#current_period_selector_label {position: absolute;top: -13px;left: 67px;font-size: 13px;}
+#time_period_selector_label {position: absolute;top: -13px;left: 67px;font-size: 13px;}
 
-.data-entry div {
-    position: relative;
-    padding: 2px;
-    display: flex;
-    flex: 1;
-}
-
-.data-entry label {
-    position: absolute;
-    left: 6px;
-    top: -2px;
-    font-size: 0.6em;
-    color: black;
-    z-index: 1;
-    background-color: white;
-}
-
-.data-entry .date {
-    flex: 2;
-}
-
-.data-entry .project {
-    flex: 2;
-}
-
-#enter_time_panel {
-    flex-direction: column;
-}
-
-#enter_time_panel .row {
-    width: 100%;
-    flex-direction: row;
-}
-
-#enter_time_panel .row .action {
-   flex: 0;
-}
-
-.data-entry .details textarea {
-   height: 20px;
-}
-
-#edit_time_panel {
-    display: flex;
-    flex-direction: column;
-}
-
-#edit_time_panel .details textarea {
-    height: 55px;
-}
-
-.data-entry {
-  border: 2px solid #e2e2e2;
-  margin: auto;
-  border-radius: 6px;
-  background-color: white;
-  opacity: 82%;
-  padding: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  flex-direction: column;
-}
-
-#create-date {
-  width: 0;
-}
-
-.data-entry select,
-.data-entry textarea,
-.data-entry input {
-  border: 1.8px solid #3b3b3b;
-  border-radius: 6px;
-  background-color: #CFC1C1;
-  opacity: 82%;
-  color: #333333;
-  padding: 3px;
-  height: 20px;
-  flex: 1;
-  width: 100%;
-  font-size: 16px;
-}
-
-.data-entry select:focus,
-.data-entry input:focus,
-.data-entry textarea:focus {
-    outline: none;
-    background-color: inherit;
-    border-radius: 6px;
-    border: 1.8px solid blue;
-}
-
-.data-entry select {
-  height: 30px;
-  font-size: 16px;
-}
-
-.data-entry button {
-  cursor: pointer;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  border-radius: 6px;
-  padding: 3px;
-  height: 30px;
-  width: 80px;
-  justify-content: center;
-  line-height: 1.7em;
-}
-
-.data-entry button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
-
-.data-entry button:focus {
-    outline: none;
-    border-radius: 6px;
-    border: 1.8px solid blue;
-}
-
-
-.timerows-container button {
-  cursor: pointer;
-  color: white;
-  background-color: #C65364;
-  border: 1.8px solid #3b3b3b;
-  border-radius: 6px;
-  padding: 3px;
-  /* height: 30px; */
-  width: 100%;
-}
-
-.timerows-container button:hover {
-  color: #5f5f5f;
-  background-color: #DDDDE5;
-}
-
-.timerows-container button:focus {
-    outline: none;
-    border-radius: 6px;
-    border: 1.8px solid blue;
-}
-
-#edit-buttons {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-}
-
-#edit-buttons button {
-    display: flex;
-    justify-content: center;
-    line-height: 2em;
-}
-
-#edit-buttons #deletebutton {
-}
+/*
+The widget for letting an approver select an employee to review
+*/
 
 #employee-selector {
 width: 80px;
@@ -376,3 +95,262 @@ font-size: 16px;
     left: 12px;
     font-size: 13px;
 }
+
+/*
+The overall nav control panel, containing
+all the buttons and the time period selector
+*/
+ nav#control_panel {
+    border: 2px solid #e2e2e2;
+    border-radius: .5em;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin: 1px;
+ }
+
+#employee_switch_form,
+#time_period_selector {
+    display: flex;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 13px;
+}
+
+nav#control_panel div.navitem {
+    border-radius: 4px;
+}
+
+nav#control_panel select,
+nav#control_panel button {
+    height: 28px;
+    align-items: center;
+    border-radius: 4px;
+}
+
+/*
+For elements related to entering and editing time entries
+*/
+#data-entry-container div {
+    position: relative;
+    padding: 2px;
+    display: flex;
+    flex: 1;
+}
+
+#data-entry-container label {
+    position: absolute;
+    left: 6px;
+    top: -2px;
+    font-size: 0.6em;
+    color: black;
+    z-index: 1;
+    background-color: white;
+}
+
+#data-entry-container .date {
+    flex: 2;
+}
+
+#data-entry-container .project {
+    flex: 2;
+}
+
+#enter_time_panel {
+    flex-direction: column;
+}
+
+#enter_time_panel .row {
+    width: 100%;
+    flex-direction: row;
+}
+
+#enter_time_panel .row .action {
+   flex: 0;
+}
+
+.details textarea {
+   height: 20px;
+}
+
+#edit_time_panel {
+    display: flex;
+    flex-direction: column;
+}
+
+#data-entry-container button {
+    height: 28px;
+    border-radius: 4px;
+}
+
+#data-entry-container {
+  border: 2px solid #e2e2e2;
+  margin: auto;
+  border-radius: 6px;
+  background-color: white;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+#create-date {
+  width: 0;
+}
+
+#data-entry-container select,
+#data-entry-container textarea,
+#data-entry-container input {
+  border: 1.8px solid #3b3b3b;
+  border-radius: 6px;
+  background-color: #CFC1C1;
+  color: #333333;
+  padding: 3px;
+  height: 20px;
+  flex: 1;
+  width: 100%;
+  font-size: 16px;
+}
+
+#data-entry-container select:focus,
+#data-entry-container input:focus,
+#data-entry-container textarea:focus {
+    outline: none;
+    background-color: inherit;
+    border-radius: 6px;
+    border: 1.8px solid blue;
+}
+
+#data-entry-container select {
+  height: 30px;
+  font-size: 16px;
+}
+
+#edit-buttons {
+    justify-content: center;
+}
+
+#edit-buttons button {
+    display: flex;
+    margin-left: 10px;
+}
+
+/*
+The buttons on the page
+*/
+
+button {
+  cursor: pointer;
+  color: white;
+  background-color: #C65364;
+  border: 1.8px solid #3b3b3b;
+  font-size: 16px;
+}
+
+button:hover {
+  color: #5f5f5f;
+  background-color: #DDDDE5;
+}
+
+button:focus {
+    outline: none;
+    border: 1.8px solid blue;
+}
+
+button:disabled {
+    cursor: inherit;
+    color: white;
+    background-color: lightgray;
+}
+
+/*
+The timerows
+*/
+
+#timerows-container {
+}
+
+#timerows-container table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  background-color: white;
+}
+
+#timerows-container th, td {
+  padding: 0.25rem;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+
+
+
+ @media only screen and (min-width: 751px) {
+    #timerows-container th.prj {
+      width: 200px;
+    }
+
+    #timerows-container th {
+        font-size: 18px;
+    }
+ }
+
+ @media only screen and (min-width: 351px) and (max-width:750px) {
+    #timerows-container th.prj {
+      width: 130px;
+    }
+
+    #timerows-container th {
+        font-size: 16px;
+    }
+ }
+
+ @media only screen and (max-width: 350px) {
+    #timerows-container th.prj {
+      width: 57px;
+    }
+
+    #timerows-container th {
+        font-size: 12px;
+    }
+ }
+
+#timerows-container th.time {
+  width: 34px;
+}
+
+#timerows-container th.dtl {
+}
+
+#timerows-container th.act {
+  width: 32px;
+}
+
+#timerows-container td {
+    overflow: hidden;
+    font-size: 14px;
+}
+
+@media only screen and (min-width: 751px) {
+    #timerows-container td {
+        font-size: 16px;
+    }
+}
+
+@media only screen and (min-width: 351px) and (max-width:750px) {
+    #timerows-container td {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (max-width: 350px) {
+    #timerows-container td {
+        font-size: 12px;
+    }
+}
+
+#timerows-container caption {background: antiquewhite;}
