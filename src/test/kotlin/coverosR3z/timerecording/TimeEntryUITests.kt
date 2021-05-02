@@ -17,11 +17,11 @@ import coverosR3z.uitests.UITestCategory
 import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.openqa.selenium.By
 import org.openqa.selenium.Point
 import org.openqa.selenium.WebDriver
 import java.io.File
@@ -54,7 +54,11 @@ class TimeEntryUITests {
         `timeentry - An employee should be able to enter time for a specified date`()
         `editTime - An employee should be able to edit the number of hours worked from a previous time entry`()
         `timeentry - should be able to submit time for a certain period`()
+        `approval - should be able to approve a time period`()
+        `timeentry - should not be able to make any edits if approved`()
+        `approval - should be able to unapprove time`()
         `timeentry - should be able to unsubmit a period`()
+        `approval - should not be able to approve unsubmitted time`()
         `timeentry - I should see my existing time entries when I open the time entry page`()
         `timeentry - I should be able to view previous time periods when viewing entries`()
     }
@@ -149,17 +153,26 @@ class TimeEntryUITests {
     }
 
     private fun `timeentry - should be able to unsubmit a period`() {
+        logout()
+        loginAndrea()
+        pom.vtp.gotoDate(DEFAULT_DATE)
         val s = TimeEntryUserStory.getScenario("timeentry - should be able to unsubmit a period")
+        val a = ApprovalUserStory.getScenario("Approval - unapproved time periods can be unsubmitted")
         s.markDone("Given that I had submitted my time but need to make a change")
+        a.markDone("Given a time period had previously been approved but then unapproved")
 
         pom.vtp.unsubmitForTimePeriod()
         s.markDone("When I unsubmit my time")
+        a.markDone("when the employee tries to unsubmit their time")
 
         assertTrue(pom.vtp.verifyPeriodIsUnsubmitted())
         s.markDone("Then the time period is ready for more editing")
+        a.markDone("then they are able to do so")
     }
 
     private fun `timeentry - I should see my existing time entries when I open the time entry page`() {
+        logout()
+        loginAndrea()
         val s = TimeEntryUserStory.getScenario("timeentry - I should see my existing time entries when I open the time entry page")
         s.markDone("Given I had previous entries this period")
 
@@ -179,6 +192,83 @@ class TimeEntryUITests {
 
         verifySubmissionsAreThere()
         s.markDone("Then I can see my entries")
+    }
+
+    private fun `approval - should not be able to approve unsubmitted time`() {
+        logout()
+        pom.lp.login(adminUsername, adminPassword)
+        val s = ApprovalUserStory.getScenario("Approval - An approver should not be able to approve unsubmitted time")
+        pom.vtp.gotoDate(DEFAULT_DATE)
+        pom.vtp.switchToViewingEmployee(regularEmployeeName)
+        val viewingMessage = pom.driver.findElement(By.id("viewing_whose_timesheet")).text
+        assertEquals("Viewing Andrea's unsubmitted timesheet", viewingMessage)
+        s.markDone("Given an employee had not submitted their time,")
+
+        assertFalse(pom.vtp.isApproved())
+        pom.vtp.toggleApproval(regularEmployeeName, DEFAULT_DATE)
+        s.markDone("when I try to approve it")
+
+        assertFalse(pom.vtp.isApproved())
+        s.markDone("then the approval status remains unchanged")
+    }
+
+    /**
+     * If a time period is approved, a user won't see a submit button, an edit button,
+     * a create button
+     */
+    private fun `timeentry - should not be able to make any edits if approved`() {
+        val s = ApprovalUserStory.getScenario("Approval - approved time periods cannot be unsubmitted")
+        s.markDone("Given a time period had been approved")
+
+        logout()
+        loginAndrea()
+        pom.vtp.gotoDate(DEFAULT_DATE)
+        try {
+            pom.driver.findElement(By.id(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
+            fail("The create button shouldn't be found")
+        } catch (ex: Throwable) {}
+
+        try {
+            pom.driver.findElement(By.id(ViewTimeAPI.Elements.EDIT_BUTTON.getId()))
+            fail("The create button shouldn't be found")
+        } catch (ex: Throwable) {}
+
+        try {
+            pom.driver.findElement(By.id(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
+            fail("The submit button shouldn't be found")
+        } catch (ex: Throwable) {}
+
+        s.markDone("when the employee tries to unsubmit their time")
+        s.markDone("then they are unable to do so")
+        assertTrue("if we got here, we didn't fail earlier steps", true)
+    }
+
+    private fun `approval - should be able to unapprove time`() {
+        logout()
+        pom.lp.login(adminUsername, adminPassword)
+        val s = ApprovalUserStory.getScenario("Approval - An approver should be able to unapprove submitted time")
+        s.markDone("Given an employee needs to make some changes to previously approved time")
+
+        // unapprove the time period
+        pom.vtp.toggleApproval(regularEmployeeName, DEFAULT_DATE)
+        s.markDone("when I unapprove that time period")
+
+        assertFalse(pom.vtp.isApproved())
+        s.markDone("then the timesheet is unapproved")
+    }
+
+    private fun `approval - should be able to approve a time period`() {
+        logout()
+        pom.lp.login(adminUsername, adminPassword)
+        val s = ApprovalUserStory.getScenario("Approval - An approver should be able to approve submitted time")
+        s.markDone("Given an employee submitted their time,")
+
+        // approve the time period
+        pom.vtp.toggleApproval(regularEmployeeName, DEFAULT_DATE)
+        s.markDone("when I approve it")
+
+        assertTrue(pom.vtp.isApproved())
+        s.markDone("then the timesheet is approved")
     }
 
     private fun `timeentry - should be able to submit time for a certain period`() {

@@ -32,6 +32,7 @@ class SubmitTimeAPI(private val sd: ServerData){
 
         override val requiredInputs = setOf(
             Elements.START_DATE,
+            Elements.UNSUBMIT
         )
         override val path: String
             get() = "submittime"

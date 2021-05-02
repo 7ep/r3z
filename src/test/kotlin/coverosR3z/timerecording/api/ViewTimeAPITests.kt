@@ -205,7 +205,7 @@ class ViewTimeAPITests {
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
         assertTrue("The page should announce we are viewing another's timesheet",
-            result.contains("<h2>Viewing DefaultEmployee's"))
+            result.contains("""<h2 id="viewing_whose_timesheet">Viewing DefaultEmployee's"""))
         assertTrue(result.contains("<title>Viewing DefaultEmployee's"))
         assertFalse(result.contains(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
@@ -342,7 +342,7 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<button >Approve</button>"""))
+        assertTrue(result.contains("""<button id="${ViewTimeAPI.Elements.APPROVAL_BUTTON.getId()}" >Approve</button>"""))
     }
 
     /**
@@ -359,7 +359,7 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<button disabled>Approve</button>"""))
+        assertTrue(result.contains("""disabled>Approve<"""))
     }
 
     /**

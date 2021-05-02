@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.support.ui.Select
 
 enum class Drivers(val driver: () -> WebDriver){
     FIREFOX(
@@ -334,6 +335,23 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         setDetailsForEditingTimeEntry(details)
         setTheDateEntryOnEdit(date)
         clickSaveTimeEntry()
+    }
+
+    fun isApproved(): Boolean {
+        val approvalButtonText = driver.findElement(By.id(ViewTimeAPI.Elements.APPROVAL_BUTTON.getId())).text
+        return approvalButtonText == "Unapprove"
+    }
+
+    fun toggleApproval(employeeName: String, date: Date) {
+        gotoDate(date)
+        switchToViewingEmployee(employeeName)
+        driver.findElement(By.id(ViewTimeAPI.Elements.APPROVAL_BUTTON.getId())).click()
+    }
+
+    fun switchToViewingEmployee(employeeName: String) {
+        val employeeSelector = driver.findElement(By.id("employee-selector"))
+        Select(employeeSelector).selectByVisibleText(employeeName)
+        driver.findElement(By.cssSelector("#employee_switch_form button")).click()
     }
 
 

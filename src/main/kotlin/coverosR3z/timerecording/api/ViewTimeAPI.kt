@@ -71,13 +71,13 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         // parts of the time entries
 
-        READ_ONLY_ROW("readonly-time-entry-row"),
         SUBMIT_BUTTON("submitbutton"),
 
         /**
          * for approval of an employee's timesheet
          */
         EMPLOYEE_TO_APPROVE_INPUT("approval-employee"),
+        APPROVAL_BUTTON("approval_button"),
         ;
         override fun getId(): String {
             return this.value
@@ -142,7 +142,7 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
         // show this if we are viewing someone else's timesheet
-        val viewingHeader = if (! reviewingOtherTimesheet) "" else """<h2>Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
+        val viewingHeader = if (! reviewingOtherTimesheet) "" else """<h2 id="viewing_whose_timesheet">Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
         val timeEntryPanel = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderTimeEntryPanel(
             te,
             idBeingEdited,
@@ -175,15 +175,17 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun createApproveUI(reviewingOtherTimesheet: Boolean, isSubmitted: Boolean, approvalStatus: ApprovalStatus, employee: Employee, timePeriod: TimePeriod): String {
         if (! reviewingOtherTimesheet) return ""
         val renderDisabled = if (! isSubmitted) "disabled" else ""
-        val buttonHtml = if (approvalStatus == ApprovalStatus.UNAPPROVED) {
-            """<button $renderDisabled>Approve</button>"""
+        val isApproved = approvalStatus == ApprovalStatus.APPROVED
+        val buttonHtml = if (! isApproved) {
+            """<button id="${Elements.APPROVAL_BUTTON.getId()}" $renderDisabled>Approve</button>"""
         } else {
-            """<button>Unapprove</button>"""
+            """<button id="${Elements.APPROVAL_BUTTON.getId()}">Unapprove</button>"""
         }
         return """
             <form class="navitem" action="${ApproveApi.path}" method="post">
                 <input type="hidden" name="${Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName()}" value="${employee.id.value}" />
                 <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${timePeriod.start.stringValue}" />
+                <input type="hidden" name="${ApproveApi.Elements.IS_UNAPPROVAL.getElemName()}" value="${isApproved.toString().toLowerCase()}" />
                 $buttonHtml
             </form>
         """.trimIndent()

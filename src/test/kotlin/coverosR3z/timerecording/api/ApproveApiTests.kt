@@ -8,6 +8,7 @@ import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
+import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 import org.junit.Assert.assertEquals
@@ -174,6 +175,49 @@ class ApproveApiTests {
 
         assertEquals(StatusCode.SEE_OTHER, result)
     }
+
+    @Test
+    fun testApprove_MissingInput_Employee() {
+        val data = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to DEFAULT_DATE.stringValue,
+                ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to "true"
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
+        assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [date, unappr]", ex.message)
+    }
+
+    @Test
+    fun testApprove_MissingInput_TimePeriod() {
+        val data = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString(),
+                ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to "true"
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
+        assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [approval-employee, unappr]", ex.message)
+    }
+
+    @Test
+    fun testApprove_MissingInput_IsApproval() {
+        val data = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName() to DEFAULT_EMPLOYEE.id.value.toString(),
+                ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to DEFAULT_DATE.stringValue,
+            )
+        )
+        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
+        assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [approval-employee, date]", ex.message)
+    }
+
 
     /**
      * helper method for creating [ServerData] for this set of tests

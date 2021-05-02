@@ -6,6 +6,7 @@ import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
+import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.ApprovalStatus
 import org.junit.Assert.*
@@ -119,6 +120,35 @@ class SubmitTimeAPITests {
         val ex = assertThrows(IllegalStateException::class.java) { SubmitTimeAPI.handlePost(sd).statusCode }
         assertEquals("This time period is already submitted.  Cannot submit on this period again.", ex.message)
     }
+
+    @Test
+    fun testSubmitting_MissingRequired_StartDate() {
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.UNSUBMIT.getElemName() to "true",
+            )
+        )
+        val sd =  makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        val ex = assertThrows(InexactInputsException::class.java) { SubmitTimeAPI.handlePost(sd) }
+
+        assertEquals("expected keys: [start_date, unsubmit]. received keys: [unsubmit]", ex.message)
+    }
+
+    @Test
+    fun testSubmitting_MissingRequired_Unsubmit() {
+        val data = PostBodyData(
+            mapOf(
+                SubmitTimeAPI.Elements.START_DATE.getElemName() to DEFAULT_DATE.stringValue,
+            )
+        )
+        val sd =  makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+
+        val ex = assertThrows(InexactInputsException::class.java) { SubmitTimeAPI.handlePost(sd) }
+
+        assertEquals("expected keys: [start_date, unsubmit]. received keys: [start_date]", ex.message)
+    }
+
 
     /**
      * A test helper for this class, just to remove repetitive boilerplate

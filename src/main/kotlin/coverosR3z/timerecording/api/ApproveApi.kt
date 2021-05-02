@@ -76,7 +76,8 @@ class ApproveApi {
 
         override val requiredInputs: Set<Element> = setOf(
             ViewTimeAPI.Elements.EMPLOYEE_TO_APPROVE_INPUT,
-            ViewTimeAPI.Elements.TIME_PERIOD
+            ViewTimeAPI.Elements.TIME_PERIOD,
+            Elements.IS_UNAPPROVAL
         )
 
         override val path: String = "approve"
