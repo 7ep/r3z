@@ -29,8 +29,7 @@ data class SystemConfiguration(
         return 1
     }
 
-    override val dataMappings: Map<SerializationKeys, String>
-        get() = mapOf(
+    override val dataMappings: Map<SerializationKeys, String> = mapOf(
             Keys.ID to "${getIndex()}",
             Keys.LOGGING_AUDIT to "${logSettings.audit}",
             Keys.LOGGING_WARN to "${logSettings.warn}",

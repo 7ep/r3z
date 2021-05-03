@@ -14,6 +14,7 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.databaseFileSuffix
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
+import coverosR3z.system.config.types.SystemConfiguration
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -870,8 +871,7 @@ class PureMemoryDatabaseTests {
      */
     @Test
     fun testRestoreSubmittedPeriods() {
-        val databaseDirectorySuffix = "testRestoreSubmittedPeriods"
-        val (before, after) = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = databaseDirectorySuffix)
+        val (before, after) = arrangeFullDatabaseWithDisk(databaseDirectorySuffix = "testRestoreSubmittedPeriods")
 
         assertEquals(before, after)
     }
@@ -898,6 +898,17 @@ class PureMemoryDatabaseTests {
         assertEquals(DEFAULT_INVITATION, deserialized)
     }
 
+    @Test
+    fun testSerialization_SystemConfiguration() {
+        val result = DEFAULT_CONFIGURATION.serialize()
+
+        assertEquals("{ id: 1 , la: true , lw: true , ld: true , lt: true }", result)
+
+        val deserialized = SystemConfiguration.Deserializer().deserialize(result)
+
+        assertEquals(DEFAULT_CONFIGURATION, deserialized)
+    }
+
     /*
      _ _       _                  __ __        _    _           _
     | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
@@ -921,6 +932,7 @@ class PureMemoryDatabaseTests {
         skipCreatingUser: Boolean = false,
         skipCreatingSession : Boolean = false,
         skipCreatingTimeEntries : Boolean = false,
+        skipUpdatingTimeEntry : Boolean = false,
         skipCreatingEmployees : Boolean = false,
         skipCreatingProjects : Boolean = false,
         skipCreatingSubmissions : Boolean = false,
@@ -949,8 +961,12 @@ class PureMemoryDatabaseTests {
             }
         }
         if (! skipCreatingTimeEntries) {
-            tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+            val newEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+            if (! skipUpdatingTimeEntry) {
+                tep.overwriteTimeEntry(newEntry.copy(time = Time(4 * 60)))
+            }
         }
+
         if(! skipCreatingSubmissions) {
             tep.persistNewSubmittedTimePeriod(newEmployee, TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
         }

@@ -62,15 +62,15 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // junit, for running unit tests
-    // https://mvnrepository.com/artifact/junit/junit/4.13.1
-    testImplementation ("junit:junit:4.13.1")
+    // https://mvnrepository.com/artifact/junit/junit/4.13.2
+    testImplementation ("junit:junit:4.13.2")
 
     // Selenium - used for testing commonly-used browsers
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
     testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
 
-    // https://github.com/bonigarcia/webdrivermanager
-    testImplementation("io.github.bonigarcia:webdrivermanager:4.2.2")
+    // https://search.maven.org/artifact/io.github.bonigarcia/webdrivermanager/4.4.1/jar
+    testImplementation("io.github.bonigarcia:webdrivermanager:4.4.1")
 }
 
 // if you want to run this with gradle, just run

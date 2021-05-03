@@ -45,7 +45,7 @@ fun checkParseToDouble(value: String?,
     return try {
         notNullValue.toDouble()
     } catch (ex: java.lang.NumberFormatException) {
-        throw IllegalArgumentException(parseMsg())
+        throw IllegalStateException(parseMsg())
     }
 }
 
@@ -56,13 +56,13 @@ fun checkParseToDouble(value: String?,
 fun checkParseToLong(value: String?,
                     nullMsg: () -> String = {"Must not be a null value"},
                     blankMsg: () -> String = {"Must not be blank"},
-                    parseMsg: () -> String = {"Must be able to parse ${value?.replace(" ", SPACE)} as long"}): Long {
+                    parseMsg: () -> String = {"Must be able to parse \"${value?.replace(" ", SPACE)}\" as a long"}): Long {
     val notNullValue = requireNotNull(value){ nullMsg() }
     require(notNullValue.isNotBlank()) { blankMsg() }
     return try {
         notNullValue.toLong()
     } catch (ex: java.lang.NumberFormatException) {
-        throw IllegalArgumentException(parseMsg())
+        throw IllegalStateException(parseMsg())
     }
 }
 

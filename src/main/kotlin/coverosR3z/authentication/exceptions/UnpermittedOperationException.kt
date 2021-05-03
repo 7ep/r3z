@@ -5,4 +5,4 @@ package coverosR3z.authentication.exceptions
  * which the [coverosR3z.authentication.types.CurrentUser] has
  * no authorization to do
  */
-class UnpermittedOperationException(msg: String? = null) : Exception(msg)
+class UnpermittedOperationException(msg: String) : Exception(msg)

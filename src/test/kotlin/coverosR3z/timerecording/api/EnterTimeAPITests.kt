@@ -202,7 +202,7 @@ class EnterTimeAPITests {
                 ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
         ))
         val sd = makeETServerData(data)
-        val ex = assertThrows(java.lang.IllegalArgumentException::class.java){ EnterTimeAPI.handlePost(sd) }
+        val ex = assertThrows(java.lang.IllegalStateException::class.java){ EnterTimeAPI.handlePost(sd) }
         assertEquals("""Must be able to parse "aaa" as a double""", ex.message)
     }
 

@@ -10,6 +10,7 @@ import coverosR3z.system.misc.types.DateTime
 import coverosR3z.system.misc.types.Month
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.types.*
+import coverosR3z.system.config.types.SystemConfiguration
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -69,6 +70,7 @@ val DEFAULT_SUBMITTED_PERIOD = SubmittedPeriod(SubmissionId(1), DEFAULT_EMPLOYEE
 val DEFAULT_APPROVER = User(UserId(1), UserName("DefaultApproverUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, role=Role.APPROVER)
 val DEFAULT_INVITATION_CODE = InvitationCode("abc123")
 val DEFAULT_INVITATION = Invitation(InvitationId(1), InvitationCode("abc123"), DEFAULT_EMPLOYEE, DEFAULT_DATETIME)
+val DEFAULT_CONFIGURATION = SystemConfiguration(SystemConfiguration.LogSettings(audit = true, warn = true, debug = true, trace = true))
 const val DEFAULT_SESSION_TOKEN = "abc123"
 const val granularPerfArchiveDirectory = "docs/performance_archive/granular_tests/"
 val testLogger = TestLogger()
