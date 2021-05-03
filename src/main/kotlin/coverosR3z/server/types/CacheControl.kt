@@ -1,6 +1,6 @@
 package coverosR3z.server.types
 
-private const val secondsToCache = 60 * 10
+private const val secondsToCache = 60 * 60 * 24 * 7
 
 enum class CacheControl(value: String) {
 

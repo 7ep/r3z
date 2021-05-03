@@ -106,7 +106,7 @@ class ServerUITests {
 
         // Each UI test puts the window in a different place around the screen
         // so we have a chance to see what all is going on
-        pom.driver.manage().window().position = Point(400, 400)
+        pom.driver.manage().window().position = Point(300, 300)
     }
 
     private fun restart(driver: () -> WebDriver) {

@@ -8,10 +8,10 @@ label {
 form {
   border: 2px solid #e2e2e2;
   margin: auto;
-  border-radius: .5em;
   background-color: white;
-  opacity: 82%;
   padding: 10px;
+  position: sticky;
+  top: 48px;
 }
 
 input {
@@ -64,7 +64,6 @@ table {
   margin: auto;
   border-radius: .5em;
   background-color: white;
-  opacity: 82%;
   padding: 10px;
 }
 
