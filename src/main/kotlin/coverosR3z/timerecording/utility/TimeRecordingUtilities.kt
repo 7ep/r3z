@@ -189,6 +189,7 @@ class TimeRecordingUtilities(
         if (!didDelete) {
             throw IllegalStateException("Attempted to delete a non-existent time entry by id")
         }
+        logger.logAudit (cu) { "Deleted time entry: ${timeEntry.shortString()} " }
         return true
     }
 
