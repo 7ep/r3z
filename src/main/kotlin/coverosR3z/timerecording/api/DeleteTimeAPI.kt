@@ -22,7 +22,10 @@ class DeleteTimeAPI {
                     val timeEntryId = TimeEntryId.make(sd.ahd.data.mapping[ViewTimeAPI.Elements.ID_INPUT.getElemName()])
                     val timeEntry = sd.bc.tru.findTimeEntryById(timeEntryId)
                     sd.bc.tru.deleteTimeEntry(timeEntry)
-                    redirectTo(ViewTimeAPI.path)
+
+                    val currentPeriod = sd.ahd.data.mapping[ViewTimeAPI.Elements.TIME_PERIOD.getElemName()]
+                    val viewEntriesPage = ViewTimeAPI.path + if (currentPeriod.isNullOrBlank()) "" else "" + "?" + ViewTimeAPI.Elements.TIME_PERIOD.getElemName() + "=" + currentPeriod
+                    redirectTo(viewEntriesPage)
             }
 
         }

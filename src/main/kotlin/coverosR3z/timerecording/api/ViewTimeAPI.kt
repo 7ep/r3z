@@ -591,6 +591,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                             <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                         </form>
                         <form id="delete_form" action="${DeleteTimeAPI.path}" method="post">
+                            <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                             <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
                         </form>
                         <div id="edit-buttons" class="action">
