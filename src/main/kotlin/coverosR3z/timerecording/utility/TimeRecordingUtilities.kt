@@ -209,6 +209,7 @@ class TimeRecordingUtilities(
         }
         val stp = persistence.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
         persistence.approveTimesheet(stp)
+        logger.logAudit (cu) { "Approved ${employee.name.value}'s timesheet" }
         return ApprovalResultStatus.SUCCESS
     }
 
@@ -234,6 +235,7 @@ class TimeRecordingUtilities(
         }
         val stp = persistence.getSubmittedTimePeriod(employee, timePeriod)
         persistence.unapproveTimesheet(stp)
+        logger.logAudit (cu) { "Unapproved ${employee.name.value}'s timesheet" }
         return ApprovalResultStatus.SUCCESS
     }
 
