@@ -1,6 +1,9 @@
 #outermost_container {
-    max-width: 900px;margin: auto;
+    max-width: 900px;
+    margin: auto;
 }
+
+#inner_container {margin-left: 6px;margin-right: 6px;border: 2px solid grey;}
 
 #control_surface {
     position: sticky;

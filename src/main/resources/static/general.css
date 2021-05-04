@@ -23,6 +23,7 @@ footer, header, menu, nav, section {
 
 body {
 	line-height: 1;
+	font-family: sans-serif;
 }
 
 table {
@@ -46,6 +47,14 @@ input
 RESET SECTION FINISHES
 */
 
+html {
+  background: url("dawnsunrise.webp") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 @media only screen and (min-width: 751px) {
 
     header {
@@ -60,14 +69,6 @@ RESET SECTION FINISHES
       justify-content: space-between;
       z-index: 1;
       position: sticky;
-    }
-
-    html {
-      background: url("dawnsunrise.webp") no-repeat center center fixed;
-      -webkit-background-size: cover;
-      -moz-background-size: cover;
-      -o-background-size: cover;
-      background-size: cover;
     }
 
     body {
@@ -101,15 +102,6 @@ RESET SECTION FINISHES
       position: sticky;
     }
 
-    body {
-      color: #885555;
-      background-color: rgb(75, 109, 154);
-      font-family: sans-serif;
-      margin: 0;
-      background-image: url("dawnsunrise.webp");
-      background-size: 100vw 100vh;
-    }
-
     .header-button {
       color: #ffffff;
       text-decoration: none;
@@ -132,15 +124,6 @@ RESET SECTION FINISHES
       top: 0;
       z-index: 1;
       position: sticky;
-    }
-
-    body {
-      color: #885555;
-      background-color: rgb(75, 109, 154);
-      font-family: sans-serif;
-      margin: 0;
-      background-image: url("dawnsunrise.webp");
-      background-size: 100vw 100vh;
     }
 
     .header-button {

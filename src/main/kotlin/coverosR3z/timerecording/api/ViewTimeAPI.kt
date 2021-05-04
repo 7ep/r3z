@@ -155,14 +155,16 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         val body = """
             <div id="outermost_container">
-                <div id="control_surface">
-                    $viewingHeader
-                    $navMenu
-                    $timeEntryPanel
-                </div>
-                <div id="timerows-container">
-                    ${renderTimeRows(te, currentPeriod, hideEditButtons)}
-                </div>
+                <div id="inner_container">
+                    <div id="control_surface">
+                        $viewingHeader
+                        $navMenu
+                        $timeEntryPanel
+                    </div>
+                    <div id="timerows-container">
+                        ${renderTimeRows(te, currentPeriod, hideEditButtons)}
+                    </div>
+                </div>    
             </div>
             <script src="viewtime.js"></script>
         """
