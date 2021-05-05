@@ -83,11 +83,13 @@ class TimeEntryPersistence(
     }
 
     override fun isProjectUsedForTimeEntry(project: Project): Boolean {
-        TODO("Not yet implemented")
+        require (project != NO_PROJECT)
+        return timeEntryDataAccess.read { timeentries -> timeentries.any{ it.project == project } }
     }
 
     override fun deleteProject(project: Project): Boolean {
-        TODO("Not yet implemented")
+        require (project != NO_PROJECT)
+        return projectDataAccess.actOn { projects -> projects.remove(project) }
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {

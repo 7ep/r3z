@@ -11,6 +11,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import java.lang.IllegalArgumentException
 
 @Category(IntegrationTestCategory::class)
 class TimeEntryPersistenceTests {
@@ -278,13 +279,7 @@ class TimeEntryPersistenceTests {
 
     @Test
     fun testGetTimeEntriesForPeriod() {
-        val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val inputTimeEntry = tep.persistNewTimeEntry(
-            createTimeEntryPreDatabase(
-                project = project,
-                employee = employee,
-                date = DEFAULT_PERIOD_START_DATE))
+        val (_, employee, inputTimeEntry) = createTimeEntry()
 
         val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
 
@@ -297,13 +292,7 @@ class TimeEntryPersistenceTests {
      */
     @Test
     fun testGetTimeEntriesForPeriod_outOfRange() {
-        val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        tep.persistNewTimeEntry(
-            createTimeEntryPreDatabase(
-                project = project,
-                employee = employee,
-                date = A_RANDOM_DAY_IN_JUNE_2020))
+        val (_, employee, _) = createTimeEntry(date = A_RANDOM_DAY_IN_JUNE_2020)
 
         val result : Set<TimeEntry> = tep.getTimeEntriesForTimePeriod(employee, DEFAULT_TIME_PERIOD)
 
@@ -315,9 +304,7 @@ class TimeEntryPersistenceTests {
      */
     @Test
     fun testFindTimeEntry() {
-        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
+        val (_, _, newTimeEntry) = createTimeEntry()
         val result = tep.findTimeEntryById(newTimeEntry.id)
         assertEquals(newTimeEntry, result)
     }
@@ -336,9 +323,7 @@ class TimeEntryPersistenceTests {
      */
     @Test
     fun testDeleteTimeEntry() {
-        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val newTimeEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
+        val (_, _, newTimeEntry) = createTimeEntry()
         val result = tep.deleteTimeEntry(newTimeEntry)
         assertTrue(result)
         val findResult = tep.findTimeEntryById(newTimeEntry.id)
@@ -370,4 +355,94 @@ class TimeEntryPersistenceTests {
         val result: Employee = tep.getEmployeeByName(DEFAULT_EMPLOYEE_NAME)
         assertEquals(DEFAULT_EMPLOYEE, result)
     }
+
+    /**
+     * If we successfully remove a project, we get true back
+     */
+    @Test
+    fun testDeleteProject() {
+        val project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
+
+        val result = tep.deleteProject(project)
+
+        assertTrue(result)
+    }
+
+    /**
+     * If we try to delete a project and it fails (this means
+     * the project didn't exist in the set), we get false back
+     */
+    @Test
+    fun testDeleteProject_NoProjectFound() {
+        val result = tep.deleteProject(DEFAULT_PROJECT)
+
+        assertFalse(result)
+    }
+
+    /**
+     * If somehow [NO_PROJECT] is passed into this method,
+     * we should throw an exception, since there is no valid
+     * situation where we can handle that.
+     */
+    @Test
+    fun testDeleteProject_PassInNoProject() {
+        assertThrows(IllegalArgumentException::class.java) { tep.deleteProject(NO_PROJECT) }
+    }
+
+    /**
+     * Check whether a particular project is used in *any* time entry
+     * This is a check run when deleting a project, since if it
+     * has been used anywhere, we cannot delete it.
+     */
+    @Test
+    fun testIfProjectUsedInTimeEntry() {
+        val (project, _, _) = createTimeEntry()
+        assertTrue(tep.isProjectUsedForTimeEntry(project))
+    }
+
+    /**
+     * Similar to [testIfProjectUsedInTimeEntry] but none found
+     */
+    @Test
+    fun testIfProjectUsedInTimeEntry_NoneFound() {
+        val (_, _, _) = createTimeEntry()
+        assertFalse(tep.isProjectUsedForTimeEntry(DEFAULT_PROJECT_2))
+    }
+
+    /**
+     * Similar to [testIfProjectUsedInTimeEntry] but if [NO_PROJECT]
+     * is passed in, we'll throw an exception - there must be
+     * in that case something coded wrong or something, because the only
+     * correct answer for NO_PROJECT being in the time entries is to
+     * throw an exception
+     */
+    @Test
+    fun testIfProjectUsedInTimeEntry_SearchingNoProject() {
+        assertThrows(IllegalArgumentException::class.java) { tep.isProjectUsedForTimeEntry(NO_PROJECT) }
+    }
+
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
+    private fun createTimeEntry(
+        date: Date = DEFAULT_PERIOD_START_DATE,
+        projectName: ProjectName = DEFAULT_PROJECT_NAME,
+        employeeName: EmployeeName = DEFAULT_EMPLOYEE_NAME) : Triple<Project, Employee, TimeEntry> {
+        val project = tep.persistNewProject(projectName)
+        val employee = tep.persistNewEmployee(employeeName)
+        val timeEntry = tep.persistNewTimeEntry(
+            createTimeEntryPreDatabase(
+                project = project,
+                employee = employee,
+                date = date))
+        return Triple(project, employee, timeEntry)
+    }
+
 }
