@@ -237,6 +237,10 @@ tasks.withType(Test).configureEach {
     finalizedBy jacocoTestReport
 }
 
+jacoco {
+    toolVersion = "0.8.7"
+}
+
 // Configure Jacoco, our code-coverage tool
 jacocoTestReport {
     getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
