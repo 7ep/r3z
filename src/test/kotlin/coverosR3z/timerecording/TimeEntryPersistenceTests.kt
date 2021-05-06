@@ -431,6 +431,10 @@ class TimeEntryPersistenceTests {
      alt-text: Helper Methods
      */
 
+    /**
+     * Create a default time entry in the database - which
+     * requires us to create its dependencies first.
+     */
     private fun createTimeEntry(
         date: Date = DEFAULT_PERIOD_START_DATE,
         projectName: ProjectName = DEFAULT_PROJECT_NAME,
