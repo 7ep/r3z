@@ -611,8 +611,7 @@ class TimeRecordingUtilityTests {
 
     /**
      * After creating a project, you can delete it, as long as it hasn't
-     * been used for any time entries.  If it has been used, you should get
-     * up to three example time entries where it was used.
+     * been used for any time entries.
      */
     @Test
     fun `I should be able to delete a project that hasn't been used yet`() {
