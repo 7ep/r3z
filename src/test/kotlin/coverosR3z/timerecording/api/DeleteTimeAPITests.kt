@@ -14,6 +14,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(APITestCategory::class)
 class DeleteTimeAPITests {
     lateinit var au : FakeAuthenticationUtilities
     lateinit var tru : FakeTimeRecordingUtilities
@@ -25,7 +26,6 @@ class DeleteTimeAPITests {
     }
 
     // test deleting a time entry
-    @Category(APITestCategory::class)
     @Test
     fun testDeleteTime() {
         val data = PostBodyData(mapOf(
@@ -39,7 +39,6 @@ class DeleteTimeAPITests {
     }
 
     // test deleting a non-existent time entry
-    @Category(APITestCategory::class)
     @Test
     fun testDeleteTime_BadId() {
         tru.deleteTimeEntryBehavior = { throw IllegalStateException() }
@@ -52,7 +51,7 @@ class DeleteTimeAPITests {
     }
 
     /**
-     * Helper method to make a [ServerData] for the Edit time API tests
+     * Helper method to make a [ServerData] for the delete time API tests
      */
     private fun makeDTServerData(data: PostBodyData): ServerData {
         return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)

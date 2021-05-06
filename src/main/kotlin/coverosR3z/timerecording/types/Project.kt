@@ -43,6 +43,11 @@ data class ProjectId(val value: Int) {
         require(value > 0) { minIdMsg }
         require(value < maximumProjectsCount) { maxProjectErrorMsg }
     }
+    companion object {
+        fun make(value: String?) : ProjectId {
+            return ProjectId(checkParseToInt(value))
+        }
+    }
 }
 
 /**
