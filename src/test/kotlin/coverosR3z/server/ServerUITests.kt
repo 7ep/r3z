@@ -68,8 +68,10 @@ class ServerUITests {
         `validation - should be stopped from entering invalid input on the project creation page`()
         `validation - should be stopped from entering invalid input on the employee creation page`()
         `hank enters time`(hankNewPassword)
+        `admin will be prevented from deleting the project used by Hank`(newPassword)
         shutdown()
     }
+
 
     /*
      _ _       _                  __ __        _    _           _
@@ -126,6 +128,19 @@ class ServerUITests {
         logout()
         pom.lp.login("hank", hankNewPassword)
         pom.vtp.enterTime("great new project", "2", "these are some details", DEFAULT_DATE)
+    }
+
+    private fun `admin will be prevented from deleting the project used by Hank`(newPassword: String) {
+        logout()
+        val p = CreateProjectUserStory.getScenario("CreateProject - I should not be able to delete a used project")
+        pom.lp.login("employeemaker", newPassword)
+
+        p.markDone("Given a project has been used for time entries")
+        pom.epp.delete("great new project", false)
+        p.markDone("when I try to delete that project,")
+
+        assertTrue(pom.driver.currentUrl.contains("PROJECT_USED"))
+        p.markDone("then the system disallows it")
     }
 
     private fun `validation - should be stopped from entering invalid input on the employee creation page`() {
