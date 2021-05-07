@@ -33,24 +33,41 @@ class DataAccess<T: IndexableSerializable> (
     fun <R> actOn(action: (ChangeTrackingSet<T>) -> R): R {
         val result = action.invoke(data)
 
-        // if the data set is now empty, reset the nextIndex to 1
-        if (data.isEmpty()) {
-            data.nextIndex.set(1)
-        }
-
         if (dbp != null) {
             do {
                 val nextItem = data.modified.poll()
                 if (nextItem != null) {
                     when (nextItem.second) {
                         CREATE -> dbp.persistToDisk(nextItem.first, name)
-                        DELETE -> dbp.deleteOnDisk(nextItem.first, name)
+                        DELETE -> handleDeletion(nextItem.first, name, dbp, data)
                         UPDATE -> dbp.updateOnDisk(nextItem.first, name)
                     }
                 }
             } while (nextItem != null)
         }
         return result
+    }
+
+    /**
+     * Deletion is a special case.  If items have been deleted so that the next
+     * index changes, we account for that here.
+     *
+     * For example, let's say we have three items, and their indexes are: 1, 2, 3
+     *
+     * What if we wipe out item 3?  Then we need to adjust our nextIndex counter to
+     * have 3 as the next index to assign.
+     *
+     * What if there is only one item in the set of data, with an index of 18? If
+     * we delete that, there are no items in the set and so our next index should be 1.
+     *
+     * Note that deleting items not at the end shouldn't have much effect.  For example,
+     * if we have items 1, 2, 3, and we delete the item with index 2, then nothing changes,
+     * we still have a nextIndex of 4.
+     */
+    private fun handleDeletion(item: T, name: String, dbp: DatabaseDiskPersistence, data: ChangeTrackingSet<T>)  {
+        dbp.deleteOnDisk(item, name)
+        val nextIndexValue = data.maxOfOrNull { it.getIndex() } ?: 0
+        data.nextIndex.set(nextIndexValue + 1)
     }
 
     /**

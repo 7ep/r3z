@@ -102,6 +102,12 @@ class EnterProjectPage(private val driver: WebDriver, private val domain : Strin
         driver.findElement(By.id(ProjectAPI.Elements.PROJECT_INPUT.getId())).sendKeys(project)
         driver.findElement(By.id(ProjectAPI.Elements.CREATE_BUTTON.getId())).click()
     }
+
+    fun delete(project: String) {
+        driver.get("$domain/${ProjectAPI.path}")
+        driver.findElement(By.xpath("//*[text() = '$project']/..//td[2]")).click()
+        driver.findElement(By.linkText("OK")).click()
+    }
 }
 
 class LoggingPage(private val driver: WebDriver, private val domain: String) {

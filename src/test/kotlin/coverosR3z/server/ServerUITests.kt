@@ -12,6 +12,7 @@ import coverosR3z.system.misc.testLogger
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.timerecording.CreateEmployeeUserStory
+import coverosR3z.timerecording.CreateProjectUserStory
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
 import coverosR3z.uitests.Drivers
@@ -63,6 +64,7 @@ class ServerUITests {
         shutdown()
         restart(driver)
         `create a new project`(newPassword)
+        `create a new project and delete it`()
         `validation - should be stopped from entering invalid input on the project creation page`()
         `validation - should be stopped from entering invalid input on the employee creation page`()
         `hank enters time`(hankNewPassword)
@@ -170,7 +172,28 @@ class ServerUITests {
 
     private fun `create a new project`(newPassword: String) {
         pom.lp.login("employeemaker", newPassword)
+
+        val p = CreateProjectUserStory.getScenario("CreateProject - I should be able to create a project")
+        p.markDone("Given my company has different projects we're working on")
+
         pom.epp.enter("great new project")
+        p.markDone("when I create a project,")
+
+        assertEquals("great new project", pom.driver.findElement(By.xpath("""//*[contains(text(),'great new project')]""")).text)
+        p.markDone("then that project is available for tracking time")
+    }
+
+    private fun `create a new project and delete it`() {
+        val p = CreateProjectUserStory.getScenario("CreateProject - I should be able to delete a project")
+
+        pom.epp.enter("born to die")
+        p.markDone("Given a newly created project hasn't been used yet for time")
+
+        pom.epp.delete("born to die")
+        p.markDone("when I delete that project,")
+
+        assertThrows(org.openqa.selenium.NoSuchElementException::class.java) { pom.driver.findElement(By.xpath("""//*[contains(text(),'born to die')]""")) }
+        p.markDone("then that project gone from the system")
     }
 
     private fun `change admin password, relogin, create new employee, use invitation and change their password and login`(): Pair<String, String> {
