@@ -89,7 +89,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             empsToInvs.entries.sortedByDescending { it.key.id.value }.joinToString("") {
                 val invitationLink = if (it.value == null) "" else
                     """
-        https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}""".trimIndent()
+        <a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}">copy this link</a>""".trimIndent()
                 """
 <tr>
     <td>${safeHtml(it.key.name.value)}</td>
@@ -103,8 +103,8 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Invitation code</th>
+                            <th id="name">Name</th>
+                            <th id="invitation">Invitation code</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,18 +118,20 @@ class CreateEmployeeAPI(private val sd: ServerData) {
     private fun createEmployeeHTML() : String {
         val body = """
         <div id="outermost_container">    
-            <form action="$path" method="post">
-                <p>
-                    <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
-                    <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
-                </p>
-            
-                <p>
-                    <button id="${Elements.CREATE_BUTTON.getId()}">Create new employee</button>
-                </p>
-            
-            </form>
-            ${existingEmployeesHTML()}
+            <div id="inner_container">
+                <form action="$path" method="post">
+                    <p>
+                        <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
+                        <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
+                    </p>
+                
+                    <p>
+                        <button id="${Elements.CREATE_BUTTON.getId()}">Create new employee</button>
+                    </p>
+                
+                </form>
+                ${existingEmployeesHTML()}
+            </div>    
         </div>
     """
         return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createemployee.css" />""")

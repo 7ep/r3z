@@ -222,7 +222,7 @@ class ServerUITests {
         s.markDone("Given the company has hired a new employee, Hank,")
         s.markDone("when I add him as an employee,")
         pom.eep.enter("hank")
-        val invitationUrl = pom.driver.findElement(By.xpath("//*[text() = 'hank']/..//td[2]")).text
+        val invitationUrl = pom.driver.findElement(By.xpath("//*[text() = 'hank']/..//td[2]/a")).getAttribute("href")
         s.markDone("when I add him as an employee,")
         logout()
         val i = CreateEmployeeUserStory.getScenario("createEmployee - using an invitation to register a user")
