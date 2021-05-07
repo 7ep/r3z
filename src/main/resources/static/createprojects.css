@@ -27,16 +27,28 @@ input {
   box-sizing: border-box;
 }
 
-button {
-  cursor: pointer;
+button#project_create_button {
   font-size: 120%;
   margin: 8px 0 1px 0;
+  width: 100%;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+form[action=deleteproject] {
+    padding: 0;
+    margin: 0;
+    position: initial;
+}
+
+button#delete_button {margin: 2px;padding: 2px;}
+
+button {
+  cursor: pointer;
   color: white;
   background-color: #C65364;
   border: 1.8px solid #3b3b3b;
   border-radius: .5em;
-  width: 100%;
-  padding: 1em;
   box-sizing: border-box;
 }
 
@@ -79,4 +91,9 @@ table {
   color: black;
   border-spacing: 1px solid black;
 }
+
+th#name {
+}
+
+th#act {width: 20px;}
 

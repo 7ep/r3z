@@ -10,6 +10,7 @@ import coverosR3z.persistence.types.IndexableSerializable
 import coverosR3z.persistence.types.SerializableCompanion
 import coverosR3z.persistence.types.SerializationKeys
 import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.dbentryDeserialize
+import coverosR3z.system.misc.utility.checkParseToLong
 import kotlin.math.roundToInt
 
 const val MAX_DETAILS_LENGTH = 500
@@ -130,7 +131,7 @@ data class TimeEntry (
                     val empId = checkParseToInt(entries[Keys.EMPLOYEE_ID])
                     val projId = checkParseToInt(entries[Keys.PROJECT_ID])
                     val minutes = checkParseToInt(entries[Keys.TIME])
-                    val epochDays = checkParseToInt(entries[Keys.DATE])
+                    val epochDays = checkParseToLong(entries[Keys.DATE])
                     val detailText = entries[Keys.DETAIL]
 
 

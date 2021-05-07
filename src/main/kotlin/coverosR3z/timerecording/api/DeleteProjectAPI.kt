@@ -1,15 +1,16 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
+import coverosR3z.server.api.MessageAPI
+import coverosR3z.server.api.MessageAPI.Companion.createMessageRedirect
 import coverosR3z.server.types.Element
 import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
-import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.timerecording.types.DeleteProjectResult
 import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.ProjectId
-import java.lang.IllegalStateException
 
 class DeleteProjectAPI {
 
@@ -22,8 +23,10 @@ class DeleteProjectAPI {
                 if (project == NO_PROJECT) {
                     throw IllegalStateException("No project found by that id")
                 }
-                sd.bc.tru.deleteProject(project)
-                redirectTo(ProjectAPI.path)
+                when(sd.bc.tru.deleteProject(project)) {
+                    DeleteProjectResult.SUCCESS -> createMessageRedirect(MessageAPI.Message.PROJECT_DELETED)
+                    DeleteProjectResult.USED -> createMessageRedirect(MessageAPI.Message.PROJECT_USED)
+                }
             }
         }
 

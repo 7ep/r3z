@@ -19,15 +19,15 @@ data class TimePeriod(val start: Date, val end: Date) {
     }
 
     fun getNext() : TimePeriod {
-        val localDate = LocalDate.ofEpochDay(end.epochDay.toLong())
+        val localDate = LocalDate.ofEpochDay(end.epochDay)
         val nextDay = localDate.plusDays(1)
-        return getTimePeriodForDate(Date(nextDay.toEpochDay().toInt()))
+        return getTimePeriodForDate(Date(nextDay.toEpochDay()))
     }
 
     fun getPrevious() : TimePeriod {
-        val localDate = LocalDate.ofEpochDay(start.epochDay.toLong())
+        val localDate = LocalDate.ofEpochDay(start.epochDay)
         val nextDay = localDate.minusDays(1)
-        return getTimePeriodForDate(Date(nextDay.toEpochDay().toInt()))
+        return getTimePeriodForDate(Date(nextDay.toEpochDay()))
     }
 
     companion object {

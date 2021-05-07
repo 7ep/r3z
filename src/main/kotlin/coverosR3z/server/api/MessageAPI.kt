@@ -95,5 +95,7 @@ class MessageAPI {
         FAILED_CREATE_PROJECT_DUPLICATE("duplicate project", ProjectAPI.path, MessageType.FAILURE, StatusCode.OK),
         FAILED_CREATE_EMPLOYEE_DUPLICATE("duplicate employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
         INVALID_PROJECT_DURING_ENTERING_TIME("invalid project", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        PROJECT_DELETED("The project was deleted", ProjectAPI.path, MessageType.SUCCESS, StatusCode.OK),
+        PROJECT_USED("The project was already used and therefore unable to be deleted", ProjectAPI.path, MessageType.FAILURE, StatusCode.OK),
     }
 }

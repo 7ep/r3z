@@ -16,7 +16,7 @@ val latestAllowableDate: LocalDate = LocalDate.of(2200, 1, 1)
  * This is used to represent nothing - just to avoid using null
  * It's a typed null, essentially
  */
-val NO_DATE = Date(earliestAllowableDate.toEpochDay().toInt())
+val NO_DATE = Date(earliestAllowableDate.toEpochDay())
 
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
@@ -43,40 +43,36 @@ enum class Month(val ord: Int) {
  * internal data is merely the number of days since the epoch - 1970-01-01
  */
 
-class Date(val epochDay : Int) : Comparable<Date> {
-    constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay().toInt())
+class Date(val epochDay : Long) : Comparable<Date> {
+    constructor(year: Int, month: Month, day: Int) : this(LocalDate.of(year, month.ord, day).toEpochDay())
 
     /**
      * Normal format "YYYY-MM-DD"
      */
-    val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())).toString()
+    val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay)).toString()
 
-    val viewTimeHeaderFormat: String = SimpleDateFormat("EEE, MMM d, ''yy").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
-
-    /**
-     * See here for the description of this formatting: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
-     * Chrome format "MMddYYYY"
-     */
-    val chromeStringValue: String = SimpleDateFormat("MMddYYYY").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay.toLong())))
+    val viewTimeHeaderFormat: String = SimpleDateFormat("EEE, MMM d, ''yy").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(
+        epochDay
+    )))
 
     init {
         val beginDate = earliestAllowableDate
         val endDate = latestAllowableDate
-        require(epochDay.toLong() in (beginDate.toEpochDay())..(endDate.toEpochDay())) {
+        require(epochDay in (beginDate.toEpochDay())..(endDate.toEpochDay())) {
             "no way on earth people are using this before $beginDate or past $endDate, you had a date of $stringValue"
         }
     }
 
     fun day() : Int {
-        return LocalDate.ofEpochDay(epochDay.toLong()).dayOfMonth
+        return LocalDate.ofEpochDay(epochDay).dayOfMonth
     }
 
     fun month() : Int {
-        return LocalDate.ofEpochDay(epochDay.toLong()).monthValue
+        return LocalDate.ofEpochDay(epochDay).monthValue
     }
 
     fun year() : Int {
-        return LocalDate.ofEpochDay(epochDay.toLong()).year
+        return LocalDate.ofEpochDay(epochDay).year
     }
 
 
@@ -111,7 +107,7 @@ class Date(val epochDay : Int) : Comparable<Date> {
 
         // get the date right now
         fun now(): Date {
-            return Date(LocalDate.now().toEpochDay().toInt())
+            return Date(LocalDate.now().toEpochDay())
         }
 
         /**

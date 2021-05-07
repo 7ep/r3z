@@ -27,7 +27,13 @@ class EnterTimeAPI(private val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.REGULAR, Role.APPROVER, Role.ADMIN) { et.handlePOST() }
+            return doPOSTAuthenticated(
+                sd.ahd.user,
+                requiredInputs,
+                sd.ahd.data,
+                Role.REGULAR, Role.APPROVER, Role.ADMIN) {
+                et.handlePOST()
+            }
         }
     }
 
@@ -39,7 +45,10 @@ class EnterTimeAPI(private val sd: ServerData) {
         if (project == NO_PROJECT) {
             return MessageAPI.createMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
         }
-        val time = Time.makeHoursToMinutes(data.mapping[Elements.TIME_INPUT.getElemName()])
+        val timeInputString = data.mapping[Elements.TIME_INPUT.getElemName()]
+        val time = Time.makeHoursToMinutes(timeInputString)
+        check(time.numberOfMinutes % 5 == 0) { "number of minutes must be multiple of 15.  Yours was ${time.getHoursAsString()} hours or ${time.numberOfMinutes} minutes" }
+        check(time.numberOfMinutes < 24 * 60) { "Not able to enter more than 24 hours on a daily entry.  You entered ${time.getHoursAsString()} hours" }
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 

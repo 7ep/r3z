@@ -10,9 +10,9 @@ import coverosR3z.server.types.StatusCode
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.DeleteProjectResult
 import coverosR3z.timerecording.types.NO_PROJECT
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -40,9 +40,11 @@ class DeleteProjectAPITests {
         ))
         val sd = makeDPServerData(data)
 
-        val response = DeleteProjectAPI.handlePost(sd).statusCode
+        val response = DeleteProjectAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response)
+        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
+        assertEquals(1, response.headers.count())
+        assertEquals("Location: result?msg=PROJECT_DELETED", response.headers[0])
     }
 
     @Test
@@ -71,6 +73,26 @@ class DeleteProjectAPITests {
         val ex = assertThrows(IllegalStateException::class.java) { DeleteProjectAPI.handlePost(sd).statusCode }
 
         assertEquals("No project found by that id", ex.message)
+    }
+
+    /**
+     * If we send an ID for a project that is currently used,
+     * then we cannot delete it
+     */
+    @Test
+    fun testDeleteProject_ProjectUsed() {
+        tru.deleteProjectBehavior = { DeleteProjectResult.USED }
+        tru.findProjectByIdBehavior = { DEFAULT_PROJECT }
+        val data = PostBodyData(mapOf(
+            DeleteProjectAPI.Elements.ID.getElemName() to "123"
+        ))
+        val sd = makeDPServerData(data)
+
+        val response = DeleteProjectAPI.handlePost(sd)
+
+        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
+        assertEquals(1, response.headers.count())
+        assertEquals("Location: result?msg=PROJECT_USED", response.headers[0])
     }
 
     // if we are missing the id, get an exception

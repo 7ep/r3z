@@ -8,6 +8,7 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.misc.utility.safeAttr
 import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.ProjectName
 import coverosR3z.timerecording.types.maxProjectNameSize
@@ -16,7 +17,8 @@ class ProjectAPI(private val sd: ServerData) {
 
     enum class Elements(private val elemName: String, private val id: String) : Element {
         PROJECT_INPUT("project_name", "project_name"),
-        CREATE_BUTTON("", "project_create_button"),;
+        CREATE_BUTTON("", "project_create_button"),
+        DELETE_BUTTON("", "delete_button");
 
         override fun getId(): String {
             return this.id
@@ -66,10 +68,18 @@ class ProjectAPI(private val sd: ServerData) {
 
 
     private fun existingProjectsHtml(): String {
-        val projectRows = sd.bc.tru.listAllProjects().sortedByDescending { it.id.value }.joinToString("") {
+        val projectRows = sd.bc.tru.listAllProjects()
+            .sortedByDescending { it.id.value }
+            .joinToString("") {
 """
     <tr>
         <td>${safeHtml(it.name.value)}</td>
+        <td>
+             <form action="${DeleteProjectAPI.path}" method="post">
+                <input type="hidden" name="${DeleteProjectAPI.Elements.ID.getElemName()}" value="${it.id.value}" />
+                <button id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
+            </form>
+        </td>
     </tr>
 """
             }
@@ -79,7 +89,8 @@ class ProjectAPI(private val sd: ServerData) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th id="name">Name</th>
+                            <th id="act">Act</th>
                         </tr>
                     </thead>
                     <tbody>
