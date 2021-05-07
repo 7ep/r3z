@@ -289,7 +289,11 @@ The timerows
   border: 1px solid #ccc;
 }
 
-
+tr.being_edited {
+    background: grey;
+    color: white;
+    border: 2px dashed black;
+}
 
 
  @media only screen and (min-width: 751px) {

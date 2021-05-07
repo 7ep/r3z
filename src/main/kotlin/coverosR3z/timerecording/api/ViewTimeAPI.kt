@@ -19,7 +19,13 @@ class ViewTimeAPI(private val sd: ServerData) {
         DATE_INPUT_EDIT("edit-date"),
         TIME_INPUT_EDIT("edit-time"),
         DETAILS_INPUT_EDIT("edit-details"),
-        
+
+        /**
+         * This is used to indicate a time entry row that
+         * is in the midst of being edited
+         */
+        BEING_EDITED("being_edited"),
+
         // create fields
         PROJECT_INPUT_CREATE("create-project-entry"),
         DATE_INPUT_CREATE("create-date"),
@@ -162,7 +168,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         $timeEntryPanel
                     </div>
                     <div id="timerows-container">
-                        ${renderTimeRows(te, currentPeriod, hideEditButtons)}
+                        ${renderTimeRows(te, currentPeriod, hideEditButtons, idBeingEdited)}
                     </div>
                 </div>    
             </div>
@@ -425,12 +431,13 @@ class ViewTimeAPI(private val sd: ServerData) {
         te: Set<TimeEntry>,
         currentPeriod: TimePeriod,
         hideEditButtons: Boolean,
+        idBeingEdited: Int?,
     ): String {
         val timeentriesByDate = te.groupBy { it.date }
 
         var readOnlyRows = ""
         for (date in timeentriesByDate.keys.sortedDescending()) {
-            readOnlyRows += renderTimeEntriesForDate(timeentriesByDate, date, currentPeriod, hideEditButtons)
+            readOnlyRows += renderTimeEntriesForDate(timeentriesByDate, date, currentPeriod, hideEditButtons, idBeingEdited)
         }
 
         return readOnlyRows
@@ -440,7 +447,8 @@ class ViewTimeAPI(private val sd: ServerData) {
         timeentriesByDate: Map<Date, List<TimeEntry>>,
         date: Date,
         currentPeriod: TimePeriod,
-        hideEditButtons: Boolean
+        hideEditButtons: Boolean,
+        idBeingEdited: Int?
     ): String {
         val dailyHours = Time(timeentriesByDate[date]?.sumBy { it.time.numberOfMinutes } ?: 0).getHoursAsString()
         val dateHeaderString = "${date.viewTimeHeaderFormat}, Daily hours: $dailyHours"
@@ -448,7 +456,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         val tableRows = timeentriesByDate[date]
             ?.sortedBy { it.project.name.value }
             ?.joinToString("") {
-                renderReadOnlyRow(it, currentPeriod, hideEditButtons)
+                renderReadOnlyRow(it, currentPeriod, hideEditButtons, idBeingEdited)
             }
 
         val actionColumnHeader = if (hideEditButtons) "" else """<th class="act">Act</th>"""
@@ -474,17 +482,18 @@ class ViewTimeAPI(private val sd: ServerData) {
         it: TimeEntry,
         currentPeriod: TimePeriod,
         hideEditButtons: Boolean,
+        idBeingEdited: Int?,
     ): String {
 
-        val actionButtons = if (hideEditButtons) "" else """
-        <td>
+        val actionButtons = if (hideEditButtons || it.id.value == idBeingEdited) "" else """
             <a href="$path?${Elements.EDIT_ID.getElemName()}=${it.id.value}&${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.start.stringValue}">edit</a>
-        </td>
         """
+
+        val isBeingEditedClass = if (it.id.value == idBeingEdited) """class="${Elements.BEING_EDITED.getElemClass()}"""" else ""
 
         val detailContent = if (it.details.value.isBlank()) "&nbsp;" else safeHtml(it.details.value)
         return """
-        <tr id="time-entry-${it.id.value}">
+        <tr $isBeingEditedClass id="time-entry-${it.id.value}">
             <td>
                 ${safeHtml(it.project.name.value)}
             </td>
@@ -494,7 +503,9 @@ class ViewTimeAPI(private val sd: ServerData) {
             <td>
                 $detailContent
             </td>
-            $actionButtons
+            <td>
+                $actionButtons
+            </td>
         </tr>
     """
     }

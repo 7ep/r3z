@@ -21,3 +21,11 @@ for (var i = 0; i < inputs.length; i++) {
     }
   });
 }
+
+// scroll the row being edited into view
+window.onload = function centerTheEditedRow() {
+    let timeBeingEdited = document.getElementsByClassName("being_edited")[0];
+    if (typeof timeBeingEdited !== 'undefined') {
+        timeBeingEdited.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+    }
+}
