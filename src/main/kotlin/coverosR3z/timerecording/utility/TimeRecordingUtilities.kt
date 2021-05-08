@@ -38,15 +38,15 @@ class TimeRecordingUtilities(
 
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return createOrModifyEntry(entry.toTimeEntryPreDatabase()) {
-            val oldEntry = persistence.findTimeEntryById(entry.id)
+        val oldEntry = persistence.findTimeEntryById(entry.id)
+        return createOrModifyEntry(entry.toTimeEntryPreDatabase(), oldEntry = oldEntry) {
             val newTimeEntry = persistence.overwriteTimeEntry(entry)
             logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${newTimeEntry.shortString()}"}
             newTimeEntry
         }
     }
 
-    private fun createOrModifyEntry(entry: TimeEntryPreDatabase, behavior: () -> TimeEntry): RecordTimeResult{
+    private fun createOrModifyEntry(entry: TimeEntryPreDatabase, oldEntry: TimeEntry = NO_TIMEENTRY, behavior: () -> TimeEntry): RecordTimeResult{
         val user = cu
         // ensure time entry user is the logged in user, or
         // is the system
@@ -55,7 +55,7 @@ class TimeRecordingUtilities(
                     "to modify time for ${entry.employee.name.value}"}
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
-        confirmLessThan24Hours(entry.time, entry.employee, entry.date)
+        confirmLessThan24Hours(entry.time, entry.employee, entry.date, oldEntry)
         if(persistence.isInASubmittedPeriod(entry.employee, entry.date)){
             return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
         }
@@ -75,13 +75,22 @@ class TimeRecordingUtilities(
         }
     }
 
-    private fun confirmLessThan24Hours(time: Time, employee: Employee, date: Date) {
+    private fun confirmLessThan24Hours(time: Time, employee: Employee, date: Date, oldEntry: TimeEntry) {
         logger.logDebug(cu) {"confirming total time is less than 24 hours"}
+
         // make sure the employee has a total (new plus existing) of less than 24 hours
         val minutesRecorded : Time = persistence.queryMinutesRecorded(employee, date)
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
-        val existingPlusNewMinutes = minutesRecorded.numberOfMinutes + time.numberOfMinutes
+
+        val existingPlusNewMinutes = if (oldEntry == NO_TIMEENTRY) {
+            logger.logTrace { "creating a new time entry" }
+            minutesRecorded.numberOfMinutes + time.numberOfMinutes
+        } else {
+            logger.logTrace { "editing a time entry" }
+            minutesRecorded.numberOfMinutes - oldEntry.time.numberOfMinutes + time.numberOfMinutes
+        }
+
         if (existingPlusNewMinutes > twentyFourHours) {
             logger.logDebug(cu) {"More minutes entered ($existingPlusNewMinutes) than exists in a day (1440)"}
             throw ExceededDailyHoursAmountException()

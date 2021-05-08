@@ -18,10 +18,10 @@ import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.openqa.selenium.By
 import org.openqa.selenium.Point
 import org.openqa.selenium.WebDriver
 import java.io.File
@@ -53,34 +53,36 @@ class TimeEntryUIValidationTests {
 
         pom.lp.login("bob", DEFAULT_PASSWORD.value)
 
-        noProjectOrTime()
-        includesProjectButNoTime(defaultProject)
-        includesTimeButNoProject()
-        badDateSyntax(defaultProject)
-        badDateBefore1980(defaultProject)
-        badDateAfter2200(defaultProject)
+        val timestamp = getTimestamp()
+        noProjectOrTime(timestamp)
+        includesProjectButNoTime(defaultProject, timestamp)
+        includesTimeButNoProject(timestamp)
+        badDateSyntax(defaultProject, timestamp)
+        badDateBefore1980(defaultProject, timestamp)
+        badDateAfter2200(defaultProject, timestamp)
 
-        timeBelowZero(defaultProject, DEFAULT_DATE)
-        timeAboveTwentyFour(defaultProject, DEFAULT_DATE)
-        timeNotOnValidDivision(defaultProject, DEFAULT_DATE)
-        invalidSyntaxOnTimeInput(defaultProject, DEFAULT_DATE)
-        badDateBeforeCurrentTimePeriod(defaultProject, DEFAULT_DATE)
-        badDateAfterCurrentTimePeriod(defaultProject, DEFAULT_DATE)
+        timeBelowZero(defaultProject, DEFAULT_DATE, timestamp)
+        timeAboveTwentyFour(defaultProject, DEFAULT_DATE, timestamp)
+        timeNotOnValidDivision(defaultProject, DEFAULT_DATE, timestamp)
+        invalidSyntaxOnTimeInput(defaultProject, DEFAULT_DATE, timestamp)
+        badDateBeforeCurrentTimePeriod(defaultProject, DEFAULT_DATE, timestamp)
+        badDateAfterCurrentTimePeriod(defaultProject, DEFAULT_DATE, timestamp)
 
         // this one actually does create a time entry
         val timeEntry = badDescriptionEntry(defaultProject, DEFAULT_DATE)
+        pom.vtp.clickEditTimeEntry(timeEntry.id.value)
 
-        setNoTimeOnEdit(timeEntry)
-        badDateSyntaxOnEdit(timeEntry)
-        badDateBefore1980OnEdit(timeEntry)
-        badDateAfter2200OnEdit(timeEntry)
-        badDateBeforeCurrentTimePeriod_OnEdit(timeEntry)
-        badDateAfterCurrentTimePeriod_OnEdit(timeEntry)
+        setNoTimeOnEdit(timestamp)
+        badDateSyntaxOnEdit(timestamp)
+        badDateBefore1980OnEdit(timestamp)
+        badDateAfter2200OnEdit(timestamp)
+        badDateBeforeCurrentTimePeriod_OnEdit(timestamp)
+        badDateAfterCurrentTimePeriod_OnEdit(timestamp)
 
-        timeBelowZeroOnEdit(timeEntry)
-        timeAboveTwentyFourOnEdit(timeEntry)
-        timeNotOnValidDivisionOnEdit(timeEntry)
-        invalidTimeValueOnEdit(timeEntry)
+        timeBelowZeroOnEdit(timestamp)
+        timeAboveTwentyFourOnEdit(timestamp)
+        timeNotOnValidDivisionOnEdit(timestamp)
+        invalidTimeValueOnEdit(timestamp)
     }
 
     /*
@@ -131,6 +133,24 @@ class TimeEntryUIValidationTests {
         pom.lop.go()
     }
 
+    /**
+     * Gets the value of the timestamp meta information on the page
+     *
+     * Each page is labeled in its header section with a meta element called timestamp,
+     * which has the date and time in GMT of the rendering.  That way, we can tell whether
+     * we are still looking at the same page or not.
+     */
+    private fun getTimestamp() : String {
+        return pom.driver.findElement(By.cssSelector("meta[name=timestamp]")).getAttribute("content")
+    }
+
+    /**
+     * Returns true if the entered timestamp is equal to the page's timestamp
+     */
+    private fun checkTimestamp(timestamp: String) : Boolean {
+        return timestamp == pom.driver.findElement(By.cssSelector("meta[name=timestamp]")).getAttribute("content")
+    }
+
     private fun `setup some default projects and employees`() {
         logout()
         val employee = pom.businessCode.tru.createEmployee(DEFAULT_ADMINISTRATOR_NAME)
@@ -162,55 +182,47 @@ class TimeEntryUIValidationTests {
     /**
      * If I just click save without doing anything, the project being empty will stop us
      */
-    private fun noProjectOrTime() {
+    private fun noProjectOrTime(timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
-    }
-
-    private fun anyEntriesForBob(): Boolean {
-        return pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName).read { entries -> entries.any { it.employee.name.value == "Bob" } }
+        checkTimestamp(timestamp)
     }
 
     /**
      * If I click save after entering a project, the time being empty will stop us
      */
-    private fun includesProjectButNoTime(project: String) {
+    private fun includesProjectButNoTime(project: String, timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * If I click save without the project, the project being empty will stop us
      */
-    private fun includesTimeButNoProject() {
+    private fun includesTimeButNoProject(timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.setTimeForNewEntry("1")
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Everything required has been set (project, time) but the date
      * field has been cleared.
      */
-    private fun badDateSyntax(project: String) {
+    private fun badDateSyntax(project: String, timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.setTimeForNewEntry("1")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.clearTheNewEntryDateEntry()
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
@@ -218,15 +230,14 @@ class TimeEntryUIValidationTests {
      * date field is too far in the past
      * @see [earliestAllowableDate]
      */
-    private fun badDateBefore1980(project: String) {
+    private fun badDateBefore1980(project: String, timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.setTimeForNewEntry("1")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntryString("1979-12-31")
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided a date before 1980
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
@@ -234,102 +245,95 @@ class TimeEntryUIValidationTests {
      * field is too far in the future
      * @see [latestAllowableDate]
      */
-    private fun badDateAfter2200(project: String) {
+    private fun badDateAfter2200(project: String, timestamp: String) {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.setTimeForNewEntry("1")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntryString("2200-01-01")
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided a date before 1980
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Everything required has been set (project, time, date) but the time is too low
      */
-    private fun timeBelowZero(project: String, date: Date) {
+    private fun timeBelowZero(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("-0.25")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(date)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
 
     /**
      * Everything required has been set (project, time, date) but the time is too high
      */
-    private fun timeAboveTwentyFour(project: String, date: Date) {
+    private fun timeAboveTwentyFour(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("24.25")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(date)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Our time entry only allows 0 to 24 and quarter hours.  If we
      * enter 1.23, it shouldn't work.
      */
-    private fun timeNotOnValidDivision(project: String, date: Date) {
+    private fun timeNotOnValidDivision(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("1.23")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(date)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Our time entry only allows 0 to 24 and quarter hours.  If we
      * enter a letter, it shouldn't work
      */
-    private fun invalidSyntaxOnTimeInput(project: String, date: Date) {
+    private fun invalidSyntaxOnTimeInput(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("1.23")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(date)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Not allowed to enter new time on a date after the current [coverosR3z.timerecording.types.TimePeriod]
      */
-    private fun badDateAfterCurrentTimePeriod(project: String, date: Date) {
+    private fun badDateAfterCurrentTimePeriod(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("1.00")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(DEFAULT_DATE_NEXT_PERIOD)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Not allowed to enter new time on a date before the current [coverosR3z.timerecording.types.TimePeriod]
      */
-    private fun badDateBeforeCurrentTimePeriod(project: String, date: Date) {
+    private fun badDateBeforeCurrentTimePeriod(project: String, date: Date, timestamp: String) {
         pom.vtp.gotoDate(date)
         pom.vtp.setTimeForNewEntry("1.00")
         pom.vtp.setProjectForNewEntry(project)
         pom.vtp.setDateForNewEntry(DEFAULT_DATE_PREVIOUS_PERIOD)
         pom.vtp.clickCreateNewTimeEntry()
 
-        // Confirm we don't have any new entries because we provided no project or time
-        assertFalse(anyEntriesForBob())
+        checkTimestamp(timestamp)
     }
 
     /**
@@ -352,14 +356,11 @@ class TimeEntryUIValidationTests {
     /**
      * If we clear the time field and try to save, it won't happen
      */
-    private fun setNoTimeOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun setNoTimeOnEdit(timestamp: String) {
         pom.vtp.setTimeForEditingTimeEntry("")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     private fun bobSingleEntry(): TimeEntry {
@@ -370,14 +371,11 @@ class TimeEntryUIValidationTests {
      * Everything required has been set (project, time) but the date
      * field has been cleared.
      */
-    private fun badDateSyntaxOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun badDateSyntaxOnEdit(timestamp: String) {
         pom.vtp.clearTheDateEntryOnEdit()
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
@@ -385,14 +383,11 @@ class TimeEntryUIValidationTests {
      * date field is too far in the past
      * @see [earliestAllowableDate]
      */
-    private fun badDateBefore1980OnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun badDateBefore1980OnEdit(timestamp: String) {
         pom.vtp.setTheDateEntryOnEditString("1979-12-31")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
@@ -400,96 +395,75 @@ class TimeEntryUIValidationTests {
      * field is too far in the future
      * @see [latestAllowableDate]
      */
-    private fun badDateAfter2200OnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun badDateAfter2200OnEdit(timestamp: String) {
         pom.vtp.setTheDateEntryOnEditString("2200-01-01")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
      * When viewing a particular time period, the UI will only allow
      * us to edit time within the current set of dates of this period
      */
-    private fun badDateAfterCurrentTimePeriod_OnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun badDateAfterCurrentTimePeriod_OnEdit(timestamp: String) {
         pom.vtp.setTheDateEntryOnEdit(DEFAULT_DATE_NEXT_PERIOD)
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
      * see [badDateAfterCurrentTimePeriod_OnEdit]
      */
-    private fun badDateBeforeCurrentTimePeriod_OnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun badDateBeforeCurrentTimePeriod_OnEdit(timestamp: String) {
         pom.vtp.setTheDateEntryOnEdit(DEFAULT_DATE_PREVIOUS_PERIOD)
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Everything required has been set (project, time, date) but the time is too low
      */
-    private fun timeBelowZeroOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun timeBelowZeroOnEdit(timestamp: String) {
         pom.vtp.setTimeForEditingTimeEntry("-0.25")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
 
     /**
      * Everything required has been set (project, time, date) but the time is too high
      */
-    private fun timeAboveTwentyFourOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun timeAboveTwentyFourOnEdit(timestamp: String) {
         pom.vtp.setTimeForEditingTimeEntry("24.25")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Our time entry only allows 0 to 24 and quarter hours.  If we
      * enter 1.23, it shouldn't work.
      */
-    private fun timeNotOnValidDivisionOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun timeNotOnValidDivisionOnEdit(timestamp: String) {
         pom.vtp.setTimeForEditingTimeEntry("1.24")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
     /**
      * Our time entry only allows 0 to 24 and quarter hours.  If we
      * enter a letter, it shouldn't work
      */
-    private fun invalidTimeValueOnEdit(expectedTimeEntry: TimeEntry) {
-        pom.vtp.gotoDate(DEFAULT_DATE)
-        pom.vtp.clickEditTimeEntry(expectedTimeEntry.id.value)
+    private fun invalidTimeValueOnEdit(timestamp: String) {
         pom.vtp.setTimeForEditingTimeEntry("a")
         pom.vtp.clickSaveTimeEntry()
 
-        // Confirm we still have the unchanged time entry
-        assertEquals(expectedTimeEntry, bobSingleEntry())
+        checkTimestamp(timestamp)
     }
 
 }

@@ -48,7 +48,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         val timeInputString = data.mapping[Elements.TIME_INPUT.getElemName()]
         val time = Time.makeHoursToMinutes(timeInputString)
         check(time.numberOfMinutes % 5 == 0) { "number of minutes must be multiple of 15.  Yours was ${time.getHoursAsString()} hours or ${time.numberOfMinutes} minutes" }
-        check(time.numberOfMinutes < 24 * 60) { "Not able to enter more than 24 hours on a daily entry.  You entered ${time.getHoursAsString()} hours" }
+        check(time.numberOfMinutes <= 24 * 60) { "Not able to enter more than 24 hours on a daily entry.  You entered ${time.getHoursAsString()} hours" }
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 

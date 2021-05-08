@@ -539,7 +539,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         
                     <div class="date">
                         <label for="${Elements.DATE_INPUT_CREATE.getId()}">Date:</label>
-                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="$defaultDateValue" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
+                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="$defaultDateValue" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" required="required" />
                     </div>
                     
                     <div class="time">
@@ -583,7 +583,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                         <div class="date">
                             <label for="${Elements.DATE_INPUT_EDIT.getId()}">Date:</label>
                             <input id="${Elements.DATE_INPUT_EDIT.getId()}" name="${Elements.DATE_INPUT.getElemName()}" 
-                                type="date" value="${te.date.stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" />
+                                type="date" value="${te.date.stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" required="required" />
                         </div>
             
                         <div class="time">

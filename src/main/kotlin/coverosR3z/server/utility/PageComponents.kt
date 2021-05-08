@@ -5,6 +5,9 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.ServerData
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class PageComponents(sd: ServerData) {
 
@@ -27,21 +30,25 @@ class PageComponents(sd: ServerData) {
 </span>""".trimMargin()
         }
 
-        fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String="") = """
-<!DOCTYPE html>    
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href="general.css" />
-        $extraHeaderContent
-        <title>$title</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="file" content="$apiFile" >
-    </head>
-    <body>
-        $standardHeader
-        $body
-    </body>
-</html>
-"""
+        fun makeTemplate(title: String, apiFile: String, body: String, extraHeaderContent: String=""): String {
+                val date = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT)
+                return """
+        <!DOCTYPE html>    
+        <html lang="en">
+            <head>
+                <link rel="stylesheet" href="general.css" />
+                $extraHeaderContent
+                <title>$title</title>
+                <meta name="timestamp" content="$date">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="file" content="$apiFile" >
+            </head>
+            <body>
+                $standardHeader
+                $body
+            </body>
+        </html>
+        """
+        }
 
 }
