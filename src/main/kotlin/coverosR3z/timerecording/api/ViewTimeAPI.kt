@@ -172,12 +172,15 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </div>
                 </div>    
             </div>
-            <script src="viewtime.js"></script>
         """
 
         val viewingSelf = sd.ahd.user.employee == employee
         val title = if (viewingSelf) "Your time entries" else "Viewing ${safeHtml(employee.name.value)}'s $submittedString timesheet "
-        return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="viewtime.css" />""" )
+        return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body,
+            extraHeaderContent="""
+                <link rel="stylesheet" href="viewtime.css" />
+                <script src="viewtime.js"></script>
+                """.trimIndent() )
     }
 
     private fun createApproveUI(reviewingOtherTimesheet: Boolean, isSubmitted: Boolean, approvalStatus: ApprovalStatus, employee: Employee, timePeriod: TimePeriod): String {
@@ -485,8 +488,13 @@ class ViewTimeAPI(private val sd: ServerData) {
         idBeingEdited: Int?,
     ): String {
 
-        val actionButtons = if (hideEditButtons || it.id.value == idBeingEdited) "" else """
-            <a href="$path?${Elements.EDIT_ID.getElemName()}=${it.id.value}&${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.start.stringValue}">edit</a>
+        val actContent = if (it.id.value == idBeingEdited) "" else """
+            <a class="button" href="$path?${Elements.EDIT_ID.getElemName()}=${it.id.value}&${Elements.TIME_PERIOD.getElemName()}=${currentPeriod.start.stringValue}">edit</a>
+        """.trimIndent()
+        val actionColumn = if (hideEditButtons) "" else """
+            <td>
+                $actContent
+            </td>
         """
 
         val isBeingEditedClass = if (it.id.value == idBeingEdited) """class="${Elements.BEING_EDITED.getElemClass()}"""" else ""
@@ -503,9 +511,7 @@ class ViewTimeAPI(private val sd: ServerData) {
             <td>
                 $detailContent
             </td>
-            <td>
-                $actionButtons
-            </td>
+            $actionColumn
         </tr>
     """
     }
