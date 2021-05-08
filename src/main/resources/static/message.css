@@ -22,12 +22,13 @@ a.button {
   border-radius: 11px;
   padding: 0.4em;
   box-sizing: border-box;
-  text-decoration: auto;
+  text-decoration: none! important;
 }
 
 a.button:hover {
   color: #5f5f5f;
   background-color: #DDDDE5;
+  text-decoration: none! important;
 }
 
 a.button:focus {
