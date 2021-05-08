@@ -24,6 +24,8 @@ class TimeRecordingUtilities(
         return TimeRecordingUtilities(persistence, cu, logger, RolesChecker(cu))
     }
 
+    // region timeentries
+
     override fun createTimeEntry(entry: TimeEntryPreDatabase): RecordTimeResult {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
 
@@ -86,6 +88,40 @@ class TimeRecordingUtilities(
         }
     }
 
+    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.getTimeEntriesForTimePeriod(employee, timePeriod)
+    }
+
+    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        val didDelete = persistence.deleteTimeEntry(timeEntry)
+        if (!didDelete) {
+            throw IllegalStateException("Attempted to delete a non-existent time entry by id")
+        }
+        logger.logAudit (cu) { "Deleted time entry: ${timeEntry.shortString()} " }
+        return true
+    }
+
+    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
+        return persistence.findTimeEntryById(id)
+    }
+
+    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.readTimeEntriesOnDate(employee, date)
+    }
+
+    override fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry> {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.readTimeEntries(employee)
+    }
+
+    // endregion
+
+    // region projects
+
     /**
      * Business code for creating a new project in the
      * system (persists it to the database)
@@ -102,6 +138,34 @@ class TimeRecordingUtilities(
         return persistence.persistNewProject(projectName)
     }
 
+    override fun listAllProjects(): List<Project> {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.getAllProjects()
+    }
+
+    override fun findProjectById(id: ProjectId): Project {
+        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+        return persistence.getProjectById(id)
+    }
+
+    override fun findProjectByName(name: ProjectName): Project {
+        return persistence.getProjectByName(name)
+    }
+
+    override fun deleteProject(project: Project): DeleteProjectResult {
+        require(persistence.getProjectById(project.id) != NO_PROJECT)
+
+        return if (persistence.isProjectUsedForTimeEntry(project)) {
+            DeleteProjectResult.USED
+        } else {
+            persistence.deleteProject(project)
+            DeleteProjectResult.SUCCESS
+        }
+    }
+
+    // endregion
+
+    // region employees
     /**
      * Business code for creating a new employee in the
      * system (persists it to the database)
@@ -115,26 +179,6 @@ class TimeRecordingUtilities(
         val newEmployee = persistence.persistNewEmployee(employeename)
         logger.logAudit(cu) {"Created a new employee, \"${newEmployee.name.value}\""}
         return newEmployee
-    }
-
-    override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.readTimeEntriesOnDate(employee, date)
-    }
-
-    override fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry> {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.readTimeEntries(employee)
-    }
-
-    override fun listAllProjects(): List<Project> {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getAllProjects()
-    }
-
-    override fun findProjectById(id: ProjectId): Project {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getProjectById(id)
     }
 
     override fun findEmployeeById(id: EmployeeId): Employee {
@@ -151,6 +195,10 @@ class TimeRecordingUtilities(
         rc.checkAllowed(Role.SYSTEM, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.NONE)
         return persistence.getAllEmployees()
     }
+
+    // endregion
+
+    // region submittals
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
@@ -173,30 +221,14 @@ class TimeRecordingUtilities(
         return persistence.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
     }
 
-    override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getTimeEntriesForTimePeriod(employee, timePeriod)
-    }
-
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
         return persistence.isInASubmittedPeriod(employee, date)
     }
 
-    override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val didDelete = persistence.deleteTimeEntry(timeEntry)
-        if (!didDelete) {
-            throw IllegalStateException("Attempted to delete a non-existent time entry by id")
-        }
-        logger.logAudit (cu) { "Deleted time entry: ${timeEntry.shortString()} " }
-        return true
-    }
+    // endregion
 
-    override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
-        rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
-        return persistence.findTimeEntryById(id)
-    }
+    // region approvals
 
     override fun approveTimesheet(employee: Employee, startDate: Date) : ApprovalResultStatus{
         rc.checkAllowed(Role.APPROVER, Role.ADMIN)
@@ -240,19 +272,6 @@ class TimeRecordingUtilities(
         return ApprovalResultStatus.SUCCESS
     }
 
-    override fun findProjectByName(name: ProjectName): Project {
-        return persistence.getProjectByName(name)
-    }
-
-    override fun deleteProject(project: Project): DeleteProjectResult {
-        require(persistence.getProjectById(project.id) != NO_PROJECT)
-
-        return if (persistence.isProjectUsedForTimeEntry(project)) {
-            DeleteProjectResult.USED
-        } else {
-            persistence.deleteProject(project)
-            DeleteProjectResult.SUCCESS
-        }
-    }
+    // endregion
 
 }
