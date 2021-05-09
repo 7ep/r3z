@@ -49,6 +49,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertTrue(frc.roleCanDoAction)
 
+        tru.findEmployeeByName(DEFAULT_EMPLOYEE.name)
+        assertTrue(frc.roleCanDoAction)
+
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertTrue(frc.roleCanDoAction)
 
@@ -116,6 +119,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertTrue(frc.roleCanDoAction)
 
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
+        assertTrue(frc.roleCanDoAction)
+
+        tru.findEmployeeByName(DEFAULT_EMPLOYEE.name)
         assertTrue(frc.roleCanDoAction)
 
         tru.findProjectById(DEFAULT_PROJECT.id)
@@ -186,6 +192,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertFalse(frc.roleCanDoAction)
 
+        tru.findEmployeeByName(DEFAULT_EMPLOYEE.name)
+        assertFalse(frc.roleCanDoAction)
+
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertFalse(frc.roleCanDoAction)
 
@@ -254,6 +263,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
         assertTrue(frc.roleCanDoAction)
 
+        tru.findEmployeeByName(DEFAULT_EMPLOYEE.name)
+        assertTrue(frc.roleCanDoAction)
+
         tru.findProjectById(DEFAULT_PROJECT.id)
         assertTrue(frc.roleCanDoAction)
 
@@ -320,6 +332,9 @@ class TimeRecordingUtilitiesRoleTests {
         assertFalse(frc.roleCanDoAction)
 
         tru.findEmployeeById(DEFAULT_EMPLOYEE.id)
+        assertFalse(frc.roleCanDoAction)
+
+        tru.findEmployeeByName(DEFAULT_EMPLOYEE.name)
         assertFalse(frc.roleCanDoAction)
 
         tru.findProjectById(DEFAULT_PROJECT.id)

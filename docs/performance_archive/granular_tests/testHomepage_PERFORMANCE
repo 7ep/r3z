@@ -439,3 +439,4 @@
 2021-05-07	numberOfThreads: 10	numberOfRequests: 300	time: 92
 2021-05-08	numberOfThreads: 10	numberOfRequests: 300	time: 100
 2021-05-08	numberOfThreads: 10	numberOfRequests: 300	time: 84
+2021-05-09	numberOfThreads: 10	numberOfRequests: 300	time: 99

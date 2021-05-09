@@ -268,7 +268,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      */
     fun setDateForNewEntry(date: Date) {
         (driver as JavascriptExecutor)
-            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').setAttribute('value','${date.stringValue}');")
+            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').value = '${date.stringValue}';")
     }
 
     /**
@@ -280,7 +280,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      */
     fun setDateForNewEntryString(date: String) {
         (driver as JavascriptExecutor)
-            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').setAttribute('value','$date');")
+            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').value = '$date';")
     }
 
     /**
@@ -291,6 +291,16 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         val timeInput = driver.findElement(By.id(ViewTimeAPI.Elements.TIME_INPUT_EDIT.getId()))
         timeInput.clear()
         timeInput.sendKeys(time)
+    }
+
+    /**
+     * Understand: this is for editing an existing time entry
+     * @param project the project
+     */
+    fun setProjectForEditingTimeEntry(project: String) {
+        val projectInput = driver.findElement(By.id(ViewTimeAPI.Elements.PROJECT_INPUT_EDIT.getId()))
+        projectInput.clear()
+        projectInput.sendKeys(project)
     }
 
     /**
