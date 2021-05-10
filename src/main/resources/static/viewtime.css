@@ -305,6 +305,7 @@ The timerows
   width: 100%;
   table-layout: fixed;
   background-color: white;
+  margin-top: 20px;
 }
 
 #timerows-container th, td {
@@ -327,6 +328,8 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 18px;
+        background: black;
+        color: lightgrey;
     }
  }
 
@@ -337,6 +340,8 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 16px;
+        background: black;
+        color: lightgrey;
     }
  }
 
@@ -347,6 +352,8 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 12px;
+        background: black;
+        color: lightgrey;
     }
  }
 
@@ -384,4 +391,18 @@ tr.being_edited {
     }
 }
 
-#timerows-container caption {background: antiquewhite;}
+#timerows-container caption {
+      background: -webkit-gradient(
+      linear, 0 0, 0 100%,
+      from(#eee), to(#ccc)
+    );
+      background:-moz-linear-gradient(#eee, #ccc);
+      background:-o-linear-gradient(#eee, #ccc);
+      background:-ms-linear-gradient(#eee, #ccc);
+      background:linear-gradient(#eee, #ccc);
+      color:#333;
+      text-decoration:none;
+      text-align:center;
+      text-shadow:0 1px 0 rgba(255,255,255,.5);
+      border-bottom:1px solid #aaa;
+      }
