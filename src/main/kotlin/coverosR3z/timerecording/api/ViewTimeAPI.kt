@@ -129,7 +129,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         // let's see if they are asking for a particular employee's information
         val (employee, reviewingOtherTimesheet) = determineCriteriaForWhoseTimesheet()
 
-        val te = sd.bc.tru.getTimeEntriesForTimePeriod(employee, currentPeriod)
+        val tru = sd.bc.tru
+
+        val te = tru.getTimeEntriesForTimePeriod(employee, currentPeriod)
         val totalHours = Time(te.sumBy {it.time.numberOfMinutes}).getHoursAsString()
         val neededHours = Time(8 * 60 * TimePeriod.numberOfWeekdays(currentPeriod)).getHoursAsString()
         val editidValue = sd.ahd.queryString[Elements.EDIT_ID.getElemName()]
@@ -138,9 +140,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         // the code will handle either properly
         val idBeingEdited = determineWhichTimeEntryIsBeingEdited(editidValue, reviewingOtherTimesheet)
 
-        val projects = sd.bc.tru.listAllProjects()
+        val projects = tru.listAllProjects()
 
-        val approvalStatus = sd.bc.tru.isApproved(employee, currentPeriod.start)
+        val approvalStatus = tru.isApproved(employee, currentPeriod.start)
         val (inASubmittedPeriod, submitButton) = processSubmitButton(employee, currentPeriod, reviewingOtherTimesheet, approvalStatus)
         val switchEmployeeUI = createEmployeeSwitch(currentPeriod)
 
@@ -161,6 +163,11 @@ class ViewTimeAPI(private val sd: ServerData) {
         )
         val hideEditButtons = inASubmittedPeriod || reviewingOtherTimesheet || approvalStatus == ApprovalStatus.APPROVED
 
+        val dateToDailyHours = te
+            .groupBy { it.date }
+            .mapValues { (_,v) -> v.sumBy { it.time.numberOfMinutes } }
+            .entries.joinToString(separator = ",") { "'${it.key.stringValue}' : ${it.value}" }
+
         val body = """
             <div id="outermost_container">
                 <div id="inner_container">
@@ -174,6 +181,9 @@ class ViewTimeAPI(private val sd: ServerData) {
                     </div>
                 </div>    
             </div>
+            <script>
+                let timeentries = { $dateToDailyHours  }
+            </script>
         """
 
         val viewingSelf = sd.ahd.user.employee == employee
@@ -469,7 +479,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         return """
             
             <table>
-                <caption>$dateHeaderString</caption>
+                <caption><div>$dateHeaderString</div></caption>
                 <thead>
                     <th class="prj">Project</th>
                     <th class="time">Time</th>
@@ -546,7 +556,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     
                     <div class="time">
                         <label for="${Elements.TIME_INPUT_CREATE.getId()}">Time:</label>
-                        <input  id="${Elements.TIME_INPUT_CREATE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
+                        <input autocomplete="off" id="${Elements.TIME_INPUT_CREATE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
                     </div>
                 </div>
                 
@@ -591,7 +601,8 @@ class ViewTimeAPI(private val sd: ServerData) {
             
                         <div class="time">
                             <label for="${Elements.TIME_INPUT_EDIT.getId()}">Time:</label>
-                            <input id="${Elements.TIME_INPUT_EDIT.getId()}" name="${Elements.TIME_INPUT.getElemName()}" 
+                            <script>let previoustime = ${te.time.numberOfMinutes}</script>
+                            <input autocomplete="off" id="${Elements.TIME_INPUT_EDIT.getId()}" name="${Elements.TIME_INPUT.getElemName()}" 
                                 type="number" inputmode="decimal" 
                                 step="0.25" min="0" max="24" required="required"
                                 value="${te.time.getHoursAsString()}" 

@@ -3,7 +3,10 @@
     margin: auto;
 }
 
-#inner_container {margin-left: 6px;margin-right: 6px;border: 2px solid grey;}
+#inner_container {
+    margin-left: 6px;
+    margin-right: 6px;
+}
 
 #control_surface {
     position: sticky;
@@ -20,7 +23,7 @@ h2 {
   text-align: center;
   font-size: 18px;
   color: black;
-  background-color: burlywood;
+  background-color: white;
 }
 
 /*
@@ -107,7 +110,7 @@ all the buttons and the time period selector
  nav#control_panel {
     border: 2px solid #e2e2e2;
     border-radius: .5em;
-    background-color: burlywood;
+    background-color: white;
     display: flex;
     justify-content: center;
     align-items: baseline;
@@ -151,7 +154,7 @@ For elements related to entering and editing time entries
     font-size: 0.6em;
     color: black;
     z-index: 1;
-    background-color: burlywood;
+    background-color: white;
 }
 
 #data-entry-container .date {
@@ -193,7 +196,7 @@ For elements related to entering and editing time entries
   border: 2px solid #e2e2e2;
   margin: auto;
   border-radius: 6px;
-  background-color: burlywood;
+  background-color: white;
   padding: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -305,7 +308,7 @@ The timerows
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-  background-color: burlywood;
+  background-color: white;
   margin-top: 20px;
 }
 
@@ -329,7 +332,7 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 18px;
-        background: black;
+        background: darkslategrey;
         color: lightgrey;
     }
  }
@@ -341,7 +344,7 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 16px;
-        background: black;
+        background: darkslategrey;
         color: lightgrey;
     }
  }
@@ -353,7 +356,7 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 12px;
-        background: black;
+        background: darkslategrey;
         color: lightgrey;
     }
  }
@@ -372,6 +375,11 @@ tr.being_edited {
 #timerows-container td {
     overflow: hidden;
     font-size: 14px;
+}
+
+#timerows-container td:nth-child(4),
+#timerows-container td:nth-child(2) {
+    text-align: center;
 }
 
 @media only screen and (min-width: 751px) {
@@ -403,7 +411,16 @@ tr.being_edited {
       background:linear-gradient(#eee, #ccc);
       color:#333;
       text-decoration:none;
-      text-align:center;
-      text-shadow:0 1px 0 rgba(255,255,255,.5);
+      text-shadow: 0 1px 0 rgba(255,255,255,.5);
       border-bottom:1px solid #aaa;
+      font-size: 16px;
+      font-weight: bold;
+      height: 25px;
       }
+
+#timerows-container caption > div {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

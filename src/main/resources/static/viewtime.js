@@ -5,6 +5,7 @@
 window.addEventListener("load", function(){
 
     preventInvalidInputOnDatalistInput();
+    totalHoursValidation();
     centerTheEditedRow();
 
 });
@@ -42,6 +43,37 @@ function preventInvalidInputOnDatalistInput() {
         }
       });
     }
+}
+
+/*
+Prevents input of time that would cause there to be more
+than 24 hours entered in a day.  pretty easy for adding
+entries, but a bit trickier for editing entries - you have
+to remove the old before adding the new to get an accurate
+sum.
+*/
+function totalHoursValidation() {
+    // Find all inputs on the DOM which are bound to a datalist via their list attribute.
+    let timeinput = document.getElementById('create-time') || document.getElementById('edit-time');
+    let dateInput = document.getElementById('create-date') || document.getElementById('edit-date');
+    let twentyFourHrs = 24 * 60;
+
+    let checkValidation = function() {
+          if (typeof previoustime === 'undefined')
+             previoustime = 0;
+
+          let hoursGreaterThanPossible = ((timeinput.value * 60) - previoustime + timeentries[dateInput.value]) > twentyFourHrs;
+
+          if (hoursGreaterThanPossible) {
+              this.setCustomValidity('You are entering more hours than are possible in a day');
+          } else {
+              this.setCustomValidity('');
+          }
+      }
+
+    // When the value of the input changes
+    timeinput.addEventListener('change', checkValidation);
+    timeinput.addEventListener('keyup', checkValidation);
 }
 
 // scroll the row being edited into view
