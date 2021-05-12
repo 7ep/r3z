@@ -7,6 +7,8 @@ import coverosR3z.server.utility.ServerUtilities
 import coverosR3z.system.logging.LoggingAPI
 import coverosR3z.system.misc.utility.decode
 import coverosR3z.system.misc.utility.encode
+import coverosR3z.system.misc.utility.safeAttr
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
@@ -34,8 +36,8 @@ class MessageAPI {
              */
             val body = """
                 <div class="container">
-                    <div id="message_text" class="${message.type.toString().toLowerCase()}" >${message.text}</div>
-                    <a class="button" href="${message.returnLink}">OK</a>
+                    <div id="message_text" class="${message.type.toString().toLowerCase()}" >${safeHtml(message.text)}</div>
+                    <a class="button" href="${safeAttr(message.returnLink)}">OK</a>
                 </div>
                 """.trimIndent()
 
