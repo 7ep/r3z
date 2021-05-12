@@ -36,7 +36,7 @@ class ApproveApi {
     companion object : PostEndpoint {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            return AuthUtilities.doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN, Role.APPROVER) {
+            return AuthUtilities.doPOSTAuthenticated(sd, requiredInputs, ViewTimeAPI.path, Role.ADMIN, Role.APPROVER) {
                 val (employee, startDate, isUnapproval) = extractData(sd)
 
                 if (isUnapproval == "true") {

@@ -7,6 +7,7 @@ import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.timerecording.types.NO_TIMEENTRY
 import coverosR3z.timerecording.types.TimeEntryId
 
 class DeleteTimeAPI {
@@ -15,12 +16,13 @@ class DeleteTimeAPI {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             return doPOSTAuthenticated(
-                sd.ahd.user,
+                sd,
                 requiredInputs,
-                sd.ahd.data,
+                ViewTimeAPI.path,
                 Role.SYSTEM, Role.ADMIN, Role.APPROVER, Role.REGULAR) {
                     val timeEntryId = TimeEntryId.make(sd.ahd.data.mapping[ViewTimeAPI.Elements.ID_INPUT.getElemName()])
                     val timeEntry = sd.bc.tru.findTimeEntryById(timeEntryId)
+                    check(timeEntry != NO_TIMEENTRY) { "No time entry found with id" }
                     sd.bc.tru.deleteTimeEntry(timeEntry)
 
                     val currentPeriod = sd.ahd.data.mapping[ViewTimeAPI.Elements.TIME_PERIOD.getElemName()]

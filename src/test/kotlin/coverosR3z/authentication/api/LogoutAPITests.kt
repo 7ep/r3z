@@ -68,6 +68,6 @@ class LogoutAPITests {
     }
 
     private fun makeLogoutServerData(user: User = DEFAULT_ADMIN_USER): ServerData {
-        return makeServerData(PostBodyData(), tru, au, user = user)
+        return makeServerData(PostBodyData(), tru, au, user = user, path = LogoutAPI.path)
     }
 }

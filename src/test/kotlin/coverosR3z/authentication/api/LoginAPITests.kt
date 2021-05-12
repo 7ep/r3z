@@ -130,7 +130,7 @@ class LoginAPITests {
      * A helper method for the ordinary [ServerData] present during login
      */
     private fun makeLoginServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED, user = NO_USER)
+        return makeServerData(data, tru, au, AuthStatus.UNAUTHENTICATED, user = NO_USER, path = LoginAPI.path)
     }
 
 }

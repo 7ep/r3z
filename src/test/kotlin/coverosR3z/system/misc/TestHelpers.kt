@@ -127,11 +127,13 @@ fun makeServerData(
     tru: ITimeRecordingUtilities,
     au: IAuthenticationUtilities,
     authStatus: AuthStatus = AuthStatus.AUTHENTICATED,
-    user: User = SYSTEM_USER): ServerData {
+    user: User = SYSTEM_USER,
+    path: String
+    ): ServerData {
     return ServerData(
         BusinessCode(tru, au),
         fakeServerObjects,
-        AnalyzedHttpData(data = data, user = user),
+        AnalyzedHttpData(data = data, user = user, path = path),
         authStatus = authStatus,
         testLogger
     )

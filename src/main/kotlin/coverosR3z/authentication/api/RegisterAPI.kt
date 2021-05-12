@@ -70,7 +70,7 @@ class RegisterAPI(private val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val r = RegisterAPI(sd)
-            return doPOSTRequireUnauthenticated(sd.ahd.user, requiredInputs, sd.ahd.data) { r.handlePOST() }
+            return doPOSTRequireUnauthenticated(sd, requiredInputs) { r.handlePOST() }
         }
     }
 

@@ -9,7 +9,7 @@
     position: sticky;
     top: 47px;
     z-index: 1;
-    background-color: white;
+    background-color: black;
 }
 
 /*
@@ -20,6 +20,7 @@ h2 {
   text-align: center;
   font-size: 18px;
   color: black;
+  background-color: burlywood;
 }
 
 /*
@@ -106,7 +107,7 @@ all the buttons and the time period selector
  nav#control_panel {
     border: 2px solid #e2e2e2;
     border-radius: .5em;
-    background-color: white;
+    background-color: burlywood;
     display: flex;
     justify-content: center;
     align-items: baseline;
@@ -150,7 +151,7 @@ For elements related to entering and editing time entries
     font-size: 0.6em;
     color: black;
     z-index: 1;
-    background-color: white;
+    background-color: burlywood;
 }
 
 #data-entry-container .date {
@@ -192,7 +193,7 @@ For elements related to entering and editing time entries
   border: 2px solid #e2e2e2;
   margin: auto;
   border-radius: 6px;
-  background-color: white;
+  background-color: burlywood;
   padding: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -304,7 +305,7 @@ The timerows
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-  background-color: white;
+  background-color: burlywood;
   margin-top: 20px;
 }
 

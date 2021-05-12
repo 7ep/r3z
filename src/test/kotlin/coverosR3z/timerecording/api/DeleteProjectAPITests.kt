@@ -16,7 +16,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.lang.IllegalStateException
 
 @Category(APITestCategory::class)
 class DeleteProjectAPITests {
@@ -54,9 +53,12 @@ class DeleteProjectAPITests {
         ))
         val sd = makeDPServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java) { DeleteProjectAPI.handlePost(sd).statusCode }
+        val result = DeleteProjectAPI.handlePost(sd)
 
-        assertEquals("Must be able to parse \"abc\" as an integer", ex.message)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=Must+be+able+to+parse+%22abc%22+as+an+integer")
+        )
     }
 
     /**
@@ -70,9 +72,12 @@ class DeleteProjectAPITests {
         ))
         val sd = makeDPServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java) { DeleteProjectAPI.handlePost(sd).statusCode }
+        val result = DeleteProjectAPI.handlePost(sd)
 
-        assertEquals("No project found by that id", ex.message)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=No+project+found+by+that+id")
+        )
     }
 
     /**
@@ -151,6 +156,6 @@ class DeleteProjectAPITests {
      * Helper method to make a [ServerData] for the delete project API tests
      */
     private fun makeDPServerData(data: PostBodyData, user: User = DEFAULT_ADMIN_USER): ServerData {
-        return makeServerData(data, tru, au, user = user)
+        return makeServerData(data, tru, au, user = user, path = DeleteProjectAPI.path)
     }
 }

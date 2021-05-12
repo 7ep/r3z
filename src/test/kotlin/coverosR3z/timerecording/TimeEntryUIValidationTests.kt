@@ -4,11 +4,11 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Password
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.UserName
+import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
 import coverosR3z.system.misc.types.earliestAllowableDate
 import coverosR3z.system.misc.types.latestAllowableDate
-import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.uitests.Drivers
 import coverosR3z.uitests.PageObjectModelLocal
@@ -17,7 +17,6 @@ import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.experimental.categories.Category

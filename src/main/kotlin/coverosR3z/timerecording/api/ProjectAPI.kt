@@ -8,7 +8,6 @@ import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
-import coverosR3z.system.misc.utility.safeAttr
 import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.ProjectName
 import coverosR3z.timerecording.types.maxProjectNameSize
@@ -48,7 +47,7 @@ class ProjectAPI(private val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val p = ProjectAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN) { p.handlePOST() }
+            return doPOSTAuthenticated(sd, requiredInputs, path, Role.ADMIN) { p.handlePOST() }
         }
 
 
@@ -59,7 +58,7 @@ class ProjectAPI(private val sd: ServerData) {
         val projectNameTrimmed = projectNameString.trim()
         val projectName = ProjectName(projectNameTrimmed)
         return if (sd.bc.tru.findProjectByName(projectName) != NO_PROJECT) {
-            MessageAPI.createMessageRedirect(MessageAPI.Message.FAILED_CREATE_PROJECT_DUPLICATE)
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_CREATE_PROJECT_DUPLICATE)
         } else {
             sd.bc.tru.createProject(projectName)
             return redirectTo(path)

@@ -11,8 +11,7 @@ import coverosR3z.server.types.StatusCode
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.NO_EMPLOYEE
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -51,7 +50,7 @@ class ApproveApiTests {
      */
     @Test
     fun testApproval_badRole_Regular() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeSdForApprove(user = DEFAULT_REGULAR_USER)
 
         val result = ApproveApi.handlePost(sd).statusCode
 
@@ -63,7 +62,7 @@ class ApproveApiTests {
      */
     @Test
     fun testApproval_badRole_System() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        val sd = makeSdForApprove(user = SYSTEM_USER)
 
         val result = ApproveApi.handlePost(sd).statusCode
 
@@ -80,9 +79,13 @@ class ApproveApiTests {
         tru.findEmployeeByIdBehavior = { NO_EMPLOYEE }
         val sd = makeSdForApprove()
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("No employee was found with an id of ${DEFAULT_EMPLOYEE_2.id.value}", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=No+employee+was+found+with+an+id+of+2")
+        )
     }
 
     /**
@@ -92,9 +95,13 @@ class ApproveApiTests {
     fun testApprove_InvalidEmployeeId_EmployeeIdInvalid() {
         val sd = makeSdForApprove(employeeId = "a")
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("""The employee id was not interpretable as an integer.  You sent "a".""", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+employee+id+was+not+interpretable+as+an+integer.++You+sent+%22a%22.")
+        )
     }
 
     /**
@@ -105,9 +112,13 @@ class ApproveApiTests {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeSdForApprove(startDate = "a")
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("""The date for approving time was not interpreted as a date. You sent "a".  Format is YYYY-MM-DD""", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+date+for+approving+time+was+not+interpreted+as+a+date.+You+sent+%22a%22.++Format+is+YYYY-MM-DD")
+        )
     }
     /**
      * If the employee id is blank...
@@ -116,9 +127,13 @@ class ApproveApiTests {
     fun testApprove_InvalidEmployeeId_EmployeeIdBlank() {
         val sd = makeSdForApprove(employeeId = "")
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("""The employee id must not be blank""", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+employee+id+must+not+be+blank")
+        )
     }
 
     /**
@@ -129,9 +144,13 @@ class ApproveApiTests {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeSdForApprove(startDate = "")
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("""The date for approving time was not interpreted as a date. You sent "".  Format is YYYY-MM-DD""", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+date+for+approving+time+was+not+interpreted+as+a+date.+You+sent+%22%22.++Format+is+YYYY-MM-DD")
+        )
     }
 
     /**
@@ -143,9 +162,13 @@ class ApproveApiTests {
         tru.approveTimesheetBehavior = { throw IllegalStateException("Cannot approve a non-submitted timesheet.  EmployeeId: ${DEFAULT_EMPLOYEE_2.id.value}, Timeperiod start: $defaultStartDate") }
         val sd = makeSdForApprove()
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("Cannot approve a non-submitted timesheet.  EmployeeId: ${DEFAULT_EMPLOYEE_2.id.value}, Timeperiod start: $defaultStartDate", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Cannot+approve+a+non-submitted+timesheet.++EmployeeId%3A+2%2C+Timeperiod+start%3A+2021-01-01")
+        )
     }
 
     /**
@@ -157,9 +180,13 @@ class ApproveApiTests {
         tru.approveTimesheetBehavior = { throw IllegalStateException("Cannot approve your own timesheet") }
         val sd = makeSdForApprove()
 
-        val ex = assertThrows(IllegalStateException::class.java) { ApproveApi.handlePost(sd).statusCode }
+        val result = ApproveApi.handlePost(sd)
 
-        assertEquals("Cannot approve your own timesheet", ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Cannot+approve+your+own+timesheet")
+        )
     }
 
     /**
@@ -184,7 +211,7 @@ class ApproveApiTests {
                 ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to "true"
             )
         )
-        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeSdForApprove(data = data, user = DEFAULT_ADMIN_USER)
 
         val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
         assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [date, unappr]", ex.message)
@@ -198,7 +225,7 @@ class ApproveApiTests {
                 ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to "true"
             )
         )
-        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeSdForApprove(data = data, user = DEFAULT_ADMIN_USER)
 
         val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
         assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [approval-employee, unappr]", ex.message)
@@ -212,7 +239,7 @@ class ApproveApiTests {
                 ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to DEFAULT_DATE.stringValue,
             )
         )
-        val sd = makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeSdForApprove(data = data, user = DEFAULT_ADMIN_USER)
 
         val ex = assertThrows(InexactInputsException::class.java) { ApproveApi.handlePost(sd) }
         assertEquals("expected keys: [approval-employee, date, unappr]. received keys: [approval-employee, date]", ex.message)
@@ -222,20 +249,20 @@ class ApproveApiTests {
     /**
      * helper method for creating [ServerData] for this set of tests
      */
-    private fun makeSdForApprove(employeeId: String = DEFAULT_EMPLOYEE_2.id.value.toString(),
-                                 startDate: String = defaultStartDate,
-                                 user: User = DEFAULT_ADMIN_USER,
-                                 unapprove: Boolean = false,
-                                 ): ServerData {
-        val dataMap = mapOf(
-            ViewTimeAPI.Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName() to employeeId,
-            ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to startDate,
-            ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to unapprove.toString()
-        )
-        val data = PostBodyData(
-            dataMap
-        )
-        return makeServerData(data, tru, au, user = user)
+    private fun makeSdForApprove(
+        employeeId: String = DEFAULT_EMPLOYEE_2.id.value.toString(),
+        startDate: String = defaultStartDate,
+        user: User = DEFAULT_ADMIN_USER,
+        unapprove: Boolean = false,
+        data: PostBodyData = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.EMPLOYEE_TO_APPROVE_INPUT.getElemName() to employeeId,
+                ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to startDate,
+                ApproveApi.Elements.IS_UNAPPROVAL.getElemName() to unapprove.toString()
+            )
+        )): ServerData {
+
+        return makeServerData(data, tru, au, user = user, path = ApproveApi.path)
     }
 
 }

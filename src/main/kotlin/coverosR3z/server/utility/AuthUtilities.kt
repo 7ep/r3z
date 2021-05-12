@@ -6,13 +6,12 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.server.api.*
 import coverosR3z.system.misc.utility.checkHasRequiredInputs
-import coverosR3z.server.api.HomepageAPI
-import coverosR3z.server.api.handleUnauthenticated
-import coverosR3z.server.api.handleUnauthorized
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.misc.exceptions.InexactInputsException
 
 /*
 These are utilities to standardize handling of various scenarious
@@ -58,14 +57,19 @@ class AuthUtilities {
          * Handle the (pretty ordinary) situation where a user POSTS data to us
          * and they have to be authenticated to do so
          * @param handler the method run to handle the POST
+         * @param messageReturnPage the page we return to if we needed to show the user a message
          */
         fun doPOSTAuthenticated(
-            user: User,
+            serverData: ServerData,
             requiredInputs: Set<Element>,
-            data: PostBodyData,
+            messageReturnPage: String,
             vararg roles: Role,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
+            val user = serverData.ahd.user
+            val data = serverData.ahd.data
+            val logger = serverData.logger
+
             return try {
                 when (isAuthenticated(user)) {
                     AuthStatus.AUTHENTICATED -> {
@@ -77,6 +81,16 @@ class AuthUtilities {
                 }
             } catch (ex: UnpermittedOperationException) {
                 handleUnauthorized(ex.message)
+            } catch (ex: InexactInputsException) {
+                /*
+                If we encounter an [InexactInputsException], that means a problem
+                with our code, no need to show that in a nice format, throw it
+                */
+                throw ex
+            } catch (ex: Throwable) {
+                // If there ane any complaints whatsoever, we return them here
+                logger.logTrace { "handling internal server error: ${ex.stackTraceToString()}" }
+                MessageAPI.createCustomMessageRedirect(ex.message ?: "", false, messageReturnPage)
             }
         }
 
@@ -86,11 +100,13 @@ class AuthUtilities {
          * @param handler the method run to handle the POST
          */
         fun doPOSTRequireUnauthenticated(
-            user: User,
+            serverData: ServerData,
             requiredInputs: Set<Element>,
-            data: PostBodyData,
             handler: () -> PreparedResponseData
         ): PreparedResponseData {
+            val user = serverData.ahd.user
+            val data = serverData.ahd.data
+
             return when (isAuthenticated(user)) {
                 AuthStatus.UNAUTHENTICATED -> {
                     checkHasRequiredInputs(data.mapping.keys, requiredInputs)

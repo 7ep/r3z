@@ -12,7 +12,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.lang.IllegalStateException
 
 @Category(APITestCategory::class)
 class MessageAPITests {
@@ -30,8 +29,8 @@ class MessageAPITests {
      * A message should be displayed to the user
      */
     @Test
-    fun testShouldShowMessage() {
-        val sd = makePostResultSd()
+    fun testMessageAPI_ShouldShowMessage() {
+        val sd = makeMessageServerData()
 
         val result = MessageAPI.handleGet(sd).fileContentsString()
 
@@ -42,8 +41,8 @@ class MessageAPITests {
      * There should be a link to wherever we need to send the user
      */
     @Test
-    fun testShouldIncludeLinkToProperPage() {
-        val sd = makePostResultSd()
+    fun testMessageAPI_ShouldIncludeLinkToProperPage() {
+        val sd = makeMessageServerData()
 
         val result = MessageAPI.handleGet(sd).fileContentsString()
 
@@ -55,8 +54,8 @@ class MessageAPITests {
      * See [MessageAPI.MessageType]
      */
     @Test
-    fun testShouldIncludeTypeOfMessage() {
-        val sd = makePostResultSd()
+    fun testMessageAPI_ShouldIncludeTypeOfMessage() {
+        val sd = makeMessageServerData()
 
         val result = MessageAPI.handleGet(sd).fileContentsString()
 
@@ -64,35 +63,175 @@ class MessageAPITests {
     }
 
     /**
-     * If the message code isn't sent, it's null
+     * If neither the [MessageAPI.enumeratedMessageKey] nor the [MessageAPI.customMessageKey] is sent,
+     * show "NO MESSAGE"
      */
     @Test
-    fun testInvalidMessageCode_Null() {
-        val sd = makePostResultSd(queryString = emptyMap())
-        val ex = assertThrows(IllegalStateException::class.java) { MessageAPI.handleGet(sd).fileContentsString() }
-        assertEquals("This requires a message code - was null", ex.message)
+    fun testMessageAPI_InvalidMessageCode_noMessagesSent() {
+        val sd = makeMessageServerData(queryString = emptyMap())
+
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""NO MESSAGE"""))
     }
 
     /**
-     * If the message code doesn't match a known message enum
+     * If the key for an enumerated message is sent empty, show NO MATCHING MESSAGE
      */
     @Test
-    fun testInvalidMessageCode_NoMatch() {
-        val sd = makePostResultSd(queryString = mapOf(
-            MessageAPI.queryStringKey to "NO MATCH",
+    fun testMessageAPI_InvalidMessageCode_emptyEnumValueSent() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.enumeratedMessageKey to "",
         ))
-        val ex = assertThrows(IllegalStateException::class.java) { MessageAPI.handleGet(sd).fileContentsString() }
-        assertEquals("No matching message code was provided", ex.message)
+
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""NO MATCHING MESSAGE"""))
+    }
+
+    /**
+     * If the message code doesn't match a known message enum and
+     * no custom message was sent, show "NO MATCHING MESSAGE"
+     */
+    @Test
+    fun testMessageAPI_InvalidMessageCode_NoMatch() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.enumeratedMessageKey to "NO MATCH",
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""NO MATCHING MESSAGE"""))
+    }
+
+    /**
+     * We can also use this API to send custom messages as part of the
+     * query string.  In that case, you send along the path for it to
+     * return to, and a message to be shown.  For example, the page
+     * might end up showing:
+     *
+     * Hi, this is the message
+     *
+     * _return_
+     *
+     */
+    @Test
+    fun testMessageAPI_CustomMessageAndReturn() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+            MessageAPI.customReturnLinkKey to "some_path",
+            MessageAPI.customIsSuccessKey to "true"
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""This is the message we show"""))
+        assertTrue(result.contains("""href="some_path""""))
+        assertTrue(result.contains("""class="${MessageAPI.MessageType.SUCCESS.toString().toLowerCase()}""""))
+    }
+
+    /**
+     * We can indicate whether the message is classed as an indicator of success or not.
+     * Generally, we indicate it isn't if we are showing that something failed.
+     */
+    @Test
+    fun testMessageAPI_CustomMessageAndReturn_unsuccessful() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+            MessageAPI.customReturnLinkKey to "some_path",
+            MessageAPI.customIsSuccessKey to "false"
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""This is the message we show"""))
+        assertTrue(result.contains("""href="some_path""""))
+        assertTrue(result.contains("""class="${MessageAPI.MessageType.FAILURE.toString().toLowerCase()}""""))
+    }
+
+    /**
+     * Similar to [testMessageAPI_CustomMessageAndReturn_unsuccessful] but we pass
+     * in something to [MessageAPI.customIsSuccessKey] that is neither "true" nor "false",
+     * so it should become false
+     */
+    @Test
+    fun testMessageAPI_CustomMessageAndReturn_unsuccessful_FOOIsFalse() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+            MessageAPI.customReturnLinkKey to "some_path",
+            MessageAPI.customIsSuccessKey to "FOO"
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""This is the message we show"""))
+        assertTrue(result.contains("""href="some_path""""))
+        assertTrue(result.contains("""class="${MessageAPI.MessageType.FAILURE.toString().toLowerCase()}""""))
+    }
+
+    /**
+     * We don't currently allow passing both custom messages and enumerated messages
+     */
+    @Test
+    fun testMessageAPI_CustomAndEnum() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+            MessageAPI.customReturnLinkKey to "some_path",
+            MessageAPI.enumeratedMessageKey to MessageAPI.Message.LOG_SETTINGS_SAVED.toString(),
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""MIXED MESSAGE TYPES"""))
+    }
+
+    /**
+     * If we don't sent the key for [MessageAPI.customIsSuccessKey],
+     * it defaults to false = failure
+     */
+    @Test
+    fun testMessageAPI_CustomMissingIsSuccess() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+            MessageAPI.customReturnLinkKey to "some_path",
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""class="failure""""))
+    }
+
+    /**
+     * If we don't send a return link, it defaults to homepage
+     */
+    @Test
+    fun testMessageAPI_CustomMissingReturnLink() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "This is the message we show",
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains(""">This is the message we show<"""))
+        assertTrue(result.contains("""href="homepage""""))
+    }
+
+    /**
+     * If the custom message is empty,
+     * it shows NO MESSAGE
+     */
+    @Test
+    fun testMessageAPI_CustomEmptyMessage() {
+        val sd = makeMessageServerData(queryString = mapOf(
+            MessageAPI.customMessageKey to "",
+        ))
+        val result = MessageAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""NO MESSAGE"""))
+        assertTrue(result.contains("""href="homepage""""))
     }
 
     /**
      * Creats a [ServerData] with a default user of [DEFAULT_ADMIN_USER] and
      * a default query string with a message code of "1"
      */
-    private fun makePostResultSd(
+    private fun makeMessageServerData(
         user: User = DEFAULT_ADMIN_USER,
         queryString: Map<String, String> = mapOf(
-            MessageAPI.queryStringKey to MessageAPI.Message.LOG_SETTINGS_SAVED.name,
+            MessageAPI.enumeratedMessageKey to MessageAPI.Message.LOG_SETTINGS_SAVED.name,
         ),
         authStatus: AuthStatus = AuthStatus.AUTHENTICATED
     ): ServerData {

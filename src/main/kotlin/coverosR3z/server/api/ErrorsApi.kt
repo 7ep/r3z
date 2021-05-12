@@ -1,10 +1,10 @@
 package coverosR3z.server.api
 
-import coverosR3z.system.logging.ILogger
-import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.ContentType
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.StatusCode
+import coverosR3z.system.logging.ILogger
+import coverosR3z.system.misc.utility.safeHtml
 
 fun handleBadRequest(msg: String? = null): PreparedResponseData {
     return PreparedResponseData(badRequestHTML(msg), StatusCode.BAD_REQUEST, listOf(ContentType.TEXT_HTML.value))
@@ -31,8 +31,7 @@ fun handleUnauthorized(message: String? = null): PreparedResponseData {
 fun handleInternalServerError(shortMessage : String, fullStackTrace : String, logger: ILogger) : PreparedResponseData {
     logger.logTrace { "handling internal server error: $fullStackTrace" }
     return PreparedResponseData(
-        internalServerErrorHTML(shortMessage), StatusCode.INTERNAL_SERVER_ERROR, listOf(
-        ContentType.TEXT_HTML.value))
+        internalServerErrorHTML(shortMessage), StatusCode.INTERNAL_SERVER_ERROR, listOf(ContentType.TEXT_HTML.value))
 }
 
 fun badRequestHTML(msg: String?) : String {
@@ -86,10 +85,10 @@ fun internalServerErrorHTML(msg : String) : String {
 <!DOCTYPE html>    
 <html lang="en">
     <head>
-    </head>
         <title>500 error</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta apifile="ErrorsAPI" >
+    </head>
     <body>
        <p>500 error - INTERNAL SERVER ERROR</p>
        <p><a href="homepage">Homepage</a></p>

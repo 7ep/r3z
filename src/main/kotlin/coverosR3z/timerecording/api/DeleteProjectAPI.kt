@@ -2,7 +2,7 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
-import coverosR3z.server.api.MessageAPI.Companion.createMessageRedirect
+import coverosR3z.server.api.MessageAPI.Companion.createEnumMessageRedirect
 import coverosR3z.server.types.Element
 import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
@@ -17,15 +17,15 @@ class DeleteProjectAPI {
     companion object : PostEndpoint {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN) {
+            return doPOSTAuthenticated(sd, requiredInputs, ProjectAPI.path, Role.ADMIN) {
                 val projectId = ProjectId.make(sd.ahd.data.mapping[Elements.ID.getElemName()])
                 val project = sd.bc.tru.findProjectById(projectId)
                 if (project == NO_PROJECT) {
                     throw IllegalStateException("No project found by that id")
                 }
                 when(sd.bc.tru.deleteProject(project)) {
-                    DeleteProjectResult.SUCCESS -> createMessageRedirect(MessageAPI.Message.PROJECT_DELETED)
-                    DeleteProjectResult.USED -> createMessageRedirect(MessageAPI.Message.PROJECT_USED)
+                    DeleteProjectResult.SUCCESS -> createEnumMessageRedirect(MessageAPI.Message.PROJECT_DELETED)
+                    DeleteProjectResult.USED -> createEnumMessageRedirect(MessageAPI.Message.PROJECT_USED)
                 }
             }
         }

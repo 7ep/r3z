@@ -2,7 +2,7 @@ package coverosR3z.system.logging
 
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
-import coverosR3z.server.api.MessageAPI.Companion.createMessageRedirect
+import coverosR3z.server.api.MessageAPI.Companion.createEnumMessageRedirect
 import coverosR3z.system.logging.ILogger.Companion.logImperative
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
@@ -53,7 +53,7 @@ class LoggingAPI(private val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val l = LoggingAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN) { l.handlePOST() }
+            return doPOSTAuthenticated(sd, requiredInputs, path, Role.ADMIN) { l.handlePOST() }
         }
 
     }
@@ -68,7 +68,7 @@ class LoggingAPI(private val sd: ServerData) {
         )
         logImperative("Changing log configuration to: ${sd.logger.logSettings}")
         sd.so.scp.setSystemConfig(SystemConfiguration(sd.logger.logSettings))
-        return createMessageRedirect(MessageAPI.Message.LOG_SETTINGS_SAVED)
+        return createEnumMessageRedirect(MessageAPI.Message.LOG_SETTINGS_SAVED)
     }
 
     private fun checkIsTrueOrFalse(s: String?): Boolean {

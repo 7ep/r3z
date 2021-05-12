@@ -40,9 +40,9 @@ class SubmitTimeAPI(private val sd: ServerData){
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val st = SubmitTimeAPI(sd)
             return AuthUtilities.doPOSTAuthenticated(
-                sd.ahd.user,
+                sd,
                 requiredInputs,
-                sd.ahd.data,
+                ViewTimeAPI.path,
                 Role.REGULAR, Role.APPROVER, Role.ADMIN
             ) { st.handlePOST() }
         }

@@ -52,7 +52,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val ce = CreateEmployeeAPI(sd)
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.SYSTEM, Role.ADMIN) { ce.createEmployee() }
+            return doPOSTAuthenticated(sd, requiredInputs, path, Role.SYSTEM, Role.ADMIN) { ce.createEmployee() }
         }
 
     }
@@ -62,7 +62,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         val employeeNameTrimmed = employeeNameString.trim()
         val employeename = EmployeeName(employeeNameTrimmed)
         return if (sd.bc.tru.findEmployeeByName(employeename) != NO_EMPLOYEE) {
-            MessageAPI.createMessageRedirect(MessageAPI.Message.FAILED_CREATE_EMPLOYEE_DUPLICATE)
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_CREATE_EMPLOYEE_DUPLICATE)
         } else {
             val employee = sd.bc.tru.createEmployee(employeename)
             sd.bc.au.createInvitation(employee)

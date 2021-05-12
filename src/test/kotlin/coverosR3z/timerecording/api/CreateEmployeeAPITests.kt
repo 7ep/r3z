@@ -64,9 +64,12 @@ class CreateEmployeeAPITests {
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
         val sd = makeTypicalCEServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ CreateEmployeeAPI.handlePost(sd)}
+        val result = CreateEmployeeAPI.handlePost(sd)
 
-        assertEquals("Max size of employee name is 30", ex.message)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=createemployee&suc=false&custommsg=Max+size+of+employee+name+is+30")
+        )
     }
 
     /**
@@ -224,6 +227,6 @@ class CreateEmployeeAPITests {
      * Simpler helper to make the server data commonly used for CreateEmployee
      */
     private fun makeTypicalCEServerData(data: PostBodyData = PostBodyData(), user: User = DEFAULT_ADMIN_USER): ServerData {
-        return makeServerData(data, tru, au, user = user)
+        return makeServerData(data, tru, au, user = user, path = CreateEmployeeAPI.path)
     }
 }

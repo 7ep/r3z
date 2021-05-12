@@ -1,5 +1,6 @@
 package coverosR3z.server.api
 
+import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.DEFAULT_ADMIN_USER
 import coverosR3z.system.misc.DEFAULT_APPROVER
@@ -7,6 +8,7 @@ import coverosR3z.system.misc.DEFAULT_REGULAR_USER
 import coverosR3z.system.misc.makeServerData
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
+import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.Assert.assertEquals
@@ -32,7 +34,7 @@ class HomepageAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testGetAsAdmin() {
-        val sd = makeServerData(user = DEFAULT_ADMIN_USER, data = PostBodyData(), tru = tru, au = au)
+        val sd = makeServerData(user = DEFAULT_ADMIN_USER)
 
         val result = HomepageAPI.handleGet(sd).fileContentsString()
 
@@ -49,7 +51,7 @@ class HomepageAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testGetAsRegularUser() {
-        val sd = makeServerData(user = DEFAULT_REGULAR_USER, data = PostBodyData(), tru = tru, au = au)
+        val sd = makeServerData(user = DEFAULT_REGULAR_USER)
 
         val result = HomepageAPI.handleGet(sd).statusCode
 
@@ -63,10 +65,14 @@ class HomepageAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testGetAsApproverUser() {
-        val sd = makeServerData(user = DEFAULT_APPROVER, data = PostBodyData(), tru = tru, au = au)
+        val sd = makeServerData(user = DEFAULT_APPROVER)
 
         val result = HomepageAPI.handleGet(sd).statusCode
 
         assertEquals(StatusCode.SEE_OTHER, result)
+    }
+
+    fun makeServerData(user: User = DEFAULT_ADMIN_USER): ServerData {
+        return makeServerData(user = user, data = PostBodyData(), tru = tru, au = au, path = HomepageAPI.path)
     }
 }

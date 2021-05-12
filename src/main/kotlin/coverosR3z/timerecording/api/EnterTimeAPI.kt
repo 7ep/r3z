@@ -2,15 +2,14 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
-import coverosR3z.system.misc.types.Date
 import coverosR3z.server.types.PostEndpoint
 import coverosR3z.server.types.PreparedResponseData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.api.ViewTimeAPI.Elements
 import coverosR3z.timerecording.types.*
-import java.lang.IllegalStateException
 
 class EnterTimeAPI(private val sd: ServerData) {
 
@@ -28,9 +27,9 @@ class EnterTimeAPI(private val sd: ServerData) {
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val et = EnterTimeAPI(sd)
             return doPOSTAuthenticated(
-                sd.ahd.user,
+                sd,
                 requiredInputs,
-                sd.ahd.data,
+                ViewTimeAPI.path,
                 Role.REGULAR, Role.APPROVER, Role.ADMIN) {
                 et.handlePOST()
             }
@@ -40,32 +39,48 @@ class EnterTimeAPI(private val sd: ServerData) {
     fun handlePOST() : PreparedResponseData {
         val data = sd.ahd.data
         val tru = sd.bc.tru
+        val employee = sd.ahd.user.employee
+        val twentyFourHours = 24 * 60
+
+        // get the project
         val projectName = ProjectName.make(data.mapping[Elements.PROJECT_INPUT.getElemName()])
         val project = tru.findProjectByName(projectName)
-        if (project == NO_PROJECT) {
-            return MessageAPI.createMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
-        }
-        val timeInputString = data.mapping[Elements.TIME_INPUT.getElemName()]
-        val time = Time.makeHoursToMinutes(timeInputString)
-        check(time.numberOfMinutes % 5 == 0) { "number of minutes must be multiple of 15.  Yours was ${time.getHoursAsString()} hours or ${time.numberOfMinutes} minutes" }
-        check(time.numberOfMinutes <= 24 * 60) { "Not able to enter more than 24 hours on a daily entry.  You entered ${time.getHoursAsString()} hours" }
+
         val details = Details.make(data.mapping[Elements.DETAIL_INPUT.getElemName()])
+
         val date = Date.make(data.mapping[Elements.DATE_INPUT.getElemName()])
 
-        val employee = checkNotNull(sd.ahd.user.employee){ employeeIdNotNullMsg }
-        if (sd.ahd.user.employee != employee) {
-            throw IllegalStateException("It is not allowed for other employees to enter this employee's time")
-        }
-        check(! tru.isInASubmittedPeriod(employee, date)) { "A new time entry is not allowed in a submitted time period" }
+        // get the time entered
+        val timeInputString = data.mapping[Elements.TIME_INPUT.getElemName()]
+        val time = Time.makeHoursToMinutes(timeInputString)
 
-        val timeEntry = TimeEntryPreDatabase(
+        // confirm the project is valid
+        if (project == NO_PROJECT) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
+
+        // confirm the time entered is valid
+        if (time.numberOfMinutes % 5 != 0) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.MINUTES_MUST_BE_MULTIPLE_OF_15)
+
+        if (time.numberOfMinutes > twentyFourHours) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.TIME_MUST_BE_LESS_OR_EQUAL_TO_24)
+
+        // confirm we're not entering time in a submitted period
+        if(tru.isInASubmittedPeriod(employee, date)) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD)
+
+        // enter or edit the time entry
+        if (data.mapping[Elements.BEING_EDITED.getElemName()].toBoolean()) {
+            val entryId = TimeEntryId.make(data.mapping[Elements.ID_INPUT.getElemName()])
+            val timeEntry = TimeEntry(entryId, employee, project, time, date, details)
+            tru.changeEntry(timeEntry)
+        } else {
+            // set up the time entry object
+            val timeEntry = TimeEntryPreDatabase(
                 employee,
                 project,
                 time,
                 date,
                 details)
+            tru.createTimeEntry(timeEntry)
+        }
 
-        tru.createTimeEntry(timeEntry)
 
         return redirectTo(ViewTimeAPI.path + "?date=" + date.stringValue)
     }

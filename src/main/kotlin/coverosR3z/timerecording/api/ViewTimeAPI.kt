@@ -22,7 +22,9 @@ class ViewTimeAPI(private val sd: ServerData) {
 
         /**
          * This is used to indicate a time entry row that
-         * is in the midst of being edited
+         * is in the midst of being edited, and is also
+         * sent to the enter time api to indicate we
+         * want an edit, not a new entry
          */
         BEING_EDITED("being_edited"),
 
@@ -568,9 +570,10 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderEditRow(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
 
         return """
-                <form id="edit_time_panel" action="${EditTimeAPI.path}" method="post">
+                <form id="edit_time_panel" action="${EnterTimeAPI.path}" method="post">
                     <input type="hidden" name="${Elements.ID_INPUT.getElemName()}" value="${te.id.value}" />
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
+                    <input type="hidden" name="${Elements.BEING_EDITED.getElemName()}" value="true" />
                     <div class="row">
                         <div class="project">
                             <label for="${Elements.PROJECT_INPUT_EDIT.getId()}">Project:</label>

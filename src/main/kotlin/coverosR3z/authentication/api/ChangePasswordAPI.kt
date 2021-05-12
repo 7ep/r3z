@@ -59,7 +59,7 @@ class ChangePasswordAPI {
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            return doPOSTAuthenticated(sd.ahd.user, requiredInputs, sd.ahd.data, Role.ADMIN, Role.APPROVER, Role.REGULAR) {
+            return doPOSTAuthenticated(sd, requiredInputs, HomepageAPI.path, Role.ADMIN, Role.APPROVER, Role.REGULAR) {
                 val newPassword = Password(generateRandomString(SIZE_OF_DECENT_PASSWORD))
                 sd.logger.logAudit { "Requested new password" }
                 sd.bc.au.changePassword(sd.ahd.user, newPassword)

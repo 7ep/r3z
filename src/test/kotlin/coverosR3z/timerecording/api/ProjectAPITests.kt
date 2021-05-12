@@ -1,6 +1,7 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
@@ -34,7 +35,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
@@ -45,11 +46,14 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_HugeName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize + 1)))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
 
-        val ex = assertThrows(IllegalArgumentException::class.java){ ProjectAPI.handlePost(sd)}
+        val result = ProjectAPI.handlePost(sd)
 
-        assertEquals(maxProjectNameSizeMsg, ex.message)
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=Max+size+of+project+name+is+100")
+        )
     }
 
     /**
@@ -58,7 +62,7 @@ class ProjectAPITests {
     @Test
     fun testHandlePOSTNewProject_BigName() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize)))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
@@ -68,8 +72,7 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_noBody() {
-        val data = PostBodyData()
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(PostBodyData())
         val ex = assertThrows(InexactInputsException::class.java){  ProjectAPI.handlePost(sd) }
         assertEquals("expected keys: [project_name]. received keys: []", ex.message)
     }
@@ -82,7 +85,7 @@ class ProjectAPITests {
     @Test
     fun testShouldAllowAdminForPost() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
 
         assertEquals(StatusCode.SEE_OTHER, ProjectAPI.handlePost(sd).statusCode)
     }
@@ -92,7 +95,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowSystemForPost() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        val sd = makePServerData(PostBodyData(), user = SYSTEM_USER)
 
         val result = ProjectAPI.handlePost(sd).statusCode
 
@@ -104,7 +107,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowApproverForPost() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER)
 
         val result = ProjectAPI.handlePost(sd).statusCode
 
@@ -116,7 +119,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowRegularRoleForPost() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_REGULAR_USER)
 
         val result = ProjectAPI.handlePost(sd).statusCode
 
@@ -129,7 +132,7 @@ class ProjectAPITests {
     @Test
     fun testShouldAllowAdminForGet() {
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT_NAME.value))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
 
         assertEquals(StatusCode.OK, ProjectAPI.handleGet(sd).statusCode)
     }
@@ -139,7 +142,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowSystemForGet() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        val sd = makePServerData(PostBodyData(), user = SYSTEM_USER)
 
         val result = ProjectAPI.handleGet(sd).statusCode
 
@@ -151,7 +154,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowApproverForGet() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER)
 
         val result = ProjectAPI.handleGet(sd).statusCode
 
@@ -163,7 +166,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowRegularRoleForGet() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_REGULAR_USER)
 
         val result = ProjectAPI.handleGet(sd).statusCode
 
@@ -181,7 +184,7 @@ class ProjectAPITests {
         tru.findProjectByNameBehavior = { Project(ProjectId(1), ProjectName("abc123")) }
         val data = PostBodyData(mapOf(
             ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "   abc123   "))
-        val sd = makeTypicalServerDataForProjectAPI(data)
+        val sd = makePServerData(data)
         val result = ProjectAPI.handlePost(sd)
 
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
@@ -189,7 +192,7 @@ class ProjectAPITests {
     }
 
 
-    private fun makeTypicalServerDataForProjectAPI(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+    private fun makePServerData(data: PostBodyData, user: User = DEFAULT_ADMIN_USER): ServerData {
+        return makeServerData(data, tru, au, user = user, path = ProjectAPI.path)
     }
 }

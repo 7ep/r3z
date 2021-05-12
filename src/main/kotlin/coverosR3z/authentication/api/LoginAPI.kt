@@ -46,7 +46,7 @@ class LoginAPI(val sd: ServerData) {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)
-            return doPOSTRequireUnauthenticated(sd.ahd.user, requiredInputs, sd.ahd.data) { l.handlePOST() }
+            return doPOSTRequireUnauthenticated(sd, requiredInputs) { l.handlePOST() }
         }
     }
 
@@ -63,7 +63,7 @@ class LoginAPI(val sd: ServerData) {
             PreparedResponseData("", StatusCode.SEE_OTHER, listOf(cookie, "Location: ${HomepageAPI.path}"))
         } else {
             sd.logger.logDebug { "User (${username.value}) failed to login" }
-            MessageAPI.createMessageRedirect(MessageAPI.Message.FAILED_LOGIN)
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_LOGIN)
         }
     }
 

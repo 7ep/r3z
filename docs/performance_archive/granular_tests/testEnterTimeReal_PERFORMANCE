@@ -452,3 +452,6 @@
 2021-05-08	numberThreads: 5	numberRequests: 200	time: 195
 2021-05-08	numberThreads: 5	numberRequests: 200	time: 175
 2021-05-09	numberThreads: 5	numberRequests: 200	time: 232
+2021-05-11	numberThreads: 5	numberRequests: 200	time: 247
+2021-05-11	numberThreads: 5	numberRequests: 200	time: 226
+2021-05-11	numberThreads: 5	numberRequests: 200	time: 168

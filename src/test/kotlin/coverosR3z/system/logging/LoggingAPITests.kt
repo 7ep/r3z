@@ -1,6 +1,7 @@
 package coverosR3z.system.logging
 
 import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
@@ -10,6 +11,7 @@ import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -183,9 +185,13 @@ class LoggingAPITests {
         val data = allTrue(audit = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
+        val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        Assert.assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
+        )
     }
 
     @Category(APITestCategory::class)
@@ -194,9 +200,13 @@ class LoggingAPITests {
         val data = allTrue(warn = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
+        val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        Assert.assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
+        )
     }
 
     @Category(APITestCategory::class)
@@ -205,9 +215,13 @@ class LoggingAPITests {
         val data = allTrue(debug = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
+        val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        Assert.assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
+        )
     }
 
     @Category(APITestCategory::class)
@@ -216,9 +230,13 @@ class LoggingAPITests {
         val data = allTrue(trace = "foo")
         val sd = makeLoggingServerData(data)
 
-        val ex = assertThrows(IllegalStateException::class.java){  LoggingAPI.handlePost(sd) }
+        val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(LoggingAPI.badInputLoggingDataMsg, ex.message)
+        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
+        Assert.assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
+        )
     }
 
     // region ROLES TESTS
@@ -234,7 +252,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowSystemDoPost() {
-        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        val sd = makeLoggingServerData(allTrue(), user = SYSTEM_USER)
 
         val result = LoggingAPI.handlePost(sd).statusCode
 
@@ -244,7 +262,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoPost() {
-        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER)
 
         val result = LoggingAPI.handlePost(sd).statusCode
 
@@ -254,7 +272,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserDoPost() {
-        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_REGULAR_USER)
 
         val result = LoggingAPI.handlePost(sd).statusCode
 
@@ -272,7 +290,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowSystemDoGet() {
-        val sd = makeServerData(allTrue(), tru, au, user = SYSTEM_USER)
+        val sd = makeLoggingServerData(allTrue(), user = SYSTEM_USER)
 
         val result = LoggingAPI.handleGet(sd).statusCode
 
@@ -282,7 +300,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoGet() {
-        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER)
 
         val result = LoggingAPI.handleGet(sd).statusCode
 
@@ -292,7 +310,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowRegularUserDoGet() {
-        val sd = makeServerData(allTrue(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_REGULAR_USER)
 
         val result = LoggingAPI.handleGet(sd).statusCode
 
@@ -336,7 +354,7 @@ class LoggingAPITests {
         val au = FakeAuthenticationUtilities()
     }
 
-    private fun makeLoggingServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, user = DEFAULT_ADMIN_USER)
+    private fun makeLoggingServerData(data: PostBodyData, user: User = DEFAULT_ADMIN_USER): ServerData {
+        return makeServerData(data, tru, au, user = user, path = LoggingAPI.path)
     }
 }

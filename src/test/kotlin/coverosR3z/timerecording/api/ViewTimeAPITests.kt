@@ -34,7 +34,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_RegularUser() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeSD(user = DEFAULT_REGULAR_USER)
 
         val result = ViewTimeAPI.handleGet(sd)
 
@@ -43,7 +43,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_System() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = SYSTEM_USER)
+        val sd = makeSD(user = SYSTEM_USER)
 
         val result = ViewTimeAPI.handleGet(sd)
 
@@ -52,7 +52,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_None() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = NO_USER)
+        val sd = makeSD(user = NO_USER)
 
         val result = ViewTimeAPI.handleGet(sd)
 
@@ -61,7 +61,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_Admin() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_ADMIN_USER)
+        val sd = makeSD(user = DEFAULT_ADMIN_USER)
 
         val result = ViewTimeAPI.handleGet(sd)
 
@@ -70,7 +70,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_Approver() {
-        val sd = makeServerData(PostBodyData(), tru, au, user = DEFAULT_APPROVER)
+        val sd = makeSD(user = DEFAULT_APPROVER)
 
         val result = ViewTimeAPI.handleGet(sd)
 
@@ -90,7 +90,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testGettingDate() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -105,7 +105,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testGettingDateNextDay() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-17"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-17"))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -119,7 +119,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_letters() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-1a"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-1a"))
 
         val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -131,7 +131,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_tooAncient() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "1979-12-31"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "1979-12-31"))
 
         val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -143,7 +143,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_tooFuture() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2200-01-02"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2200-01-02"))
 
         val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -155,7 +155,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_invalidMonth() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-13-01"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-13-01"))
 
         val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -167,7 +167,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_invalidMonthZero() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-00-01"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-00-01"))
 
         val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -179,7 +179,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testDateInvalid_blank() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to ""))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to ""))
 
         val ex = assertThrows(IllegalArgumentException::class.java) {ViewTimeAPI.handleGet(sd)}
 
@@ -198,7 +198,7 @@ class ViewTimeAPITests {
     fun testEmployeeRequested() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
@@ -219,7 +219,7 @@ class ViewTimeAPITests {
     @Test
     fun testEmployeeRequested_NoEditAllowed() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "2",
                 ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
@@ -238,7 +238,7 @@ class ViewTimeAPITests {
     @Test
     fun testEmployeeRequested_DifferentDate() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString(),
                 ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-01-11"))
@@ -261,7 +261,7 @@ class ViewTimeAPITests {
     fun testEmployeeRequested_Invalid_OurOwnId() {
         // we assume the current user's own employee id is 1
         val currentEmpId = 1
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "$currentEmpId"))
 
@@ -275,7 +275,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested_Invalid_NoEmployeeWithThisId() {
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "123"))
 
@@ -289,7 +289,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested_Invalid_NonInteger() {
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "abc"))
 
@@ -303,7 +303,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested_Invalid_Blank() {
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(
                 ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to ""))
 
@@ -317,7 +317,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testEmployeeRequested_Invalid_Role() {
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to "1"),
             user = DEFAULT_REGULAR_USER)
 
@@ -336,7 +336,7 @@ class ViewTimeAPITests {
     fun testApproveButtonAvailable() {
         tru.isInASubmittedPeriodBehavior = { true }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             user = DEFAULT_ADMIN_USER,
             queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
@@ -353,7 +353,7 @@ class ViewTimeAPITests {
     @Test
     fun testApproveButtonNotAvailable() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             user = DEFAULT_ADMIN_USER,
             queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
@@ -369,7 +369,7 @@ class ViewTimeAPITests {
     @Test
     fun testApproveButtonInvisible() {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
-        val sd = makeServerDataForGetWithQueryString(user = DEFAULT_REGULAR_USER)
+        val sd = makeSD(user = DEFAULT_REGULAR_USER)
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -385,7 +385,7 @@ class ViewTimeAPITests {
         tru.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
         tru.isApprovedBehavior = { ApprovalStatus.APPROVED }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
-        val sd = makeServerDataForGetWithQueryString(
+        val sd = makeSD(
             user = DEFAULT_ADMIN_USER,
             queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
@@ -404,7 +404,7 @@ class ViewTimeAPITests {
      */
     @Test
     fun testViewingTimeEntries_TotalNeededHours() {
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.TIME_PERIOD.getElemName() to "2021-03-16"))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -418,7 +418,7 @@ class ViewTimeAPITests {
     @Test
     fun testViewingTimeEntries_EditPanel() {
         tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -434,7 +434,7 @@ class ViewTimeAPITests {
     fun testViewingTimeEntries_AsAdmin() {
         tru.listAllEmployeesBehavior = {listOf(DEFAULT_EMPLOYEE_2, DEFAULT_EMPLOYEE)}
         tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
-        val sd = makeServerDataForGetWithQueryString()
+        val sd = makeSD()
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -448,7 +448,7 @@ class ViewTimeAPITests {
     @Test
     fun testViewingTimeEntries_ProjectsListed() {
         tru.listAllProjectsBehavior = {listOf(DEFAULT_PROJECT)}
-        val sd = makeServerDataForGetWithQueryString()
+        val sd = makeSD()
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -462,7 +462,7 @@ class ViewTimeAPITests {
     fun testViewingTimeEntries_ProjectsListedOnEdit() {
         tru.listAllProjectsBehavior = {listOf(DEFAULT_PROJECT, DEFAULT_PROJECT_2)}
         tru.getTimeEntriesForTimePeriodBehavior = {setOf(DEFAULT_TIME_ENTRY)}
-        val sd = makeServerDataForGetWithQueryString(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
+        val sd = makeSD(queryStringMap = mapOf(ViewTimeAPI.Elements.EDIT_ID.getElemName() to "1"))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
@@ -474,7 +474,7 @@ class ViewTimeAPITests {
      * Builds a prefabricated object for a GET query,
      * where the user must set the value of the query string
      */
-    private fun makeServerDataForGetWithQueryString(
+    private fun makeSD(
         queryStringMap: Map<String, String> = mapOf(),
         data: PostBodyData = PostBodyData(),
         tru: ITimeRecordingUtilities = this.tru,
@@ -484,9 +484,9 @@ class ViewTimeAPITests {
         return ServerData(
             BusinessCode(tru, au),
             fakeServerObjects,
-            AnalyzedHttpData(data = data, user = user, queryString = queryStringMap),
+            AnalyzedHttpData(data = data, user = user, queryString = queryStringMap, path = ViewTimeAPI.path),
             authStatus = authStatus,
-            testLogger
+            testLogger,
         )
     }
 }

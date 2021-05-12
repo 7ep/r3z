@@ -1,15 +1,16 @@
 package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.system.misc.DEFAULT_REGULAR_USER
-import coverosR3z.system.misc.makeServerData
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
+import coverosR3z.system.misc.DEFAULT_REGULAR_USER
+import coverosR3z.system.misc.makeServerData
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.types.NO_TIMEENTRY
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -41,19 +42,24 @@ class DeleteTimeAPITests {
     // test deleting a non-existent time entry
     @Test
     fun testDeleteTime_BadId() {
-        tru.deleteTimeEntryBehavior = { throw IllegalStateException() }
+        tru.findTimeEntryByIdBehavior = { NO_TIMEENTRY }
         val data = PostBodyData(mapOf(
             ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1"
         ))
         val sd = makeDTServerData(data)
 
-        assertThrows(IllegalStateException::class.java) { DeleteTimeAPI.handlePost(sd) }
+        val result = DeleteTimeAPI.handlePost(sd)
+
+        assertTrue(
+            result.headers.joinToString(";"),
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=No+time+entry+found+with+id")
+        )
     }
 
     /**
      * Helper method to make a [ServerData] for the delete time API tests
      */
     private fun makeDTServerData(data: PostBodyData): ServerData {
-        return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER)
+        return makeServerData(data, tru, au, user = DEFAULT_REGULAR_USER, path = DeleteTimeAPI.path)
     }
 }

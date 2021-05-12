@@ -30,7 +30,7 @@ class ChangePasswordAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testHandlePost_happyPath() {
-        val sd = makeServerData(PostBodyData(emptyMap()), tru, au, user = DEFAULT_REGULAR_USER)
+        val sd = makeServerData(PostBodyData(emptyMap()), tru, au, user = DEFAULT_REGULAR_USER, path = ChangePasswordAPI.path)
 
         val resultStatusCode = ChangePasswordAPI.handlePost(sd).statusCode
 
