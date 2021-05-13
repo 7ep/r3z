@@ -51,7 +51,7 @@ class Date(val epochDay : Long) : Comparable<Date> {
      */
     val stringValue = java.sql.Date.valueOf(LocalDate.ofEpochDay(epochDay)).toString()
 
-    val viewTimeHeaderFormat: String = SimpleDateFormat("EEE, MMM d, ''yy").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(
+    val viewTimeHeaderFormat: String = SimpleDateFormat("EEE, MMM d").format(java.sql.Date.valueOf(LocalDate.ofEpochDay(
         epochDay
     )))
 

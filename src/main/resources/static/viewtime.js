@@ -72,8 +72,10 @@ function totalHoursValidation() {
       }
 
     // When the value of the input changes
-    timeinput.addEventListener('change', checkValidation);
-    timeinput.addEventListener('keyup', checkValidation);
+    if (timeinput) {
+        timeinput.addEventListener('change', checkValidation);
+        timeinput.addEventListener('keyup', checkValidation);
+    }
 }
 
 // scroll the row being edited into view

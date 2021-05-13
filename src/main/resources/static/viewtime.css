@@ -41,10 +41,14 @@ and also to show some stats for the current time period
 nav#control_panel div#time_period_selector {
  flex-direction: row;
  display: flex;
+ justify-content: space-between;
  height: 28px;
  margin-top: 13px;
  position: relative;
  }
+
+div#time_period_selector > form,
+div#time_period_selector > div {display: flex;}
 
  #timeperiod_display {
     color: black;

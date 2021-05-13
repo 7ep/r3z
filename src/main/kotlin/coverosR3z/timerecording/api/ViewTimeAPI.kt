@@ -241,7 +241,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     $switchEmployeeUI
                     
                     <div id="time_period_selector">
-                        <label id="time_period_selector_label">Time period selector</label>
+                        <label id="time_period_selector_label">Time period</label>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
                         ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                         ${timeperiodDisplay(currentPeriod)}
@@ -351,7 +351,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         // Figure out time period date from viewTimeAPITests
         val periodStartDate = currentPeriod.start
         val inASubmittedPeriod = sd.bc.tru.isInASubmittedPeriod(employee, periodStartDate)
-        val submitButtonLabel = if (inASubmittedPeriod) "UNSUBMIT" else "SUBMIT"
+        val submitButtonLabel = if (inASubmittedPeriod) "Unsubmit" else "Submit"
         val submitButton = if (reviewingOtherTimesheet) "" else """
     <form class="navitem" action="${SubmitTimeAPI.path}" method="post">
         <button id="${Elements.SUBMIT_BUTTON.getId()}">$submitButtonLabel</button>
