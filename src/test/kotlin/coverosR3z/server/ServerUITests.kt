@@ -156,12 +156,10 @@ class ServerUITests {
 
         // entering a duplicate
         pom.eep.enter("hank")
-        assertEquals("duplicate employee", pom.driver.title)
         assertEquals(1, dataAccess.read { employees -> employees.count { it.name.value == "hank" } })
 
         // entering a duplicate surrounded by whitespace
-        pom.eep.enter("hank")
-        assertEquals("duplicate employee", pom.driver.title)
+        pom.eep.enter("    hank    ")
         assertEquals(1, dataAccess.read { employees -> employees.count { it.name.value == "hank" } })
     }
 

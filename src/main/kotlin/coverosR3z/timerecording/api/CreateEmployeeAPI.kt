@@ -122,7 +122,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                 <form action="$path" method="post">
                     <p>
                         <label for="${Elements.EMPLOYEE_INPUT.getElemName()}">Name:</label>
-                        <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" autofocus oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')" />
+                        <input autocomplete="off" name="${Elements.EMPLOYEE_INPUT.getElemName()}" id="${Elements.EMPLOYEE_INPUT.getId()}" type="text"  minlength="1" maxlength="$maxEmployeeNameSize" required="required" autofocus />
                     </p>
                 
                     <p>
@@ -134,6 +134,10 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             </div>    
         </div>
     """
-        return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createemployee.css" />""")
+        return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body,
+            extraHeaderContent="""
+                <link rel="stylesheet" href="createemployee.css" />
+                <script src="createemployee.js"></script>
+                """.trimIndent())
     }
 }

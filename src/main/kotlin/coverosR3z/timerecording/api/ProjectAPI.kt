@@ -107,7 +107,7 @@ class ProjectAPI(private val sd: ServerData) {
                     <form action="$path" method="post">
                         <p>
                             <label for="${Elements.PROJECT_INPUT.getElemName()}">Name:</label>
-                            <input autocomplete="off" name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" pattern="[\s\S]*\S[\s\S]*" oninvalid="this.setCustomValidity('Enter one or more non-whitespace characters')" oninput="this.setCustomValidity('')"  autofocus />
+                            <input autocomplete="off" name="${Elements.PROJECT_INPUT.getElemName()}" id="${Elements.PROJECT_INPUT.getId()}" type="text" minlength="1" maxlength="$maxProjectNameSize" required="required" autofocus />
                         </p>
                     
                         <p>
@@ -119,7 +119,11 @@ class ProjectAPI(private val sd: ServerData) {
                 </div>    
             </div>
 """
-        return PageComponents(sd).makeTemplate("create project", "ProjectAPI", body, extraHeaderContent="""<link rel="stylesheet" href="createprojects.css" />""")
+        return PageComponents(sd).makeTemplate("create project", "ProjectAPI", body,
+            extraHeaderContent="""
+                <link rel="stylesheet" href="createprojects.css" />
+                <script src="createproject.js"></script>
+                """.trimIndent())
     }
 }
 
