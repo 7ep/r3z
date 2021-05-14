@@ -533,10 +533,11 @@ class ViewTimeAPI(private val sd: ServerData) {
     private fun renderCreateTimeRow(currentPeriod: TimePeriod): String {
         val projects = sd.bc.tru.listAllProjects()
         val defaultDateValue = if (currentPeriod == TimePeriod.getTimePeriodForDate(Date.now())) {
-            Date.now().stringValue
+            Date.now()
         } else {
-            currentPeriod.start.stringValue
+            currentPeriod.start
         }
+
         return """
             <form id="${Elements.CREATE_TIME_ENTRY_FORM.getId()}" action="${EnterTimeAPI.path}" method="post">
                 <div class="row">
@@ -550,7 +551,9 @@ class ViewTimeAPI(private val sd: ServerData) {
         
                     <div class="date">
                         <label for="${Elements.DATE_INPUT_CREATE.getId()}">Date:</label>
-                        <input  id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" type="date" value="$defaultDateValue" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" required="required" />
+                        <select id="${Elements.DATE_INPUT_CREATE.getId()}" name="${Elements.DATE_INPUT.getElemName()}" required="required" >
+                            ${createDateOptions(currentPeriod, defaultDateValue)}
+                        </select>
                     </div>
                     
                     <div class="time">
@@ -574,6 +577,17 @@ class ViewTimeAPI(private val sd: ServerData) {
     }
 
     /**
+     * Creates the set of options for the date select
+     */
+    private fun createDateOptions(currentPeriod: TimePeriod, selectedDate: Date): String {
+
+        return (currentPeriod.start.epochDay..currentPeriod.end.epochDay).joinToString (separator = "",
+            transform = fun(it: Long): CharSequence {
+                return """<option ${if (it == selectedDate.epochDay) "selected" else ""} value="${Date(it).stringValue}">${Date(it).viewTimeHeaderFormat}</option>"""
+            })
+    }
+
+    /**
      * Similar to [renderCreateTimeRow] but for editing entries
      */
     private fun renderEditRow(te: TimeEntry, projects: List<Project>, currentPeriod: TimePeriod): String {
@@ -594,8 +608,9 @@ class ViewTimeAPI(private val sd: ServerData) {
                         
                         <div class="date">
                             <label for="${Elements.DATE_INPUT_EDIT.getId()}">Date:</label>
-                            <input id="${Elements.DATE_INPUT_EDIT.getId()}" name="${Elements.DATE_INPUT.getElemName()}" 
-                                type="date" value="${te.date.stringValue}" min="${currentPeriod.start.stringValue}" max="${currentPeriod.end.stringValue}" required="required" />
+                            <select id="${Elements.DATE_INPUT_EDIT.getId()}" name="${Elements.DATE_INPUT.getElemName()}" required="required" >
+                                ${createDateOptions(currentPeriod, te.date)}
+                            </select>    
                         </div>
             
                         <div class="time">

@@ -267,8 +267,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * existing time entries
      */
     fun setDateForNewEntry(date: Date) {
-        (driver as JavascriptExecutor)
-            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').value = '${date.stringValue}';")
+        setDateForNewEntryString(date.stringValue)
     }
 
     /**
@@ -279,8 +278,8 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * Note: Format of the string should be YYYY-MM-DD
      */
     fun setDateForNewEntryString(date: String) {
-        (driver as JavascriptExecutor)
-            .executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName()}').value = '$date';")
+        val dateSelector = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE.getId()))
+        Select(dateSelector).selectByValue(date)
     }
 
     /**
@@ -312,20 +311,11 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         detailInput.sendKeys(details)
     }
 
-
-    /**
-     * Resets the date entry when editing.
-     */
-    fun clearTheDateEntryOnEdit() {
-        val dateInput =  driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()))
-        dateInput.clear()
-    }
-
     /**
      * Sets the date field when editing
      */
     fun setTheDateEntryOnEdit(date: Date) {
-        (driver as JavascriptExecutor).executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()}').setAttribute('value','${date.stringValue}');")
+        setTheDateEntryOnEditString(date.stringValue)
     }
 
     /**
@@ -336,11 +326,9 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * Note: Format of the string should be YYYY-MM-DD
      */
     fun setTheDateEntryOnEditString(date: String) {
+        val dateSelector = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()))
+        Select(dateSelector).selectByValue(date)
         (driver as JavascriptExecutor).executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()}').setAttribute('value','$date');")
-    }
-
-    fun clearTheNewEntryDateEntry() {
-        driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE.getElemName())).clear()
     }
 
     /**

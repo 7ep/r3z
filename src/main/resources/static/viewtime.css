@@ -162,7 +162,7 @@ For elements related to entering and editing time entries
 }
 
 #data-entry-container .date {
-    flex: 2;
+    flex: 1.2;
 }
 
 #data-entry-container .project {
@@ -238,6 +238,7 @@ For elements related to entering and editing time entries
 #data-entry-container select {
   height: 30px;
   font-size: 16px;
+  font-family: monospace;
 }
 
 #edit-buttons {
