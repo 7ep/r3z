@@ -241,7 +241,6 @@ class ViewTimeAPI(private val sd: ServerData) {
                     $switchEmployeeUI
                     
                     <div id="time_period_selector">
-                        <label id="time_period_selector_label">Time period</label>
                         ${currentPeriodButton(employee, reviewingOtherTimesheet)}
                         ${previousPeriodButton(currentPeriod, employee, reviewingOtherTimesheet)}
                         ${timeperiodDisplay(currentPeriod)}
@@ -474,7 +473,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                 renderReadOnlyRow(it, currentPeriod, hideEditButtons, idBeingEdited)
             }
 
-        val actionColumnHeader = if (hideEditButtons) "" else """<th class="act">Act</th>"""
+        val actionColumnHeader = if (hideEditButtons) "" else """<th class="act"></th>"""
 
         return """
             

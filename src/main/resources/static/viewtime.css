@@ -85,8 +85,6 @@ div#time_period_selector > div {display: flex;}
 #total_hours #total_hours_value {
 }
 
-#time_period_selector_label {position: absolute;top: -13px;left: 67px;font-size: 13px;}
-
 /*
 The widget for letting an approver select an employee to review
 */
@@ -139,6 +137,8 @@ nav#control_panel button {
     height: 28px;
     align-items: center;
     border-radius: 4px;
+    margin-left: 3px;
+    margin-right: 3px;
 }
 
 /*
@@ -328,6 +328,24 @@ tr.being_edited {
     border: 2px dashed black;
 }
 
+#timerows-container th {
+     background: -webkit-gradient(
+          linear, 0 0, 0 100%,
+          from(#eee), to(#ccc)
+        );
+     background:-moz-linear-gradient(#eee, #ccc);
+     background:-o-linear-gradient(#eee, #ccc);
+     background:-ms-linear-gradient(#eee, #ccc);
+     background:linear-gradient(#eee, #ccc);
+     color:#333;
+     text-decoration:none;
+     text-shadow: 0 1px 0 rgba(255,255,255,.5);
+     border-bottom:1px solid #aaa;
+     font-size: 16px;
+     font-weight: bold;
+     height: 18px;
+}
+
 
  @media only screen and (min-width: 751px) {
     #timerows-container th.prj {
@@ -336,8 +354,6 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 18px;
-        background: darkslategrey;
-        color: lightgrey;
     }
  }
 
@@ -348,8 +364,6 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 16px;
-        background: darkslategrey;
-        color: lightgrey;
     }
  }
 
@@ -360,8 +374,6 @@ tr.being_edited {
 
     #timerows-container th {
         font-size: 12px;
-        background: darkslategrey;
-        color: lightgrey;
     }
  }
 
@@ -374,6 +386,7 @@ tr.being_edited {
 
 #timerows-container th.act {
   width: 32px;
+  align-items: center;
 }
 
 #timerows-container td {
@@ -381,7 +394,10 @@ tr.being_edited {
     font-size: 14px;
 }
 
-#timerows-container td:nth-child(4),
+#timerows-container td:nth-child(4) {}
+#timerows-container td:nth-child(4) > div {}
+#timerows-container td:nth-child(4) > div > a {}
+
 #timerows-container td:nth-child(2) {
     text-align: center;
 }
@@ -405,22 +421,11 @@ tr.being_edited {
 }
 
 #timerows-container caption {
-      background: -webkit-gradient(
-      linear, 0 0, 0 100%,
-      from(#eee), to(#ccc)
-    );
-      background:-moz-linear-gradient(#eee, #ccc);
-      background:-o-linear-gradient(#eee, #ccc);
-      background:-ms-linear-gradient(#eee, #ccc);
-      background:linear-gradient(#eee, #ccc);
-      color:#333;
-      text-decoration:none;
-      text-shadow: 0 1px 0 rgba(255,255,255,.5);
-      border-bottom:1px solid #aaa;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 18px;
+      background: darkslategrey;
+      color: lightgrey;
       height: 25px;
-      }
+}
 
 #timerows-container caption > div {
     height: 100%;
