@@ -422,10 +422,13 @@ tr.being_edited {
 }
 
 #timerows-container caption {
-      font-size: 18px;
+      font-size: 14px;
       background: darkslategrey;
       color: lightgrey;
       height: 25px;
+      width: 15em;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
 }
 
 #timerows-container caption > div {
