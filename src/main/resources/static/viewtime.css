@@ -312,15 +312,16 @@ The timerows
 #timerows-container table {
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed;
-  background-color: white;
   margin-top: 20px;
+}
+
+#timerows-container table tbody {
+  background-color: white;
 }
 
 #timerows-container th, td {
   padding: 0.25rem;
   text-align: left;
-  border: 1px solid #ccc;
 }
 
 tr.being_edited {
@@ -388,6 +389,22 @@ tr.being_edited {
 #timerows-container th.act {
   width: 32px;
   align-items: center;
+}
+
+th:last-of-type {
+  border-top-right-radius: 10px;
+}
+
+tr:last-of-type td:first-of-type {
+  border-bottom-left-radius: 10px;
+}
+
+tr:last-of-type td:last-of-type {
+  border-bottom-right-radius: 10px;
+}
+
+td {
+  border-top: 1px solid #ccc;
 }
 
 #timerows-container td {
