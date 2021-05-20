@@ -28,6 +28,10 @@ R3z consists of a web application and tests.  Its goals are:
 tool driven or following the more typical big-design-up-front waterfall methods
 * To provide a demonstration of the results of deep agile internally, as well as for clients and partners
 
+#### UI Tests:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mxdxYZWLbDQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 #### Getting started:
 
 Check out the [development handbook](docs/development_handbook.md)
@@ -71,3 +75,9 @@ Check out the [development handbook](docs/development_handbook.md)
 > for the endless immensity of the sea. 
 > 
 > -- _Antoine de Saint-Exupery_
+
+## Screenshots:
+
+![Login]()
+![Time entry]()
+![Project creation]()
