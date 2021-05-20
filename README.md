@@ -30,7 +30,7 @@ tool driven or following the more typical big-design-up-front waterfall methods
 
 #### UI Tests:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mxdxYZWLbDQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![A run of the UI tests](https://img.youtube.com/vi/mxdxYZWLbDQ/0.jpg)](https://www.youtube.com/watch?v=mxdxYZWLbDQ)
 
 #### Getting started:
 
@@ -78,6 +78,4 @@ Check out the [development handbook](docs/development_handbook.md)
 
 ## Screenshots:
 
-![Login]()
-![Time entry]()
-![Project creation]()
+<img src="https://github.com/7ep/r3z/blob/master/docs/project_creation.jpg" width="300"> <img src="https://github.com/7ep/r3z/blob/master/docs/login.jpg" width="300"> <img src="https://github.com/7ep/r3z/blob/master/docs/time_entry.jpg" width="300">
