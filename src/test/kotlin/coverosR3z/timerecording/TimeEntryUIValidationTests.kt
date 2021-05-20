@@ -19,6 +19,7 @@ import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
@@ -42,6 +43,7 @@ class TimeEntryUIValidationTests {
         `all inputs should restrict to valid values`()
     }
 
+    @Ignore
     @Test
     fun testWithFirefox() {
         init(Drivers.FIREFOX.driver)

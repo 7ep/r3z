@@ -22,6 +22,7 @@ import coverosR3z.uitests.startupTestForUI
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.junit.Assert.*
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.openqa.selenium.By
@@ -37,6 +38,7 @@ class ServerUITests {
         serverTests(Drivers.CHROME.driver)
     }
 
+    @Ignore
     @Test
     fun testWithFirefox() {
         serverTests(Drivers.FIREFOX.driver)
