@@ -331,14 +331,7 @@ tr.being_edited {
 }
 
 #timerows-container th {
-     background: -webkit-gradient(
-          linear, 0 0, 0 100%,
-          from(#eee), to(#ccc)
-        );
-     background:-moz-linear-gradient(#eee, #ccc);
-     background:-o-linear-gradient(#eee, #ccc);
-     background:-ms-linear-gradient(#eee, #ccc);
-     background:linear-gradient(#eee, #ccc);
+     background-color: lightgrey;
      color:#333;
      text-decoration:none;
      text-shadow: 0 1px 0 rgba(255,255,255,.5);
