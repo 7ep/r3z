@@ -460,3 +460,5 @@
 2021-05-13	numberThreads: 5	numberRequests: 200	time: 279
 2021-05-14	numberThreads: 5	numberRequests: 200	time: 164
 2021-05-14	numberThreads: 5	numberRequests: 200	time: 196
+2021-05-23	numberThreads: 5	numberRequests: 200	time: 248
+2021-05-23	numberThreads: 5	numberRequests: 200	time: 226

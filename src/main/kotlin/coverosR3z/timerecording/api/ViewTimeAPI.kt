@@ -558,7 +558,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                     
                     <div class="time">
                         <label for="${Elements.TIME_INPUT_CREATE.getId()}">Time:</label>
-                        <input autocomplete="off" id="${Elements.TIME_INPUT_CREATE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.25" min="0" max="24" required="required" />
+                        <input autocomplete="off" id="${Elements.TIME_INPUT_CREATE.getId()}" name="${Elements.TIME_INPUT.getElemName()}" type="number" inputmode="decimal" step="0.50" min="0" max="24" required="required" />
                     </div>
                 </div>
                 
@@ -618,7 +618,7 @@ class ViewTimeAPI(private val sd: ServerData) {
                             <script>let previoustime = ${te.time.numberOfMinutes}</script>
                             <input autocomplete="off" id="${Elements.TIME_INPUT_EDIT.getId()}" name="${Elements.TIME_INPUT.getElemName()}" 
                                 type="number" inputmode="decimal" 
-                                step="0.25" min="0" max="24" required="required"
+                                step="0.50" min="0" max="24" required="required"
                                 value="${te.time.getHoursAsString()}" 
                                  />
                         </div>

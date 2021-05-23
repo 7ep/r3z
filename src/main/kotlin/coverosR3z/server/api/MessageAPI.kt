@@ -160,7 +160,7 @@ class MessageAPI {
         PROJECT_USED("The project was already used and therefore unable to be deleted", ProjectAPI.path, MessageType.FAILURE, StatusCode.OK),
 
         // messages for problems during entering time
-        MINUTES_MUST_BE_MULTIPLE_OF_15("The time entered must be on quarter-hour divisions", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR("The time entered must be on half-hour divisions", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The time entered must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         TOTAL_TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The total time entered for a day must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD("It is not allowed to enter new time in a submitted period", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),

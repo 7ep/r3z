@@ -58,7 +58,7 @@ class EnterTimeAPI(private val sd: ServerData) {
         if (project == NO_PROJECT) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
 
         // confirm the time entered is valid
-        if (time.numberOfMinutes % 5 != 0) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.MINUTES_MUST_BE_MULTIPLE_OF_15)
+        if (time.numberOfMinutes % 30 != 0) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR)
 
         if (time.numberOfMinutes > twentyFourHours) return MessageAPI.createEnumMessageRedirect(MessageAPI.Message.TIME_MUST_BE_LESS_OR_EQUAL_TO_24)
 

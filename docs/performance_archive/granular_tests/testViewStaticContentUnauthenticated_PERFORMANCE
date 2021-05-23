@@ -451,3 +451,5 @@
 2021-05-13	numberThreads: 10	numberRequests: 500	time: 309
 2021-05-14	numberThreads: 10	numberRequests: 500	time: 191
 2021-05-14	numberThreads: 10	numberRequests: 500	time: 201
+2021-05-23	numberThreads: 10	numberRequests: 500	time: 266
+2021-05-23	numberThreads: 10	numberRequests: 500	time: 247

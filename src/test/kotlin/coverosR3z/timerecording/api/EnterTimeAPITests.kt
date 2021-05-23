@@ -211,7 +211,7 @@ class EnterTimeAPITests {
     fun testEnterTimeAPI_greaterThanTwentyFour() {
         val data = PostBodyData(mapOf(
             ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "24.25",
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "24.50",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
         val sd = makeETServerData(data)
@@ -279,7 +279,7 @@ class EnterTimeAPITests {
         val result = EnterTimeAPI.handlePost(sd)
 
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=MINUTES_MUST_BE_MULTIPLE_OF_15"))
+        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR"))
     }
 
     /**
