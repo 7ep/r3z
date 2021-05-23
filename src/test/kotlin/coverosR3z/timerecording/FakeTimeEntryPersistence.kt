@@ -24,7 +24,6 @@ class FakeTimeEntryPersistence(
     var getEmployeeByIdBehavior : (id : EmployeeId) -> Employee = { NO_EMPLOYEE },
     var getEmployeeByNameBehavior : () -> Employee = { NO_EMPLOYEE },
     var overwriteTimeEntryBehavior : () -> TimeEntry = { DEFAULT_TIME_ENTRY },
-    var setCurrentUserBehavior : () -> ITimeEntryPersistence = { FakeTimeEntryPersistence() },
     var isInASubmittedPeriodBehavior : () -> Boolean = { false },
     var persistNewSubmittedTimePeriodBehavior : () -> SubmittedPeriod = { DEFAULT_SUBMITTED_PERIOD },
     var unsubmitTimePeriodBehavior : () -> Unit = {},
@@ -35,10 +34,6 @@ class FakeTimeEntryPersistence(
     var approveTimesheetBehavior: () -> Boolean = { true },
     var unapproveTimesheetBehavior: () -> Boolean = { true },
 ) : ITimeEntryPersistence {
-
-    override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
-        return setCurrentUserBehavior()
-    }
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         return persistNewTimeEntryBehavior()

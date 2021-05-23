@@ -21,6 +21,31 @@ object CreateEmployeeUserStory : UserStory(
                 "then the system persists the data."
         )
 
+        /*
+        Deleting elements in the system is reserved for those situations
+        where it wasn't really meant to be done in the first place.  Later,
+        when actions have taken place (registering a user, creating time entries,
+        etc), it would mean a cascade of deletions that pose a much greater risk of
+        data corruption.  In that case, if the admins want to remove a user, it
+        would be preferable to do so with a simpler active/inactive flag
+         */
+        addScenario(
+            "createEmployee - I should be able to delete an employee",
+
+                "Given I accidentally added a new employee",
+                "when I delete that employee",
+                "then the employee no longer exists in the system"
+        )
+
+        // see notes on "createEmployee - I should be able to delete an employee"
+        addScenario(
+            "createEmployee - I should not be able to delete a registered employee",
+
+                "Given a new employee was created and they registered a user",
+                "when I try deleting that employee",
+                "then I am prevented from doing so"
+        )
+
         addScenario(
             "createEmployee - an invitation is created",
 

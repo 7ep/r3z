@@ -12,7 +12,7 @@ import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(
-    private val persistence: ITimeEntryPersistence,
+    private val tep: ITimeEntryPersistence,
     val cu: CurrentUser,
     private val logger: ILogger,
     private val rc: IRolesChecker = RolesChecker(cu)
@@ -21,7 +21,7 @@ class TimeRecordingUtilities(
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
         rc.checkAllowed(Role.SYSTEM)
-        return TimeRecordingUtilities(persistence, cu, logger, RolesChecker(cu))
+        return TimeRecordingUtilities(tep, cu, logger, RolesChecker(cu))
     }
 
     // region timeentries
@@ -30,7 +30,7 @@ class TimeRecordingUtilities(
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
 
         return createOrModifyEntry(entry) {
-            val newTimeEntry = persistence.persistNewTimeEntry(entry)
+            val newTimeEntry = tep.persistNewTimeEntry(entry)
             logger.logAudit(cu) { "Creating new time entry: ${newTimeEntry.shortString()}" }
             newTimeEntry
         }
@@ -38,9 +38,9 @@ class TimeRecordingUtilities(
 
     override fun changeEntry(entry: TimeEntry): RecordTimeResult{
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val oldEntry = persistence.findTimeEntryById(entry.id)
+        val oldEntry = tep.findTimeEntryById(entry.id)
         return createOrModifyEntry(entry.toTimeEntryPreDatabase(), oldEntry = oldEntry) {
-            val newTimeEntry = persistence.overwriteTimeEntry(entry)
+            val newTimeEntry = tep.overwriteTimeEntry(entry)
             logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${newTimeEntry.shortString()}"}
             newTimeEntry
         }
@@ -56,7 +56,7 @@ class TimeRecordingUtilities(
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
         confirmLessThan24Hours(entry.time, entry.employee, entry.date, oldEntry)
-        if(persistence.isInASubmittedPeriod(entry.employee, entry.date)){
+        if(tep.isInASubmittedPeriod(entry.employee, entry.date)){
             return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
         }
         return try {
@@ -79,7 +79,7 @@ class TimeRecordingUtilities(
         logger.logDebug(cu) {"confirming total time is less than 24 hours"}
 
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        val minutesRecorded : Time = persistence.queryMinutesRecorded(employee, date)
+        val minutesRecorded : Time = tep.queryMinutesRecorded(employee, date)
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
 
@@ -99,12 +99,12 @@ class TimeRecordingUtilities(
 
     override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getTimeEntriesForTimePeriod(employee, timePeriod)
+        return tep.getTimeEntriesForTimePeriod(employee, timePeriod)
     }
 
     override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val didDelete = persistence.deleteTimeEntry(timeEntry)
+        val didDelete = tep.deleteTimeEntry(timeEntry)
         if (!didDelete) {
             throw IllegalStateException("Attempted to delete a non-existent time entry by id")
         }
@@ -114,17 +114,17 @@ class TimeRecordingUtilities(
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
-        return persistence.findTimeEntryById(id)
+        return tep.findTimeEntryById(id)
     }
 
     override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.readTimeEntriesOnDate(employee, date)
+        return tep.readTimeEntriesOnDate(employee, date)
     }
 
     override fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry> {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.readTimeEntries(employee)
+        return tep.readTimeEntries(employee)
     }
 
     // endregion
@@ -141,33 +141,33 @@ class TimeRecordingUtilities(
      */
     override fun createProject(projectName: ProjectName) : Project {
         rc.checkAllowed(Role.ADMIN, Role.SYSTEM)
-        require(persistence.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
+        require(tep.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
-        return persistence.persistNewProject(projectName)
+        return tep.persistNewProject(projectName)
     }
 
     override fun listAllProjects(): List<Project> {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getAllProjects()
+        return tep.getAllProjects()
     }
 
     override fun findProjectById(id: ProjectId): Project {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getProjectById(id)
+        return tep.getProjectById(id)
     }
 
     override fun findProjectByName(name: ProjectName): Project {
-        return persistence.getProjectByName(name)
+        return tep.getProjectByName(name)
     }
 
     override fun deleteProject(project: Project): DeleteProjectResult {
-        require(persistence.getProjectById(project.id) != NO_PROJECT)
+        require(tep.getProjectById(project.id) != NO_PROJECT)
 
-        return if (persistence.isProjectUsedForTimeEntry(project)) {
+        return if (tep.isProjectUsedForTimeEntry(project)) {
             DeleteProjectResult.USED
         } else {
-            persistence.deleteProject(project)
+            tep.deleteProject(project)
             DeleteProjectResult.SUCCESS
         }
     }
@@ -185,24 +185,24 @@ class TimeRecordingUtilities(
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
         rc.checkAllowed(Role.ADMIN, Role.SYSTEM)
-        val newEmployee = persistence.persistNewEmployee(employeename)
+        val newEmployee = tep.persistNewEmployee(employeename)
         logger.logAudit(cu) {"Created a new employee, \"${newEmployee.name.value}\""}
         return newEmployee
     }
 
     override fun findEmployeeById(id: EmployeeId): Employee {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getEmployeeById(id)
+        return tep.getEmployeeById(id)
     }
 
     override fun findEmployeeByName(name: EmployeeName): Employee {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getEmployeeByName(name)
+        return tep.getEmployeeByName(name)
     }
 
     override fun listAllEmployees(): List<Employee> {
         rc.checkAllowed(Role.SYSTEM, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.NONE)
-        return persistence.getAllEmployees()
+        return tep.getAllEmployees()
     }
 
     // endregion
@@ -211,28 +211,28 @@ class TimeRecordingUtilities(
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val existingSubmission = persistence.getSubmittedTimePeriod(cu.employee, timePeriod)
+        val existingSubmission = tep.getSubmittedTimePeriod(cu.employee, timePeriod)
         check (existingSubmission == NullSubmittedPeriod) { "Cannot submit an already-submitted period" }
         logger.logAudit (cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
-        return persistence.persistNewSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        return tep.persistNewSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
     }
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val submittedPeriod = persistence.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        val submittedPeriod = tep.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
         check (submittedPeriod != NullSubmittedPeriod) { "Cannot unsubmit a non-submitted period" }
         logger.logAudit (cu) { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
-        return persistence.unsubmitTimePeriod(submittedPeriod)
+        return tep.unsubmitTimePeriod(submittedPeriod)
     }
 
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod) : SubmittedPeriod {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        return tep.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
     }
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         rc.checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return persistence.isInASubmittedPeriod(employee, date)
+        return tep.isInASubmittedPeriod(employee, date)
     }
 
     // endregion
@@ -245,18 +245,18 @@ class TimeRecordingUtilities(
             logger.logWarn(cu) { "Cannot approve timesheet for NO_EMPLOYEE" }
             return ApprovalResultStatus.FAILURE
         }
-        if (! persistence.isInASubmittedPeriod(employee, startDate)) {
+        if (! tep.isInASubmittedPeriod(employee, startDate)) {
             logger.logWarn(cu) { "Cannot approve timesheet for unsubmitted period" }
             return ApprovalResultStatus.FAILURE
         }
-        val stp = persistence.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
-        persistence.approveTimesheet(stp)
+        val stp = tep.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        tep.approveTimesheet(stp)
         logger.logAudit (cu) { "Approved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
         return ApprovalResultStatus.SUCCESS
     }
 
     override fun isApproved(employee: Employee, startDate: Date): ApprovalStatus {
-        val stp = persistence.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        val stp = tep.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
         return stp.approvalStatus
     }
 
@@ -266,17 +266,17 @@ class TimeRecordingUtilities(
             logger.logWarn(cu) { "Cannot unapprove timesheet for NO_EMPLOYEE" }
             return ApprovalResultStatus.FAILURE
         }
-        if (! persistence.isInASubmittedPeriod(employee, startDate)) {
+        if (! tep.isInASubmittedPeriod(employee, startDate)) {
             logger.logWarn(cu) { "Cannot unapprove timesheet for unsubmitted period" }
             return ApprovalResultStatus.FAILURE
         }
         val timePeriod = TimePeriod.getTimePeriodForDate(startDate)
-        if (persistence.getSubmittedTimePeriod(employee, timePeriod).approvalStatus == ApprovalStatus.UNAPPROVED) {
+        if (tep.getSubmittedTimePeriod(employee, timePeriod).approvalStatus == ApprovalStatus.UNAPPROVED) {
             logger.logWarn(cu) { "Cannot unapprove an already-unapproved timesheet" }
             return ApprovalResultStatus.FAILURE
         }
-        val stp = persistence.getSubmittedTimePeriod(employee, timePeriod)
-        persistence.unapproveTimesheet(stp)
+        val stp = tep.getSubmittedTimePeriod(employee, timePeriod)
+        tep.unapproveTimesheet(stp)
         logger.logAudit (cu) { "Unapproved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
         return ApprovalResultStatus.SUCCESS
     }

@@ -10,7 +10,7 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.timerecording.types.*
 
 class TimeEntryPersistence(
-    private val pmd : PureMemoryDatabase,
+    pmd : PureMemoryDatabase,
     private val cu : CurrentUser = CurrentUser(SYSTEM_USER),
     private val logger: ILogger
 ) : ITimeEntryPersistence {
@@ -19,10 +19,6 @@ class TimeEntryPersistence(
     private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
     private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
     private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
-
-    override fun setCurrentUser(cu: CurrentUser): ITimeEntryPersistence {
-        return TimeEntryPersistence(pmd, cu, logger)
-    }
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
         isEntryValid(entry)

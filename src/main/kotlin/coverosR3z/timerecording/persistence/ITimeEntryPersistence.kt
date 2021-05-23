@@ -5,7 +5,6 @@ import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.types.*
 
 interface ITimeEntryPersistence {
-    fun setCurrentUser(cu : CurrentUser) : ITimeEntryPersistence
     fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry
     fun persistNewProject(projectName: ProjectName) : Project
     fun persistNewEmployee(employeename: EmployeeName): Employee
