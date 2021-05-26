@@ -16,7 +16,7 @@ import java.lang.IllegalArgumentException
 @Category(IntegrationTestCategory::class)
 class TimeEntryPersistenceTests {
 
-    private lateinit var tep : ITimeEntryPersistence
+    private lateinit var tep : TimeEntryPersistence
 
     @Before fun init() {
         tep = TimeEntryPersistence(createEmptyDatabase(), logger = testLogger)
@@ -419,6 +419,32 @@ class TimeEntryPersistenceTests {
     @Test
     fun testIfProjectUsedInTimeEntry_SearchingNoProject() {
         assertThrows(IllegalArgumentException::class.java) { tep.isProjectUsedForTimeEntry(NO_PROJECT) }
+    }
+
+    /**
+     * Happy path - just delete a valid employee
+     */
+    @Test
+    fun testDeleteEmployee() {
+        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+        assertTrue(tep.deleteEmployee(newEmployee))
+    }
+
+    /**
+     * If we try deleting an employee that isn't in the
+     * database, return false
+     */
+    @Test
+    fun testDeleteEmployee_NoneFound() {
+        assertFalse(tep.deleteEmployee(DEFAULT_EMPLOYEE))
+    }
+
+    /**
+     * If we pass in [NO_EMPLOYEE], throw [IllegalArgumentException]
+     */
+    @Test
+    fun testDeleteEmployee_NO_EMPLOYEE() {
+        assertThrows(IllegalArgumentException::class.java) { tep.deleteEmployee(NO_EMPLOYEE) }
     }
 
 

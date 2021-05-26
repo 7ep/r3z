@@ -19,4 +19,5 @@ interface IAuthPersistence {
     fun removeInvitation(employee: Employee): Boolean
     fun listAllInvitations() : Set<Invitation>
     fun updateUser(user: User): Boolean
+    fun getUserByEmployee(employee: Employee): User
 }

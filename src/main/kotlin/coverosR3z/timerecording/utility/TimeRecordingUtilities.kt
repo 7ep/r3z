@@ -175,6 +175,10 @@ class TimeRecordingUtilities(
         }
     }
 
+    override fun deleteEmployee(employee: Employee): Boolean {
+        return tep.deleteEmployee(employee)
+    }
+
     // endregion
 
     // region employees

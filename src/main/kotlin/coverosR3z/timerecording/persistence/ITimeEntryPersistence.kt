@@ -38,5 +38,16 @@ interface ITimeEntryPersistence {
     fun unapproveTimesheet(stp: SubmittedPeriod): Boolean
     fun getEmployeeByName(employeeName: EmployeeName): Employee
     fun isProjectUsedForTimeEntry(project: Project): Boolean
+
+    /**
+     * Deletes an project, if found.  If [coverosR3z.timerecording.types.NO_PROJECT]
+     * if passed in, we'll throw an [IllegalArgumentException]
+     */
     fun deleteProject(project: Project): Boolean
+
+    /**
+     * Deletes an employee, if found.  If [coverosR3z.timerecording.types.NO_EMPLOYEE]
+     * if passed in, we'll throw an [IllegalArgumentException]
+     */
+    fun deleteEmployee(employee: Employee): Boolean
 }

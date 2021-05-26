@@ -88,6 +88,11 @@ class TimeEntryPersistence(
         return projectDataAccess.actOn { projects -> projects.remove(project) }
     }
 
+    override fun deleteEmployee(employee: Employee): Boolean {
+        require (employee != NO_EMPLOYEE)
+        return employeeDataAccess.actOn { employees -> employees.remove(employee) }
+    }
+
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
         return employeeDataAccess.actOn { employees ->
             val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))

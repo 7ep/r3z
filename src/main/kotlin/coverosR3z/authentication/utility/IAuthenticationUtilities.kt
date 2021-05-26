@@ -70,4 +70,13 @@ interface IAuthenticationUtilities {
 
     fun changePassword(user: User, password: Password): ChangePasswordResult
 
+    /**
+     * Gets the user associated with an employee.  If
+     * the employee isn't found in the database, or
+     * if there is no user yet registered with this
+     * employee, we'll return [NO_USER], otherwise
+     * we'll return the user found.
+     */
+    fun getUserByEmployee(employee: Employee): User
+
 }

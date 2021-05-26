@@ -27,6 +27,10 @@ class AuthenticationPersistence(pmd : PureMemoryDatabase, private val logger: IL
         return userDataAccess.actOn { users -> users.update(user) }
     }
 
+    override fun getUserByEmployee(employee: Employee): User {
+        return userDataAccess.read { users -> users.singleOrNull{ it.employee == employee } ?: NO_USER }
+    }
+
     override fun isUserRegistered(name: UserName): Boolean {
         return userDataAccess.read { users -> users.singleOrNull { u -> u.name == name } ?: NO_USER } != NO_USER
     }

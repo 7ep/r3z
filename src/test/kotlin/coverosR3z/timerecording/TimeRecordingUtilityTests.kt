@@ -638,6 +638,17 @@ class TimeRecordingUtilityTests {
         assertThrows(java.lang.IllegalArgumentException::class.java) { tru.deleteProject(NO_PROJECT) }
     }
 
+    /**
+     * Happy path - just provides access to the underlying
+     * persistence layer.  Not much business action here.
+     */
+    @Test
+    fun testDeleteEmployee() {
+        tep.deleteEmployeeBehavior = {false}
+        val result = tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertFalse(result)
+    }
+
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)

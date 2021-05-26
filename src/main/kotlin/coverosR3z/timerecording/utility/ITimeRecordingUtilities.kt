@@ -50,4 +50,10 @@ interface ITimeRecordingUtilities {
     fun unapproveTimesheet(employee: Employee, startDate: Date): ApprovalResultStatus
     fun findProjectByName(name: ProjectName): Project
     fun deleteProject(project: Project): DeleteProjectResult
+
+    /**
+     * Just deletes the employee, doesn't check any
+     * business rules.  If you want that, see [coverosR3z.timerecording.utility.DeleteEmployeeUtility.deleteEmployee]
+     */
+    fun deleteEmployee(employee: Employee): Boolean
 }

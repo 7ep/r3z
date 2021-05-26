@@ -117,4 +117,12 @@ class AuthenticationUtilities(
         }
     }
 
+    override fun getUserByEmployee(employee: Employee): User {
+        if (employee == NO_EMPLOYEE) {
+            return NO_USER
+        }
+
+        return ap.getUserByEmployee(employee)
+    }
+
 }

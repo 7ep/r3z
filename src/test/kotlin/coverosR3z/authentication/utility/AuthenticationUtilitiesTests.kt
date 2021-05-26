@@ -7,6 +7,7 @@ import coverosR3z.system.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.utility.getTime
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
+import coverosR3z.timerecording.types.NO_EMPLOYEE
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -320,6 +321,38 @@ class AuthenticationUtilitiesTests {
     fun testCanChangePassword() {
         val result = authUtils.changePassword(DEFAULT_USER, Password("newPasswordHere"))
         assertEquals(ChangePasswordResult.SUCCESSFULLY_CHANGED, result)
+    }
+
+    /**
+     * If we pass in [NO_EMPLOYEE] for this method,
+     * we'll get back [NO_USER]
+     */
+    @Test
+    fun testGetUserByEmployee_NoEmployee() {
+        val result = authUtils.getUserByEmployee(NO_EMPLOYEE)
+        assertEquals(NO_USER, result)
+    }
+
+    /**
+     * If we pass in an employee value that doesn't
+     * match any user in the database,
+     * we'll get back [NO_USER]
+     */
+    @Test
+    fun testGetUserByEmployee_NoEmployeeFound() {
+        ap.getUserByEmployeeBehavior = { NO_USER }
+        val result = authUtils.getUserByEmployee(DEFAULT_EMPLOYEE)
+        assertEquals(NO_USER, result)
+    }
+
+    /**
+     * happy path - we get the user for an employee
+     */
+    @Test
+    fun testGetUserByEmployee() {
+        ap.getUserByEmployeeBehavior = { DEFAULT_USER }
+        val result = authUtils.getUserByEmployee(DEFAULT_EMPLOYEE)
+        assertEquals(DEFAULT_USER, result)
     }
 
 }

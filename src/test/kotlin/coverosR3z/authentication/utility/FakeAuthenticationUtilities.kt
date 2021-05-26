@@ -23,6 +23,7 @@ class FakeAuthenticationUtilities (
     var removeInvitationBehavior: () -> Boolean = { true },
     var listAllInvitationsBehavior: () -> Set<Invitation> = { setOf() },
     var changePasswordBehavior: () -> ChangePasswordResult = { ChangePasswordResult.SUCCESSFULLY_CHANGED },
+    var getUserByEmployeeBehavior: () -> User = { DEFAULT_USER },
     ) : IAuthenticationUtilities {
 
     override fun register(username: UserName, password: Password, invitationCode: InvitationCode): RegistrationResult {
@@ -71,6 +72,10 @@ class FakeAuthenticationUtilities (
 
     override fun changePassword(user: User, password: Password): ChangePasswordResult {
         return changePasswordBehavior()
+    }
+
+    override fun getUserByEmployee(employee: Employee): User {
+        return getUserByEmployeeBehavior()
     }
 
 }
