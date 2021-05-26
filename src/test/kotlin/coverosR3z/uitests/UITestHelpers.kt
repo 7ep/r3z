@@ -93,6 +93,12 @@ class EnterEmployeePage(private val driver: WebDriver, private val domain : Stri
         driver.findElement(By.id(CreateEmployeeAPI.Elements.EMPLOYEE_INPUT.getId())).sendKeys(employee)
         driver.findElement(By.id(CreateEmployeeAPI.Elements.CREATE_BUTTON.getId())).click()
     }
+
+    fun delete(employee: String) {
+        driver.get("$domain/${CreateEmployeeAPI.path}")
+        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[3]")).click()
+        driver.findElement(By.linkText("OK")).click()
+    }
 }
 
 class EnterProjectPage(private val driver: WebDriver, private val domain : String) {
@@ -361,4 +367,21 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     }
 
 
+}
+
+/**
+ * Applicable on any page
+ */
+class AllPages(private val driver: WebDriver, private val sslDomain: String) {
+
+    /**
+     * Gets the value of the timestamp meta information on the page
+     *
+     * Each page is labeled in its header section with a meta element called timestamp,
+     * which has the date and time in GMT of the rendering.  That way, we can tell whether
+     * we are still looking at the same page or not.
+     */
+    fun getTimestamp() : String {
+        return driver.findElement(By.cssSelector("meta[name=timestamp]")).getAttribute("content")
+    }
 }

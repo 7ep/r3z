@@ -15,6 +15,12 @@ form {
   top: 46px;
 }
 
+form[action=deleteemployee] {
+    padding: 0;
+    margin: 0;
+    position: initial;
+}
+
 input {
   margin-bottom: 1em;
   padding: .8em 1em .8em 1em;
@@ -51,6 +57,14 @@ button:focus {
     border: 1.8px solid blue;
 }
 
+button#delete_button {margin: 0px;padding: 0px;border-radius: 0.3em;}
+
+button:disabled {
+    cursor: inherit;
+    color: white;
+    background-color: lightgray;
+}
+
 table {
     table-layout: auto;
     width: 93%;
@@ -84,4 +98,8 @@ table {
 
 th#name {width: 20px;}
 
-th#invitation {width: 100px;}
+th#invitation {}
+
+th#act {
+    width: 80px;
+}

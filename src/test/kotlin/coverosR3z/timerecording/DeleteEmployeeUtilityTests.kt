@@ -1,16 +1,22 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.FakeRolesChecker
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.misc.*
+import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.DeleteEmployeeResult
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 import coverosR3z.timerecording.utility.DeleteEmployeeUtility
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.lang.IllegalArgumentException
 
 /**
@@ -99,7 +105,24 @@ class DeleteEmployeeUtilityTests {
         makeDeleteEmployeeUtility(cu = CurrentUser(DEFAULT_REGULAR_USER))
         de.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
+    }
 
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun testDeleteEmployee_DeletesInviation() {
+        val pmd = PureMemoryDatabase.createEmptyDatabase()
+        val cu = CurrentUser(DEFAULT_ADMIN_USER)
+        val tep = TimeEntryPersistence(pmd, cu = cu, logger = testLogger)
+        val ap = AuthenticationPersistence(pmd, testLogger)
+        val tru = TimeRecordingUtilities(tep, cu, testLogger)
+        val au = AuthenticationUtilities(ap, testLogger)
+        val de = DeleteEmployeeUtility(tru, au, cu, testLogger)
+
+        val newEmployee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        au.createInvitation(newEmployee)
+        assertEquals(1, au.listAllInvitations().count { it.employee == newEmployee })
+        de.deleteEmployee(newEmployee)
+        assertTrue(au.listAllInvitations().none { it.employee == newEmployee })
     }
 
 

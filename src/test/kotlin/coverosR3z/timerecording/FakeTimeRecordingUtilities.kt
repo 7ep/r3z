@@ -38,6 +38,7 @@ class FakeTimeRecordingUtilities(
     var approveTimesheetBehavior: () -> ApprovalResultStatus = { ApprovalResultStatus.SUCCESS },
     var unapproveTimesheetBehavior: () -> ApprovalResultStatus = { ApprovalResultStatus.SUCCESS },
     var isApprovedBehavior: () -> ApprovalStatus = { ApprovalStatus.UNAPPROVED },
+    var isProjectUsedForTimeEntryBehavior: () -> Boolean = { true },
     ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -137,5 +138,9 @@ class FakeTimeRecordingUtilities(
 
     override fun deleteEmployee(employee: Employee): Boolean {
         return deleteEmployeeBehavior()
+    }
+
+    override fun isProjectUsedForTimeEntry(project: Project): Boolean {
+        return isProjectUsedForTimeEntryBehavior()
     }
 }

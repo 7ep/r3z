@@ -169,6 +169,11 @@ class MessageAPI {
         EDIT_MINUTES_MUST_BE_MULTIPLE_OF_15("The time entered must be on quarter-hour divisions", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         EDIT_TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The time entered must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         EDIT_TOTAL_TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The total time entered for a day must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
-        EDIT_NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD("It is not allowed to enter new time in a submitted period", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK)
+        EDIT_NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD("It is not allowed to enter new time in a submitted period", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
+
+        // messages for deleting employees
+        EMPLOYEE_DELETED("Employee successfully deleted", CreateEmployeeAPI.path, MessageType.SUCCESS, StatusCode.OK),
+        EMPLOYEE_USED("Unable to delete employee - already registered to a user", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        FAILED_TO_DELETE_EMPLOYEE("general failure to delete employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.INTERNAL_SERVER_ERROR),
     }
 }

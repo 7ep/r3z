@@ -42,7 +42,15 @@ form[action=deleteproject] {
     position: initial;
 }
 
-button#delete_button {margin: 2px;padding: 2px;}
+button#delete_button {
+    width: 100%;
+}
+
+button:disabled {
+    cursor: inherit;
+    color: white;
+    background-color: lightgray;
+}
 
 button {
   cursor: pointer;
@@ -54,7 +62,6 @@ button {
 }
 
 button:hover {
-  color: #5f5f5f;
   background-color: #DDDDE5;
 }
 
@@ -94,7 +101,8 @@ table {
 }
 
 th#name {
+    text-align: inherit;
 }
 
-th#act {width: 20px;}
+th#act {width: 80px;}
 

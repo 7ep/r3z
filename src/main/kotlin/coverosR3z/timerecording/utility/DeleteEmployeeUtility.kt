@@ -35,6 +35,7 @@ class DeleteEmployeeUtility(
         val deleteEmployeeResult = tru.deleteEmployee(employee)
 
         return if (deleteEmployeeResult) {
+            au.removeInvitation(employee)
             DeleteEmployeeResult.SUCCESS
         } else {
             DeleteEmployeeResult.DID_NOT_DELETE

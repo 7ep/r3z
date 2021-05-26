@@ -649,6 +649,18 @@ class TimeRecordingUtilityTests {
         assertFalse(result)
     }
 
+    @Test
+    fun testIsProjectUsedForTimeEntry() {
+        tep.isProjectUsedForTimeEntryBehavior = { true }
+        assertTrue(tru.isProjectUsedForTimeEntry(DEFAULT_PROJECT))
+    }
+
+    @Test
+    fun testIsProjectUsedForTimeEntry_False() {
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        assertFalse(tru.isProjectUsedForTimeEntry(DEFAULT_PROJECT))
+    }
+
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)

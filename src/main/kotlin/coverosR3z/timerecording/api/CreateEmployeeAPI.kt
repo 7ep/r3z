@@ -2,6 +2,7 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.Invitation
+import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
 import coverosR3z.system.misc.utility.safeAttr
@@ -20,7 +21,8 @@ class CreateEmployeeAPI(private val sd: ServerData) {
 
     enum class Elements(private val elemName: String, private val id: String) : Element {
         EMPLOYEE_INPUT("employee_name", "employee_name"),
-        CREATE_BUTTON("", "employee_create_button");
+        CREATE_BUTTON("", "employee_create_button"),
+        DELETE_BUTTON("", "delete_button");
 
         override fun getId(): String {
             return this.id
@@ -88,12 +90,18 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         val employeeRows =
             empsToInvs.entries.sortedByDescending { it.key.id.value }.joinToString("") {
                 val invitationLink = if (it.value == null) "" else
-                    """
-        <a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}">copy this link</a>""".trimIndent()
-                """
+                    """<a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}">copy this link</a>""".trimIndent()
+                val maybeDisabled = if (sd.bc.au.getUserByEmployee(it.key) == NO_USER) "" else "disabled"
+"""
 <tr>
     <td>${safeHtml(it.key.name.value)}</td>
     <td>$invitationLink</td>
+    <td>
+         <form action="${DeleteEmployeeAPI.path}" method="post">
+            <input type="hidden" name="${DeleteEmployeeAPI.Elements.EMPLOYEE_ID.getElemName()}" value="${it.key.id.value}" />
+            <button $maybeDisabled id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
+        </form>
+    </td>
 </tr>
 """
             }
@@ -105,6 +113,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                         <tr>
                             <th id="name">Name</th>
                             <th id="invitation">Invitation code</th>
+                            <th id="act"></th>
                         </tr>
                     </thead>
                     <tbody>

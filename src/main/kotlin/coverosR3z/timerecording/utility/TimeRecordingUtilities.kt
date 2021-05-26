@@ -179,6 +179,10 @@ class TimeRecordingUtilities(
         return tep.deleteEmployee(employee)
     }
 
+    override fun isProjectUsedForTimeEntry(project: Project): Boolean {
+        return tep.isProjectUsedForTimeEntry(project)
+    }
+
     // endregion
 
     // region employees

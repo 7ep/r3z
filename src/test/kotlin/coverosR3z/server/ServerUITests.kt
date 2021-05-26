@@ -13,6 +13,8 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
 import coverosR3z.timerecording.CreateEmployeeUserStory
 import coverosR3z.timerecording.CreateProjectUserStory
+import coverosR3z.timerecording.api.CreateEmployeeAPI
+import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.Project
 import coverosR3z.uitests.Drivers
@@ -67,10 +69,12 @@ class ServerUITests {
         restart(driver)
         `create a new project`(newPassword)
         `create a new project and delete it`()
+        `create a new employee and delete it`()
         `validation - should be stopped from entering invalid input on the project creation page`()
         `validation - should be stopped from entering invalid input on the employee creation page`()
         `hank enters time`(hankNewPassword)
         `admin will be prevented from deleting the project used by Hank`(newPassword)
+        `admin will be prevented from deleting Hank`()
         shutdown()
     }
 
@@ -87,8 +91,8 @@ class ServerUITests {
 
     companion object {
         private const val port = 4001
-        private lateinit var pom : PageObjectModelLocal
-        private lateinit var databaseDirectory : String
+        private lateinit var pom: PageObjectModelLocal
+        private lateinit var databaseDirectory: String
 
         @BeforeClass
         @JvmStatic
@@ -132,17 +136,41 @@ class ServerUITests {
         pom.vtp.enterTime("great new project", "2", "these are some details", DEFAULT_DATE)
     }
 
+    private fun `admin will be prevented from deleting Hank`() {
+        val s = CreateEmployeeUserStory.getScenario("createEmployee - I should not be able to delete a registered employee")
+        s.markDone("Given a new employee was created and they registered a user")
+
+        pom.driver.get("${pom.sslDomain}/${CreateEmployeeAPI.path}")
+        val timestamp = pom.ap.getTimestamp()
+        pom.driver.findElement(By.xpath("//*[text() = 'hank']/..//td[3]")).click()
+        s.markDone("when I try deleting that employee")
+
+        assertEquals(timestamp, pom.ap.getTimestamp())
+        s.markDone("then I am prevented from doing so")
+    }
+
     private fun `admin will be prevented from deleting the project used by Hank`(newPassword: String) {
         logout()
         val p = CreateProjectUserStory.getScenario("CreateProject - I should not be able to delete a used project")
         pom.lp.login("employeemaker", newPassword)
 
         p.markDone("Given a project has been used for time entries")
-        pom.epp.delete("great new project", false)
+
+        val timestamp = tryDeletingProject()
         p.markDone("when I try to delete that project,")
 
-        assertTrue(pom.driver.currentUrl.contains("PROJECT_USED"))
+        assertEquals(timestamp, pom.ap.getTimestamp())
         p.markDone("then the system disallows it")
+    }
+
+    private fun tryDeletingProject(): String {
+        pom.driver.get("${pom.sslDomain}/${ProjectAPI.path}")
+        val timestamp = pom.ap.getTimestamp()
+        pom.driver.findElement(By.xpath("//*[text() = '${"great new project"}']/..//td[2]")).click()
+        if (false) {
+            pom.driver.findElement(By.linkText("OK")).click()
+        }
+        return timestamp
     }
 
     private fun `validation - should be stopped from entering invalid input on the employee creation page`() {
@@ -170,19 +198,19 @@ class ServerUITests {
 
         // entering nothing
         pom.epp.enter("")
-        assertFalse(dataAccess.read {projects -> projects.any{it.name.value == ""}})
+        assertFalse(dataAccess.read { projects -> projects.any { it.name.value == "" } })
 
         // entering all whitespace
         pom.epp.enter("   ")
-        assertFalse(dataAccess.read {projects -> projects.any{it.name.value == "   "}})
+        assertFalse(dataAccess.read { projects -> projects.any { it.name.value == "   " } })
 
         // entering a duplicate
         pom.epp.enter("great new project")
-        assertEquals(1, dataAccess.read {projects -> projects.count{it.name.value == "great new project"}})
+        assertEquals(1, dataAccess.read { projects -> projects.count { it.name.value == "great new project" } })
 
         // entering a duplicate surrounded by whitespace
         pom.epp.enter("   great new project   ")
-        assertEquals(1, dataAccess.read {projects -> projects.count{it.name.value == "great new project"}})
+        assertEquals(1, dataAccess.read { projects -> projects.count { it.name.value == "great new project" } })
     }
 
     private fun `create a new project`(newPassword: String) {
@@ -194,8 +222,24 @@ class ServerUITests {
         pom.epp.enter("great new project")
         p.markDone("when I create a project,")
 
-        assertEquals("great new project", pom.driver.findElement(By.xpath("""//*[contains(text(),'great new project')]""")).text)
+        assertEquals(
+            "great new project",
+            pom.driver.findElement(By.xpath("""//*[contains(text(),'great new project')]""")).text
+        )
         p.markDone("then that project is available for tracking time")
+    }
+
+    private fun `create a new employee and delete it`() {
+        val e = CreateEmployeeUserStory.getScenario("createEmployee - I should be able to delete an employee")
+
+        pom.eep.enter("bye bye baby")
+        e.markDone("Given I accidentally added a new employee")
+
+        pom.eep.delete("bye bye baby")
+        e.markDone("when I delete that employee")
+
+        assertThrows(org.openqa.selenium.NoSuchElementException::class.java) { pom.driver.findElement(By.xpath("""//*[contains(text(),'bye bye baby')]""")) }
+        e.markDone("then the employee no longer exists in the system")
     }
 
     private fun `create a new project and delete it`() {
@@ -272,8 +316,12 @@ class ServerUITests {
     private fun `general - should be able to see the homepage and the authenticated homepage`() {
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
         assertEquals("login page", pom.driver.title)
-        val adminEmployee = pom.businessCode.tru.listAllEmployees().single{it.name.value == "Administrator"}
-        val (_, user) = pom.businessCode.au.registerWithEmployee(UserName("employeemaker"), Password("password12345"), adminEmployee)
+        val adminEmployee = pom.businessCode.tru.listAllEmployees().single { it.name.value == "Administrator" }
+        val (_, user) = pom.businessCode.au.registerWithEmployee(
+            UserName("employeemaker"),
+            Password("password12345"),
+            adminEmployee
+        )
         pom.businessCode.au.addRoleToUser(user, Role.ADMIN)
         pom.lp.login("employeemaker", "password12345")
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
@@ -297,7 +345,7 @@ class ServerUITests {
     private fun `validation - Validation should stop me entering invalid input on the registration page`() {
         pom.lp.login("employeemaker", "password12345")
         pom.eep.enter("alice")
-        val invitationCode = pom.businessCode.au.listAllInvitations().single {it.employee.name.value == "alice"}
+        val invitationCode = pom.businessCode.au.listAllInvitations().single { it.employee.name.value == "alice" }
 
         logout()
 
@@ -353,25 +401,34 @@ class ServerUITests {
     private fun disallowDuplicateUsernameWithWhitespace(invitation: Invitation) {
         val existingUsername = "   employeemaker    "
         pom.rp.register(existingUsername, invitation.code.value)
-        assertEquals("The chosen username has already been selected. Please choose another", pom.driver.findElement(By.id("error_message")).text)
+        assertEquals(
+            "The chosen username has already been selected. Please choose another",
+            pom.driver.findElement(By.id("error_message")).text
+        )
     }
 
     private fun disallowDuplicateUsername(invitation: Invitation) {
         val existingUsername = "employeemaker"
         pom.rp.register(existingUsername, invitation.code.value)
-        assertEquals("The chosen username has already been selected. Please choose another", pom.driver.findElement(By.id("error_message")).text)
+        assertEquals(
+            "The chosen username has already been selected. Please choose another",
+            pom.driver.findElement(By.id("error_message")).text
+        )
     }
 
     private fun disallowAllWhitespace(invitation: Invitation) {
         val allWhitespace = "   "
         pom.rp.register(allWhitespace, invitation.code.value)
-        assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == allWhitespace } })
+        assertFalse(
+            pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == allWhitespace } })
     }
 
     private fun tooLongUsername(invitation: Invitation) {
         val tooLongUsername = "a".repeat(maxUserNameSize + 1)
         pom.rp.register(tooLongUsername, invitation.code.value)
-        assertFalse(pom.pmd.dataAccess<User>(User.directoryName).read { users -> users.any { it.name.value == tooLongUsername } })
+        assertFalse(
+            pom.pmd.dataAccess<User>(User.directoryName)
+                .read { users -> users.any { it.name.value == tooLongUsername } })
     }
 
     private fun tooShortUsername(invitation: Invitation) {

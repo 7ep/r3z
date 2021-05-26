@@ -1,5 +1,6 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
 import coverosR3z.system.misc.utility.safeHtml
@@ -70,13 +71,14 @@ class ProjectAPI(private val sd: ServerData) {
         val projectRows = sd.bc.tru.listAllProjects()
             .sortedByDescending { it.id.value }
             .joinToString("") {
+                val maybeDisabled = if (sd.bc.tru.isProjectUsedForTimeEntry(it)) "disabled" else ""
 """
     <tr>
         <td>${safeHtml(it.name.value)}</td>
         <td>
              <form action="${DeleteProjectAPI.path}" method="post">
                 <input type="hidden" name="${DeleteProjectAPI.Elements.ID.getElemName()}" value="${it.id.value}" />
-                <button id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
+                <button $maybeDisabled id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
             </form>
         </td>
     </tr>
@@ -89,7 +91,7 @@ class ProjectAPI(private val sd: ServerData) {
                     <thead>
                         <tr>
                             <th id="name">Name</th>
-                            <th id="act">Act</th>
+                            <th id="act"></th>
                         </tr>
                     </thead>
                     <tbody>

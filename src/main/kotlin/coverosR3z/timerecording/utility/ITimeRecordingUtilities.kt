@@ -56,4 +56,5 @@ interface ITimeRecordingUtilities {
      * business rules.  If you want that, see [coverosR3z.timerecording.utility.DeleteEmployeeUtility.deleteEmployee]
      */
     fun deleteEmployee(employee: Employee): Boolean
+    fun isProjectUsedForTimeEntry(project: Project): Boolean
 }
