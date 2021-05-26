@@ -19,8 +19,11 @@ class TimeRecordingUtilities(
 ) :
     ITimeRecordingUtilities {
 
+    /**
+     * A special command to change the current user.  Careful
+     * who you empower to use this.
+     */
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        rc.checkAllowed(Role.SYSTEM)
         return TimeRecordingUtilities(tep, cu, logger, RolesChecker(cu))
     }
 

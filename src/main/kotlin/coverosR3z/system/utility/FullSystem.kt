@@ -210,9 +210,8 @@ class FullSystem private constructor(
             cu: CurrentUser = CurrentUser(SYSTEM_USER)
         ): BusinessCode {
             val tep = TimeEntryPersistence(pmd, cu, logger)
-            val tru = TimeRecordingUtilities(tep, cu, logger)
-
             val ap = AuthenticationPersistence(pmd, logger)
+            val tru = TimeRecordingUtilities(tep, cu, logger)
             val au = AuthenticationUtilities(ap, logger)
 
             return BusinessCode(tru, au)

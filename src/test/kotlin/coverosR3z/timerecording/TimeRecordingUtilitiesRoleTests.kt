@@ -1,5 +1,6 @@
 package coverosR3z.timerecording
 
+import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
@@ -15,6 +16,7 @@ import org.junit.Test
 class TimeRecordingUtilitiesRoleTests {
 
     private val tep = FakeTimeEntryPersistence()
+    private val ap = FakeAuthPersistence()
     /*
                         _                    _       _          _
       _ _ ___ __ _ _  _| |__ _ _ _   _ _ ___| |___  | |_ ___ __| |_ ___
@@ -30,9 +32,6 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
-
-        tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
-        assertFalse(frc.roleCanDoAction)
 
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         assertFalse(frc.roleCanDoAction)
@@ -103,9 +102,6 @@ class TimeRecordingUtilitiesRoleTests {
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
 
-        tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
-        assertFalse(frc.roleCanDoAction)
-
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         assertTrue(frc.roleCanDoAction)
 
@@ -173,9 +169,6 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(frc.roleCanDoAction)
-
-        tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
-        assertTrue(frc.roleCanDoAction)
 
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         assertTrue(frc.roleCanDoAction)
@@ -245,9 +238,6 @@ class TimeRecordingUtilitiesRoleTests {
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
 
-        tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
-        assertFalse(frc.roleCanDoAction)
-
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         assertFalse(frc.roleCanDoAction)
 
@@ -314,9 +304,6 @@ class TimeRecordingUtilitiesRoleTests {
         val (tru, frc) = makeTRU(NO_USER)
 
         tru.changeEntry(DEFAULT_TIME_ENTRY)
-        assertFalse(frc.roleCanDoAction)
-
-        tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
         assertFalse(frc.roleCanDoAction)
 
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)

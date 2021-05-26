@@ -11,7 +11,6 @@ import coverosR3z.system.misc.types.Month
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.types.*
 import coverosR3z.system.config.types.SystemConfiguration
-import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -90,20 +89,21 @@ fun createTimeEntryPreDatabase(
  * with a real database connected
  */
 fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingUtilities {
-        val timeEntryPersistence : ITimeEntryPersistence = TimeEntryPersistence(createEmptyDatabase(), logger = testLogger)
-        return TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)
+    val pmd = createEmptyDatabase()
+    val tep = TimeEntryPersistence(pmd, logger = testLogger)
+    return TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
 }
 
 /**
  * Create an employee, "Alice", register a user for her, create a project
  */
-fun initializeAUserAndLogin() : Triple<TimeRecordingUtilities, Employee, Employee>{
+fun initializeAUserAndLogin() : Triple<ITimeRecordingUtilities, Employee, Employee>{
     val pmd = createEmptyDatabase()
-    val authPersistence = AuthenticationPersistence(pmd, testLogger)
-    val au = AuthenticationUtilities(authPersistence, testLogger)
+    val ap = AuthenticationPersistence(pmd, testLogger)
+    val au = AuthenticationUtilities(ap, testLogger)
 
-    val persistence = TimeEntryPersistence(pmd, logger = testLogger)
-    val adminTru = TimeRecordingUtilities(persistence, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
+    val tep = TimeEntryPersistence(pmd, logger = testLogger)
+    val adminTru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
     val aliceEmployee = adminTru.createEmployee(EmployeeName("Alice"))
     val sarahEmployee = adminTru.createEmployee(EmployeeName("Sarah"))
     adminTru.createProject(DEFAULT_PROJECT_NAME)
@@ -111,7 +111,7 @@ fun initializeAUserAndLogin() : Triple<TimeRecordingUtilities, Employee, Employe
     au.registerWithEmployee(UserName("alice"), DEFAULT_PASSWORD, aliceEmployee)
     val (_, aliceUser) = au.login(UserName("alice"), DEFAULT_PASSWORD)
 
-    val tru = TimeRecordingUtilities(persistence, CurrentUser(aliceUser), testLogger)
+    val tru = adminTru.changeUser(CurrentUser(aliceUser))
     // Perform some quick checks
     Assert.assertTrue("Registration must have succeeded", au.isUserRegistered(UserName("alice")))
 

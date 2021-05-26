@@ -12,6 +12,7 @@ import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.RecordTimeResult
 import coverosR3z.timerecording.types.StatusEnum
+import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -79,7 +80,7 @@ class AuthenticationBDD {
         val au : FakeAuthenticationUtilities = FakeAuthenticationUtilities()
         val tru : FakeTimeRecordingUtilities = FakeTimeRecordingUtilities()
 
-        private fun initializeTwoUsersAndLogin(): Pair<TimeRecordingUtilities, Employee> {
+        private fun initializeTwoUsersAndLogin(): Pair<ITimeRecordingUtilities, Employee> {
             val (tru, _, sarah) = initializeAUserAndLogin()
             return Pair(tru, sarah)
         }

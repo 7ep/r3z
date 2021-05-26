@@ -382,8 +382,9 @@ class EnterTimeAPITests {
         // set up real database
         val pmd = createEmptyDatabase()
         val tep  = TimeEntryPersistence(pmd, logger = testLogger)
+        val ap = AuthenticationPersistence(pmd, logger = testLogger)
         val au = AuthenticationUtilities(
-            AuthenticationPersistence(pmd, logger = testLogger),
+            ap,
             testLogger,
         )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)

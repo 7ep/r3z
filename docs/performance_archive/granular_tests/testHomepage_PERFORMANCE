@@ -450,3 +450,5 @@
 2021-05-14	numberOfThreads: 10	numberOfRequests: 300	time: 100
 2021-05-23	numberOfThreads: 10	numberOfRequests: 300	time: 88
 2021-05-23	numberOfThreads: 10	numberOfRequests: 300	time: 120
+2021-05-25	numberOfThreads: 10	numberOfRequests: 300	time: 81
+2021-05-25	numberOfThreads: 10	numberOfRequests: 300	time: 85

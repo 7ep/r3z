@@ -10,6 +10,7 @@ import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDa
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Test
@@ -61,7 +62,7 @@ class EnteringTimeBDD {
      alt-text: Helper Methods
      */
 
-    private fun addingProjectHoursWithNotes(): Pair<TimeRecordingUtilities, TimeEntryPreDatabase> {
+    private fun addingProjectHoursWithNotes(): Pair<ITimeRecordingUtilities, TimeEntryPreDatabase> {
         val pmd = createEmptyDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger)
@@ -69,17 +70,15 @@ class EnteringTimeBDD {
         val adminTru = TimeRecordingUtilities(
             TimeEntryPersistence(pmd, logger = testLogger),
             CurrentUser(DEFAULT_ADMIN_USER),
-            testLogger)
+            testLogger
+        )
         val alice = adminTru.createEmployee(EmployeeName("Alice"))
         val userName = UserName("alice_1")
 
         au.registerWithEmployee(userName, DEFAULT_PASSWORD,alice)
         val (_, user) = au.login(userName, DEFAULT_PASSWORD)
 
-        val tru = TimeRecordingUtilities(
-            TimeEntryPersistence(pmd, logger = testLogger),
-            CurrentUser(user),
-            testLogger)
+        val tru = adminTru.changeUser(CurrentUser(user))
 
         assertTrue("Registration must have succeeded", au.isUserRegistered(userName))
 
@@ -94,9 +93,11 @@ class EnteringTimeBDD {
         return Pair(tru, entry)
     }
 
-    private fun enterTwentyFourHoursPreviously(): Triple<TimeRecordingUtilities, Project, Employee> {
+    private fun enterTwentyFourHoursPreviously(): Triple<ITimeRecordingUtilities, Project, Employee> {
         val pmd = createEmptyDatabase()
         val timeEntryPersistence = TimeEntryPersistence(pmd, logger = testLogger)
+        val ap = AuthenticationPersistence(pmd, testLogger)
+
         val adminTru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val newProject = adminTru.createProject(ProjectName("A"))
         val newEmployee = adminTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -104,13 +105,13 @@ class EnteringTimeBDD {
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))
 
         val au = AuthenticationUtilities(
-            AuthenticationPersistence(pmd, testLogger),
+            ap,
             testLogger
         )
         au.registerWithEmployee(newUsername, DEFAULT_PASSWORD, newEmployee)
         val (_, user) = au.login(newUsername, DEFAULT_PASSWORD)
 
-        val tru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(user), testLogger)
+        val tru = adminTru.changeUser(CurrentUser(user))
         tru.createTimeEntry(existingTimeForTheDay)
         return Triple(tru, newProject, newEmployee)
     }
