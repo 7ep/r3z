@@ -63,6 +63,7 @@ button:disabled {
     cursor: inherit;
     color: white;
     background-color: lightgray;
+    border: 1.8px solid white;
 }
 
 table {
