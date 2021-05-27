@@ -79,3 +79,4 @@ Check out the [development handbook](docs/development_handbook.md)
 ## Screenshots:
 
 <img src="https://github.com/7ep/r3z/blob/master/docs/project_creation.jpg" width="300"> <img src="https://github.com/7ep/r3z/blob/master/docs/login.jpg" width="300"> <img src="https://github.com/7ep/r3z/blob/master/docs/time_entry.jpg" width="300">
+<img src="https://github.com/7ep/r3z/blob/master/docs/testEnterTImeRealPerformance.jpg" width="600">
