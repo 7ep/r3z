@@ -102,6 +102,27 @@ class DeleteEmployeeAPITests {
         assertEquals("Location: result?msg=EMPLOYEE_USED", response.headers[0])
     }
 
+    /**
+     * If there is some inexplicable error when deleting,
+     * we should get a general "failed to delete" message, a 500 status code
+     */
+    @Test
+    fun testDeleteEmployee_GeneralDeletionFailure() {
+        tru.deleteEmployeeBehavior = { false }
+        au.getUserByEmployeeBehavior = { NO_USER }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
+        val data = PostBodyData(mapOf(
+            DeleteEmployeeAPI.Elements.EMPLOYEE_ID.getElemName() to "1"
+        ))
+        val sd = makeDEServerData(data)
+
+        val response = DeleteEmployeeAPI.handlePost(sd)
+
+        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
+        assertEquals(1, response.headers.count())
+        assertEquals("Location: result?msg=FAILED_TO_DELETE_EMPLOYEE", response.headers[0])
+    }
+
     // if we are missing the id, get an exception
     @Test
     fun testDeleteEmployee_MissingId() {

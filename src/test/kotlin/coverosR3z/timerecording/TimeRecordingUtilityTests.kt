@@ -588,8 +588,28 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testUnapprove_NegativeCase_AlreadyUnapproved() {
+        tep.isInASubmittedPeriodBehavior = { true }
         tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.UNAPPROVED) }
         val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.FAILURE, result)
+    }
+
+    /**
+     * If we try to unapprove something and it's an unsubmitted period
+     */
+    @Test
+    fun testUnapprove_NegativeCase_UnsubmittedPeriod() {
+        tep.isInASubmittedPeriodBehavior = { false }
+        val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalResultStatus.FAILURE, result)
+    }
+
+    /**
+     * If we try to unapprove but somehow pass in [NO_EMPLOYEE]
+     */
+    @Test
+    fun testUnapprove_NegativeCase_NoEmployee() {
+        val result = tru.unapproveTimesheet(NO_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.FAILURE, result)
     }
 
@@ -659,6 +679,16 @@ class TimeRecordingUtilityTests {
     fun testIsProjectUsedForTimeEntry_False() {
         tep.isProjectUsedForTimeEntryBehavior = { false }
         assertFalse(tru.isProjectUsedForTimeEntry(DEFAULT_PROJECT))
+    }
+
+    /**
+     * Let's us find out whether a time period is approved
+     */
+    @Test
+    fun testIsApproved() {
+        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        val result = tru.isApproved(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertEquals(ApprovalStatus.UNAPPROVED, result)
     }
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {

@@ -237,7 +237,7 @@ class TimeEntryPersistenceTests {
 
         // act and assert
         val ex = assertThrows(java.lang.IllegalStateException::class.java) {tep.overwriteTimeEntry(revisedTimeEntry)}
-        assertEquals("a time entry with no employee is invalid", ex.message)
+        assertEquals("a time entry with a non-registered employee is invalid", ex.message)
     }
 
 

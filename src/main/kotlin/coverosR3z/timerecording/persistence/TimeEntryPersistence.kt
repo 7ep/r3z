@@ -63,10 +63,8 @@ class TimeEntryPersistence(
      * or is missing in the time entry
      */
     private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidNoProject}
-        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidNoEmployee}
-        check(employeeDataAccess.read { it.any{employee -> employee == entry.employee} }) {timeEntryInvalidBadEmployee}
-        check(projectDataAccess.read { it.any{project -> project == entry.project} }) {timeEntryInvalidBadProject}
+        check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidBadProject}
+        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidBadEmployee}
     }
 
     override fun persistNewProject(projectName: ProjectName): Project {
@@ -219,8 +217,6 @@ class TimeEntryPersistence(
     }
 
     companion object {
-        const val timeEntryInvalidNoProject = "a time entry with no project is invalid"
-        const val timeEntryInvalidNoEmployee = "a time entry with no employee is invalid"
         const val timeEntryInvalidBadEmployee = "a time entry with a non-registered employee is invalid"
         const val timeEntryInvalidBadProject = "a time entry with a non-registered project is invalid"
     }
