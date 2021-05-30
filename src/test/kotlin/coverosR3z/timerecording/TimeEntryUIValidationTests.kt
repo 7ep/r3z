@@ -71,6 +71,7 @@ class TimeEntryUIValidationTests {
 
         // this one actually does create a time entry
         val timeEntry = badDescriptionEntry(defaultProject, DEFAULT_DATE)
+
         pom.vtp.clickEditTimeEntry(timeEntry.id.value)
 
         val timestampForEdit = getTimestamp()

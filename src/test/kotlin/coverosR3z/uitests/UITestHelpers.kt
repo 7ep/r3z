@@ -255,7 +255,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     fun clickEditTimeEntry(id : Int) {
         driver
             .findElement(
-                By.cssSelector("#time-entry-$id > :nth-child(4)")).click()
+                By.cssSelector("#time-entry-$id > :nth-child(4) > a")).click()
     }
 
     /**
