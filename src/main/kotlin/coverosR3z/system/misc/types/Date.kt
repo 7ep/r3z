@@ -18,6 +18,50 @@ val latestAllowableDate: LocalDate = LocalDate.of(2200, 1, 1)
  */
 val NO_DATE = Date(earliestAllowableDate.toEpochDay())
 
+enum class DayOfWeek {
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday
+}
+
+/**
+ * Given an epochDay, returns the [DayOfWeek]
+ *
+ *  we'll find the day of the week by understanding that the days of the week have
+ *  continued in an orderly fashion since starting at epoch day zero.  That first
+ *  day was a Thursday, as it happens.  Since we've had no duplicate days of the week
+ *  since then (we've never had, for example, a Tuesday immediately followed by a Tuesday)
+ *  we can figure out today's day of the week by a bit of modulo math.
+ *
+ *  the day of the week, by example:
+ *  assume the epoch day today is zero.
+ *  assume the days Sunday through Saturday are labeled 0 through 6:
+ *  Sunday is 0
+ *  Monday is 1
+ *  Tuesday is 2
+ *  Wednesday is 3
+ *  Thursday is 4
+ *  Friday is 5
+ *  Saturday is 6
+ *
+ *  0 + 4 = 4 -> Thursday, as expected
+ *  7 + 4 = 11 -> 11 modulo 7 is 4 -> Thursday
+ *
+ *
+ */
+fun dayOfWeekCalc(epochDay: Long): DayOfWeek {
+    return DayOfWeek.values()[(epochDay + 4).rem(7).toInt()]
+}
+
+fun calculateSundayDate(today: Date): Date {
+    val dayOfWeek = dayOfWeekCalc(today.epochDay)
+    return Date(today.epochDay - dayOfWeek.ordinal)
+}
+
 enum class Month(val ord: Int) {
     JAN(1), FEB(2), MAR(3), APR(4), MAY(5), JUN(6),
     JUL(7), AUG(8), SEP(9), OCT(10), NOV(11), DEC(12);

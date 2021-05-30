@@ -402,10 +402,13 @@ td {
 
 #timerows-container td {
     overflow: hidden;
+    overflow-wrap: anywhere;
     font-size: 14px;
 }
 
-#timerows-container td:nth-child(4) {}
+#timerows-container td:nth-child(4) {
+    width: 38px;
+}
 #timerows-container td:nth-child(4) > div {}
 #timerows-container td:nth-child(4) > div > a {}
 
@@ -432,11 +435,11 @@ td {
 }
 
 #timerows-container caption {
-      font-size: 14px;
+      font-size: 13px;
       background: darkslategrey;
       color: lightgrey;
       height: 25px;
-      width: 15em;
+      max-width: 331px;
       border-top-left-radius: 10px;
       border-top-right-radius: 10px;
 }

@@ -691,6 +691,28 @@ class TimeRecordingUtilityTests {
         assertEquals(ApprovalStatus.UNAPPROVED, result)
     }
 
+    @Test
+    fun `should properly calculate the number of hours spent for a week`() {
+        val expected = DEFAULT_TIME
+        val result = tru.getTimeForWeek(DEFAULT_EMPLOYEE, DEFAULT_DATE)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `should complain if we pass in NO_EMPLOYEE when calculating the weeks hours`() {
+        assertThrows(IllegalArgumentException::class.java) { tru.getTimeForWeek(NO_EMPLOYEE, DEFAULT_DATE) }
+    }
+
+
+    /*
+     _ _       _                  __ __        _    _           _
+    | | | ___ | | ___  ___  _ _  |  \  \ ___ _| |_ | |_  ___  _| | ___
+    |   |/ ._>| || . \/ ._>| '_> |     |/ ._> | |  | . |/ . \/ . |<_-<
+    |_|_|\___.|_||  _/\___.|_|   |_|_|_|\___. |_|  |_|_|\___/\___|/__/
+                 |_|
+     alt-text: Helper Methods
+     */
+
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
         val pmd = createEmptyDatabase()
         val tep = TimeEntryPersistence(pmd, logger = testLogger)

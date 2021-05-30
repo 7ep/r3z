@@ -6,6 +6,8 @@ import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.utility.IRolesChecker
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.calculateSundayDate
+import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -179,6 +181,14 @@ class TimeRecordingUtilities(
 
     override fun isProjectUsedForTimeEntry(project: Project): Boolean {
         return tep.isProjectUsedForTimeEntry(project)
+    }
+
+    override fun getTimeForWeek(employee: Employee, todayDate: Date): Time {
+        require(employee != NO_EMPLOYEE)
+
+        val sunday = calculateSundayDate(todayDate)
+
+        return tep.getHoursOfWeekOfTimePeriodStartingAt(sunday, employee)
     }
 
     // endregion

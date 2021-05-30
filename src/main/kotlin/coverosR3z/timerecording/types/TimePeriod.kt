@@ -1,7 +1,9 @@
 package coverosR3z.timerecording.types
 
 import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.DayOfWeek
 import coverosR3z.system.misc.types.Month
+import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import java.time.LocalDate
 import kotlin.math.floor
@@ -58,7 +60,9 @@ data class TimePeriod(val start: Date, val end: Date) {
          * Returns the number of weekdays (Mon,Tues,Weds,Thurs,Fri) within this time period
          */
         fun numberOfWeekdays(currentPeriod: TimePeriod): Int {
-            return (currentPeriod.start.epochDay .. currentPeriod.end.epochDay).count { floor((it + 4).toDouble()).rem(7).toInt() !in listOf(0,6) }
+            return (currentPeriod.start.epochDay .. currentPeriod.end.epochDay).count {
+                val dayOfWeek = dayOfWeekCalc(it)
+                dayOfWeek !in listOf(DayOfWeek.Sunday, DayOfWeek.Saturday) }
         }
 
     }

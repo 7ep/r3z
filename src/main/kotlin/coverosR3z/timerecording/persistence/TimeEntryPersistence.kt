@@ -7,6 +7,8 @@ import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.system.misc.types.DayOfWeek
+import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.types.*
 
 class TimeEntryPersistence(
@@ -89,6 +91,19 @@ class TimeEntryPersistence(
     override fun deleteEmployee(employee: Employee): Boolean {
         require (employee != NO_EMPLOYEE)
         return employeeDataAccess.actOn { employees -> employees.remove(employee) }
+    }
+
+    override fun getHoursOfWeekOfTimePeriodStartingAt(sunday: Date, employee: Employee): Time {
+        // get Sunday as an epoch day
+        val sundayED = sunday.epochDay
+        require (dayOfWeekCalc(sundayED) == DayOfWeek.Sunday)
+
+        val totalMinutesOverWeek = timeEntryDataAccess.read { timeentries -> timeentries
+            .filter { (sundayED..(sundayED + 6)).contains(it.date.epochDay) && it.employee == employee }
+            .sumBy { it.time.numberOfMinutes }
+        }
+
+        return Time(totalMinutesOverWeek)
     }
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {

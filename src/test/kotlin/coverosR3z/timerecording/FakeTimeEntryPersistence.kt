@@ -1,10 +1,6 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.system.misc.DEFAULT_EMPLOYEE
-import coverosR3z.system.misc.DEFAULT_PROJECT
-import coverosR3z.system.misc.DEFAULT_SUBMITTED_PERIOD
-import coverosR3z.system.misc.DEFAULT_TIME_ENTRY
+import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -34,6 +30,7 @@ class FakeTimeEntryPersistence(
     var findTimeEntryByIdBehavior: () -> TimeEntry = { DEFAULT_TIME_ENTRY },
     var approveTimesheetBehavior: () -> Boolean = { true },
     var unapproveTimesheetBehavior: () -> Boolean = { true },
+    var getHoursOfWeekOfTimePeriodStartingAtBehavior: () -> Time = { DEFAULT_TIME }
 ) : ITimeEntryPersistence {
 
     override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
@@ -135,6 +132,10 @@ class FakeTimeEntryPersistence(
 
     override fun deleteEmployee(employee: Employee): Boolean {
         return deleteEmployeeBehavior()
+    }
+
+    override fun getHoursOfWeekOfTimePeriodStartingAt(sunday: Date, employee: Employee): Time {
+        return getHoursOfWeekOfTimePeriodStartingAtBehavior()
     }
 
 }

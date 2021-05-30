@@ -57,4 +57,11 @@ interface ITimeRecordingUtilities {
      */
     fun deleteEmployee(employee: Employee): Boolean
     fun isProjectUsedForTimeEntry(project: Project): Boolean
+
+    /**
+     * Calculates time entered for the current week, assuming the
+     * week is between Sunday and Saturday, for a particular employee
+     * @param todayDate today's date
+     */
+    fun getTimeForWeek(employee: Employee, todayDate: Date): Time
 }

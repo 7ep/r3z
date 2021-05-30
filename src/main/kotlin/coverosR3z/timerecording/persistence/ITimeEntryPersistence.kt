@@ -1,6 +1,5 @@
 package coverosR3z.timerecording.persistence
 
-import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.types.*
 
@@ -50,4 +49,11 @@ interface ITimeEntryPersistence {
      * if passed in, we'll throw an [IllegalArgumentException]
      */
     fun deleteEmployee(employee: Employee): Boolean
+
+    /**
+     * Given the date of a particular Sunday, find all the hours for
+     * the entire week.  If there are no time entries for any particular
+     * day, that day will contribute zero to the sum.
+     */
+    fun getHoursOfWeekOfTimePeriodStartingAt(sunday: Date, employee: Employee): Time
 }

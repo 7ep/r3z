@@ -1,10 +1,7 @@
 package coverosR3z.timerecording
 
-import coverosR3z.system.misc.DEFAULT_EMPLOYEE
-import coverosR3z.system.misc.DEFAULT_PROJECT
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.system.misc.DEFAULT_SUBMITTED_PERIOD
-import coverosR3z.system.misc.DEFAULT_TIME_ENTRY
+import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -39,6 +36,7 @@ class FakeTimeRecordingUtilities(
     var unapproveTimesheetBehavior: () -> ApprovalResultStatus = { ApprovalResultStatus.SUCCESS },
     var isApprovedBehavior: () -> ApprovalStatus = { ApprovalStatus.UNAPPROVED },
     var isProjectUsedForTimeEntryBehavior: () -> Boolean = { true },
+    var getTimeForWeekBehavior: () -> Time = { DEFAULT_TIME },
     ) : ITimeRecordingUtilities {
 
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
@@ -142,5 +140,9 @@ class FakeTimeRecordingUtilities(
 
     override fun isProjectUsedForTimeEntry(project: Project): Boolean {
         return isProjectUsedForTimeEntryBehavior()
+    }
+
+    override fun getTimeForWeek(employee: Employee, todayDate: Date): Time {
+        return getTimeForWeekBehavior()
     }
 }

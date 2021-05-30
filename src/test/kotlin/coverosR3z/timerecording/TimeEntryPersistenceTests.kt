@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
+import coverosR3z.system.misc.types.calculateSundayDate
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
@@ -445,6 +446,77 @@ class TimeEntryPersistenceTests {
     @Test
     fun testDeleteEmployee_NO_EMPLOYEE() {
         assertThrows(IllegalArgumentException::class.java) { tep.deleteEmployee(NO_EMPLOYEE) }
+    }
+
+    /**
+     * If we only have time entered on one day
+     */
+    @Test
+    fun testCalculatesHoursProperlyForWeek_JustOneDay() {
+        val (_, employee, _) = createTimeEntry()
+        val sunday = calculateSundayDate(DEFAULT_PERIOD_START_DATE)
+        val result = tep.getHoursOfWeekOfTimePeriodStartingAt(sunday, employee)
+        assertEquals(DEFAULT_TIME, result)
+    }
+
+    /**
+     * If we have several entries on one day
+     */
+    @Test
+    fun testCalculatesHoursProperlyForWeek_JustOneDayTwoEntries() {
+        val (project, employee, _) = createTimeEntry()
+        tep.persistNewTimeEntry(
+            createTimeEntryPreDatabase(
+                project = project,
+                employee = employee,
+                date = DEFAULT_PERIOD_START_DATE))
+        val sunday = calculateSundayDate(DEFAULT_PERIOD_START_DATE)
+        val result = tep.getHoursOfWeekOfTimePeriodStartingAt(sunday, employee)
+        assertEquals(Time(DEFAULT_TIME.numberOfMinutes * 2), result)
+    }
+
+    /**
+     * If we have several entries through the week
+     */
+    @Test
+    fun testCalculatesHoursProperlyForWeek_SeveralThroughWeek() {
+        val sunday = calculateSundayDate(DEFAULT_PERIOD_START_DATE)
+        val (project, employee, _) = createTimeEntry()
+
+        // total time so far: DEFAULT_TIME
+        fun enterTime(date: Date) {
+            tep.persistNewTimeEntry(
+                createTimeEntryPreDatabase(
+                    project = project,
+                    employee = employee,
+                    date = date))
+        }
+
+        enterTime(sunday)
+        // total time so far: DEFAULT_TIME * 2
+        // Monday
+        enterTime(Date(sunday.epochDay + 1))
+        // total time so far: DEFAULT_TIME * 3
+        // Tuesday
+        enterTime(Date(sunday.epochDay + 2))
+        // total time so far: DEFAULT_TIME * 4
+        // Wednesday
+        enterTime(Date(sunday.epochDay + 3))
+        // total time so far: DEFAULT_TIME * 5
+        // Thursday
+        enterTime(Date(sunday.epochDay + 4))
+        // total time so far: DEFAULT_TIME * 6
+        // Friday
+        enterTime(Date(sunday.epochDay + 5))
+        // total time so far: DEFAULT_TIME * 7
+        // Saturday
+        enterTime(Date(sunday.epochDay + 6))
+        // total time so far: DEFAULT_TIME * 8
+        // The following Sunday - shouldn't be included in total time for week
+        enterTime(Date(sunday.epochDay + 7))
+
+        val result = tep.getHoursOfWeekOfTimePeriodStartingAt(sunday, employee)
+        assertEquals(Time(DEFAULT_TIME.numberOfMinutes * 8), result)
     }
 
 

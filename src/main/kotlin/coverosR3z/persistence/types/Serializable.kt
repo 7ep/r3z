@@ -9,7 +9,7 @@ abstract class Serializable {
 
     /**
      * this represents the connection between a name of a property
-     * and the associated value ot it in this class,
+     * and the associated value of it in this class,
      * used during the serialization process.  For example,
      * if we think about the [coverosR3z.timerecording.types.Project] type, it has an id
      * and a name.  Therefore, an appropriate map might
