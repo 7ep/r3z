@@ -223,9 +223,6 @@ then you can make another domain at the top level, under the coverosR3z package.
 Underneath that, the typical pattern for organizing the kinds of files are indicated
 in [Directories](#directories).
 
-If we are following a test-driven approach to developing this, the first thing
-you will want to focus on is the utility - that is, the overarching business code.
-
 Start by creating a test in the appropriate place in the tests directory, and
 using wishful thinking, test what you wish already existed.
 

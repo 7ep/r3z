@@ -85,6 +85,14 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
+
+        tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertFalse(frc.roleCanDoAction)
+
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tru.deleteProject(DEFAULT_PROJECT)
+        assertFalse(frc.roleCanDoAction)
     }
 
     /*
@@ -154,6 +162,14 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
+
+        tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertTrue(frc.roleCanDoAction)
+
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tru.deleteProject(DEFAULT_PROJECT)
+        assertTrue(frc.roleCanDoAction)
     }
 
     /*
@@ -221,6 +237,14 @@ class TimeRecordingUtilitiesRoleTests {
         tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertFalse(frc.roleCanDoAction)
+
+        tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertFalse(frc.roleCanDoAction)
+
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }
 
@@ -290,6 +314,14 @@ class TimeRecordingUtilitiesRoleTests {
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
+
+        tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertFalse(frc.roleCanDoAction)
+
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tru.deleteProject(DEFAULT_PROJECT)
+        assertFalse(frc.roleCanDoAction)
     }
 
     /*
@@ -357,6 +389,14 @@ class TimeRecordingUtilitiesRoleTests {
         tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
+        assertFalse(frc.roleCanDoAction)
+
+        tru.deleteEmployee(DEFAULT_EMPLOYEE)
+        assertFalse(frc.roleCanDoAction)
+
+        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        tep.isProjectUsedForTimeEntryBehavior = { false }
+        tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }
 

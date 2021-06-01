@@ -165,17 +165,21 @@ class TimeRecordingUtilities(
     }
 
     override fun deleteProject(project: Project): DeleteProjectResult {
+        rc.checkAllowed(Role.ADMIN)
         require(tep.getProjectById(project.id) != NO_PROJECT)
 
         return if (tep.isProjectUsedForTimeEntry(project)) {
             DeleteProjectResult.USED
         } else {
             tep.deleteProject(project)
+            logger.logAudit(cu) { "deleted project: ${project.name.value} id: ${project.id.value}" }
             DeleteProjectResult.SUCCESS
         }
     }
 
     override fun deleteEmployee(employee: Employee): Boolean {
+        rc.checkAllowed(Role.ADMIN)
+        logger.logAudit(cu) { "deleted employee: ${employee.name.value} id: ${employee.id.value}" }
         return tep.deleteEmployee(employee)
     }
 
