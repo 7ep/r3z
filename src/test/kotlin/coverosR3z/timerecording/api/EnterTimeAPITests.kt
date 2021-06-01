@@ -46,14 +46,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI() {
-        val data = PostBodyData(mapOf(
-                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = makeETServerData(data)
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI()
 
         assertSuccessfulTimeEntry(result)
     }
@@ -128,14 +121,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_emptyStringProject() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.epochDay.toString()))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(proj = "")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -149,14 +135,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_allSpacesProject() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "   ",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(proj = "   ")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -171,13 +150,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_unrecognizedProject() {
         tru.findProjectByNameBehavior = { NO_PROJECT }
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "UNRECOGNIZED",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "60",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
-        val sd = makeETServerData(data)
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(proj = "UNRECOGNIZED")
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
         assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=INVALID_PROJECT_DURING_ENTERING_TIME"))
     }
@@ -188,14 +161,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_negativeTime() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "-1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(time = "-1")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -209,14 +175,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_greaterThanTwentyFour() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "24.50",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to A_RANDOM_DAY_IN_JUNE_2020.stringValue))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(time = "24.50")
 
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
         assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=TIME_MUST_BE_LESS_OR_EQUAL_TO_24"))
@@ -228,14 +187,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_zeroTime() {
-        val data = PostBodyData(mapOf(
-                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "0",
-                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = makeETServerData(data)
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(time = "0")
 
         assertSuccessfulTimeEntry(result)
     }
@@ -246,37 +198,21 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_nonNumericTime() {
-        val data = PostBodyData(mapOf(
-                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "aaa",
-                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(time = "a")
 
         assertTrue(
             result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Must+be+able+to+parse+%22aaa%22+as+a+double")
+            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Must+be+able+to+parse+%22a%22+as+a+double")
         )
     }
 
     /**
-     * The time must be a valid multiple of 0.25
+     * The time must be a valid multiple of 0.50
      */
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_timeNotOnValidMultiple() {
-        val data = PostBodyData(mapOf(
-                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1.23",
-                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(time = "1.49")
 
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
         assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR"))
@@ -290,15 +226,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTime_DateInvalid_DateEntryDisallowedForSubmittedTime() {
         tru.isInASubmittedPeriodBehavior = { true }
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING
-        ))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI()
 
         assertEquals(StatusCode.SEE_OTHER, result.statusCode)
         assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD"))
@@ -307,15 +235,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_EmptyDateString() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to ""
-        ))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(date = "")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -329,14 +249,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_TooEarlyDateString() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to "1979-12-31"
-        ))
-        val sd = makeETServerData(data)
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(date = "1979-12-31")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -350,15 +263,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_TooLateDateString() {
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to "default project",
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to "2200-01-02"
-        ))
-        val sd = makeETServerData(data)
-
-        val result = EnterTimeAPI.handlePost(sd)
+        val result = enterTimeWithAPI(date = "2200-01-02")
 
         assertTrue(
             result.headers.joinToString(";"),
@@ -519,7 +424,8 @@ class EnterTimeAPITests {
             ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
             ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
             ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
-            ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1"
+            ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1",
+            ViewTimeAPI.Elements.BEING_EDITED.getElemName() to "true",
         ))
         val sd = makeETServerData(data)
 
@@ -542,6 +448,23 @@ class EnterTimeAPITests {
                  |_|
      alt-text: Helper Methods
      */
+
+
+    private fun enterTimeWithAPI(
+        proj: String = "default project",
+        time: String = "1",
+        dtl: String = "not much to say",
+        date: String = DEFAULT_DATE_STRING
+    ): PreparedResponseData {
+        val data = PostBodyData(mapOf(
+            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to proj,
+            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to time,
+            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to dtl,
+            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to date))
+        val sd = makeETServerData(data)
+
+        return EnterTimeAPI.handlePost(sd)
+    }
 
 
     /**
