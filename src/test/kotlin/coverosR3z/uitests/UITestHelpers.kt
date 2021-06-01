@@ -283,7 +283,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * object.  This one takes a string, which lets us use values the [Date] won't.
      * Note: Format of the string should be YYYY-MM-DD
      */
-    fun setDateForNewEntryString(date: String) {
+    private fun setDateForNewEntryString(date: String) {
         val dateSelector = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_CREATE.getId()))
         Select(dateSelector).selectByValue(date)
     }
@@ -320,7 +320,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     /**
      * Sets the date field when editing
      */
-    fun setTheDateEntryOnEdit(date: Date) {
+    private fun setTheDateEntryOnEdit(date: Date) {
         setTheDateEntryOnEditString(date.stringValue)
     }
 
@@ -331,7 +331,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
      * object.  This one takes a string, which lets us use values the [Date] won't.
      * Note: Format of the string should be YYYY-MM-DD
      */
-    fun setTheDateEntryOnEditString(date: String) {
+    private fun setTheDateEntryOnEditString(date: String) {
         val dateSelector = driver.findElement(By.id(ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()))
         Select(dateSelector).selectByValue(date)
         (driver as JavascriptExecutor).executeScript("document.getElementById('${ViewTimeAPI.Elements.DATE_INPUT_EDIT.getId()}').setAttribute('value','$date');")

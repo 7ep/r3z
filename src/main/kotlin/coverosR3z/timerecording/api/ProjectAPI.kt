@@ -1,14 +1,13 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
 import coverosR3z.server.api.MessageAPI
-import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.*
 import coverosR3z.server.utility.AuthUtilities.Companion.doGETRequireAuth
 import coverosR3z.server.utility.AuthUtilities.Companion.doPOSTAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.ProjectName
 import coverosR3z.timerecording.types.maxProjectNameSize

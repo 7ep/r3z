@@ -167,9 +167,6 @@ class ServerUITests {
         pom.driver.get("${pom.sslDomain}/${ProjectAPI.path}")
         val timestamp = pom.ap.getTimestamp()
         pom.driver.findElement(By.xpath("//*[text() = '${"great new project"}']/..//td[2]")).click()
-        if (false) {
-            pom.driver.findElement(By.linkText("OK")).click()
-        }
         return timestamp
     }
 

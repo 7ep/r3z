@@ -6,7 +6,6 @@ import coverosR3z.system.misc.types.Month
 import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.InvalidTimePeriodException
 import java.time.LocalDate
-import kotlin.math.floor
 
 /**
  * Represents a period of time to contain a set of time entries

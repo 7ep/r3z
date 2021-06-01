@@ -1,10 +1,9 @@
 package coverosR3z.timerecording
 
 import coverosR3z.authentication.FakeAuthPersistence
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
-import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
+import coverosR3z.system.misc.*
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -13,7 +12,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.lang.IllegalStateException
 
 class TimeRecordingUtilityTests {
 

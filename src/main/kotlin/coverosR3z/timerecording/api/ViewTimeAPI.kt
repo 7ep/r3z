@@ -12,7 +12,7 @@ import coverosR3z.server.utility.PageComponents
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 
-class ViewTimeAPI(private val sd: ServerData) {
+class ViewTimeAPI {
 
     enum class Elements (private val value: String = "") : Element {
         // edit fields
@@ -110,7 +110,7 @@ class ViewTimeAPI(private val sd: ServerData) {
         override val path: String
             get() = "timeentries"
 
-        fun projectsToOptions(projects: List<Project>): String {
+        private fun projectsToOptions(projects: List<Project>): String {
             return projects.sortedBy { it.name.value }.joinToString("") {
                 """<option value="${safeAttr(it.name.value)}" >"""
             }

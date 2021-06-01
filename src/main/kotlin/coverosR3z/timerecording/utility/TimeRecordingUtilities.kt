@@ -1,13 +1,12 @@
 package coverosR3z.timerecording.utility
 
-import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.utility.IRolesChecker
+import coverosR3z.authentication.utility.RolesChecker
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.Date
 import coverosR3z.system.misc.types.calculateSundayDate
-import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
