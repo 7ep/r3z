@@ -39,6 +39,18 @@ class GeneralUtilitiesTests {
         assertEquals("""Must be able to parse "abc" as a double""", ex.message)
     }
 
+    @Test
+    fun testCapitalizeFirstLetterOfWords() {
+        val result: String = "foo foo fah".toTitleCase()
+        assertEquals("Foo Foo Fah", result)
+    }
+
+    @Test
+    fun testCapitalizeFirstLetterOfWordsWithArticle() {
+        val result: String = "the Foo foo to The an apple fah".toTitleCase()
+        assertEquals("The Foo Foo to the an Apple Fah", result)
+    }
+
 }
 
 private fun String.toTitleCase(): String {
