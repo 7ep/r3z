@@ -102,7 +102,7 @@ class RegisterAPI(private val sd: ServerData) {
                     <p><a href="${HomepageAPI.path}">Homepage</a></p>
                 </div>
                 """
-                okHTML(PageComponents(sd).makeTemplate("New password generated", "RegisterAPI", newUserHtml, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />"""))
+                okHTML(PageComponents(sd).makeTemplate("User Created", "RegisterAPI", newUserHtml, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />"""))
             }
             RegistrationResultStatus.NO_INVITATION_FOUND -> {
                 handleUnauthorized()
@@ -147,7 +147,7 @@ class RegisterAPI(private val sd: ServerData) {
           </table>
         </form>
     """
-        return PageComponents(sd).makeTemplate("register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")
+        return PageComponents(sd).makeTemplate("Register", "RegisterAPI", body, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")
     }
 
 }

@@ -170,7 +170,7 @@ class ViewTimeAPI {
                     neededHours
                 )
 
-            val submittedString = if (inASubmittedPeriod) "submitted" else "unsubmitted"
+            val submittedString = if (inASubmittedPeriod) "Submitted" else "Unsubmitted"
             // show this if we are viewing someone else's timesheet
             val viewingHeader = if (! reviewingOtherTimesheet) "" else """<h2 id="viewing_whose_timesheet">Viewing ${safeHtml(employee.name.value)}'s <em>$submittedString</em> timesheet</h2>"""
             val timeEntryPanel = if (approvalStatus == ApprovalStatus.APPROVED) "" else renderTimeEntryPanel(
@@ -208,7 +208,7 @@ class ViewTimeAPI {
         """
 
             val viewingSelf = sd.ahd.user.employee == employee
-            val title = if (viewingSelf) "Your time entries" else "Viewing ${safeHtml(employee.name.value)}'s $submittedString timesheet "
+            val title = if (viewingSelf) "Your time entries" else "${safeHtml(employee.name.value)}'s $submittedString timesheet "
             return PageComponents(sd).makeTemplate(title, "ViewTimeAPI", body,
                 extraHeaderContent="""
                 <link rel="stylesheet" href="viewtime.css" />

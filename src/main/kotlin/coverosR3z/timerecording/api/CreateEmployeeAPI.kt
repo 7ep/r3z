@@ -143,7 +143,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
             </div>    
         </div>
     """
-        return PageComponents(sd).makeTemplate("create employee", "CreateEmployeeAPI", body,
+        return PageComponents(sd).makeTemplate("Create Employee", "CreateEmployeeAPI", body,
             extraHeaderContent="""
                 <link rel="stylesheet" href="createemployee.css" />
                 <script src="createemployee.js"></script>

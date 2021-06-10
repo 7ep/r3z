@@ -41,12 +41,7 @@ class MessageAPI {
                 </div>
                 """.trimIndent()
 
-            val fullTemplate = PageComponents(sd).makeTemplate(
-                title = message.text,
-                "MessageAPI",
-                body = body,
-                """<link rel="stylesheet" href="message.css" />"""
-            )
+            val fullTemplate = PageComponents(sd).makeTemplate(title = message.text,"MessageAPI",body = body,"""<link rel="stylesheet" href="message.css" />""")
             return PreparedResponseData(fullTemplate, message.statusCode, listOf(ContentType.TEXT_HTML.value))
         }
 
