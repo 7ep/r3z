@@ -41,7 +41,7 @@ class LoginAPI(val sd: ServerData) {
         override fun handleGet(sd: ServerData): PreparedResponseData {
             val l = LoginAPI(sd)
             return doGETRequireUnauthenticated(sd.ahd.user)
-            { PageComponents(sd).makeTemplate("login page", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")}
+            { PageComponents(sd).makeTemplate("Login", "LoginAPI", l.loginHTML, extraHeaderContent="""<link rel="stylesheet" href="auth.css" />""")}
         }
 
         override fun handlePost(sd: ServerData): PreparedResponseData {

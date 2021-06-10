@@ -53,7 +53,7 @@ class HomepageAPI(private val sd: ServerData)  {
     private fun authHomePageHTML(): String {
         val body = renderHomepageBody()
 
-        return PageComponents(sd).makeTemplate("Authenticated Homepage", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
+        return PageComponents(sd).makeTemplate("Home", "HomepageAPI", body, extraHeaderContent="""<link rel="stylesheet" href="authhomepage.css" />""")
     }
 
     data class HomepageItem(val link: String, val descr: String)

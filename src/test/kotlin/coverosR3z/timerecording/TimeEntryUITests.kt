@@ -7,6 +7,7 @@ import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
 import coverosR3z.system.misc.types.Month
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
+import coverosR3z.system.config.APPLICATION_NAME
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.EmployeeName
@@ -203,7 +204,7 @@ class TimeEntryUITests {
         pom.vtp.gotoDate(DEFAULT_DATE)
         pom.vtp.switchToViewingEmployee(regularEmployeeName)
         val viewingMessage = pom.driver.findElement(By.id("viewing_whose_timesheet")).text
-        assertEquals("Viewing Andrea's unsubmitted timesheet", viewingMessage)
+        assertEqualsIgnoreCase("Viewing Andrea's unsubmitted timesheet", viewingMessage)
         s.markDone("Given an employee had not submitted their time,")
 
         assertFalse(pom.vtp.isApproved())
@@ -326,7 +327,7 @@ class TimeEntryUITests {
         val id = pom.pmd.dataAccess<TimeEntry>(TimeEntry.directoryName)
             .read { entries -> entries.single { it.employee.name.value == "Andrea" && it.date == DEFAULT_DATE } }.id.value
         pom.driver.get("${pom.sslDomain}/${ViewTimeAPI.path}?date=$DEFAULT_DATE_STRING")
-        assertEquals("Your time entries", pom.driver.title)
+        assertEqualsIgnoreCase("$APPLICATION_NAME | Your time entries", pom.driver.title)
         assertEquals("1.00", pom.vtp.getTimeForEntry(id))
     }
 

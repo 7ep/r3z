@@ -137,3 +137,7 @@ fun makeServerData(
         testLogger
     )
 }
+
+fun assertEqualsIgnoreCase(expected: String, actual: String, message: String? = null){
+    Assert.assertTrue(message ?: "Expected: $expected, Received: $actual", actual.equals(expected, ignoreCase = true))
+}

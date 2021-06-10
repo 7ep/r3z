@@ -54,7 +54,7 @@ class ChangePasswordAPI {
             
         </div>
     """.trimIndent()
-                PageComponents(sd).makeTemplate("change password", "ChangePasswordAPI", body, extraHeaderContent="""<link rel="stylesheet" href="changepassword.css" />""")
+                PageComponents(sd).makeTemplate("Change Password", "ChangePasswordAPI", body, extraHeaderContent="""<link rel="stylesheet" href="changepassword.css" />""")
             }
         }
 
@@ -74,7 +74,7 @@ class ChangePasswordAPI {
                     <p><a href="${HomepageAPI.path}">Homepage</a></p>
                 </div>
                 """
-                okHTML(PageComponents(sd).makeTemplate("New password generated", "ChangePasswordAPI", newUserHtml, extraHeaderContent="""<link rel="stylesheet" href="changepassword.css" />"""))
+                okHTML(PageComponents(sd).makeTemplate("Password Generated", "ChangePasswordAPI", newUserHtml, extraHeaderContent="""<link rel="stylesheet" href="changepassword.css" />"""))
             }
         }
 

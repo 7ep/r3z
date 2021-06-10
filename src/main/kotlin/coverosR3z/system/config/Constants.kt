@@ -1,5 +1,9 @@
 package coverosR3z.system.config
 
+/**
+ * The name of this glorious application.
+ */
+const val APPLICATION_NAME = "r3z"
 
 /** The version of the database.  Update when we have
  * real users and we're changing live prod data.

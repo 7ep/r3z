@@ -9,6 +9,7 @@ import coverosR3z.fakeServerObjects
 import coverosR3z.system.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
+import coverosR3z.system.config.APPLICATION_NAME
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.ApprovalStatus
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -206,7 +207,7 @@ class ViewTimeAPITests {
 
         assertTrue("The page should announce we are viewing another's timesheet",
             result.contains("""<h2 id="viewing_whose_timesheet">Viewing DefaultEmployee's"""))
-        assertTrue(result.contains("<title>Viewing DefaultEmployee's"))
+        assertTrue(result.contains("<title>$APPLICATION_NAME | DefaultEmployee's", ignoreCase = true))
         assertFalse(result.contains(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()))
@@ -249,7 +250,7 @@ class ViewTimeAPITests {
                 result.contains("""id="timeperiod_display_start">2021-01-01""") &&
                 result.contains("""id="timeperiod_display_end">2021-01-15"""))
         assertTrue("The page should announce we are viewing another's timesheet",
-            result.contains("Viewing DefaultEmployee's unsubmitted timesheet"))
+            result.contains("DefaultEmployee's unsubmitted timesheet", ignoreCase = true))
     }
 
     /**
