@@ -40,3 +40,20 @@ class GeneralUtilitiesTests {
     }
 
 }
+
+private fun String.toTitleCase(): String {
+    val articles = listOf("a", "an", "the", "to")
+    var toReturn : String = ""
+    val result = mutableListOf<String>()
+    val arr = this.split(" ")
+    result.add(arr[0][0].toUpperCase() + arr[0].substring(1))
+
+    for (i in 1.rangeTo(arr.size-1)) {
+        if (arr[i].toLowerCase() !in articles) {
+            result.add(arr[i][0].toUpperCase() + arr[i].substring(1))
+        } else {
+            result.add(arr[i][0].toLowerCase() + arr[i].substring(1))
+        }
+    }
+        return result.joinToString(" ")
+}
