@@ -11,13 +11,13 @@ functional development and considerations
         [ ] methods
         [ ] tests
         [ ] unusual aspects documented within code
-        [ ] README's
-        [ ] Developer documentation
-        [ ] User documentation
-        [ ] Log entries added
+        [ ] READMEs
+        [ ] developer documentation
+        [ ] user documentation
+        [ ] log entries added
     correctness
         [ ] unit tests written
-        [ ] Were the tests thorough, or only superficial?
+        [ ] were the tests thorough, or only superficial?
         [ ] invariants applied - e.g. check(val > 10)
         [ ] integration tests written
 
