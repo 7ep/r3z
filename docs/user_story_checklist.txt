@@ -11,7 +11,7 @@ functional development and considerations
         [ ] methods
         [ ] tests
         [ ] unusual aspects documented within code
-        [ ] README's
+        [ ] READMEs
         [ ] Developer documentation
         [ ] User documentation
         [ ] Log entries added
