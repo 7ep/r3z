@@ -5,6 +5,11 @@ package coverosR3z.system.config
  */
 const val APPLICATION_NAME = "r3z"
 
+/**
+ * The text at the beginning of the title on HTML pages
+ */
+const val TITLE_PREFIX = "$APPLICATION_NAME |"
+
 /** The version of the database.  Update when we have
  * real users and we're changing live prod data.
  */

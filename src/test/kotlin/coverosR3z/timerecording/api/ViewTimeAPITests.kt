@@ -6,10 +6,10 @@ import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities
 import coverosR3z.fakeServerObjects
-import coverosR3z.system.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.types.*
-import coverosR3z.system.config.APPLICATION_NAME
+import coverosR3z.system.config.TITLE_PREFIX
+import coverosR3z.system.misc.*
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.ApprovalStatus
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -207,7 +207,7 @@ class ViewTimeAPITests {
 
         assertTrue("The page should announce we are viewing another's timesheet",
             result.contains("""<h2 id="viewing_whose_timesheet">Viewing DefaultEmployee's"""))
-        assertTrue(result.contains("<title>$APPLICATION_NAME | DefaultEmployee's", ignoreCase = true))
+        assertTrue(result.contains("<title>$TITLE_PREFIX DefaultEmployee's", ignoreCase = true))
         assertFalse(result.contains(ViewTimeAPI.Elements.SUBMIT_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.CREATE_BUTTON.getId()))
         assertFalse(result.contains(ViewTimeAPI.Elements.EDIT_BUTTON.getElemClass()))

@@ -32,6 +32,11 @@ tool driven or following the more typical big-design-up-front waterfall methods
 
 [![A run of the UI tests](https://img.youtube.com/vi/mxdxYZWLbDQ/0.jpg)](https://www.youtube.com/watch?v=mxdxYZWLbDQ)
 
+#### Pair programming:
+
+[![pair programming with Matt with TDD](https://img.youtube.com/vi/XhZ4qBROY6I/0.jpg)](https://www.youtube.com/watch?v=XhZ4qBROY6I)
+[![pair programming with Matt on generics](https://img.youtube.com/vi/FryXTzzm7ws/0.jpg)](https://www.youtube.com/watch?v=FryXTzzm7ws)
+
 #### Getting started:
 
 Check out the [development handbook](docs/development_handbook.md)

@@ -1,11 +1,10 @@
 package coverosR3z.timerecording
 
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.types.Date
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.types.calculateSundayDate
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import org.junit.Assert.*

@@ -3,9 +3,9 @@ package coverosR3z.server.utility
 import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.Role
-import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.ServerData
-import coverosR3z.system.config.APPLICATION_NAME
+import coverosR3z.system.config.TITLE_PREFIX
+import coverosR3z.system.misc.utility.safeHtml
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,7 +39,7 @@ class PageComponents(sd: ServerData) {
             <head>
                 <link rel="stylesheet" href="general.css" />
                 $extraHeaderContent
-                <title>$APPLICATION_NAME | $title</title>
+                <title>$TITLE_PREFIX $title</title>
                 <meta name="timestamp" content="$date">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <meta name="file" content="$apiFile" >
