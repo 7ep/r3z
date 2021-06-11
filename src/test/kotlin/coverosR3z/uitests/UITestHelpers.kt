@@ -3,7 +3,7 @@ package coverosR3z.uitests
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.LogoutAPI
 import coverosR3z.authentication.api.RegisterAPI
-import coverosR3z.system.config.APPLICATION_NAME
+import coverosR3z.system.config.TITLE_PREFIX
 import coverosR3z.system.config.utility.SystemOptions
 import coverosR3z.system.logging.LogTypes
 import coverosR3z.system.logging.LoggingAPI
@@ -16,8 +16,6 @@ import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -223,7 +221,7 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         setDateForNewEntry(date)
         clickCreateNewTimeEntry()
         // we verify the time entry is registered later, so only need to test that we end up on the right page successfully
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Your time entries", driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Your time entries", driver.title)
     }
 
     fun setProjectForNewEntry(project: String) {

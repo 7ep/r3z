@@ -4,10 +4,10 @@ import coverosR3z.authentication.api.ChangePasswordAPI
 import coverosR3z.authentication.api.LoginAPI
 import coverosR3z.authentication.api.RegisterAPI
 import coverosR3z.authentication.types.*
-import coverosR3z.system.logging.LogTypes
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
 import coverosR3z.server.api.HomepageAPI
-import coverosR3z.system.config.APPLICATION_NAME
+import coverosR3z.system.config.TITLE_PREFIX
+import coverosR3z.system.logging.LogTypes
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.CreateEmployeeUserStory
 import coverosR3z.timerecording.CreateProjectUserStory
@@ -255,22 +255,22 @@ class ServerUITests {
         // go to the change password page
         pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
         // confirm the title
-        assertEqualsIgnoreCase("$APPLICATION_NAME | change password", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX change password", pom.driver.title)
         // disagree to change the password
         pom.driver.findElement(By.id(ChangePasswordAPI.Elements.BRING_ME_BACK.getId())).click()
         // confirm we are back on the homepage
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Home", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Home", pom.driver.title)
         // go back to the change password page
         pom.driver.get("${pom.sslDomain}/${ChangePasswordAPI.path}")
         // agree this time to change the password
         pom.driver.findElement(By.id(ChangePasswordAPI.Elements.YES_BUTTON.getId())).click()
         // confirm the title
-        assertEqualsIgnoreCase("$APPLICATION_NAME | password generated", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX password generated", pom.driver.title)
         val newAdminPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
         logout()
         // confirm the new password works
         pom.lp.login("employeemaker", newAdminPassword)
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Home", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Home", pom.driver.title)
         // create a new employee
         val s = CreateEmployeeUserStory.getScenario("createEmployee - an invitation is created")
         s.markDone("Given the company has hired a new employee, Hank,")
@@ -293,12 +293,12 @@ class ServerUITests {
         // agree to change the password
         pom.driver.findElement(By.id(ChangePasswordAPI.Elements.YES_BUTTON.getId())).click()
         // confirm the title
-        assertEqualsIgnoreCase("$APPLICATION_NAME | password generated", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX password generated", pom.driver.title)
         val hankNewPassword = pom.driver.findElement(By.id(ChangePasswordAPI.Elements.NEW_PASSWORD.getId())).text
         logout()
         // confirm the new password works
         pom.lp.login("hank", hankNewPassword)
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Your time entries", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Your time entries", pom.driver.title)
         logout()
         return Pair(newAdminPassword, hankNewPassword)
     }
@@ -310,7 +310,7 @@ class ServerUITests {
 
     private fun `general - should be able to see the homepage and the authenticated homepage`() {
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Login", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Login", pom.driver.title)
         val adminEmployee = pom.businessCode.tru.listAllEmployees().single { it.name.value == "Administrator" }
         val (_, user) = pom.businessCode.au.registerWithEmployee(
             UserName("employeemaker"),
@@ -320,7 +320,7 @@ class ServerUITests {
         pom.businessCode.au.addRoleToUser(user, Role.ADMIN)
         pom.lp.login("employeemaker", "password12345")
         pom.driver.get("${pom.sslDomain}/${HomepageAPI.path}")
-        assertEquals("$APPLICATION_NAME | Home", pom.driver.title)
+        assertEquals("$TITLE_PREFIX Home", pom.driver.title)
         logout()
     }
 
@@ -371,12 +371,12 @@ class ServerUITests {
 
     private fun `Try logging in with invalid credentials, expecting to be forbidden`() {
         pom.lp.login("userabc", DEFAULT_PASSWORD.value)
-        assertEqualsIgnoreCase("$APPLICATION_NAME | authentication failed", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX authentication failed", pom.driver.title)
     }
 
     private fun `Try hitting the insecure login page, expecting to be redirected to the secure one`() {
         pom.driver.get("${pom.insecureDomain}/${LoginAPI.path}")
-        assertEqualsIgnoreCase("$APPLICATION_NAME | Login", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX Login", pom.driver.title)
     }
 
     private fun `Go to an unknown page, expecting a not-found error`() {
@@ -428,7 +428,7 @@ class ServerUITests {
 
     private fun tooShortUsername(invitation: Invitation) {
         pom.rp.register("a".repeat(minUserNameSize - 1), invitation.code.value)
-        assertEqualsIgnoreCase("$APPLICATION_NAME | register", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX register", pom.driver.title)
     }
 
     private fun tooShortUsernameWhitespace(invitation: Invitation) {
@@ -438,7 +438,7 @@ class ServerUITests {
 
     private fun disallowBecauseMissingUsername(invitation: Invitation) {
         pom.rp.register("", invitation.code.value)
-        assertEqualsIgnoreCase("$APPLICATION_NAME | register", pom.driver.title)
+        assertEqualsIgnoreCase("$TITLE_PREFIX register", pom.driver.title)
     }
 
 }
