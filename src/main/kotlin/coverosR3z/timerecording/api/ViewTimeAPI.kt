@@ -300,7 +300,7 @@ class ViewTimeAPI {
                     <label id="view_other_timesheet_label">View other timesheet</label>
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />
                     <select id="employee-selector" name="${Elements.REQUESTED_EMPLOYEE.getElemName()}">
-                        <option selected disabled hidden value="">Self</option>
+                        <option selected value="">Self</option>
                         ${allEmployeesOptions(sd)}
                     </select>
                     <button>Switch</button>
@@ -409,7 +409,7 @@ class ViewTimeAPI {
          */
         private fun determineCriteriaForWhoseTimesheet(sd: ServerData): Pair<Employee, Boolean> {
             val employeeQueryString: String? = sd.ahd.queryString[Elements.REQUESTED_EMPLOYEE.getElemName()]
-            return if (employeeQueryString != null) {
+            return if (! employeeQueryString.isNullOrBlank()) {
                 if (sd.ahd.user.role == Role.REGULAR) {
                     throw UnpermittedOperationException("Your role does not allow viewing other employee's timesheets.  Your URL had a query string requesting to see a particular employee, using the key ${Elements.REQUESTED_EMPLOYEE.getElemName()}")
                 }
