@@ -300,20 +300,6 @@ class ViewTimeAPITests {
     }
 
     /**
-     * If we use an employee id that is blank, throw exception
-     */
-    @Test
-    fun testEmployeeRequested_Invalid_Blank() {
-        val sd = makeSD(
-            queryStringMap = mapOf(
-                ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to ""))
-
-        val ex = assertThrows(IllegalStateException::class.java) {ViewTimeAPI.handleGet(sd)}
-
-        assertEquals("The employee id must not be blank", ex.message)
-    }
-
-    /**
      * If we pass in an employee id but we are a Role.REGULAR, throw exception
      */
     @Test
@@ -439,7 +425,7 @@ class ViewTimeAPITests {
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
 
-        assertTrue(result.contains("""<option selected disabled hidden value="">Self</option>"""))
+        assertTrue(result.contains("""<option selected value="">Self</option>"""))
         assertTrue(result.contains("""<option value="2">DefaultEmployee</option>"""))
     }
 
