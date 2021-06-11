@@ -3,6 +3,7 @@ package coverosR3z.system.misc
 import coverosR3z.system.misc.utility.checkParseToDouble
 import coverosR3z.system.misc.utility.checkParseToInt
 import coverosR3z.system.misc.utility.checkParseToLong
+import coverosR3z.system.misc.utility.toTitleCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -102,29 +103,4 @@ class GeneralUtilitiesTests {
         val result = "a  \tb".toTitleCase()
         assertEquals("A  \tb", result)
     }
-}
-
-private fun String.toTitleCase(): String {
-    require(this.isNotBlank()){"cannot title-case an empty string"}
-    val articles = listOf("a", "an", "the", "to")
-    val result = mutableListOf<String>()
-    val arr = this.split(" ")
-    result.add(
-        if (arr[0].isEmpty()) {
-            arr[0]
-        } else {
-            arr[0][0].toUpperCase() + arr[0].substring(1)
-        }
-    )
-
-    for (i in 1.rangeTo(arr.size-1)) {
-        if(arr[i].isEmpty()){
-            result.add(arr[i])
-        } else if (arr[i].toLowerCase() !in articles) {
-            result.add(arr[i][0].toUpperCase() + arr[i].substring(1))
-        } else {
-            result.add(arr[i][0].toLowerCase() + arr[i].substring(1))
-        }
-    }
-        return result.joinToString(" ")
 }
