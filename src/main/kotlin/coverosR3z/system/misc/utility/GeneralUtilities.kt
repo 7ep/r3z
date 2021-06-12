@@ -148,6 +148,31 @@ fun decode(str : String?) : String {
     return URLDecoder.decode(str, Charsets.UTF_8)
 }
 
+/**
+ * Returns the string in "title case", which means
+ * the individual words are capitalized based on a small
+ * set of rules.
+ * 1. The first letter is capitalized.
+ * 2. All words are capitalized, except articles (e.g. a, an, the).
+ *
+ * For example,
+ *
+ *  a dog ate the plane
+ *
+ *  becomes
+ *
+ *  A Dog Ate the Plane
+ *
+ *  This program is mostly focused on the titles of pages,
+ *  and doesn't account for all the myriad edge cases if
+ *  we were trying to be 100% correct.  It's just 90%
+ *  correct, which requires minimal code, and worst case
+ *  scenario is that some words may not be capitalized
+ *  perfectly.
+ *
+ *  If a future need arises to be more precise,
+ *  adjust this as necessary.
+ */
 fun String.toTitleCase(): String {
     require(this.isNotBlank()){"cannot title-case an empty string"}
     val articles = listOf("a", "an", "the", "to")

@@ -40,24 +40,73 @@ class GeneralUtilitiesTests {
         assertEquals("""Must be able to parse "abc" as a double""", ex.message)
     }
 
+    /**
+     * The basic happy path for title casing
+     */
     @Test
     fun testTitleCase_basic() {
         val result: String = "foo foo fah".toTitleCase()
         assertEquals("Foo Foo Fah", result)
     }
 
+    /**
+     * A bit more advanced a test, including articles and
+     * needing to lower-case some words
+     */
     @Test
     fun testTitleCase_moreAdvanced() {
         val result: String = "the Foo foo to The an apple fah".toTitleCase()
         assertEquals("The Foo Foo to the an Apple Fah", result)
     }
 
+    /**
+     * What if we pass in an empty string
+     */
     @Test
     fun testTitleCase_edgeCase_EmptyString() {
         val result = assertThrows(IllegalArgumentException::class.java) { "".toTitleCase() }
         assertEquals("cannot title-case an empty string" , result.message)
     }
 
+    /**
+     * What if we pass in whitespace - one space
+     */
+    @Test
+    fun testTitleCase_edgeCase_Whitespace_Space() {
+        val result = assertThrows(IllegalArgumentException::class.java) { " ".toTitleCase() }
+        assertEquals("cannot title-case an empty string" , result.message)
+    }
+
+    /**
+     * What if we pass in whitespace - two spaces
+     */
+    @Test
+    fun testTitleCase_edgeCase_Whitespace_TwoSpace() {
+        val result = assertThrows(IllegalArgumentException::class.java) { "  ".toTitleCase() }
+        assertEquals("cannot title-case an empty string" , result.message)
+    }
+
+    /**
+     * What if we pass in whitespace - tab
+     */
+    @Test
+    fun testTitleCase_edgeCase_Whitespace_Tab() {
+        val result = assertThrows(IllegalArgumentException::class.java) { "\t".toTitleCase() }
+        assertEquals("cannot title-case an empty string" , result.message)
+    }
+
+    /**
+     * What if we pass in whitespace - newline
+     */
+    @Test
+    fun testTitleCase_edgeCase_Whitespace_Newline() {
+        val result = assertThrows(IllegalArgumentException::class.java) { "\n".toTitleCase() }
+        assertEquals("cannot title-case an empty string" , result.message)
+    }
+
+    /**
+     * What if we just pass in a single number
+     */
     @Test
     fun testTitleCase_edgeCase_Number() {
         val result = "1".toTitleCase()
@@ -103,4 +152,41 @@ class GeneralUtilitiesTests {
         val result = "a  \tb".toTitleCase()
         assertEquals("A  \tb", result)
     }
+
+    /**
+     * What if we pass in just a single letter
+     */
+    @Test
+    fun testTitleCase_singleLetter() {
+        val result = "a".toTitleCase()
+        assertEquals("A", result)
+    }
+
+    /**
+     * What if we pass in just a single word
+     */
+    @Test
+    fun testTitleCase_singleWord() {
+        val result = "aaaa".toTitleCase()
+        assertEquals("Aaaa", result)
+    }
+
+    /**
+     * What if we pass in just a single word that is an article ("an")
+     */
+    @Test
+    fun testTitleCase_singleWordArticle() {
+        val result = "an".toTitleCase()
+        assertEquals("An", result)
+    }
+
+    /**
+     * What if we pass in just a single word that is an article ("an")
+     */
+    @Test
+    fun testTitleCase_symbol() {
+        val result = "!".toTitleCase()
+        assertEquals("!", result)
+    }
+
 }
