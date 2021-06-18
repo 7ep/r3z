@@ -107,7 +107,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowApproverForPost() {
-        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER_USER)
 
         val result = ProjectAPI.handlePost(sd).statusCode
 
@@ -154,7 +154,7 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowApproverForGet() {
-        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER)
+        val sd = makePServerData(PostBodyData(), user = DEFAULT_APPROVER_USER)
 
         val result = ProjectAPI.handleGet(sd).statusCode
 

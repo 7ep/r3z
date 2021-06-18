@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.UserName
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.bddframework.BDD
@@ -65,7 +66,7 @@ class EnteringTimeBDD {
     private fun addingProjectHoursWithNotes(): Pair<ITimeRecordingUtilities, TimeEntryPreDatabase> {
         val pmd = createEmptyDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
 
         val adminTru = TimeRecordingUtilities(
             TimeEntryPersistence(pmd, logger = testLogger),
@@ -106,7 +107,8 @@ class EnteringTimeBDD {
 
         val au = AuthenticationUtilities(
             ap,
-            testLogger
+            testLogger,
+            CurrentUser(SYSTEM_USER)
         )
         au.registerWithEmployee(newUsername, DEFAULT_PASSWORD, newEmployee)
         val (_, user) = au.login(newUsername, DEFAULT_PASSWORD)

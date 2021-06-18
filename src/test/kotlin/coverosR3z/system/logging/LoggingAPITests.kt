@@ -262,7 +262,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoPost() {
-        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER_USER)
 
         val result = LoggingAPI.handlePost(sd).statusCode
 
@@ -300,7 +300,7 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldDisallowApproverDoGet() {
-        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER)
+        val sd = makeLoggingServerData(allTrue(), user = DEFAULT_APPROVER_USER)
 
         val result = LoggingAPI.handleGet(sd).statusCode
 

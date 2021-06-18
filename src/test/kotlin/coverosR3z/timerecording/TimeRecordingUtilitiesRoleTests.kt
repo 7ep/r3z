@@ -257,7 +257,7 @@ class TimeRecordingUtilitiesRoleTests {
      */
     @Test
     fun testApproverRole() {
-        val (tru, frc) = makeTRU(DEFAULT_APPROVER)
+        val (tru, frc) = makeTRU(DEFAULT_APPROVER_USER)
 
         tru.changeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(frc.roleCanDoAction)
@@ -410,7 +410,7 @@ class TimeRecordingUtilitiesRoleTests {
      */
 
     private fun makeTRU(user: User = DEFAULT_ADMIN_USER): Pair<ITimeRecordingUtilities, FakeRolesChecker>{
-        val frc = FakeRolesChecker(CurrentUser(user))
+        val frc = FakeRolesChecker()
         val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger, frc)
         return Pair(tru, frc)
     }

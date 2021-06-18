@@ -298,6 +298,7 @@ class EnterTimeAPITests {
         val au = AuthenticationUtilities(
             ap,
             testLogger,
+            CurrentUser(SYSTEM_USER),
         )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val user = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD,employee).user
@@ -348,7 +349,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldAllowApproverToEnterTimePOST() {
-        val sd = makeETServerData(happyPathData, user = DEFAULT_APPROVER)
+        val sd = makeETServerData(happyPathData, user = DEFAULT_APPROVER_USER)
 
         val result = EnterTimeAPI.handlePost(sd).statusCode
 

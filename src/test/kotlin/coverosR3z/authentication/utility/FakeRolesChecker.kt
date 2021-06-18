@@ -5,9 +5,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
 import java.lang.IllegalStateException
 
-class FakeRolesChecker(
-    private val cu: CurrentUser,
-) : IRolesChecker {
+class FakeRolesChecker : IRolesChecker{
 
     /**
      * Part of a dead man's switch
@@ -30,9 +28,9 @@ class FakeRolesChecker(
             diediedie = false
         }
 
-    override fun checkAllowed(vararg roles: Role) {
+    override fun checkAllowed(cu: CurrentUser, vararg roles: Role) {
         roleCanDoAction = try {
-            RolesChecker(cu).checkAllowed(roles = roles)
+            RolesChecker.checkAllowed(cu, roles = roles)
             true
         } catch (ex: UnpermittedOperationException) {
             false

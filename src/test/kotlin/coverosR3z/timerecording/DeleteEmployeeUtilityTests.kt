@@ -3,6 +3,7 @@ package coverosR3z.timerecording
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.authentication.utility.FakeRolesChecker
@@ -98,7 +99,7 @@ class DeleteEmployeeUtilityTests {
         de.deleteEmployee(DEFAULT_EMPLOYEE)
         assertTrue(frc.roleCanDoAction)
 
-        makeDeleteEmployeeUtility(cu = CurrentUser(DEFAULT_APPROVER))
+        makeDeleteEmployeeUtility(cu = CurrentUser(DEFAULT_APPROVER_USER))
         de.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
@@ -109,13 +110,13 @@ class DeleteEmployeeUtilityTests {
 
     @Category(IntegrationTestCategory::class)
     @Test
-    fun testDeleteEmployee_DeletesInviation() {
+    fun testDeleteEmployee_DeletesInvitation() {
         val pmd = PureMemoryDatabase.createEmptyDatabase()
         val cu = CurrentUser(DEFAULT_ADMIN_USER)
         val tep = TimeEntryPersistence(pmd, cu = cu, logger = testLogger)
         val ap = AuthenticationPersistence(pmd, testLogger)
         val tru = TimeRecordingUtilities(tep, cu, testLogger)
-        val au = AuthenticationUtilities(ap, testLogger)
+        val au = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
         val de = DeleteEmployeeUtility(tru, au, cu, testLogger)
 
         val newEmployee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -129,7 +130,7 @@ class DeleteEmployeeUtilityTests {
     private fun makeDeleteEmployeeUtility(
         cu: CurrentUser = CurrentUser(DEFAULT_ADMIN_USER)
     ) {
-        frc = FakeRolesChecker(cu)
+        frc = FakeRolesChecker()
         de = DeleteEmployeeUtility(tru, au, cu, testLogger, frc)
     }
 }

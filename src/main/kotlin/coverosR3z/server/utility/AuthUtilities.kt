@@ -31,7 +31,7 @@ class AuthUtilities {
             return try {
                 when (isAuthenticated(user)) {
                     AuthStatus.AUTHENTICATED -> {
-                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                        RolesChecker.checkAllowed(CurrentUser(user), *roles)
                         okHTML(generator())
                     }
                     AuthStatus.UNAUTHENTICATED -> redirectTo(HomepageAPI.path)
@@ -73,7 +73,7 @@ class AuthUtilities {
             return try {
                 when (isAuthenticated(user)) {
                     AuthStatus.AUTHENTICATED -> {
-                        RolesChecker(CurrentUser(user)).checkAllowed(*roles)
+                        RolesChecker.checkAllowed(CurrentUser(user), *roles)
                         checkHasRequiredInputs(data.mapping.keys, requiredInputs)
                         handler()
                     }

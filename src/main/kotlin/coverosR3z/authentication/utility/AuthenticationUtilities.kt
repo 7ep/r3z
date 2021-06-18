@@ -10,6 +10,8 @@ import coverosR3z.timerecording.types.NO_EMPLOYEE
 class AuthenticationUtilities(
     private val ap: IAuthPersistence,
     val logger: ILogger,
+    val cu: CurrentUser,
+    val rc : IRolesChecker = RolesChecker.Companion
     ) : IAuthenticationUtilities {
 
     /**
@@ -87,6 +89,7 @@ class AuthenticationUtilities(
     }
 
     override fun addRoleToUser(user: User, role: Role) : User {
+        rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
         return ap.addRoleToUser(user, role)
     }
 

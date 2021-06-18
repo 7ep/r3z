@@ -1,12 +1,13 @@
 package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.FakeAuthPersistence
+import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.utility.getTime
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 import org.junit.Assert.*
 import org.junit.Before
@@ -20,7 +21,7 @@ class AuthenticationUtilitiesTests {
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, testLogger)
+        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
     }
 
     @Test
@@ -289,17 +290,40 @@ class AuthenticationUtilitiesTests {
         val au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, testLogger),
             testLogger,
+            CurrentUser(DEFAULT_ADMIN_USER),
         )
 
         val ex = assertThrows(IllegalStateException::class.java) { au.logout(DEFAULT_USER) }
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
 
+    /**
+     * Tests that an admin can add an admin role to a user
+     */
     @Test
-    fun testAdminShouldAddRoleToUser() {
+    fun testAdminShouldAddAdminRoleToUser() {
         ap.addRoleToUserBehavior = { DEFAULT_ADMIN_USER }
         val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Role.ADMIN)
         assertEquals(DEFAULT_ADMIN_USER, elevatedUser)
+    }
+
+    /**
+     * Tests that an admin can add an approver role to a user
+     */
+    @Test
+    fun testAdminShouldAddApproverRoleToUser() {
+        ap.addRoleToUserBehavior = { DEFAULT_APPROVER_USER }
+        val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Role.APPROVER)
+        assertEquals(DEFAULT_APPROVER_USER, elevatedUser)
+    }
+
+    /**
+     * Tests that a non-admin cannot add an approver role to a user
+     */
+    @Test
+    fun testRegularUserShouldFailToAddApproverRoleToUser() {
+        val au = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_REGULAR_USER))
+        assertThrows(UnpermittedOperationException::class.java) { au.addRoleToUser(DEFAULT_USER, Role.APPROVER) }
     }
 
     /**

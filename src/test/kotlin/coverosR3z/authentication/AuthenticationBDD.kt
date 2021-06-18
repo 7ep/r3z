@@ -1,7 +1,9 @@
 package coverosR3z.authentication
 
 import coverosR3z.authentication.persistence.AuthenticationPersistence
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.RegistrationResultStatus
+import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
@@ -96,14 +98,14 @@ class AuthenticationBDD {
 
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
         val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
         val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger)
+        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return au
     }

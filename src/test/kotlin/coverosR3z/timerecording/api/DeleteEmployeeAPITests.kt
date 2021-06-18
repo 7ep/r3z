@@ -155,7 +155,7 @@ class DeleteEmployeeAPITests {
         val data = PostBodyData(mapOf(
             DeleteEmployeeAPI.Elements.EMPLOYEE_ID.getElemName() to "1"
         ))
-        val sd = makeDEServerData(data, DEFAULT_APPROVER)
+        val sd = makeDEServerData(data, DEFAULT_APPROVER_USER)
 
         val response = DeleteEmployeeAPI.handlePost(sd).statusCode
 

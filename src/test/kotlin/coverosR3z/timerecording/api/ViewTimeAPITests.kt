@@ -71,7 +71,7 @@ class ViewTimeAPITests {
 
     @Test
     fun testViewingTimeEntries_Approver() {
-        val sd = makeSD(user = DEFAULT_APPROVER)
+        val sd = makeSD(user = DEFAULT_APPROVER_USER)
 
         val result = ViewTimeAPI.handleGet(sd)
 

@@ -16,11 +16,11 @@ class DeleteEmployeeUtility(
     private val au: IAuthenticationUtilities,
     val cu: CurrentUser,
     private val logger: ILogger,
-    private val rc: IRolesChecker = RolesChecker(cu)
+    private val rc : IRolesChecker = RolesChecker.Companion
 ) {
 
     fun deleteEmployee(employee: Employee): DeleteEmployeeResult {
-        rc.checkAllowed(Role.ADMIN)
+        rc.checkAllowed(cu, Role.ADMIN)
 
         require(employee != NO_EMPLOYEE)
 

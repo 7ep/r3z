@@ -65,7 +65,7 @@ val DEFAULT_PERIOD_START_DATE = Date.make( "2021-02-01")
 val DEFAULT_PERIOD_END_DATE = Date.make( "2021-02-15")
 val DEFAULT_TIME_PERIOD = TimePeriod(DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
 val DEFAULT_SUBMITTED_PERIOD = SubmittedPeriod(SubmissionId(1), DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD, ApprovalStatus.UNAPPROVED)
-val DEFAULT_APPROVER = User(UserId(1), UserName("DefaultApproverUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, role=Role.APPROVER)
+val DEFAULT_APPROVER_USER = User(UserId(1), UserName("DefaultApproverUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, role=Role.APPROVER)
 val DEFAULT_INVITATION_CODE = InvitationCode("abc123")
 val DEFAULT_INVITATION = Invitation(InvitationId(1), InvitationCode("abc123"), DEFAULT_EMPLOYEE, DEFAULT_DATETIME)
 val DEFAULT_CONFIGURATION = SystemConfiguration(SystemConfiguration.LogSettings(audit = true, warn = true, debug = true, trace = true))
@@ -100,7 +100,7 @@ fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingU
 fun initializeAUserAndLogin() : Triple<ITimeRecordingUtilities, Employee, Employee>{
     val pmd = createEmptyDatabase()
     val ap = AuthenticationPersistence(pmd, testLogger)
-    val au = AuthenticationUtilities(ap, testLogger)
+    val au = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
 
     val tep = TimeEntryPersistence(pmd, logger = testLogger)
     val adminTru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)

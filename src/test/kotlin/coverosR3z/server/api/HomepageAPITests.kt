@@ -3,7 +3,7 @@ package coverosR3z.server.api
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.DEFAULT_ADMIN_USER
-import coverosR3z.system.misc.DEFAULT_APPROVER
+import coverosR3z.system.misc.DEFAULT_APPROVER_USER
 import coverosR3z.system.misc.DEFAULT_REGULAR_USER
 import coverosR3z.system.misc.makeServerData
 import coverosR3z.server.APITestCategory
@@ -65,7 +65,7 @@ class HomepageAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testGetAsApproverUser() {
-        val sd = makeServerData(user = DEFAULT_APPROVER)
+        val sd = makeServerData(user = DEFAULT_APPROVER_USER)
 
         val result = HomepageAPI.handleGet(sd).statusCode
 

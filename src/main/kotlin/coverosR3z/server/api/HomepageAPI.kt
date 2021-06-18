@@ -27,7 +27,7 @@ class HomepageAPI(private val sd: ServerData)  {
                 when (isAuthenticated(sd.ahd.user)) {
                     AuthStatus.AUTHENTICATED -> {
                         val cu = CurrentUser(sd.ahd.user)
-                        RolesChecker(cu).checkAllowed(Role.REGULAR, Role.APPROVER, Role.ADMIN)
+                        RolesChecker.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
                         if (cu.role in listOf(Role.REGULAR, Role.APPROVER)) {
                             redirectTo(ViewTimeAPI.path)
                         } else {

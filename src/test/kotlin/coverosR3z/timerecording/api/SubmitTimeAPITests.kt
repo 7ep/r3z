@@ -43,7 +43,7 @@ class SubmitTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testSubmittingTime_ApproverUser() {
-        val sd = makeSdForSubmit(user = DEFAULT_APPROVER)
+        val sd = makeSdForSubmit(user = DEFAULT_APPROVER_USER)
 
         // the API processes the client input
         val response = SubmitTimeAPI.handlePost(sd).statusCode

@@ -130,7 +130,7 @@ class DeleteProjectAPITests {
         val data = PostBodyData(mapOf(
             DeleteProjectAPI.Elements.ID.getElemName() to "1"
         ))
-        val sd = makeDPServerData(data, DEFAULT_APPROVER)
+        val sd = makeDPServerData(data, DEFAULT_APPROVER_USER)
 
         val response = DeleteProjectAPI.handlePost(sd).statusCode
 

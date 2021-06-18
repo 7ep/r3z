@@ -131,7 +131,7 @@ class CreateEmployeeAPITests {
      */
     @Test
     fun testShouldDisallowApproverUserForPost() {
-        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER_USER)
 
         val result = CreateEmployeeAPI.handlePost(sd).statusCode
 
@@ -177,7 +177,7 @@ class CreateEmployeeAPITests {
      */
     @Test
     fun testShouldDisallowApproverUserToGetPage() {
-        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER)
+        val sd = makeTypicalCEServerData(user = DEFAULT_APPROVER_USER)
 
         val result = CreateEmployeeAPI.handleGet(sd).statusCode
 
