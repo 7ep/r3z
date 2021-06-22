@@ -16,6 +16,12 @@ interface IAuthenticationUtilities {
      */
     fun register(username: UserName, password: Password, invitationCode: InvitationCode) : RegistrationResult
 
+    /**
+     * This is the core registration functionality, guarded by the [register] function
+     * needing an invitation code.  That is, only one carrying a valid invitation code
+     * can make it to this method.  This is also used in testing to avoid having to create
+     * an invitation code first.
+     */
     fun registerWithEmployee(username: UserName, password: Password, employee: Employee) : RegistrationResult
 
     /**
