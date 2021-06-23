@@ -160,16 +160,18 @@ class TimeRecordingUtilities(
 
     override fun listAllProjects(): List<Project> {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getAllProjects()
+        return projectDataAccess.read { it.toList() }
     }
 
     override fun findProjectById(id: ProjectId): Project {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getProjectById(id)
+        check(projectDataAccess.read { it.count { p -> p.id == id } in 0..1 }) {"There must be 0 or 1 project with id of $id"}
+        return projectDataAccess.read { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
     override fun findProjectByName(name: ProjectName): Project {
-        return tep.getProjectByName(name)
+        check(projectDataAccess.read { it.count { p -> p.name == name } in 0..1 }) {"There must be 0 or 1 project with name of ${name.value}"}
+        return projectDataAccess.read { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun deleteProject(project: Project): DeleteProjectResult {

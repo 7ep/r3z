@@ -2,6 +2,7 @@ package coverosR3z.timerecording
 
 import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
@@ -21,6 +22,7 @@ class TimeRecordingUtilityTests {
     private lateinit var ap : FakeAuthPersistence
     private lateinit var cu : CurrentUser
     private lateinit var pmd: PureMemoryDatabase
+    private lateinit var projectDataAccess: DataAccess<Project>
 
     @Before
     fun init() {
@@ -28,6 +30,7 @@ class TimeRecordingUtilityTests {
         ap = FakeAuthPersistence()
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
+        projectDataAccess = pmd.dataAccess(Project.directoryName)
         tru = TimeRecordingUtilities(tep, pmd, cu, testLogger)
     }
 
@@ -286,7 +289,7 @@ class TimeRecordingUtilityTests {
      * happy path
      */
     @Test fun testCanGetProjectByName() {
-        tep.getProjectByNameBehavior = { DEFAULT_PROJECT }
+        projectDataAccess.actOn { projects -> projects.add(DEFAULT_PROJECT) }
         val foundProject = tru.findProjectByName(DEFAULT_PROJECT.name)
         assertEquals(DEFAULT_PROJECT, foundProject)
     }
@@ -296,6 +299,7 @@ class TimeRecordingUtilityTests {
      */
     @Test fun testCanGetProjectByName_NotFound() {
         tep.getProjectByNameBehavior = { NO_PROJECT }
+
         val foundProject = tru.findProjectByName(DEFAULT_PROJECT.name)
         assertEquals(NO_PROJECT, foundProject)
     }
