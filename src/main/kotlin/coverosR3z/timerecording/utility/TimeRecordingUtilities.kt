@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.utility.IRolesChecker
 import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.Date
@@ -20,6 +21,8 @@ class TimeRecordingUtilities(
     private val logger: ILogger,
     private val rc: IRolesChecker = RolesChecker
 ) : ITimeRecordingUtilities {
+
+    private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
 
     /**
      * A special command to change the current user.  Careful
@@ -147,7 +150,12 @@ class TimeRecordingUtilities(
         require(tep.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
-        return tep.persistNewProject(projectName)
+        return projectDataAccess.actOn { projects ->
+            val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
+            projects.add(newProject)
+            logger.logDebug(cu) { "Recorded a new project, \"${projectName.value}\", id: ${newProject.id.value}, to the database" }
+            newProject
+        }
     }
 
     override fun listAllProjects(): List<Project> {

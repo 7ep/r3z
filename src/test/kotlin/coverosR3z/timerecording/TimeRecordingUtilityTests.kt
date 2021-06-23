@@ -27,7 +27,7 @@ class TimeRecordingUtilityTests {
         tep = FakeTimeEntryPersistence()
         ap = FakeAuthPersistence()
         cu = CurrentUser(DEFAULT_ADMIN_USER)
-        pmd = PureMemoryDatabase()
+        pmd = createEmptyDatabase()
         tru = TimeRecordingUtilities(tep, pmd, cu, testLogger)
     }
 

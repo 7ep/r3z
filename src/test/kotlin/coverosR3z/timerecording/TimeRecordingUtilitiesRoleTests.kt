@@ -7,6 +7,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeRolesChecker
 import coverosR3z.persistence.utility.PureMemoryDatabase
+import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.types.NullSubmittedPeriod
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -17,7 +18,7 @@ import org.junit.Test
 class TimeRecordingUtilitiesRoleTests {
 
     private val tep = FakeTimeEntryPersistence()
-    private val pmd = PureMemoryDatabase()
+    private val pmd = createEmptyDatabase()
 
     /*
                         _                    _       _          _
