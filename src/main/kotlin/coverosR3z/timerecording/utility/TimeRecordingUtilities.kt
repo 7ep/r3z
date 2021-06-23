@@ -22,7 +22,10 @@ class TimeRecordingUtilities(
     private val rc: IRolesChecker = RolesChecker
 ) : ITimeRecordingUtilities {
 
+    private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
     private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
+    private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
+    private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
 
     /**
      * A special command to change the current user.  Careful
@@ -176,12 +179,13 @@ class TimeRecordingUtilities(
 
     override fun deleteProject(project: Project): DeleteProjectResult {
         rc.checkAllowed(cu, Role.ADMIN)
-        require(tep.getProjectById(project.id) != NO_PROJECT)
+        val foundProject = projectDataAccess.read { it.singleOrNull { p -> p.id == project.id } ?: NO_PROJECT }
+        require(foundProject != NO_PROJECT)
 
-        return if (tep.isProjectUsedForTimeEntry(project)) {
+        return if (timeEntryDataAccess.read { timeentries -> timeentries.any{ it.project == project } }) {
             DeleteProjectResult.USED
         } else {
-            tep.deleteProject(project)
+            projectDataAccess.actOn { projects -> projects.remove(project) }
             logger.logAudit(cu) { "deleted project: ${project.name.value} id: ${project.id.value}" }
             DeleteProjectResult.SUCCESS
         }

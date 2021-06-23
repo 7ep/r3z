@@ -23,6 +23,9 @@ class TimeRecordingUtilityTests {
     private lateinit var cu : CurrentUser
     private lateinit var pmd: PureMemoryDatabase
     private lateinit var projectDataAccess: DataAccess<Project>
+    private lateinit var employeeDataAccess: DataAccess<Employee>
+    private lateinit var timeEntryDataAccess: DataAccess<TimeEntry>
+    private lateinit var submittedPeriodsDataAccess: DataAccess<SubmittedPeriod>
 
     @Before
     fun init() {
@@ -31,6 +34,9 @@ class TimeRecordingUtilityTests {
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
         projectDataAccess = pmd.dataAccess(Project.directoryName)
+        employeeDataAccess = pmd.dataAccess(Employee.directoryName)
+        timeEntryDataAccess = pmd.dataAccess(TimeEntry.directoryName)
+        submittedPeriodsDataAccess = pmd.dataAccess(SubmittedPeriod.directoryName)
         tru = TimeRecordingUtilities(tep, pmd, cu, testLogger)
     }
 
@@ -298,8 +304,6 @@ class TimeRecordingUtilityTests {
      * what if the project doesn't exist? [NO_PROJECT]
      */
     @Test fun testCanGetProjectByName_NotFound() {
-        tep.getProjectByNameBehavior = { NO_PROJECT }
-
         val foundProject = tru.findProjectByName(DEFAULT_PROJECT.name)
         assertEquals(NO_PROJECT, foundProject)
     }
@@ -625,8 +629,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun `I should be able to delete a project that hasn't been used yet`() {
-        tep.isProjectUsedForTimeEntryBehavior = { false }
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
 
         val result = tru.deleteProject(DEFAULT_PROJECT)
 
@@ -638,8 +641,8 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun `I should not be able to delete a project that has been used for a time entry`() {
-        tep.isProjectUsedForTimeEntryBehavior = { true }
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
 
         val result = tru.deleteProject(DEFAULT_PROJECT)
 
@@ -720,7 +723,11 @@ class TimeRecordingUtilityTests {
      */
 
     private fun makeTruWithAdminUser(): TimeRecordingUtilities {
-        val pmd = createEmptyDatabase()
+        pmd = createEmptyDatabase()
+        projectDataAccess = pmd.dataAccess(Project.directoryName)
+        employeeDataAccess = pmd.dataAccess(Employee.directoryName)
+        timeEntryDataAccess = pmd.dataAccess(TimeEntry.directoryName)
+        submittedPeriodsDataAccess = pmd.dataAccess(SubmittedPeriod.directoryName)
         val tep = TimeEntryPersistence(pmd, logger = testLogger)
         return TimeRecordingUtilities(
             tep,
