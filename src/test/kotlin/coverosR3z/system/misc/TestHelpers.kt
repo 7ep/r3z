@@ -91,7 +91,7 @@ fun createTimeEntryPreDatabase(
 fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingUtilities {
     val pmd = createEmptyDatabase()
     val tep = TimeEntryPersistence(pmd, logger = testLogger)
-    return TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
+    return TimeRecordingUtilities(tep, pmd, CurrentUser(user), testLogger)
 }
 
 /**
@@ -103,7 +103,7 @@ fun initializeAUserAndLogin() : Triple<ITimeRecordingUtilities, Employee, Employ
     val au = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
 
     val tep = TimeEntryPersistence(pmd, logger = testLogger)
-    val adminTru = TimeRecordingUtilities(tep, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
+    val adminTru = TimeRecordingUtilities(tep, pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
     val aliceEmployee = adminTru.createEmployee(EmployeeName("Alice"))
     val sarahEmployee = adminTru.createEmployee(EmployeeName("Sarah"))
     adminTru.createProject(DEFAULT_PROJECT_NAME)

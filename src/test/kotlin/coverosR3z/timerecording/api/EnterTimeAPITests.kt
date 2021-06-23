@@ -302,7 +302,7 @@ class EnterTimeAPITests {
         )
         val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
         val user = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD,employee).user
-        val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger)
+        val tru = TimeRecordingUtilities(tep, pmd, CurrentUser(user), testLogger)
         val project : Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
 
         val (time, _) = getTime {

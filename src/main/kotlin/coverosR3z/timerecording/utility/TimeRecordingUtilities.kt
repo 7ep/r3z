@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.utility.IRolesChecker
 import coverosR3z.authentication.utility.RolesChecker
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.Date
 import coverosR3z.system.misc.types.calculateSundayDate
@@ -14,9 +15,10 @@ import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(
     private val tep: ITimeEntryPersistence,
+    val pmd: PureMemoryDatabase,
     val cu: CurrentUser,
     private val logger: ILogger,
-    private val rc : IRolesChecker = RolesChecker.Companion
+    private val rc: IRolesChecker = RolesChecker
 ) : ITimeRecordingUtilities {
 
     /**
@@ -24,7 +26,7 @@ class TimeRecordingUtilities(
      * who you empower to use this.
      */
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        return TimeRecordingUtilities(tep, cu, logger, rc)
+        return TimeRecordingUtilities(tep, pmd, cu, logger, rc)
     }
 
     // region timeentries

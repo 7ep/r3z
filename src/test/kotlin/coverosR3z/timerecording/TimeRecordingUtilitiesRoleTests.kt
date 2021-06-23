@@ -6,6 +6,7 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeRolesChecker
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.types.NullSubmittedPeriod
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
@@ -16,7 +17,8 @@ import org.junit.Test
 class TimeRecordingUtilitiesRoleTests {
 
     private val tep = FakeTimeEntryPersistence()
-    private val ap = FakeAuthPersistence()
+    private val pmd = PureMemoryDatabase()
+
     /*
                         _                    _       _          _
       _ _ ___ __ _ _  _| |__ _ _ _   _ _ ___| |___  | |_ ___ __| |_ ___
@@ -411,7 +413,7 @@ class TimeRecordingUtilitiesRoleTests {
 
     private fun makeTRU(user: User = DEFAULT_ADMIN_USER): Pair<ITimeRecordingUtilities, FakeRolesChecker>{
         val frc = FakeRolesChecker()
-        val tru = TimeRecordingUtilities(tep, CurrentUser(user), testLogger, frc)
+        val tru = TimeRecordingUtilities(tep, pmd, CurrentUser(user), testLogger, frc)
         return Pair(tru, frc)
     }
 }

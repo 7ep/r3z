@@ -70,6 +70,7 @@ class EnteringTimeBDD {
 
         val adminTru = TimeRecordingUtilities(
             TimeEntryPersistence(pmd, logger = testLogger),
+            pmd,
             CurrentUser(DEFAULT_ADMIN_USER),
             testLogger
         )
@@ -99,7 +100,7 @@ class EnteringTimeBDD {
         val timeEntryPersistence = TimeEntryPersistence(pmd, logger = testLogger)
         val ap = AuthenticationPersistence(pmd, testLogger)
 
-        val adminTru = TimeRecordingUtilities(timeEntryPersistence, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
+        val adminTru = TimeRecordingUtilities(timeEntryPersistence, pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val newProject = adminTru.createProject(ProjectName("A"))
         val newEmployee = adminTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUsername = UserName(newEmployee.name.value)
