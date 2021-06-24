@@ -16,20 +16,26 @@ class TimeEntryPersistence(
     private val cu : CurrentUser = CurrentUser(SYSTEM_USER),
     private val logger: ILogger
 ) : ITimeEntryPersistence {
-    
+
     private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
     private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
     private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
     private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
 
-    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase) : TimeEntry {
-        isEntryValid(entry)
+    override fun persistNewTimeEntry(entry: TimeEntryPreDatabase): TimeEntry {
+        /**
+         * This will throw an exception if the project or employee in
+         * this time entry don't exist in the list of projects / employees
+         * or is missing in the time entry
+         */
+        check(getProjectById(entry.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
+        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
         return timeEntryDataAccess.actOn { entries ->
 
             // add the new data
             val newIndex = entries.nextIndex.getAndIncrement()
 
-            logger.logTrace(cu) {"new time-entry index is $newIndex" }
+            logger.logTrace(cu) { "new time-entry index is $newIndex" }
             val newTimeEntry = TimeEntry(
                 TimeEntryId(newIndex),
                 entry.employee,
@@ -39,13 +45,19 @@ class TimeEntryPersistence(
                 entry.details
             )
             entries.add(newTimeEntry)
-            logger.logTrace(cu) {"recorded a new timeEntry: $newTimeEntry"}
+            logger.logTrace(cu) { "recorded a new timeEntry: $newTimeEntry" }
             newTimeEntry
         }
     }
 
     override fun overwriteTimeEntry(newEntry: TimeEntry) : TimeEntry {
-        isEntryValid(newEntry.toTimeEntryPreDatabase())
+        /**
+         * This will throw an exception if the project or employee in
+         * this time entry don't exist in the list of projects / employees
+         * or is missing in the time entry
+         */
+        check(getProjectById(newEntry.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
+        check(getEmployeeById(newEntry.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
         val oldEntry = timeEntryDataAccess.read {entries ->
             entries.single{it.id == newEntry.id}
         }
@@ -59,16 +71,6 @@ class TimeEntryPersistence(
         return newEntry
     }
 
-    /**
-     * This will throw an exception if the project or employee in
-     * this time entry don't exist in the list of projects / employees
-     * or is missing in the time entry
-     */
-    private fun isEntryValid(entry: TimeEntryPreDatabase) {
-        check(getProjectById(entry.project.id) != NO_PROJECT) {timeEntryInvalidBadProject}
-        check(getEmployeeById(entry.employee.id) != NO_EMPLOYEE) {timeEntryInvalidBadEmployee}
-    }
-
     override fun persistNewProject(projectName: ProjectName): Project {
         return projectDataAccess.actOn { projects ->
             val newProject = Project(ProjectId(projects.nextIndex.getAndIncrement()), ProjectName(projectName.value))
@@ -79,28 +81,29 @@ class TimeEntryPersistence(
     }
 
     override fun isProjectUsedForTimeEntry(project: Project): Boolean {
-        require (project != NO_PROJECT)
-        return timeEntryDataAccess.read { timeentries -> timeentries.any{ it.project == project } }
+        require(project != NO_PROJECT)
+        return timeEntryDataAccess.read { timeentries -> timeentries.any { it.project == project } }
     }
 
     override fun deleteProject(project: Project): Boolean {
-        require (project != NO_PROJECT)
+        require(project != NO_PROJECT)
         return projectDataAccess.actOn { projects -> projects.remove(project) }
     }
 
     override fun deleteEmployee(employee: Employee): Boolean {
-        require (employee != NO_EMPLOYEE)
+        require(employee != NO_EMPLOYEE)
         return employeeDataAccess.actOn { employees -> employees.remove(employee) }
     }
 
     override fun getHoursOfWeekOfTimePeriodStartingAt(sunday: Date, employee: Employee): Time {
         // get Sunday as an epoch day
         val sundayED = sunday.epochDay
-        require (dayOfWeekCalc(sundayED) == DayOfWeek.Sunday)
+        require(dayOfWeekCalc(sundayED) == DayOfWeek.Sunday)
 
-        val totalMinutesOverWeek = timeEntryDataAccess.read { timeentries -> timeentries
-            .filter { (sundayED..(sundayED + 6)).contains(it.date.epochDay) && it.employee == employee }
-            .sumBy { it.time.numberOfMinutes }
+        val totalMinutesOverWeek = timeEntryDataAccess.read { timeentries ->
+            timeentries
+                .filter { (sundayED..(sundayED + 6)).contains(it.date.epochDay) && it.employee == employee }
+                .sumBy { it.time.numberOfMinutes }
         }
 
         return Time(totalMinutesOverWeek)
@@ -108,7 +111,8 @@ class TimeEntryPersistence(
 
     override fun persistNewEmployee(employeename: EmployeeName): Employee {
         return employeeDataAccess.actOn { employees ->
-            val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
+            val newEmployee =
+                Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
             employees.add(newEmployee)
             logger.logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
             newEmployee
@@ -116,11 +120,12 @@ class TimeEntryPersistence(
     }
 
     override fun queryMinutesRecorded(employee: Employee, date: Date): Time {
-        return timeEntryDataAccess.read (
+        return timeEntryDataAccess.read(
             fun(timeEntries): Time {
 
                 // if the employee hasn't entered any time on this date, return 0 minutes
-                val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }.sumBy { te -> te.time.numberOfMinutes }
+                val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }
+                    .sumBy { te -> te.time.numberOfMinutes }
                 return Time(totalMinutes)
             })
     }
@@ -130,16 +135,17 @@ class TimeEntryPersistence(
     }
 
     override fun readTimeEntriesOnDate(employee: Employee, date: Date): Set<TimeEntry> {
-        return timeEntryDataAccess.read { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }.toSet()
+        return timeEntryDataAccess.read { timeEntries -> timeEntries.filter { it.employee == employee && it.date == date } }
+            .toSet()
     }
 
     override fun getProjectByName(name: ProjectName): Project {
-        check(projectDataAccess.read { it.count { p -> p.name == name } in 0..1 }) {"There must be 0 or 1 project with name of ${name.value}"}
+        check(projectDataAccess.read { it.count { p -> p.name == name } in 0..1 }) { "There must be 0 or 1 project with name of ${name.value}" }
         return projectDataAccess.read { it.singleOrNull { p -> p.name == name } ?: NO_PROJECT }
     }
 
     override fun getProjectById(id: ProjectId): Project {
-        check(projectDataAccess.read { it.count { p -> p.id == id } in 0..1 }) {"There must be 0 or 1 project with id of $id"}
+        check(projectDataAccess.read { it.count { p -> p.id == id } in 0..1 }) { "There must be 0 or 1 project with id of $id" }
         return projectDataAccess.read { it.singleOrNull { p -> p.id == id } ?: NO_PROJECT }
     }
 
@@ -152,40 +158,45 @@ class TimeEntryPersistence(
     }
 
     override fun getEmployeeById(id: EmployeeId): Employee {
-        check(employeeDataAccess.read { employees -> employees.count {it.id == id} } in 0..1) {"There must be 0 or 1 employee with id of $id"}
-        return employeeDataAccess.read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
+        check(employeeDataAccess.read { employees -> employees.count { it.id == id } } in 0..1) { "There must be 0 or 1 employee with id of $id" }
+        return employeeDataAccess.read { employees -> employees.singleOrNull { it.id == id } ?: NO_EMPLOYEE }
     }
 
     override fun getEmployeeByName(employeeName: EmployeeName): Employee {
-        check(employeeDataAccess.read { employees -> employees.count {it.name == employeeName} } in 0..1) {"TThere must be 0 or 1 employee with name of ${employeeName.value}"}
-        return employeeDataAccess.read { employees -> employees.singleOrNull {it.name == employeeName} ?: NO_EMPLOYEE }
+        check(employeeDataAccess.read { employees -> employees.count { it.name == employeeName } } in 0..1) { "TThere must be 0 or 1 employee with name of ${employeeName.value}" }
+        return employeeDataAccess.read { employees ->
+            employees.singleOrNull { it.name == employeeName } ?: NO_EMPLOYEE
+        }
     }
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
         // The following closure returns a boolean depending on whether the provided date falls within
         // any of the submission date ranges for the provided employee
-        return submittedPeriodsDataAccess.read {
-                submissions -> submissions
-                    .filter{it.employee == employee}
-                    .any{it.bounds.contains(date)}
+        return submittedPeriodsDataAccess.read { submissions ->
+            submissions
+                .filter { it.employee == employee }
+                .any { it.bounds.contains(date) }
         }
     }
 
     override fun persistNewSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
-        val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employee == employee && it.bounds == timePeriod} }
+        val alreadyExists =
+            submittedPeriodsDataAccess.read { submissions -> submissions.any { it.employee == employee && it.bounds == timePeriod } }
         if (alreadyExists) {
             throw MultipleSubmissionsInPeriodException("A submission already exists for ${employee.name.value} on $timePeriod")
         }
 
-        return submittedPeriodsDataAccess.actOn{ submissions ->
+        return submittedPeriodsDataAccess.actOn { submissions ->
             val newSubmission = SubmittedPeriod(
                 SubmissionId(submissions.nextIndex.getAndIncrement()),
                 employee,
                 timePeriod,
                 ApprovalStatus.UNAPPROVED)
-            logger.logDebug(cu) { "Recorded a new time period submission," +
-                    " employee id \"${employee.id.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
-                    "to the database" }
+            logger.logDebug(cu) {
+                "Recorded a new time period submission," +
+                        " employee id \"${employee.id.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
+                        "to the database"
+            }
             submissions.add(newSubmission)
             newSubmission
         }
@@ -194,16 +205,15 @@ class TimeEntryPersistence(
     override fun getSubmittedTimePeriod(employee: Employee, timePeriod: TimePeriod): SubmittedPeriod {
         check(submittedPeriodsDataAccess.read { submissions ->
             submissions.count { it.employee == employee && it.bounds == timePeriod } in 0..1
-        }) {"There must be either 0 or 1 submitted time periods with employee = $employee and timeperiod = $timePeriod"}
+        }) { "There must be either 0 or 1 submitted time periods with employee = $employee and timeperiod = $timePeriod" }
         return submittedPeriodsDataAccess.read { submissions ->
             submissions.singleOrNull { it.employee == employee && it.bounds == timePeriod }
         } ?: NullSubmittedPeriod
     }
 
     override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
-        return timeEntryDataAccess.read {
-            timeEntries ->
-                timeEntries.filter { it.employee == employee && timePeriod.contains(it.date)}.toSet()
+        return timeEntryDataAccess.read { timeEntries ->
+            timeEntries.filter { it.employee == employee && timePeriod.contains(it.date) }.toSet()
         }
     }
 
@@ -219,8 +229,8 @@ class TimeEntryPersistence(
     }
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
-        check(timeEntryDataAccess.read { timeentries -> timeentries.count { it.id == id } in 0..1}) {"There must be 0 or 1 time entry with id of $id"}
-        return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull{ it.id == id } ?: NO_TIMEENTRY }
+        check(timeEntryDataAccess.read { timeentries -> timeentries.count { it.id == id } in 0..1 }) { "There must be 0 or 1 time entry with id of $id" }
+        return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull { it.id == id } ?: NO_TIMEENTRY }
     }
 
     override fun approveTimesheet(stp: SubmittedPeriod): Boolean {

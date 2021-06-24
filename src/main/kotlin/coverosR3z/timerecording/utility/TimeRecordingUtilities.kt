@@ -44,19 +44,61 @@ class TimeRecordingUtilities(
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
 
         return createOrModifyEntry(entry) {
-            val newTimeEntry = tep.persistNewTimeEntry(entry)
+            /**
+             * This will throw an exception if the project or employee in
+             * this time entry don't exist in the list of projects / employees
+             * or is missing in the time entry
+             */
+            check(findProjectById(entry.project.id) != NO_PROJECT) { TimeEntryPersistence.timeEntryInvalidBadProject }
+            check(findEmployeeById(entry.employee.id) != NO_EMPLOYEE) { TimeEntryPersistence.timeEntryInvalidBadEmployee }
+            val newTimeEntry = timeEntryDataAccess.actOn { entries ->
+
+                // add the new data
+                val newIndex = entries.nextIndex.getAndIncrement()
+
+                logger.logTrace(cu) { "new time-entry index is $newIndex" }
+                val newTimeEntry = TimeEntry(
+                    TimeEntryId(newIndex),
+                    entry.employee,
+                    entry.project,
+                    entry.time,
+                    entry.date,
+                    entry.details
+                )
+                entries.add(newTimeEntry)
+                logger.logTrace(cu) { "recorded a new timeEntry: $newTimeEntry" }
+                newTimeEntry
+            }
             logger.logAudit(cu) { "Creating new time entry: ${newTimeEntry.shortString()}" }
             newTimeEntry
         }
     }
 
-    override fun changeEntry(entry: TimeEntry): RecordTimeResult{
+    override fun changeEntry(entry: TimeEntry): RecordTimeResult {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val oldEntry = tep.findTimeEntryById(entry.id)
         return createOrModifyEntry(entry.toTimeEntryPreDatabase(), oldEntry = oldEntry) {
-            val newTimeEntry = tep.overwriteTimeEntry(entry)
-            logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${newTimeEntry.shortString()}"}
-            newTimeEntry
+
+
+            val entryPreDatabase = entry.toTimeEntryPreDatabase()
+            /**
+             * This will throw an exception if the project or employee in
+             * this time entry don't exist in the list of projects / employees
+             * or is missing in the time entry
+             */
+            check(findProjectById(entryPreDatabase.project.id) != NO_PROJECT) { TimeEntryPersistence.timeEntryInvalidBadProject }
+            check(findEmployeeById(entryPreDatabase.employee.id) != NO_EMPLOYEE) { TimeEntryPersistence.timeEntryInvalidBadEmployee }
+
+            check(oldEntry.employee == entry.employee) { "Employee field of a time entry may not be changed" }
+
+            timeEntryDataAccess.actOn { entries -> entries.update(entry) }
+
+            logger.logDebug(cu) { "modified an existing timeEntry: $entry" }
+            logger.logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $entry" }
+
+
+            logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${entry.shortString()}"}
+            entry
         }
     }
 
@@ -70,7 +112,7 @@ class TimeRecordingUtilities(
             return RecordTimeResult(StatusEnum.USER_EMPLOYEE_MISMATCH, null)
         }
         confirmLessThan24Hours(entry.time, entry.employee, entry.date, oldEntry)
-        if(tep.isInASubmittedPeriod(entry.employee, entry.date)){
+        if(isInASubmittedPeriod(entry.employee, entry.date)){
             return RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
         }
         return try {
@@ -111,14 +153,16 @@ class TimeRecordingUtilities(
 
     override fun getTimeEntriesForTimePeriod(employee: Employee, timePeriod: TimePeriod): Set<TimeEntry> {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getTimeEntriesForTimePeriod(employee, timePeriod)
+        return timeEntryDataAccess.read { timeEntries ->
+            timeEntries.filter { it.employee == employee && timePeriod.contains(it.date) }.toSet()
+        }
     }
 
     override fun deleteTimeEntry(timeEntry: TimeEntry): Boolean {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val didDelete = tep.deleteTimeEntry(timeEntry)
+        val didDelete = timeEntryDataAccess.actOn { timeentries -> timeentries.remove(timeEntry) }
         if (!didDelete) {
-            throw IllegalStateException("Attempted to delete a non-existent time entry by id")
+            throw IllegalStateException("failed to find this time entry to delete: ${timeEntry.shortString()}")
         }
         logger.logAudit (cu) { "Deleted time entry: ${timeEntry.shortString()} " }
         return true
@@ -126,17 +170,22 @@ class TimeRecordingUtilities(
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
-        return tep.findTimeEntryById(id)
+        check(timeEntryDataAccess.read { timeentries -> timeentries.count { it.id == id } in 0..1 }) { "There must be 0 or 1 time entry with id of $id" }
+        return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull { it.id == id } ?: NO_TIMEENTRY }
     }
 
     override fun getEntriesForEmployeeOnDate(employee: Employee, date: Date): Set<TimeEntry> {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.readTimeEntriesOnDate(employee, date)
+        return timeEntryDataAccess.read { timeEntries -> timeEntries
+            .filter { it.employee == employee && it.date == date } }
+            .toSet()
     }
 
     override fun getAllEntriesForEmployee(employee: Employee): Set<TimeEntry> {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.readTimeEntries(employee)
+        return timeEntryDataAccess.read { timeEntries -> timeEntries
+            .filter { it.employee == employee } }
+            .toSet()
     }
 
     // endregion

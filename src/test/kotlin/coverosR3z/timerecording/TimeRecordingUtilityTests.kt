@@ -45,7 +45,8 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun `record time for someone`() {
-        tep.minutesRecorded = Time(60)
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
+        employeeDataAccess.actOn { e -> e.add(DEFAULT_EMPLOYEE) }
         val entry = createTimeEntryPreDatabase()
 
         val actualResult = tru.createTimeEntry(entry)
@@ -403,7 +404,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testSubmitTime_expectLockedTimeEntries_editingTimeEntry() {
-        tep.isInASubmittedPeriodBehavior = {true}
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         val result = tru.changeEntry(
@@ -424,7 +425,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testSubmitTime_expectLockedTimeEntries_creatingTimeEntry() {
-        tep.isInASubmittedPeriodBehavior = {true}
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         val result = tru.createTimeEntry(createTimeEntryPreDatabase(date = DEFAULT_PERIOD_START_DATE))
@@ -492,9 +493,11 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testGetTimeEntriesForPeriod() {
-        tep.getTimeEntriesForTimePeriodBehavior = { setOf(DEFAULT_TIME_ENTRY) }
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
 
-        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
+        val allEntriesForPeriod : Set<TimeEntry> = tru.getTimeEntriesForTimePeriod(
+            DEFAULT_EMPLOYEE,
+            TimePeriod.getTimePeriodForDate(A_RANDOM_DAY_IN_JUNE_2020))
 
         assertTrue(allEntriesForPeriod.any())
     }
@@ -512,7 +515,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testCanDeleteTimeEntry() {
-        tep.deleteTimeEntryBehavior = { true }
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
         val result = tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertTrue(result)
     }
@@ -534,7 +537,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testFindTimeEntryById() {
-        tep.findTimeEntryByIdBehavior = { DEFAULT_TIME_ENTRY }
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
         val result = tru.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
         assertEquals(DEFAULT_TIME_ENTRY, result)
     }

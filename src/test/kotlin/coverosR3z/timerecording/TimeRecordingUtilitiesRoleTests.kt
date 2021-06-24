@@ -6,10 +6,12 @@ import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeRolesChecker
+import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.types.NullSubmittedPeriod
+import coverosR3z.timerecording.types.TimeEntry
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -19,6 +21,7 @@ class TimeRecordingUtilitiesRoleTests {
 
     private val tep = FakeTimeEntryPersistence()
     private val pmd = createEmptyDatabase()
+    private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
 
     /*
                         _                    _       _          _
@@ -186,6 +189,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertFalse(frc.roleCanDoAction)
 
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
         tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(frc.roleCanDoAction)
 
@@ -326,6 +330,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.createTimeEntry(DEFAULT_TIME_ENTRY.toTimeEntryPreDatabase())
         assertFalse(frc.roleCanDoAction)
 
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
         tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)
         assertFalse(frc.roleCanDoAction)
 
