@@ -457,7 +457,7 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun testGetSubmittedPeriod() {
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         val submittedTimePeriod = tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
 
         assertEquals(DEFAULT_SUBMITTED_PERIOD, submittedTimePeriod)
@@ -554,7 +554,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testApproveTime_HappyPath() {
-        tep.isInASubmittedPeriodBehavior = { true }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         val result = tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.SUCCESS, result)
     }

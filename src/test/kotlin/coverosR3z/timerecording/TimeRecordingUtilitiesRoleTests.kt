@@ -63,13 +63,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
         tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -140,13 +134,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
         tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -216,13 +204,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
-        assertFalse(frc.roleCanDoAction)
-
         tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
-        assertFalse(frc.roleCanDoAction)
-
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -292,13 +274,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
-        tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
         tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
-        assertTrue(frc.roleCanDoAction)
-
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertTrue(frc.roleCanDoAction)
 
         tru.listAllEmployees()
@@ -368,13 +344,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.getEntriesForEmployeeOnDate(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
-        tru.getSubmittedTimePeriod(DEFAULT_TIME_PERIOD)
-        assertFalse(frc.roleCanDoAction)
-
         tru.getTimeEntriesForTimePeriod(DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD)
-        assertFalse(frc.roleCanDoAction)
-
-        tru.isInASubmittedPeriod(DEFAULT_EMPLOYEE, DEFAULT_DATE)
         assertFalse(frc.roleCanDoAction)
 
         tru.listAllEmployees()

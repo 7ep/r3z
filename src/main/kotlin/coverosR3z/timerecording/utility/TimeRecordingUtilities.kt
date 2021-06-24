@@ -269,12 +269,7 @@ class TimeRecordingUtilities(
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        check(submittedPeriodsDataAccess.read { submissions ->
-            submissions.count { it.employee == cu.employee && it.bounds == timePeriod } in 0..1
-        }) {"There must be either 0 or 1 submitted time periods with employee = ${cu.employee} and timeperiod = $timePeriod"}
-        val existingSubmission = submittedPeriodsDataAccess.read { submissions ->
-            submissions.singleOrNull { it.employee == cu.employee && it.bounds == timePeriod }
-        } ?: NullSubmittedPeriod
+        val existingSubmission = getSubmittedTimePeriod(timePeriod)
         check (existingSubmission == NullSubmittedPeriod) { "Cannot submit an already-submitted period" }
         logger.logAudit (cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employee == cu.employee && it.bounds == timePeriod} }
@@ -298,20 +293,36 @@ class TimeRecordingUtilities(
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val submittedPeriod = tep.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        val submittedPeriod = getSubmittedTimePeriod(timePeriod)
         check (submittedPeriod != NullSubmittedPeriod) { "Cannot unsubmit a non-submitted period" }
         logger.logAudit (cu) { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
-        return tep.unsubmitTimePeriod(submittedPeriod)
+        submittedPeriodsDataAccess.actOn { submissions ->
+            submissions.remove(submittedPeriod)
+            logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${submittedPeriod.employee.id.value}\", id: ${submittedPeriod.id.value}, from the database" }
+        }
+    }
+
+    fun getSubmittedTimePeriod(timePeriod: TimePeriod, employee: Employee) : SubmittedPeriod {
+        check(submittedPeriodsDataAccess.read { submissions ->
+            submissions.count { it.employee == employee && it.bounds == timePeriod } in 0..1
+        }) {"There must be either 0 or 1 submitted time periods with employee = $employee and timeperiod = $timePeriod"}
+        return submittedPeriodsDataAccess.read { submissions ->
+            submissions.singleOrNull { it.employee == employee && it.bounds == timePeriod }
+        } ?: NullSubmittedPeriod
     }
 
     override fun getSubmittedTimePeriod(timePeriod: TimePeriod) : SubmittedPeriod {
-        rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        return getSubmittedTimePeriod(timePeriod, cu.employee)
     }
 
     override fun isInASubmittedPeriod(employee: Employee, date: Date): Boolean {
-        rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.isInASubmittedPeriod(employee, date)
+        // The following closure returns a boolean depending on whether the provided date falls within
+        // any of the submission date ranges for the provided employee
+        return submittedPeriodsDataAccess.read {
+                submissions -> submissions
+            .filter{it.employee == employee}
+            .any{it.bounds.contains(date)}
+        }
     }
 
     // endregion
@@ -324,11 +335,11 @@ class TimeRecordingUtilities(
             logger.logWarn(cu) { "Cannot approve timesheet for NO_EMPLOYEE" }
             return ApprovalResultStatus.FAILURE
         }
-        if (! tep.isInASubmittedPeriod(employee, startDate)) {
+        if (! isInASubmittedPeriod(employee, startDate)) {
             logger.logWarn(cu) { "Cannot approve timesheet for unsubmitted period" }
             return ApprovalResultStatus.FAILURE
         }
-        val stp = tep.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        val stp = getSubmittedTimePeriod(TimePeriod.getTimePeriodForDate(startDate), employee)
         tep.approveTimesheet(stp)
         logger.logAudit (cu) { "Approved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
         return ApprovalResultStatus.SUCCESS
