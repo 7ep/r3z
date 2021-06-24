@@ -91,10 +91,6 @@ class AuthenticationPersistenceTests {
         assertEquals("There must exist a session in the database for (${DEFAULT_USER.name.value}) in order to delete it", ex.message)
     }
 
-
-    /**
-     * See [coverosR3z.persistence.PureMemoryDatabaseTests.testCorruptingEmployeeDataWithMultiThreading]
-     */
     @Test
     fun testCorruptingSessionDataWithMultiThreading() {
         val listOfThreads = mutableListOf<Future<*>>()
@@ -110,10 +106,6 @@ class AuthenticationPersistenceTests {
         assertEquals(numberNewSessionsAdded, ap.getAllSessions().size)
     }
 
-
-    /**
-     * See [coverosR3z.persistence.PureMemoryDatabaseTests.testCorruptingEmployeeDataWithMultiThreading]
-     */
     @Test
     fun testCorruptingUserDataWithMultiThreading() {
         val listOfThreads = mutableListOf<Future<*>>()

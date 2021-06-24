@@ -1,32 +1,23 @@
 package coverosR3z.timerecording.api
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
-import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
-import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.fakeServerObjects
-import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.APITestCategory
-import coverosR3z.server.ServerPerformanceTests
 import coverosR3z.server.api.MessageAPI
-import coverosR3z.server.types.*
+import coverosR3z.server.types.PostBodyData
+import coverosR3z.server.types.PreparedResponseData
+import coverosR3z.server.types.ServerData
+import coverosR3z.server.types.StatusCode
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
-import coverosR3z.system.misc.types.Date
-import coverosR3z.system.misc.utility.getTime
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.NO_PROJECT
-import coverosR3z.timerecording.types.Project
-import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.io.File
 
 class EnterTimeAPITests {
 

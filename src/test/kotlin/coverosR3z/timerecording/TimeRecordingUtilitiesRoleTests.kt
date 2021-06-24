@@ -19,7 +19,6 @@ class TimeRecordingUtilitiesRoleTests {
     private val pmd = createEmptyDatabase()
     private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
     private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
-    private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
     private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
 
     /*

@@ -186,7 +186,7 @@ fun String.toTitleCase(): String {
         }
     )
 
-    for (i in 1.rangeTo(arr.size-1)) {
+    for (i in 1 until arr.size) {
         if(arr[i].isEmpty()){
             result.add(arr[i])
         } else if (arr[i].toLowerCase() !in articles) {
