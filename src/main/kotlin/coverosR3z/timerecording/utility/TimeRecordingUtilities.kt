@@ -23,6 +23,8 @@ class TimeRecordingUtilities(
     private val rc: IRolesChecker = RolesChecker
 ) : ITimeRecordingUtilities {
 
+    private val timeEntryInvalidBadEmployee = "a time entry with a non-registered employee is invalid"
+    private val timeEntryInvalidBadProject = "a time entry with a non-registered project is invalid"
     private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
     private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
     private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
@@ -47,8 +49,8 @@ class TimeRecordingUtilities(
              * this time entry don't exist in the list of projects / employees
              * or is missing in the time entry
              */
-            check(findProjectById(entry.project.id) != NO_PROJECT) { TimeEntryPersistence.timeEntryInvalidBadProject }
-            check(findEmployeeById(entry.employee.id) != NO_EMPLOYEE) { TimeEntryPersistence.timeEntryInvalidBadEmployee }
+            check(findProjectById(entry.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
+            check(findEmployeeById(entry.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
             val newTimeEntry = timeEntryDataAccess.actOn { entries ->
 
                 // add the new data
@@ -84,8 +86,8 @@ class TimeRecordingUtilities(
              * this time entry don't exist in the list of projects / employees
              * or is missing in the time entry
              */
-            check(findProjectById(entryPreDatabase.project.id) != NO_PROJECT) { TimeEntryPersistence.timeEntryInvalidBadProject }
-            check(findEmployeeById(entryPreDatabase.employee.id) != NO_EMPLOYEE) { TimeEntryPersistence.timeEntryInvalidBadEmployee }
+            check(findProjectById(entryPreDatabase.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
+            check(findEmployeeById(entryPreDatabase.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
 
             check(oldEntry.employee == entry.employee) { "Employee field of a time entry may not be changed" }
 
@@ -120,8 +122,8 @@ class TimeRecordingUtilities(
             logger.logDebug(cu) {"Error adding time entry: ${ex.message}"}
 
             when (ex.message) {
-                TimeEntryPersistence.timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
-                TimeEntryPersistence.timeEntryInvalidBadProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
+                timeEntryInvalidBadEmployee -> RecordTimeResult(StatusEnum.INVALID_EMPLOYEE, null)
+                timeEntryInvalidBadProject -> RecordTimeResult(StatusEnum.INVALID_PROJECT, null)
                 else -> RecordTimeResult(StatusEnum.NULL, null)
             }
         }
