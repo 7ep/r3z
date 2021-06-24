@@ -64,8 +64,7 @@ class EnteringTimeBDD {
 
     private fun addingProjectHoursWithNotes(): Pair<ITimeRecordingUtilities, TimeEntryPreDatabase> {
         val pmd = createEmptyDatabase()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, pmd, testLogger, CurrentUser(SYSTEM_USER))
+        val au = AuthenticationUtilities(pmd, testLogger, CurrentUser(SYSTEM_USER))
 
         val adminTru = TimeRecordingUtilities(
             pmd,
@@ -95,7 +94,6 @@ class EnteringTimeBDD {
 
     private fun enterTwentyFourHoursPreviously(): Triple<ITimeRecordingUtilities, Project, Employee> {
         val pmd = createEmptyDatabase()
-        val ap = AuthenticationPersistence(pmd, testLogger)
 
         val adminTru = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val newProject = adminTru.createProject(ProjectName("A"))
@@ -104,7 +102,6 @@ class EnteringTimeBDD {
         val existingTimeForTheDay = createTimeEntryPreDatabase(employee = newEmployee, project = newProject, time = Time(60 * 24))
 
         val au = AuthenticationUtilities(
-            ap,
             pmd,
             testLogger,
             CurrentUser(SYSTEM_USER)

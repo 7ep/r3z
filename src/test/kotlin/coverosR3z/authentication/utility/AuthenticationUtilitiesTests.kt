@@ -2,7 +2,6 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -11,7 +10,6 @@ import coverosR3z.system.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.utility.getTime
 import coverosR3z.timerecording.types.NO_EMPLOYEE
-import coverosR3z.timerecording.types.Project
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -35,7 +33,7 @@ class AuthenticationUtilitiesTests {
         userDataAccess = pmd.dataAccess(User.directoryName)
         sessionDataAccess = pmd.dataAccess(Session.directoryName)
         invitationDataAccess = pmd.dataAccess(Invitation.directoryName)
-        authUtils = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(SYSTEM_USER))
+        authUtils = AuthenticationUtilities(pmd, testLogger, CurrentUser(SYSTEM_USER))
     }
 
     @Test
@@ -303,7 +301,6 @@ class AuthenticationUtilitiesTests {
     fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
         val pmd = createEmptyDatabase()
         val au = AuthenticationUtilities(
-            AuthenticationPersistence(pmd, testLogger),
             pmd,
             testLogger,
             CurrentUser(DEFAULT_ADMIN_USER),
@@ -338,7 +335,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testRegularUserShouldFailToAddApproverRoleToUser() {
-        val au = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(DEFAULT_REGULAR_USER))
+        val au = AuthenticationUtilities(pmd, testLogger, CurrentUser(DEFAULT_REGULAR_USER))
         assertThrows(UnpermittedOperationException::class.java) { au.addRoleToUser(DEFAULT_USER, Role.APPROVER) }
     }
 

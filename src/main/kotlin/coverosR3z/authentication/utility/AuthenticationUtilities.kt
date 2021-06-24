@@ -1,6 +1,5 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -10,7 +9,6 @@ import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class AuthenticationUtilities(
-    private val ap: IAuthPersistence,
     val pmd: PureMemoryDatabase,
     val logger: ILogger,
     val cu: CurrentUser,
