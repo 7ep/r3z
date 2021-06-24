@@ -15,9 +15,8 @@ import coverosR3z.persistence.utility.DatabaseDiskPersistence.Companion.database
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.config.types.SystemConfiguration
-import coverosR3z.timerecording.persistence.ITimeEntryPersistence
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -40,30 +39,6 @@ class PureMemoryDatabaseTests {
     }
 
     /**
-     * This will typically complete in 40 milliseconds
-     */
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun `should get responses from the database quickly_PERFORMANCE`() {
-        val numberOfEmployees = 30
-        val numberOfProjects = 30
-        val numberOfDays = 31
-
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
-        val allEmployees = recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
-
-
-        val (totalTime) = getTime {
-            readTimeEntriesForOneEmployee(tep, allEmployees)
-            accumulateMinutesPerEachEmployee(tep, allEmployees)
-        }
-
-        testLogger.logAudit { "It took a total of $totalTime milliseconds for this code" }
-        File("${granularPerfArchiveDirectory}should_get_responses_from_the_database_quickly_PERFORMANCE")
-            .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttime: $totalTime\n")
-    }
-
-    /**
      * I wish to make an exact copy of the PMD in completely new memory locations
      */
     @Test
@@ -80,128 +55,6 @@ class PureMemoryDatabaseTests {
     fun testShouldBePossibleToCopy_similar() {
         val originalPmd = pmd.copy()
         assertEquals(originalPmd, pmd)
-    }
-
-    /**
-     * Test writing the whole database and reading the whole database
-     */
-    @IntegrationTest(usesDirectory=true)
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun testShouldWriteAndReadToDisk_PERFORMANCE() {
-        val numberOfEmployees = 20
-        val numberOfProjects = 10
-        val numberOfDays = 31
-
-        val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldWriteAndReadToDisk_PERFORMANCE/"
-        File(dbDirectory).deleteRecursively()
-        pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
-
-        val (totalTimeWriting, _) = getTime {
-            recordManyTimeEntries(tep, numberOfEmployees, numberOfProjects, numberOfDays)
-            pmd.stop()
-        }
-
-        val (totalTimeReading, readPmd) = getTime {
-            DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
-        }
-
-        assertEquals("The database should be exactly the same after the reload", pmd, readPmd)
-
-        val totalTime = totalTimeReading + totalTimeWriting
-        File("${granularPerfArchiveDirectory}testShouldWriteAndReadToDisk_PERFORMANCE")
-            .appendText("${Date.now().stringValue}\tnumberOfEmployees: $numberOfEmployees\tnumberOfProjects: $numberOfProjects\tnumberOfDays: $numberOfDays\ttotalTime: $totalTime\n")
-        testLogger.logAudit { "Total time taken for serialization / deserialzation was $totalTime milliseconds" }
-    }
-
-    /**
-     * This is to test that it could be possible to corrupt the data when
-     * multiple threads are changing it
-     *
-     * The idea behind this test is that if we aren't handling
-     * the threading cleanly, we won't get one hundred employees
-     * added, it will be some smaller number.
-     *
-     * It used to be easy to see this fail, you just had to remove
-     * the locking mechanism from the method at
-     * PureMemoryDatabase.addNewEmployee, and you
-     * would need to run it a time or two to see it fail.
-     *
-     * Now, however, we aren't using locking - we're using
-     * [coverosR3z.persistence.types.MutableConcurrentSet] which is based on [ConcurrentHashMap], and
-     * also [AtomicInteger], which means we don't need to lock
-     * at all.
-     *
-     * So the only way to get this un-thread-safe again
-     * would be to switch back to using an un-thread-safe
-     * data collection, which isn't quite as easy.
-     *
-     * In any case, this test should still help us, since
-     * if this test passes, it should still mean we are handling
-     * our threads properly.
-     */
-    @Test
-    fun testCorruptingEmployeeDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
-        val listOfThreads = mutableListOf<Future<*>>()
-        val numberNewEmployeesAdded = 20
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-        testLogger.turnOffAllLogging()
-        repeat(numberNewEmployeesAdded) { // each thread calls the add a single time
-            listOfThreads.add(cachedThreadPool.submit(Thread {
-                tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-            }))
-        }
-        // wait for all those threads
-        listOfThreads.forEach{it.get()}
-        testLogger.resetLogSettingsToDefault()
-        assertEquals(numberNewEmployeesAdded, tep.getAllEmployees().size)
-    }
-
-
-    /**
-     * See [testCorruptingEmployeeDataWithMultiThreading]
-     */
-    @Test
-    fun testCorruptingProjectDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
-        val listOfThreads = mutableListOf<Future<*>>()
-        val numberNewProjectsAdded = 20
-        testLogger.turnOffAllLogging()
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-        repeat(numberNewProjectsAdded) { // each thread calls the add a single time
-            listOfThreads.add(cachedThreadPool.submit(Thread {
-                tep.persistNewProject(DEFAULT_PROJECT_NAME)
-            }))
-        }
-        // wait for all those threads
-        listOfThreads.forEach{it.get()}
-        testLogger.resetLogSettingsToDefault()
-        assertEquals(numberNewProjectsAdded, tep.getAllProjects().size)
-    }
-
-    /**
-     * See [testCorruptingEmployeeDataWithMultiThreading]
-     */
-    @Test
-    fun testCorruptingTimeEntryDataWithMultiThreading() {
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
-        val listOfThreads = mutableListOf<Future<*>>()
-        val numberTimeEntriesAdded = 20
-        val newProject = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-        val newEmployee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
-        testLogger.turnOffAllLogging()
-        repeat(numberTimeEntriesAdded) { // each thread calls the add a single time
-            listOfThreads.add(cachedThreadPool.submit(Thread {
-                tep.persistNewTimeEntry(createTimeEntryPreDatabase(project = newProject, employee = newEmployee))
-            }))
-        }
-        // wait for all those threads
-        listOfThreads.forEach{it.get()}
-        testLogger.resetLogSettingsToDefault()
-        assertEquals(numberTimeEntriesAdded, tep.readTimeEntries(DEFAULT_EMPLOYEE).size)
     }
 
     /**
@@ -943,14 +796,14 @@ class PureMemoryDatabaseTests {
         File(databaseDirectory).deleteRecursively()
         pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         val ap = AuthenticationPersistence(pmd, testLogger)
-        val tep = TimeEntryPersistence(pmd, logger = testLogger)
+        val tru = TimeRecordingUtilities(pmd, logger = testLogger, cu = CurrentUser(DEFAULT_ADMIN_USER))
         val newEmployee = if (! skipCreatingEmployees) {
-            tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
+            tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         } else {
             NO_EMPLOYEE
         }
         val newProject = if (! skipCreatingProjects) {
-            tep.persistNewProject(DEFAULT_PROJECT_NAME)
+            tru.createProject(DEFAULT_PROJECT_NAME)
         } else {
             NO_PROJECT
         }
@@ -961,14 +814,14 @@ class PureMemoryDatabaseTests {
             }
         }
         if (! skipCreatingTimeEntries) {
-            val newEntry = tep.persistNewTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
+            val (_, newEntry) = tru.createTimeEntry(createTimeEntryPreDatabase(employee = newEmployee, project = newProject))
             if (! skipUpdatingTimeEntry) {
-                tep.overwriteTimeEntry(newEntry.copy(time = Time(4 * 60)))
+                tru.changeEntry(newEntry!!.copy(time = Time(4 * 60)))
             }
         }
 
         if(! skipCreatingSubmissions) {
-            tep.persistNewSubmittedTimePeriod(newEmployee, TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
+            tru.submitTimePeriod(TimePeriod.getTimePeriodForDate(DEFAULT_DATE))
         }
         pmd.stop()
 
@@ -977,95 +830,6 @@ class PureMemoryDatabaseTests {
         } else {
             Pair(pmd, null)
         }
-    }
-
-    private fun recordManyTimeEntries(tep: ITimeEntryPersistence, numberOfEmployees: Int, numberOfProjects: Int, numberOfDays: Int) : List<Employee> {
-        val lotsOfEmployees: List<String> = generateEmployeeNames()
-        persistEmployeesToDatabase(tep, numberOfEmployees, lotsOfEmployees)
-        val allEmployees: List<Employee> = readEmployeesFromDatabase(tep)
-        persistProjectsToDatabase(tep, numberOfProjects)
-        val allProjects: List<Project> = readProjectsFromDatabase(tep)
-        enterTimeEntries(tep, numberOfDays, allEmployees, allProjects, numberOfEmployees)
-        return allEmployees
-    }
-
-    private fun accumulateMinutesPerEachEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
-        val (timeToAccumulate) = getTime {
-            val minutesPerEmployeeTotal =
-                    allEmployees.map { e -> tep.readTimeEntries(e).sumBy { te -> te.time.numberOfMinutes } }
-                            .toList()
-            testLogger.logAudit { "the time ${allEmployees[0].name.value} spent was ${minutesPerEmployeeTotal[0]}" }
-            testLogger.logAudit { "the time ${allEmployees[1].name.value} spent was ${minutesPerEmployeeTotal[1]}" }
-        }
-
-        testLogger.logAudit { "It took $timeToAccumulate milliseconds to accumulate the minutes per employee" }
-    }
-
-    private fun readTimeEntriesForOneEmployee(tep: ITimeEntryPersistence, allEmployees: List<Employee>) {
-        val (timeToGetAllTimeEntries) = getTime { tep.readTimeEntries(allEmployees[0]) }
-        testLogger.logAudit { "It took $timeToGetAllTimeEntries milliseconds to get all the time entries for a employee" }
-    }
-
-    private fun enterTimeEntries(tep: ITimeEntryPersistence, numberOfDays: Int, allEmployees: List<Employee>, allProjects: List<Project>, numberOfEmployees: Int) {
-        testLogger.turnOffAllLogging()
-        val (timeToEnterAllTimeEntries) = getTime {
-            for (day in 1..numberOfDays) {
-                for (employee in allEmployees) {
-                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                    tep.persistNewTimeEntry(TimeEntryPreDatabase(employee, allProjects.random(), Time(2 * 60), Date(18438L + day), Details("AAAAAAAAAAAA")))
-                }
-            }
-        }
-        testLogger.resetLogSettingsToDefault()
-        testLogger.logAudit { "It took $timeToEnterAllTimeEntries milliseconds total to enter ${numberOfDays * 4} time entries for each of $numberOfEmployees employees" }
-        testLogger.logAudit { "(That's a total of ${("%,d".format(numberOfDays * 4 * numberOfEmployees))} time entries)" }
-    }
-
-    private fun readProjectsFromDatabase(tep: ITimeEntryPersistence): List<Project> {
-        val (timeToReadAllProjects, allProjects) = getTime { tep.getAllProjects()}
-        testLogger.logAudit { "It took $timeToReadAllProjects milliseconds to read all the projects" }
-        return allProjects
-    }
-
-    private fun persistProjectsToDatabase(tep: ITimeEntryPersistence, numberOfProjects: Int) {
-        testLogger.turnOffAllLogging()
-        val (timeToCreateProjects) =
-                getTime { (1..numberOfProjects).forEach { i -> tep.persistNewProject(ProjectName("project$i")) } }
-        testLogger.resetLogSettingsToDefault()
-        testLogger.logAudit { "It took $timeToCreateProjects milliseconds to create $numberOfProjects projects" }
-    }
-
-    private fun readEmployeesFromDatabase(tep: ITimeEntryPersistence): List<Employee> {
-        val (timeToReadAllEmployees, allEmployees) = getTime {
-            tep.getAllEmployees()
-        }
-        testLogger.logAudit { "It took $timeToReadAllEmployees milliseconds to read all the employees" }
-        return allEmployees
-    }
-
-    private fun persistEmployeesToDatabase(tep: ITimeEntryPersistence, numberOfEmployees: Int, lotsOfEmployees: List<String>) {
-        testLogger.turnOffAllLogging()
-        val (timeToEnterEmployees) = getTime {
-            for (i in 1..numberOfEmployees) {
-                tep.persistNewEmployee(EmployeeName(lotsOfEmployees[i]))
-            }
-        }
-        testLogger.resetLogSettingsToDefault()
-        testLogger.logAudit { "It took $timeToEnterEmployees milliseconds to enter $numberOfEmployees employees" }
-    }
-
-    private fun generateEmployeeNames(): List<String> {
-        val (timeToMakeEmployeenames, lotsOfEmployees) = getTime {
-            listOf(
-                    "Arlen", "Hedwig", "Allix", "Tandi", "Silvia", "Catherine", "Mavis", "Hally", "Renate", "Anastasia", "Christy", "Nora", "Molly", "Nelli", "Daphna", "Chloette", "TEirtza", "Nannie", "Melinda", "Tyne", "Belva", "Pam", "Rebekkah", "Elayne", "Dianne", "Christina", "Jeanne", "Norry", "Reina", "Erminia", "Eadie", "Valina", "Gayle", "Wylma", "Annette", "Annmaria", "Fayina", "Dita", "Sibella", "Alis", "Georgena", "Luciana", "Sidonnie", "Dina", "Ferdinande", "Coletta", "Esma", "Saidee", "Hannah", "Colette", "Anitra", "Grissel", "Caritta", "Ann", "Rhodia", "Meta", "Bride", "Dalenna", "Rozina", "Ottilie", "Eliza", "Gerda", "Anthia", "Kathryn", "Lilian", "Jeannie", "Nichole", "Marylinda", "Angelica", "Margie", "Ruthie", "Augustina", "Netta", "Fleur", "Mahala", "Cosette", "Zsa Zsa", "Karry", "Tabitha", "Andriana", "Fey", "Hedy", "Saudra", "Geneva", "Lacey", "Fawnia", "Ertha", "Bernie", "Natty", "Joyan", "Teddie", "Hephzibah", "Vonni", "Ambur", "Lyndsie", "Anna", "Minnaminnie", "Andy", "Brina", "Pamella", "Trista", "Antonetta", "Kerrin", "Crysta", "Kira", "Gypsy", "Candy", "Ree", "Sharai", "Mariana", "Eleni", "Yetty", "Maisie", "Deborah", "Doretta", "Juliette", "Esta", "Amandi", "Anallise", "Indira", "Aura", "Melodee", "Desiri", "Jacquenetta", "Joell", "Delcine", "Justine", "Theresita", "Belia", "Mallory", "Antonie", "Jobi", "Katalin", "Kelli", "Ester", "Katey", "Gianna", "Berry", "Sidonia", "Roseanne", "Cherida", "Beatriz", "Eartha", "Robina", "Florri", "Vitoria", "Debera", "Jeanette", "Almire", "Saree", "Liana", "Ruth", "Renell", "Katinka", "Anya", "Gwyn", "Kaycee", "Rori", "Rianon", "Joann", "Zorana", "Hermia", "Gwenni", "Poppy", "Dedie", "Cloe", "Kirsti", "Krysta", "Clarinda", "Enid", "Katina", "Ralina", "Meryl", "Andie", "Orella", "Alexia", "Clarey", "Iris", "Chris", "Devin", "Kally", "Vernice", "Noelyn", "Stephana", "Catina", "Faydra", "Fionna", "Nola", "Courtnay", "Vera", "Meriel", "Eleonora", "Clare", "Marsha", "Marita", "Concettina", "Kristien", "Celina", "Maryl", "Codee", "Lorraine", "Lauraine", "Sephira", "Kym", "Odette", "Ranee", "Margaux", "Debra", "Corenda", "Mariejeanne", "Georgeanne", "Laural", "Fredelia", "Dulcine", "Tess", "Tina", "Adaline", "Melisandra", "Lita", "Nettie", "Lesley", "Clea", "Marysa", "Arleyne", "Meade", "Ella", "Theodora", "Morgan", "Carena", "Camille", "Janene", "Anett", "Camellia", "Guglielma", "Evvy", "Shayna", "Karilynn", "Ingeberg", "Maudie", "Colene", "Kelcy", "Blythe", "Lacy", "Cesya", "Bobbe", "Maggi", "Darline", "Almira", "Constantia", "Helaina", "Merrili", "Maxine", "Linea", "Marley", "Timmie", "Devon", "Mair", "Thomasine", "Sherry", "Gilli", "Ursa", "Marlena", "Cloris", "Vale", "Alexandra", "Angel", "Alice", "Ulrica", "Britteny", "Annie", "Juliane", "Candida", "Jennie", "Susanne", "Robenia", "Benny", "Cassy", "Denyse", "Jackquelin", "Lorelle", "Lenore", "Sheryl", "Marice", "Clarissa", "Kippy", "Cristen", "Hanni", "Marne", "Melody", "Shane", "Kalli", "Deane", "Kaila", "Faye", "Noella", "Penni", "Sophia", "Marilin", "Cori", "Clair", "Morna", "Lynn", "Rozelle", "Berta", "Bamby", "Janifer", "Doro", "Beryle", "Pammy", "Paige", "Juanita", "Ellene", "Kora", "Kerrie", "Perrine", "Dorena", "Mady", "Dorian", "Lucine", "Jill", "Octavia", "Sande", "Talyah", "Rafaelia", "Doris", "Patti", "Mora", "Marja", "Rivi", "Drucill", "Marina", "Rennie", "Annabell", "Xylia", "Zorina", "Ashil", "Becka", "Blithe", "Lenora", "Kattie", "Analise", "Jasmin", "Minetta", "Deeanne", "Sharity", "Merci", "Julissa", "Nicoli", "Nevsa", "Friederike", "Caroljean", "Catlee", "Charil", "Dara", "Kristy", "Ag", "Andriette", "Kati", "Jackqueline", "Letti", "Allys", "Carlee", "Frannie", "Philis", "Aili", "Else", "Diane", "Tobey", "Tildie", "Merrilee", "Pearle", "Christan", "Dominique", "Rosemaria", "Bunnie", "Tedi", "Elinor", "Aeriell", "Karissa", "Darya", "Tonye", "Alina", "Nalani", "Marcela", "Anabelle", "Layne", "Dorice", "Aleda", "Anette", "Arliene", "Rosemarie", "Pru", "Tiffani", "Addi", "Roda", "Shandra", "Wendeline", "Karoline", "Ciel", "Ania"
-            )
-            // if you want to make a lot more names, uncomment below
-            // lotsOfEmployees = (1..10).flatMap { n -> employeenames.map { u -> "$u$n" } }.toList()
-        }
-        testLogger.logAudit { "It took $timeToMakeEmployeenames milliseconds to create ${lotsOfEmployees.size} employeenames" }
-        return lotsOfEmployees
     }
 
     companion object {

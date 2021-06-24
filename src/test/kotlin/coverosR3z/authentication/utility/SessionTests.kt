@@ -5,7 +5,6 @@ import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.DatabaseDiskPersistence
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert
 import org.junit.Test

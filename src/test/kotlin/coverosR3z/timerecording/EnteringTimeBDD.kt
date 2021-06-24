@@ -9,7 +9,6 @@ import coverosR3z.bddframework.BDD
 import coverosR3z.system.misc.*
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

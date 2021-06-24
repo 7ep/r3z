@@ -11,7 +11,6 @@ import coverosR3z.system.misc.types.Month
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.server.types.*
 import coverosR3z.system.config.types.SystemConfiguration
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities

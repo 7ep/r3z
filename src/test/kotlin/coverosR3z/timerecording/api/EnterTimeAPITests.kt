@@ -18,7 +18,6 @@ import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.system.misc.types.Date
 import coverosR3z.system.misc.utility.getTime
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.Employee
 import coverosR3z.timerecording.types.NO_PROJECT
 import coverosR3z.timerecording.types.Project
@@ -276,59 +275,6 @@ class EnterTimeAPITests {
         val result = enterTimeWithAPI(date = "2200-01-02")
 
         assertEquals(expected, result)
-    }
-
-    /**
-     * Just how quickly does it go, from this level?
-     *
-     * With 1000 requests, it takes .180 seconds = 5,555 requests per second.
-     *
-     * See [ServerPerformanceTests.testEnterTimeReal_PERFORMANCE]
-     */
-    @Category(PerformanceTestCategory::class)
-    @Test
-    fun testEnterTimeAPI_PERFORMANCE() {
-        val numberOfRequests = 200
-
-        testLogger.turnOffAllLogging()
-        // set up real database
-        val pmd = createEmptyDatabase()
-        val tep  = TimeEntryPersistence(pmd, logger = testLogger)
-        val ap = AuthenticationPersistence(pmd, logger = testLogger)
-        val au = AuthenticationUtilities(
-            ap,
-            testLogger,
-            CurrentUser(SYSTEM_USER),
-        )
-        val employee : Employee = tep.persistNewEmployee(DEFAULT_EMPLOYEE_NAME)
-        val user = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD,employee).user
-        val tru = TimeRecordingUtilities(pmd, CurrentUser(user), testLogger)
-        val project : Project = tep.persistNewProject(DEFAULT_PROJECT_NAME)
-
-        val (time, _) = getTime {
-            for (i in 1..numberOfRequests) {
-
-                val data = PostBodyData(mapOf(
-                    ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to project.name.value,
-                    ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-                    ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-                    ViewTimeAPI.Elements.DATE_INPUT.getElemName() to Date(A_RANDOM_DAY_IN_JUNE_2020.epochDay + (i / 20)).stringValue
-                ))
-
-                val sd = ServerData(
-                    BusinessCode(tru, au),
-                    fakeServerObjects,
-                    AnalyzedHttpData(data = data, user = user), authStatus = AuthStatus.AUTHENTICATED, testLogger)
-                val result = EnterTimeAPI.handlePost(sd)
-
-                assertSuccessfulTimeEntry(result)
-
-            }
-        }
-        testLogger.resetLogSettingsToDefault()
-        println(time)
-        File("${granularPerfArchiveDirectory}testEnterTimeAPI_PERFORMANCE")
-            .appendText("${Date.now().stringValue}\trequests: $numberOfRequests\ttime: $time milliseconds\n")
     }
 
     // region ROLE TESTS

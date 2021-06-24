@@ -8,8 +8,7 @@ import coverosR3z.authentication.utility.FakeRolesChecker
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
-import coverosR3z.timerecording.types.NullSubmittedPeriod
-import coverosR3z.timerecording.types.TimeEntry
+import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -17,9 +16,11 @@ import org.junit.Test
 
 class TimeRecordingUtilitiesRoleTests {
 
-    private val tep = FakeTimeEntryPersistence()
     private val pmd = createEmptyDatabase()
     private val timeEntryDataAccess: DataAccess<TimeEntry> = pmd.dataAccess(TimeEntry.directoryName)
+    private val projectDataAccess: DataAccess<Project> = pmd.dataAccess(Project.directoryName)
+    private val employeeDataAccess: DataAccess<Employee> = pmd.dataAccess(Employee.directoryName)
+    private val submittedPeriodsDataAccess: DataAccess<SubmittedPeriod> = pmd.dataAccess(SubmittedPeriod.directoryName)
 
     /*
                         _                    _       _          _
@@ -76,10 +77,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -87,8 +87,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
-        tep.isProjectUsedForTimeEntryBehavior = { false }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }
@@ -147,10 +146,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
@@ -158,8 +156,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertTrue(frc.roleCanDoAction)
 
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
-        tep.isProjectUsedForTimeEntryBehavior = { false }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         tru.deleteProject(DEFAULT_PROJECT)
         assertTrue(frc.roleCanDoAction)
     }
@@ -218,10 +215,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -229,8 +225,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
-        tep.isProjectUsedForTimeEntryBehavior = { false }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }
@@ -288,10 +283,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
 
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertTrue(frc.roleCanDoAction)
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertTrue(frc.roleCanDoAction)
@@ -299,8 +293,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
-        tep.isProjectUsedForTimeEntryBehavior = { false }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }
@@ -359,10 +352,9 @@ class TimeRecordingUtilitiesRoleTests {
         tru.submitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD)
         assertFalse(frc.roleCanDoAction)
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
 
         tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertFalse(frc.roleCanDoAction)
@@ -370,8 +362,7 @@ class TimeRecordingUtilitiesRoleTests {
         tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(frc.roleCanDoAction)
 
-        tep.getProjectByIdBehavior = { DEFAULT_PROJECT }
-        tep.isProjectUsedForTimeEntryBehavior = { false }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         tru.deleteProject(DEFAULT_PROJECT)
         assertFalse(frc.roleCanDoAction)
     }

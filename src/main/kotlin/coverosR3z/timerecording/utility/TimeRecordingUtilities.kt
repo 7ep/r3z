@@ -13,7 +13,6 @@ import coverosR3z.system.misc.types.calculateSundayDate
 import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(

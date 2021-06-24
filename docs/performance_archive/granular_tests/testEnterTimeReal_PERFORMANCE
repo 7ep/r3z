@@ -477,3 +477,5 @@
 2021-06-11	numberThreads: 5	numberRequests: 200	time: 286
 2021-06-11	numberThreads: 5	numberRequests: 200	time: 301
 2021-06-11	numberThreads: 5	numberRequests: 200	time: 296
+2021-06-24	numberThreads: 5	numberRequests: 200	time: 291
+2021-06-24	numberThreads: 5	numberRequests: 200	time: 214

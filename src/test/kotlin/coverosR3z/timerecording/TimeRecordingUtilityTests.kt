@@ -7,7 +7,6 @@ import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
-import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.*
@@ -18,7 +17,6 @@ import org.junit.experimental.categories.Category
 class TimeRecordingUtilityTests {
 
     private lateinit var tru : TimeRecordingUtilities
-    private lateinit var tep : FakeTimeEntryPersistence
     private lateinit var ap : FakeAuthPersistence
     private lateinit var cu : CurrentUser
     private lateinit var pmd: PureMemoryDatabase
@@ -29,7 +27,6 @@ class TimeRecordingUtilityTests {
 
     @Before
     fun init() {
-        tep = FakeTimeEntryPersistence()
         ap = FakeAuthPersistence()
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
@@ -230,7 +227,6 @@ class TimeRecordingUtilityTests {
      * a basic happy path
      */
     @Test fun `can create project`() {
-        tep.persistNewProjectBehavior = { DEFAULT_PROJECT }
         val expected = tru.createProject(DEFAULT_PROJECT_NAME)
         assertEquals(expected, DEFAULT_PROJECT)
     }
@@ -472,8 +468,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testUnsubmitPeriod_Invalid_NotSubmitted() {
-        tep.getSubmittedTimePeriodBehavior = { NullSubmittedPeriod }
-
         val ex = assertThrows(IllegalStateException::class.java) { tru.unsubmitTimePeriod(DEFAULT_TIME_PERIOD) }
 
         assertEquals("Cannot unsubmit a non-submitted period", ex.message)
@@ -497,7 +491,6 @@ class TimeRecordingUtilityTests {
     @Test
     fun testHandleRealCreateNewEmployee() {
         val expectedEmployee = Employee(EmployeeId(1), EmployeeName("ryan \"Kenney\" mcgee"))
-        tep.persistNewEmployeeBehavior = {expectedEmployee }
         val newEmployee = tru.createEmployee(expectedEmployee.name)
         assertEquals(expectedEmployee, newEmployee)
     }
@@ -520,7 +513,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testCannotDeleteMissingTimeEntry() {
-        tep.deleteTimeEntryBehavior = { false }
         assertThrows(IllegalStateException::class.java) {tru.deleteTimeEntry(DEFAULT_TIME_ENTRY)}
     }
 
@@ -539,7 +531,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testFindTimeEntryById_NothingFound() {
-        tep.findTimeEntryByIdBehavior = { NO_TIMEENTRY }
         val result = tru.findTimeEntryById(DEFAULT_TIME_ENTRY.id)
         assertEquals(NO_TIMEENTRY, result)
     }
@@ -568,7 +559,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testApproveTime_failure_Unsubmitted() {
-        tep.isInASubmittedPeriodBehavior = { false }
         val result = tru.approveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.FAILURE, result)
     }
@@ -591,8 +581,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testUnapprove_NegativeCase_AlreadyUnapproved() {
-        tep.isInASubmittedPeriodBehavior = { true }
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.UNAPPROVED) }
         val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.FAILURE, result)
     }
@@ -602,7 +590,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testUnapprove_NegativeCase_UnsubmittedPeriod() {
-        tep.isInASubmittedPeriodBehavior = { false }
         val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.FAILURE, result)
     }
@@ -666,7 +653,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testDeleteEmployee() {
-        tep.deleteEmployeeBehavior = {false}
         val result = tru.deleteEmployee(DEFAULT_EMPLOYEE)
         assertFalse(result)
     }
@@ -687,7 +673,6 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testIsApproved() {
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
         val result = tru.isApproved(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalStatus.UNAPPROVED, result)
     }
