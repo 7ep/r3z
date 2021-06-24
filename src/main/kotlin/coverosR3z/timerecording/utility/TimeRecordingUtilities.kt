@@ -76,7 +76,7 @@ class TimeRecordingUtilities(
 
     override fun changeEntry(entry: TimeEntry): RecordTimeResult {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val oldEntry = tep.findTimeEntryById(entry.id)
+        val oldEntry = findTimeEntryById(entry.id)
         return createOrModifyEntry(entry.toTimeEntryPreDatabase(), oldEntry = oldEntry) {
 
 
@@ -133,7 +133,14 @@ class TimeRecordingUtilities(
         logger.logDebug(cu) {"confirming total time is less than 24 hours"}
 
         // make sure the employee has a total (new plus existing) of less than 24 hours
-        val minutesRecorded : Time = tep.queryMinutesRecorded(employee, date)
+        val minutesRecorded : Time =  timeEntryDataAccess.read(
+            fun(timeEntries): Time {
+
+                // if the employee hasn't entered any time on this date, return 0 minutes
+                val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }
+                    .sumBy { te -> te.time.numberOfMinutes }
+                return Time(totalMinutes)
+            })
         val twentyFourHours = 24 * 60
         // If the employee is entering in more than 24 hours in a day, that's invalid.
 
@@ -169,7 +176,6 @@ class TimeRecordingUtilities(
     }
 
     override fun findTimeEntryById(id: TimeEntryId): TimeEntry {
-        rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.SYSTEM)
         check(timeEntryDataAccess.read { timeentries -> timeentries.count { it.id == id } in 0..1 }) { "There must be 0 or 1 time entry with id of $id" }
         return timeEntryDataAccess.read { timeentries -> timeentries.singleOrNull { it.id == id } ?: NO_TIMEENTRY }
     }
@@ -202,7 +208,7 @@ class TimeRecordingUtilities(
      */
     override fun createProject(projectName: ProjectName) : Project {
         rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
-        require(tep.getProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
+        require(findProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
         logger.logAudit(cu) {"Creating a new project, \"${projectName.value}\""}
 
         return projectDataAccess.actOn { projects ->

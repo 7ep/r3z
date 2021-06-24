@@ -243,7 +243,7 @@ class TimeRecordingUtilityTests {
      * Trying to create an already-existing project should throw exception
      */
     @Test fun testCannotCreateMultipleProjectsWithSameName() {
-        tep.getProjectByNameBehavior = { DEFAULT_PROJECT }
+        projectDataAccess.actOn { p -> p.add(DEFAULT_PROJECT) }
         val ex  = assertThrows(java.lang.IllegalArgumentException::class.java) {tru.createProject(DEFAULT_PROJECT_NAME)}
         assertEquals("Cannot create a new project if one already exists by that same name", ex.message)
     }
