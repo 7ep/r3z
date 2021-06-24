@@ -302,7 +302,7 @@ class TimeRecordingUtilities(
         }
     }
 
-    fun getSubmittedTimePeriod(timePeriod: TimePeriod, employee: Employee) : SubmittedPeriod {
+    private fun getSubmittedTimePeriod(timePeriod: TimePeriod, employee: Employee) : SubmittedPeriod {
         check(submittedPeriodsDataAccess.read { submissions ->
             submissions.count { it.employee == employee && it.bounds == timePeriod } in 0..1
         }) {"There must be either 0 or 1 submitted time periods with employee = $employee and timeperiod = $timePeriod"}
@@ -340,13 +340,18 @@ class TimeRecordingUtilities(
             return ApprovalResultStatus.FAILURE
         }
         val stp = getSubmittedTimePeriod(TimePeriod.getTimePeriodForDate(startDate), employee)
-        tep.approveTimesheet(stp)
-        logger.logAudit (cu) { "Approved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
-        return ApprovalResultStatus.SUCCESS
+        val isApproved = submittedPeriodsDataAccess.actOn { submissions -> submissions.update(stp.copy(approvalStatus = ApprovalStatus.APPROVED)) }
+        return if (isApproved) {
+            logger.logAudit (cu) { "Approved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
+            ApprovalResultStatus.SUCCESS
+        } else {
+            logger.logAudit (cu) { "Failed to approve ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
+            ApprovalResultStatus.FAILURE
+        }
     }
 
     override fun isApproved(employee: Employee, startDate: Date): ApprovalStatus {
-        val stp = tep.getSubmittedTimePeriod(employee, TimePeriod.getTimePeriodForDate(startDate))
+        val stp = getSubmittedTimePeriod(TimePeriod.getTimePeriodForDate(startDate), employee)
         return stp.approvalStatus
     }
 
@@ -356,19 +361,25 @@ class TimeRecordingUtilities(
             logger.logWarn(cu) { "Cannot unapprove timesheet for NO_EMPLOYEE" }
             return ApprovalResultStatus.FAILURE
         }
-        if (! tep.isInASubmittedPeriod(employee, startDate)) {
+        if (! isInASubmittedPeriod(employee, startDate)) {
             logger.logWarn(cu) { "Cannot unapprove timesheet for unsubmitted period" }
             return ApprovalResultStatus.FAILURE
         }
         val timePeriod = TimePeriod.getTimePeriodForDate(startDate)
-        if (tep.getSubmittedTimePeriod(employee, timePeriod).approvalStatus == ApprovalStatus.UNAPPROVED) {
+        if (getSubmittedTimePeriod(timePeriod, employee).approvalStatus == ApprovalStatus.UNAPPROVED) {
             logger.logWarn(cu) { "Cannot unapprove an already-unapproved timesheet" }
             return ApprovalResultStatus.FAILURE
         }
-        val stp = tep.getSubmittedTimePeriod(employee, timePeriod)
-        tep.unapproveTimesheet(stp)
-        logger.logAudit (cu) { "Unapproved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
-        return ApprovalResultStatus.SUCCESS
+        val stp = getSubmittedTimePeriod(timePeriod, employee)
+        val isUnapproved = submittedPeriodsDataAccess.actOn { submissions -> submissions.update(stp.copy(approvalStatus = ApprovalStatus.UNAPPROVED)) }
+        return if (isUnapproved) {
+            logger.logAudit (cu) { "Unapproved ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
+            ApprovalResultStatus.SUCCESS
+        } else {
+            logger.logAudit (cu) { "Failed to unapprove ${employee.name.value}'s timesheet that starts on ${startDate.stringValue}" }
+            ApprovalResultStatus.FAILURE
+        }
+
     }
 
     // endregion

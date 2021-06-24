@@ -586,8 +586,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testUnapproveTimesheet() {
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.APPROVED) }
-        tep.isInASubmittedPeriodBehavior = { true }
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD.copy(approvalStatus = ApprovalStatus.APPROVED)) }
         val result = tru.unapproveTimesheet(DEFAULT_EMPLOYEE, DEFAULT_PERIOD_START_DATE)
         assertEquals(ApprovalResultStatus.SUCCESS, result)
     }
