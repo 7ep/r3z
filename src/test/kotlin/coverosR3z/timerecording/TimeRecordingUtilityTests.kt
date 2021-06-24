@@ -468,8 +468,7 @@ class TimeRecordingUtilityTests {
      */
     @Test
     fun testSubmitPeriod_Invalid_AlreadySubmitted() {
-        tep.getSubmittedTimePeriodBehavior = { DEFAULT_SUBMITTED_PERIOD }
-
+        submittedPeriodsDataAccess.actOn { s -> s.add(DEFAULT_SUBMITTED_PERIOD) }
         val ex = assertThrows(IllegalStateException::class.java) { tru.submitTimePeriod(DEFAULT_TIME_PERIOD) }
 
         assertEquals("Cannot submit an already-submitted period", ex.message)
@@ -680,13 +679,12 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun testIsProjectUsedForTimeEntry() {
-        tep.isProjectUsedForTimeEntryBehavior = { true }
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
         assertTrue(tru.isProjectUsedForTimeEntry(DEFAULT_PROJECT))
     }
 
     @Test
     fun testIsProjectUsedForTimeEntry_False() {
-        tep.isProjectUsedForTimeEntryBehavior = { false }
         assertFalse(tru.isProjectUsedForTimeEntry(DEFAULT_PROJECT))
     }
 
@@ -702,9 +700,9 @@ class TimeRecordingUtilityTests {
 
     @Test
     fun `should properly calculate the number of hours spent for a week`() {
-        val expected = DEFAULT_TIME
-        val result = tru.getTimeForWeek(DEFAULT_EMPLOYEE, DEFAULT_DATE)
-        assertEquals(expected, result)
+        timeEntryDataAccess.actOn { t -> t.add(DEFAULT_TIME_ENTRY) }
+        val result = tru.getTimeForWeek(DEFAULT_EMPLOYEE, A_RANDOM_DAY_IN_JUNE_2020)
+        assertEquals(DEFAULT_TIME, result)
     }
 
     @Test

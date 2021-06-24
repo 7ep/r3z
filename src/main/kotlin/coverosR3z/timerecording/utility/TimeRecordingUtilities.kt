@@ -8,8 +8,11 @@ import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.Date
+import coverosR3z.system.misc.types.DayOfWeek
 import coverosR3z.system.misc.types.calculateSundayDate
+import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
+import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
 import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
@@ -194,11 +197,13 @@ class TimeRecordingUtilities(
     override fun deleteEmployee(employee: Employee): Boolean {
         rc.checkAllowed(cu, Role.ADMIN)
         logger.logAudit(cu) { "deleted employee: ${employee.name.value} id: ${employee.id.value}" }
-        return tep.deleteEmployee(employee)
+        require (employee != NO_EMPLOYEE)
+        return employeeDataAccess.actOn { employees -> employees.remove(employee) }
     }
 
     override fun isProjectUsedForTimeEntry(project: Project): Boolean {
-        return tep.isProjectUsedForTimeEntry(project)
+        require (project != NO_PROJECT)
+        return timeEntryDataAccess.read { timeentries -> timeentries.any{ it.project == project } }
     }
 
     override fun getTimeForWeek(employee: Employee, todayDate: Date): Time {
@@ -206,7 +211,16 @@ class TimeRecordingUtilities(
 
         val sunday = calculateSundayDate(todayDate)
 
-        return tep.getHoursOfWeekOfTimePeriodStartingAt(sunday, employee)
+        // get Sunday as an epoch day
+        val sundayED = sunday.epochDay
+        require (dayOfWeekCalc(sundayED) == DayOfWeek.Sunday)
+
+        val totalMinutesOverWeek = timeEntryDataAccess.read { timeentries -> timeentries
+            .filter { (sundayED..(sundayED + 6)).contains(it.date.epochDay) && it.employee == employee }
+            .sumBy { it.time.numberOfMinutes }
+        }
+
+        return Time(totalMinutesOverWeek)
     }
 
     // endregion
@@ -222,24 +236,31 @@ class TimeRecordingUtilities(
      */
     override fun createEmployee(employeename: EmployeeName) : Employee {
         rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
-        val newEmployee = tep.persistNewEmployee(employeename)
+        val newEmployee =  employeeDataAccess.actOn { employees ->
+            val newEmployee = Employee(EmployeeId(employees.nextIndex.getAndIncrement()), EmployeeName(employeename.value))
+            employees.add(newEmployee)
+            logger.logDebug(cu) { "Recorded a new employee, \"${employeename.value}\", id: ${newEmployee.id.value}, to the database" }
+            newEmployee
+        }
         logger.logAudit(cu) {"Created a new employee, \"${newEmployee.name.value}\""}
         return newEmployee
     }
 
     override fun findEmployeeById(id: EmployeeId): Employee {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getEmployeeById(id)
+        check(employeeDataAccess.read { employees -> employees.count {it.id == id} } in 0..1) {"There must be 0 or 1 employee with id of $id"}
+        return employeeDataAccess.read { employees -> employees.singleOrNull {it.id == id} ?: NO_EMPLOYEE }
     }
 
     override fun findEmployeeByName(name: EmployeeName): Employee {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        return tep.getEmployeeByName(name)
+        check(employeeDataAccess.read { employees -> employees.count {it.name == name} } in 0..1) {"TThere must be 0 or 1 employee with name of ${name.value}"}
+        return employeeDataAccess.read { employees -> employees.singleOrNull {it.name == name} ?: NO_EMPLOYEE }
     }
 
     override fun listAllEmployees(): List<Employee> {
         rc.checkAllowed(cu, Role.SYSTEM, Role.REGULAR, Role.APPROVER, Role.ADMIN, Role.NONE)
-        return tep.getAllEmployees()
+        return employeeDataAccess.read { it.toList() }
     }
 
     // endregion
@@ -248,10 +269,31 @@ class TimeRecordingUtilities(
 
     override fun submitTimePeriod(timePeriod: TimePeriod): SubmittedPeriod {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
-        val existingSubmission = tep.getSubmittedTimePeriod(cu.employee, timePeriod)
+        check(submittedPeriodsDataAccess.read { submissions ->
+            submissions.count { it.employee == cu.employee && it.bounds == timePeriod } in 0..1
+        }) {"There must be either 0 or 1 submitted time periods with employee = ${cu.employee} and timeperiod = $timePeriod"}
+        val existingSubmission = submittedPeriodsDataAccess.read { submissions ->
+            submissions.singleOrNull { it.employee == cu.employee && it.bounds == timePeriod }
+        } ?: NullSubmittedPeriod
         check (existingSubmission == NullSubmittedPeriod) { "Cannot submit an already-submitted period" }
         logger.logAudit (cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
-        return tep.persistNewSubmittedTimePeriod(checkNotNull(cu.employee), timePeriod)
+        val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employee == cu.employee && it.bounds == timePeriod} }
+        if (alreadyExists) {
+            throw MultipleSubmissionsInPeriodException("A submission already exists for ${cu.employee.name.value} on $timePeriod")
+        }
+
+        return submittedPeriodsDataAccess.actOn{ submissions ->
+            val newSubmission = SubmittedPeriod(
+                SubmissionId(submissions.nextIndex.getAndIncrement()),
+                cu.employee,
+                timePeriod,
+                ApprovalStatus.UNAPPROVED)
+            logger.logDebug(cu) { "Recorded a new time period submission," +
+                    " employee id \"${cu.employee.id.value}\", id: ${newSubmission.id.value}, from ${newSubmission.bounds.start.stringValue} to ${newSubmission.bounds.end.stringValue}, " +
+                    "to the database" }
+            submissions.add(newSubmission)
+            newSubmission
+        }
     }
 
     override fun unsubmitTimePeriod(timePeriod: TimePeriod) {
