@@ -4,24 +4,34 @@ import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.persistence.types.DataAccess
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.config.LENGTH_OF_BYTES_OF_SESSION_STRING
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.utility.getTime
 import coverosR3z.timerecording.types.NO_EMPLOYEE
+import coverosR3z.timerecording.types.Project
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
 class AuthenticationUtilitiesTests {
+
     private lateinit var authUtils : AuthenticationUtilities
+    private lateinit var pmd: PureMemoryDatabase
+    private lateinit var cu : CurrentUser
+    private lateinit var userDataAccess: DataAccess<User>
     private lateinit var ap : FakeAuthPersistence
 
     @Before
     fun init() {
         ap = FakeAuthPersistence()
-        authUtils = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
+        cu = CurrentUser(DEFAULT_ADMIN_USER)
+        pmd = createEmptyDatabase()
+        userDataAccess = pmd.dataAccess(User.directoryName)
+        authUtils = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(SYSTEM_USER))
     }
 
     @Test
@@ -289,6 +299,7 @@ class AuthenticationUtilitiesTests {
         val pmd = createEmptyDatabase()
         val au = AuthenticationUtilities(
             AuthenticationPersistence(pmd, testLogger),
+            pmd,
             testLogger,
             CurrentUser(DEFAULT_ADMIN_USER),
         )
@@ -322,7 +333,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testRegularUserShouldFailToAddApproverRoleToUser() {
-        val au = AuthenticationUtilities(ap, testLogger, CurrentUser(DEFAULT_REGULAR_USER))
+        val au = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(DEFAULT_REGULAR_USER))
         assertThrows(UnpermittedOperationException::class.java) { au.addRoleToUser(DEFAULT_USER, Role.APPROVER) }
     }
 

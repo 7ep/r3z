@@ -97,15 +97,17 @@ class AuthenticationBDD {
     }
 
     private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
-        val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
+        val pmd = createEmptyDatabase()
+        val authPersistence = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(authPersistence, pmd, testLogger, CurrentUser(SYSTEM_USER))
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return Pair(authPersistence, au)
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
-        val authPersistence = AuthenticationPersistence(createEmptyDatabase(), testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
+        val pmd = createEmptyDatabase()
+        val authPersistence = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(authPersistence, pmd, testLogger, CurrentUser(SYSTEM_USER))
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
         return au
     }

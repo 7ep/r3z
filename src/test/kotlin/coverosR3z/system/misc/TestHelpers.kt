@@ -98,7 +98,7 @@ fun createTimeRecordingUtility(user : User = DEFAULT_ADMIN_USER): TimeRecordingU
 fun initializeAUserAndLogin() : Triple<ITimeRecordingUtilities, Employee, Employee>{
     val pmd = createEmptyDatabase()
     val ap = AuthenticationPersistence(pmd, testLogger)
-    val au = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
+    val au = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(SYSTEM_USER))
 
     val adminTru = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
     val aliceEmployee = adminTru.createEmployee(EmployeeName("Alice"))

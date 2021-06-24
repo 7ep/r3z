@@ -29,7 +29,7 @@ class SessionTests {
         File(dbDirectory).deleteRecursively()
         val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
+        val au = AuthenticationUtilities(authPersistence, pmd, testLogger, CurrentUser(SYSTEM_USER))
         val cu = CurrentUser(SYSTEM_USER)
         val tru = TimeRecordingUtilities(pmd, cu, testLogger)
 

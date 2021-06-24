@@ -65,7 +65,7 @@ class EnteringTimeBDD {
     private fun addingProjectHoursWithNotes(): Pair<ITimeRecordingUtilities, TimeEntryPreDatabase> {
         val pmd = createEmptyDatabase()
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
-        val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
+        val au = AuthenticationUtilities(authPersistence, pmd, testLogger, CurrentUser(SYSTEM_USER))
 
         val adminTru = TimeRecordingUtilities(
             pmd,
@@ -105,6 +105,7 @@ class EnteringTimeBDD {
 
         val au = AuthenticationUtilities(
             ap,
+            pmd,
             testLogger,
             CurrentUser(SYSTEM_USER)
         )

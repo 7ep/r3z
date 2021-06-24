@@ -2,6 +2,7 @@ package coverosR3z.authentication.utility
 
 import coverosR3z.authentication.persistence.IAuthPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.misc.types.DateTime
 import coverosR3z.timerecording.types.Employee
@@ -9,10 +10,11 @@ import coverosR3z.timerecording.types.NO_EMPLOYEE
 
 class AuthenticationUtilities(
     private val ap: IAuthPersistence,
+    val pmd: PureMemoryDatabase,
     val logger: ILogger,
     val cu: CurrentUser,
-    val rc : IRolesChecker = RolesChecker.Companion
-    ) : IAuthenticationUtilities {
+    val rc: IRolesChecker = RolesChecker
+) : IAuthenticationUtilities {
 
     /**
      * Register a user through auth persistent, providing a username, password, and employeeId
