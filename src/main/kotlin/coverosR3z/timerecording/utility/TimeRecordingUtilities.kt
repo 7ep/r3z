@@ -13,12 +13,10 @@ import coverosR3z.system.misc.types.calculateSundayDate
 import coverosR3z.system.misc.types.dayOfWeekCalc
 import coverosR3z.timerecording.exceptions.ExceededDailyHoursAmountException
 import coverosR3z.timerecording.exceptions.MultipleSubmissionsInPeriodException
-import coverosR3z.timerecording.persistence.ITimeEntryPersistence
 import coverosR3z.timerecording.persistence.TimeEntryPersistence
 import coverosR3z.timerecording.types.*
 
 class TimeRecordingUtilities(
-    private val tep: ITimeEntryPersistence,
     val pmd: PureMemoryDatabase,
     val cu: CurrentUser,
     private val logger: ILogger,
@@ -35,7 +33,7 @@ class TimeRecordingUtilities(
      * who you empower to use this.
      */
     override fun changeUser(cu: CurrentUser): ITimeRecordingUtilities {
-        return TimeRecordingUtilities(tep, pmd, cu, logger, rc)
+        return TimeRecordingUtilities(pmd, cu, logger, rc)
     }
 
     // region timeentries

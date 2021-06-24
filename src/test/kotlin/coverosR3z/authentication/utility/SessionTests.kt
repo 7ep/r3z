@@ -32,8 +32,7 @@ class SessionTests {
         val authPersistence = AuthenticationPersistence(pmd, testLogger)
         val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
         val cu = CurrentUser(SYSTEM_USER)
-        val tep = TimeEntryPersistence(pmd, cu, testLogger)
-        val tru = TimeRecordingUtilities(tep, pmd, cu, testLogger)
+        val tru = TimeRecordingUtilities(pmd, cu, testLogger)
 
         val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 

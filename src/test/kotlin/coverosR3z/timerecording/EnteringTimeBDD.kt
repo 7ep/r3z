@@ -69,7 +69,6 @@ class EnteringTimeBDD {
         val au = AuthenticationUtilities(authPersistence, testLogger, CurrentUser(SYSTEM_USER))
 
         val adminTru = TimeRecordingUtilities(
-            TimeEntryPersistence(pmd, logger = testLogger),
             pmd,
             CurrentUser(DEFAULT_ADMIN_USER),
             testLogger
@@ -97,10 +96,9 @@ class EnteringTimeBDD {
 
     private fun enterTwentyFourHoursPreviously(): Triple<ITimeRecordingUtilities, Project, Employee> {
         val pmd = createEmptyDatabase()
-        val timeEntryPersistence = TimeEntryPersistence(pmd, logger = testLogger)
         val ap = AuthenticationPersistence(pmd, testLogger)
 
-        val adminTru = TimeRecordingUtilities(timeEntryPersistence, pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
+        val adminTru = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val newProject = adminTru.createProject(ProjectName("A"))
         val newEmployee = adminTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val newUsername = UserName(newEmployee.name.value)

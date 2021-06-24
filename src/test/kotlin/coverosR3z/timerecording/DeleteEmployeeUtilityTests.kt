@@ -113,9 +113,8 @@ class DeleteEmployeeUtilityTests {
     fun testDeleteEmployee_DeletesInvitation() {
         val pmd = PureMemoryDatabase.createEmptyDatabase()
         val cu = CurrentUser(DEFAULT_ADMIN_USER)
-        val tep = TimeEntryPersistence(pmd, cu = cu, logger = testLogger)
         val ap = AuthenticationPersistence(pmd, testLogger)
-        val tru = TimeRecordingUtilities(tep, pmd, cu, testLogger)
+        val tru = TimeRecordingUtilities(pmd, cu, testLogger)
         val au = AuthenticationUtilities(ap, testLogger, CurrentUser(SYSTEM_USER))
         val de = DeleteEmployeeUtility(tru, au, cu, testLogger)
 

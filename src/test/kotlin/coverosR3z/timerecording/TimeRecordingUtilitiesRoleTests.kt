@@ -1,13 +1,11 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeRolesChecker
 import coverosR3z.persistence.types.DataAccess
-import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.persistence.utility.PureMemoryDatabase.Companion.createEmptyDatabase
 import coverosR3z.system.misc.*
 import coverosR3z.timerecording.types.NullSubmittedPeriod
@@ -389,7 +387,7 @@ class TimeRecordingUtilitiesRoleTests {
 
     private fun makeTRU(user: User = DEFAULT_ADMIN_USER): Pair<ITimeRecordingUtilities, FakeRolesChecker>{
         val frc = FakeRolesChecker()
-        val tru = TimeRecordingUtilities(tep, pmd, CurrentUser(user), testLogger, frc)
+        val tru = TimeRecordingUtilities(pmd, CurrentUser(user), testLogger, frc)
         return Pair(tru, frc)
     }
 }
