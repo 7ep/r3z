@@ -23,6 +23,8 @@ class AuthenticationUtilitiesTests {
     private lateinit var pmd: PureMemoryDatabase
     private lateinit var cu : CurrentUser
     private lateinit var userDataAccess: DataAccess<User>
+    private lateinit var sessionDataAccess: DataAccess<Session>
+    private lateinit var invitationDataAccess: DataAccess<Invitation>
     private lateinit var ap : FakeAuthPersistence
 
     @Before
@@ -31,6 +33,8 @@ class AuthenticationUtilitiesTests {
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
         userDataAccess = pmd.dataAccess(User.directoryName)
+        sessionDataAccess = pmd.dataAccess(Session.directoryName)
+        invitationDataAccess = pmd.dataAccess(Invitation.directoryName)
         authUtils = AuthenticationUtilities(ap, pmd, testLogger, CurrentUser(SYSTEM_USER))
     }
 
@@ -128,7 +132,7 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun `An account should not be created if the user already exists`() {
-        ap.isUserRegisteredBehavior = {true}
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
 
         val result = authUtils.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
 
@@ -239,7 +243,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get success with valid login`() {
-        ap.getUserBehavior= { DEFAULT_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         assertEquals(LoginResult.SUCCESS, status)
     }
@@ -249,7 +253,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get failure with wrong password`() {
-        ap.getUserBehavior = { DEFAULT_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("wrongwrongwrong"))
         assertEquals(LoginResult.FAILURE, status)
     }
@@ -273,7 +277,8 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testShouldConfirmUserAuthenticationBySessionToken() {
-        ap.getUserForSessionBehavior = { DEFAULT_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
+        sessionDataAccess.actOn { s -> s.add(Session(1, DEFAULT_SESSION_TOKEN, DEFAULT_USER, DEFAULT_DATETIME)) }
         assertEquals(DEFAULT_USER, authUtils.getUserForSession(DEFAULT_SESSION_TOKEN))
     }
 
@@ -313,9 +318,9 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testAdminShouldAddAdminRoleToUser() {
-        ap.addRoleToUserBehavior = { DEFAULT_ADMIN_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Role.ADMIN)
-        assertEquals(DEFAULT_ADMIN_USER, elevatedUser)
+        assertEquals(Role.ADMIN, elevatedUser.role)
     }
 
     /**
@@ -323,9 +328,9 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testAdminShouldAddApproverRoleToUser() {
-        ap.addRoleToUserBehavior = { DEFAULT_APPROVER_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val elevatedUser = authUtils.addRoleToUser(DEFAULT_USER, Role.APPROVER)
-        assertEquals(DEFAULT_APPROVER_USER, elevatedUser)
+        assertEquals(Role.APPROVER, elevatedUser.role)
     }
 
     /**
@@ -348,12 +353,14 @@ class AuthenticationUtilitiesTests {
 
     @Test
     fun testCanRemoveInvitation() {
+        invitationDataAccess.actOn { i -> i.add(DEFAULT_INVITATION) }
         val result = authUtils.removeInvitation(DEFAULT_EMPLOYEE)
         assertTrue(result)
     }
 
     @Test
     fun testCanChangePassword() {
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val result = authUtils.changePassword(DEFAULT_USER, Password("newPasswordHere"))
         assertEquals(ChangePasswordResult.SUCCESSFULLY_CHANGED, result)
     }
@@ -385,7 +392,7 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testGetUserByEmployee() {
-        ap.getUserByEmployeeBehavior = { DEFAULT_USER }
+        userDataAccess.actOn { u -> u.add(DEFAULT_USER) }
         val result = authUtils.getUserByEmployee(DEFAULT_EMPLOYEE)
         assertEquals(DEFAULT_USER, result)
     }
