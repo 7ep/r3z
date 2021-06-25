@@ -36,8 +36,10 @@ class DeleteEmployeeUtility(
 
         return if (deleteEmployeeResult) {
             au.removeInvitation(employee)
+            logger.logAudit(cu) {"succeeded at deleting the employee \"${employee.name.value}\" with id ${employee.id.value}"}
             DeleteEmployeeResult.SUCCESS
         } else {
+            logger.logWarn(cu) {"failed at deleting the employee \"${employee.name.value}\" with id ${employee.id.value}"}
             DeleteEmployeeResult.DID_NOT_DELETE
         }
     }
