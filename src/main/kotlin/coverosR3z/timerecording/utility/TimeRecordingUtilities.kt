@@ -194,14 +194,6 @@ class TimeRecordingUtilities(
 
     // region projects
 
-    /**
-     * Business code for creating a new project in the
-     * system (persists it to the database)
-     */
-    /**
-     * Business code for creating a new project in the
-     * system (persists it to the database)
-     */
     override fun createProject(projectName: ProjectName) : Project {
         rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
         require(findProjectByName(projectName) == NO_PROJECT) {"Cannot create a new project if one already exists by that same name"}
@@ -277,14 +269,7 @@ class TimeRecordingUtilities(
     // endregion
 
     // region employees
-    /**
-     * Business code for creating a new employee in the
-     * system (persists it to the database)
-     */
-    /**
-     * Business code for creating a new employee in the
-     * system (persists it to the database)
-     */
+
     override fun createEmployee(employeename: EmployeeName) : Employee {
         rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
         val newEmployee =  employeeDataAccess.actOn { employees ->
