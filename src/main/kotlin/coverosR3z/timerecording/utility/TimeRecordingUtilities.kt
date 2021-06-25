@@ -43,13 +43,7 @@ class TimeRecordingUtilities(
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
 
         return createOrModifyEntry(entry) {
-            /**
-             * This will throw an exception if the project or employee in
-             * this time entry don't exist in the list of projects / employees
-             * or is missing in the time entry
-             */
-            check(findProjectById(entry.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
-            check(findEmployeeById(entry.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
+            checkIsValidEntry(entry)
             val newTimeEntry = timeEntryDataAccess.actOn { entries ->
 
                 // add the new data
@@ -73,6 +67,16 @@ class TimeRecordingUtilities(
         }
     }
 
+    private fun checkIsValidEntry(entry: TimeEntryPreDatabase) {
+        /**
+         * This will throw an exception if the project or employee in
+         * this time entry don't exist in the list of projects / employees
+         * or is missing in the time entry
+         */
+        check(findProjectById(entry.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
+        check(findEmployeeById(entry.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
+    }
+
     override fun changeEntry(entry: TimeEntry): RecordTimeResult {
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val oldEntry = findTimeEntryById(entry.id)
@@ -80,13 +84,7 @@ class TimeRecordingUtilities(
 
 
             val entryPreDatabase = entry.toTimeEntryPreDatabase()
-            /**
-             * This will throw an exception if the project or employee in
-             * this time entry don't exist in the list of projects / employees
-             * or is missing in the time entry
-             */
-            check(findProjectById(entryPreDatabase.project.id) != NO_PROJECT) { timeEntryInvalidBadProject }
-            check(findEmployeeById(entryPreDatabase.employee.id) != NO_EMPLOYEE) { timeEntryInvalidBadEmployee }
+            checkIsValidEntry(entryPreDatabase)
 
             check(oldEntry.employee == entry.employee) { "Employee field of a time entry may not be changed" }
 
@@ -94,8 +92,6 @@ class TimeRecordingUtilities(
 
             logger.logDebug(cu) { "modified an existing timeEntry: $entry" }
             logger.logTrace(cu) { "old time-entry is $oldEntry and new time-entry is $entry" }
-
-
             logger.logAudit(cu) { "overwriting old entry with new entry. old: ${oldEntry.shortString()}  new: ${entry.shortString()}"}
             entry
         }
@@ -136,7 +132,8 @@ class TimeRecordingUtilities(
             fun(timeEntries): Time {
 
                 // if the employee hasn't entered any time on this date, return 0 minutes
-                val totalMinutes = timeEntries.filter { it.date == date && it.employee == employee }
+                val totalMinutes = timeEntries
+                    .filter { it.date == date && it.employee == employee }
                     .sumBy { te -> te.time.numberOfMinutes }
                 return Time(totalMinutes)
             })
@@ -144,10 +141,10 @@ class TimeRecordingUtilities(
         // If the employee is entering in more than 24 hours in a day, that's invalid.
 
         val existingPlusNewMinutes = if (oldEntry == NO_TIMEENTRY) {
-            logger.logTrace { "creating a new time entry" }
+            logger.logTrace(cu) { "creating a new time entry" }
             minutesRecorded.numberOfMinutes + time.numberOfMinutes
         } else {
-            logger.logTrace { "editing a time entry" }
+            logger.logTrace(cu) { "editing a time entry" }
             minutesRecorded.numberOfMinutes - oldEntry.time.numberOfMinutes + time.numberOfMinutes
         }
 
@@ -170,7 +167,7 @@ class TimeRecordingUtilities(
         if (!didDelete) {
             throw IllegalStateException("failed to find this time entry to delete: ${timeEntry.shortString()}")
         }
-        logger.logAudit (cu) { "Deleted time entry: ${timeEntry.shortString()} " }
+        logger.logAudit(cu) { "Deleted time entry: ${timeEntry.shortString()} " }
         return true
     }
 
@@ -325,7 +322,7 @@ class TimeRecordingUtilities(
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val existingSubmission = getSubmittedTimePeriod(timePeriod)
         check (existingSubmission == NullSubmittedPeriod) { "Cannot submit an already-submitted period" }
-        logger.logAudit (cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
+        logger.logAudit(cu) { "Submitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         val alreadyExists = submittedPeriodsDataAccess.read { submissions -> submissions.any{ it.employee == cu.employee && it.bounds == timePeriod} }
         if (alreadyExists) {
             throw MultipleSubmissionsInPeriodException("A submission already exists for ${cu.employee.name.value} on $timePeriod")
@@ -349,7 +346,7 @@ class TimeRecordingUtilities(
         rc.checkAllowed(cu, Role.REGULAR, Role.APPROVER, Role.ADMIN)
         val submittedPeriod = getSubmittedTimePeriod(timePeriod)
         check (submittedPeriod != NullSubmittedPeriod) { "Cannot unsubmit a non-submitted period" }
-        logger.logAudit (cu) { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
+        logger.logAudit(cu) { "Unsubmitting time period: ${timePeriod.start.stringValue} to ${timePeriod.end.stringValue}" }
         submittedPeriodsDataAccess.actOn { submissions ->
             submissions.remove(submittedPeriod)
             logger.logDebug(cu) { "Unsubmitted a time period submission, employee id \"${submittedPeriod.employee.id.value}\", id: ${submittedPeriod.id.value}, from the database" }
