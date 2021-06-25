@@ -1,6 +1,5 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.persistence.types.DataAccess
 import coverosR3z.persistence.utility.PureMemoryDatabase
@@ -17,7 +16,6 @@ import org.junit.experimental.categories.Category
 class TimeRecordingUtilityTests {
 
     private lateinit var tru : TimeRecordingUtilities
-    private lateinit var ap : FakeAuthPersistence
     private lateinit var cu : CurrentUser
     private lateinit var pmd: PureMemoryDatabase
     private lateinit var projectDataAccess: DataAccess<Project>
@@ -27,7 +25,6 @@ class TimeRecordingUtilityTests {
 
     @Before
     fun init() {
-        ap = FakeAuthPersistence()
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
         projectDataAccess = pmd.dataAccess(Project.directoryName)

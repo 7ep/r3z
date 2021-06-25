@@ -1,6 +1,5 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.system.misc.*
@@ -28,7 +27,6 @@ class SessionTests {
         val dbDirectory = DEFAULT_DB_DIRECTORY + "testShouldClearAllSessionsWhenLogout/"
         File(dbDirectory).deleteRecursively()
         val pmd = DatabaseDiskPersistence(dbDirectory, testLogger).startWithDiskPersistence()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
         val au = AuthenticationUtilities(pmd, testLogger, CurrentUser(SYSTEM_USER))
         val cu = CurrentUser(SYSTEM_USER)
         val tru = TimeRecordingUtilities(pmd, cu, testLogger)
@@ -47,8 +45,8 @@ class SessionTests {
         au.logout(user1)
 
         // check that user1 lacks sessions and user2 still has theirs
-        Assert.assertTrue(authPersistence.getAllSessions().none { it.user == user1 })
-        Assert.assertEquals(1, authPersistence.getAllSessions().filter { it.user == user2 }.size)
+        Assert.assertTrue(au.getAllSessions().none { it.user == user1 })
+        Assert.assertEquals(1, au.getAllSessions().filter { it.user == user2 }.size)
         pmd.stop()
 
         // test out loading it from the disk
@@ -56,8 +54,8 @@ class SessionTests {
             dbDirectory = dbDirectory,
             logger = testLogger,
         ).startWithDiskPersistence()
-        val authPersistence2 = AuthenticationPersistence(pmd2, testLogger)
-        Assert.assertTrue(authPersistence2.getAllSessions().none { it.user == user1 })
-        Assert.assertEquals(1, authPersistence2.getAllSessions().filter { it.user == user2 }.size)
+        val au2 = AuthenticationUtilities(pmd2, testLogger, CurrentUser(SYSTEM_USER))
+        Assert.assertTrue(au2.getAllSessions().none { it.user == user1 })
+        Assert.assertEquals(1, au2.getAllSessions().filter { it.user == user2 }.size)
     }
 }

@@ -1,6 +1,5 @@
 package coverosR3z.authentication.utility
 
-import coverosR3z.authentication.FakeAuthPersistence
 import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.*
 import coverosR3z.persistence.types.DataAccess
@@ -23,11 +22,9 @@ class AuthenticationUtilitiesTests {
     private lateinit var userDataAccess: DataAccess<User>
     private lateinit var sessionDataAccess: DataAccess<Session>
     private lateinit var invitationDataAccess: DataAccess<Invitation>
-    private lateinit var ap : FakeAuthPersistence
 
     @Before
     fun init() {
-        ap = FakeAuthPersistence()
         cu = CurrentUser(DEFAULT_ADMIN_USER)
         pmd = createEmptyDatabase()
         userDataAccess = pmd.dataAccess(User.directoryName)
@@ -262,7 +259,6 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun `should get descriptive failure with nonreal user`() {
-        ap.getUserBehavior = { NO_USER }
         val (status, _) = authUtils.login(DEFAULT_USER.name, Password("arbitraryarbitrary"))
         assertEquals(LoginResult.NOT_REGISTERED, status)
     }
@@ -379,7 +375,6 @@ class AuthenticationUtilitiesTests {
      */
     @Test
     fun testGetUserByEmployee_NoEmployeeFound() {
-        ap.getUserByEmployeeBehavior = { NO_USER }
         val result = authUtils.getUserByEmployee(DEFAULT_EMPLOYEE)
         assertEquals(NO_USER, result)
     }

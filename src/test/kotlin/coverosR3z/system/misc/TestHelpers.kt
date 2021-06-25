@@ -1,5 +1,4 @@
 package coverosR3z.system.misc
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.IAuthenticationUtilities

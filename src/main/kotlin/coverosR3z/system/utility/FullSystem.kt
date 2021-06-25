@@ -1,6 +1,5 @@
 package coverosR3z.system.utility
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
 import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.system.config.SIZE_OF_DECENT_PASSWORD
@@ -208,7 +207,6 @@ class FullSystem private constructor(
             logger: ILogger,
             cu: CurrentUser = CurrentUser(SYSTEM_USER)
         ): BusinessCode {
-            val ap = AuthenticationPersistence(pmd, logger)
             val tru = TimeRecordingUtilities(pmd, cu, logger)
             val au = AuthenticationUtilities(pmd, logger, cu)
 

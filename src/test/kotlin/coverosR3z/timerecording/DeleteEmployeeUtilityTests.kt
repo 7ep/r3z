@@ -1,6 +1,5 @@
 package coverosR3z.timerecording
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER

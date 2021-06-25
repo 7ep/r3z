@@ -2,8 +2,9 @@ package coverosR3z.server.utility
 
 import coverosR3z.system.utility.FullSystem
 import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
+import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.system.logging.ILogger
 import coverosR3z.system.logging.ILogger.Companion.logImperative
 import coverosR3z.system.misc.utility.toBytes
@@ -232,8 +233,8 @@ class ServerUtilities {
             } else {
                 // otherwise review the routing
                 // now that we know who the user is (if they authenticated) we can update the current user
-                val ap = AuthenticationPersistence(pmd, serverObjects.logger)
-                val user = ap.getUserForSession(analyzedHttpData.sessionToken)
+                val au = AuthenticationUtilities(pmd, serverObjects.logger, CurrentUser(SYSTEM_USER))
+                val user = au.getUserForSession(analyzedHttpData.sessionToken)
                 val bc = initializeBusinessCode(pmd, serverObjects.logger, CurrentUser(user))
                 val ahdWithUser = analyzedHttpData.copy(user = user)
 

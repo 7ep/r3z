@@ -79,6 +79,10 @@ class AuthenticationUtilities(
         return sessionDataAccess.read { sessions -> sessions.singleOrNull { it.sessionId == sessionToken }?.user ?: NO_USER }
     }
 
+    fun getAllSessions() : List<Session> {
+        return sessionDataAccess.read { sessions -> sessions }.toList()
+    }
+
     /**
      * Generates a new session entry for a user, which indicates they are
      * authenticated.  In so doing, we set the date and time when this is

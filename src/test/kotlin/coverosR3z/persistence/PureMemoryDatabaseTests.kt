@@ -1,11 +1,9 @@
 package coverosR3z.persistence
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.*
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.system.config.CURRENT_DATABASE_VERSION
 import coverosR3z.system.misc.*
-import coverosR3z.system.misc.types.Date
-import coverosR3z.system.misc.utility.getTime
 import coverosR3z.persistence.exceptions.DatabaseCorruptedException
 import coverosR3z.persistence.types.ChangeTrackingSet
 import coverosR3z.persistence.types.IndexableSerializable
@@ -23,11 +21,6 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.io.File
 import java.lang.IllegalStateException
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicInteger
 
 class PureMemoryDatabaseTests {
 
@@ -795,7 +788,7 @@ class PureMemoryDatabaseTests {
 
         File(databaseDirectory).deleteRecursively()
         pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
-        val ap = AuthenticationPersistence(pmd, testLogger)
+        val au = AuthenticationUtilities(pmd, testLogger, CurrentUser(SYSTEM_USER))
         val tru = TimeRecordingUtilities(pmd, logger = testLogger, cu = CurrentUser(DEFAULT_ADMIN_USER))
         val newEmployee = if (! skipCreatingEmployees) {
             tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
@@ -808,9 +801,9 @@ class PureMemoryDatabaseTests {
             NO_PROJECT
         }
         if (! skipCreatingUser) {
-            val newUser = ap.createUser(DEFAULT_USER.name, DEFAULT_HASH, DEFAULT_SALT, newEmployee, DEFAULT_USER.role)
+            val (_,newUser) = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, newEmployee)
             if (! skipCreatingSession) {
-                ap.addNewSession(DEFAULT_SESSION_TOKEN, newUser, DEFAULT_DATETIME)
+                au.createNewSession(newUser, time = DEFAULT_DATETIME, rand = {DEFAULT_SESSION_TOKEN})
             }
         }
         if (! skipCreatingTimeEntries) {

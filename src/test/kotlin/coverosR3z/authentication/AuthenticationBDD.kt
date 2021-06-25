@@ -1,6 +1,5 @@
 package coverosR3z.authentication
 
-import coverosR3z.authentication.persistence.AuthenticationPersistence
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.RegistrationResultStatus
 import coverosR3z.authentication.types.SYSTEM_USER
@@ -16,6 +15,7 @@ import coverosR3z.timerecording.types.RecordTimeResult
 import coverosR3z.timerecording.types.StatusEnum
 import coverosR3z.timerecording.utility.ITimeRecordingUtilities
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AuthenticationBDD {
@@ -57,13 +57,13 @@ class AuthenticationBDD {
     fun `I should be able to log in once I'm a registered user`() {
         val s = AuthenticationUserStory.getScenario("I should be able to log in once I'm a registered user")
 
-        val (authPersistence, au) = setupPreviousRegistration()
+        val au = setupPreviousRegistration()
         s.markDone("Given I have registered,")
 
         val (_, resultantUser) = au.login(DEFAULT_USER.name, DEFAULT_PASSWORD)
         s.markDone("when I enter valid credentials,")
 
-        assertSystemRecognizesUser(authPersistence, resultantUser)
+        assertSystemRecognizesUser(au, resultantUser)
         s.markDone("then the system knows who I am.")
     }
 
@@ -89,19 +89,17 @@ class AuthenticationBDD {
     }
 
     private fun assertSystemRecognizesUser(
-        authPersistence: AuthenticationPersistence,
+        au: AuthenticationUtilities,
         resultantUser: User
     ) {
-        val user = authPersistence.getUser(DEFAULT_USER.name)
-        assertEquals(user, resultantUser)
+        assertTrue(au.isUserRegistered(resultantUser.name))
     }
 
-    private fun setupPreviousRegistration(): Pair<AuthenticationPersistence, AuthenticationUtilities> {
+    private fun setupPreviousRegistration(): AuthenticationUtilities {
         val pmd = createEmptyDatabase()
-        val authPersistence = AuthenticationPersistence(pmd, testLogger)
         val au = AuthenticationUtilities(pmd, testLogger, CurrentUser(SYSTEM_USER))
         au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, DEFAULT_EMPLOYEE)
-        return Pair(authPersistence, au)
+        return au
     }
 
     private fun setupPreviousRegisteredUser(): AuthenticationUtilities {
