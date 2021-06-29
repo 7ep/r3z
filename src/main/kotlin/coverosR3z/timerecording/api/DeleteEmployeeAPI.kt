@@ -11,6 +11,7 @@ import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.timerecording.types.DeleteEmployeeResult
 import coverosR3z.timerecording.types.EmployeeId
 import coverosR3z.timerecording.types.NO_EMPLOYEE
+import coverosR3z.timerecording.types.NO_EMPLOYEE_ID
 import coverosR3z.timerecording.utility.DeleteEmployeeUtility
 
 class DeleteEmployeeAPI {
@@ -34,15 +35,22 @@ class DeleteEmployeeAPI {
     companion object : PostEndpoint {
         override fun handlePost(sd: ServerData): PreparedResponseData {
             return AuthUtilities.doPOSTAuthenticated(sd, requiredInputs, path, Role.ADMIN) {
-                val de = DeleteEmployeeUtility(sd.bc.tru, sd.bc.au, CurrentUser(sd.ahd.user), sd.logger)
-                val idString = sd.ahd.data.mapping[Elements.EMPLOYEE_ID.getElemName()]
-                val id = EmployeeId.make(idString)
-                val employee = sd.bc.tru.findEmployeeById(id)
-                check(employee != NO_EMPLOYEE) { "No employee found by that id" }
-                when (de.deleteEmployee(employee)) {
-                    DeleteEmployeeResult.SUCCESS -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_DELETED)
-                    DeleteEmployeeResult.TOO_LATE_REGISTERED -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_USED)
-                    DeleteEmployeeResult.DID_NOT_DELETE -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_TO_DELETE_EMPLOYEE)
+                try {
+                    val de = DeleteEmployeeUtility(sd.bc.tru, sd.bc.au, CurrentUser(sd.ahd.user), sd.logger)
+                    val idString = sd.ahd.data.mapping[Elements.EMPLOYEE_ID.getElemName()]
+                    val id: EmployeeId = EmployeeId.make(idString)
+                    val employee = sd.bc.tru.findEmployeeById(id)
+                    check(employee != NO_EMPLOYEE) { "No employee found by that id" }
+                    when (de.deleteEmployee(employee)) {
+                        DeleteEmployeeResult.SUCCESS -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_DELETED)
+                        DeleteEmployeeResult.TOO_LATE_REGISTERED -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_USED)
+                        DeleteEmployeeResult.DID_NOT_DELETE -> MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_TO_DELETE_EMPLOYEE)
+                    }
+                } catch (ex: Throwable) {
+                    MessageAPI.createCustomMessageRedirect(
+                        ex.message ?: "",
+                        false,
+                        CreateEmployeeAPI.path)
                 }
             }
         }

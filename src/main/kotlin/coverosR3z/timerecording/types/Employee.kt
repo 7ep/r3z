@@ -17,11 +17,13 @@ const val employeeIdNotNullMsg = "The employee id must not be null"
 const val employeeNameNotNullMsg = "The employee name must not be null"
 const val employeeIdCannotBeBlank = "The employee id must not be blank"
 
+val NO_EMPLOYEE_ID = EmployeeId(maxEmployeeCount - 1)
+
 /**
  * This is used to represent no employee - just to avoid using null for an employee
  * It's a typed null, essentially
  */
-val NO_EMPLOYEE = Employee(EmployeeId(maxEmployeeCount -1), EmployeeName("THIS REPRESENTS NO EMPLOYEE"))
+val NO_EMPLOYEE = Employee(NO_EMPLOYEE_ID, EmployeeName("THIS REPRESENTS NO EMPLOYEE"))
 
 /**
  * Holds a employee's name before we have a whole object, like [Employee]

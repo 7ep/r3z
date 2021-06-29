@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -33,21 +34,27 @@ class DeleteProjectAPITests {
      */
     @Test
     fun testDeleteProject() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.PROJECT_DELETED)
         tru.findProjectByIdBehavior = { DEFAULT_PROJECT }
-        val data = PostBodyData(mapOf(
-            DeleteProjectAPI.Elements.ID.getElemName() to "1"
-        ))
+        val data = PostBodyData(
+            mapOf(
+                DeleteProjectAPI.Elements.ID.getElemName() to "1"
+            )
+        )
         val sd = makeDPServerData(data)
 
         val response = DeleteProjectAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?msg=PROJECT_DELETED", response.headers[0])
+        assertEquals(expected, response)
     }
 
     @Test
     fun testDeleteProject_NonNumericId() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Must be able to parse \"abc\" as an integer",
+            false,
+            ProjectAPI.path)
+
         val data = PostBodyData(mapOf(
             DeleteProjectAPI.Elements.ID.getElemName() to "abc"
         ))
@@ -55,10 +62,7 @@ class DeleteProjectAPITests {
 
         val result = DeleteProjectAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=Must+be+able+to+parse+%22abc%22+as+an+integer")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -66,6 +70,11 @@ class DeleteProjectAPITests {
      */
     @Test
     fun testDeleteProject_ProjectNotFoundById() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "No project found by that id",
+            false,
+            ProjectAPI.path)
+
         tru.findProjectByIdBehavior = { NO_PROJECT }
         val data = PostBodyData(mapOf(
             DeleteProjectAPI.Elements.ID.getElemName() to "123"
@@ -74,10 +83,7 @@ class DeleteProjectAPITests {
 
         val result = DeleteProjectAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=No+project+found+by+that+id")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -86,6 +92,7 @@ class DeleteProjectAPITests {
      */
     @Test
     fun testDeleteProject_ProjectUsed() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.PROJECT_USED)
         tru.deleteProjectBehavior = { DeleteProjectResult.USED }
         tru.findProjectByIdBehavior = { DEFAULT_PROJECT }
         val data = PostBodyData(mapOf(
@@ -95,9 +102,7 @@ class DeleteProjectAPITests {
 
         val response = DeleteProjectAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?msg=PROJECT_USED", response.headers[0])
+        assertEquals(expected, response)
     }
 
     // if we are missing the id, get an exception

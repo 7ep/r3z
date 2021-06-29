@@ -22,7 +22,7 @@ class DeleteTimeAPI {
                 Role.SYSTEM, Role.ADMIN, Role.APPROVER, Role.REGULAR) {
                     val timeEntryId = TimeEntryId.make(sd.ahd.data.mapping[ViewTimeAPI.Elements.ID_INPUT.getElemName()])
                     val timeEntry = sd.bc.tru.findTimeEntryById(timeEntryId)
-                    check(timeEntry != NO_TIMEENTRY) { "No time entry found with id" }
+                    check(timeEntry != NO_TIMEENTRY) { "No time entry found with that id" }
                     sd.bc.tru.deleteTimeEntry(timeEntry)
 
                     val currentPeriod = sd.ahd.data.mapping[ViewTimeAPI.Elements.TIME_PERIOD.getElemName()]

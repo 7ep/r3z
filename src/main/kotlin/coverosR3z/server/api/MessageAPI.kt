@@ -146,19 +146,29 @@ class MessageAPI {
         // if we were sent both a custom message *and* an enumerated message
         MIXED_MESSAGE_TYPES("MIXED MESSAGE TYPES", HomepageAPI.path, MessageType.FAILURE, StatusCode.BAD_REQUEST),
 
+        // logging settings
         LOG_SETTINGS_SAVED("The log settings were saved", LoggingAPI.path, MessageType.SUCCESS, StatusCode.OK),
+
+        // Login
         FAILED_LOGIN("authentication failed", LoginAPI.path, MessageType.FAILURE, StatusCode.UNAUTHORIZED),
+
+        // projects
         FAILED_CREATE_PROJECT_DUPLICATE("duplicate project", ProjectAPI.path, MessageType.FAILURE, StatusCode.OK),
-        FAILED_CREATE_EMPLOYEE_DUPLICATE("duplicate employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
-        INVALID_PROJECT_DURING_ENTERING_TIME("invalid project", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         PROJECT_DELETED("The project was deleted", ProjectAPI.path, MessageType.SUCCESS, StatusCode.OK),
         PROJECT_USED("The project was already used and therefore unable to be deleted", ProjectAPI.path, MessageType.FAILURE, StatusCode.OK),
+
+        // employee
+        FAILED_CREATE_EMPLOYEE_DUPLICATE("duplicate employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        EMPLOYEE_DELETED("Employee successfully deleted", CreateEmployeeAPI.path, MessageType.SUCCESS, StatusCode.OK),
+        EMPLOYEE_USED("Unable to delete employee - already registered to a user", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        FAILED_TO_DELETE_EMPLOYEE("general failure to delete employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.INTERNAL_SERVER_ERROR),
 
         // messages for problems during entering time
         MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR("The time entered must be on half-hour divisions", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The time entered must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         TOTAL_TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The total time entered for a day must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD("It is not allowed to enter new time in a submitted period", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
+        INVALID_PROJECT_DURING_ENTERING_TIME("invalid project", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
 
         // message for problems during editing time
         EDIT_MINUTES_MUST_BE_MULTIPLE_OF_15("The time entered must be on quarter-hour divisions", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
@@ -166,9 +176,5 @@ class MessageAPI {
         EDIT_TOTAL_TIME_MUST_BE_LESS_OR_EQUAL_TO_24("The total time entered for a day must be less or equal to 24 hours", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
         EDIT_NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD("It is not allowed to enter new time in a submitted period", ViewTimeAPI.path, MessageType.FAILURE, StatusCode.OK),
 
-        // messages for deleting employees
-        EMPLOYEE_DELETED("Employee successfully deleted", CreateEmployeeAPI.path, MessageType.SUCCESS, StatusCode.OK),
-        EMPLOYEE_USED("Unable to delete employee - already registered to a user", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.OK),
-        FAILED_TO_DELETE_EMPLOYEE("general failure to delete employee", CreateEmployeeAPI.path, MessageType.FAILURE, StatusCode.INTERNAL_SERVER_ERROR),
     }
 }

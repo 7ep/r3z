@@ -6,6 +6,7 @@ import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -61,15 +62,17 @@ class CreateEmployeeAPITests {
      */
     @Test
     fun testHandlePOSTNewEmployee_HugeName() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Max size of employee name is $maxEmployeeNameSize",
+            false,
+            CreateEmployeeAPI.path)
+
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "a".repeat(31)))
         val sd = makeTypicalCEServerData(data)
 
         val result = CreateEmployeeAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=createemployee&suc=false&custommsg=Max+size+of+employee+name+is+30")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -188,14 +191,14 @@ class CreateEmployeeAPITests {
 
     @Test
     fun testShouldDisallowDuplicateEmployeeNames() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_CREATE_EMPLOYEE_DUPLICATE)
         tru.findEmployeeByNameBehavior = { Employee(EmployeeId(1), EmployeeName("abc123")) }
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "abc123"))
         val sd = makeTypicalCEServerData(data)
 
         val result = CreateEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_EMPLOYEE_DUPLICATE"))
+        assertEquals(expected, result)
     }
 
     /**
@@ -204,14 +207,14 @@ class CreateEmployeeAPITests {
      */
     @Test
     fun testShouldDisallowDuplicateEmployeeNamesWithSurroundingWhitespace() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_CREATE_EMPLOYEE_DUPLICATE)
         tru.findEmployeeByNameBehavior = { Employee(EmployeeId(1), EmployeeName("abc123")) }
         val data = PostBodyData(mapOf(Elements.EMPLOYEE_INPUT.getElemName() to "   abc123   "))
         val sd = makeTypicalCEServerData(data)
 
         val result = CreateEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_EMPLOYEE_DUPLICATE"))
+        assertEquals(expected, result)
     }
 
 /*

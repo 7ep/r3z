@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -45,15 +46,16 @@ class ProjectAPITests {
      */
     @Test
     fun testHandlePOSTNewProject_HugeName() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Max size of project name is $maxProjectNameSize",
+            false,
+            ProjectAPI.path)
         val data = PostBodyData(mapOf(ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "a".repeat(maxProjectNameSize + 1)))
         val sd = makePServerData(data)
 
         val result = ProjectAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=createproject&suc=false&custommsg=Max+size+of+project+name+is+100")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -181,14 +183,15 @@ class ProjectAPITests {
      */
     @Test
     fun testShouldDisallowDuplicateNamesAfterTrimming() {
+        val expected =
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_CREATE_PROJECT_DUPLICATE)
         tru.findProjectByNameBehavior = { Project(ProjectId(1), ProjectName("abc123")) }
         val data = PostBodyData(mapOf(
             ProjectAPI.Elements.PROJECT_INPUT.getElemName() to "   abc123   "))
         val sd = makePServerData(data)
         val result = ProjectAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(result.headers.joinToString(";"), result.headers.contains("Location: result?msg=FAILED_CREATE_PROJECT_DUPLICATE"))
+        assertEquals(expected, result)
     }
 
 

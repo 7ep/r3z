@@ -5,6 +5,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -33,6 +34,7 @@ class DeleteEmployeeAPITests {
      */
     @Test
     fun testDeleteEmployee() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_DELETED)
         au.getUserByEmployeeBehavior = { NO_USER }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
         val data = PostBodyData(mapOf(
@@ -42,13 +44,16 @@ class DeleteEmployeeAPITests {
 
         val response = DeleteEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?msg=EMPLOYEE_DELETED", response.headers[0])
+        assertEquals(expected, response)
     }
 
     @Test
     fun testDeleteEmployee_NonNumericId() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The employee id was not interpretable as an integer.  You sent \"abc\".",
+            false,
+            CreateEmployeeAPI.path)
+
         au.getUserByEmployeeBehavior = { NO_USER }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
         val data = PostBodyData(mapOf(
@@ -58,9 +63,7 @@ class DeleteEmployeeAPITests {
 
         val response = DeleteEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?rtn=deleteemployee&suc=false&custommsg=The+employee+id+was+not+interpretable+as+an+integer.++You+sent+%22abc%22.", response.headers[0])
+        assertEquals(expected, response)
     }
 
     /**
@@ -68,6 +71,11 @@ class DeleteEmployeeAPITests {
      */
     @Test
     fun testDeleteEmployee_EmployeeNotFoundById() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "No employee found by that id",
+            false,
+            CreateEmployeeAPI.path)
+
         au.getUserByEmployeeBehavior = { NO_USER }
         tru.findEmployeeByIdBehavior = { NO_EMPLOYEE }
         val data = PostBodyData(mapOf(
@@ -77,9 +85,7 @@ class DeleteEmployeeAPITests {
 
         val response = DeleteEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?rtn=deleteemployee&suc=false&custommsg=No+employee+found+by+that+id", response.headers[0])
+        assertEquals(expected, response)
     }
 
     /**
@@ -88,6 +94,7 @@ class DeleteEmployeeAPITests {
      */
     @Test
     fun testDeleteEmployee_UserRegisteredToEmployee() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.EMPLOYEE_USED)
         au.getUserByEmployeeBehavior = { DEFAULT_USER }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
         val data = PostBodyData(mapOf(
@@ -97,9 +104,7 @@ class DeleteEmployeeAPITests {
 
         val response = DeleteEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?msg=EMPLOYEE_USED", response.headers[0])
+        assertEquals(expected, response)
     }
 
     /**
@@ -108,6 +113,7 @@ class DeleteEmployeeAPITests {
      */
     @Test
     fun testDeleteEmployee_GeneralDeletionFailure() {
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.FAILED_TO_DELETE_EMPLOYEE)
         tru.deleteEmployeeBehavior = { false }
         au.getUserByEmployeeBehavior = { NO_USER }
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
@@ -118,9 +124,7 @@ class DeleteEmployeeAPITests {
 
         val response = DeleteEmployeeAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, response.statusCode)
-        assertEquals(1, response.headers.count())
-        assertEquals("Location: result?msg=FAILED_TO_DELETE_EMPLOYEE", response.headers[0])
+        assertEquals(expected, response)
     }
 
     // if we are missing the id, get an exception

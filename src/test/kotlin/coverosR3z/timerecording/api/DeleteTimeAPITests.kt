@@ -2,6 +2,7 @@ package coverosR3z.timerecording.api
 
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -42,6 +43,10 @@ class DeleteTimeAPITests {
     // test deleting a non-existent time entry
     @Test
     fun testDeleteTime_BadId() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "No time entry found with that id",
+            false,
+            ViewTimeAPI.path)
         tru.findTimeEntryByIdBehavior = { NO_TIMEENTRY }
         val data = PostBodyData(mapOf(
             ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1"
@@ -50,10 +55,7 @@ class DeleteTimeAPITests {
 
         val result = DeleteTimeAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=No+time+entry+found+with+id")
-        )
+        assertEquals(expected, result)
     }
 
     /**

@@ -120,7 +120,8 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_emptyStringProject() {
-        val expected = customResponse("Makes no sense to have an empty project name")
+        val expected =
+            MessageAPI.createCustomMessageRedirect("Makes no sense to have an empty project name", false, ViewTimeAPI.path)
 
         val result = enterTimeWithAPI(proj = "")
 
@@ -133,7 +134,8 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_allSpacesProject() {
-        val expected = customResponse("Makes no sense to have an empty project name")
+        val expected =
+            MessageAPI.createCustomMessageRedirect("Makes no sense to have an empty project name", false, ViewTimeAPI.path)
 
         val result = enterTimeWithAPI(proj = "   ")
 
@@ -147,7 +149,7 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTimeAPI_unrecognizedProject() {
         tru.findProjectByNameBehavior = { NO_PROJECT }
-        val expected = enumeratedResponse(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.INVALID_PROJECT_DURING_ENTERING_TIME)
 
         val result = enterTimeWithAPI(proj = "UNRECOGNIZED")
 
@@ -160,7 +162,11 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_negativeTime() {
-        val expected = customResponse("Doesn't make sense to have negative time. time in minutes: -60")
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Doesn't make sense to have negative time. time in minutes: -60",
+            false,
+            ViewTimeAPI.path
+        )
 
         val result = enterTimeWithAPI(time = "-1")
 
@@ -173,7 +179,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_greaterThanTwentyFour() {
-        val expected = enumeratedResponse(MessageAPI.Message.TIME_MUST_BE_LESS_OR_EQUAL_TO_24)
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.TIME_MUST_BE_LESS_OR_EQUAL_TO_24)
 
         val result = enterTimeWithAPI(time = "24.50")
 
@@ -197,7 +203,8 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_nonNumericTime() {
-        val expected = customResponse("Must be able to parse \"a\" as a double")
+        val expected =
+            MessageAPI.createCustomMessageRedirect("Must be able to parse \"a\" as a double", false, ViewTimeAPI.path)
 
         val result = enterTimeWithAPI(time = "a")
 
@@ -210,7 +217,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_timeNotOnValidMultiple() {
-        val expected = enumeratedResponse(MessageAPI.Message.MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR)
+        val expected = MessageAPI.createEnumMessageRedirect(MessageAPI.Message.MINUTES_MUST_BE_MULTIPLE_OF_HALF_HOUR)
 
         val result = enterTimeWithAPI(time = "1.49")
 
@@ -225,7 +232,8 @@ class EnterTimeAPITests {
     @Test
     fun testEnterTime_DateInvalid_DateEntryDisallowedForSubmittedTime() {
         tru.isInASubmittedPeriodBehavior = { true }
-        val expected = enumeratedResponse(MessageAPI.Message.NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD)
+        val expected =
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD)
 
         val result = enterTimeWithAPI()
 
@@ -235,7 +243,7 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_EmptyDateString() {
-        val expected = customResponse("date must not be blank")
+        val expected = MessageAPI.createCustomMessageRedirect("date must not be blank", false, ViewTimeAPI.path)
 
         val result = enterTimeWithAPI(date = "")
 
@@ -248,7 +256,11 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_TooEarlyDateString() {
-        val expected = customResponse("no way on earth people are using this before 1980-01-01 or past 2200-01-01, you had a date of 1979-12-31")
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "no way on earth people are using this before 1980-01-01 or past 2200-01-01, you had a date of 1979-12-31",
+            false,
+            ViewTimeAPI.path
+        )
 
         val result = enterTimeWithAPI(date = "1979-12-31")
 
@@ -261,7 +273,11 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEnterTimeAPI_TooLateDateString() {
-        val expected = customResponse("no way on earth people are using this before 1980-01-01 or past 2200-01-01, you had a date of 2200-01-02")
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "no way on earth people are using this before 1980-01-01 or past 2200-01-01, you had a date of 2200-01-02",
+            false,
+            ViewTimeAPI.path
+        )
 
         val result = enterTimeWithAPI(date = "2200-01-02")
 
@@ -348,14 +364,16 @@ class EnterTimeAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testEdit_Negative_MissingId() {
-        val expected = customResponse("Integer must not be a null value")
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
-            ViewTimeAPI.Elements.BEING_EDITED.getElemName() to "true",
-        ))
+        val expected = MessageAPI.createCustomMessageRedirect("Integer must not be a null value", false, ViewTimeAPI.path)
+        val data = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+                ViewTimeAPI.Elements.BEING_EDITED.getElemName() to "true",
+            )
+        )
         val sd = makeETServerData(data)
 
         val result = EnterTimeAPI.handlePost(sd)
@@ -370,16 +388,19 @@ class EnterTimeAPITests {
      */
     @Test
     fun testEdit_DateInvalid_DateEntryDisallowedForSubmittedTime() {
-        val expected = enumeratedResponse(MessageAPI.Message.NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD)
+        val expected =
+            MessageAPI.createEnumMessageRedirect(MessageAPI.Message.NO_TIME_ENTRY_ALLOWED_IN_SUBMITTED_PERIOD)
         tru.isInASubmittedPeriodBehavior = { true }
-        val data = PostBodyData(mapOf(
-            ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
-            ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
-            ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
-            ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1",
-            ViewTimeAPI.Elements.BEING_EDITED.getElemName() to "true",
-        ))
+        val data = PostBodyData(
+            mapOf(
+                ViewTimeAPI.Elements.PROJECT_INPUT.getElemName() to DEFAULT_PROJECT.name.value,
+                ViewTimeAPI.Elements.TIME_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.DETAIL_INPUT.getElemName() to "not much to say",
+                ViewTimeAPI.Elements.DATE_INPUT.getElemName() to DEFAULT_DATE_STRING,
+                ViewTimeAPI.Elements.ID_INPUT.getElemName() to "1",
+                ViewTimeAPI.Elements.BEING_EDITED.getElemName() to "true",
+            )
+        )
         val sd = makeETServerData(data)
 
         val result = EnterTimeAPI.handlePost(sd)
@@ -414,14 +435,6 @@ class EnterTimeAPITests {
         val sd = makeETServerData(data)
 
         return EnterTimeAPI.handlePost(sd)
-    }
-
-    private fun customResponse(msg: String): PreparedResponseData {
-        return MessageAPI.createCustomMessageRedirect(msg, false, "timeentries")
-    }
-
-    private fun enumeratedResponse(enumMsg: MessageAPI.Message): PreparedResponseData {
-        return MessageAPI.createEnumMessageRedirect(enumMsg)
     }
 
     /**

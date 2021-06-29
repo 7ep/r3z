@@ -4,6 +4,7 @@ import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
@@ -74,15 +75,17 @@ class SubmitTimeAPITests {
 
     @Test
     fun testSubmittingTime_InvalidStartDate() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The date for submitting time was not interpreted as a date. You sent \"a1\".  Format is YYYY-MM-DD",
+            false,
+            ViewTimeAPI.path
+        )
         val sd = makeSdForSubmit(startDate = "a1")
 
         // the API processes the client input
         val result = SubmitTimeAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+date+for+submitting+time+was+not+interpreted+as+a+date.+You+sent+%22a1%22.++Format+is+YYYY-MM-DD")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -104,16 +107,18 @@ class SubmitTimeAPITests {
      */
     @Test
     fun testUnsubmittingApprovedTime() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "This time period is approved.  Cannot operate on approved time periods.",
+            false,
+            ViewTimeAPI.path
+        )
         tru.isApprovedBehavior = { ApprovalStatus.APPROVED }
         val sd = makeSdForSubmit(unsubmit = true)
 
         // the API processes the client input
         val result = SubmitTimeAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=This+time+period+is+approved.++Cannot+operate+on+approved+time+periods.")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -122,16 +127,18 @@ class SubmitTimeAPITests {
      */
     @Test
     fun testSubmittingAlreadySubmitted() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "This time period is already submitted.  Cannot submit on this period again.",
+            false,
+            ViewTimeAPI.path
+        )
         tru.isInASubmittedPeriodBehavior = { true }
         val sd = makeSdForSubmit()
 
         // the API processes the client input
         val result = SubmitTimeAPI.handlePost(sd)
 
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=This+time+period+is+already+submitted.++Cannot+submit+on+this+period+again.")
-        )
+        assertEquals(expected, result)
     }
 
     @Test

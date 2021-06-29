@@ -6,10 +6,12 @@ import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
+import coverosR3z.timerecording.api.CreateEmployeeAPI
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -182,61 +184,61 @@ class LoggingAPITests {
     @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_audit() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "input for log setting must be \"true\" or \"false\"",
+            false,
+            LoggingAPI.path)
         val data = allTrue(audit = "foo")
         val sd = makeLoggingServerData(data)
 
         val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        Assert.assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
-        )
+        assertEquals(expected, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_warn() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "input for log setting must be \"true\" or \"false\"",
+            false,
+            LoggingAPI.path)
         val data = allTrue(warn = "foo")
         val sd = makeLoggingServerData(data)
 
         val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        Assert.assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
-        )
+        assertEquals(expected, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_debug() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "input for log setting must be \"true\" or \"false\"",
+            false,
+            LoggingAPI.path)
         val data = allTrue(debug = "foo")
         val sd = makeLoggingServerData(data)
 
         val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        Assert.assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
-        )
+        assertEquals(expected, result)
     }
 
     @Category(APITestCategory::class)
     @Test
     fun testShouldComplainAboutBadInput_trace() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "input for log setting must be \"true\" or \"false\"",
+            false,
+            LoggingAPI.path)
         val data = allTrue(trace = "foo")
         val sd = makeLoggingServerData(data)
 
         val result = LoggingAPI.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        Assert.assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=logging&suc=false&custommsg=input+for+log+setting+must+be+%22true%22+or+%22false%22")
-        )
+        assertEquals(expected, result)
     }
 
     // region ROLES TESTS

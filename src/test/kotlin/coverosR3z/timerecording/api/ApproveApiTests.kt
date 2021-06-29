@@ -5,12 +5,14 @@ import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
 import coverosR3z.system.misc.*
 import coverosR3z.server.APITestCategory
+import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.NO_EMPLOYEE
+import coverosR3z.timerecording.types.maxEmployeeNameSize
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -76,16 +78,17 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_InvalidEmployeeId_NoEmployeeFound() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "No employee was found with an id of 2",
+            false,
+            ViewTimeAPI.path)
+
         tru.findEmployeeByIdBehavior = { NO_EMPLOYEE }
         val sd = makeSdForApprove()
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=No+employee+was+found+with+an+id+of+2")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -93,15 +96,16 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_InvalidEmployeeId_EmployeeIdInvalid() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The employee id was not interpretable as an integer.  You sent \"a\".",
+            false,
+            ViewTimeAPI.path)
+
         val sd = makeSdForApprove(employeeId = "a")
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+employee+id+was+not+interpretable+as+an+integer.++You+sent+%22a%22.")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -109,31 +113,33 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_InvalidEmployeeId_StartDateInvalid() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The date for approving time was not interpreted as a date. You sent \"a\".  Format is YYYY-MM-DD",
+            false,
+            ViewTimeAPI.path)
+
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeSdForApprove(startDate = "a")
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+date+for+approving+time+was+not+interpreted+as+a+date.+You+sent+%22a%22.++Format+is+YYYY-MM-DD")
-        )
+        assertEquals(expected, result)
     }
     /**
      * If the employee id is blank...
      */
     @Test
     fun testApprove_InvalidEmployeeId_EmployeeIdBlank() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The employee id must not be blank",
+            false,
+            ViewTimeAPI.path)
+
         val sd = makeSdForApprove(employeeId = "")
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+employee+id+must+not+be+blank")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -141,16 +147,17 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_InvalidEmployeeId_StartDateBlank() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "The date for approving time was not interpreted as a date. You sent \"\".  Format is YYYY-MM-DD",
+            false,
+            ViewTimeAPI.path)
+
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeSdForApprove(startDate = "")
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=The+date+for+approving+time+was+not+interpreted+as+a+date.+You+sent+%22%22.++Format+is+YYYY-MM-DD")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -158,17 +165,18 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_TimesheetIsNotSubmitted() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Cannot approve a non-submitted timesheet.  EmployeeId: ${DEFAULT_EMPLOYEE_2.id.value}, Timeperiod start: $defaultStartDate",
+            false,
+            ViewTimeAPI.path)
+
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         tru.approveTimesheetBehavior = { throw IllegalStateException("Cannot approve a non-submitted timesheet.  EmployeeId: ${DEFAULT_EMPLOYEE_2.id.value}, Timeperiod start: $defaultStartDate") }
         val sd = makeSdForApprove()
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Cannot+approve+a+non-submitted+timesheet.++EmployeeId%3A+2%2C+Timeperiod+start%3A+2021-01-01")
-        )
+        assertEquals(expected, result)
     }
 
     /**
@@ -176,17 +184,18 @@ class ApproveApiTests {
      */
     @Test
     fun testApprove_TimesheetIsOurOwn() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "Cannot approve your own timesheet",
+            false,
+            ViewTimeAPI.path)
+
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE }
         tru.approveTimesheetBehavior = { throw IllegalStateException("Cannot approve your own timesheet") }
         val sd = makeSdForApprove()
 
         val result = ApproveApi.handlePost(sd)
 
-        assertEquals(StatusCode.SEE_OTHER, result.statusCode)
-        assertTrue(
-            result.headers.joinToString(";"),
-            result.headers.contains("Location: result?rtn=timeentries&suc=false&custommsg=Cannot+approve+your+own+timesheet")
-        )
+        assertEquals(expected, result)
     }
 
     /**
