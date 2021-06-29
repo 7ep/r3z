@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(IntegrationTestCategory::class)
 class TimeRecordingUtilityTests {
 
     private lateinit var tru : TimeRecordingUtilities
@@ -52,17 +53,13 @@ class TimeRecordingUtilityTests {
      * Negative case - what happens if we receive a request to enter
      * time for an invalid project?
      */
-    @IntegrationTest
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should fail to record time for non-existent project`() {
         // it's an invalid project because the project doesn't exist
-        val pmd = createEmptyDatabase()
-        val utils = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
         val entry = createTimeEntryPreDatabase(project= Project(ProjectId(1), ProjectName("an invalid project")))
         val expectedResult = RecordTimeResult(StatusEnum.INVALID_PROJECT)
 
-        val actualResult = utils.createTimeEntry(entry)
+        val actualResult =tru.createTimeEntry(entry)
 
         assertEquals("Expect to see a message about invalid project", expectedResult, actualResult)
     }
@@ -71,18 +68,14 @@ class TimeRecordingUtilityTests {
      * Negative case - what happens if we receive a request to enter
      * time for an invalid employee?
      */
-    @IntegrationTest
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should fail to record time for non-existent employee`() {
         // it's an invalid project because the project doesn't exist
-        val pmd = createEmptyDatabase()
-        val utils = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
-        val project = utils.createProject(DEFAULT_PROJECT_NAME)
+        val project = tru.createProject(DEFAULT_PROJECT_NAME)
         val entry = createTimeEntryPreDatabase(project = project)
         val expectedResult = RecordTimeResult(StatusEnum.INVALID_EMPLOYEE)
 
-        val actualResult = utils.createTimeEntry(entry)
+        val actualResult = tru.createTimeEntry(entry)
 
         assertEquals("Expect to see a message about invalid employee", expectedResult, actualResult)
     }
@@ -92,20 +85,16 @@ class TimeRecordingUtilityTests {
      * any more time when we've already recorded the maximum for the day?
      * (It should throw an exception)
      */
-    @IntegrationTest
-    @Category(IntegrationTestCategory::class)
     @Test
     fun `Should throw ExceededDailyHoursException when asked to record more than 24 hours total in a day`() {
         val twentyFourHours = Time(24 * 60)
-        val pmd = createEmptyDatabase()
-        val utils = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
-        val project = utils.createProject(DEFAULT_PROJECT_NAME)
-        val employee = utils.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val entry1 = createTimeEntryPreDatabase(time= twentyFourHours, project= project, employee = employee)
-        utils.createTimeEntry(entry1)
+        tru.createTimeEntry(entry1)
         val entry2 = createTimeEntryPreDatabase(time= Time(1), project= project, employee = employee)
 
-        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.createTimeEntry(entry2) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { tru.createTimeEntry(entry2) }
     }
 
     /**
@@ -117,15 +106,13 @@ class TimeRecordingUtilityTests {
     @Test
     fun `Should throw ExceededDailyHoursException when asked to record more than 24 hours total with prior hours entered`() {
         val twentyThreeHours = Time(23 * 60)
-        val pmd = createEmptyDatabase()
-        val utils = TimeRecordingUtilities(pmd, CurrentUser(DEFAULT_ADMIN_USER), testLogger)
-        val project = utils.createProject(DEFAULT_PROJECT_NAME)
-        val employee = utils.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val entry1 = createTimeEntryPreDatabase(time= twentyThreeHours, project= project, employee = employee)
-        utils.createTimeEntry(entry1)
+        tru.createTimeEntry(entry1)
         val entry2 = createTimeEntryPreDatabase(time= Time(60 * 2), project= project, employee = employee)
 
-        assertThrows(ExceededDailyHoursAmountException::class.java) { utils.createTimeEntry(entry2) }
+        assertThrows(ExceededDailyHoursAmountException::class.java) { tru.createTimeEntry(entry2) }
     }
 
 
@@ -240,7 +227,6 @@ class TimeRecordingUtilityTests {
     /**
      * List all of two projects
      */
-    @Category(IntegrationTestCategory::class)
     @Test fun testCanListAllProjects() {
         val utils = makeTruWithAdminUser()
         val expectedList = mutableListOf<Project>()
@@ -253,7 +239,6 @@ class TimeRecordingUtilityTests {
     /**
      * List all and no projects in database - [emptyList]
      */
-    @Category(IntegrationTestCategory::class)
     @Test fun testCanListAllProjects_NoProjects() {
         val utils = makeTruWithAdminUser()
         val allProjects : List<Project> = utils.listAllProjects()
@@ -263,7 +248,6 @@ class TimeRecordingUtilityTests {
     /**
      * happy path
      */
-    @Category(IntegrationTestCategory::class)
     @Test fun testCanGetProjectById() {
         val tru = makeTruWithAdminUser()
         val createdProject = tru.createProject(DEFAULT_PROJECT_NAME)
@@ -274,7 +258,6 @@ class TimeRecordingUtilityTests {
     /**
      * what if the project doesn't exist? [NO_PROJECT]
      */
-    @Category(IntegrationTestCategory::class)
     @Test fun testCanGetProjectById_NotFound() {
         val tru = makeTruWithAdminUser()
         val foundProject = tru.findProjectById(ProjectId(1))
@@ -302,13 +285,10 @@ class TimeRecordingUtilityTests {
      * Given we have a time entry in the database, let's
      * edit its values
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry() {
         // arrange
         testLogger.turnOnAllLogging()
-        val pmd = createEmptyDatabase()
-        val tru = TimeRecordingUtilities(pmd, cu, testLogger)
         tru.createProject(DEFAULT_PROJECT_NAME)
         tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         val (_, newTimeEntry) = tru.createTimeEntry(createTimeEntryPreDatabase(time = Time(1)))
@@ -327,7 +307,6 @@ class TimeRecordingUtilityTests {
      * Nothing much different should take place if we're overwriting
      * with the exact same values, just want to make that explicit in a test
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_Unchanged() {
         // arrange
@@ -346,7 +325,6 @@ class TimeRecordingUtilityTests {
     /**
      * Someone who isn't this employee cannot change the time entry
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_DisallowDifferentEmployeeToChange() {
         // arrange
@@ -369,7 +347,6 @@ class TimeRecordingUtilityTests {
         assertEquals(expected, actual)
     }
 
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testCanEditTimeEntry_InvalidProject() {
         // arrange
@@ -420,16 +397,12 @@ class TimeRecordingUtilityTests {
             expected, result)
     }
 
-    @IntegrationTest
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testSubmitTime() {
-        val pmd = createEmptyDatabase()
-        val adminTru = TimeRecordingUtilities(pmd, cu, testLogger)
-        val project = adminTru.createProject(DEFAULT_PROJECT_NAME)
-        val employee = adminTru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        val project = tru.createProject(DEFAULT_PROJECT_NAME)
+        val employee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
 
-        val tru = adminTru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
+        val tru = tru.changeUser(CurrentUser(DEFAULT_REGULAR_USER))
         val expected = RecordTimeResult(StatusEnum.LOCKED_ALREADY_SUBMITTED)
 
         // this locks the time entries for the period
