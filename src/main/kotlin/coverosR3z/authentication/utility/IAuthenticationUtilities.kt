@@ -85,4 +85,9 @@ interface IAuthenticationUtilities {
      */
     fun getUserByEmployee(employee: Employee): User
 
+    /**
+     * Get all the users that have a particular [Role]
+     */
+    fun listUsersByRole(role: Role): Set<User>
+
 }

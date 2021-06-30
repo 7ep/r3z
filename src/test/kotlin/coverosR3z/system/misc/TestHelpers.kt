@@ -64,7 +64,6 @@ val DEFAULT_PERIOD_END_DATE = Date.make( "2021-02-15")
 val DEFAULT_TIME_PERIOD = TimePeriod(DEFAULT_PERIOD_START_DATE, DEFAULT_PERIOD_END_DATE)
 val DEFAULT_SUBMITTED_PERIOD = SubmittedPeriod(SubmissionId(1), DEFAULT_EMPLOYEE, DEFAULT_TIME_PERIOD, ApprovalStatus.UNAPPROVED)
 val DEFAULT_APPROVER_USER = User(UserId(1), UserName("DefaultApproverUser"), DEFAULT_HASH, DEFAULT_SALT, DEFAULT_EMPLOYEE, role=Role.APPROVER)
-val DEFAULT_INVITATION_CODE = InvitationCode("abc123")
 val DEFAULT_INVITATION = Invitation(InvitationId(1), InvitationCode("abc123"), DEFAULT_EMPLOYEE, DEFAULT_DATETIME)
 val DEFAULT_CONFIGURATION = SystemConfiguration(SystemConfiguration.LogSettings(audit = true, warn = true, debug = true, trace = true))
 const val DEFAULT_SESSION_TOKEN = "abc123"

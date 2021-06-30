@@ -295,7 +295,7 @@ class ViewTimeAPI {
          * to seeing another person's timesheet
          */
         private fun createEmployeeSwitch(currentPeriod: TimePeriod, sd: ServerData): String {
-            return if (sd.ahd.user.role != Role.ADMIN) "" else """                
+            return if (sd.ahd.user.role !in listOf(Role.ADMIN, Role.APPROVER)) "" else """                
                 <form id="employee_switch_form" class="navitem" action="$path">
                     <label id="view_other_timesheet_label">View other timesheet</label>
                     <input type="hidden" name="${Elements.TIME_PERIOD.getElemName()}" value="${currentPeriod.start.stringValue}" />

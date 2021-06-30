@@ -11,7 +11,6 @@ import coverosR3z.server.utility.AuthUtilities
 import coverosR3z.timerecording.types.DeleteEmployeeResult
 import coverosR3z.timerecording.types.EmployeeId
 import coverosR3z.timerecording.types.NO_EMPLOYEE
-import coverosR3z.timerecording.types.NO_EMPLOYEE_ID
 import coverosR3z.timerecording.utility.DeleteEmployeeUtility
 
 class DeleteEmployeeAPI {

@@ -3,21 +3,20 @@ package coverosR3z.timerecording.api
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
-import coverosR3z.system.misc.*
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.PostBodyData
 import coverosR3z.server.types.ServerData
 import coverosR3z.server.types.StatusCode
+import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.NO_EMPLOYEE
-import coverosR3z.timerecording.types.maxEmployeeNameSize
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
-import java.lang.IllegalStateException
 
 @Category(APITestCategory::class)
 class ApproveApiTests {

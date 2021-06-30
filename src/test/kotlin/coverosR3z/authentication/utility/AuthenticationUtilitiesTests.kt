@@ -14,6 +14,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Category(IntegrationTestCategory::class)
 class AuthenticationUtilitiesTests {
 
     private lateinit var authUtils : AuthenticationUtilities
@@ -292,7 +293,6 @@ class AuthenticationUtilitiesTests {
      * If somehow the user were to able to attempt to logout
      * while already logged out, an exception should be thrown
      */
-    @Category(IntegrationTestCategory::class)
     @Test
     fun testShouldFailDeletingSessionsIfAlreadyLoggedOut() {
         val pmd = createEmptyDatabase()
@@ -388,5 +388,22 @@ class AuthenticationUtilitiesTests {
         val result = authUtils.getUserByEmployee(DEFAULT_EMPLOYEE)
         assertEquals(DEFAULT_USER, result)
     }
+
+    @Test
+    fun `it should be possible to obtain a list of users by their role`() {
+        userDataAccess.actOn { u -> u.add(DEFAULT_REGULAR_USER) }
+        val result = authUtils.listUsersByRole(Role.REGULAR)
+        assertEquals(result, setOf(DEFAULT_REGULAR_USER))
+    }
+
+    @Test
+    fun `I should get an empty list if I search for a role that has no one in it`() {
+        // add an admin role
+        userDataAccess.actOn { u -> u.add(DEFAULT_ADMIN_USER) }
+        // search for regular role
+        val result = authUtils.listUsersByRole(Role.REGULAR)
+        assertEquals(result, emptySet<User>())
+    }
+
 
 }

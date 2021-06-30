@@ -15,6 +15,10 @@ import coverosR3z.server.utility.AuthUtilities.Companion.isAuthenticated
 import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
+import coverosR3z.system.logging.LoggingAPI
+import coverosR3z.timerecording.api.CreateEmployeeAPI
+import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.api.SetApproverAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 
 class HomepageAPI(private val sd: ServerData)  {
@@ -63,15 +67,16 @@ class HomepageAPI(private val sd: ServerData)  {
         val allowedToSee: List<HomepageItem> = when (user.role) {
             Role.ADMIN ->
                 listOf(
-                    HomepageItem("createemployee", "Employees"),
-                    HomepageItem("createproject", "Projects"),
-                    HomepageItem("timeentries", "Time entries"),
-                    HomepageItem("logging", "Log configuration"),
+                    HomepageItem(CreateEmployeeAPI.path, "Employees"),
+                    HomepageItem(ProjectAPI.path, "Projects"),
+                    HomepageItem(ViewTimeAPI.path, "Time entries"),
+                    HomepageItem(LoggingAPI.path, "Log configuration"),
+                    HomepageItem(SetApproverAPI.path, "Set approver"),
                 )
             Role.APPROVER,
             Role.REGULAR ->
                 listOf(
-                    HomepageItem("timeentries", "Time entries"),
+                    HomepageItem(ViewTimeAPI.path, "Time entries"),
                 )
 
             Role.SYSTEM,

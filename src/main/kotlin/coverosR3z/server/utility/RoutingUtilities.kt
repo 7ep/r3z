@@ -39,6 +39,7 @@ class RoutingUtilities {
                 Pair(Verb.GET, LoggingAPI.path) -> LoggingAPI.handleGet(sd)
                 Pair(Verb.GET, ChangePasswordAPI.path) -> ChangePasswordAPI.handleGet(sd)
                 Pair(Verb.GET, MessageAPI.path) -> MessageAPI.handleGet(sd)
+                Pair(Verb.GET, SetApproverAPI.path) -> SetApproverAPI.handleGet(sd)
 
                 // POST
 
@@ -54,6 +55,7 @@ class RoutingUtilities {
                 Pair(Verb.POST, SubmitTimeAPI.path) -> SubmitTimeAPI.handlePost(sd)
                 Pair(Verb.POST, ChangePasswordAPI.path) -> ChangePasswordAPI.handlePost(sd)
                 Pair(Verb.POST, ApproveApi.path) -> ApproveApi.handlePost(sd)
+                Pair(Verb.POST, SetApproverAPI.path) -> SetApproverAPI.handlePost(sd)
 
                 else -> {
                     handleNotFound()

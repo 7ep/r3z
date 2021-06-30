@@ -12,7 +12,7 @@ class AuthenticationUtilities(
     val pmd: PureMemoryDatabase,
     val logger: ILogger,
     val cu: CurrentUser,
-    val rc: IRolesChecker = RolesChecker
+    private val rc: IRolesChecker = RolesChecker
 ) : IAuthenticationUtilities {
 
     private val userDataAccess: DataAccess<User> = pmd.dataAccess(User.directoryName)
@@ -152,6 +152,10 @@ class AuthenticationUtilities(
         }
 
         return userDataAccess.read { users -> users.singleOrNull{ it.employee == employee } ?: NO_USER }
+    }
+
+    override fun listUsersByRole(role: Role): Set<User> {
+        return userDataAccess.read { u -> u.filter { it.role == role }}.toSet()
     }
 
 }

@@ -333,6 +333,59 @@ class ViewTimeAPITests {
     }
 
     /**
+     * If you are an approver and viewing another person's time, and if
+     * they have submitted their time, you will see a clickable approve button
+     */
+    @Test
+    fun testApproveButtonAvailable_approver() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeSD(
+            user = DEFAULT_APPROVER_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""<button id="${ViewTimeAPI.Elements.APPROVAL_BUTTON.getId()}" >Approve</button>"""))
+    }
+
+    /**
+     * If you are an approver and viewing another person's time, and if
+     * they have submitted their time, you will see a widget to switch to a different user
+     * to view their timesheet
+     */
+    @Test
+    fun testSwitchWidgetAvailable() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeSD(
+            user = DEFAULT_ADMIN_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""id="view_other_timesheet_label""""))
+    }
+
+    /**
+     * If you are an approver and viewing another person's time, and if
+     * they have submitted their time, you will see a widget to switch to a different user
+     * to view their timesheet
+     */
+    @Test
+    fun testSwitchWidgetAvailable_approver() {
+        tru.isInASubmittedPeriodBehavior = { true }
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeSD(
+            user = DEFAULT_APPROVER_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""id="view_other_timesheet_label""""))
+    }
+
+    /**
      * Like [testApproveButtonAvailable] but in this case it's assumed
      * that the employee hasn't submitted their time, so the approve
      * button will be disabled (that is, unavailable to click)
@@ -342,6 +395,21 @@ class ViewTimeAPITests {
         tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
         val sd = makeSD(
             user = DEFAULT_ADMIN_USER,
+            queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
+
+        val result = ViewTimeAPI.handleGet(sd).fileContentsString()
+
+        assertTrue(result.contains("""disabled>Approve<"""))
+    }
+
+    /**
+     * Like [testApproveButtonNotAvailable] but with an approver
+     */
+    @Test
+    fun testApproveButtonNotAvailable_Approver() {
+        tru.findEmployeeByIdBehavior = { DEFAULT_EMPLOYEE_2 }
+        val sd = makeSD(
+            user = DEFAULT_APPROVER_USER,
             queryStringMap = mapOf(ViewTimeAPI.Elements.REQUESTED_EMPLOYEE.getElemName() to DEFAULT_EMPLOYEE_2.id.value.toString()))
 
         val result = ViewTimeAPI.handleGet(sd).fileContentsString()
