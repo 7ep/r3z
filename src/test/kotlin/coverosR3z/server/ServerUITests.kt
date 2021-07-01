@@ -73,6 +73,8 @@ class ServerUITests {
         `hank enters time`(hankNewPassword)
         `admin will be prevented from deleting the project used by Hank`(newPassword)
         `admin will be prevented from deleting Hank`()
+        `admin makes Hank an approver`()
+        `hank can see other timesheets`(hankNewPassword)
         shutdown()
     }
 
@@ -126,6 +128,17 @@ class ServerUITests {
         val pmd = DatabaseDiskPersistence(databaseDirectory, testLogger).startWithDiskPersistence()
         assertEquals(pom.pmd, pmd)
         pom.driver.quit()
+    }
+
+    private fun `admin makes Hank an approver`() {
+        pom.sa.makeApprover("hank")
+    }
+
+
+    private fun `hank can see other timesheets`(hankNewPassword: String) {
+        logout()
+        pom.lp.login("hank", hankNewPassword)
+        pom.driver.findElement(By.cssSelector("#employee_switch_form button"))
     }
 
     private fun `hank enters time`(hankNewPassword: String) {

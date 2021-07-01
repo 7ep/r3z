@@ -473,3 +473,4 @@
 2021-06-25	numberThreads: 10	numberRequests: 500	time: 226
 2021-06-30	numberThreads: 10	numberRequests: 500	time: 254
 2021-06-30	numberThreads: 10	numberRequests: 500	time: 203
+2021-07-01	numberThreads: 10	numberRequests: 500	time: 260

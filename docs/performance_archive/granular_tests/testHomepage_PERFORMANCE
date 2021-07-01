@@ -470,3 +470,4 @@
 2021-06-25	numberOfThreads: 10	numberOfRequests: 300	time: 106
 2021-06-30	numberOfThreads: 10	numberOfRequests: 300	time: 103
 2021-06-30	numberOfThreads: 10	numberOfRequests: 300	time: 89
+2021-07-01	numberOfThreads: 10	numberOfRequests: 300	time: 145

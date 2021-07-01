@@ -14,6 +14,7 @@ import coverosR3z.system.utility.FullSystem
 import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
+import coverosR3z.timerecording.api.SetApproverAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.openqa.selenium.By
@@ -367,7 +368,44 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
         driver.findElement(By.cssSelector("#employee_switch_form button")).click()
     }
 
+    /**
+     * Go to the ViewTime page, on the current time period
+     */
+    fun go() {
+        driver.get("$domain/${ViewTimeAPI.path}")
+    }
 
+
+}
+
+class SetApproverPage(private val driver: WebDriver, private val domain: String) {
+
+    /**
+     * Go to this page
+     */
+    fun go() {
+        driver.get("$domain/${SetApproverAPI.path}")
+    }
+
+    /**
+     * make an employee an approver.  Note: the employee has to have a user associated with
+     * them, and they must be currently a regular role.
+     */
+    fun makeApprover(employeeName: String) {
+        go()
+        val employeeSelector = driver.findElement(By.id(SetApproverAPI.Elements.EMPLOYEE_INPUT.getId()))
+        Select(employeeSelector).selectByVisibleText(employeeName)
+        enter()
+    }
+
+    /**
+     * Click the button on the page
+     *
+     * There's only one button on the page
+     */
+    fun enter() {
+        driver.findElement(By.tagName("button")).click()
+    }
 }
 
 /**
