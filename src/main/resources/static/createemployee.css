@@ -15,10 +15,10 @@ form {
   top: 46px;
 }
 
-form[action=deleteemployee] {
-    padding: 0;
-    margin: 0;
-    position: initial;
+td > form {
+  padding: 0;
+  margin: 0; 
+  position: initial;
 }
 
 input {
@@ -57,7 +57,11 @@ button:focus {
     border: 1.8px solid blue;
 }
 
-button#delete_button {margin: 0px;padding: 0px;border-radius: 0.3em;}
+td > form > button {
+  margin: 0px;
+  padding: 0px;
+  border-radius: 0.3em;
+}
 
 button:disabled {
     cursor: inherit;
@@ -97,10 +101,9 @@ table {
 
 .container table td {text-align: center;}
 
-th#name {width: 20px;}
+th#name {}
 
 th#invitation {}
 
 th#act {
-    width: 80px;
 }

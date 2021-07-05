@@ -483,3 +483,5 @@
 2021-06-30	numberThreads: 5	numberRequests: 200	time: 190
 2021-06-30	numberThreads: 5	numberRequests: 200	time: 232
 2021-07-01	numberThreads: 5	numberRequests: 200	time: 304
+2021-07-05	numberThreads: 5	numberRequests: 200	time: 236
+2021-07-05	numberThreads: 5	numberRequests: 200	time: 190

@@ -5,8 +5,6 @@ import coverosR3z.authentication.exceptions.UnpermittedOperationException
 import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.Role
 import coverosR3z.authentication.utility.RolesChecker
-import coverosR3z.system.misc.utility.safeAttr
-import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.server.types.AuthStatus
 import coverosR3z.server.types.GetEndpoint
 import coverosR3z.server.types.PreparedResponseData
@@ -16,9 +14,10 @@ import coverosR3z.server.utility.PageComponents
 import coverosR3z.server.utility.ServerUtilities.Companion.okHTML
 import coverosR3z.server.utility.ServerUtilities.Companion.redirectTo
 import coverosR3z.system.logging.LoggingAPI
+import coverosR3z.system.misc.utility.safeAttr
+import coverosR3z.system.misc.utility.safeHtml
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
-import coverosR3z.timerecording.api.SetApproverAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 
 class HomepageAPI(private val sd: ServerData)  {
@@ -71,7 +70,6 @@ class HomepageAPI(private val sd: ServerData)  {
                     HomepageItem(ProjectAPI.path, "Projects"),
                     HomepageItem(ViewTimeAPI.path, "Time entries"),
                     HomepageItem(LoggingAPI.path, "Log configuration"),
-                    HomepageItem(SetApproverAPI.path, "Set approver"),
                 )
             Role.APPROVER,
             Role.REGULAR ->

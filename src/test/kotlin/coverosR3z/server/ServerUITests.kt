@@ -131,7 +131,7 @@ class ServerUITests {
     }
 
     private fun `admin makes Hank an approver`() {
-        pom.sa.makeApprover("hank")
+        pom.eep.setApprover("hank")
     }
 
 

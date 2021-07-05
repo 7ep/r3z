@@ -1,5 +1,6 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.NO_USER
 import coverosR3z.authentication.types.SYSTEM_USER
 import coverosR3z.authentication.types.User
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
@@ -215,6 +216,61 @@ class CreateEmployeeAPITests {
         val result = CreateEmployeeAPI.handlePost(sd)
 
         assertEquals(expected, result)
+    }
+
+    /**
+     * The role buttons for an employee let us change their role, but it's actually
+     * tied to the user - and we cannot change the role unless they register a user
+     * to the employee.  Until they register, the "delete" button will remain active
+     * and the role-changing buttons will all be disabled
+     */
+    @Test
+    fun `if an employee has no associated user, all of their role buttons should be disabled`() {
+        // create a couple employees...
+        tru.listAllEmployeesBehavior = { listOf(DEFAULT_EMPLOYEE, DEFAULT_EMPLOYEE_2) }
+        // but none of them have an associated user
+        au.getUserByEmployeeBehavior = { NO_USER }
+        val sd = makeTypicalCEServerData()
+
+        val result = CreateEmployeeAPI.handleGet(sd)
+
+        assertTrue(result.fileContentsString().contains("""<button disabled class="${Elements.MAKE_REGULAR.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button disabled class="${Elements.MAKE_APPROVER.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button disabled class="${Elements.MAKE_ADMINISTRATOR.getElemClass()}""""))
+    }
+
+    @Test
+    fun `if an employee has a user, and they are a regular role, then just the regular role button should be disabled`() {
+        // create a couple employees...
+        tru.listAllEmployeesBehavior = { listOf(DEFAULT_EMPLOYEE, DEFAULT_EMPLOYEE_2) }
+        // and they all have a user - admittedly this is a bit artificial,
+        // they can't *really* all be tied to this one user.  This user
+        // has a role of Role.REGULAR
+        au.getUserByEmployeeBehavior = { DEFAULT_REGULAR_USER }
+        val sd = makeTypicalCEServerData()
+
+        val result = CreateEmployeeAPI.handleGet(sd)
+
+        assertTrue(result.fileContentsString().contains("""<button disabled class="${Elements.MAKE_REGULAR.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button  class="${Elements.MAKE_APPROVER.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button  class="${Elements.MAKE_ADMINISTRATOR.getElemClass()}""""))
+    }
+
+    @Test
+    fun `if an employee has a user, and they are an approver role, then just the approver role button should be disabled`() {
+        // create a couple employees...
+        tru.listAllEmployeesBehavior = { listOf(DEFAULT_EMPLOYEE, DEFAULT_EMPLOYEE_2) }
+        // and they all have a user - admittedly this is a bit artificial,
+        // they can't *really* all be tied to this one user.  This user
+        // has a role of Role.APPROVER
+        au.getUserByEmployeeBehavior = { DEFAULT_APPROVER_USER }
+        val sd = makeTypicalCEServerData()
+
+        val result = CreateEmployeeAPI.handleGet(sd)
+
+        assertTrue(result.fileContentsString().contains("""<button  class="${Elements.MAKE_REGULAR.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button disabled class="${Elements.MAKE_APPROVER.getElemClass()}""""))
+        assertTrue(result.fileContentsString().contains("""<button  class="${Elements.MAKE_ADMINISTRATOR.getElemClass()}""""))
     }
 
 /*

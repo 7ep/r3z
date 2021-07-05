@@ -42,7 +42,6 @@ class PageObjectModelLocal : PageObjectModel() {
             pom.lop = LogoutPage(driver, pom.sslDomain)
             pom.vtp = ViewTimePage(driver, pom.sslDomain)
             pom.ap = AllPages(driver, pom.sslDomain)
-            pom.sa = SetApproverPage(driver, pom.sslDomain)
             return pom
         }
     }

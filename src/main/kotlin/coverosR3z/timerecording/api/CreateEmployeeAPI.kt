@@ -22,7 +22,10 @@ class CreateEmployeeAPI(private val sd: ServerData) {
     enum class Elements(private val elemName: String, private val id: String) : Element {
         EMPLOYEE_INPUT("employee_name", "employee_name"),
         CREATE_BUTTON("", "employee_create_button"),
-        DELETE_BUTTON("", "delete_button");
+        DELETE_BUTTON("", "delete_button"),
+        MAKE_REGULAR("","make_regular"),
+        MAKE_APPROVER("","make_approver"),
+        MAKE_ADMINISTRATOR("","make_administrator");
 
         override fun getId(): String {
             return this.id
@@ -33,7 +36,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         }
 
         override fun getElemClass(): String {
-            throw IllegalAccessError()
+            return this.id
         }
     }
 
@@ -88,18 +91,44 @@ class CreateEmployeeAPI(private val sd: ServerData) {
         }
 
         val employeeRows =
-            empsToInvs.entries.sortedByDescending { it.key.id.value }.joinToString("") {
-                val invitationLink = if (it.value == null) "" else
-                    """<a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}">copy this link</a>""".trimIndent()
-                val maybeDisabled = if (sd.bc.au.getUserByEmployee(it.key) == NO_USER) "" else "disabled"
+            empsToInvs.entries
+                .sortedByDescending { it.key.id.value }
+                .joinToString("") {
+                    val invitationLink = if (it.value == null) "" else
+                        """<a href="https://${sd.so.host}:${sd.so.sslPort}/${RegisterAPI.path}?${RegisterAPI.Elements.INVITATION_INPUT.getElemName()}=${safeAttr(it.value?.code?.value ?: "")}">copy this link</a>""".trimIndent()
+                    val associatedUser = sd.bc.au.getUserByEmployee(it.key)
+                    val hasNoUser = associatedUser == NO_USER
+                    // if there is a user associated with this employee, we cannot delete them
+                    val deleteDisabled = if (hasNoUser) "" else "disabled"
+                    // if the employee has a role of regular, or if they have no associated user,
+                    // the button to make them a regular role is disabled
+                    val regularRoleDisabled = if (hasNoUser || associatedUser.role == Role.REGULAR) "disabled" else ""
+                    val approverRoleDisabled = if (hasNoUser || associatedUser.role == Role.APPROVER) "disabled" else ""
+                    val adminRoleDisabled = if (hasNoUser || associatedUser.role == Role.ADMIN) "disabled" else ""
 """
 <tr>
     <td>${safeHtml(it.key.name.value)}</td>
     <td>$invitationLink</td>
+    <td>${associatedUser.role.toString().toLowerCase()}</td>
     <td>
+         <form action="${RoleAPI.path}" method="post">
+            <input type="hidden" name="${RoleAPI.Elements.EMPLOYEE_ID.getElemName()}" value="${it.key.id.value}" />
+            <input type="hidden" name="${RoleAPI.Elements.ROLE.getElemName()}" value="${Role.REGULAR.name}" />
+            <button $regularRoleDisabled class="${Elements.MAKE_REGULAR.getElemClass()}" title="Set to regular role">Regular</button>
+        </form>
+         <form action="${RoleAPI.path}" method="post">
+            <input type="hidden" name="${RoleAPI.Elements.EMPLOYEE_ID.getElemName()}" value="${it.key.id.value}" />
+            <input type="hidden" name="${RoleAPI.Elements.ROLE.getElemName()}" value="${Role.APPROVER.name}" />
+            <button $approverRoleDisabled class="${Elements.MAKE_APPROVER.getElemClass()}" title="set to approver role">Approver</button>
+        </form>
+         <form action="${RoleAPI.path}" method="post">
+            <input type="hidden" name="${RoleAPI.Elements.EMPLOYEE_ID.getElemName()}" value="${it.key.id.value}" />
+            <input type="hidden" name="${RoleAPI.Elements.ROLE.getElemName()}" value="${Role.ADMIN.name}" />
+            <button $adminRoleDisabled class="${Elements.MAKE_ADMINISTRATOR.getElemClass()}" title="set to administrator role">Admin</button>
+        </form>
          <form action="${DeleteEmployeeAPI.path}" method="post">
             <input type="hidden" name="${DeleteEmployeeAPI.Elements.EMPLOYEE_ID.getElemName()}" value="${it.key.id.value}" />
-            <button $maybeDisabled id="${Elements.DELETE_BUTTON.getId()}">Delete</button>
+            <button $deleteDisabled class="${Elements.DELETE_BUTTON.getElemClass()}">Delete</button>
         </form>
     </td>
 </tr>
@@ -113,6 +142,7 @@ class CreateEmployeeAPI(private val sd: ServerData) {
                         <tr>
                             <th id="name">Name</th>
                             <th id="invitation">Invitation code</th>
+                            <th id="role">Role</th>
                             <th id="act"></th>
                         </tr>
                     </thead>

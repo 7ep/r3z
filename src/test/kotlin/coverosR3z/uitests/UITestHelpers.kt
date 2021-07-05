@@ -14,7 +14,6 @@ import coverosR3z.system.utility.FullSystem
 import coverosR3z.system.utility.FullSystem.Companion.initializeBusinessCode
 import coverosR3z.timerecording.api.CreateEmployeeAPI
 import coverosR3z.timerecording.api.ProjectAPI
-import coverosR3z.timerecording.api.SetApproverAPI
 import coverosR3z.timerecording.api.ViewTimeAPI
 import coverosR3z.webDriver
 import org.openqa.selenium.By
@@ -98,9 +97,41 @@ class EnterEmployeePage(private val driver: WebDriver, private val domain : Stri
 
     fun delete(employee: String) {
         driver.get("$domain/${CreateEmployeeAPI.path}")
-        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[3]")).click()
+        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[4]//*[@class='${CreateEmployeeAPI.Elements.DELETE_BUTTON.getElemClass()}']")).click()
         driver.findElement(By.linkText("OK")).click()
     }
+
+    /**
+     * make an employee a regular role.  Note: the employee has to have a user associated with
+     * them, and they must not be currently a regular role.
+     */
+    fun setRegular(employee: String) {
+        driver.get("$domain/${CreateEmployeeAPI.path}")
+        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[4]//*[@class='${CreateEmployeeAPI.Elements.MAKE_REGULAR.getElemClass()}']")).click()
+        driver.findElement(By.linkText("OK")).click()
+    }
+
+    /**
+     * make an employee an approver role.  Note: the employee has to have a user associated with
+     * them, and they must not be currently a approver role.
+     */
+    fun setApprover(employee: String) {
+        driver.get("$domain/${CreateEmployeeAPI.path}")
+        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[4]//*[@class='${CreateEmployeeAPI.Elements.MAKE_APPROVER.getElemClass()}']")).click()
+        driver.findElement(By.linkText("OK")).click()
+    }
+
+    /**
+     * make an employee an admin role.  Note: the employee has to have a user associated with
+     * them, and they must not be currently a admin role.
+     */
+    fun setAdmin(employee: String) {
+        driver.get("$domain/${CreateEmployeeAPI.path}")
+        driver.findElement(By.xpath("//*[text() = '$employee']/..//td[4]//*[@class='${CreateEmployeeAPI.Elements.MAKE_ADMINISTRATOR.getElemClass()}']")).click()
+        driver.findElement(By.linkText("OK")).click()
+    }
+
+
 }
 
 class EnterProjectPage(private val driver: WebDriver, private val domain : String) {
@@ -376,36 +407,6 @@ class ViewTimePage(private val driver: WebDriver, private val domain: String) {
     }
 
 
-}
-
-class SetApproverPage(private val driver: WebDriver, private val domain: String) {
-
-    /**
-     * Go to this page
-     */
-    fun go() {
-        driver.get("$domain/${SetApproverAPI.path}")
-    }
-
-    /**
-     * make an employee an approver.  Note: the employee has to have a user associated with
-     * them, and they must be currently a regular role.
-     */
-    fun makeApprover(employeeName: String) {
-        go()
-        val employeeSelector = driver.findElement(By.id(SetApproverAPI.Elements.EMPLOYEE_INPUT.getId()))
-        Select(employeeSelector).selectByVisibleText(employeeName)
-        enter()
-    }
-
-    /**
-     * Click the button on the page
-     *
-     * There's only one button on the page
-     */
-    fun enter() {
-        driver.findElement(By.tagName("button")).click()
-    }
 }
 
 /**
