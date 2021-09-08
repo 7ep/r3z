@@ -1,7 +1,12 @@
 package coverosR3z.timerecording.api
 
+import coverosR3z.authentication.types.CurrentUser
 import coverosR3z.authentication.types.NO_USER
+import coverosR3z.authentication.types.Role
+import coverosR3z.authentication.types.SYSTEM_USER
+import coverosR3z.authentication.utility.AuthenticationUtilities
 import coverosR3z.authentication.utility.FakeAuthenticationUtilities
+import coverosR3z.persistence.utility.PureMemoryDatabase
 import coverosR3z.server.APITestCategory
 import coverosR3z.server.api.MessageAPI
 import coverosR3z.server.types.AuthStatus
@@ -11,6 +16,7 @@ import coverosR3z.system.misc.*
 import coverosR3z.system.misc.exceptions.InexactInputsException
 import coverosR3z.timerecording.FakeTimeRecordingUtilities
 import coverosR3z.timerecording.types.NO_EMPLOYEE
+import coverosR3z.timerecording.utility.TimeRecordingUtilities
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -164,6 +170,55 @@ class RoleAPITests {
         val result = assertThrows(InexactInputsException::class.java) { RoleAPI.handlePost(sd) }
 
         assertEquals("expected keys: [employee_id, role]. received keys: [role]", result.message)
+    }
+
+    /**
+     * The moment a user's role gets changed, the system should treat them
+     * according to their new role immediately.
+     *
+     * This tests by using real state within the test.
+     *
+     * In here, we'll start with a user who has admin privileges,
+     * and then switch them to regular and confirm they cannot see
+     * a page only admins could see.
+     */
+    @Category(IntegrationTestCategory::class)
+    @Test
+    fun `should immediately change a user's role`() {
+        val expected = MessageAPI.createCustomMessageRedirect(
+            "${DEFAULT_REGULAR_USER.employee.name.value} now has a role of: admin",
+            true,
+            CreateEmployeeAPI.path
+        )
+
+        val cu = CurrentUser(SYSTEM_USER)
+        val pmd = PureMemoryDatabase.createEmptyDatabase()
+        val tru = TimeRecordingUtilities(pmd, cu, testLogger)
+        val au = AuthenticationUtilities(pmd, testLogger, cu)
+        // make a new employee (required for a user)
+        val defaultEmployee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
+        // make a new user
+        val (_, defaultUser) = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, defaultEmployee)
+        // make them an admin, so they can run this API command.
+        au.addRoleToUser(defaultUser, Role.ADMIN)
+        assertEquals(Role.ADMIN, defaultUser.role)
+
+        val data = PostBodyData(
+            mapOf(
+                RoleAPI.Elements.EMPLOYEE_ID.getElemName() to defaultUser.employee.id.value.toString(),
+                RoleAPI.Elements.ROLE.getElemName() to "regular"
+            )
+        )
+
+        val sd = makeServerData(data, tru, au, AuthStatus.AUTHENTICATED, user = defaultUser, path = RoleAPI.path)
+
+        // this is the point where they change the role
+        val successfulRoleChangeResult = RoleAPI.handlePost(sd)
+        assertEquals(expected, successfulRoleChangeResult.fileContentsString())
+
+        // at this point, it shouldn't work
+        val failedRoleChangeResult = RoleAPI.handlePost(sd)
+        assertEquals("User lacked proper role for this action. Roles allowed: SYSTEM;ADMIN. Your role: REGULAR", failedRoleChangeResult.fileContentsString())
     }
 
 
