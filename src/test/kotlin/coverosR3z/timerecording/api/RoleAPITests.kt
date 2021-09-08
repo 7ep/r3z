@@ -201,7 +201,7 @@ class RoleAPITests {
         val (_, defaultUser) = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, defaultEmployee)
         // make them an admin, so they can run this API command.
         val defaultUserAdmin = au.addRoleToUser(defaultUser, Role.ADMIN)
-        cu = CurrentUser(defaultUserAdmin)
+        cu = CurrentUser(defaultUser)
         tru = TimeRecordingUtilities(pmd, cu, testLogger)
         au = AuthenticationUtilities(pmd, testLogger, cu)
 
@@ -209,12 +209,12 @@ class RoleAPITests {
 
         val data = PostBodyData(
             mapOf(
-                RoleAPI.Elements.EMPLOYEE_ID.getElemName() to cu.employee.id.value.toString(),
+                RoleAPI.Elements.EMPLOYEE_ID.getElemName() to defaultUserAdmin.employee.id.value.toString(),
                 RoleAPI.Elements.ROLE.getElemName() to "regular"
             )
         )
 
-        val sd = makeServerData(data, tru, au, AuthStatus.AUTHENTICATED, user = cu, path = RoleAPI.path)
+        val sd = makeServerData(data, tru, au, AuthStatus.AUTHENTICATED, user = defaultUserAdmin, path = RoleAPI.path)
 
         // this is the point where they change the role
         val successfulRoleChangeResult = RoleAPI.handlePost(sd)

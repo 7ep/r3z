@@ -108,6 +108,10 @@ class AuthenticationUtilities(
     override fun addRoleToUser(user: User, role: Role) : User {
         rc.checkAllowed(cu, Role.ADMIN, Role.SYSTEM)
         val changedUser = user.copy(role=role)
+        if (user == cu) {
+            cu.changeExistentially(changedUser)
+        }
+        // if user == cu : cu = changeUser
         userDataAccess.actOn { users -> users.update(changedUser) }
         return changedUser
     }
