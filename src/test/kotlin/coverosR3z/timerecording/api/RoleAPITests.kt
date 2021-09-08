@@ -186,7 +186,7 @@ class RoleAPITests {
     @Test
     fun `should immediately change a user's role`() {
         val expected = MessageAPI.createCustomMessageRedirect(
-            "${DEFAULT_REGULAR_USER.employee.name.value} now has a role of: admin",
+            "${DEFAULT_REGULAR_USER.employee.name.value} now has a role of: regular",
             true,
             CreateEmployeeAPI.path
         )
@@ -209,20 +209,20 @@ class RoleAPITests {
 
         val data = PostBodyData(
             mapOf(
-                RoleAPI.Elements.EMPLOYEE_ID.getElemName() to defaultUser.employee.id.value.toString(),
+                RoleAPI.Elements.EMPLOYEE_ID.getElemName() to cu.employee.id.value.toString(),
                 RoleAPI.Elements.ROLE.getElemName() to "regular"
             )
         )
 
-        val sd = makeServerData(data, tru, au, AuthStatus.AUTHENTICATED, user = defaultUser, path = RoleAPI.path)
+        val sd = makeServerData(data, tru, au, AuthStatus.AUTHENTICATED, user = cu, path = RoleAPI.path)
 
         // this is the point where they change the role
         val successfulRoleChangeResult = RoleAPI.handlePost(sd)
-        assertEquals(expected, successfulRoleChangeResult.fileContentsString())
+        assertEquals(expected, successfulRoleChangeResult)
 
-        // at this point, it shouldn't work
-        val failedRoleChangeResult = RoleAPI.handlePost(sd)
-        assertEquals("User lacked proper role for this action. Roles allowed: SYSTEM;ADMIN. Your role: REGULAR", failedRoleChangeResult.fileContentsString())
+        assertEquals(Role.ADMIN, cu.role)
+        val failedRoleChangeResult = RoleAPI.handlePost(sd) // at this point, it shouldn't work
+        assertEquals("User lacked proper role for this action. Roles allowed: SYSTEM;ADMIN. Your role: REGULAR", failedRoleChangeResult.headers)
     }
 
 

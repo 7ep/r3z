@@ -32,10 +32,10 @@ class RoleAPI {
     companion object : PostEndpoint {
 
         override fun handlePost(sd: ServerData): PreparedResponseData {
-            return doPOSTAuthenticated(sd, requiredInputs, path, Role.SYSTEM, Role.ADMIN) { setApprover(sd) }
+            return doPOSTAuthenticated(sd, requiredInputs, path, Role.SYSTEM, Role.ADMIN) { setRole(sd) }
         }
 
-        private fun setApprover(sd: ServerData): PreparedResponseData {
+        private fun setRole(sd: ServerData): PreparedResponseData {
             val (employee, user) = obtainEmployeeAndUser(sd)
             val role = obtainRole(sd)
             sd.bc.au.addRoleToUser(user, role)
