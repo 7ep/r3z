@@ -191,17 +191,21 @@ class RoleAPITests {
             CreateEmployeeAPI.path
         )
 
-        val cu = CurrentUser(SYSTEM_USER)
+        var cu = CurrentUser(SYSTEM_USER)
         val pmd = PureMemoryDatabase.createEmptyDatabase()
-        val tru = TimeRecordingUtilities(pmd, cu, testLogger)
-        val au = AuthenticationUtilities(pmd, testLogger, cu)
+        var tru = TimeRecordingUtilities(pmd, cu, testLogger)
+        var au = AuthenticationUtilities(pmd, testLogger, cu)
         // make a new employee (required for a user)
         val defaultEmployee = tru.createEmployee(DEFAULT_EMPLOYEE_NAME)
         // make a new user
         val (_, defaultUser) = au.registerWithEmployee(DEFAULT_USER.name, DEFAULT_PASSWORD, defaultEmployee)
         // make them an admin, so they can run this API command.
-        au.addRoleToUser(defaultUser, Role.ADMIN)
-        assertEquals(Role.ADMIN, defaultUser.role)
+        val defaultUserAdmin = au.addRoleToUser(defaultUser, Role.ADMIN)
+        cu = CurrentUser(defaultUserAdmin)
+        tru = TimeRecordingUtilities(pmd, cu, testLogger)
+        au = AuthenticationUtilities(pmd, testLogger, cu)
+
+        assertEquals(Role.ADMIN, defaultUserAdmin.role)
 
         val data = PostBodyData(
             mapOf(
