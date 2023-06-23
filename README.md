@@ -1,5 +1,8 @@
 ### r3z
 
+_note_ This project is now archived and will receive no further modifications.  See 
+https://github.com/byronka/r3z for continued updates.
+
 This is an application by [Coveros](https://www.coveros.com/) to demonstrate good
 software practices.  As we say in agile... _Working software over comprehensive 
 documentation_ ... but that doesn't mean we can't have pretty good documentation too. 
